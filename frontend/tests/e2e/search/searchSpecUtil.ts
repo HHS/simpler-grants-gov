@@ -73,8 +73,10 @@ export async function selectSortBy(page: Page, sortByValue: string) {
 }
 
 export async function expectSortBy(page: Page, value: string) {
-  const sortSelectElement = page.locator('select[name="search-sort-by"]');
-  await expect(sortSelectElement).toHaveValue(value);
+  const selectedValue = await page
+    .locator('select[name="search-sort-by"]')
+    .inputValue();
+  expect(selectedValue).toBe(value);
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
@@ -215,15 +217,4 @@ export const validateTopLevelAndNestedSelectedFilterCounts = async (
   if (expectedNestedCount) {
     await expect(expanderButton).toContainText(`${expectedNestedCount}`);
   }
-};
-
-export const waitForFilterOptions = async (page: Page, filterType: string) => {
-  const filterButton = page.locator(
-    `button[aria-controls="opportunity-filter-${filterType}"]`,
-  );
-  await filterButton.click();
-  // expect(page.locator(`input[name="${filterType}-*"]`)).toBeTruthy();
-  const filterOptions = page.locator(`input[name="${filterType}-*"]`);
-  await filterOptions.isVisible();
-  await filterButton.click();
 };
