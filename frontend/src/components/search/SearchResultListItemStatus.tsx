@@ -24,7 +24,12 @@ const StatusItem = ({
         tablet:margin-right-1
         tablet:border-base-lighter"
     >
-      <span className={clsx({ "usa-tag": tag, "bg-accent-warm-dark": orange })}>
+      <span
+        className={clsx({
+          "usa-tag margin-right-2 tablet:margin-0": tag,
+          "bg-accent-warm-dark": orange,
+        })}
+      >
         <strong>{description}</strong>
         {showDate && (
           <span className="text-no-uppercase">

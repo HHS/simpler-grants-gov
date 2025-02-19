@@ -24,7 +24,6 @@ export default function SearchResultsListItem({
   const t = useTranslations("Search");
 
   const metadataBorderClasses = `
-    display-block
     tablet:display-inline-block
     tablet:border-left-1px
     tablet:padding-x-1
@@ -57,7 +56,7 @@ export default function SearchResultsListItem({
                 </Link>
               </h2>
             </div>
-            <div className="font-body-xs display-flex">
+            <div className="font-body-xs display-flex flex-wrap">
               <SearchResultListItemStatus
                 archiveDate={opportunity?.summary?.archive_date}
                 archivedString={t("resultsListItem.status.archived")}
@@ -67,7 +66,9 @@ export default function SearchResultsListItem({
                 postedString={t("resultsListItem.status.posted")}
                 status={opportunity?.opportunity_status}
               />
-              <span className={metadataBorderClasses}>
+              <span
+                className={`${metadataBorderClasses} tablet:order-0 order-2`}
+              >
                 <strong>{t("resultsListItem.summary.posted")}</strong>
                 {opportunity?.summary?.post_date
                   ? formatDate(opportunity?.summary?.post_date)
@@ -86,6 +87,7 @@ export default function SearchResultsListItem({
                   </div>
                 </div>
               )}
+              <div className="width-full tablet:width-auto" />
             </div>
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
               <strong>{t("resultsListItem.summary.agency")}</strong>
