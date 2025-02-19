@@ -1,12 +1,3 @@
-variable "name" {
-  description = "name of the database cluster. Note that this is not the name of the Postgres database itself, but the name of the cluster in RDS. The name of the Postgres database is set in module and defaults to 'app'."
-  type        = string
-  validation {
-    condition     = can(regex("^[-_\\da-z]+$", var.name))
-    error_message = "use only lower case letters, numbers, dashes, and underscores"
-  }
-}
-
 variable "environment_name" {
   type        = string
   description = "name of the application environment"
@@ -72,12 +63,6 @@ variable "enable_http_endpoint" {
 variable "database_subnet_group_name" {
   type        = string
   description = "Name of database subnet group"
-}
-
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection."
-  type        = bool
-  default     = false
 }
 
 variable "migrator_access_policy_name" {

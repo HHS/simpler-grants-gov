@@ -9,51 +9,16 @@ variable "certificate_arn" {
   default     = null
 }
 
-variable "hosted_zone_id" {
-  type        = string
-  description = "The Route53 hosted zone id for the domain"
-  default     = null
-}
-
-variable "image_tag" {
-  type        = string
-  description = "The tag of the image to deploy"
-}
-
-variable "image_repository_url" {
-  type        = string
-  description = "The full URL of the container image repository, used instead of image_repository_name if set."
-  default     = null
-}
-
 variable "image_repository_name" {
   type        = string
   description = "The name of the container image repository"
   default     = null
 }
 
-variable "desired_instance_count" {
-  type        = number
-  description = "The port number on the container that's bound to the user-specified"
-  default     = 8000
-}
-
 variable "cpu" {
   type        = number
   default     = 256
   description = "Number of cpu units used by the task, expessed as an integer value, e.g 512 "
-}
-
-variable "memory" {
-  type        = number
-  default     = 512
-  description = "Amount (in MiB) of memory used by the task. e.g. 2048"
-}
-
-variable "enable_command_execution" {
-  type        = bool
-  default     = false
-  description = "Whether the service should enable ECS Exec, such as for debugging"
 }
 
 variable "container_port" {
@@ -74,37 +39,6 @@ variable "hostname" {
   default     = null
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "Uniquely identifies the VPC."
-}
-
-variable "public_subnet_ids" {
-  type        = list(any)
-  description = "Public subnet ids in VPC"
-}
-
-variable "private_subnet_ids" {
-  type        = list(any)
-  description = "Private subnet ids in VPC"
-}
-
-variable "extra_environment_variables" {
-  type        = map(string)
-  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
-  default     = {}
-}
-
-variable "scheduled_jobs" {
-  description = "Variable for configuration of the step functions scheduled job"
-  type = map(object({
-    task_command        = list(string)
-    schedule_expression = string
-    state               = string
-  }))
-  default = {}
-}
-
 variable "s3_buckets" {
   type = map(object({
     env_var = string
@@ -121,20 +55,6 @@ variable "enable_drafts_bucket" {
   description = "does the service need a private S3 bucket for draft document storage"
   type        = bool
   default     = false
-}
-
-variable "aws_services_security_group_id" {
-  type        = string
-  description = "Security group ID for VPC endpoints that access AWS Services"
-}
-
-variable "secrets" {
-  type = set(object({
-    name      = string
-    valueFrom = string
-  }))
-  description = "List of configurations for defining environment variables that pull from SSM parameter store"
-  default     = []
 }
 
 variable "db_vars" {
@@ -206,11 +126,6 @@ variable "min_capacity" {
   description = "Minimum number of tasks for autoscaling"
   type        = number
   default     = 2
-}
-
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
-  type        = bool
 }
 
 variable "readonly_root_filesystem" {
@@ -351,6 +266,7 @@ variable "scheduled_jobs" {
   type = map(object({
     task_command        = list(string)
     schedule_expression = string
+    state               = string
   }))
   default = {}
 }
