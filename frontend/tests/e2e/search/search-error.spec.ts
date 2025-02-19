@@ -21,7 +21,7 @@ test.describe("Search error page", () => {
 
     await toggleCheckbox(page, "status-closed");
 
-    await page.waitForURL(/closed/, {
+    await page.waitForURL(/status=forecasted,posted,closed/, {
       timeout: 5000,
     });
   });
