@@ -19,10 +19,10 @@ const StatusItem = ({
   return (
     <span
       className="
-  tablet:padding-x-1
-  tablet:margin-left-neg-1
-  tablet:margin-right-1
-  tablet:border-base-lighter"
+        tablet:padding-x-1
+        tablet:margin-left-neg-1
+        tablet:margin-right-1
+        tablet:border-base-lighter"
     >
       <span className={clsx({ "usa-tag": tag, "bg-accent-warm-dark": orange })}>
         <strong>{description}</strong>
