@@ -23,7 +23,7 @@ We use the GitHub GraphQL API to export data from GitHub.
 
 In current practice, the service is triggered daily via an AWS Step Function orchestrated with Terraform. The service may also be triggered on-demand in the AWS console (access privs required). 
 
-- [Terraform config file](../infra/analytics/app-config/env-config/scheduled_jobs.tf)
+- [Terraform config file](../../infra/analytics/app-config/env-config/scheduled_jobs.tf)
 - [AWS Step Function console](https://us-east-1.console.aws.amazon.com/states/home?region=us-east-1#/statemachines)
 
 <!-- Key technologies -->

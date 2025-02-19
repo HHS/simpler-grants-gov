@@ -48,8 +48,6 @@ For this project specifically:
 - Under `tests/`, the organization mirrors the source code structure
   - The tests for [`analytics/src/analytics/datasets/`](../../analytics/src/analytics/datasets/)
     are found at [`analytics/tests/datasets/`](../../analytics/tests/datasets/)
-  - The tests for [`analytics/src/analytics/metrics/`](../../analytics/src/analytics/metrics/)
-    are found at [`analytics/tests/metrics/`](../../analytics/tests/metrics/)
 - Integration tests have their own dedicated `tests/integrations/` testing sub-directory
 - Create `__init__.py` files for each directory. This helps [avoid name conflicts
   when pytest is resolving tests](https://docs.pytest.org/en/stable/goodpractices.html#tests-outside-application-code).
@@ -79,36 +77,6 @@ The main `tests/conftest.py` holds widely useful fixtures included for all tests
 
 [More info about conftest files](https://docs.pytest.org/en/latest/how-to/fixtures.html?highlight=conftest#scope-sharing-fixtures-across-classes-modules-packages-or-session)
 
-### Testing helpers
-
-If there is useful functionality that needs to be shared between tests, but is only applicable to testing and is not a fixture, create modules under `tests/helpers/`.
-
-They can be imported into tests from the path `tests.helpers`, for example, `from tests.helpers.foo import helper_func`.
-
-### Using factories
-
-One of the more common use cases for helpers is generating factory functions or classes for test data that you want to use in your tests. Currently, the `analytics` package has a series of factory functions in `tests/helpers/factory.py`.
-
-These factory functions (e.g. `json_issue_row()`) allow developers to generate rows of test data that are customized for the current test, while only declaring the test-specific fields:
-
-```python
-from tests.helpers.factor import (
-    DAY_0,
-    DAY_3,
-    sprint_row,
-)
-
-def test_return_name_if_matching_sprint_exists():
-    """Test that correct sprint is returned if date exists in a sprint."""
-    # setup - create sample dataset
-    board_data = [
-        sprint_row(issue=1, sprint=1, sprint_start=DAY_0, sprint_length=3),
-        sprint_row(issue=2, sprint=1, sprint_start=DAY_0, sprint_length=3),
-        sprint_row(issue=3, sprint=2, sprint_start=DAY_3, sprint_length=3),
-    ]
-    # rest of the test below
-    ...
-```
 
 ### Debugging tests
 
