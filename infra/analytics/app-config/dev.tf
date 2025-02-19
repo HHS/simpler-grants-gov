@@ -15,6 +15,9 @@ module "dev_config" {
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
 
+  service_cpu    = 256
+  service_memory = 2048
+
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
