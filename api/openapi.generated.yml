@@ -580,6 +580,49 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/saved-opportunities/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Opportunities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -2263,38 +2306,6 @@ components:
             - object
             allOf:
             - $ref: '#/components/schemas/SavedSearchResponse'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    OpportunityVersionV1:
-      type: object
-      properties:
-        opportunity:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityV1'
-        forecasts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpportunitySummaryV1'
-        non_forecasts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpportunitySummaryV1'
-    OpportunityVersionsGetResponseV1:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityVersionV1'
         status_code:
           type: integer
           description: The HTTP status code
