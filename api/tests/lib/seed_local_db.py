@@ -7,6 +7,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.db.models.opportunity_models import FundingCategory, FundingInstrument
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 
@@ -14,37 +15,74 @@ logger = logging.getLogger(__name__)
 
 
 def _build_opportunities(db_session: db.Session, iterations: int) -> None:
-    # Just create a variety of opportunities for local testing
-    # we can eventually look into creating more specific scenarios
     for i in range(iterations):
         logger.info(f"Creating opportunity batch number {i}")
-        # Create a few opportunities in various scenarios
-        factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
-        factories.OpportunityFactory.create_batch(
-            size=5, is_posted_summary=True, has_attachments=True
-        )
-        factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
-        factories.OpportunityFactory.create_batch(
-            size=2, is_posted_summary=True, has_long_descriptions=True
+
+        # Create regular (non-historical) opportunities
+        opportunity1 = factories.OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
         )
 
-        # generate a few opportunities with mostly null values
-        all_null_opportunities = factories.OpportunityFactory.create_batch(
-            size=5, all_fields_null=True
+        # Create current summaries - only one per is_forecast value
+        current_forecast = factories.OpportunitySummaryFactory.create(
+            is_forecasted_summary=True,
+            revision_number=None,  # Current records
+            opportunity=opportunity1,
         )
-        for all_null_opportunity in all_null_opportunities:
+        current_posted = factories.OpportunitySummaryFactory.create(
+            is_posted_summary=True,
+            revision_number=None,  # Current records
+            opportunity=opportunity1,
+        )
+
+        # Create historical summaries with unique revision numbers
+        historical_summaries = []
+
+        # Forecast historical records
+        for rev_num in range(1, 4):  # Revisions 1, 2, 3
             summary = factories.OpportunitySummaryFactory.create(
-                # We  set post_date to something so that running the set-current-opportunities logic
-                # won't get rid of it for having a null post date
+                is_forecasted_summary=True, revision_number=rev_num, opportunity=opportunity1
+            )
+            historical_summaries.append(summary)
+
+        # Posted historical records
+        for rev_num in range(4, 7):  # Revisions 4, 5, 6
+            summary = factories.OpportunitySummaryFactory.create(
+                is_posted_summary=True, revision_number=rev_num, opportunity=opportunity1
+            )
+            historical_summaries.append(summary)
+
+        all_null_opportunities = factories.OpportunityFactory.create_batch(
+            size=2, all_fields_null=True
+        )
+        for idx, all_null_opportunity in enumerate(all_null_opportunities):
+            # Current summary
+            current_summary = factories.OpportunitySummaryFactory.create(
                 all_fields_null=True,
                 opportunity=all_null_opportunity,
                 post_date=datetime_util.get_now_us_eastern_date(),
+                revision_number=None,  # Current record
+                is_forecasted_summary=bool(idx % 2),  # Alternate between forecast and posted
             )
             factories.CurrentOpportunitySummaryFactory.create(
-                opportunity=all_null_opportunity, opportunity_summary=summary
+                opportunity=all_null_opportunity, opportunity_summary=current_summary
+            )
+
+            # Historical summary - use unique revision numbers
+            historical_summary = factories.OpportunitySummaryFactory.create(
+                all_fields_null=True,
+                opportunity=all_null_opportunity,
+                post_date=datetime_util.get_now_us_eastern_date(),
+                revision_number=10 + idx,  # Unique revision numbers (10, 11)
+                is_forecasted_summary=bool(idx % 2),  # Alternate between forecast and posted
+            )
+
+            factories.LinkOpportunitySummaryFundingCategoryFactory.create(
+                opportunity_summary=historical_summary
+            )
+
+            factories.LinkOpportunitySummaryApplicantTypeFactory.create(
+                opportunity_summary=historical_summary
             )
 
     logger.info("Finished creating opportunities")
