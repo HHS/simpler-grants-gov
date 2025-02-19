@@ -27,7 +27,7 @@ describe("GET request", () => {
       token: "fakeToken",
     }));
 
-    const response = await GET({
+    const response = await GET(new Request("http://simpler.grants.gov"), {
       params: Promise.resolve({ id: "1" }),
     });
     const json = (await response.json()) as { opportunity_id: number };
@@ -42,7 +42,7 @@ describe("GET request", () => {
       token: "",
     }));
 
-    const response = await GET({
+    const response = await GET(new Request("http://simpler.grants.gov"), {
       params: Promise.resolve({ id: "1" }),
     });
     expect(response.status).toBe(401);
@@ -54,7 +54,7 @@ describe("GET request", () => {
       token: "fakeToken",
     }));
 
-    const response = await GET({
+    const response = await GET(new Request("http://simpler.grants.gov"), {
       params: Promise.resolve({ id: "" }),
     });
     const json = (await response.json()) as null;
