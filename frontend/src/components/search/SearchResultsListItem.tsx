@@ -87,7 +87,6 @@ export default function SearchResultsListItem({
                 </div>
               )}
             </div>
-
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
               <span className="">
                 <strong>{t("resultsListItem.summary.agency")}</strong>
@@ -103,27 +102,21 @@ export default function SearchResultsListItem({
               </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
-              <span className="">
-                <strong>{t("resultsListItem.opportunity_number")}</strong>
-                {opportunity?.opportunity_number}
-              </span>
+              <strong>{t("resultsListItem.opportunity_number")}</strong>
+              {opportunity?.opportunity_number}
             </div>
           </div>
         </div>
         <div className="desktop:grid-col-auto">
           <div className="overflow-hidden font-body-xs">
             {/* TODO: Better way to format as a dollar amounts */}
-            <span
-              className={`desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
-            >
+            <span className="desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
               <strong>{t("resultsListItem.award_ceiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
               </span>
             </span>
-            <span
-              className={`margin-left-3 desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
-            >
+            <span className="margin-left-3 desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
               <strong>{t("resultsListItem.floor")}</strong>
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
