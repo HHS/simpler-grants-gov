@@ -67,7 +67,7 @@ const fetchMock = jest.fn().mockResolvedValue({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TypedSearchPageComponent = Search as (props: any) => React.JSX.Element;
 
-describe("Search Page", () => {
+describe("Search Route", () => {
   let originalFetch: typeof global.fetch;
   beforeAll(() => {
     originalFetch = global.fetch;
