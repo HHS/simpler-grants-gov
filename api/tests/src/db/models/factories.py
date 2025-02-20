@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
@@ -1821,6 +1822,84 @@ class UserSavedSearchFactory(BaseFactory):
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
     searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+
+
+class CompetitionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Competition
+
+    competition_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    public_competition_id = sometimes_none("ABC-134-56789")
+    legacy_package_id = sometimes_none("PKG-00260155")
+
+    competition_title = sometimes_none(factory.Faker("sentence"))
+
+    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
+    closing_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.opening_date)
+    )
+
+    grace_period = factory.Faker("random_int", min=1, max=10)
+    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+    )
+
+
+class CompetitionInstructionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionInstruction
+
+    competition_instruction_id = Generators.UuidObj
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+    file_location = "file_location"
+
+
+class CompetitionAssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionAssistanceListing
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
+    opportunity_assistance_listing_id = factory.LazyAttribute(
+        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
+    )
+
+
+class ApplicationFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationForm
+
+    form_id = Generators.UuidObj
+    form_name = fake.bs()
+    form_version = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
+    agency_code = factory.Faker("agency_code")
+    active_at = sometimes_none(factory.Faker("date_time_between", start_date="-3y", end_date="-1d"))
+    inactive_at = sometimes_none(
+        factory.LazyAttribute(
+            lambda o: fake.date_time_between(start_date=o.active_at) if o.active_at else None
+        )
+    )
+
+
+class CompetitionFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionForm
+
+    competition_id = Generators.UuidObj
+    application_form = factory.SubFactory(ApplicationFormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
+
+    is_required = False
 
 
 class OpportunityVersionFactory(BaseFactory):
