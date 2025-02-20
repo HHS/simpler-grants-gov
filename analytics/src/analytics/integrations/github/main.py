@@ -73,7 +73,9 @@ def transform_project_data(
             transformed_data.append(transformed)
 
         except ValidationError as err:
-            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
+            logger.info(
+                "**** Can't validate project data for row %d, skipping. ****", i,
+            )
             logger.debug("Error: %s", err)
             continue
 
