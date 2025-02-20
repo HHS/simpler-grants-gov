@@ -6,7 +6,6 @@ from src.db.models.staging.forecast import (
     TapplicanttypesForecast,
     TapplicanttypesForecastHist,
     Tforecast,
-    TforecastHist,
     TfundactcatForecast,
     TfundactcatForecastHist,
     TfundinstrForecast,
@@ -21,7 +20,6 @@ from src.db.models.staging.synopsis import (
     TfundinstrSynopsis,
     TfundinstrSynopsisHist,
     Tsynopsis,
-    TsynopsisHist,
 )
 
 ORPHANED_CFDA = "orphaned_cfda"
@@ -46,7 +44,6 @@ class Metrics(StrEnum):
     TOTAL_RECORDS_SKIPPED = "total_records_skipped"
     TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
     TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
-    TOTAL_HISTORICAL_ORPHANS_SKIPPED = "total_historical_orphans_skipped"
     TOTAL_DELETE_ORPHANS_SKIPPED = "total_delete_orphans_skipped"
 
     TOTAL_ERROR_COUNT = "total_error_count"
@@ -55,8 +52,7 @@ class Metrics(StrEnum):
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
 
-
-SourceSummary: TypeAlias = Tforecast | Tsynopsis | TforecastHist | TsynopsisHist
+SourceSummary: TypeAlias = Tforecast | Tsynopsis
 
 SourceApplicantType: TypeAlias = (
     TapplicanttypesForecast
@@ -73,6 +69,4 @@ SourceFundingInstrument: TypeAlias = (
     TfundinstrForecastHist | TfundinstrForecast | TfundinstrSynopsisHist | TfundinstrSynopsis
 )
 
-SourceAny: TypeAlias = (
-    SourceSummary | SourceApplicantType | SourceFundingCategory | SourceFundingInstrument
-)
+SourceAny: TypeAlias = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument

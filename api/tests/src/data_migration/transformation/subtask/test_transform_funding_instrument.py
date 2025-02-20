@@ -192,18 +192,3 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
             match="Funding instrument record cannot be processed as the opportunity summary for it does not exist",
         ):
             transform_funding_instrument.process_link_funding_instrument(source_record, None, None)
-
-    @pytest.mark.parametrize(
-        "factory_cls",
-        [f.StagingTfundinstrForecastHistFactory, f.StagingTfundinstrSynopsisHistFactory],
-    )
-    def test_process_funding_instrument_but_no_opportunity_summary_hist(
-        self,
-        db_session,
-        transform_funding_instrument,
-        factory_cls,
-    ):
-        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
-        transform_funding_instrument.process_link_funding_instrument(source_record, None, None)
-        assert source_record.transformed_at is not None
-        assert source_record.transformation_notes == "orphaned_historical_record"

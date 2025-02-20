@@ -29,7 +29,6 @@ class TransformApplicantType(AbstractTransformSubTask):
                 == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
             ],
             is_forecast=True,
-            is_historical_table=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(forecast_applicant_type_records)
@@ -45,7 +44,6 @@ class TransformApplicantType(AbstractTransformSubTask):
                 == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
             ],
             is_forecast=False,
-            is_historical_table=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(synopsis_applicant_type_records)
@@ -94,16 +92,6 @@ class TransformApplicantType(AbstractTransformSubTask):
                 target_applicant_type,
                 transform_constants.APPLICANT_TYPE,
                 extra,
-            )
-
-        # Historical records are linked to other historical records, however
-        # we don't import historical opportunity records, so if the opportunity
-        # was deleted, we won't have created the opportunity summary. Whenever we do
-        # support historical opportunities, we'll have these all marked with a
-        # flag that we can use to reprocess these.
-        elif self._is_orphaned_historical(opportunity_summary, source_applicant_type):
-            self._handle_orphaned_historical(
-                source_applicant_type, transform_constants.APPLICANT_TYPE, extra
             )
 
         elif opportunity_summary is None:
