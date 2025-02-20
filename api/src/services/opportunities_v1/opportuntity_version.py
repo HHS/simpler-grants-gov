@@ -24,5 +24,3 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     )
 
     db_session.add(opportunity_version)
-
-    db_session.commit()
