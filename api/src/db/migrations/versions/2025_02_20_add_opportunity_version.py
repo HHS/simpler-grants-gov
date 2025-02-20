@@ -1,8 +1,8 @@
 """add opportunity version
 
-Revision ID: ab2123834345
-Revises: 56d129425397
-Create Date: 2025-02-19 20:37:11.085557
+Revision ID: 20590d71bc20
+Revises: d5f73aa58acb
+Create Date: 2025-02-20 17:46:56.068111
 
 """
 
@@ -11,8 +11,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "ab2123834345"
-down_revision = "56d129425397"
+revision = "20590d71bc20"
+down_revision = "d5f73aa58acb"
 branch_labels = None
 depends_on = None
 
