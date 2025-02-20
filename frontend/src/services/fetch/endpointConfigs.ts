@@ -30,7 +30,7 @@ export const userLogoutEndpoint = {
 };
 
 export const userSavedOpportunityEndpoint = (
-  type: "GET" | "POST" | "DELETE",
+  type: "POST" | "DELETE",
 ) => {
   return {
     basePath: environment.API_URL,
