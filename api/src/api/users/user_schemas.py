@@ -86,6 +86,17 @@ class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class UserSavedOpportunitiesRequestSchema(Schema):
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserGetSavedOpportunityPaginationV1Schema",
+            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
 class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(SavedOpportunityResponseV1Schema),
