@@ -7,7 +7,6 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.opportunity_models import FundingCategory, FundingInstrument
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 
@@ -24,12 +23,12 @@ def _build_opportunities(db_session: db.Session, iterations: int) -> None:
         )
 
         # Create current summaries - only one per is_forecast value
-        current_forecast = factories.OpportunitySummaryFactory.create(
+        factories.OpportunitySummaryFactory.create(
             is_forecasted_summary=True,
             revision_number=None,  # Current records
             opportunity=opportunity1,
         )
-        current_posted = factories.OpportunitySummaryFactory.create(
+        factories.OpportunitySummaryFactory.create(
             is_posted_summary=True,
             revision_number=None,  # Current records
             opportunity=opportunity1,
