@@ -251,3 +251,23 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             )
 
         assert insert.transformed_at is None
+
+    def test_transform_opportunity_attachment_null_mime_type(
+        self, db_session, transform_opportunity_attachment, s3_config
+    ):
+        opportunity = f.OpportunityFactory.create(opportunity_attachments=[])
+        insert = setup_opportunity_attachment(
+            create_existing=False,
+            opportunity=opportunity,
+            config=s3_config,
+            source_values={"mime_type": None},
+        )
+
+        with pytest.raises(
+            ValueError, match="Opportunity attachment does not have a mime type, cannot process"
+        ):
+            transform_opportunity_attachment.process_opportunity_attachment(
+                insert, None, opportunity
+            )
+
+        assert insert.transformed_at is None
