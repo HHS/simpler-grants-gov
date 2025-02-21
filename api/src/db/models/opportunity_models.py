@@ -24,6 +24,7 @@ from src.db.models.lookup_models import (
 )
 
 if TYPE_CHECKING:
+    from src.db.models.competition_models import Competition
     from src.db.models.user_models import UserSavedOpportunity
 
 
@@ -91,6 +92,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         primaryjoin="Opportunity.agency_code == foreign(Agency.agency_code)",
         uselist=False,
         viewonly=True,
+    )
+
+    competitions: Mapped[list["Competition"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
     @property
