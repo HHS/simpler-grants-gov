@@ -75,12 +75,12 @@ export default function SearchResultsListItem({
                   : "--"}
               </span>
               {saved && (
-                <span className="padding-x-105 padding-y-1px bg-base-lighter display-flex flex-align-center font-sans-2xs">
-                    <USWDSIcon
-                      name="star"
-                      className="text-accent-warm-dark button-icon-large padding-right-05"
-                    />
-                    {t("opportunitySaved")}
+                <span className="padding-x-105 padding-y-2px bg-base-lighter display-flex flex-align-center font-sans-3xs radius-sm">
+                  <USWDSIcon
+                    name="star"
+                    className="text-accent-warm-dark button-icon-large padding-right-05"
+                  />
+                  {t("opportunitySaved")}
                 </span>
               )}
               <div className="width-full tablet:width-auto" />
