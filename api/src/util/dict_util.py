@@ -44,14 +44,14 @@ def flatten_dict(in_dict: Any, separator: str = ".", prefix: str = "") -> dict:
 
 def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
     """
-    Compare two dictionaries (possibly nested), return a list of differences
-    with 'field', 'before', and 'after' for each key.
+        Compare two dictionaries (possibly nested), return a list of differences
+        with 'field', 'before', and 'after' for each key.
 
 
-    :param dict1 : The first dictionary.
-    :param dict2 : The second dictionary.
-    :return : Returns a list of dictionaries representing the differences.
-a    """
+        :param dict1 : The first dictionary.
+        :param dict2 : The second dictionary.
+        :return : Returns a list of dictionaries representing the differences.
+    a"""
 
     flatt_dict1 = flatten_dict(dict1)
     flatt_dict2 = flatten_dict(dict2)

@@ -58,7 +58,7 @@ def test_flatten_dict(data, expected_output):
     [
         (
             # dict1
-            {"a": "apple", "b": {"x": 1, "y": 2}, "c": 100}, # additional field a
+            {"a": "apple", "b": {"x": 1, "y": 2}, "c": 100},  # additional field a
             # dict2
             {
                 "b": {"x": 1, "y": 3},  # changed y
@@ -101,23 +101,16 @@ def test_flatten_dict(data, expected_output):
             [{"field": "z.n", "before": True, "after": False}],
         ),
         (
-            #dict1
-            {"x": {"x": {"x":[1,2,True]}}},
-            #dict2
-            {"x": {"x": {"x":[1,2,True]}}}, # no change
+            # dict1
+            {"x": {"x": {"x": [1, 2, True]}}},
+            # dict2
+            {"x": {"x": {"x": [1, 2, True]}}},  # no change
             # expected output
-            []
-        )
+            [],
+        ),
     ],
 )
 def test_diff_nested_dicts(dict1, dict2, expected_output):
-
-    expected = [
-        {"field": "nested.sub_value3", "before": "initial value", "after": "new value"},
-        {"field": "name", "before": "bob", "after": "steve"},
-        {"field": "new_field", "before": None, "after": "yay"},
-        {"field": "nested.sub_value1", "before": [1, 2, 3, 4], "after": [1, 2, 5]},
-    ]
     result = diff_nested_dicts(dict1, dict2)
 
     assert len(result) == len(expected_output)
