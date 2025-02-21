@@ -1900,3 +1900,15 @@ class CompetitionFormFactory(BaseFactory):
     form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
 
     is_required = False
+
+
+class OpportunityVersionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityVersion
+
+    opportunity_version_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    opportunity_data = factory.LazyAttribute(lambda o: o.opportunity_data)
