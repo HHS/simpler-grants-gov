@@ -56,6 +56,7 @@ Errors in standing up the API can originate from an out of date container, datab
 * **db-check-migrations** - check if migrations are out of sync
 * **volume-recreate** - delete all existing volumes and data
 * **remake-backend** - delete all data (`volume-recreate`) and load data (`db-seed-local` and `populate-search-opportunities`)
+   - This may be needed if you are experiencing errors from the API indicating data not found.
 
 ### VSCode Remote Attach Container Debugging
 
