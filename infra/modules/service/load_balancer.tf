@@ -4,7 +4,6 @@
 
 # ALB for an app running in ECS
 resource "aws_lb" "alb" {
-  count           = var.enable_load_balancer ? 1 : 0
   depends_on      = [aws_s3_bucket_policy.access_logs]
   name            = var.service_name
   idle_timeout    = "120"
@@ -41,9 +40,8 @@ resource "aws_lb_listener" "alb_listener_http" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Use HTTPS protocol
   # checkov:skip=CKV_AWS_2:Implement HTTPS in issue #163
   # checkov:skip=CKV_AWS_103:Require TLS 1.2 as part of implementing HTTPS support
-  count = var.enable_load_balancer ? 1 : 0
 
-  load_balancer_arn = aws_lb.alb[0].arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = "80"
   protocol          = "HTTP"
 
@@ -58,36 +56,13 @@ resource "aws_lb_listener" "alb_listener_http" {
   }
 }
 
-resource "aws_lb_listener_rule" "redirect_http_to_https" {
-  count        = var.cert_arn != null ? 1 : 0
-  listener_arn = aws_lb_listener.alb_listener_http[0].arn
+resource "aws_lb_listener_rule" "app_http_forward" {
+  listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 100
 
   action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "app_http_forward" {
-  count        = var.enable_load_balancer ? 1 : 0
-  listener_arn = aws_lb_listener.alb_listener_http[0].arn
-  priority     = 110
-
-  action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg[0].arn
+    target_group_arn = aws_lb_target_group.app_tg.arn
   }
   condition {
     path_pattern {
@@ -99,7 +74,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 resource "aws_lb_listener" "alb_listener_https" {
   count = var.certificate_arn != null ? 1 : 0
 
-  load_balancer_arn = aws_lb.alb[0].arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
   certificate_arn   = var.certificate_arn
@@ -126,7 +101,7 @@ resource "aws_lb_listener_rule" "app_https_forward" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg[0].arn
+    target_group_arn = aws_lb_target_group.app_tg.arn
   }
   condition {
     path_pattern {
@@ -137,8 +112,6 @@ resource "aws_lb_listener_rule" "app_https_forward" {
 
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
-  # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
-  count                = var.enable_load_balancer ? 1 : 0
   name_prefix          = "app-"
   port                 = var.container_port
   protocol             = "HTTP"
@@ -147,7 +120,7 @@ resource "aws_lb_target_group" "app_tg" {
   deregistration_delay = "30"
 
   health_check {
-    path                = var.healthcheck_path
+    path                = "/health"
     port                = var.container_port
     healthy_threshold   = 2
     unhealthy_threshold = 10

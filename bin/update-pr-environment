@@ -1,0 +1,57 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Create or update a temporary environment that will exist while a pull request
+# is open.
+#
+# Positional parameters:
+#   app_name (required) – the name of subdirectory of /infra that holds the
+#     application's infrastructure code.
+#   environment - the name of the application environment (e.g. dev, staging, prod)
+#   pr_number - the pull request number in GitHub
+#   image_tag - the commit hash to deploy for the temporary environment
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+app_name="$1"
+environment="$2"
+pr_number="$3"
+image_tag="$4"
+
+workspace="p-${pr_number}"
+
+echo "::group::Initialize Terraform with backend for environment: ${environment}"
+terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+echo "::endgroup::"
+
+echo "Select or create Terraform workspace: ${workspace}"
+terraform -chdir="infra/${app_name}/service" workspace select -or-create "${workspace}"
+
+echo "::group::Apply changes to environment using image tag: ${image_tag}"
+terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
+echo "::endgroup::"
+
+cluster_name="$(terraform -chdir="infra/$app_name/service" output -raw service_cluster_name)"
+service_name="$(terraform -chdir="infra/$app_name/service" output -raw service_name)"
+echo "Wait for service ${service_name} to become stable"
+aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
+
+service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
+pr_info=$(cat <<EOF
+<!-- begin PR environment info -->
+## Preview environment
+- Service endpoint: ${service_endpoint}
+- Deployed commit: ${image_tag}
+<!-- end PR environment info -->
+EOF
+)
+
+pr_body="$(gh pr view "${pr_number}" --json body | jq --raw-output .body)"
+if [[ $pr_body == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
+  pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->/$pr_info}"
+else
+  pr_body="${pr_body}"$'\n\n'"${pr_info}"
+fi
+
+echo "Update PR description with PR environment info"
+echo "${pr_info}"
+gh pr edit "${pr_number}" --body "${pr_body}"

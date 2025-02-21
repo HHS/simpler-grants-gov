@@ -1,6 +1,13 @@
-variable "service_name" {
+variable "email_alerts_subscription_list" {
+  type        = set(string)
+  default     = []
+  description = "List of emails to subscribe to alerts"
+}
+
+variable "incident_management_service_integration_url" {
   type        = string
-  description = "Name of the service running within ECS cluster"
+  default     = null
+  description = "URL for integrating with for external incident management services"
 }
 
 variable "load_balancer_arn_suffix" {
@@ -8,15 +15,7 @@ variable "load_balancer_arn_suffix" {
   description = "The ARN suffix for use with CloudWatch Metrics."
 }
 
-variable "email_alerts_subscription_list" {
-  type        = set(string)
-  default     = []
-  description = "List of emails to subscribe to alerts"
-
-}
-
-variable "incident_management_service_integration_url" {
+variable "service_name" {
   type        = string
-  default     = null
-  description = "URL for integrating with for external incident management services"
+  description = "Name of the service running within ECS cluster"
 }
