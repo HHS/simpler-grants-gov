@@ -10,8 +10,6 @@ def test_save_opportunity_version(db_session, enable_factory_create):
     # Save opportunity into opportunity_version table
     save_opportunity_version(db_session, opportunity)
 
-    # db_session.refresh(OpportunityVersion)
-
     # Verify Record created
     saved_opp_version = db_session.query(OpportunityVersion).all()
 
