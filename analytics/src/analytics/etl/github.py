@@ -274,7 +274,11 @@ def populate_issue_lookup_table(
         try:
             entry = IssueMetadata.model_validate(issue)
         except ValidationError as err:
-            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
+            logger.info(
+                "Skipping issue %d: %s.",
+                i,
+                err,
+            )
             logger.debug("Error: %s", err)
             continue
         lookup[entry.issue_url] = entry
