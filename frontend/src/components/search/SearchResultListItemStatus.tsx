@@ -25,7 +25,7 @@ const StatusItem = ({
         tablet:border-base-lighter"
     >
       <span
-        className={clsx({
+        className={clsx("display-flex", {
           "usa-tag margin-right-2 tablet:margin-0": tag,
           "bg-accent-warm-dark": orange,
         })}
