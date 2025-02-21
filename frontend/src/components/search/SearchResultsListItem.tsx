@@ -75,17 +75,13 @@ export default function SearchResultsListItem({
                   : "--"}
               </span>
               {saved && (
-                <div className="bg-base-lighter padding-x-105 height-205 font-body-3xs">
-                  <div className="display-flex flex-align-center">
+                <span className="padding-x-105 padding-y-1px bg-base-lighter display-flex flex-align-center font-sans-2xs">
                     <USWDSIcon
                       name="star"
                       className="text-accent-warm-dark button-icon-large padding-right-05"
                     />
-                    <span className="font-body-3xs">
-                      {t("opportunitySaved")}
-                    </span>
-                  </div>
-                </div>
+                    {t("opportunitySaved")}
+                </span>
               )}
               <div className="width-full tablet:width-auto" />
             </div>
