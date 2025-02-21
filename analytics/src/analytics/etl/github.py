@@ -275,7 +275,8 @@ def populate_issue_lookup_table(
             entry = IssueMetadata.model_validate(issue)
         except ValidationError as err:
             logger.info(
-                "Error parsing row for issue lookup table %d, skipping.", i,
+                "Error parsing row for issue lookup table %d, skipping.",
+                i,
             )
             logger.debug("Error: %s", err)
             continue

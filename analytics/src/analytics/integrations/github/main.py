@@ -74,7 +74,8 @@ def transform_project_data(
 
         except ValidationError as err:
             logger.info(
-                "**** Can't validate project data for row %d, skipping. ****", i,
+                "**** Can't validate project data for row %d, skipping. ****",
+                i,
             )
             logger.debug("Error: %s", err)
             continue
