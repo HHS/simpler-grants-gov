@@ -3,7 +3,6 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
-  fetchAgenciesEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
   userLogoutEndpoint,
@@ -36,10 +35,9 @@ export function requesterForEndpoint({
       subPath?: string;
       body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
-      nextOptions?: NextFetchRequestConfig;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
+    const { additionalHeaders = {}, body, subPath } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -59,7 +57,6 @@ export function requesterForEndpoint({
         body: method === "GET" || !body ? null : createRequestBody(body),
         headers,
         method,
-        next: nextOptions,
       });
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
@@ -103,7 +100,5 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const userSavedOpportunity = (type: "GET" | "POST" | "DELETE") =>
+export const userSavedOpportunity = (type: "POST" | "DELETE") =>
   requesterForEndpoint(userSavedOpportunityEndpoint(type));
-
-export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);

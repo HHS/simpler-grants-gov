@@ -17,7 +17,7 @@ module "prod_config" {
   has_incident_management_service = local.has_incident_management_service
 
   service_cpu                    = 1024
-  service_memory                 = 4096
+  service_memory                 = 8192
   service_desired_instance_count = 3
 
   # Enables ECS Exec access for debugging or jump access.

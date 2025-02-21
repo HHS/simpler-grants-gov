@@ -29,20 +29,11 @@ export const userLogoutEndpoint = {
   method: "POST" as ApiMethod,
 };
 
-export const userSavedOpportunityEndpoint = (
-  type: "GET" | "POST" | "DELETE",
-) => {
+export const userSavedOpportunityEndpoint = (type: "POST" | "DELETE") => {
   return {
     basePath: environment.API_URL,
     version: "v1",
     namespace: "users",
     method: type as ApiMethod,
   };
-};
-
-export const fetchAgenciesEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "agencies",
-  method: "POST" as ApiMethod,
 };
