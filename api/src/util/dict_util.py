@@ -51,19 +51,18 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
     :param dict1 : The first dictionary.
     :param dict2 : The second dictionary.
     :return : Returns a list of dictionaries representing the differences.
-
-    """
+a    """
 
     flatt_dict1 = flatten_dict(dict1)
     flatt_dict2 = flatten_dict(dict2)
 
     diffs: list = []
 
-    all_keys = set(flatt_dict1.keys()).union(flatt_dict2.keys())
+    all_keys = set(flatt_dict1.keys()).union(flatt_dict2.keys())  # Does not keep order
 
     for k in all_keys:
         v_a = flatt_dict1.get(k, None)
-        v_b = flatt_dict1.get(k, None)
+        v_b = flatt_dict2.get(k, None)
 
         # Store diff if values are different
         if v_a != v_b:
