@@ -3,6 +3,7 @@ import logging
 from . import (
     agency_models,
     base,
+    competition_models,
     extract_models,
     lookup_models,
     opportunity_models,
@@ -24,4 +25,5 @@ __all__ = [
     "user_models",
     "extract_models",
     "task_models",
+    "competition_models",
 ]

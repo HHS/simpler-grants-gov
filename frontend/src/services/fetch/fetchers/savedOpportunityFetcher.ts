@@ -36,10 +36,23 @@ export const getSavedOpportunity = async (
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const subPath = `${userId}/saved-opportunities`;
-  const resp = await userSavedOpportunity("GET")({
+  const body = {
+    pagination: {
+      page_offset: 1,
+      page_size: 5000,
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "descending",
+        },
+      ],
+    },
+  };
+  const subPath = `${userId}/saved-opportunities/list`;
+  const resp = await userSavedOpportunity("POST")({
     subPath,
     additionalHeaders: ssgToken,
+    body,
   });
   const json = (await resp.json()) as { data: [] };
   const savedOpportunities = json.data;

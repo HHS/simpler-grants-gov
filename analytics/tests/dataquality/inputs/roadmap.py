@@ -676,4 +676,12 @@ def mock_graphql_roadmap_data(
             "pillar": None,
             "status": {"optionId": "f75ad846", "name": "Backlog"},
         },
+        {
+            "content": None,
+            "status": None,
+            "sprint": None,
+            "points": None,
+            "quad": None,
+            "pillar": None,
+        },
     ]
