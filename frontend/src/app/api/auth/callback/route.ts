@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     await createSession(token);
   } catch (_e) {
+    console.error("Error creating session for token", { token });
+    console.error(_e);
     return redirect("/error");
   }
-  return redirect("/");
+  return redirect("/login");
 }
