@@ -100,5 +100,5 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const userSavedOpportunity = (type: "GET" | "POST" | "DELETE") =>
+export const userSavedOpportunity = (type: "POST" | "DELETE") =>
   requesterForEndpoint(userSavedOpportunityEndpoint(type));

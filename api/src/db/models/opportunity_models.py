@@ -1,7 +1,9 @@
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +26,7 @@ from src.db.models.lookup_models import (
 )
 
 if TYPE_CHECKING:
+    from src.db.models.competition_models import Competition
     from src.db.models.user_models import UserSavedOpportunity
 
 
@@ -91,6 +94,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         primaryjoin="Opportunity.agency_code == foreign(Agency.agency_code)",
         uselist=False,
         viewonly=True,
+    )
+
+    competitions: Mapped[list["Competition"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
     @property
@@ -451,3 +458,18 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+
+class OpportunityVersion(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_version"
+
+    opportunity_version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    opportunity_data: Mapped[dict] = mapped_column(JSONB)
