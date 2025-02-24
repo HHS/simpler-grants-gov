@@ -112,7 +112,7 @@ export default function SearchResultsListItem({
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
               </span>
             </span>
-            <span className="margin-left-3 desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
+            <span className="border-left-1px border-base-lighter margin-left-1 padding-left-1 text-right  desktop:border-0 desktop:display-block desktop:margin-left-3 desktop:margin-right-0 desktop:padding-right-0">
               <strong>{t("resultsListItem.floor")}</strong>
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>

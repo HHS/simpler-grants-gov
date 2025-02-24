@@ -90,7 +90,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
       </GridContainer>
       <div
         className={clsx({
-          "bg-base-lightest": resolvedOpportunities.length < 0,
+          "bg-base-lightest": resolvedOpportunities.length === 0,
         })}
       >
         <div className="grid-container padding-y-5 display-flex">
