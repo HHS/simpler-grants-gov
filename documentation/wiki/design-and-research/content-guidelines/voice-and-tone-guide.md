@@ -2,7 +2,7 @@
 description: Guidance for writing content and communications in the Grants.gov brand voice
 ---
 
-# Voice and tone guidelines
+# Voice and tone
 
 ## I. Introduction and Definitions
 
@@ -69,7 +69,7 @@ For grants you can apply for using Grants.gov, you’ll be able to track when it
 * We anticipate what our audiences want or need to know and pull out the information that impacts them most.
 
 {% hint style="warning" %}
-_In this example from the Grants.Gov Release Notes page, a user has to open a PDF to understand the changes and whether they affect them._ <img src="../.gitbook/assets/Grants.gov Release Notes Example (1).png" alt="Screenshot of a release notes table entry that includes the release number, a short description of the release, the release date, and a link to the full release details." data-size="original">
+_In this example from the Grants.Gov Release Notes page, a user has to open a PDF to understand the changes and whether they affect them._ <img src="../../.gitbook/assets/Grants.gov Release Notes Example (1).png" alt="Screenshot of a release notes table entry that includes the release number, a short description of the release, the release date, and a link to the full release details." data-size="original">
 {% endhint %}
 
 {% hint style="success" %}

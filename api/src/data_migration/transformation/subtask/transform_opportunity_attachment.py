@@ -196,6 +196,18 @@ def transform_opportunity_attachment(
         raise ValueError("Opportunity attachment does not have a file name, cannot process.")
     file_name = attachment_util.adjust_legacy_file_name(source_attachment.file_name)
 
+    # We should always have a mime type. Raise an error if we don't
+    if source_attachment.mime_type is None:
+        raise ValueError("Opportunity attachment does not have a mime type, cannot process.")
+
+    # We should always have a file description. Raise an error if we don't
+    if source_attachment.file_desc is None:
+        raise ValueError("Opportunity attachment does not have a file description, cannot process.")
+
+    # We should always have a file size. Raise an error if we don't
+    if source_attachment.file_lob_size is None:
+        raise ValueError("Opportunity attachment does not have a file size, cannot process.")
+
     file_location = attachment_util.get_s3_attachment_path(
         file_name, source_attachment.syn_att_id, opportunity, s3_config
     )
