@@ -20,21 +20,18 @@ layout:
 
 # 👋 Welcome
 
-{% hint style="warning" %}
-**In Progress** :construction:
+This website is a shared resource for internal Simpler.Grants.gov team members, external collaborators, and community members.
 
-Pardon the construction dust! We're still setting up our public wiki, so pages may be changing names or getting moved.&#x20;
-{% endhint %}
-
-Looking to join the Simpler Grants community? Start here:
+#### Interested in joining the Simpler Grants community? Start here:
 
 {% content-ref url="get-involved/get-involved.md" %}
 [get-involved.md](get-involved/get-involved.md)
 {% endcontent-ref %}
 
-## Find the information you need
+#### What's the rest of the wiki about?
 
-* [I want to meet the team that is working on the Simpler.Grants.gov initiative](about/team.md)
-* [I want to learn more about the features the team is planning to build for simpler.grants.gov](product/product-roadmap.md)
-* [I want to learn more about the tools the team is using to collaborate](get-involved/communication-channels/)
-* [I want to figure out how I can get more involved with the project](get-involved/get-involved.md)
+The **'Product'** section of the wiki will help you understand how past development and process decisions were made and what we're currently focused on.
+
+The **'Design and Research'** section is a collection of guidelines and past research to guide anyone contributing to code or design.
+
+The **'References'** section has all the extras—More reading that community members may find helpful as they participate in the Simpler.Grants.gov initiative.

@@ -24,7 +24,7 @@ describe("/api/auth/callback GET handler", () => {
 
     expect(createSessionMock).toHaveBeenCalledTimes(1);
     expect(createSessionMock).toHaveBeenCalledWith("fakeToken");
-    expect(redirectError.digest).toContain(";/;");
+    expect(redirectError.digest).toContain(";/login;");
   });
 
   it("if no token exists on query param, does not call createSession and redirects to unauthorized page", async () => {
