@@ -12,18 +12,6 @@ interface ServerPageProps {
   searchResults: SearchAPIResponse;
 }
 
-const fetchSavedOpportunities = async (): Promise<SavedOpportunity[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-  const savedOpportunities = await getSavedOpportunities(
-    session.token,
-    session.user_id as string,
-  );
-  return savedOpportunities;
-};
-
 export default async function SearchResultsList({
   searchResults,
 }: ServerPageProps) {
