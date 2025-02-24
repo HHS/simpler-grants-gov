@@ -78,6 +78,7 @@ class TforecastHistMixin:
     est_project_start_date: Mapped[datetime.datetime | None]
     fiscal_year: Mapped[int | None]
     modification_comments: Mapped[str | None]
+    action_type: Mapped[str | None]
     action_date: Mapped[datetime.datetime | None]
     create_ts: Mapped[datetime.datetime]
     created_date: Mapped[datetime.datetime | None]
