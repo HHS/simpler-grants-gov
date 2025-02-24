@@ -63,4 +63,7 @@ WHERE revision_number IS NOT NULL;
 
 -- If everything looks good, commit the transaction
 -- If not, ROLLBACK instead
-COMMIT;
+
+-- Should commit defaulting to ROLLBACK in case of accidental run
+-- COMMIT;
+ROLLBACK;
