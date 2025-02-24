@@ -24,19 +24,14 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 const SavedOpportunitiesList = ({
   opportunities,
-  savedOpportunityIds,
 }: {
   opportunities: Opportunity[];
-  savedOpportunityIds: number[];
 }) => {
   return (
     <ul className="usa-prose usa-list--unstyled">
       {opportunities.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem
-            opportunity={opportunity}
-            saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
-          />
+          <SearchResultsListItem opportunity={opportunity} saved={true} />
         </li>
       ))}
     </ul>
@@ -70,9 +65,6 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const savedOpportunities = await fetchSavedOpportunities();
-  const savedOpportunityIds = savedOpportunities.map(
-    (opportunity) => opportunity.opportunity_id,
-  );
   const opportunities = savedOpportunities.map(async (savedOpportunity) => {
     const { data: opportunityData } = await getOpportunityDetails(
       String(savedOpportunity.opportunity_id),
@@ -95,10 +87,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
       >
         <div className="grid-container padding-y-5 display-flex">
           {resolvedOpportunities.length > 0 ? (
-            <SavedOpportunitiesList
-              opportunities={resolvedOpportunities}
-              savedOpportunityIds={savedOpportunityIds}
-            />
+            <SavedOpportunitiesList opportunities={resolvedOpportunities} />
           ) : (
             <NoSavedOpportunities
               noSavedCTA={t.rich("SavedGrants.noSavedCTA", {
