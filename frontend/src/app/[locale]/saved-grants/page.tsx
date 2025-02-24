@@ -1,10 +1,15 @@
+import clsx from "clsx";
 import { Metadata } from "next";
+import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
+import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -17,9 +22,64 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
+const SavedOpportunitiesList = ({
+  opportunities,
+  savedOpportunityIds,
+}: {
+  opportunities: Opportunity[];
+  savedOpportunityIds: number[];
+}) => {
+  return (
+    <ul className="usa-prose usa-list--unstyled">
+      {opportunities.map((opportunity) => (
+        <li key={opportunity?.opportunity_id}>
+          <SearchResultsListItem
+            opportunity={opportunity}
+            saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const NoSavedOpportunities = ({
+  noSavedCTA,
+  searchButtonText,
+}: {
+  noSavedCTA: React.ReactNode;
+  searchButtonText: string;
+}) => {
+  return (
+    <>
+      <USWDSIcon
+        name="star_outline"
+        className="grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+      />
+      <div className="margin-top-2 grid-col-11">
+        <p className="usa-intro ">{noSavedCTA}</p>{" "}
+        <Link href="/search">
+          <Button type="button">{searchButtonText}</Button>
+        </Link>
+      </div>
+    </>
+  );
+};
+
 export default async function SavedGrants({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const savedOpportunities = await fetchSavedOpportunities();
+  const savedOpportunityIds = savedOpportunities.map(
+    (opportunity) => opportunity.opportunity_id,
+  );
+  const opportunities = savedOpportunities.map(async (savedOpportunity) => {
+    const { data: opportunityData } = await getOpportunityDetails(
+      String(savedOpportunity.opportunity_id),
+    );
+    return opportunityData;
+  });
+  const resolvedOpportunities = await Promise.all(opportunities);
 
   return (
     <>
@@ -28,15 +88,20 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
           {t("SavedGrants.heading")}
         </h1>
       </GridContainer>
-      <div className="bg-base-lightest">
+      <div
+        className={clsx({
+          "bg-base-lightest": resolvedOpportunities.length < 0,
+        })}
+      >
         <div className="grid-container padding-y-5 display-flex">
-          <USWDSIcon
-            name="star_outline"
-            className="grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
-          />
-          <div className="margin-top-2 grid-col-11">
-            <p className="usa-intro ">
-              {t.rich("SavedGrants.noSavedCTA", {
+          {resolvedOpportunities.length > 0 ? (
+            <SavedOpportunitiesList
+              opportunities={resolvedOpportunities}
+              savedOpportunityIds={savedOpportunityIds}
+            />
+          ) : (
+            <NoSavedOpportunities
+              noSavedCTA={t.rich("SavedGrants.noSavedCTA", {
                 br: () => (
                   <>
                     <br />
@@ -44,11 +109,9 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
                   </>
                 ),
               })}
-            </p>
-            <Link href="/search">
-              <Button type="button">{t("SavedGrants.searchButton")}</Button>
-            </Link>
-          </div>
+              searchButtonText={t("SavedGrants.searchButton")}
+            />
+          )}
         </div>
       </div>
     </>

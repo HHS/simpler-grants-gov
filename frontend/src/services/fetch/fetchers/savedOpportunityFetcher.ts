@@ -1,3 +1,4 @@
+import { getSession } from "src/services/auth/session";
 import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
 import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
 
@@ -55,4 +56,23 @@ export const getSavedOpportunity = async (
       savedOpportunity.opportunity_id === opportunityId,
   );
   return savedOpportunity ?? null;
+};
+
+export const fetchSavedOpportunities = async (): Promise<
+  SavedOpportunity[]
+> => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      return [];
+    }
+    const savedOpportunities = await getSavedOpportunities(
+      session.token,
+      session.user_id as string,
+    );
+    return savedOpportunities;
+  } catch (e) {
+    console.error("Error fetching saved opportunities:", e);
+    return [];
+  }
 };
