@@ -90,7 +90,8 @@ def export_github_data(
     GitHubProjectETL(config).run()
     end_time = time.perf_counter()
     logger.info(
-        "extract workflow executed in %.5f seconds", float(end_time - start_time),
+        "extract workflow executed in %.5f seconds",
+        float(end_time - start_time),
     )
 
 
@@ -157,7 +158,8 @@ def transform_and_load(
     etldb.sync_data(dataset, datestamp)
     end_time = time.perf_counter()
     logger.info(
-        "transform and load is done after %.5f seconds", float(end_time - start_time),
+        "transform and load is done after %.5f seconds",
+        float(end_time - start_time),
     )
 
 
@@ -197,7 +199,8 @@ def extract_transform_and_load(
     etldb.sync_data(dataset, datestamp)
     end_time = time.perf_counter()
     logger.info(
-        "transform and load executed in %.5f seconds", float(end_time - start_time),
+        "transform and load executed in %.5f seconds",
+        float(end_time - start_time),
     )
 
     logger.info("ETL workflow is done")
