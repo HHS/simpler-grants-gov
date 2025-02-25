@@ -1,12 +1,5 @@
-<<<<<<< before updating
 name: Deploy Analytics
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
-=======
-name: Deploy analytics
-# Need to set a default value for when the workflow is triggered from a git push
-# which bypasses the default configuration for inputs
-run-name: Deploy ${{ inputs.version || 'main' }} to analytics ${{ inputs.environment || 'dev' }}
->>>>>>> after updating
+run-name: Deploy ${{ inputs.version || 'main' }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -55,7 +48,6 @@ jobs:
       matrix:
         envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
     with:
-<<<<<<< before updating
       app_name: "analytics"
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
@@ -65,8 +57,3 @@ jobs:
     needs: [analytics-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
-=======
-      app_name: analytics
-      environment: ${{ inputs.environment || 'dev' }}
-      version: ${{ inputs.version || 'main' }}
->>>>>>> after updating
