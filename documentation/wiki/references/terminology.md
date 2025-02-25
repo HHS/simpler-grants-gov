@@ -2,7 +2,7 @@
 description: Understand some of the key acronyms and terms we use on the project.
 ---
 
-# Terminology
+# Glossary
 
 ## Federal abbreviations
 
@@ -20,4 +20,5 @@ The following terms we commonly use to describe our work on the codebase and oth
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>4/23/2024</td><td>Acronym change</td><td>Updated acronym from FDG to FDP</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>4/23/2024</td><td>Acronym change</td><td>Updated acronym from FDG to FDP</td></tr><tr><td>2/21/2025</td><td>Retitled 'Terminology' to 'Glossary' and moved the page under a Resources section.</td><td></td></tr></tbody></table>
+

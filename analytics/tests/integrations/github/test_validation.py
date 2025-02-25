@@ -153,6 +153,48 @@ class TestProjectItems:
         assert item.pillar.name is None
         assert item.pillar.option_id is None
 
+    def test_points_as_float_convert_to_int(self) -> None:
+        """Test validating floats for points get converted to int."""
+        float_input = 5.1
+        data = {
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
+            "points": {"number": float_input},
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
+        }
+        item = ProjectItem.model_validate(data)
+        # Check issue content
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
+        # Check sprint fields
+        assert item.sprint.title == "Sprint 1"
+        assert item.points.number == int(float_input)
+        # Check roadmap fields
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
+
+    def test_points_as_none_return_none(self) -> None:
+        """Test validating none for points is handled."""
+        data = {
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
+        }
+        item = ProjectItem.model_validate(data)
+        # Check issue content
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
+        # Check sprint fields
+        assert item.sprint.title == "Sprint 1"
+        assert item.points.number is None
+        # Check roadmap fields
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
+
 
 # #############################################
 # Issue content tests
