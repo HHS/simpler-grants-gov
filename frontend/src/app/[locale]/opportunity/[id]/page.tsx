@@ -145,11 +145,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityDescription
               summary={opportunityData.summary}
               nofoPath={nofoPath}
-              id={opportunityData.opportunity_id}
+              opportunityId={opportunityData.opportunity_id}
             />
             <OpportunityDocuments
               documents={opportunityData.attachments}
-              id={opportunityData.opportunity_id}
+              opportunityId={opportunityData.opportunity_id}
             />
             <OpportunityLink opportunityData={opportunityData} />
           </div>

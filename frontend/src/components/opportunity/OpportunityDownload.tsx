@@ -7,14 +7,17 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 type OpportunityDownloadProps = {
   nofoPath: string;
-  id: number;
+  opportunityId: number;
 };
 
 const downloadNOFO = (nofoPath: string) => {
   window.open(nofoPath, "_blank");
 };
 
-const OpportunityDownload = ({ nofoPath, id }: OpportunityDownloadProps) => {
+const OpportunityDownload = ({
+  nofoPath,
+  opportunityId,
+}: OpportunityDownloadProps) => {
   const t = useTranslations("OpportunityListing.description");
 
   return (
@@ -24,7 +27,7 @@ const OpportunityDownload = ({ nofoPath, id }: OpportunityDownloadProps) => {
           <Button
             onClick={() => downloadNOFO(nofoPath)}
             type="button"
-            id={`opportunity-document-button-${id}`}
+            id={`opportunity-document-button-${opportunityId}`}
           >
             <span>{t("nofo_download")} </span>
             <USWDSIcon name={"file_download"} className="usa-icon--size-4" />

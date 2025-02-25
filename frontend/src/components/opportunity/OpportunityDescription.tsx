@@ -10,7 +10,7 @@ import OpportunityDownload from "src/components/opportunity/OpportunityDownload"
 type OpportunityDescriptionProps = {
   summary: Summary;
   nofoPath: string;
-  id: number;
+  opportunityId: number;
 };
 
 enum ApplicantType {
@@ -109,7 +109,7 @@ const SummaryDescriptionDisplay = ({
 const OpportunityDescription = ({
   summary,
   nofoPath,
-  id,
+  opportunityId,
 }: OpportunityDescriptionProps) => {
   const t = useTranslations("OpportunityListing.description");
 
@@ -127,7 +127,10 @@ const OpportunityDescription = ({
     <>
       <div className="usa-prose margin-top-3">
         <h2>{t("title")}</h2>
-        <OpportunityDownload nofoPath={nofoPath} id={id} />
+        <OpportunityDownload
+          nofoPath={nofoPath}
+          opportunityId={opportunityId}
+        />
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}

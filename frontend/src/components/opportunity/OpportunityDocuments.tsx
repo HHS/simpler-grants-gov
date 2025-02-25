@@ -11,10 +11,13 @@ interface OpportunityDocument {
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
-  id: number;
+  opportunityId: number;
 }
 
-const DocumentTable = ({ documents, id }: OpportunityDocumentsProps) => {
+const DocumentTable = ({
+  documents,
+  opportunityId,
+}: OpportunityDocumentsProps) => {
   const t = useTranslations("OpportunityListing.documents");
 
   return (
@@ -32,7 +35,7 @@ const DocumentTable = ({ documents, id }: OpportunityDocumentsProps) => {
               <Link
                 target="_blank"
                 href={document.download_path}
-                id={`opportunity-document-link-${id}-${document.file_name}`}
+                id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
               >
                 {document.file_name}
               </Link>
@@ -50,7 +53,10 @@ const DocumentTable = ({ documents, id }: OpportunityDocumentsProps) => {
   );
 };
 
-const OpportunityDocuments = ({ documents, id }: OpportunityDocumentsProps) => {
+const OpportunityDocuments = ({
+  documents,
+  opportunityId,
+}: OpportunityDocumentsProps) => {
   const t = useTranslations("OpportunityListing.documents");
 
   return (
@@ -58,7 +64,7 @@ const OpportunityDocuments = ({ documents, id }: OpportunityDocumentsProps) => {
       <h2 id="opportunity_documents">{t("title")}</h2>
       {documents.length > 0 ? (
         <Table>
-          <DocumentTable documents={documents} id={id} />
+          <DocumentTable documents={documents} opportunityId={opportunityId} />
         </Table>
       ) : (
         <p>--</p>
