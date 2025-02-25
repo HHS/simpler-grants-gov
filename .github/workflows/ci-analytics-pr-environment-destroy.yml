@@ -1,0 +1,18 @@
+name: CI App PR Environment Destroy
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+  # !! Uncomment the following lines once you've set up the dev environment and are ready to enable PR environments
+  # pull_request:
+  #   types: [closed]
+jobs:
+  destroy:
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    uses: ./.github/workflows/pr-environment-destroy.yml
+    with:
+      app_name: "app"
+      environment: "dev"
+      pr_number: ${{ inputs.pr_number || github.event.number }}
