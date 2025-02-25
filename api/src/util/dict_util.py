@@ -67,14 +67,8 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
         # Store diff if values are different
         if isinstance(v_a, list):
             if set(v_a) != set(v_b):
-                diffs.append({
-                    "field": k,
-                    "before": v_a,
-                    "after": v_b}
-
-                )
-            continue
-        if v_a != v_b:
+                diffs.append({"field": k, "before": v_a, "after": v_b})
+        elif v_a != v_b:
 
             diffs.append({"field": k, "before": v_a, "after": v_b})
 
