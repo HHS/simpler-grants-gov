@@ -299,7 +299,7 @@ class TransformAgencyHierarchy(AbstractTransformSubTask):
             if top_level_agency_code and top_level_agency_code in agency_map:
                 agency.top_level_agency = agency_map[top_level_agency_code]
             else:
-                # We want to unset the top level agency is something is incorrectly
+                # We want to unset the top level agency if something is incorrectly
                 # pointed to (just as a safeguard)
                 agency.top_level_agency = None
 
