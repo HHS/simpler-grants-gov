@@ -4,7 +4,6 @@ module "dev_config" {
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "dev"
-  account_name                    = "dev"
   network_name                    = "dev"
   domain_name                     = null
   enable_https                    = false
@@ -12,6 +11,7 @@ module "dev_config" {
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
 
+<<<<<<< before updating
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
@@ -39,6 +39,15 @@ module "dev_config" {
     # Login.gov OAuth
     ENABLE_AUTH_ENDPOINT = 1
   }
+=======
+  # Enable and configure identity provider.
+  enable_identity_provider = local.enable_identity_provider
+
+  # Support local development against the dev instance.
+  extra_identity_provider_callback_urls = ["http://localhost"]
+  extra_identity_provider_logout_urls   = ["http://localhost"]
+
+>>>>>>> after updating
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.

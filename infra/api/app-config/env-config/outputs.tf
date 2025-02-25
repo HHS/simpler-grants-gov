@@ -1,3 +1,4 @@
+<<<<<<< before updating
 output "search_config" {
   value = var.has_search ? {
     instance_type           = var.search_data_instance_type
@@ -14,8 +15,20 @@ output "account_name" {
   description = "Name of the AWS account that contains the resources for the application environment."
 }
 
+=======
+>>>>>>> after updating
 output "database_config" {
   value = local.database_config
+}
+
+output "scheduled_jobs" {
+  value = local.scheduled_jobs
+}
+
+output "incident_management_service_integration" {
+  value = var.has_incident_management_service ? {
+    integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
+  } : null
 }
 
 output "network_name" {
@@ -54,12 +67,21 @@ output "service_config" {
   }
 }
 
+output "identity_provider_config" {
+  value = local.identity_provider_config
+}
+
+output "notifications_config" {
+  value = local.notifications_config
+}
+
 output "storage_config" {
   value = {
     # Include project name in bucket name since buckets need to be globally unique across AWS
     bucket_name = local.bucket_name
   }
 }
+<<<<<<< before updating
 
 output "scheduled_jobs" {
   value = local.scheduled_jobs
@@ -74,3 +96,5 @@ output "incident_management_service_integration" {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
 }
+=======
+>>>>>>> after updating
