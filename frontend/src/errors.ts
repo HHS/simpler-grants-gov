@@ -8,11 +8,11 @@ import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
-  const cause = <FrontendErrorDetails>error.cause;
+  const cause = error.cause as FrontendErrorDetails;
 
   try {
     if (cause?.status) {
-      return cause?.status;
+      return cause.status;
     }
     const parsedMessage = JSON.parse(message) as { status: number };
     return parsedMessage.status;
