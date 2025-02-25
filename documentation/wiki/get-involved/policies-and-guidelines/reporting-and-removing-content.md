@@ -1,6 +1,6 @@
 # Reporting and removing content
 
-If content that violates our above policies is posted in any of our communication channels, please follow the steps below to remove the content. If you are the one who posted it by accident, please remove it if possible. If someone else has posted it or you are in a channel you do not have privileges to delete, please contact the appropriate Simpler Grants administrator to remove it.&#x20;
+If content that violates our community guidelines is posted in any of our communication channels, please follow the steps below to remove the content. If you are the one who posted it by accident, please remove it if possible. If someone else has posted it or you are in a channel you do not have privileges to delete, contact the appropriate Simpler.Grants.gov administrator to remove it.&#x20;
 
 {% hint style="info" %}
 **Note:** Many of the steps to remove content involve contacting platform administrators.&#x20;

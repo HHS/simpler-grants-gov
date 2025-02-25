@@ -32,7 +32,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
             ],
             is_forecast=True,
-            is_historical_table=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(forecast_funding_category_records)
@@ -48,7 +47,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
             ],
             is_forecast=False,
-            is_historical_table=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(synopsis_funding_category_records)
@@ -97,16 +95,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 target_funding_category,
                 transform_constants.FUNDING_CATEGORY,
                 extra,
-            )
-
-        # Historical records are linked to other historical records, however
-        # we don't import historical opportunity records, so if the opportunity
-        # was deleted, we won't have created the opportunity summary. Whenever we do
-        # support historical opportunities, we'll have these all marked with a
-        # flag that we can use to reprocess these.
-        elif self._is_orphaned_historical(opportunity_summary, source_funding_category):
-            self._handle_orphaned_historical(
-                source_funding_category, transform_constants.FUNDING_CATEGORY, extra
             )
 
         elif opportunity_summary is None:

@@ -1239,7 +1239,6 @@ class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
         model = staging.synopsis.TsynopsisHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
@@ -1255,7 +1254,6 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
         model = staging.forecast.TforecastHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
@@ -1485,7 +1483,6 @@ class ForeignTsynopsisHistFactory(ForeignTsynopsisFactory):
         model = foreign.synopsis.TsynopsisHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class ForeignTforecastFactory(TforecastFactory):
@@ -1501,7 +1498,6 @@ class ForeignTforecastHistFactory(ForeignTforecastFactory):
         model = foreign.forecast.TforecastHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
