@@ -1,11 +1,11 @@
 ---
 description: Welcome to the public wiki for the Simpler.Grants.gov initiative.
-cover: .gitbook/assets/BannerH4.png
-coverY: -39.279661016949156
+cover: .gitbook/assets/Logo.png
+coverY: 0
 layout:
   cover:
     visible: true
-    size: full
+    size: hero
   title:
     visible: true
   description:
