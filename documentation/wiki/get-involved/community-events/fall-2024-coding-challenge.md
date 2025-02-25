@@ -73,3 +73,5 @@ Our designers have created guidelines for contributing design mockups and conten
 Can't wait until October 25th? Join the Simpler Grants.gov open-source community and start contributing today!
 
 * **Get Involved Now**: [Join the Community](https://app.gitbook.com/o/cFcvhi6d0nlLyH2VzVgn/s/Pm7UEzeiS1tbLCV1SFRu/collaborating/get-involved)
+
+<table><thead><tr><th width="215">Date</th><th width="185">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
