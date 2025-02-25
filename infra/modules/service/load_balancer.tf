@@ -81,6 +81,7 @@ resource "aws_lb_listener_rule" "redirect_http_to_https" {
 }
 
 resource "aws_lb_listener_rule" "app_http_forward" {
+  count        = var.enable_load_balancer ? 1 : 0
   listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 100
 
