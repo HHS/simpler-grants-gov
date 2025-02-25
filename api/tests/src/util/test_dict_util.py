@@ -108,6 +108,14 @@ def test_flatten_dict(data, expected_output):
             # expected output
             [],
         ),
+        (
+            # dict1
+            {"x": {"x": {"x": [1, 2, True]}}},
+            # dict2
+            {"x": {"x": {"x": [1, True, 2]}}}, # re-ordered list
+            # expected output
+            [],
+        )
     ],
 )
 def test_diff_nested_dicts(dict1, dict2, expected_output):
