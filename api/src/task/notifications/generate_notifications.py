@@ -1,18 +1,19 @@
 import logging
 import uuid
 from dataclasses import dataclass, field
+from datetime import timedelta
 from enum import StrEnum
 
 import botocore.client
 from pydantic import Field
-from sqlalchemy import select, update
+from sqlalchemy import and_, exists, select, update
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
-from src.db.models.opportunity_models import OpportunityChangeAudit
+from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit, OpportunitySummary
 from src.db.models.user_models import (
     User,
     UserNotificationLog,
@@ -48,6 +49,7 @@ def run_notification_task(db_session: db.Session, search_client: search.SearchCl
 class NotificationConstants:
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
+    CLOSING_DATE_REMINDER = "closing_date_reminder"  #
 
 
 @dataclass
@@ -56,6 +58,7 @@ class NotificationContainer:
 
     saved_opportunities: list[UserSavedOpportunity] = field(default_factory=list)
     saved_searches: list[UserSavedSearch] = field(default_factory=list)
+    closing_opportunities: list[UserSavedOpportunity] = field(default_factory=list)
 
 
 class NotificationTask(Task):
@@ -87,6 +90,7 @@ class NotificationTask(Task):
         """Main task logic to collect and send notifications"""
         self._collect_opportunity_notifications()
         self._collect_search_notifications()
+        self._collect_closing_date_notifications()
         self._send_notifications()
 
     def _collect_opportunity_notifications(self) -> None:
@@ -170,7 +174,11 @@ class NotificationTask(Task):
     def _send_notifications(self) -> None:
         """Send collected notifications to users"""
         for user_id, container in self.user_notification_map.items():
-            if not container.saved_opportunities and not container.saved_searches:
+            if (
+                not container.saved_opportunities
+                and not container.saved_searches
+                and not container.closing_opportunities
+            ):
                 continue
 
             user = self.db_session.execute(
@@ -179,6 +187,89 @@ class NotificationTask(Task):
 
             if not user or not user.email:
                 logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
+
+            notification_logs: list[UserNotificationLog] = []
+
+            subject = ""
+            message = ""
+
+            if len(container.closing_opportunities) == 1:
+                # Single opportunity closing
+                opportunity = container.closing_opportunities[0]
+                close_date_stmt = select(OpportunitySummary.close_date).where(
+                    OpportunitySummary.opportunity_id == opportunity.opportunity_id
+                )
+                close_date = self.db_session.execute(close_date_stmt).scalar_one_or_none()
+                if close_date is None:
+                    logger.warning(
+                        "No close date found for opportunity",
+                        extra={"opportunity_id": opportunity.opportunity_id},
+                    )
+                    continue
+
+                subject = f"Applications for your bookmarked funding opportunity are due soon"
+                message = (
+                    f"Applications for the following funding opportunity are due in two weeks:"
+                )
+            elif len(container.closing_opportunities) > 1:
+                # Multiple opportunities closing
+                subject = "Applications for your bookmarked funding opportunities are due soon"
+                message = "Applications for the following funding opportunities are due in two weeks::\n\n"
+
+                for opportunity in container.closing_opportunities:
+                    close_date_stmt = select(OpportunitySummary.close_date).where(
+                        OpportunitySummary.opportunity_id == opportunity.opportunity_id
+                    )
+                    close_date = self.db_session.execute(close_date_stmt).scalar_one_or_none()
+                    if close_date:
+                        message += (
+                            f"• {opportunity.opportunity.opportunity_title}\n"
+                            f"  Closing on: {close_date.strftime('%B %d, %Y')}\n\n"
+                        )
+
+            for closing_opportunity in container.closing_opportunities:
+                # Create notification log entry
+                notification_log = UserNotificationLog(
+                    user_id=user_id,
+                    opportunity_id=closing_opportunity.opportunity_id,
+                    notification_reason=NotificationConstants.CLOSING_DATE_REMINDER,
+                    notification_sent=False,  # Default to False, update on success
+                )
+                self.db_session.add(notification_log)
+                notification_logs.append(notification_log)
+
+            if len(container.closing_opportunities) > 0:
+                try:
+                    send_pinpoint_email_raw(
+                        to_address=user.email,
+                        subject=subject,
+                        message=message,
+                        pinpoint_client=self.pinpoint_client,
+                        app_id=self.config.app_id,
+                    )
+                    for notification_log in notification_logs:
+                        notification_log.notification_sent = True
+
+                    logger.info(
+                        "Successfully sent closing date reminder",
+                        extra={
+                            "user_id": user_id,
+                            "opportunity_ids": [log.opportunity_id for log in notification_logs],
+                        },
+                    )
+                    self.increment(self.Metrics.NOTIFICATIONS_SENT)
+                except Exception:
+                    logger.exception(
+                        "Failed to send closing date reminder email",
+                        extra={
+                            "user_id": user_id,
+                            "email": user.email,
+                            "opportunity_ids": [log.opportunity_id for log in notification_logs],
+                        },
+                    )
+
+            if not container.saved_opportunities and not container.saved_searches:
                 continue
 
             # Send email via Pinpoint
@@ -267,6 +358,54 @@ class NotificationTask(Task):
             self.increment(self.Metrics.SEARCHES_TRACKED, len(container.saved_searches))
             self.increment(self.Metrics.NOTIFICATIONS_SENT)
             self.increment(self.Metrics.USERS_NOTIFIED)
+
+    def _collect_closing_date_notifications(self) -> None:
+        """Collect notifications for opportunities closing in two weeks"""
+        two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
+
+        # Find saved opportunities closing in two weeks that haven't been notified
+        stmt = (
+            select(UserSavedOpportunity)
+            .join(UserSavedOpportunity.opportunity)
+            .join(
+                OpportunitySummary, OpportunitySummary.opportunity_id == Opportunity.opportunity_id
+            )
+            .where(
+                # Check if closing date is within 24 hours of two weeks from now
+                and_(
+                    OpportunitySummary.close_date >= two_weeks_from_now - timedelta(hours=24),
+                    OpportunitySummary.close_date <= two_weeks_from_now + timedelta(hours=24),
+                ),
+                # Ensure we haven't already sent a closing reminder
+                ~exists().where(
+                    and_(
+                        UserNotificationLog.user_id == UserSavedOpportunity.user_id,
+                        UserNotificationLog.notification_reason
+                        == NotificationConstants.CLOSING_DATE_REMINDER,
+                        UserNotificationLog.opportunity_id == UserSavedOpportunity.opportunity_id,
+                    )
+                ),
+            )
+        )
+
+        results = self.db_session.execute(stmt)
+
+        for row in results.scalars():
+            user_id = row.user_id
+            if user_id not in self.user_notification_map:
+                self.user_notification_map[user_id] = NotificationContainer()
+            self.user_notification_map[user_id].closing_opportunities.append(row)
+
+        logger.info(
+            "Collected closing date notifications",
+            extra={
+                "user_count": len(self.user_notification_map),
+                "total_notifications": sum(
+                    len(container.closing_opportunities)
+                    for container in self.user_notification_map.values()
+                ),
+            },
+        )
 
 
 def _strip_pagination_params(search_query: dict) -> dict:

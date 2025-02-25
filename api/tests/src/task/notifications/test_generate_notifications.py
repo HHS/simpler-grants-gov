@@ -195,7 +195,11 @@ def test_notification_log_creation(
 ):
     """Test that notification logs are created when notifications are sent"""
     # Create a saved opportunity that needs notification
-    opportunity = factories.OpportunityFactory.create()
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+    factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        close_date=datetime_util.utcnow() + timedelta(days=21),
+    )
     saved_opportunity = factories.UserSavedOpportunityFactory.create(
         user=user,
         opportunity=opportunity,
@@ -451,3 +455,106 @@ def test_pagination_params_are_stripped_from_search_query(
 
     params = _strip_pagination_params(saved_search.search_query)
     assert params.keys() == {"query"}
+
+
+def test_closing_date_notifications(
+    db_session, enable_factory_create, user_with_email, search_client, clear_notification_logs
+):
+    """Test that notifications are sent for opportunities closing in two weeks"""
+    two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
+
+    # Create an opportunity closing in two weeks
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+    factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity, close_date=two_weeks_from_now
+    )
+    factories.UserSavedOpportunityFactory.create(user=user_with_email, opportunity=opportunity)
+
+    # Create an opportunity closing in three weeks (shouldn't trigger notification)
+    opportunity_later = factories.OpportunityFactory.create(no_current_summary=True)
+    factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity_later, close_date=datetime_util.utcnow() + timedelta(days=21)
+    )
+
+    factories.UserSavedOpportunityFactory.create(
+        user=user_with_email, opportunity=opportunity_later
+    )
+
+    _clear_mock_responses()
+
+    # Run the notification task
+    task = NotificationTask(db_session, search_client)
+    task.run()
+
+    # Verify notification log was created only for the opportunity closing in two weeks
+    notification_logs = (
+        db_session.execute(
+            select(UserNotificationLog).where(
+                UserNotificationLog.notification_reason
+                == NotificationConstants.CLOSING_DATE_REMINDER
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    assert len(notification_logs) == 1
+    assert notification_logs[0].opportunity_id == opportunity.opportunity_id
+    assert notification_logs[0].user_id == user_with_email.user_id
+    assert notification_logs[0].notification_sent is True
+
+    # Verify email was sent via Pinpoint
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+
+def test_closing_date_notification_not_sent_twice(
+    db_session, enable_factory_create, user_with_email, search_client, clear_notification_logs
+):
+    """Test that closing date notifications aren't sent multiple times for the same opportunity"""
+    two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
+
+    # Create an opportunity closing in two weeks
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+    factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity, close_date=two_weeks_from_now
+    )
+    factories.UserSavedOpportunityFactory.create(user=user_with_email, opportunity=opportunity)
+
+    # Create an existing notification log
+    notification_log = UserNotificationLog(
+        user_id=user_with_email.user_id,
+        opportunity_id=opportunity.opportunity_id,
+        notification_reason=NotificationConstants.CLOSING_DATE_REMINDER,
+        notification_sent=True,
+    )
+    db_session.add(notification_log)
+    db_session.commit()
+
+    _clear_mock_responses()
+
+    # Run the notification task
+    task = NotificationTask(db_session, search_client)
+    task.run()
+
+    # Verify no new notification logs were created
+    notification_logs = (
+        db_session.execute(
+            select(UserNotificationLog).where(
+                UserNotificationLog.notification_reason
+                == NotificationConstants.CLOSING_DATE_REMINDER
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    assert len(notification_logs) == 1  # Only the original notification log
+
+    # Run the notification task
+    task_again = NotificationTask(db_session, search_client)
+    task_again.run()
+
+    # Verify no emails were sent
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 0
