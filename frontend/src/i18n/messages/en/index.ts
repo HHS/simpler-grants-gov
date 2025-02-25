@@ -586,6 +586,7 @@ export const messages = {
     callToAction: {
       title: "Search funding opportunities",
     },
+    opportunitySaved: "Saved",
     opportunityStatus: {
       title: "Opportunity status",
       label: {

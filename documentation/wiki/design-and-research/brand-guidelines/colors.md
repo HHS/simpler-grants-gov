@@ -40,19 +40,4 @@ Color contrast is crucial to legibility and accessibility in type. Always be sur
 
 Do not diminish the value of color in the brand. Avoid the following uses.
 
-\
-Do not use unapproved colors.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants color dont use unapproved colors.png" alt=""><figcaption></figcaption></figure></div>
-
-Do not use gradients.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants color dont use gradients.png" alt=""><figcaption></figcaption></figure></div>
-
-Do not use low-contrast combinations.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants color dont use low contrast combinations.png" alt=""><figcaption></figcaption></figure></div>
-
-Do not use only accent color combinations.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants do not use only accent color combinations.png" alt=""><figcaption></figcaption></figure></div>
+<table data-card-size="large" data-view="cards"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th></tr></thead><tbody><tr><td>Do not use unapproved colors.</td><td><a href="../../.gitbook/assets/simpler grants color dont use unapproved colors.png">simpler grants color dont use unapproved colors.png</a></td></tr><tr><td>Do not use gradients.</td><td><a href="../../.gitbook/assets/simpler grants color dont use gradients.png">simpler grants color dont use gradients.png</a></td></tr><tr><td>Do not use low-contrast combinations.</td><td><a href="../../.gitbook/assets/simpler grants color dont use low contrast combinations.png">simpler grants color dont use low contrast combinations.png</a></td></tr><tr><td>Do not use only accent color combinations.</td><td><a href="../../.gitbook/assets/simpler grants do not use only accent color combinations.png">simpler grants do not use only accent color combinations.png</a></td></tr></tbody></table>

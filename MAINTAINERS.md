@@ -9,6 +9,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Brandon Tabaska
 * Bruk Abebe
 * Doug Schrashun
+* Freddie Yebra
 * Kai Siren
 * Matt Dragon
 * Michael Chouinard

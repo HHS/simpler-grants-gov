@@ -17,12 +17,12 @@ Please [use this invitation link](https://join.slack.com/t/betagrantsgov/shared_
 ### 1. Joining Slack
 
 * If you need help installing Slack, please use the link below to our step-by-step guide.
-* If you haven't already, sign up for Slack using the provided invitation link above.
-* Once signed up, download the Slack desktop or mobile app for easy access to the workspace.
-* Post a short introduction in [#all-introductions](https://betagrantsgov.slack.com/archives/C05TDLG3M51) please include:
+* If you haven't already, sign up for Slack using the invitation link above.
+* Once signed up, download the Slack desktop or mobile app to easily access the workspace.
+* Post a short introduction in [#all-introductions](https://betagrantsgov.slack.com/archives/C05TDLG3M51). Please include:
   * Name
   * Pronouns
-  * What brings you to the Simpler Grants community
+  * What brings you to the Simpler.Grants.gov community
 
 {% content-ref url="installing-slack.md" %}
 [installing-slack.md](installing-slack.md)
