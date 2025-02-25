@@ -22,16 +22,12 @@ layout:
 
 This website is a shared resource for internal Simpler.Grants.gov team members, external collaborators, and community members.
 
-#### Interested in joining the Simpler Grants community? Start here:
+### Interested in joining the Simpler Grants community? Start here:
 
 {% content-ref url="get-involved/get-involved.md" %}
 [get-involved.md](get-involved/get-involved.md)
 {% endcontent-ref %}
 
-#### What's the rest of the wiki about?
+### What else is in this wiki?
 
-The **'Product'** section of the wiki will help you understand how past development and process decisions were made and what we're currently focused on.
-
-The **'Design and Research'** section is a collection of guidelines and past research to guide anyone contributing to code or design.
-
-The **'References'** section has all the extras—More reading that community members may find helpful as they participate in the Simpler.Grants.gov initiative.
+<table data-view="cards"><thead><tr><th></th></tr></thead><tbody><tr><td>The <a href="broken-reference"><strong>Product</strong></a> section of the wiki will help you understand how past development and process decisions were made and what we're currently focused on.</td></tr><tr><td>The <a href="broken-reference"><strong>Design and Research</strong></a> section is a collection of guidelines and past research to guide anyone contributing to code or design.</td></tr><tr><td>The <a href="broken-reference"><strong>References</strong></a> section has all the extras—More reading that community members may find helpful as they participate in the Simpler.Grants.gov initiative.</td></tr></tbody></table>
