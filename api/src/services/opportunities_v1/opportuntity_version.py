@@ -13,13 +13,12 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     :param opportunity: An instance of the Opportunity model containing the data to be saved.
     :return: This function does not return a value. It saves a new version of the opportunity in the database.
     """
-
     #  Extracts the opportunity data as JSON object
     opp_obj = opportunity.for_json()
 
     # Add new OpportunityVersion instance to the database session
     opportunity_version = OpportunityVersion(
-        opportunity_id=opp_obj["opportunity_id"],
+        opportunity_id=opportunity.opportunity_id,
         opportunity_data=opp_obj,
     )
 
