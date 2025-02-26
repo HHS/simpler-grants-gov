@@ -187,6 +187,95 @@ class TestTransformApplicantType(BaseTransformTestClass):
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
+    def test_process_applicant_types_delete_and_inserts(self, db_session, transform_applicant_type):
+        """Test that if we receive an insert and delete of the same lookup value
+        in a single batch, we'll delete and then insert the record (effectively no meaningful change)
+        """
+        opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
+            is_forecast=True, revision_number=None, no_link_values=True
+        )
+        forecast_insert1 = setup_applicant_type(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="04",
+        )
+        forecast_insert2 = setup_applicant_type(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="05",
+        )
+        forecast_delete1 = setup_applicant_type(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="04",
+            applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+        )
+        forecast_delete2 = setup_applicant_type(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="05",
+            applicant_type=ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS,
+        )
+
+        opportunity_summary_syn = f.OpportunitySummaryFactory.create(
+            is_forecast=False, revision_number=None, no_link_values=True
+        )
+        syn_insert1 = setup_applicant_type(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="25",
+        )
+        syn_insert2 = setup_applicant_type(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="99",
+        )
+        syn_delete1 = setup_applicant_type(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="25",
+            applicant_type=ApplicantType.OTHER,
+        )
+        syn_delete2 = setup_applicant_type(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="99",
+            applicant_type=ApplicantType.UNRESTRICTED,
+        )
+
+        transform_applicant_type.run_subtask()
+
+        validate_applicant_type(
+            db_session,
+            forecast_insert1,
+            expected_applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+        )
+        validate_applicant_type(
+            db_session,
+            forecast_insert2,
+            expected_applicant_type=ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS,
+        )
+        validate_applicant_type(
+            db_session, syn_insert1, expected_applicant_type=ApplicantType.OTHER
+        )
+        validate_applicant_type(
+            db_session, syn_insert2, expected_applicant_type=ApplicantType.UNRESTRICTED
+        )
+
+        validate_applicant_type(db_session, forecast_delete1, expect_in_db=False)
+        validate_applicant_type(db_session, forecast_delete2, expect_in_db=False)
+        validate_applicant_type(db_session, syn_delete1, expect_in_db=False)
+        validate_applicant_type(db_session, syn_delete2, expect_in_db=False)
+
+        metrics = transform_applicant_type.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 8
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 4
+
     @pytest.mark.parametrize("is_forecast", [True, False])
     def test_process_applicant_type_but_no_opportunity_summary_non_hist(
         self,
