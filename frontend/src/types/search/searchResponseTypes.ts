@@ -64,21 +64,33 @@ export interface SearchAPIResponse extends APIResponse {
   fieldChanged?: string;
 }
 
-export enum validSearchQueryParamKeys {
-  page = "page",
-  query = "query",
-  sortby = "sortby",
-  status = "status",
-  fundingInstrument = "fundingInstrument",
-  eligibility = "eligibility",
-  agency = "agency",
-  category = "category",
-}
+// export enum validSearchQueryParamKeys {
+//   page = "page",
+//   query = "query",
+//   sortby = "sortby",
+//   status = "status",
+//   fundingInstrument = "fundingInstrument",
+//   eligibility = "eligibility",
+//   agency = "agency",
+//   category = "category",
+// }
+
+export const validSearchQueryParamKeys = [
+  "page",
+  "query",
+  "sortby",
+  "status",
+  "fundingInstrument",
+  "eligibility",
+  "agency",
+  "category",
+] as const;
 
 // Only a few defined keys possible
 // URL example => ?query=abcd&status=closed,archived
-// export type ValidSearchQueryParam =
-//   (typeof validSearchQueryParamKeys)[keyof typeof validSearchQueryParamKeys];
+export type ValidSearchQueryParam = (typeof validSearchQueryParamKeys)[number];
 
-export type ValidSearchQueryParam = keyof typeof validSearchQueryParamKeys;
+// type Attempt = (typeof keysArray)[number];
+
+// export type ValidSearchQueryParam = keyof typeof validSearchQueryParamKeys;
 export type SearchResponseData = Opportunity[];
