@@ -57,7 +57,7 @@ def transform_project_data(
                 "issue_closed_at": validated_item.content.closed_at,
                 "issue_points": validated_item.points.number,
                 # sprint metadata
-                "sprint_ghidid": validated_item.sprint.iteration_id,
+                "sprint_ghid": validated_item.sprint.iteration_id,
                 "sprint_name": validated_item.sprint.title,
                 "sprint_start": validated_item.sprint.start_date,
                 "sprint_length": validated_item.sprint.duration,
