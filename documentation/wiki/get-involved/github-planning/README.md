@@ -1,6 +1,6 @@
-# How to create tickets
+# How to file issues
 
-Simpler.Grants.gov uses GitHub as our primary work tracker. If you encounter bugs, have feature requests, or want to provide feedback, filing an issue on GitHub is the way to go. ("Filing an issue" and "Creating a ticket" are the same actions! GitHub prefers to use the former phrase.) This guide will help you understand how to file issues and contribute to improving our projects.
+Simpler.Grants.gov uses GitHub as our primary work tracker. If you encounter bugs, have feature requests, or want to provide feedback, filing an issue on GitHub is the way to go. This guide will help you understand how to file issues and contribute to improving our projects.
 
 ## Getting Started
 
