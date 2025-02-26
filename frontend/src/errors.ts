@@ -204,6 +204,7 @@ export const readError = (e: Error, defaultStatus: number) => {
 
   return {
     status: Number(status),
-    message: cause ? JSON.stringify(cause) : message,
+    message,
+    cause: cause as FrontendErrorDetails,
   };
 };
