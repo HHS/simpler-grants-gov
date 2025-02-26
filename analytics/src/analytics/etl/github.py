@@ -281,7 +281,7 @@ def populate_issue_lookup_table(
             )
             logger.debug("Error: %s", err)
             continue
-        lookup[entry.issue_url] = entry
+        lookup[entry.issue_ghid] = entry
     return lookup
 
 
@@ -338,18 +338,18 @@ def flatten_issue_data(lookup: dict[str, IssueMetadata]) -> list[dict]:
 
         # Get the parent deliverable, if the issue has one
         deliverable = get_parent_with_type(
-            child_url=issue.issue_url,
+            child_url=issue.issue_ghid,
             lookup=lookup,
             type_wanted=IssueType.DELIVERABLE,
         )
         if deliverable:
             # Set deliverable metadata
             issue.deliverable_title = deliverable.issue_title
-            issue.deliverable_url = deliverable.issue_url
+            issue.deliverable_ghid = deliverable.issue_ghid
             issue.deliverable_pillar = deliverable.deliverable_pillar
             issue.deliverable_status = deliverable.issue_status
             # Set quad metadata
-            issue.quad_id = deliverable.quad_id
+            issue.quad_ghid = deliverable.quad_ghid
             issue.quad_name = deliverable.quad_name
             issue.quad_start = deliverable.quad_start
             issue.quad_end = deliverable.quad_end
@@ -357,13 +357,13 @@ def flatten_issue_data(lookup: dict[str, IssueMetadata]) -> list[dict]:
 
         # Get the parent epic, if the issue has one
         epic = get_parent_with_type(
-            child_url=issue.issue_url,
+            child_url=issue.issue_ghid,
             lookup=lookup,
             type_wanted=IssueType.EPIC,
         )
         if epic:
             issue.epic_title = epic.issue_title
-            issue.epic_url = epic.issue_url
+            issue.epic_ghid = epic.issue_ghid
 
         # Add the issue to the results
         result.append(issue.model_dump())
