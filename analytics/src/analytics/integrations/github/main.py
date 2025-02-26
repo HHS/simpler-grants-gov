@@ -86,7 +86,7 @@ def transform_project_data(
             continue
 
     if count > 0:
-        failure_rate = round(100*fail/count, 3)
+        failure_rate = round(100 * fail / count, 3)
         message = f"validation failure rate: {failure_rate} %"
         logger.info(message)
 
