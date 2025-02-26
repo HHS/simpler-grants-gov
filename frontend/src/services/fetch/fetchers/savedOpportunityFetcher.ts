@@ -1,3 +1,5 @@
+"server-only";
+
 import { getSession } from "src/services/auth/session";
 import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
 import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";

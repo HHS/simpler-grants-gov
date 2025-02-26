@@ -30,9 +30,13 @@ const SavedOpportunitiesList = ({
   return (
     <ul className="usa-prose usa-list--unstyled">
       {opportunities.map((opportunity) => (
-        <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem opportunity={opportunity} saved={true} />
-        </li>
+        <>
+          {opportunity && (
+            <li key={opportunity.opportunity_id}>
+              <SearchResultsListItem opportunity={opportunity} saved={true} />
+            </li>
+          )}
+        </>
       ))}
     </ul>
   );
@@ -65,13 +69,15 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const savedOpportunities = await fetchSavedOpportunities();
-  const opportunities = savedOpportunities.map(async (savedOpportunity) => {
-    const { data: opportunityData } = await getOpportunityDetails(
-      String(savedOpportunity.opportunity_id),
-    );
-    return opportunityData;
-  });
-  const resolvedOpportunities = await Promise.all(opportunities);
+  const opportunityPromises = savedOpportunities.map(
+    async (savedOpportunity) => {
+      const { data: opportunityData } = await getOpportunityDetails(
+        String(savedOpportunity.opportunity_id),
+      );
+      return opportunityData;
+    },
+  );
+  const resolvedOpportunities = await Promise.all(opportunityPromises);
 
   return (
     <>
