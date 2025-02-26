@@ -15,7 +15,7 @@ layout:
     visible: true
 ---
 
-# Photos & Illustrations
+# Photos and illustrations
 
 ## Overview
 
@@ -46,24 +46,4 @@ When choosing a photo, look for things in the image that closely match a color i
 
 ## Additional Don’ts
 
-Don't crop inappropriately.
-
-<figure><img src="../../.gitbook/assets/simpler grants photos do not crop inappropriately.png" alt=""><figcaption></figcaption></figure>
-
-
-
-Don't use low-res photos.
-
-<figure><img src="../../.gitbook/assets/simpler grants photos do not use low res photos.png" alt=""><figcaption></figcaption></figure>
-
-
-
-Don't use AI-generated imagery.
-
-<figure><img src="../../.gitbook/assets/simpler grants photos do not use AI-generated imagery.png" alt=""><figcaption></figcaption></figure>
-
-
-
-Don't use distracting or off-topic imagery.
-
-<figure><img src="../../.gitbook/assets/simpler grants photos do not use distracting or off-topic imagery.png" alt=""><figcaption></figcaption></figure>
+<table data-card-size="large" data-view="cards"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th></tr></thead><tbody><tr><td>Don't crop inappropriately.</td><td><a href="../../.gitbook/assets/simpler grants photos do not crop inappropriately.png">simpler grants photos do not crop inappropriately.png</a></td></tr><tr><td>Don't use low-res photos.</td><td><a href="../../.gitbook/assets/simpler grants photos do not use low res photos.png">simpler grants photos do not use low res photos.png</a></td></tr><tr><td>Don't use AI-generated imagery.</td><td><a href="../../.gitbook/assets/simpler grants photos do not use AI-generated imagery.png">simpler grants photos do not use AI-generated imagery.png</a></td></tr><tr><td>Don't use distracting or off-topic imagery.</td><td><a href="../../.gitbook/assets/simpler grants photos do not use distracting or off-topic imagery.png">simpler grants photos do not use distracting or off-topic imagery.png</a></td></tr></tbody></table>

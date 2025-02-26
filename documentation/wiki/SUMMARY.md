@@ -36,6 +36,7 @@
 * [Decisions](product/decisions/README.md)
   * [ADR Template](product/decisions/template.md)
   * [ADRs](product/decisions/adr/README.md)
+    * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/template.md)
     * [Recording Architecture Decisions](product/decisions/adr/2023-06-26-recording-architecture-decisions.md)
     * [Task Runner for the CI / CD Pipeline](product/decisions/adr/2023-06-29-ci-cd-task-runner.md)
     * [API Language](product/decisions/adr/2023-06-30-api-language.md)
