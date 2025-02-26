@@ -21,7 +21,23 @@ class TransformFundingInstrument(AbstractTransformSubTask):
         link_table = LinkOpportunitySummaryFundingInstrument
         relationship_load_value = OpportunitySummary.link_funding_instruments
 
-        logger.info("Processing forecast funding instruments")
+        logger.info("Processing deletes for forecast funding instruments")
+        delete_forecast_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrForecast,
+            link_table,
+            [
+                TfundinstrForecast.fi_frcst_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_delete=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(delete_forecast_funding_instrument_records)
+
+        logger.info("Processing inserts/updates for forecast funding instruments")
         forecast_funding_instrument_records = self.fetch_with_opportunity_summary(
             TfundinstrForecast,
             link_table,
@@ -32,11 +48,28 @@ class TransformFundingInstrument(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
             ],
             is_forecast=True,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(forecast_funding_instrument_records)
 
-        logger.info("Processing synopsis funding instruments")
+        logger.info("Processing deletes for synopsis funding instruments")
+        delete_synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrSynopsis,
+            link_table,
+            [
+                TfundinstrSynopsis.fi_syn_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_delete=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(delete_synopsis_funding_instrument_records)
+
+        logger.info("Processing inserts/updates for synopsis funding instruments")
         synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
             TfundinstrSynopsis,
             link_table,
@@ -47,6 +80,7 @@ class TransformFundingInstrument(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
             ],
             is_forecast=False,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_records)
