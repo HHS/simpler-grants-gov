@@ -707,6 +707,7 @@ export const messages = {
             },
           ],
         ],
+        link: "View all of our deliverables on GitHub",
       },
       milestones: {
         title: "Recent milestones reached",

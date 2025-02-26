@@ -14,17 +14,19 @@ import {
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const GithubIssueLink = ({
+export const GithubIssueLink = ({
   issueNumber,
   chunks,
+  extraClasses = "",
 }: {
-  issueNumber: number;
+  issueNumber?: number;
   chunks: ReactNode;
+  extraClasses?: string;
 }) => (
   <Link
     target="_blank"
-    className="usa-link--external text-bold"
-    href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
+    className={`usa-link--external text-bold ${extraClasses}`}
+    href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber !== undefined ? issueNumber : "?q=is%3Aissue%20type%3ADeliverable%20"}`}
   >
     {chunks}
   </Link>
