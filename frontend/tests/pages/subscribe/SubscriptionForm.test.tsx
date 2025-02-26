@@ -3,36 +3,16 @@ import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 
+const mockSubscribeEmail = jest.fn();
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
   useMessages: () => mockMessages,
 }));
 
-jest.mock("react-dom", () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const originalModule = jest.requireActual("react-dom");
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return {
-    ...originalModule,
-    useFormStatus: jest.fn(() => ({ pending: false })),
-    useFormState: () => [
-      [
-        {
-          // Return a mock state object
-          errorMessage: "errors.server",
-          validationErrors: {
-            name: ["errors.missing_name"],
-            email: ["errors.missing_email", "errors.invalid_email"],
-          },
-        },
-        // Mock setState function
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        () => {},
-      ],
-    ],
-  };
-});
+jest.mock("src/app/[locale]/subscribe/actions", () => ({
+  subscribeEmail: (...args: unknown[]): unknown => mockSubscribeEmail(...args),
+}));
 
 describe("SubscriptionForm", () => {
   it("renders", () => {
@@ -41,5 +21,48 @@ describe("SubscriptionForm", () => {
     const button = screen.getByRole("button", { name: "form.button" });
 
     expect(button).toBeInTheDocument();
+  });
+
+  it("calls subscribeEmail action on submit", () => {
+    mockSubscribeEmail.mockImplementation(() => Promise.resolve());
+    render(<SubscriptionForm />);
+
+    const button = screen.getByRole("button", { name: "form.button" });
+    button.click();
+
+    expect(mockSubscribeEmail).toHaveBeenCalledWith(
+      { errorMessage: "", validationErrors: {} },
+      expect.any(FormData),
+    );
+  });
+
+  // unclear why, but React server actions are still not working with Jest here
+  // action function is replaced with `javascript:throw new Error('A React form was unexpectedly submitted')`
+  // See also https://github.com/facebook/react/blob/f83903bfcc5a61811bd1b69b14f0ebbac4754462/packages/react-dom-bindings/src/client/ReactDOMComponent.js#L468
+  // - DWS 2-12-25
+  it.skip("shows relevant errors returned by action", () => {
+    mockSubscribeEmail.mockImplementation(() =>
+      Promise.resolve({
+        errorMessage: "an error message",
+        validationErrors: {
+          name: "bad name, sorry",
+          email: "this really was not a valid email",
+        },
+      }),
+    );
+    const { rerender } = render(<SubscriptionForm />);
+
+    const button = screen.getByRole("button", { name: "form.button" });
+    button.click();
+
+    rerender(<SubscriptionForm />);
+
+    const errorAlerts = screen.getAllByRole("alert");
+
+    expect(errorAlerts).toHaveLength(2);
+    expect(errorAlerts[0]).toHaveTextContent("bad name, sorry");
+    expect(errorAlerts[1]).toHaveTextContent(
+      "this really was not a valid email",
+    );
   });
 });

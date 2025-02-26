@@ -11,22 +11,6 @@ jest.mock("react-dom", () => {
   return {
     ...originalModule,
     useFormStatus: jest.fn(() => ({ pending: false })),
-    useFormState: () => [
-      [
-        {
-          // Return a mock state object
-          errorMessage: "errors.server",
-          validationErrors: {
-            name: ["errors.missing_name"],
-            email: ["errors.missing_email", "errors.invalid_email"],
-          },
-        },
-        // Mock setState function
-        () => {
-          ("");
-        },
-      ],
-    ],
   };
 });
 
