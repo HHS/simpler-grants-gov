@@ -2,16 +2,11 @@
 
 * [👋 Welcome](README.md)
 
-## About
-
-* [Team](about/team.md)
-* [Terminology](about/terminology.md)
-
 ## GET INVOLVED
 
 * [Why open source?](get-involved/get-involved.md)
 * [How to contribute code](get-involved/github-code.md)
-* [How to contribute issues](get-involved/github-planning/README.md)
+* [How to create tickets](get-involved/github-planning/README.md)
   * [Report a bug](get-involved/github-planning/filling-out-a-bug-report.md)
   * [Request a feature](get-involved/github-planning/filling-out-a-feature-request.md)
   * [Report a security vulnerability](get-involved/github-planning/reporting-a-security-vulnerability.md)
@@ -41,6 +36,7 @@
 * [Decisions](product/decisions/README.md)
   * [ADR Template](product/decisions/template.md)
   * [ADRs](product/decisions/adr/README.md)
+    * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/template.md)
     * [Recording Architecture Decisions](product/decisions/adr/2023-06-26-recording-architecture-decisions.md)
     * [Task Runner for the CI / CD Pipeline](product/decisions/adr/2023-06-29-ci-cd-task-runner.md)
     * [API Language](product/decisions/adr/2023-06-30-api-language.md)
@@ -116,6 +112,11 @@
   * [Typography](design-and-research/brand-guidelines/typography.md)
   * [Iconography](design-and-research/brand-guidelines/iconography.md)
   * [Photos and illustrations](design-and-research/brand-guidelines/photos-and-illustrations.md)
-* [Voice and tone guidelines](design-and-research/voice-and-tone-guide.md)
+* [Content guidelines](design-and-research/content-guidelines/README.md)
+  * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
 * [User research](design-and-research/user-research/README.md)
   * [Grants.gov archetypes](design-and-research/user-research/grants.gov-archetypes.md)
+
+## REFERENCES
+
+* [Glossary](references/terminology.md)

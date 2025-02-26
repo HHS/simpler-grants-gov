@@ -1,3 +1,6 @@
+"server-only";
+
+import { getSession } from "src/services/auth/session";
 import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
 import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
 
@@ -28,11 +31,10 @@ export const handleSavedOpportunity = async (
   });
 };
 
-export const getSavedOpportunity = async (
+export const getSavedOpportunities = async (
   token: string,
   userId: string,
-  opportunityId: number,
-): Promise<SavedOpportunity | null> => {
+): Promise<SavedOpportunity[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -55,10 +57,37 @@ export const getSavedOpportunity = async (
     body,
   });
   const json = (await resp.json()) as { data: [] };
-  const savedOpportunities = json.data;
+  return json.data;
+};
+
+export const getSavedOpportunity = async (
+  token: string,
+  userId: string,
+  opportunityId: number,
+): Promise<SavedOpportunity | null> => {
+  const savedOpportunities = await getSavedOpportunities(token, userId);
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: number }) =>
       savedOpportunity.opportunity_id === opportunityId,
   );
   return savedOpportunity ?? null;
+};
+
+export const fetchSavedOpportunities = async (): Promise<
+  SavedOpportunity[]
+> => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      return [];
+    }
+    const savedOpportunities = await getSavedOpportunities(
+      session.token,
+      session.user_id as string,
+    );
+    return savedOpportunities;
+  } catch (e) {
+    console.error("Error fetching saved opportunities:", e);
+    return [];
+  }
 };

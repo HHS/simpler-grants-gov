@@ -98,26 +98,6 @@ class AbstractTransformSubTask(SubTask):
         self.increment(transform_constants.Metrics.TOTAL_RECORDS_DELETED, prefix=record_type)
         self.db_session.delete(target)
 
-    def _is_orphaned_historical(
-        self,
-        parent_record: Opportunity | OpportunitySummary | None,
-        source_record: transform_constants.SourceAny,
-    ) -> bool:
-        return parent_record is None and source_record.is_historical_table
-
-    def _handle_orphaned_historical(
-        self, source_record: transform_constants.SourceAny, record_type: str, extra: dict
-    ) -> None:
-        logger.warning(
-            "Historical %s does not have a corresponding parent record - cannot import, but will mark as processed",
-            record_type,
-            extra=extra,
-        )
-        self.increment(
-            transform_constants.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED, prefix=record_type
-        )
-        source_record.transformation_notes = transform_constants.ORPHANED_HISTORICAL_RECORD
-
     def fetch(
         self,
         source_model: Type[transform_constants.S],
@@ -175,7 +155,6 @@ class AbstractTransformSubTask(SubTask):
         destination_model: Type[transform_constants.D],
         join_clause: Sequence,
         is_forecast: bool,
-        is_historical_table: bool,
         relationship_load_value: Any,
     ) -> list[
         Tuple[transform_constants.S, transform_constants.D | None, OpportunitySummary | None]
@@ -187,12 +166,7 @@ class AbstractTransformSubTask(SubTask):
             OpportunitySummary.is_forecast.is_(is_forecast),
         ]
 
-        if is_historical_table:
-            opportunity_summary_join_clause.append(
-                source_model.revision_number == OpportunitySummary.revision_number  # type: ignore[attr-defined]
-            )
-        else:
-            opportunity_summary_join_clause.append(OpportunitySummary.revision_number.is_(None))
+        opportunity_summary_join_clause.append(OpportunitySummary.revision_number.is_(None))
 
         return cast(
             list[

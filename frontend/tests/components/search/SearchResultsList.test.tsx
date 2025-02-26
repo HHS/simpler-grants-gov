@@ -13,6 +13,16 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
+const getSessionMock = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
+  fetchSavedOpportunities: () => [{ opportunity_id: 1 }],
+}));
+
 const makeSearchResults = (overrides = {}) => ({
   status_code: 200,
   data: [],
@@ -88,5 +98,22 @@ describe("SearchResultsList", () => {
     render(component);
     const listItems = screen.getAllByRole("listitem");
     expect(listItems).toHaveLength(2);
+  });
+  it("shows saved tag", async () => {
+    getSessionMock.mockImplementation(() => ({
+      token: "fakeToken",
+    }));
+    const component = await SearchResultsList({
+      searchResults: makeSearchResults({
+        data: [
+          makeOpportunity({ opportunity_id: 1 }),
+          makeOpportunity({ opportunity_id: 2 }),
+        ],
+      }),
+    });
+    render(component);
+    const listItems = screen.getAllByRole("listitem");
+    expect(listItems[0]).toHaveTextContent("Saved");
+    expect(listItems[1]).not.toHaveTextContent("Saved");
   });
 });

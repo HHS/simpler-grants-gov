@@ -9,7 +9,7 @@ description: >-
 {% hint style="danger" %}
 **Warning**
 
-Prohibited activity (e.g. violations of our code of conduct or the Federal Hatch Act) are _**never**_ allowed in _**any**_ channel. Project maintainers have the right and responsibility to moderate and remove prohibited content from all communication channels.
+Prohibited activity (e.g., violations of our Code of Conduct or the Federal Hatch Act) is never allowed in any channel. Project maintainers have the right and responsibility to moderate and remove prohibited content from all communication channels.
 {% endhint %}
 
 ## Public channels
@@ -20,22 +20,10 @@ The following table links to the main channels we use to collaborate on the proj
 
 ## Channel-specific guides
 
-Visit the following pages to learn more about individual communication channels
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
+Visit the following pages to learn more about individual communication channels.
 
 {% content-ref url="slack-community-chat/" %}
 [slack-community-chat](slack-community-chat/)
-{% endcontent-ref %}
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
-
-{% content-ref url="../github-planning/" %}
-[github-planning](../github-planning/)
 {% endcontent-ref %}
 
 {% content-ref url="zoom-public-meetings.md" %}

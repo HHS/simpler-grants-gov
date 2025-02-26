@@ -1,5 +1,6 @@
 "use server";
 
+import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -16,6 +17,10 @@ export default async function SearchResultsList({
 }: ServerPageProps) {
   const t = await getTranslations("Search");
 
+  const savedOpportunities = await fetchSavedOpportunities();
+  const savedOpportunityIds = savedOpportunities.map(
+    (opportunity) => opportunity.opportunity_id,
+  );
   if (searchResults.status_code !== 200) {
     return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
   }
@@ -38,7 +43,10 @@ export default async function SearchResultsList({
     <ul className="usa-list--unstyled">
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem opportunity={opportunity} />
+          <SearchResultsListItem
+            opportunity={opportunity}
+            saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
+          />
         </li>
       ))}
     </ul>

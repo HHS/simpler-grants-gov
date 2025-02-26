@@ -31,13 +31,13 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
 
     def test_transform_records(self, db_session, transform_agency_hierarchy):
         # Create agencies with varying top-level agency codes
-        [
-            AgencyFactory.create(agency_code="DHS"),
-            AgencyFactory.create(agency_code="DHS-ICE"),
-            AgencyFactory.create(agency_code="DHS--ICE"),
-            AgencyFactory.create(agency_code="DHS-ICE-123"),
-            AgencyFactory.create(agency_code="ABC-ICE"),
-        ]
+        parent_agency = AgencyFactory.create(agency_code="DHS")
+        AgencyFactory.create(agency_code="DHS-ICE")
+        AgencyFactory.create(agency_code="DHS--ICE")
+        AgencyFactory.create(agency_code="DHS-ICE-123")
+        AgencyFactory.create(agency_code="ABC-ICE")
+
+        AgencyFactory.create(agency_code="SOMETHING-123-456", top_level_agency=parent_agency)
 
         # Run the transformation
         transform_agency_hierarchy.transform_records()
@@ -48,6 +48,9 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         agency3 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE-123").one_or_none()
         agency4 = db_session.query(Agency).filter(Agency.agency_code == "ABC-ICE").one_or_none()
         agency5 = db_session.query(Agency).filter(Agency.agency_code == "DHS--ICE").one_or_none()
+        agency6 = (
+            db_session.query(Agency).filter(Agency.agency_code == "SOMETHING-123-456").one_or_none()
+        )
 
         # Verify that the top-level agencies are set correctly
         assert agency1.top_level_agency_id is None
@@ -55,10 +58,38 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         assert agency3.top_level_agency_id == agency1.agency_id
         assert agency4.top_level_agency_id is None
         assert agency5.top_level_agency_id == agency1.agency_id
+        assert agency6.top_level_agency_id is None  # Verify this was unset
 
     def test_get_top_level_agency_code(self, transform_agency_hierarchy):
         assert transform_agency_hierarchy.get_top_level_agency_code("DHS-ICE") == "DHS"
         assert transform_agency_hierarchy.get_top_level_agency_code("DHS") is None
+
+    def test_transform_records_test_agencies(self, db_session, transform_agency_hierarchy):
+        # Note that our configuration has IVV as a test agency
+
+        AgencyFactory.create(agency_code="IVV", is_test_agency=False)
+        AgencyFactory.create(agency_code="IVV-123", is_test_agency=False)
+        AgencyFactory.create(
+            agency_code="IVVxyz", is_test_agency=False
+        )  # despite being a different top-level, this also gets caught
+        AgencyFactory.create(agency_code="NOTTEST", is_test_agency=False)
+        AgencyFactory.create(agency_code="NOTTEST-123", is_test_agency=True)
+
+        # Run the transformation
+        transform_agency_hierarchy.transform_records()
+
+        # Fetch the agencies again to verify the changes
+        agency1 = db_session.query(Agency).filter(Agency.agency_code == "IVV").one_or_none()
+        agency2 = db_session.query(Agency).filter(Agency.agency_code == "IVV-123").one_or_none()
+        agency3 = db_session.query(Agency).filter(Agency.agency_code == "IVVxyz").one_or_none()
+        agency4 = db_session.query(Agency).filter(Agency.agency_code == "NOTTEST").one_or_none()
+        agency5 = db_session.query(Agency).filter(Agency.agency_code == "NOTTEST-123").one_or_none()
+
+        assert agency1.is_test_agency is True
+        assert agency2.is_test_agency is True
+        assert agency3.is_test_agency is True
+        assert agency4.is_test_agency is False
+        assert agency5.is_test_agency is False
 
 
 class TestTransformAgency(BaseTransformTestClass):
@@ -76,7 +107,7 @@ class TestTransformAgency(BaseTransformTestClass):
             # None passed in here will make it not appear at all in the tgroups rows
             source_values={"ldapGp": None, "description": None, "label": None},
         )
-        insert_test_agency = setup_agency("GDIT", create_existing=False)
+        insert_test_agency = setup_agency("GDIT-xyz-123", create_existing=False)
 
         # Already processed fields are ones that were handled on a prior run and won't be updated
         # during this specific run

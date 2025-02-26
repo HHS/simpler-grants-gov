@@ -1,5 +1,7 @@
 "use-client";
 
+import SessionStorage from "src/utils/sessionStorage";
+
 import { RefObject } from "react";
 import {
   ButtonGroup,
@@ -47,7 +49,17 @@ export const LoginModal = ({
       </div>
       <ModalFooter>
         <ButtonGroup>
-          <a href={LOGIN_URL} key="login-link" className="usa-button">
+          <a
+            href={LOGIN_URL}
+            key="login-link"
+            className="usa-button"
+            onClick={() => {
+              const startURL = `${location.pathname}${location.search}`;
+              if (startURL !== "") {
+                SessionStorage.setItem("login-redirect", startURL);
+              }
+            }}
+          >
             {buttonText}
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"

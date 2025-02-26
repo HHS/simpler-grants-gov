@@ -1,11 +1,11 @@
 ---
 description: Welcome to the public wiki for the Simpler.Grants.gov initiative.
-cover: .gitbook/assets/BannerH4.png
-coverY: -39.279661016949156
+cover: .gitbook/assets/Logo.png
+coverY: 0
 layout:
   cover:
     visible: true
-    size: full
+    size: hero
   title:
     visible: true
   description:
@@ -20,21 +20,14 @@ layout:
 
 # 👋 Welcome
 
-{% hint style="warning" %}
-**In Progress** :construction:
+This website is a shared resource for internal Simpler.Grants.gov team members, external collaborators, and community stakeholders.
 
-Pardon the construction dust! We're still setting up our public wiki, so pages may be changing names or getting moved.&#x20;
-{% endhint %}
-
-Looking to join the Simpler Grants community? Start here:
+### Interested in joining the Simpler Grants community? Start here:
 
 {% content-ref url="get-involved/get-involved.md" %}
 [get-involved.md](get-involved/get-involved.md)
 {% endcontent-ref %}
 
-## Find the information you need
+### What else is in this wiki?
 
-* [I want to meet the team that is working on the Simpler.Grants.gov initiative](about/team.md)
-* [I want to learn more about the features the team is planning to build for simpler.grants.gov](product/product-roadmap.md)
-* [I want to learn more about the tools the team is using to collaborate](get-involved/communication-channels/)
-* [I want to figure out how I can get more involved with the project](get-involved/get-involved.md)
+<table data-view="cards"><thead><tr><th></th></tr></thead><tbody><tr><td>The <a href="broken-reference"><strong>Product</strong></a> section of the wiki will help you understand how past development and process decisions were made and what we're currently working on.</td></tr><tr><td>The <a href="broken-reference"><strong>Design and Research</strong></a> section is a collection of guidelines and past research to guide anyone contributing to code or design.</td></tr><tr><td>The <a href="broken-reference"><strong>References</strong></a> section has all the extras—More reading that community members may find helpful as they participate in the Simpler.Grants.gov initiative.</td></tr></tbody></table>
