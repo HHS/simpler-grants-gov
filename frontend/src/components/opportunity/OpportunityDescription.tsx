@@ -7,9 +7,10 @@ import { useTranslations } from "next-intl";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 
-type Props = {
+type OpportunityDescriptionProps = {
   summary: Summary;
   nofoPath: string;
+  opportunityId: number;
 };
 
 enum ApplicantType {
@@ -105,7 +106,11 @@ const SummaryDescriptionDisplay = ({
   );
 };
 
-const OpportunityDescription = ({ summary, nofoPath }: Props) => {
+const OpportunityDescription = ({
+  summary,
+  nofoPath,
+  opportunityId,
+}: OpportunityDescriptionProps) => {
   const t = useTranslations("OpportunityListing.description");
 
   const additionalInformationOnEligibility =
@@ -122,7 +127,10 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
     <>
       <div className="usa-prose margin-top-3">
         <h2>{t("title")}</h2>
-        <OpportunityDownload nofoPath={nofoPath} />
+        <OpportunityDownload
+          nofoPath={nofoPath}
+          opportunityId={opportunityId}
+        />
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
