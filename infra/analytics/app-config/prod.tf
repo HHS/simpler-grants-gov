@@ -15,6 +15,7 @@ module "prod_config" {
   enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
 
   service_cpu                    = 1024
   service_memory                 = 8192

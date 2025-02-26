@@ -1,5 +1,5 @@
 name: Deploy Analytics
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
+run-name: Deploy ${{ inputs.version || 'main' }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "target environment"
+        description: Environment to deploy to
         required: true
         default: "dev"
         type: choice

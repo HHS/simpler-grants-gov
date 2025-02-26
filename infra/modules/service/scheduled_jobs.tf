@@ -75,7 +75,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
 resource "aws_cloudwatch_log_group" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
-  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}"
+  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}/scheduled-jobs/"
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

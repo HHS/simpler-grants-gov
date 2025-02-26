@@ -8,13 +8,13 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-account_name=$1
+account_name="$1"
 
 # This is used later to determine the run id of the workflow run
 # See comment below about "Getting workflow run id"
 prev_run_create_time=$(gh run list --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq ".[].createdAt")
 
-code_repository=$(terraform -chdir=infra/project-config output --raw code_repository)
+code_repository=$(terraform -chdir="infra/project-config" output --raw code_repository)
 
 echo "========================="
 echo "Check GitHub Actions Auth"
@@ -26,25 +26,25 @@ echo
 # Get AWS account authentication details (AWS account, IAM role, AWS region)
 echo "::group::AWS account authentication details"
 
-terraform -chdir=infra/project-config init > /dev/null
-terraform -chdir=infra/project-config apply -auto-approve > /dev/null
-aws_region=$(terraform -chdir=infra/project-config output -raw default_region)
-echo "aws_region=$aws_region"
-github_actions_role_name=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
+terraform -chdir="infra/project-config" init > /dev/null
+terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
+aws_region=$(terraform -chdir="infra/project-config" output -raw default_region)
+echo "aws_region=${aws_region}"
+github_actions_role_name=$(terraform -chdir="infra/project-config" output -raw github_actions_role_name)
 echo "github_actions_role_name=${github_actions_role_name}"
 
 # Get the account id associated with the account name extracting the
 # account_id part of the tfbackend file name which looks like
 # <account_name>.<account_id>.s3.tfbackend.
-# The cut command splits the string with period as the delimeter and
+# The cut command splits the string with period as the delimiter and
 # extracts the second field.
-account_id=$(find infra/accounts/"${account_name}".*.s3.tfbackend | cut -d. -f2)
+account_id=$(find "infra/accounts/${account_name}."*.s3.tfbackend | cut -d. -f2)
 echo "account_id=${account_id}"
 
 aws_role_to_assume="arn:aws:iam::${account_id}:role/${github_actions_role_name}"
-echo "aws_role_to_assume=$aws_role_to_assume"
+echo "aws_role_to_assume=${aws_role_to_assume}"
 
-echo "::endgroup::"  
+echo "::endgroup::"
 
 ##################
 ## Run workflow ##
@@ -72,21 +72,21 @@ echo "Get workflow run id"
 # * This GitHub community discussion also requests this feature:
 # https://github.com/orgs/community/discussions/17389
 
-echo "Previous workflow run created at $prev_run_create_time"
+echo "Previous workflow run created at ${prev_run_create_time}"
 echo "Check workflow run create time until we find a newer workflow run"
 while : ; do
   echo -n "."
   run_create_time=$(gh run list --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq ".[].createdAt")
-  [[ $run_create_time > $prev_run_create_time ]] && break
+  [[ "${run_create_time}" > "${prev_run_create_time}" ]] && break
 done
-echo "Found newer workflow run created at $run_create_time"
+echo "Found newer workflow run created at ${run_create_time}"
 
 echo "Get id of workflow run"
 workflow_run_id=$(gh run list --workflow check-ci-cd-auth.yml --limit 1 --json databaseId --jq ".[].databaseId")
-echo "Workflow run id: $workflow_run_id"
+echo "Workflow run id: ${workflow_run_id}"
 
 workflow_run_url="https://github.com/${code_repository}/actions/runs/${workflow_run_id}"
-echo "See run logs at":
+echo "See run logs at:"
 echo "    ${workflow_run_url}"
 
 echo "Watch workflow run until it exits"
