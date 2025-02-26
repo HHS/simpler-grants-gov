@@ -89,6 +89,8 @@ def test_successful_task_completion(db_session):
     assert db_session.is_active  # Session should be active with new transaction
 
 
+# Ignore the SAWarning that Pytest will complain about as we're intentionally causing it for the test scenario
+@pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
 def test_task_handles_duplicate_key_error(db_session, enable_factory_create):
     """Test that task properly handles SQLAlchemy errors e.g. integrity errors"""
     # Clear any existing ExtractMetadata records

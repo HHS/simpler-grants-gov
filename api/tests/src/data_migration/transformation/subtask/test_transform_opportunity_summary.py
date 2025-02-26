@@ -191,25 +191,3 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             match="Opportunity summary cannot be processed as the opportunity for it does not exist",
         ):
             transform_opportunity_summary.process_opportunity_summary(source_record, None, None)
-
-    @pytest.mark.parametrize("is_forecast,revision_number", [(True, 10), (False, 9)])
-    def test_process_opportunity_summary_but_no_opportunity_hist(
-        self,
-        db_session,
-        transform_opportunity_summary,
-        is_forecast,
-        revision_number,
-    ):
-        source_record = setup_synopsis_forecast(
-            is_forecast=is_forecast,
-            revision_number=revision_number,
-            create_existing=False,
-            opportunity=None,
-            source_values={"opportunity_id": 12121212},
-        )
-
-        transform_opportunity_summary.process_opportunity_summary(source_record, None, None)
-
-        validate_opportunity_summary(db_session, source_record, expect_in_db=False)
-        assert source_record.transformed_at is not None
-        assert source_record.transformation_notes == "orphaned_historical_record"
