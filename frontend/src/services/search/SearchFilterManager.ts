@@ -1,10 +1,10 @@
-import { QueryParamKey } from "src/types/search/searchResponseTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 
 import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 type UpdateQueryParamsFunction = (
   checkedSet: Set<string>,
-  queryParamKey: QueryParamKey,
+  queryParamKey: ValidSearchQueryParam,
 ) => void;
 
 // TODO (Issue #1491): explore setting up a more maintanable class to manage checked state
