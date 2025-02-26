@@ -44,11 +44,11 @@ def transform_project_data(
             # Transform into flattened format
             transformed = {
                 # project metadata
-                "project_owner": owner,
-                "project_number": project,
+                "project_name": owner,
+                "project_ghid": project,
                 # issue metadata
                 "issue_title": validated_item.content.title,
-                "issue_url": validated_item.content.url,
+                "issue_ghid": validated_item.content.url,
                 "issue_parent": validated_item.content.parent.url,
                 "issue_type": validated_item.content.issue_type.name,
                 "issue_status": validated_item.status.name,
@@ -57,14 +57,14 @@ def transform_project_data(
                 "issue_closed_at": validated_item.content.closed_at,
                 "issue_points": validated_item.points.number,
                 # sprint metadata
-                "sprint_id": validated_item.sprint.iteration_id,
+                "sprint_ghidid": validated_item.sprint.iteration_id,
                 "sprint_name": validated_item.sprint.title,
                 "sprint_start": validated_item.sprint.start_date,
                 "sprint_length": validated_item.sprint.duration,
                 "sprint_end": validated_item.sprint.end_date,
                 # roadmap metadata
                 "deliverable_pillar": validated_item.pillar.name,
-                "quad_id": validated_item.quad.iteration_id,
+                "quad_ghid": validated_item.quad.iteration_id,
                 "quad_name": validated_item.quad.title,
                 "quad_start": validated_item.quad.start_date,
                 "quad_length": validated_item.quad.duration,

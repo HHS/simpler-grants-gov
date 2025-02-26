@@ -241,12 +241,12 @@ def issue(  # pylint: disable=too-many-locals
     sprint_end_ts = sprint_start_ts + sprint_duration
     return IssueMetadata(
         # project metadata
-        project_owner=owner,
-        project_number=project,
+        project_name=owner,
+        project_ghid=project,
         # issue metadata
         issue_title=name,
         issue_type=kind.value,
-        issue_url=name,
+        issue_ghid=name,
         issue_is_closed=bool(closed),
         issue_opened_at=created,
         issue_closed_at=closed,
@@ -255,12 +255,12 @@ def issue(  # pylint: disable=too-many-locals
         # quad and epic metadata
         quad_name=quad,
         epic_title=epic,
-        epic_url=epic,
+        epic_ghid=epic,
         # deliverable metadata
         deliverable_title=deliverable,
-        deliverable_url=deliverable,
+        deliverable_ghid=deliverable,
         # sprint metadata
-        sprint_id=sprint_name,
+        sprint_ghid=sprint_name,
         sprint_name=sprint_name,
         sprint_start=sprint_start,
         sprint_end=sprint_end_ts.strftime("%Y-%m-%d"),

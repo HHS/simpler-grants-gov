@@ -37,11 +37,11 @@ class IssueMetadata(BaseModel):
     """Stores information about issue type and parent (if applicable)."""
 
     # Project metadata -- attributes about the sprint project board
-    project_owner: str
-    project_number: int
+    project_name: str
+    project_ghid: int
     # Issue metadata -- attributes about the issue common to both projects
     issue_title: str
-    issue_url: str
+    issue_ghid: str
     issue_parent: str | None
     issue_type: str | None
     issue_is_closed: bool
@@ -50,23 +50,23 @@ class IssueMetadata(BaseModel):
     # Sprint metadata -- custom fields specific to the sprint board project
     issue_points: int | float | None = Field(default=None)
     issue_status: str | None = Field(default=None)
-    sprint_id: str | None = Field(default=None)
+    sprint_ghid: str | None = Field(default=None)
     sprint_name: str | None = Field(default=None)
     sprint_start: str | None = Field(default=None)
     sprint_length: int | None = Field(default=None)
     sprint_end: str | None = Field(default=None)
     # Roadmap metadata -- custom fields specific to the roadmap project
-    quad_id: str | None = Field(default=None)
+    quad_ghid: str | None = Field(default=None)
     quad_name: str | None = Field(default=None)
     quad_start: str | None = Field(default=None)
     quad_length: int | None = Field(default=None)
     quad_end: str | None = Field(default=None)
     deliverable_pillar: str | None = Field(default=None)
     # Parent metadata -- attributes about parent issues populated via lookup
-    deliverable_url: str | None = Field(default=None)
+    deliverable_ghid: str | None = Field(default=None)
     deliverable_title: str | None = Field(default=None)
     deliverable_status: str | None = Field(default=None)
-    epic_url: str | None = Field(default=None)
+    epic_ghid: str | None = Field(default=None)
     epic_title: str | None = Field(default=None)
 
     # See https://docs.pydantic.dev/2.0/usage/computed_fields/

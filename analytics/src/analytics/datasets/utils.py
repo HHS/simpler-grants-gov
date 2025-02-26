@@ -67,9 +67,9 @@ def load_json_data_as_df_from_object(
     """
     # flatten the nested json into a dataframe
     df = pd.json_normalize(json_data)
-    # reorder and rename the columns
-    df = df[column_map.keys()]
-    df = df.rename(columns=column_map)
+    # reorder the columns
+    df = df[column_map.values()]
+
     # convert datetime columns to date
     if date_cols:
         for col in date_cols:
