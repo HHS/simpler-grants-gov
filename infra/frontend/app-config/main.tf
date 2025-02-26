@@ -1,12 +1,8 @@
 locals {
-<<<<<<< before updating
-  app_name     = "frontend"
-=======
   # app_name is the name of the application, which by convention should match the name of
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
->>>>>>> after updating
   environments = ["dev", "staging", "prod"]
   project_name = module.project_config.project_name
 
@@ -46,7 +42,6 @@ locals {
     staging = module.staging_config
     prod    = module.prod_config
   }
-<<<<<<< before updating
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".
@@ -82,19 +77,13 @@ locals {
     staging = "simpler-grants-gov"
     prod    = "simpler-grants-gov"
   }
-=======
->>>>>>> after updating
 
   # The name of the network that contains the resources shared across all
   # application environments, such as the build repository.
   # The list of networks can be found in /infra/networks
   # by looking for the backend config files of the form:
   #   <NETWORK_NAME>.s3.tfbackend
-<<<<<<< before updating
   shared_network_name = "staging"
-=======
-  shared_network_name = "dev"
->>>>>>> after updating
 }
 
 module "project_config" {

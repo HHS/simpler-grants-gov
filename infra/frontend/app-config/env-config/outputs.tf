@@ -59,7 +59,6 @@ output "storage_config" {
     bucket_name = local.bucket_name
   }
 }
-<<<<<<< before updating
 
 output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
@@ -70,5 +69,3 @@ output "incident_management_service_integration" {
 output "domain_name" {
   value = var.domain_name
 }
-=======
->>>>>>> after updating

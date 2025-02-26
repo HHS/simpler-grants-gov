@@ -57,7 +57,6 @@ output "storage_config" {
     bucket_name = local.bucket_name
   }
 }
-<<<<<<< before updating
 
 output "scheduled_jobs" {
   value = local.scheduled_jobs
@@ -72,5 +71,3 @@ output "incident_management_service_integration" {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
 }
-=======
->>>>>>> after updating

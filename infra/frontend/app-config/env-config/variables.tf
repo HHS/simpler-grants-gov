@@ -2,28 +2,17 @@ variable "app_name" {
   type = string
 }
 
-<<<<<<< before updating
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string
 }
 
-variable "account_name" {
-  description = <<EOT
-    Name of the AWS account that contains the resources for the application environment.
-    The list of configured AWS accounts is stored in /infra/account as
-    backend config files with the naming convention:
-      <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend
-    Provide the ACCOUNT_NAME for this variable.
-    EOT
+variable "network_name" {
+  description = "Human readable identifier of the network / VPC"
   type        = string
 }
 
-variable "network_name" {
-  description = "Human readable identifier of the network / VPC"
-=======
 variable "certificate_arn" {
->>>>>>> after updating
   type        = string
   description = "The ARN of the certificate to use for the application"
   default     = null
@@ -89,7 +78,6 @@ variable "has_incident_management_service" {
   type = bool
 }
 
-<<<<<<< before updating
 variable "instance_cpu" {
   description = "CPU units for the ECS container instances"
   type        = number
@@ -102,8 +90,6 @@ variable "instance_memory" {
   default     = 512
 }
 
-variable "instance_desired_instance_count" {
-=======
 variable "network_name" {
   description = "Human readable identifier of the network / VPC"
   type        = string
@@ -118,19 +104,19 @@ variable "service_cpu" {
   default = 256
 }
 
-variable "service_desired_instance_count" {
->>>>>>> after updating
+variable "service_memory" {
+  type    = number
+  default = 512
+}
+
+variable "instance_desired_instance_count" {
   type    = number
   default = 1
 }
 
-<<<<<<< before updating
 variable "instance_scaling_min_capacity" {
-=======
-variable "service_memory" {
->>>>>>> after updating
   type    = number
-  default = 512
+  default = 1
 }
 
 variable "instance_scaling_max_capacity" {

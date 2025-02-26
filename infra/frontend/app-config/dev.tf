@@ -10,7 +10,6 @@ module "dev_config" {
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
 
-<<<<<<< before updating
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/frontend-dev/services/frontend-dev/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
@@ -20,17 +19,11 @@ module "dev_config" {
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 10
-=======
-  # Enable and configure identity provider.
-  enable_identity_provider = local.enable_identity_provider
-
-  # Support local development against the dev instance.
-  extra_identity_provider_callback_urls = ["http://localhost"]
-  extra_identity_provider_logout_urls   = ["http://localhost"]
->>>>>>> after updating
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  enable_identity_provider = local.enable_identity_provider
 }

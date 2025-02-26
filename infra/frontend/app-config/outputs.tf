@@ -2,26 +2,22 @@ output "app_name" {
   value = local.app_name
 }
 
-<<<<<<< before updating
 output "account_names_by_environment" {
   value = local.account_names_by_environment
-=======
+}
+
 output "build_repository_config" {
   value = local.build_repository_config
->>>>>>> after updating
 }
 
 output "environment_configs" {
   value = local.environment_configs
 }
 
-<<<<<<< before updating
-=======
 output "environments" {
   value = local.environments
 }
 
->>>>>>> after updating
 output "has_database" {
   value = local.has_database
 }
@@ -34,7 +30,6 @@ output "has_incident_management_service" {
   value = local.has_incident_management_service
 }
 
-<<<<<<< before updating
 output "image_repository_name" {
   value = local.image_repository_name
 }
@@ -54,12 +49,12 @@ output "enable_autoscaling" {
 
 output "hostname" {
   value = local.hostname
-=======
+}
+
 output "enable_identity_provider" {
   value = local.enable_identity_provider
 }
 
 output "shared_network_name" {
   value = local.shared_network_name
->>>>>>> after updating
 }

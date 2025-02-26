@@ -1,9 +1,4 @@
 locals {
-<<<<<<< before updating
-  app_name     = "api"
-  environments = ["dev", "prod"]
-  project_name = module.project_config.project_name
-=======
   # app_name is the name of the application, which by convention should match the name of
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
@@ -18,7 +13,6 @@ locals {
   # 2. Each environment's config will have a database_config property that is used to
   #    pass db_vars into the infra/modules/service module, which provides the necessary
   #    configuration for the service to access the database
->>>>>>> after updating
   has_database = true
 
   # Whether or not the application depends on external non-AWS services.
@@ -47,7 +41,6 @@ locals {
     prod    = module.prod_config
   }
 
-<<<<<<< before updating
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".
@@ -84,8 +77,6 @@ locals {
     prod    = "simpler-grants-gov"
   }
 
-=======
->>>>>>> after updating
   # The name of the network that contains the resources shared across all
   # application environments, such as the build repository.
   # The list of networks can be found in /infra/networks

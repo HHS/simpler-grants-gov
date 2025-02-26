@@ -1,5 +1,4 @@
 module "prod_config" {
-<<<<<<< before updating
   source                  = "./env-config"
   project_name            = local.project_name
   app_name                = local.app_name
@@ -12,14 +11,6 @@ module "prod_config" {
     # In prod, post results to the #z_bot-sprint-reporting channel in slack
     ACTION = "post-results"
   }
-=======
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "prod"
-  network_name                    = "prod"
->>>>>>> after updating
   domain_name                     = null
   enable_https                    = false
   has_database                    = local.has_database

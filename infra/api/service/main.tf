@@ -28,17 +28,11 @@ data "aws_subnets" "public" {
 }
 
 locals {
-<<<<<<< before updating
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
-=======
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
   #
   # To isolate changes during infrastructure development by using manually created
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
->>>>>>> after updating
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -47,7 +41,6 @@ locals {
     description = "Application resources created in ${var.environment_name} environment"
   })
 
-<<<<<<< before updating
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
   is_temporary = terraform.workspace != "default"
@@ -55,21 +48,10 @@ locals {
   # Include project name in bucket name since buckets need to be globally unique across AWS
   bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
-=======
-  # All non-default terraform workspaces are considered temporary.
-  # Temporary environments do not have deletion protection enabled.
-  # Examples: pull request preview environments are temporary.
-  is_temporary = terraform.workspace != "default"
-
-  build_repository_config                        = module.app_config.build_repository_config
->>>>>>> after updating
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-<<<<<<< before updating
-  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
-=======
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
@@ -85,7 +67,6 @@ locals {
     COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
     COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
   } : {}
->>>>>>> after updating
 }
 
 terraform {
@@ -94,11 +75,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-<<<<<<< before updating
       version = "~> 5.68.0"
-=======
-      version = ">= 5.35.0, < 6.0.0"
->>>>>>> after updating
     }
   }
 
@@ -201,17 +178,12 @@ module "service" {
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
-<<<<<<< before updating
   file_upload_jobs     = local.service_config.file_upload_jobs
   enable_s3_cdn        = true
   s3_cdn_bucket_name   = "public-files"
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = true
-=======
-  file_upload_jobs = local.service_config.file_upload_jobs
-  scheduled_jobs   = local.environment_config.scheduled_jobs
->>>>>>> after updating
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
@@ -226,12 +198,6 @@ module "service" {
     }
   } : null
 
-<<<<<<< before updating
-  extra_environment_variables = merge({
-    # FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
-    # BUCKET_NAME           = local.storage_config.bucket_name
-  }, local.service_config.extra_environment_variables)
-=======
   extra_environment_variables = merge(
     {
       BUCKET_NAME = local.storage_config.bucket_name
@@ -239,14 +205,16 @@ module "service" {
     local.identity_provider_environment_variables,
     local.service_config.extra_environment_variables
   )
->>>>>>> after updating
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
-<<<<<<< before updating
+    module.app_config.enable_identity_provider ? [{
+      name      = "COGNITO_CLIENT_SECRET"
+      valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : [],
     local.environment_config.search_config != null ? [{
       name      = "SEARCH_USERNAME"
       valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
@@ -261,17 +229,6 @@ module "service" {
     }] : []
   )
 
-  extra_policies = {
-    # feature_flags_access = module.feature_flags.access_policy_arn,
-    # storage_access       = module.storage.access_policy_arn
-  }
-=======
-    module.app_config.enable_identity_provider ? [{
-      name      = "COGNITO_CLIENT_SECRET"
-      valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : []
-  )
-
   extra_policies = merge(
     {
       storage_access = module.storage.access_policy_arn
@@ -280,7 +237,6 @@ module "service" {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {}
   )
->>>>>>> after updating
 
   is_temporary = local.is_temporary
 }
@@ -295,8 +251,6 @@ module "monitoring" {
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 }
-<<<<<<< before updating
-=======
 
 module "storage" {
   source       = "../../modules/storage"
@@ -345,4 +299,3 @@ module "identity_provider_client" {
 
   user_pool_id = local.identity_provider_user_pool_id
 }
->>>>>>> after updating
