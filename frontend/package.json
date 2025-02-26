@@ -16,7 +16,7 @@
     "lint": "next lint",
     "lint-fix": "npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
-    "start:nr": "NODE_OPTIONS= '-r @newrelic/next' next start -p ${PORT:-3000}",
+    "start:nr": "NODE_OPTIONS='-r @newrelic/next' next start -p ${PORT:-3000}",
     "start": "next start -p ${PORT:-3000}",
     "storybook": "storybook dev -p 6006",
     "storybook-build": "storybook build",
