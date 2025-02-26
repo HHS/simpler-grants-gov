@@ -9,23 +9,8 @@ output "search_config" {
   } : null
 }
 
-output "account_name" {
-  value       = var.account_name
-  description = "Name of the AWS account that contains the resources for the application environment."
-}
-
 output "database_config" {
   value = local.database_config
-}
-
-output "scheduled_jobs" {
-  value = local.scheduled_jobs
-}
-
-output "incident_management_service_integration" {
-  value = var.has_incident_management_service ? {
-    integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
-  } : null
 }
 
 output "network_name" {

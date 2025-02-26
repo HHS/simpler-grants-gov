@@ -2,16 +2,6 @@ variable "app_name" {
   type = string
 }
 
-variable "environment" {
-  description = "name of the application environment (e.g. dev, staging, prod)"
-  type        = string
-}
-
-variable "network_name" {
-  description = "Human readable identifier of the network / VPC"
-  type        = string
-}
-
 variable "certificate_arn" {
   type        = string
   description = "The ARN of the certificate to use for the application"

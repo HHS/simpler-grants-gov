@@ -67,11 +67,6 @@ variable "enable_notifications" {
   default     = false
 }
 
-variable "environment" {
-  description = "name of the application environment (e.g. dev, staging, prod)"
-  type        = string
-}
-
 variable "extra_identity_provider_callback_urls" {
   type        = list(string)
   description = "List of additional URLs that the identity provider will redirect the user to after a successful sign-in. Used for local development."
@@ -99,11 +94,6 @@ variable "database_instance_count" {
   description = "Number of database instances. Should be 2+ for production environments."
   type        = number
   default     = 1
-}
-
-variable "network_name" {
-  description = "Human readable identifier of the network / VPC"
-  type        = string
 }
 
 variable "project_name" {
