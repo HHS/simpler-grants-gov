@@ -17,6 +17,7 @@ from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.db.models.user_models import (
     User,
     UserNotificationLog,
+    UserOpportunityNotificationLog,
     UserSavedOpportunity,
     UserSavedSearch,
 )
@@ -189,8 +190,6 @@ class NotificationTask(Task):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            notification_logs: list[UserNotificationLog] = []
-
             subject = ""
             message = ""
 
@@ -208,10 +207,8 @@ class NotificationTask(Task):
                     )
                     continue
 
-                subject = f"Applications for your bookmarked funding opportunity are due soon"
-                message = (
-                    f"Applications for the following funding opportunity are due in two weeks:"
-                )
+                subject = "Applications for your bookmarked funding opportunity are due soon"
+                message = "Applications for the following funding opportunity are due in two weeks:"
             elif len(container.closing_opportunities) > 1:
                 # Multiple opportunities closing
                 subject = "Applications for your bookmarked funding opportunities are due soon"
@@ -228,18 +225,16 @@ class NotificationTask(Task):
                             f"  Closing on: {close_date.strftime('%B %d, %Y')}\n\n"
                         )
 
-            for closing_opportunity in container.closing_opportunities:
-                # Create notification log entry
+            if len(container.closing_opportunities) > 0:
+                print("LEN")
+                print(len(container.closing_opportunities))
                 notification_log = UserNotificationLog(
                     user_id=user_id,
-                    opportunity_id=closing_opportunity.opportunity_id,
                     notification_reason=NotificationConstants.CLOSING_DATE_REMINDER,
                     notification_sent=False,  # Default to False, update on success
                 )
                 self.db_session.add(notification_log)
-                notification_logs.append(notification_log)
 
-            if len(container.closing_opportunities) > 0:
                 try:
                     send_pinpoint_email_raw(
                         to_address=user.email,
@@ -248,14 +243,23 @@ class NotificationTask(Task):
                         pinpoint_client=self.pinpoint_client,
                         app_id=self.config.app_id,
                     )
-                    for notification_log in notification_logs:
-                        notification_log.notification_sent = True
+                    notification_log.notification_sent = True
+
+                    for closing_opportunity in container.closing_opportunities:
+                        # Create notification log entry
+                        opp_notification_log = UserOpportunityNotificationLog(
+                            user_id=user_id,
+                            opportunity_id=closing_opportunity.opportunity_id,
+                        )
+                        self.db_session.add(opp_notification_log)
 
                     logger.info(
                         "Successfully sent closing date reminder",
                         extra={
                             "user_id": user_id,
-                            "opportunity_ids": [log.opportunity_id for log in notification_logs],
+                            "opportunity_ids": [
+                                opp.opportunity_id for opp in container.closing_opportunities
+                            ],
                         },
                     )
                     self.increment(self.Metrics.NOTIFICATIONS_SENT)
@@ -265,7 +269,9 @@ class NotificationTask(Task):
                         extra={
                             "user_id": user_id,
                             "email": user.email,
-                            "opportunity_ids": [log.opportunity_id for log in notification_logs],
+                            "opportunity_ids": [
+                                opp.opportunity_id for opp in container.closing_opportunities
+                            ],
                         },
                     )
 
@@ -379,10 +385,9 @@ class NotificationTask(Task):
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
                     and_(
-                        UserNotificationLog.user_id == UserSavedOpportunity.user_id,
-                        UserNotificationLog.notification_reason
-                        == NotificationConstants.CLOSING_DATE_REMINDER,
-                        UserNotificationLog.opportunity_id == UserSavedOpportunity.opportunity_id,
+                        UserOpportunityNotificationLog.user_id == UserSavedOpportunity.user_id,
+                        UserOpportunityNotificationLog.opportunity_id
+                        == UserSavedOpportunity.opportunity_id,
                     )
                 ),
             )
