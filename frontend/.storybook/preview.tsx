@@ -27,6 +27,7 @@ const parameters = {
       order: [
         "About",
         "Brand",
+        "Core Components",
         "Welcome",
         "Core",
         // Storybook infers the title when not explicitly set, but is case-sensitive
