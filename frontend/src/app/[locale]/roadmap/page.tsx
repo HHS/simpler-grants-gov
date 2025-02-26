@@ -2,9 +2,11 @@ import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import RoadmapPageSection from "./RoadmapPageSection";
+import RoadmapHeader from "./RoadmapHeader";
+import RoadmapMilestones from "./RoadmapMilestones";
+import RoadmapProcess from "./RoadmapProcess";
+import RoadmapWhatWereWorkingOn from "./RoadmapWhatWereWorkingOn";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -16,63 +18,13 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export async function Roadmap({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale });
-
-  const headerSection = (
-    <div className="text-white bg-primary-darkest">
-      <GridContainer>
-        <Grid row>
-          <Grid tablet={{ col: 6 }}>
-            <h1>{t("Roadmap.pageHeaderTitle")}</h1>
-            <p>{t("Roadmap.pageHeaderParagraph")}</p>
-          </Grid>
-          <Grid
-            tablet={{ col: 6 }}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <div>img</div>
-          </Grid>
-        </Grid>
-      </GridContainer>
-    </div>
-  );
-
-  const whatWereWorkingOnSection = (
-    <RoadmapPageSection
-      sectionTitle={t("Roadmap.sections.progress.title")}
-      sectionContent={<>content</>}
-    />
-  );
-
-  const milestonesSection = (
-    <RoadmapPageSection
-      sectionTitle={t("Roadmap.sections.milestones.title")}
-      sectionContent={<>content</>}
-      sectionBackgroundColorClass="bg-base-lightest"
-    />
-  );
-
-  const processSection = (
-    <RoadmapPageSection
-      sectionTitle={t("Roadmap.sections.process.title")}
-      sectionContent={<>content</>}
-    />
-  );
-
+export default function Roadmap() {
   return (
     <>
-      {headerSection}
-      {whatWereWorkingOnSection}
-      {milestonesSection}
-      {processSection}
+      <RoadmapHeader />
+      <RoadmapWhatWereWorkingOn />
+      <RoadmapMilestones />
+      <RoadmapProcess />
     </>
   );
 }
-
-export default Roadmap;
