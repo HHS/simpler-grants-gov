@@ -18,7 +18,9 @@ export default function RoadmapWhatWereWorkingOn() {
             <Grid row>
               {i.map((k, l) => (
                 <Grid tablet={{ col: 6 }}>
-                  <h3 style={{ fontSize: 18 }}>{k.title}</h3>
+                  <h3 style={{ fontSize: 18 }}>
+                    {t(`contentItems.${j}.${l}.title`)}
+                  </h3>
                   <div style={{ lineHeight: "24.3px", fontSize: 18 }}>
                     {t.rich(`contentItems.${j}.${l}.content`, {
                       p: (chunks) => <p className={"margin-0"}>{chunks}</p>,
