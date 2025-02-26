@@ -19,7 +19,6 @@ export async function POST() {
     return Response.json({ message: "logout success" });
   } catch (e) {
     const { message, status, cause } = readError(e as Error, 500);
-    console.log(status, message, cause);
     // if token expired, delete session and return 401
     if (status === 401 && cause?.message === "Token expired") {
       await deleteSession();
