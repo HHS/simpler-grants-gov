@@ -310,7 +310,7 @@ export const messages = {
       ],
     },
     progress: {
-      title: "Our progress so far",
+      title: "Recent milestones reached",
       list: [
         {
           title: "RESTful API",
@@ -346,7 +346,7 @@ export const messages = {
       ],
     },
     next: {
-      title: "What's happening next",
+      title: "What we're working on right now",
       link: "View all of our deliverables on GitHub",
       list: [
         {
@@ -671,5 +671,22 @@ export const messages = {
     noSavedCTA: `To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page`,
     searchButton: "Start a new search",
     title: "Saved Grants | Simpler.Grants.gov",
+  },
+  Roadmap: {
+    pageTitle: "Roadmap",
+    pageHeaderTitle: "Product roadmap",
+    pageHeaderParagraph:
+      "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
+    sections: {
+      progress: {
+        title: "What we're working on right now",
+      },
+      milestones: {
+        title: "Recent milestones reached",
+      },
+      process: {
+        title: "How we work",
+      },
+    },
   },
 };
