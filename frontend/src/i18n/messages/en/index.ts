@@ -748,6 +748,25 @@ export const messages = {
       },
       process: {
         title: "How we work",
+        sectionSummary:
+          "With each iteration of Simpler.Grants.gov, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+        contentItems: [
+          {
+            title: "Transparent",
+            content:
+              "We’re building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
+          },
+          {
+            title: "Agile",
+            content:
+              "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+        ],
       },
     },
   },
