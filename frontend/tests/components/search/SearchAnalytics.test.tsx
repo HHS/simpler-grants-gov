@@ -13,10 +13,11 @@ jest.mock("@next/third-parties/google", () => ({
 }));
 
 jest.mock("src/utils/analyticsUtil", () => ({
-  waitForNewRelic: () => waitForNewRelicMock(),
-  setNewRelicCustomAttribute: (...args) =>
+  waitForNewRelic: () => waitForNewRelicMock() as unknown,
+  setNewRelicCustomAttribute: (...args: unknown[]): unknown =>
     setNewRelicCustomAttributeMock(...args),
-  unsetAllNewRelicQueryAttributes: () => unsetAllNewRelicQueryAttributesMock(),
+  unsetAllNewRelicQueryAttributes: () =>
+    unsetAllNewRelicQueryAttributesMock() as unknown,
 }));
 
 const basicParams = {

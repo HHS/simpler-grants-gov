@@ -70,7 +70,7 @@ describe("unsetAllNewRelicQueryAttributes", () => {
     jest.resetAllMocks();
   });
   it("does not attempt to call new relic if new relic does not exist", () => {
-    unsetAllNewRelicQueryAttributes("key");
+    unsetAllNewRelicQueryAttributes();
     expect(mockSetCustomAttribute).not.toHaveBeenCalled();
   });
   it("calls new relic with passed values, with key properly prefixed", () => {
