@@ -48,6 +48,7 @@ locals {
   # Include project name in bucket name since buckets need to be globally unique across AWS
   bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
+  build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   storage_config                                 = local.environment_config.storage_config

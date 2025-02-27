@@ -135,10 +135,10 @@ data "aws_acm_certificate" "certificate" {
   domain = local.service_config.domain_name
 }
 
-# data "aws_route53_zone" "zone" {
-#   count = local.service_config.domain_name != null ? 1 : 0
-#   name  = local.network_config.domain_config.hosted_zone
-# }
+data "aws_ssm_parameter" "incident_management_service_integration_url" {
+  count = module.app_config.has_incident_management_service ? 1 : 0
+  name  = local.incident_management_service_integration_config.integration_url_param_name
+}
 
 module "service" {
   source       = "../../modules/service"
