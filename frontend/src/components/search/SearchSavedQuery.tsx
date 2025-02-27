@@ -1,42 +1,68 @@
 "use client";
 
-import { environment } from "src/constants/environments";
 import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
+import { useSnackbar } from "src/hooks/useSnackbar";
 
-import { usePathname, useSearchParams } from "next/navigation";
 import { Button, Tooltip } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+const SNACKBAR_VISIBLE_TIME = 4000;
+
 type SearchSavedQueryProps = {
   copyText: string;
+  copyingText: string;
+  copiedText: string;
   helpText: string;
+  url: string;
+  snackbarMessage: React.ReactNode | string;
 };
-const SearchSavedQuery2 = ({ copyText, helpText }: SearchSavedQueryProps) => {
+
+const SearchSavedQuery = ({
+  copyText,
+  copyingText,
+  copiedText,
+  helpText,
+  url,
+  snackbarMessage,
+}: SearchSavedQueryProps) => {
   const { copied, loading, copyToClipboard } = useCopyToClipboard();
-  const path = usePathname();
-  const searchParams = useSearchParams();
-  const url = `${environment.NEXT_PUBLIC_BASE_URL}${path}?${searchParams.toString()}`;
+  const { snackbarIsVisible, showSnackbar, Snackbar } = useSnackbar();
+
   return (
-    <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
-      <Button
-        type="button"
-        unstyled
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={() => copyToClipboard(url)}
-      >
-        <USWDSIcon name="content_copy" />
-        {loading ? "Copying..." : <>{copied ? "Copied!" : copyText}</>}
-      </Button>
-      <Tooltip
-        className="text-secondary-darker usa-button--unstyled"
-        label={helpText}
-        position="top"
-      >
-        <USWDSIcon className="margin-left-1" name="info_outline" />
-      </Tooltip>
+    <div>
+      <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
+        <Button
+          type="button"
+          unstyled
+          onClick={() => {
+            copyToClipboard(url, SNACKBAR_VISIBLE_TIME)
+              .then(() => {
+                showSnackbar(SNACKBAR_VISIBLE_TIME);
+              })
+              .catch((error) => {
+                console.error("Error copying to clipboard:", error);
+              });
+          }}
+        >
+          <USWDSIcon name="content_copy" />
+          {loading ? (
+            <>{copyingText}</>
+          ) : (
+            <>{copied ? { copiedText } : copyText}</>
+          )}
+        </Button>
+        <Tooltip
+          className="text-secondary-darker usa-button--unstyled"
+          label={helpText}
+          position="top"
+        >
+          <USWDSIcon className="margin-left-1" name="info_outline" />
+        </Tooltip>
+      </div>
+      <Snackbar isVisible={snackbarIsVisible}>{snackbarMessage}</Snackbar>
     </div>
   );
 };
 
-export default SearchSavedQuery2;
+export default SearchSavedQuery;

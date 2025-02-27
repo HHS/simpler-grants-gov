@@ -260,16 +260,19 @@ i.e.
   }
   &--right {
     &::after {
+      border-top-color: transparent;
       border-right-color: color("secondary-darker");
     }
   }
   &--left {
     &::after {
+      border-top-color: transparent;
       border-left-color: color("secondary-darker");
     }
   }
   &--bottom {
     &::after {
+      border-top-color: transparent;
       border-bottom-color: color("secondary-darker");
     }
   }
