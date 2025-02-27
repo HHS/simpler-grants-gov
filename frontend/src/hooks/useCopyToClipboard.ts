@@ -19,7 +19,7 @@ export const useCopyToClipboard = () => {
     } finally {
       setTimeout(() => {
         setCopied(false);
-      }, 2000); // Reset copied state after 2 seconds
+      }, 5000); // Reset copied state after 2 seconds
     }
   };
 
