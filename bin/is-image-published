@@ -4,11 +4,11 @@
 
 set -euo pipefail
 
-app_name=$1
-git_ref=$2
+app_name="$1"
+git_ref="$2"
 
 # Get commit hash
-image_tag=$(git rev-parse "$git_ref")
+image_tag=$(git rev-parse "${git_ref}")
 
 # Need to init module when running in CD since GitHub actions does a fresh checkout of repo
 terraform -chdir="infra/$app_name/app-config" init >/dev/null

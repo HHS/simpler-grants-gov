@@ -1,8 +1,7 @@
-#---------------------
-# Task Scheduler Role
-#---------------------
+#------------
+# Events Role
+#------------
 # Role and policy used by AWS EventBridge to trigger jobs from events
-#
 
 # Role that EventBridge will assume
 # The role allows EventBridge to run tasks on the ECS cluster
@@ -30,28 +29,37 @@ resource "aws_iam_policy" "run_task" {
 }
 
 data "aws_iam_policy_document" "run_task" {
+
   statement {
-    effect    = "Allow"
-    actions   = ["ecs:RunTask"]
-    resources = ["${aws_ecs_task_definition.app.arn_without_revision}:*"]
-    condition {
-      test     = "ArnLike"
-      variable = "ecs:cluster"
-      values   = [aws_ecs_cluster.cluster.arn]
+    sid = "StepFunctionsEvents"
+    actions = [
+      "events:PutTargets",
+      "events:PutRule",
+      "events:DescribeRule",
+    ]
+    resources = ["arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"]
+  }
+
+  dynamic "statement" {
+    for_each = aws_sfn_state_machine.file_upload_jobs
+
+    content {
+      actions = [
+        "states:StartExecution",
+      ]
+      resources = [statement.value.arn]
     }
   }
 
-  statement {
-    effect  = "Allow"
-    actions = ["iam:PassRole"]
-    resources = [
-      aws_iam_role.task_executor.arn,
-      aws_iam_role.app_service.arn,
-    ]
-    condition {
-      test     = "StringLike"
-      variable = "iam:PassedToService"
-      values   = ["ecs-tasks.amazonaws.com"]
+  dynamic "statement" {
+    for_each = aws_sfn_state_machine.file_upload_jobs
+
+    content {
+      actions = [
+        "states:DescribeExecution",
+        "states:StopExecution",
+      ]
+      resources = ["${statement.value.arn}:*"]
     }
   }
 }

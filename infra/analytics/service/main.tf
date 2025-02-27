@@ -28,9 +28,11 @@ data "aws_subnets" "public" {
 }
 
 locals {
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
+  # The prefix is used to create uniquely named resources per terraform workspace, which
+  # are needed in CI/CD for preview environments and tests.
+  #
+  # To isolate changes during infrastructure development by using manually created
+  # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -39,13 +41,31 @@ locals {
     description = "Application resources created in ${var.environment_name} environment"
   })
 
+  # All non-default terraform workspaces are considered temporary.
+  # Temporary environments do not have deletion protection enabled.
+  # Examples: pull request preview environments are temporary.
   is_temporary = terraform.workspace != "default"
 
+  build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
+  identity_provider_config                       = local.environment_config.identity_provider_config
+  notifications_config                           = local.environment_config.notifications_config
+
+  network_config = module.project_config.network_configs[local.environment_config.network_name]
+
+  # Identity provider locals.
+  # If this is a temporary environment, re-use an existing Cognito user pool.
+  # Otherwise, create a new one.
+  identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
+    local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
+  ) : null
+  identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
+    COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
+    COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
+  } : {}
 }
 
 terraform {
@@ -115,17 +135,19 @@ data "aws_acm_certificate" "certificate" {
   domain = local.service_config.domain_name
 }
 
-# data "aws_route53_zone" "zone" {
-#   count = local.service_config.domain_name != null ? 1 : 0
-#   name  = local.network_config.domain_config.hosted_zone
-# }
+data "aws_ssm_parameter" "incident_management_service_integration_url" {
+  count = module.app_config.has_incident_management_service ? 1 : 0
+  name  = local.incident_management_service_integration_config.integration_url_param_name
+}
 
 module "service" {
   source       = "../../modules/service"
   service_name = local.service_config.service_name
 
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
+  image_repository_arn = local.build_repository_config.repository_arn
+  image_repository_url = local.build_repository_config.repository_url
+
+  image_tag = local.image_tag
 
   vpc_id             = data.aws_vpc.network.id
   public_subnet_ids  = data.aws_subnets.public.ids
@@ -163,9 +185,12 @@ module "service" {
   readonly_root_filesystem = false
 
   extra_environment_variables = merge(
+    {
+      BUCKET_NAME = local.storage_config.bucket_name
+      "ENVIRONMENT" : var.environment_name
+    },
     local.service_config.extra_environment_variables,
     local.api_analytics_bucket_environment_variables,
-    { "ENVIRONMENT" : var.environment_name }
   )
 
   secrets = concat(
@@ -173,13 +198,80 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
+    module.app_config.enable_identity_provider ? [{
+      name      = "COGNITO_CLIENT_SECRET"
+      valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : []
   )
 
   extra_policies = merge(
     {
-      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
+      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
+      storage_access              = module.storage.access_policy_arn
     },
+    module.app_config.enable_identity_provider ? {
+      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {}
   )
 
   is_temporary = local.is_temporary
+}
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+  #Email subscription list:
+  #email_alerts_subscription_list = ["email1@email.com", "email2@email.com"]
+
+  # Module takes service and ALB names to link all alerts with corresponding targets
+  service_name                                = local.service_config.service_name
+  load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
+  incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
+}
+
+module "storage" {
+  source       = "../../modules/storage"
+  name         = local.storage_config.bucket_name
+  is_temporary = local.is_temporary
+}
+
+# If the app has `enable_identity_provider` set to true AND this is not a temporary
+# environment, then create a new identity provider.
+module "identity_provider" {
+  count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
+  source = "../../modules/identity-provider/resources"
+
+  is_temporary = local.is_temporary
+
+  name                             = local.identity_provider_config.identity_provider_name
+  password_minimum_length          = local.identity_provider_config.password_policy.password_minimum_length
+  temporary_password_validity_days = local.identity_provider_config.password_policy.temporary_password_validity_days
+  verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
+  verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
+
+  sender_email        = local.notifications_config == null ? null : local.notifications_config.sender_email
+  sender_display_name = local.notifications_config == null ? null : local.notifications_config.sender_display_name
+  reply_to_email      = local.notifications_config == null ? null : local.notifications_config.reply_to_email
+}
+
+# If the app has `enable_identity_provider` set to true AND this *is* a temporary
+# environment, then use an existing identity provider.
+module "existing_identity_provider" {
+  count  = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  source = "../../modules/identity-provider/data"
+
+  name = local.identity_provider_config.identity_provider_name
+}
+
+# If the app has `enable_identity_provider` set to true, create a new identity provider
+# client for the service. A new client is created for all environments, including
+# temporary environments.
+module "identity_provider_client" {
+  count  = module.app_config.enable_identity_provider ? 1 : 0
+  source = "../../modules/identity-provider-client/resources"
+
+  callback_urls = local.identity_provider_config.client.callback_urls
+  logout_urls   = local.identity_provider_config.client.logout_urls
+  name          = "${local.prefix}${local.identity_provider_config.identity_provider_name}"
+
+  user_pool_id = local.identity_provider_user_pool_id
 }
