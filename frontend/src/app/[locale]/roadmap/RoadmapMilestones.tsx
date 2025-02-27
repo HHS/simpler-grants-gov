@@ -13,7 +13,7 @@ export default function RoadmapMilestones() {
       sectionBackgroundColorClass="bg-base-lightest"
       sectionContent={
         <>
-          <h4>{t("contentTitle")}</h4>
+          <h2>{t("contentTitle")}</h2>
           {Object.keys(contentItems).map((key) => {
             const title = t(`contentItems.${key}.title`);
             const content = t.rich(`contentItems.${key}.content`, {
@@ -25,7 +25,7 @@ export default function RoadmapMilestones() {
             });
             return (
               <div key={`roadmap-milestones-${title}-key`}>
-                <h5>{title}</h5>
+                <h3>{title}</h3>
                 {content}
               </div>
             );
