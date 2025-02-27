@@ -8,7 +8,7 @@ describe("Process Content", () => {
     render(<ProcessNext />);
     const ProcessH1 = screen.getByRole("heading", {
       level: 2,
-      name: /What's happening/i,
+      name: /What we're working on right now/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();
