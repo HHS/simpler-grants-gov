@@ -255,6 +255,24 @@ i.e.
 .usa-tooltip__body {
   background-color: color("secondary-darker");
   color: white;
+  &::after {
+    border-top-color: color("secondary-darker");
+  }
+  &--right {
+    &::after {
+      border-right-color: color("secondary-darker");
+    }
+  }
+  &--left {
+    &::after {
+      border-left-color: color("secondary-darker");
+    }
+  }
+  &--bottom {
+    &::after {
+      border-bottom-color: color("secondary-darker");
+    }
+  }
 }
 
 // There is no config for setting the current nav item border color

@@ -10,11 +10,15 @@ type SearchSavedQueryProps = {
 
 const SearchSavedQuery = ({ copyText, helpText }: SearchSavedQueryProps) => {
   return (
-    <div className="border-base-lighter border-1px padding-2">
+    <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
+      <USWDSIcon className="margin-right-1" name="content_copy" />
       {copyText}
-      <USWDSIcon className="text-primary-darker" name="content_copy" />
-      <Tooltip label={helpText} position="top">
-        <USWDSIcon name="info_outline" />
+      <Tooltip
+        className="text-secondary-darker"
+        label={helpText}
+        position="top"
+      >
+        <USWDSIcon className="margin-left-1" name="info_outline" />
       </Tooltip>
     </div>
   );

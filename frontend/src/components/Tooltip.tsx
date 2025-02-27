@@ -7,6 +7,7 @@ export interface TooltipProps {
   label: string;
   position?: "top" | "right" | "bottom" | "left";
   children: ReactNode;
+  className?: string;
 }
 
 /**
@@ -16,6 +17,7 @@ export const Tooltip = ({
   label,
   position = "top",
   children,
+  className,
 }: TooltipProps): React.ReactElement => {
   const tooltipRef = useRef<HTMLSpanElement>(null);
   useLayoutEffect(() => {
@@ -29,7 +31,7 @@ export const Tooltip = ({
     return () => tooltip.off(tooltipElement);
   });
   return (
-    <span ref={tooltipRef}>
+    <span className={className} ref={tooltipRef}>
       {children}
     </span>
   );
