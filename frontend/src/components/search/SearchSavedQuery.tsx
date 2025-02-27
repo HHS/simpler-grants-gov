@@ -1,20 +1,35 @@
 "use client";
 
-import Tooltip from "src/components/Tooltip";
+import { environment } from "src/constants/environments";
+import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
+
+import { usePathname, useSearchParams } from "next/navigation";
+import { Button, Tooltip } from "@trussworks/react-uswds";
+
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type SearchSavedQueryProps = {
   copyText: string;
   helpText: string;
 };
-
-const SearchSavedQuery = ({ copyText, helpText }: SearchSavedQueryProps) => {
+const SearchSavedQuery2 = ({ copyText, helpText }: SearchSavedQueryProps) => {
+  const { copied, loading, copyToClipboard } = useCopyToClipboard();
+  const path = usePathname();
+  const searchParams = useSearchParams();
+  const url = `${environment.NEXT_PUBLIC_BASE_URL}${path}?${searchParams.toString()}`;
   return (
     <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
-      <USWDSIcon className="margin-right-1" name="content_copy" />
-      {copyText}
+      <Button
+        type="button"
+        unstyled
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onClick={() => copyToClipboard(url)}
+      >
+        <USWDSIcon name="content_copy" />
+        {loading ? "Copying..." : <>{copied ? "Copied!" : copyText}</>}
+      </Button>
       <Tooltip
-        className="text-secondary-darker"
+        className="text-secondary-darker usa-button--unstyled"
         label={helpText}
         position="top"
       >
@@ -24,4 +39,4 @@ const SearchSavedQuery = ({ copyText, helpText }: SearchSavedQueryProps) => {
   );
 };
 
-export default SearchSavedQuery;
+export default SearchSavedQuery2;
