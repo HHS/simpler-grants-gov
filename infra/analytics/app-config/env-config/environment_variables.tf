@@ -3,10 +3,13 @@ locals {
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
-    # Example environment variables
-    # WORKER_THREADS_COUNT    = 4
-    # LOG_LEVEL               = "info"
-    # DB_CONNECTION_POOL_SIZE = 5
+    MB_DB_TYPE      = "postgres"
+    MB_DB_USER      = "metabaseuser"
+    MB_DB_DBNAME    = "metabase"
+    PY_RUN_APPROACH = "local"
+    SPRINT_FILE     = "/tmp/sprint-data.json"
+    ISSUE_FILE      = "/tmp/issue-data.json"
+    OUTPUT_DIR      = "/tmp/"
   }
 
   # Configuration for secrets
@@ -19,16 +22,56 @@ locals {
   #   }
   # }
   secrets = {
-    # Example generated secret
-    # RANDOM_SECRET = {
-    #   manage_method     = "generated"
-    #   secret_store_name = "/${var.app_name}-${var.environment}/random-secret"
-    # }
-
-    # Example secret that references a manually created secret
-    # SECRET_SAUCE = {
-    #   manage_method     = "manual"
-    #   secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
-    # }
+    # Create this in Github
+    GH_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/github-token"
+    }
+    # Create this in Slack
+    ANALYTICS_SLACK_BOT_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/slack-bot-token"
+    }
+    # Retrieve this from Slack
+    ANALYTICS_REPORTING_CHANNEL_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
+    }
+    #
+    # Run this SQL manually in the AWS console via the RDS Query Editor
+    # inside of the analytics RDS instance and the `app` database.
+    # It creates a "metabase" database that store metabase user configuration,
+    # saved queries, dashboards, and other such things. It also grants permission
+    # to access the "app" database where the analytics data is stored.
+    #
+    # You can find the value of < ROOT USER > by running:
+    # SELECT usename AS role_name FROM pg_catalog.pg_user ORDER BY role_name desc;
+    # It is the user that starts with `root`
+    #
+    #     CREATE ROLE metabaserole;
+    #     GRANT metabase TO '< ROOT USER >';                            -- retrieve this from the database
+    #     CREATE DATABASE metabase OWNER = '< ROOT USER >';
+    #     CREATE USER metabaseuser WITH PASSWORD '< RANDOM PASSWORD >'; -- add this to Parameter Store at the "secret_store_name" path
+    #     GRANT metabaserole TO metabaseuser;
+    #
+    #     -- the "metabase" database is where metabase configuration is stored, like user logins
+    #     GRANT ALL PRIVILEGES ON DATABASE metabase TO metabaseuser;
+    #     GRANT CONNECT ON DATABASE metabase TO metabaseuser;
+    #
+    #     -- the "app" database is where the analytics data is stored
+    #     GRANT ALL PRIVILEGES ON DATABASE app TO metabaseuser;
+    #     GRANT CONNECT ON DATABASE app TO metabaseuser;
+    #     GRANT USAGE ON SCHEMA app TO metabaseuser;
+    #     ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT ON TABLES TO metabaseuser;
+    #     GRANT SELECT ON ALL TABLES IN SCHEMA app TO metabaseuser;
+    #
+    # Then after you do the above, connect to the "metabase" database and run the following:
+    #
+    #     GRANT USAGE, CREATE ON SCHEMA public TO metabaseuser;
+    #     GRANT USAGE, CREATE ON SCHEMA public TO metabaserole;
+    MB_DB_PASS = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
+    }
   }
 }
