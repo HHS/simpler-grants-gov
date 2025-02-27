@@ -6,7 +6,7 @@
 
 * [Why open source?](get-involved/get-involved.md)
 * [How to contribute code](get-involved/github-code.md)
-* [How to create tickets](get-involved/github-planning/README.md)
+* [How to file issues](get-involved/github-planning/README.md)
   * [Report a bug](get-involved/github-planning/filling-out-a-bug-report.md)
   * [Request a feature](get-involved/github-planning/filling-out-a-feature-request.md)
   * [Report a security vulnerability](get-involved/github-planning/reporting-a-security-vulnerability.md)

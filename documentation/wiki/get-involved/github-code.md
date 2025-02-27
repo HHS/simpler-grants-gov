@@ -60,6 +60,12 @@ API Development Instructions [API Development Instructions](https://chatgpt.com/
 
 Front End Development Instructions [Front End Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
 
+{% hint style="info" %}
+Nee**d help with your local development environment?**\
+\
+Join the Slack workspace if you're having issues so we can walk you through the process of resolving blockers.
+{% endhint %}
+
 ### 3. Make & Commit changes
 
 Make your desired changes to the codebase using your preferred editor. Once you're done, stage and commit your changes:
