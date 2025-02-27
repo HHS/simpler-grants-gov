@@ -1,7 +1,7 @@
-import ProcessNext, {
-  gitHubLinkForIssue,
-} from "src/app/[locale]/process/ProcessNext";
+import ProcessNext from "src/app/[locale]/process/ProcessNext";
 import { render, screen } from "tests/react-utils";
+
+import { gitHubLinkForIssue } from "src/components/GithubLink";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {

@@ -15,7 +15,7 @@ export default function RoadmapProcess() {
           <p>{t("sectionSummary")}</p>
           {Object.keys(contentItems).map((key) => {
             return (
-              <div>
+              <div key={`roadmap-process-${key}`}>
                 <h3>{t(`contentItems.${key}.title`)}</h3>
                 <p>{t(`contentItems.${key}.content`)}</p>
               </div>
