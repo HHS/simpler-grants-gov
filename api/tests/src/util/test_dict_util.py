@@ -118,13 +118,14 @@ def test_flatten_dict(data, expected_output):
         ),
         (
             # dict1
-            {"x": {"x": [1, 2]}},  # missing y
+            {"x": {"x": [1, 2], "z": None}},  # missing y
             # dict2
-            {"x": {"y": [1, 2]}},  # missing x
+            {"x": {"y": [1, 2], "z": 4}},  # missing x
             # expected output
             [
                 {"field": "x.x", "before": [1, 2], "after": None},
                 {"field": "x.y", "before": None, "after": [1, 2]},
+                {"field": "x.z", "before": None, "after": 4},
             ],
         ),
     ],

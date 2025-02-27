@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any
 
 
 def flatten_dict(in_dict: Any, separator: str = ".", prefix: str = "") -> dict:
@@ -63,8 +63,8 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
     for k in all_keys:
         values = [flatt_dict1.get(k, None), flatt_dict2.get(k, None)]
         # convert values to set for comparison
-        v_a = _convert_to_set(values[0])
-        v_b = _convert_to_set(values[1])
+        v_a = _convert_iterables_to_set(values[0])
+        v_b = _convert_iterables_to_set(values[1])
 
         if v_a != v_b:
             diffs.append({"field": k, "before": values[0], "after": values[1]})
@@ -72,11 +72,7 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
     return diffs
 
 
-def _convert_to_set(data: Any) -> set:
-    if data is None:
-        return set()
-    if isinstance(data, Iterable) and not isinstance(
-        data, str
-    ):  # Check if iterable exclude strings
+def _convert_iterables_to_set(data: Any) -> Any:
+    if isinstance(data, (list, tuple)):
         return set(data)
-    return {data}
+    return data
