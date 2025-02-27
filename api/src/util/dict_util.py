@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 
 def flatten_dict(in_dict: Any, separator: str = ".", prefix: str = "") -> dict:
@@ -65,11 +65,10 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
         v_b = flatt_dict2.get(k, None)
 
         # Store diff if values are different
-        if isinstance(v_a, list):
+        if all(isinstance(v, Iterable) and not isinstance(v, str) for v in (v_a, v_b)): # Check if values are iterable and not strings
             if set(v_a) != set(v_b):
                 diffs.append({"field": k, "before": v_a, "after": v_b})
         elif v_a != v_b:
-
             diffs.append({"field": k, "before": v_a, "after": v_b})
 
     return diffs
