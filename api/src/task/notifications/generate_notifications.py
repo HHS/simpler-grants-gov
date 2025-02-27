@@ -208,11 +208,26 @@ class NotificationTask(Task):
                     continue
 
                 subject = "Applications for your bookmarked funding opportunity are due soon"
-                message = "Applications for the following funding opportunity are due in two weeks:"
+                message = (
+                    "Applications for the following funding opportunity are due in two weeks:\n\n"
+                    f"[{opportunity.opportunity.opportunity_title}]\n"
+                    f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
+                    "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
+                    "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
+                    "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
+                    "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+                    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
+                    "support@grants.gov\n"
+                    "1-800-518-4726\n"
+                    "24 hours a day, 7 days a week\n"
+                    "Closed on federal holidays"
+                )
             elif len(container.closing_opportunities) > 1:
                 # Multiple opportunities closing
                 subject = "Applications for your bookmarked funding opportunities are due soon"
-                message = "Applications for the following funding opportunities are due in two weeks::\n\n"
+                message = (
+                    "Applications for the following funding opportunities are due in two weeks:\n\n"
+                )
 
                 for opportunity in container.closing_opportunities:
                     close_date_stmt = select(OpportunitySummary.close_date).where(
@@ -221,13 +236,21 @@ class NotificationTask(Task):
                     close_date = self.db_session.execute(close_date_stmt).scalar_one_or_none()
                     if close_date:
                         message += (
-                            f"• {opportunity.opportunity.opportunity_title}\n"
-                            f"  Closing on: {close_date.strftime('%B %d, %Y')}\n\n"
+                            f"[{opportunity.opportunity.opportunity_title}]\n"
+                            f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
                         )
 
+                message += (
+                    "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
+                    "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
+                    "If you have questions, please contact the Grants.gov Contact Center:\n"
+                    "support@grants.gov\n"
+                    "1-800-518-4726\n"
+                    "24 hours a day, 7 days a week\n"
+                    "Closed on federal holidays"
+                )
+
             if len(container.closing_opportunities) > 0:
-                print("LEN")
-                print(len(container.closing_opportunities))
                 notification_log = UserNotificationLog(
                     user_id=user_id,
                     notification_reason=NotificationConstants.CLOSING_DATE_REMINDER,
