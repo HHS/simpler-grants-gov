@@ -61,12 +61,13 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
     all_keys = set(flatt_dict1.keys()).union(flatt_dict2.keys())  # Does not keep order
 
     for k in all_keys:
+        values = [flatt_dict1.get(k, None), flatt_dict2.get(k, None)]
         # convert values to set for comparison
-        v_a = _convert_to_set(flatt_dict1.get(k, None))
-        v_b = _convert_to_set(flatt_dict2.get(k, None))
+        v_a = _convert_to_set(values[0])
+        v_b = _convert_to_set(values[1])
 
         if v_a != v_b:
-            diffs.append({"field": k, "before": v_a, "after": v_b})
+            diffs.append({"field": k, "before": values[0], "after": values[1]})
 
     return diffs
 
@@ -74,6 +75,8 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
 def _convert_to_set(data: Any) -> set:
     if data is None:
         return set()
-    if isinstance(data, Iterable) and not isinstance(data, str):  # Check if iterable exclude strings
+    if isinstance(data, Iterable) and not isinstance(
+        data, str
+    ):  # Check if iterable exclude strings
         return set(data)
     return {data}

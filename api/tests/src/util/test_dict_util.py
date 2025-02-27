@@ -118,12 +118,15 @@ def test_flatten_dict(data, expected_output):
         ),
         (
             # dict1
-            {"x": {"x": [1,2]}},
+            {"x": {"x": [1, 2]}},  # missing y
             # dict2
-            {"x": {"y": [1,2]}},  # missing x
+            {"x": {"y": [1, 2]}},  # missing x
             # expected output
-            [{"field": "x.x", "before": [1,2], "after": None}, {"field": "x.y", "before": None, "after": [1,2]}],
-        )
+            [
+                {"field": "x.x", "before": [1, 2], "after": None},
+                {"field": "x.y", "before": None, "after": [1, 2]},
+            ],
+        ),
     ],
 )
 def test_diff_nested_dicts(dict1, dict2, expected_output):
