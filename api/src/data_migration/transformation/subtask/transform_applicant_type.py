@@ -18,7 +18,23 @@ class TransformApplicantType(AbstractTransformSubTask):
         link_table = LinkOpportunitySummaryApplicantType
         relationship_load_value = OpportunitySummary.link_applicant_types
 
-        logger.info("Processing forecast applicant types")
+        logger.info("Processing deletes for forecast applicant types")
+        delete_forecast_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesForecast,
+            link_table,
+            [
+                TapplicanttypesForecast.at_frcst_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_delete=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(delete_forecast_applicant_type_records)
+
+        logger.info("Processing inserts/updates for forecast applicant types")
         forecast_applicant_type_records = self.fetch_with_opportunity_summary(
             TapplicanttypesForecast,
             link_table,
@@ -29,11 +45,28 @@ class TransformApplicantType(AbstractTransformSubTask):
                 == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
             ],
             is_forecast=True,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(forecast_applicant_type_records)
 
-        logger.info("Processing synopsis applicant types")
+        logger.info("Processing deletes for synopsis applicant types")
+        delete_synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesSynopsis,
+            link_table,
+            [
+                TapplicanttypesSynopsis.at_syn_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_delete=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(delete_synopsis_applicant_type_records)
+
+        logger.info("Processing inserts/updates for synopsis applicant types")
         synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
             TapplicanttypesSynopsis,
             link_table,
@@ -44,6 +77,7 @@ class TransformApplicantType(AbstractTransformSubTask):
                 == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
             ],
             is_forecast=False,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(synopsis_applicant_type_records)
