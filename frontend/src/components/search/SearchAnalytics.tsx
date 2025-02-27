@@ -41,21 +41,16 @@ function SearchAnalytics({
       return () => {};
     }
     if (params) {
-      console.log(
-        "~~~ updating new relic search query param custom attributes",
-        params,
-      );
       Object.entries(params).forEach(([key, value]) => {
+        // only pass on valid query params to NR
         if ((validSearchQueryParamKeys as readonly string[]).includes(key)) {
-          console.log("$$$ setting new relic custom attribute", key, value);
           setNewRelicCustomAttribute(key, value || "");
         }
       });
     }
+    // note that this cleanup is not running quickly enough to prevent search query params
+    // being sent on route transition when navigating away from the search page
     return () => {
-      console.log(
-        "!!! unsetting new relic search query param custom attributes",
-      );
       unsetAllNewRelicQueryAttributes();
     };
   }, [params, newRelicEnabled, newRelicInitialized]);

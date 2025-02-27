@@ -15,7 +15,7 @@ export const waitForNewRelic = (elapsed = 0) => {
     console.error("New Relic browser code not found");
     return false;
   }
-  console.debug("waiting for new relic: ", elapsed);
+  console.debug("Waiting for new relic: ", elapsed);
   if (!present) {
     return setTimeout(
       () => waitForNewRelic(elapsed + NEW_RELIC_POLL_INTERVAL),
@@ -38,6 +38,7 @@ export const setNewRelicCustomAttribute = (
     console.error("New Relic not defined setting custom attribute");
     return;
   }
+  // using underscores since NR has problems with querying fields with dashes
   newRelic.setCustomAttribute(`search_param_${key}`, value);
 };
 
