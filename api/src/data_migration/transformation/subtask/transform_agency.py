@@ -230,8 +230,8 @@ class TransformAgency(AbstractTransformSubTask):
         self.update_agency_download_file_types(agency, updates.agency_download_file_types)
 
         # Set whether the agency is a test agency based on the config
-        is_test_agency = tgroup_agency.agency_code in self.agency_config.test_agency_config
-        agency.is_test_agency = is_test_agency
+        # Note that we also recalculate this in the TransformAgencyHierarchy task that runs after this
+        agency.is_test_agency = is_test_agency_code(tgroup_agency.agency_code, self.agency_config)
 
         # After we have fully updated the agency, set the transformed_at timestamp
         # for all tgroup records that weren't already set.
@@ -275,17 +275,43 @@ class TransformAgency(AbstractTransformSubTask):
 
 
 class TransformAgencyHierarchy(AbstractTransformSubTask):
-    def __init__(self, task: Task):
+    def __init__(self, task: Task, agency_config: AgencyConfig | None = None) -> None:
         super().__init__(task)
+
+        if agency_config is None:
+            agency_config = AgencyConfig()
+
+        self.agency_config = agency_config
 
     def transform_records(self) -> None:
         agencies = self.db_session.scalars(select(Agency)).all()
         agency_map = {agency.agency_code: agency for agency in agencies}
 
         for agency in agencies:
+            log_extra = {"agency_code": agency.agency_code}
+            logger.info("Processing agency hierarchy", extra=log_extra)
+
             top_level_agency_code = self.get_top_level_agency_code(agency.agency_code)
+            logger.info(
+                "Determined top level agency code for agency",
+                extra=log_extra | {"top_level_agency_code": top_level_agency_code},
+            )
             if top_level_agency_code and top_level_agency_code in agency_map:
                 agency.top_level_agency = agency_map[top_level_agency_code]
+            else:
+                # We want to unset the top level agency if something is incorrectly
+                # pointed to (just as a safeguard)
+                agency.top_level_agency = None
+
+            # Recalculate whether an agency is a test agency on each run
+            # in case we update the config values
+            # This same function is called whenever we create/update an agency that has other updates
+            is_test_agency = is_test_agency_code(agency.agency_code, self.agency_config)
+            logger.info(
+                "Determined whether agency is a test agency",
+                extra=log_extra | {"is_test_agency": is_test_agency},
+            )
+            agency.is_test_agency = is_test_agency
 
     def get_top_level_agency_code(self, agency_code: str) -> str | None:
         if "-" not in agency_code:
@@ -441,3 +467,15 @@ def apply_updates(
         record.updated_at is not None and updated_at is not None and record.updated_at < updated_at
     ):
         record.updated_at = updated_at
+
+
+def is_test_agency_code(agency_code: str, agency_config: AgencyConfig) -> bool:
+    """Determine whether an agency is a test agency
+
+    If the agency_code starts with one of the configured values, it is a test agency
+    """
+    for test_agency in agency_config.test_agency_config:
+        if agency_code.startswith(test_agency):
+            return True
+
+    return False

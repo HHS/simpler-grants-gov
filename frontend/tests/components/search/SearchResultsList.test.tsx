@@ -20,7 +20,7 @@ jest.mock("src/services/auth/session", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  getSavedOpportunities: () => [{ opportunity_id: 1 }],
+  fetchSavedOpportunities: () => [{ opportunity_id: 1 }],
 }));
 
 const makeSearchResults = (overrides = {}) => ({

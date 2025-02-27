@@ -12,3 +12,4 @@ The format varies. Software engineers of all experience levels are encouraged. S
 
 About every four months, our team hosts a public virtual demonstration of the features and work we produced in the previous 4-month development cycle. &#x20;
 
+<table><thead><tr><th width="215">Date</th><th width="185">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

@@ -4,7 +4,7 @@ description: >-
   simpler.grants.gov.
 ---
 
-# Product roadmap
+# Roadmap
 
 {% hint style="warning" %}
 **Important**
@@ -37,4 +37,8 @@ The features and functionality we plan to deliver as part of the SimplerGrants i
 The following terms are used to categorize items in our roadmap, we've defined them below and provided examples to help folks understand
 
 <table><thead><tr><th width="139">Term</th><th width="395">Description</th><th>Examples</th></tr></thead><tbody><tr><td>Quad</td><td>Four-month planning increments that we use to prioritize items in our roadmap.</td><td><p><strong>Quad 1.1:</strong></p><p>Base Year 1, Quad 1</p></td></tr><tr><td>Deliverable</td><td>A product feature or update that aims to improve functionality for users.</td><td><ul><li><a href="https://github.com/HHS/simpler-grants-gov/issues/2200">Search</a></li><li><a href="https://github.com/HHS/simpler-grants-gov/issues/2203">Opportunity listing</a></li></ul></td></tr><tr><td>Epic</td><td>A body of work that is broken down into smaller tasks to help complete a deliverable.</td><td><ul><li><a href="https://github.com/HHS/simpler-grants-gov/issues/2368">Search launch</a></li><li><a href="https://github.com/HHS/simpler-grants-gov/issues/2719">Search API engagement</a></li></ul></td></tr></tbody></table>
+
+
+
+{% include "../.gitbook/includes/change-log.md" %}
 
