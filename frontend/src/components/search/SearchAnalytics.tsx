@@ -30,8 +30,9 @@ function SearchAnalytics({
     if (!newRelicEnabled) {
       return;
     }
-    const ready = waitForNewRelic();
-    setNewRelicInitialized(!!ready);
+    waitForNewRelic()
+      .then((ready) => setNewRelicInitialized(!!ready))
+      .catch((e) => console.error("Error waiting for new relic", e));
   }, [newRelicEnabled]);
 
   // set new relic query param based custom attributes

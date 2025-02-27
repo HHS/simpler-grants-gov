@@ -5,28 +5,37 @@ import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes"
 type NewRelicBrowser = typeof newrelic;
 
 const NEW_RELIC_POLL_INTERVAL = 2;
-const NEW_RELIC_POLL_TIMEOUT = 2000;
+const NEW_RELIC_POLL_TIMEOUT = 500;
 
 // taking less than 2 ms to intantiate locally but not ready on first run
 // this will wait until it's present on the window
-export const waitForNewRelic = (elapsed = 0) => {
-  const present = !!window.newrelic;
-  if (elapsed > NEW_RELIC_POLL_TIMEOUT) {
-    console.error("New Relic browser code not found");
-    return false;
+export const waitForNewRelic = async (): Promise<boolean> => {
+  let present = !!window.newrelic;
+  if (present) {
+    return true;
   }
-  console.debug("Waiting for new relic: ", elapsed);
-  if (!present) {
-    return setTimeout(
-      () => waitForNewRelic(elapsed + NEW_RELIC_POLL_INTERVAL),
-      NEW_RELIC_POLL_INTERVAL,
-    );
+
+  let elapsed = 0;
+  let timedOut = false;
+
+  while (!present && !timedOut) {
+    elapsed += NEW_RELIC_POLL_INTERVAL;
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        return resolve(null);
+      }, elapsed);
+    });
+    present = !!window.newrelic;
+    if (elapsed >= NEW_RELIC_POLL_TIMEOUT) {
+      console.error("Timed out waiting for new relic browser object");
+      timedOut = true;
+    }
   }
-  return true;
+  return present;
 };
 
 const getNewRelicBrowserInstance = (): NewRelicBrowser | null => {
-  return window && window.newrelic ? window.newrelic : null;
+  return window?.newrelic ?? null;
 };
 
 export const setNewRelicCustomAttribute = (
