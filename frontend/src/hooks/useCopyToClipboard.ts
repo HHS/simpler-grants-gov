@@ -6,7 +6,7 @@ export const useCopyToClipboard = () => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const copyToClipboard = async (content: string) => {
+  const copyToClipboard = async (content: string, contentTime: number) => {
     try {
       setLoading(true);
       await navigator.clipboard.writeText(content);
@@ -19,7 +19,7 @@ export const useCopyToClipboard = () => {
     } finally {
       setTimeout(() => {
         setCopied(false);
-      }, 5000); // Reset copied state after 2 seconds
+      }, contentTime); // Reset copied state
     }
   };
 

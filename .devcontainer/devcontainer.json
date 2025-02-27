@@ -7,14 +7,13 @@
   "updateContentCommand": "cd frontend && npm install && npm run build",
   "postCreateCommand": "",
   "postAttachCommand": {
-    "server": "cd frontend && npm start"
+    "server": "cd frontend && npm run storybook"
   },
-
   "portsAttributes": {
-    "3000": {
+    "6006": {
       "label": "Application",
       "onAutoForward": "openPreview"
     }
   },
-  "forwardPorts": [3000]
+  "forwardPorts": [6006]
 }
