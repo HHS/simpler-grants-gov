@@ -41,7 +41,6 @@ function SearchAnalytics({
       return () => {};
     }
     if (params) {
-      // updateNewRelicSearchParams(params, newRelicInitialized);
       console.log(
         "~~~ updating new relic search query param custom attributes",
         params,

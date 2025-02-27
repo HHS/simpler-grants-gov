@@ -35,11 +35,10 @@ export const setNewRelicCustomAttribute = (
 ): undefined => {
   const newRelic = getNewRelicBrowserInstance();
   if (!newRelic) {
-    console.log("--- nr not defined");
+    console.error("New Relic not defined setting custom attribute");
     return;
   }
-  console.log("--- setting custom attribute", key, value);
-  newRelic.setCustomAttribute(key, value);
+  newRelic.setCustomAttribute(`search_param_${key}`, value);
 };
 
 // TODO does setting "" as the value effectively `unset` the attribute?
