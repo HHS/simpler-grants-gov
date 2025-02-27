@@ -100,6 +100,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    versions: Mapped[list["OpportunityVersion"]] = relationship(
+        "OpportunityVersion",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def top_level_agency_name(self) -> str | None:
         if self.agency_record is not None and self.agency_record.top_level_agency is not None:
