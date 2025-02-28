@@ -38,8 +38,8 @@ def test_save_opportunity_version(db_session, enable_factory_create):
         "top_level_agency_name": agency_top.agency_name,
         "opportunity_assistance_listings": [
             {
-                "program_title": opp_ass.program_title,
-                "assistance_listing_number": opp_ass.assistance_listing_number,
+                "program_title": opp_al.program_title,
+                "assistance_listing_number": opp_al.assistance_listing_number,
             }
         ],
     }
