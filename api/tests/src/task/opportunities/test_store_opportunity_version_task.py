@@ -1,9 +1,11 @@
 import pytest
 
-from src.db.models.opportunity_models import OpportunityVersion
+from src.db.models.opportunity_models import OpportunityVersion, OpportunitySummary, Opportunity
 from src.task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
+from src.util import datetime_util
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory, OpportunityChangeAuditFactory
+from tests.src.db.models.factories import OpportunityFactory, OpportunityChangeAuditFactory, OpportunitySummaryFactory, \
+    OpportunityAssistanceListingFactory
 
 
 class TestStoreOpportunityVersionTask(BaseTestClass):
@@ -13,6 +15,8 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
 
     def test_store_opportunity_version_task(self, db_session, enable_factory_create, store_opportunity_version_task):
         db_session.query(OpportunityVersion).delete()
+        db_session.query(Opportunity).delete()
+        db_session.query(Opportunity).delete()
         db_session.commit()
 
         # create opportunities
@@ -31,17 +35,19 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         assert saved_opp_version[0].opportunity_id == opportunities[0].opportunity_id
 
         # Verify only opportunities updated after latest job were entered into OpportunityVersion table
+        OpportunityAssistanceListingFactory.create(
+            opportunity=opportunities[1],
+
+        )
 
         OpportunityChangeAuditFactory.create(
             opportunity=opportunities[1]
         )
-
         store_opportunity_version_task.run()
 
         saved_opp_version = db_session.query(OpportunityVersion).all()
-
         assert len(saved_opp_version) == 2
-        assert saved_opp_version[0].opportunity_id == opportunities[1].opportunity_id
+        assert saved_opp_version[1].opportunity_id == opportunities[1].opportunity_id
 
 
 
