@@ -668,6 +668,7 @@ export const messages = {
         inputLabel: "Query name",
         saveText: "Save",
         cancelText: "Cancel",
+        emptyNameError: "Please name this query.",
       },
       copySearch: {
         copy: {
