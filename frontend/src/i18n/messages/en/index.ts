@@ -660,6 +660,16 @@ export const messages = {
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
     },
+    saveSearch: {
+      modal: {
+        title: "Save search query",
+        description:
+          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
+        inputLabel: "Query name",
+        saveText: "Save",
+        cancelText: "Cancel",
+      },
+    },
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
