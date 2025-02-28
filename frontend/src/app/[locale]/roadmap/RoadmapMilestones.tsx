@@ -13,19 +13,19 @@ export default function RoadmapMilestones() {
       sectionBackgroundColorClass="bg-base-lightest"
       sectionContent={
         <>
-          <h2>{t("contentTitle")}</h2>
+          <h2 className="font-sans-lg margin-top-0">{t("contentTitle")}</h2>
           {Object.keys(contentItems).map((key) => {
             const title = t(`contentItems.${key}.title`);
             const content = t.rich(`contentItems.${key}.content`, {
               p: (chunks) => (
-                <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+                <p className="font-sans-xs line-height-sans-4 desktop-lg:line-height-sans-6">
                   {chunks}
                 </p>
               ),
             });
             return (
               <div key={`roadmap-milestones-${title}-key`}>
-                <h3>{title}</h3>
+                <h3 className="font-sans-xs margin-bottom-05">{title}</h3>
                 {content}
               </div>
             );

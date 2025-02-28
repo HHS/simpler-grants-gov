@@ -15,7 +15,7 @@ export default function GithubIssueLink({
   return (
     <Link
       target="_blank"
-      className={`usa-link--external text-bold ${extraClasses}`}
+      className={`usa-link--external ${extraClasses}`}
       href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber !== undefined ? issueNumber : "?q=is%3Aissue%20type%3ADeliverable%20"}`}
     >
       {chunks}

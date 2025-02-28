@@ -13,13 +13,17 @@ export default function RoadmapPageSection({
   sectionBackgroundColorClass = "",
 }: RoadmapPageSectionProps) {
   return (
-    <div className={`${sectionBackgroundColorClass}`}>
+    <div className={`padding-y-5 ${sectionBackgroundColorClass}`}>
       <GridContainer>
         <Grid row>
-          <Grid tablet={{ col: 4 }}>
-            <h2>{sectionTitle}</h2>
+          <Grid tablet={{ col: 3 }}>
+            <h2 className="margin-y-0" style={{ maxWidth: 200 }}>
+              {sectionTitle}
+            </h2>
           </Grid>
-          <Grid tablet={{ col: 8 }}>{sectionContent}</Grid>
+          <Grid className="margin-y-2 tablet:margin-y-0" tablet={{ col: 9 }}>
+            {sectionContent}
+          </Grid>
         </Grid>
       </GridContainer>
     </div>

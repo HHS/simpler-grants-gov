@@ -12,12 +12,14 @@ export default function RoadmapProcess() {
       sectionTitle={t("title")}
       sectionContent={
         <div>
-          <p>{t("sectionSummary")}</p>
+          <p className="margin-top-0">{t("sectionSummary")}</p>
           {Object.keys(contentItems).map((key) => {
             return (
-              <div key={`roadmap-process-${key}`}>
-                <h3>{t(`contentItems.${key}.title`)}</h3>
-                <p>{t(`contentItems.${key}.content`)}</p>
+              <div className="margin-bottom-2" key={`roadmap-process-${key}`}>
+                <h3 className="margin-bottom-1">
+                  {t(`contentItems.${key}.title`)}
+                </h3>
+                <p className="margin-0">{t(`contentItems.${key}.content`)}</p>
               </div>
             );
           })}

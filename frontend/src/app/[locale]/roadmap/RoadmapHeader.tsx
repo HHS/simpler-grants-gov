@@ -1,16 +1,17 @@
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 export default function RoadmapHeader() {
   const t = useTranslations("Roadmap");
 
   return (
-    <div className="text-white bg-primary-darkest">
+    <div className="padding-y-5 text-white bg-primary-darkest">
       <GridContainer>
         <Grid row>
           <Grid tablet={{ col: 6 }}>
             <h1>{t("pageHeaderTitle")}</h1>
-            <p>{t("pageHeaderParagraph")}</p>
+            <p className={"font-sans-sm"}>{t("pageHeaderParagraph")}</p>
           </Grid>
           <Grid
             tablet={{ col: 6 }}
@@ -20,7 +21,12 @@ export default function RoadmapHeader() {
               alignItems: "center",
             }}
           >
-            <div>img</div>
+            <Image
+              src="/img/roadmap-header-image.png"
+              alt="Picture of person on a journey"
+              width={100}
+              height={200}
+            />
           </Grid>
         </Grid>
       </GridContainer>

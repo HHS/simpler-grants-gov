@@ -15,18 +15,22 @@ export default function RoadmapWhatWereWorkingOn() {
       sectionContent={
         <GridContainer className="padding-0">
           {contentItems.map((i, j) => (
-            <Grid row key={`roadmap-what-were-working-on-${j}`}>
+            <Grid
+              row
+              className="margin-bottom-0 tablet:margin-bottom-3"
+              key={`roadmap-what-were-working-on-${j}`}
+            >
               {i.map((k, l) => (
                 <Grid
+                  className="margin-bottom-3 tablet:grid-col-6 tablet:padding-right-7"
                   key={`roadmap-what-were-working-on-${j}-${l}`}
-                  tablet={{ col: 6 }}
                 >
-                  <h3 style={{ fontSize: 18 }}>
+                  <h3 className="font-sans-xs margin-0">
                     {t(`contentItems.${j}.${l}.title`)}
                   </h3>
-                  <div style={{ lineHeight: "24.3px", fontSize: 18 }}>
+                  <div className="font-sans-xs margin-top-1">
                     {t.rich(`contentItems.${j}.${l}.content`, {
-                      p: (chunks) => <p className={"margin-0"}>{chunks}</p>,
+                      p: (chunks) => <p className=" margin-y-05">{chunks}</p>,
                       linkGithub3045: gitHubLinkForIssue(3045),
                       linkGithub2875: gitHubLinkForIssue(2875),
                       linkGithub2640: gitHubLinkForIssue(2640),
@@ -37,7 +41,7 @@ export default function RoadmapWhatWereWorkingOn() {
               ))}
             </Grid>
           ))}
-          <h3 style={{ fontSize: 18 }}>
+          <h3 className="font-sans-xs">
             <GithubIssueLink chunks={t("link")} />
           </h3>
         </GridContainer>
