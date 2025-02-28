@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 SCHEMA = OpportunityV1Schema()
 
 
-def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> None:
+def save_opportunity_version(db_session: db.Session, opportunity: OpportunityV1Schema) -> None:
     """
     Saves a new version of an Opportunity record in the OpportunityVersion table.
 
