@@ -9,6 +9,7 @@ import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 export const SaveSearchPanel = () => {
   const path = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("Search.saveSearch.copySearch");
 
   const url = useMemo(() => {
     const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
@@ -16,7 +17,6 @@ export const SaveSearchPanel = () => {
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const t = useTranslations("Search.savedQuery");
   return (
     <div className="border-base-lighter border-1px padding-2 flex-align-start text-primary-darker text-underline display-flex">
       <SearchQueryCopyButton

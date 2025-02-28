@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { use } from "react";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
@@ -58,6 +59,7 @@ function Search({ searchParams, params }: SearchPageProps) {
         <div className="grid-container">
           <div className="search-bar">
             <SearchBar query={query} />
+            <SaveSearchPanel />
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">

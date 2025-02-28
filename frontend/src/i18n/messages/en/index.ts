@@ -660,19 +660,29 @@ export const messages = {
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
     },
-    savedQuery: {
-      copy: {
-        unauthenticated: "Copy this seach query",
-        authenticated: "Copy",
+    saveSearch: {
+      modal: {
+        title: "Save search query",
+        description:
+          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
+        inputLabel: "Query name",
+        saveText: "Save",
+        cancelText: "Cancel",
       },
-      copying: "Copying",
-      copied: "Copied!",
-      help: {
-        unauthenticated:
-          "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
+      copySearch: {
+        copy: {
+          unauthenticated: "Copy this seach query",
+          authenticated: "Copy",
+        },
+        copying: "Copying",
+        copied: "Copied!",
+        help: {
+          unauthenticated:
+            "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
+        },
+        snackbar:
+          "This search query was copied to your clipboard. Paste it as a link anywhere.",
       },
-      snackbar:
-        "This search query was copied to your clipboard. Paste it as a link anywhere.",
     },
   },
   Maintenance: {
