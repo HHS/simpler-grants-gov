@@ -2,9 +2,12 @@
 
 import clsx from "clsx";
 import { debounce } from "lodash";
+import { useUser } from "src/services/auth/useUser";
+import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
 import {
   Button,
   ErrorMessage,
@@ -18,10 +21,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const saveSearch = (name: string) => {
-  console.log("~~~ saving search", name);
-};
 
 function SaveSearchInput({
   validationError,
@@ -59,8 +58,44 @@ export function SaveSearchModal() {
 
   const t = useTranslations("Search.saveSearch.modal");
   const modalRef = useRef<ModalRef>(null);
+  const { user } = useUser();
+  const searchParams = useSearchParams();
+
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
+  const [apiError, setApiError] = useState<boolean>();
+  const [loading, setLoading] = useState<boolean>();
+  const [saved, setSaved] = useState<boolean>();
+
+  const saveSearch = useCallback(
+    async (name: string) => {
+      if (!user?.token) return;
+      setLoading(true);
+      try {
+        // send up a filtered set of params, converted to an object
+        // we will do the further filter and pagination object building on the server
+        const savedSearchParams = filterSearchParams(
+          Object.fromEntries(searchParams.entries()),
+        );
+        const res = await fetch("/api/user/saved-searches", {
+          method: "POST",
+          body: JSON.stringify(savedSearchParams),
+        });
+        if (res.ok && res.status === 200) {
+          const data = (await res.json()) as { type: string };
+          data.type === "save" ? setSaved(true) : setSaved(false);
+        } else {
+          setApiError(true);
+        }
+      } catch (error) {
+        setApiError(true);
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, searchParams],
+  );
 
   const updateSavedSearchName = debounce(setSavedSearchName, 50);
 
