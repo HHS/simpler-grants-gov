@@ -14,10 +14,4 @@ const meta: Meta<typeof SearchSavedQuery> = {
 };
 export default meta;
 
-export const Default = {
-  args: {
-    snackbarCopyText:
-      "This is the success message that will let you know. really. really.d",
-    snackbarMessage: "This is the success message that will let you knowddddd",
-  },
-};
+export const Default = {};

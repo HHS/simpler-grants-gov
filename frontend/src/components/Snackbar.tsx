@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 type SnackbarProps = {
   isVisible: boolean;
-  children?: React.ReactNode;
+  children: React.ReactNode;
 };
 
 const Snackbar = ({ isVisible = false, children }: SnackbarProps) => {

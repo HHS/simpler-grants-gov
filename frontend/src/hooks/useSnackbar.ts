@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 
 import Snackbar from "src/components/Snackbar";

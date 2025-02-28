@@ -1,14 +1,15 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:22",
   "hostRequirements": {
     "cpus": 4
   },
   "waitFor": "onCreateCommand",
-  "updateContentCommand": "cd frontend && npm install && npm run build",
-  "postCreateCommand": "",
+  "updateContentCommand": "cd frontend && npm install",
+  "postCreateCommand": "sudo apt update && sudo apt install xdg-utils -y",
   "postAttachCommand": {
     "server": "cd frontend && npm run storybook"
   },
+  
   "portsAttributes": {
     "6006": {
       "label": "Application",
