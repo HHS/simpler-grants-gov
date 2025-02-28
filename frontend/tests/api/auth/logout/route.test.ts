@@ -3,6 +3,7 @@
  */
 
 import { POST } from "src/app/api/auth/logout/route";
+import { UnauthorizedError } from "src/errors";
 
 const getSessionMock = jest.fn();
 const deleteSessionMock = jest.fn();
@@ -34,7 +35,7 @@ describe("/api/auth/logout POST handler", () => {
     expect(response.status).toEqual(401);
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual(
-      'Error logging out: {"type":"UnauthorizedError","searchInputs":{},"message":"No active session to logout","status":401,"details":{}}',
+      "Error logging out: No active session to logout",
     );
   });
   it("calls postLogout with token from session", async () => {
@@ -61,7 +62,6 @@ describe("/api/auth/logout POST handler", () => {
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("Error logging out: the API threw this error");
   });
-
   it("errors if API logout call returns nothing", async () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
@@ -75,7 +75,7 @@ describe("/api/auth/logout POST handler", () => {
     const json = (await response.json()) as { message: string };
     // const message = JSON.parse(json) as FrontendErrorDetails;
     expect(json.message).toEqual(
-      'Error logging out: {"type":"APIRequestError","searchInputs":{},"message":"No logout response from API","status":400,"details":{}}',
+      "Error logging out: No logout response from API",
     );
   });
   it("calls deleteSession", async () => {
@@ -86,6 +86,22 @@ describe("/api/auth/logout POST handler", () => {
     await POST();
 
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
+  });
+  it("calls deleteSession if token expired", async () => {
+    getSessionMock.mockImplementation(() => ({
+      token: "fakeToken",
+    }));
+    postLogoutMock.mockImplementation(() => {
+      throw new UnauthorizedError("Token expired");
+    });
+    const response = await POST();
+
+    expect(postLogoutMock).toHaveBeenCalledTimes(1);
+    expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
+    expect(response.status).toEqual(401);
+    expect(deleteSessionMock).toHaveBeenCalledTimes(1);
+    const json = (await response.json()) as { message: string };
+    expect(json.message).toEqual("session previously expired");
   });
   it("returns sucess message on success", async () => {
     getSessionMock.mockImplementation(() => ({
