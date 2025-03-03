@@ -34,11 +34,13 @@ Admin users will have full access to the features available in New Relic's UI. N
 
 ## Usage
 
-TBD - what are important features to know about, and how do we use them?
+### Custom Attributes / Events
 
-## Dashboards
+New Relic does not collect search params on URLs by default for security reasons. We have implemented custom attributes on search page events to capture approved query param values. These custom attributes will all be prefixed with `search_param_`.
 
-TBD
+### Dashboards
+
+Since non-admin users will only be able to consume metrics via dashboards, it is important for any important information to be surfaced in dashboards.
 
 ## Integration
 
@@ -46,6 +48,12 @@ Note that all integrations will require access to two pieces of information:
 
 - `NEW_RELIC_APP_NAME`
 - `NEW_RELIC_LICENSE_KEY`
+
+### Browser
+
+The browser monitoring code is added via the New Relic NPM package from the main Next JS layout file. Client side code and browser monitoring will work as long as the code is injected correctly by the Next backend into the client. From the client, `window.newrelic` can be accessed to perform any necessary customization.
+
+Note that the `window.newrelic` object may not be available immediately upon page load, so timing needs to be considered whenever this object is referenced.
 
 ### Local
 
@@ -58,8 +66,6 @@ npm run build -- --no-lint && NEW_RELIC_APP_NAME="Simpler Grants Next DEV" NEW_R
 For testing locally in order to more closely emulate the deployed environment, see the considerations mentioned in the `deployed` section below.
 
 ### Deployed
-
-**Note:** This section is TBD as we work through some issues with our New Relic implementation for the Next client.
 
 Integration of New Relic into the client and Node processes will be handled by the New Relic Node package. The Node library is able to generate the necessary scripts for the client code to report back to New Relic. [See the layout file](https://github.com/HHS/simpler-grants-gov/blob/a2ce07dc15b65c9fa27ecbbe7a9566c84542b554/frontend/src/app/%5Blocale%5D/layout.tsx#L77) to see how this is being done.
 
