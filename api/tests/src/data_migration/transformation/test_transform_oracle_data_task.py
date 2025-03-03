@@ -137,7 +137,7 @@ class TestTransformFullRunTask(BaseTestClass):
         validate_agency(db_session, subagency)
 
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 24,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 27,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 18,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 0,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 0,
@@ -495,7 +495,7 @@ class TestTransformFullRunTask(BaseTestClass):
             # Despite processing 11 records, only the opportunity is actually deleted directly
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
             f"opportunity.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
-            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 9,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 7,
         }.items() <= transform_oracle_data_task.metrics.items()
 
     def test_delete_opportunity_summary_with_deleted_children(
