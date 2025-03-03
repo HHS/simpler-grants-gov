@@ -79,7 +79,7 @@ export function SaveSearchModal() {
         );
         const res = await fetch("/api/user/saved-searches", {
           method: "POST",
-          body: JSON.stringify(savedSearchParams),
+          body: JSON.stringify({ ...savedSearchParams, name }),
         });
         if (res.ok && res.status === 200) {
           const data = (await res.json()) as { type: string };

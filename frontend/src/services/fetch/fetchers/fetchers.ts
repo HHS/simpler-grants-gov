@@ -5,8 +5,8 @@ import {
   EndpointConfig,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
+  toDynamicUsersEndpoint,
   userLogoutEndpoint,
-  userSavedOpportunityEndpoint,
 } from "src/services/fetch/endpointConfigs";
 import {
   createRequestBody,
@@ -100,5 +100,5 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const userSavedOpportunity = (type: "POST" | "DELETE") =>
-  requesterForEndpoint(userSavedOpportunityEndpoint(type));
+export const fetchUserWithMethod = (type: "POST" | "DELETE") =>
+  requesterForEndpoint(toDynamicUsersEndpoint(type));
