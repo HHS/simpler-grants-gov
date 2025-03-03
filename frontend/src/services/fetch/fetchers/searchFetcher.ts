@@ -1,16 +1,9 @@
 import "server-only";
 
 import { fetchOpportunitySearch } from "src/services/fetch/fetchers/fetchers";
-import {
-  QueryParamData,
-  SearchRequestBody,
-} from "src/types/search/searchRequestTypes";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
-import {
-  buildFilters,
-  buildPagination,
-  formatSearchRequestBody,
-} from "src/utils/search/searchFormatUtils";
+import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
 
 export const searchForOpportunities = async (searchInputs: QueryParamData) => {
   const requestBody = formatSearchRequestBody(searchInputs);
@@ -36,21 +29,13 @@ export const searchForOpportunities = async (searchInputs: QueryParamData) => {
 export const downloadOpportunities = async (
   searchInputs: QueryParamData,
 ): Promise<ReadableStream<Uint8Array<ArrayBufferLike>>> => {
-  const { query } = searchInputs;
-  const filters = buildFilters(searchInputs);
-  const pagination = buildPagination(searchInputs);
+  const requestBody = formatSearchRequestBody(searchInputs);
 
-  const requestBody: SearchRequestBody = {
-    pagination: { ...pagination, page_size: 5000, page_offset: 1 },
+  requestBody.pagination = {
+    ...requestBody.pagination,
+    page_size: 5000,
+    page_offset: 1,
   };
-
-  if (Object.keys(filters).length > 0) {
-    requestBody.filters = filters;
-  }
-
-  if (query) {
-    requestBody.query = query;
-  }
 
   const response = await fetchOpportunitySearch({
     body: { ...requestBody, format: "csv" },
