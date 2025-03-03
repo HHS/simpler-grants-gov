@@ -1,19 +1,21 @@
 import clsx from "clsx";
 
+import { ReactNode } from "react";
+
 type SnackbarProps = {
+  children: ReactNode;
   isVisible: boolean;
-  children: React.ReactNode;
 };
 
-const Snackbar = ({ isVisible = false, children }: SnackbarProps) => {
+const Snackbar = ({ children, isVisible = false }: SnackbarProps) => {
   return (
     <div
       data-testid="snackbar"
       className={clsx(
-        "text-left position-fixed padding-2 text-white font-sans-2xs radius-md bg-base-darkest usa-modal-wrapper top-0 right-0",
+        "bg-base-darkest font-sans-2xs position-fixed padding-2 radius-md right-0 text-left text-white top-0 usa-modal-wrapper",
         {
-          "is-visible": isVisible,
           "is-hidden": !isVisible,
+          "is-visible": isVisible,
         },
       )}
     >
