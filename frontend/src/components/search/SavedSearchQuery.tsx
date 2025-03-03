@@ -15,7 +15,7 @@ const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
 
 const SNACKBAR_VISIBLE_TIME = 4000;
 
-type SearchSavedQueryProps = {
+type SavedSearchQueryProps = {
   copyText: string;
   copyingText: string;
   copiedText: string;
@@ -24,20 +24,21 @@ type SearchSavedQueryProps = {
   snackbarMessage: React.ReactNode;
 };
 
-const SearchSavedQuery = ({
+const SavedSearchQuery = ({
   copyText,
   copyingText,
   copiedText,
   helpText,
   url,
   snackbarMessage,
-}: SearchSavedQueryProps) => {
+}: SavedSearchQueryProps) => {
   const { copied, loading, copyToClipboard } = useCopyToClipboard();
   const { snackbarIsVisible, showSnackbar, Snackbar } = useSnackbar();
 
   return (
     <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
       <Button
+        data-testid="save-search-query"
         type="button"
         unstyled
         onClick={() => {
@@ -65,4 +66,4 @@ const SearchSavedQuery = ({
   );
 };
 
-export default SearchSavedQuery;
+export default SavedSearchQuery;

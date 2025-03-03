@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/react";
 
-import SearchSavedQuery from "src/components/search/SearchSavedQuery";
+import SearchSavedQuery from "src/components/search/SavedSearchQuery";
 
 const meta: Meta<typeof SearchSavedQuery> = {
   title: "Components/Search/SearchSavedQuery",

@@ -17,7 +17,7 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
-import { SearchQuerySaveUserControl } from "src/components/user/SearchQuerySaveUserControl";
+import { SearchQuerySaveUserControl } from "src/components/user/SavedSearchQueryUserControl";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
