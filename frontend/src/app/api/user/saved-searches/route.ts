@@ -1,7 +1,13 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
+import { omit } from "lodash";
+import {
+  ApiRequestError,
+  BadRequestError,
+  readError,
+  UnauthorizedError,
+} from "src/errors";
 import { getSession } from "src/services/auth/session";
+import { handleSavedSearch } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
 
@@ -13,36 +19,36 @@ export const POST = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to save opportunity");
     }
-    const savedSearchParamsFromBody =
-      (await request.json()) as OptionalStringDict;
+    const savedSearchBody = (await request.json()) as OptionalStringDict;
+
+    if (!savedSearchBody.name) {
+      throw new BadRequestError("No name supplied for saved search");
+    }
 
     const convertedParams = convertSearchParamsToProperTypes(
-      savedSearchParamsFromBody,
+      omit(savedSearchBody, "name"),
     );
     const savedSearch = formatSearchRequestBody(convertedParams);
 
     savedSearch.pagination.page_offset = 1;
 
-    // const response = await handleSavedSearch(
-    //   session.token,
-    //   session.user_id as string,
-    //   savedSearch,
-    // );
-    // const res = (await response.json()) as {
-    //   status_code: number;
-    //   message: string;
-    // };
-    // if (!res || res.status_code !== 200) {
-    //   throw new ApiRequestError(
-    //     `Error ${request.method} saved opportunity: ${res.message}`,
-    //     "APIRequestError",
-    //     res.status_code,
-    //   );
-    // }
+    const response = await handleSavedSearch(
+      session.token,
+      session.user_id as string,
+      savedSearch,
+      savedSearchBody.name,
+    );
+    if (!response || response.status_code !== 200) {
+      throw new ApiRequestError(
+        `Error ${request.method} saved opportunity: ${response.message}`,
+        "APIRequestError",
+        response.status_code,
+      );
+    }
     return Response.json({
       message: `Saved search success`,
       TESTING_SAVED_SEARCH_FORMAT: savedSearch,
-      savedSearches: [], // tbd but will potentially be useful when updating the list after save
+      savedSearches: response.data, // tbd but will potentially be useful when updating the list after save
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);

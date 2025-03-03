@@ -29,7 +29,8 @@ export const userLogoutEndpoint = {
   method: "POST" as ApiMethod,
 };
 
-export const userSavedOpportunityEndpoint = (type: "POST" | "DELETE") => {
+// can expand to support GET when the time comes
+export const toDynamicUsersEndpoint = (type: "POST" | "DELETE") => {
   return {
     basePath: environment.API_URL,
     version: "v1",
