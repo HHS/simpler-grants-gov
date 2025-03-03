@@ -32,7 +32,7 @@ const SavedSearchQuery = ({
   url,
   snackbarMessage,
 }: SavedSearchQueryProps) => {
-  const { copied, loading, copyToClipboard } = useCopyToClipboard();
+  const { copied, copying, copyToClipboard } = useCopyToClipboard();
   const { snackbarIsVisible, showSnackbar, Snackbar } = useSnackbar();
 
   return (
@@ -52,7 +52,7 @@ const SavedSearchQuery = ({
         }}
       >
         <USWDSIcon name="content_copy" />
-        {loading ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
+        {copying ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
       </Button>
       <TooltipWrapper
         className="text-secondary-darker usa-button--unstyled"

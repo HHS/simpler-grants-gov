@@ -4,17 +4,17 @@ import { useState } from "react";
 
 export const useCopyToClipboard = () => {
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [copying, setCopying] = useState(false);
 
   const copyToClipboard = async (content: string, contentTime: number) => {
     try {
-      setLoading(true);
+      setCopying(true);
       await navigator.clipboard.writeText(content);
       setCopied(true);
-      setLoading(false);
+      setCopying(false);
     } catch (error) {
       setCopied(false);
-      setLoading(false);
+      setCopying(false);
       console.error(`Error copying to clipboard: ${content}`, error);
     } finally {
       setTimeout(() => {
@@ -23,5 +23,5 @@ export const useCopyToClipboard = () => {
     }
   };
 
-  return { copied, loading, copyToClipboard };
+  return { copied, copying, copyToClipboard };
 };
