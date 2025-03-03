@@ -20,7 +20,7 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
 
     def test_process_funding_instruments(self, db_session, transform_funding_instrument):
         opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
-            is_forecast=True, revision_number=None, no_link_values=True
+            is_forecast=True, no_link_values=True
         )
         forecast_insert1 = setup_funding_instrument(
             create_existing=False,
@@ -49,7 +49,7 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
         )
 
         opportunity_summary_syn = f.OpportunitySummaryFactory.create(
-            is_forecast=False, revision_number=None, no_link_values=True
+            is_forecast=False, no_link_values=True
         )
         syn_insert1 = setup_funding_instrument(
             create_existing=False,
