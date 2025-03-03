@@ -1,6 +1,8 @@
 import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
 
 // import { handleSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
@@ -11,10 +13,13 @@ export const POST = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to save opportunity");
     }
-    const savedSearchParamsFromBody: QueryParamData = await request.json();
+    const savedSearchParamsFromBody =
+      (await request.json()) as OptionalStringDict;
 
-    // right now this is only returning pagination, not sure why
-    const savedSearch = formatSearchRequestBody(savedSearchParamsFromBody);
+    const convertedParams = convertSearchParamsToProperTypes(
+      savedSearchParamsFromBody,
+    );
+    const savedSearch = formatSearchRequestBody(convertedParams);
 
     savedSearch.pagination.page_offset = 1;
 

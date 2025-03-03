@@ -14,6 +14,8 @@ import {
   validSearchQueryParamKeys,
 } from "src/types/search/searchResponseTypes";
 
+import { convertSearchParamsToProperTypes } from "./convertSearchParamsToProperTypes";
+
 const orderByFieldLookup = {
   relevancy: ["relevancy"],
   opportunityNumber: ["opportunity_number"],
@@ -31,8 +33,11 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
+// typing this broadly to allow usage of conversion method
+// even though the frontend should have filtered this to only include valid params
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
   const { query } = searchInputs;
+
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
 
