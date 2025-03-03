@@ -5,7 +5,7 @@ import { environment } from "src/constants/environments";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import SearchSavedQuery from "src/components/search/SearchSavedQuery";
+import SavedSearchQuery from "src/components/search/SavedSearchQuery";
 
 export const SearchQuerySaveUserControl = () => {
   const path = usePathname();
@@ -14,7 +14,7 @@ export const SearchQuerySaveUserControl = () => {
   const url = `${environment.NEXT_PUBLIC_BASE_URL}${path}${query}`;
   const t = useTranslations("Search.savedQuery");
   return (
-    <SearchSavedQuery
+    <SavedSearchQuery
       copiedText={t("copied")}
       copyingText={t("copying")}
       copyText={t("copy.unauthenticated")}
