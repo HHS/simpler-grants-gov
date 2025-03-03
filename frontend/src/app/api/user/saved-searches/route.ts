@@ -11,8 +11,6 @@ import { OptionalStringDict } from "src/types/generalTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
 
-// import { handleSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
-
 export const POST = async (request: Request) => {
   try {
     const session = await getSession();
@@ -46,7 +44,7 @@ export const POST = async (request: Request) => {
       );
     }
     return Response.json({
-      message: `Saved search success`,
+      message: "Saved search success",
       TESTING_SAVED_SEARCH_FORMAT: savedSearch,
       savedSearches: response.data, // tbd but will potentially be useful when updating the list after save
     });
