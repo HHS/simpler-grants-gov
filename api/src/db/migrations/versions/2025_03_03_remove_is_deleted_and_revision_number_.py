@@ -26,7 +26,6 @@ def upgrade():
         "opportunity_summary",
         ["is_forecast", "opportunity_id"],
         schema="api",
-        postgresql_nulls_not_distinct=True,
     )
     op.drop_column("opportunity_summary", "is_deleted", schema="api")
     op.drop_column("opportunity_summary", "revision_number", schema="api")
