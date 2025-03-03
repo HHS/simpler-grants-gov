@@ -668,7 +668,11 @@ export const messages = {
         inputLabel: "Query name",
         saveText: "Save",
         cancelText: "Cancel",
+        closeText: "Close",
         emptyNameError: "Please name this query.",
+        successTitle: "Success!",
+        successDescription:
+          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
       },
       copySearch: {
         copy: {

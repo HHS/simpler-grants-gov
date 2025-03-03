@@ -5,7 +5,7 @@ import { fetchUserWithMethod } from "./fetchers";
 type SavedSearchResponse = {
   status_code: number;
   message: string;
-  data: {} | null;
+  data: object | null;
 };
 
 export const handleSavedSearch = async (
