@@ -159,10 +159,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
     __table_args__ = (
-        # nulls not distinct makes it so nulls work in the unique constraint
-        UniqueConstraint(
-            "is_forecast", "revision_number", "opportunity_id", postgresql_nulls_not_distinct=True
-        ),
+        UniqueConstraint("is_forecast", "opportunity_id"),
         # Need to define the table args like this to inherit whatever we set on the super table
         # otherwise we end up overwriting things and Alembic remakes the whole table
         ApiSchemaTable.__table_args__,
@@ -203,7 +200,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    revision_number: Mapped[int | None]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]
@@ -213,8 +209,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
-
-    is_deleted: Mapped[bool | None]
 
     version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
@@ -289,9 +283,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         """
         Utility method to check whether a summary object
         """
-        if self.is_deleted:
-            return False
-
         if self.post_date is None or self.post_date > current_date:
             return False
 

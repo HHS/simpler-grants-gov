@@ -102,8 +102,6 @@ class OpportunityContainer:
         close_date: date | None = None,
         archive_date: date | None = None,
         is_forecast: bool = False,
-        revision_number: int | None = None,
-        is_deleted: bool = False,
         is_expected_current: bool = False,
         is_already_current: bool = False,
     ):
@@ -113,8 +111,6 @@ class OpportunityContainer:
             close_date=close_date,
             archive_date=archive_date,
             is_forecast=is_forecast,
-            revision_number=revision_number,
-            is_deleted=is_deleted,
         )
 
         if is_expected_current:
@@ -264,56 +260,12 @@ class TestProcessOpportunity(BaseTestClass):
         summary_info,
         expected_opportunity_status,
     ):
-        container = (
-            OpportunityContainer()
-            .with_summary(
-                is_forecast=summary_info.is_forecast,
-                post_date=summary_info.post_date,
-                close_date=summary_info.close_date,
-                archive_date=summary_info.archive_date,
-                is_expected_current=True if expected_opportunity_status is not None else False,
-            )
-            .with_summary(
-                # this summary won't ever be chosen as it has a revision number set
-                revision_number=0,
-                is_forecast=summary_info.is_forecast,
-                post_date=YESTERDAY,
-                archive_date=YESTERDAY,
-                is_already_current=True,
-            )
-        )
-
-        set_current_opportunities_task._process_opportunity(container.opportunity)
-        validate_current_opportunity(db_session, container, expected_opportunity_status)
-
-    @pytest.mark.parametrize(
-        "summary_info,expected_opportunity_status",
-        SINGLE_SUMMARY_PARAMS,
-    )
-    def test_two_summary_scenarios_one_deleted(
-        self, set_current_opportunities_task, db_session, summary_info, expected_opportunity_status
-    ):
-        # This is identical to the test_single_summary_scenario test above
-        # but we always add a summary of the opposite is_forecasted value
-        # with identical date values, however it is always marked as deleted and won't be used
-        container = (
-            OpportunityContainer()
-            .with_summary(
-                is_forecast=summary_info.is_forecast,
-                post_date=summary_info.post_date,
-                close_date=summary_info.close_date,
-                archive_date=summary_info.archive_date,
-                is_expected_current=True if expected_opportunity_status is not None else False,
-            )
-            .with_summary(
-                is_forecast=not summary_info.is_forecast,
-                post_date=summary_info.post_date,
-                # technically forecasts won't have a close date, but it won't
-                # get to that check in logic anyways, so doesn't matter here
-                close_date=summary_info.close_date,
-                archive_date=summary_info.archive_date,
-                is_deleted=True,
-            )
+        container = OpportunityContainer().with_summary(
+            is_forecast=summary_info.is_forecast,
+            post_date=summary_info.post_date,
+            close_date=summary_info.close_date,
+            archive_date=summary_info.archive_date,
+            is_expected_current=True if expected_opportunity_status is not None else False,
         )
 
         set_current_opportunities_task._process_opportunity(container.opportunity)
@@ -418,39 +370,12 @@ class TestProcessOpportunity(BaseTestClass):
     ):
         # This tests various scenarios where an opportunity has a forecast and non-forecasted
         # summary at various different dates.
-        container = (
-            OpportunityContainer()
-            .with_summary(
-                is_forecast=expected_summary_info.is_forecast,
-                post_date=expected_summary_info.post_date,
-                close_date=expected_summary_info.close_date,
-                archive_date=expected_summary_info.archive_date,
-                is_expected_current=True if expected_opportunity_status is not None else False,
-            )
-            .with_summary(
-                is_forecast=other_summary_info.is_forecast,
-                post_date=other_summary_info.post_date,
-                close_date=other_summary_info.close_date,
-                archive_date=other_summary_info.archive_date,
-                revision_number=5,
-            )
-            .with_summary(
-                # Add another record of the same type as the expected, but an older revision
-                # so it won't ever be picked
-                revision_number=1,
-                is_forecast=expected_summary_info.is_forecast,
-                # but the fields within in always would lead to it being marked archived
-                post_date=LAST_YEAR,
-                close_date=LAST_MONTH,
-                archive_date=YESTERDAY,
-            )
-            .with_summary(
-                # Also add a record of the same type as the one we don't plan to pick
-                # that would always be posted/forecasted if it were the most recent
-                revision_number=2,
-                post_date=YESTERDAY,
-                archive_date=NEXT_YEAR,
-            )
+        container = OpportunityContainer().with_summary(
+            is_forecast=expected_summary_info.is_forecast,
+            post_date=expected_summary_info.post_date,
+            close_date=expected_summary_info.close_date,
+            archive_date=expected_summary_info.archive_date,
+            is_expected_current=True if expected_opportunity_status is not None else False,
         )
 
         set_current_opportunities_task._process_opportunity(container.opportunity)
@@ -506,26 +431,15 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
             close_date=FORECAST_AFTER_POST_DATE_2.close_date,
             archive_date=FORECAST_AFTER_POST_DATE_2.archive_date,
             is_already_current=True,
-            is_deleted=True,
         )
 
         # A scenario where the existing current summary should be switched to the other one
-        container5 = (
-            OpportunityContainer()
-            .with_summary(
-                is_forecast=FORECAST_AFTER_ARCHIVE_DATE_1.is_forecast,
-                post_date=FORECAST_AFTER_ARCHIVE_DATE_1.post_date,
-                close_date=FORECAST_AFTER_ARCHIVE_DATE_1.close_date,
-                archive_date=FORECAST_AFTER_ARCHIVE_DATE_1.archive_date,
-                is_already_current=True,
-            )
-            .with_summary(
-                is_forecast=NON_FORECAST_ON_POST_DATE_1.is_forecast,
-                post_date=NON_FORECAST_ON_POST_DATE_1.post_date,
-                close_date=NON_FORECAST_ON_POST_DATE_1.close_date,
-                archive_date=NON_FORECAST_ON_POST_DATE_1.archive_date,
-                is_expected_current=True,
-            )
+        container5 = OpportunityContainer().with_summary(
+            is_forecast=FORECAST_AFTER_ARCHIVE_DATE_1.is_forecast,
+            post_date=FORECAST_AFTER_ARCHIVE_DATE_1.post_date,
+            close_date=FORECAST_AFTER_ARCHIVE_DATE_1.close_date,
+            archive_date=FORECAST_AFTER_ARCHIVE_DATE_1.archive_date,
+            is_already_current=True,
         )
 
         # A scenario where the opportunity summary is valid, but the opportunity is a draft
@@ -571,27 +485,11 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
     )
 
     # a basic forecasted scenario with several past revisions
-    container2 = (
-        OpportunityContainer()
-        .with_summary(
-            is_forecast=True,
-            post_date=today - timedelta(days=5),
-            archive_date=today + timedelta(days=60),
-            is_already_current=True,
-            revision_number=2,
-        )
-        .with_summary(
-            is_forecast=True,
-            post_date=today - timedelta(days=5),
-            archive_date=today + timedelta(days=60),
-            revision_number=1,
-        )
-        .with_summary(
-            is_forecast=True,
-            post_date=today - timedelta(days=5),
-            archive_date=today + timedelta(days=120),
-            is_expected_current=True,
-        )
+    container2 = OpportunityContainer().with_summary(
+        is_forecast=True,
+        post_date=today - timedelta(days=5),
+        archive_date=today + timedelta(days=60),
+        is_already_current=True,
     )
 
     cli_runner.invoke(args=["task", "set-current-opportunities"])

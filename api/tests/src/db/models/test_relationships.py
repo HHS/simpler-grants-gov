@@ -50,13 +50,6 @@ def setup_opportunity():
     )
     OpportunitySummaryFactory.create(opportunity=opportunity, is_forecasted_summary=True)
 
-    OpportunitySummaryFactory.create(
-        opportunity=opportunity, is_posted_summary=True, revision_number=1
-    )
-    OpportunitySummaryFactory.create(
-        opportunity=opportunity, is_forecasted_summary=True, revision_number=2
-    )
-
     CurrentOpportunitySummaryFactory.create(
         opportunity=opportunity, opportunity_summary=opportunity_summary_posted
     )

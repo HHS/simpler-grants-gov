@@ -521,11 +521,6 @@ class OpportunitySummaryFactory(BaseFactory):
         lambda s: s.forecasted_project_start_date.year if s.forecasted_project_start_date else None
     )
 
-    is_deleted = False
-
-    # Generally, current summaries won't have the revision number set
-    revision_number = None
-
     version_number = factory.Faker("random_int", min=8, max=13)
 
     funding_instruments = factory.Faker(
@@ -621,7 +616,6 @@ class OpportunitySummaryFactory(BaseFactory):
             agency_contact_description=None,
             agency_email_address=None,
             agency_email_address_description=None,
-            is_deleted=None,
             funding_instruments=[],
             funding_categories=[],
             applicant_types=[],
