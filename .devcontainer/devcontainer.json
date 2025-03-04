@@ -4,12 +4,11 @@
     "cpus": 4
   },
   "waitFor": "onCreateCommand",
-  "updateContentCommand": "cd frontend && npm install",
-  "postCreateCommand": "sudo apt update && sudo apt install xdg-utils -y",
+  "postCreateCommand": "cd frontend && npm ci",
+  "updateContentCommand": "sudo apt update && sudo apt install xdg-utils chromium -y",
   "postAttachCommand": {
     "server": "cd frontend && npm run storybook"
   },
-  
   "portsAttributes": {
     "6006": {
       "label": "Application",
