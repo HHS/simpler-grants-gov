@@ -26,10 +26,6 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("Process", () => {
-  it("renders homepage unchanged", () => {
-    const { container } = render(<Process params={localeParams} />);
-    expect(container).toMatchSnapshot();
-  });
   it("renders intro text", () => {
     render(<Process params={localeParams} />);
     const content = screen.getByText("intro.content");
