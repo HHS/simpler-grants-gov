@@ -5,7 +5,6 @@
  */
 
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
@@ -26,14 +25,9 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
  */
 
 export class NetworkError extends Error {
-  constructor(error: unknown, searchInputs?: QueryParamData) {
-    const serializedSearchInputs = searchInputs
-      ? convertSearchInputSetsToArrays(searchInputs)
-      : {};
-
+  constructor(error: unknown) {
     const serializedData = JSON.stringify({
       type: "NetworkError",
-      searchInputs: serializedSearchInputs,
       message: error instanceof Error ? error.message : "Unknown Error",
       status: 500,
     });
@@ -49,14 +43,9 @@ export class BaseFrontendError extends Error {
     details?: FrontendErrorDetails,
   ) {
     const { searchInputs, status, ...additionalDetails } = details || {};
-    // Sets cannot be properly serialized so convert to arrays first
-    const serializedSearchInputs = searchInputs
-      ? convertSearchInputSetsToArrays(searchInputs)
-      : {};
 
     const serializedData = JSON.stringify({
       type,
-      searchInputs: serializedSearchInputs,
       message: message || "Unknown Error",
       status,
       details: additionalDetails,
@@ -164,28 +153,4 @@ export class ServiceUnavailableError extends ApiRequestError {
   constructor(message: string, details?: FrontendErrorDetails) {
     super(message, "ServiceUnavailableError", 503, details);
   }
-}
-
-type SearchInputsSimple = {
-  [key: string]: string[] | string | number | null | undefined;
-};
-
-function convertSearchInputSetsToArrays(
-  searchInputs: QueryParamData,
-): SearchInputsSimple {
-  return {
-    ...searchInputs,
-    status: searchInputs.status ? Array.from(searchInputs.status) : [],
-    fundingInstrument: searchInputs.fundingInstrument
-      ? Array.from(searchInputs.fundingInstrument)
-      : [],
-    eligibility: searchInputs.eligibility
-      ? Array.from(searchInputs.eligibility)
-      : [],
-    agency: searchInputs.agency ? Array.from(searchInputs.agency) : [],
-    category: searchInputs.category ? Array.from(searchInputs.category) : [],
-    query: searchInputs.query,
-    sortby: searchInputs.sortby,
-    page: searchInputs.page,
-  };
 }
