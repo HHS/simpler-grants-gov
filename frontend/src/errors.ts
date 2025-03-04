@@ -47,7 +47,7 @@ export class BaseFrontendError extends Error {
     type = "BaseFrontendError",
     details?: FrontendErrorDetails,
   ) {
-    const { searchInputs, status, ...additionalDetails } = details || {};
+    const { status, ...additionalDetails } = details || {};
 
     const cause = {
       type,
