@@ -8,19 +8,10 @@ import {
   useSearchParams,
 } from "next/navigation";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-import SearchBar from "src/components/search/SearchBar";
-import SearchFilters from "src/components/search/SearchFilters";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { usePrevious } from "src/hooks/usePrevious";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import {
-  Breakpoints,
-  ErrorProps,
-} from "src/types/uiTypes";
-import {
-  convertSearchParamsToProperTypes,
-} from "src/utils/search/convertSearchParamsToProperTypes";
+import { ErrorProps } from "src/types/uiTypes";
 
 import { Alert } from "@trussworks/react-uswds";
 
@@ -80,11 +71,6 @@ export default function SearchError({ error, reset }: ErrorProps) {
     // Valid error thrown from server component
     parsedErrorData = JSON.parse(error.message) as ParsedError;
   }
-  const convertedSearchParams = convertSearchParamsToProperTypes(
-    parsedErrorData.searchInputs,
-  );
-  const { agency, category, eligibility, fundingInstrument, query, status } =
-    convertedSearchParams;
 
   // note that the validation error will contain untranslated strings
   const ErrorAlert =
@@ -99,25 +85,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
   return (
     <QueryProvider>
       <div className="grid-container">
-        <div className="search-bar">
-          <SearchBar query={query} />
-        </div>
         <div className="grid-row grid-gap">
-          <div className="tablet:grid-col-4">
-            <ContentDisplayToggle
-              showCallToAction={t("filterDisplayToggle.showFilters")}
-              hideCallToAction={t("filterDisplayToggle.hideFilters")}
-              breakpoint={Breakpoints.TABLET}
-            >
-              <SearchFilters
-                opportunityStatus={status}
-                eligibility={eligibility}
-                category={category}
-                fundingInstrument={fundingInstrument}
-                agency={agency}
-              />
-            </ContentDisplayToggle>
-          </div>
           <div className="tablet:grid-col-8">{ErrorAlert}</div>
         </div>
       </div>
