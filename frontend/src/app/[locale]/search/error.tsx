@@ -1,25 +1,31 @@
 "use client";
 
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import { usePrevious } from "src/hooks/usePrevious";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { OptionalStringDict } from "src/types/generalTypes";
-import { Breakpoints, ErrorProps } from "src/types/uiTypes";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
+import { useEffect } from "react";
 
 import { useTranslations } from "next-intl";
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { Alert } from "@trussworks/react-uswds";
-
+import {
+  ReadonlyURLSearchParams,
+  useSearchParams,
+} from "next/navigation";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { usePrevious } from "src/hooks/usePrevious";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
+import {
+  Breakpoints,
+  ErrorProps,
+} from "src/types/uiTypes";
+import {
+  convertSearchParamsToProperTypes,
+} from "src/utils/search/convertSearchParamsToProperTypes";
+
+import { Alert } from "@trussworks/react-uswds";
 
 export interface ParsedError {
   message: string;
-  searchInputs: OptionalStringDict;
   status: number;
   type: string;
   details?: FrontendErrorDetails;
@@ -37,17 +43,6 @@ function isValidJSON(str: string) {
 function createBlankParsedError(): ParsedError {
   return {
     type: "NetworkError",
-    searchInputs: {
-      query: "",
-      status: "",
-      fundingInstrument: "",
-      eligibility: "",
-      agency: "",
-      category: "",
-      sortby: undefined,
-      page: "1",
-      actionType: "initialLoad",
-    },
     message: "Invalid error message JSON returned",
     status: -1,
   };
