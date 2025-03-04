@@ -101,6 +101,9 @@ const nextConfig = {
       "types",
     ],
   },
+  experimental: {
+    testProxy: true,
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

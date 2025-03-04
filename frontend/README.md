@@ -30,6 +30,7 @@
 
 ### Running the app locally
 
+For version 0.1.0, please install and use node <= v22.13.0.
 From the `/frontend` directory:
 
 1. Install dependencies

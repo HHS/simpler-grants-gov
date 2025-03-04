@@ -6,7 +6,7 @@
 
 from datetime import datetime, timedelta
 
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
 
 # Declare constants for the fields that need to be aliased from the GitHub data
 # so that we only have to change these values in one place.
@@ -111,6 +111,16 @@ class NumberValue(BaseModel):
     """Schema for number field values like Points."""
 
     number: int | None = None
+
+    @field_validator("number", mode="before")
+    def transform_float_to_int(cls, value) -> int | None:  # noqa: ANN001, N805
+        """Convert floats to int for number field."""
+        if value is None:
+            return None
+        if isinstance(value, float):
+            return int(value)
+
+        return value
 
 
 # #############################################

@@ -9,10 +9,10 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import ContentLayout from "src/components/ContentLayout";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
@@ -21,6 +21,7 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
@@ -130,15 +131,26 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     <div>
       <BetaAlert />
       <Breadcrumbs breadcrumbList={breadcrumbs} />
-      <OpportunityIntro opportunityData={opportunityData} />
-      <GridContainer>
-        <div className="grid-row grid-gap">
+      <ContentLayout
+        title={opportunityData.opportunity_title}
+        data-testid="opportunity-intro-content"
+        paddingTop={false}
+      >
+        <div className="usa-prose padding-y-3">
+          <OpportunitySaveUserControl />
+        </div>
+        <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+            <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
               nofoPath={nofoPath}
+              opportunityId={opportunityData.opportunity_id}
             />
-            <OpportunityDocuments documents={opportunityData.attachments} />
+            <OpportunityDocuments
+              documents={opportunityData.attachments}
+              opportunityId={opportunityData.opportunity_id}
+            />
             <OpportunityLink opportunityData={opportunityData} />
           </div>
 
@@ -149,7 +161,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityHistory summary={opportunityData.summary} />
           </div>
         </div>
-      </GridContainer>
+      </ContentLayout>
     </div>
   );
 }

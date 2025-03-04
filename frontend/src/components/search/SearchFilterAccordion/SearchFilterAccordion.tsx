@@ -3,7 +3,7 @@
 import { camelCase } from "lodash";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { QueryParamKey } from "src/types/search/searchResponseTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 
 import { useContext } from "react";
 import { Accordion } from "@trussworks/react-uswds";
@@ -32,7 +32,7 @@ export interface FilterOption {
 export interface SearchFilterAccordionProps {
   filterOptions: FilterOption[];
   query: Set<string>;
-  queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
+  queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
 }
 
@@ -164,7 +164,7 @@ export function SearchFilterAccordion({
       title: getAccordionTitle(),
       content: getAccordionContent(),
       expanded: isExpanded,
-      id: `opportunity-filter-${queryParamKey}`,
+      id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
     },
   ];
