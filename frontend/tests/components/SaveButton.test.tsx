@@ -16,7 +16,7 @@ const SaveButtonProps = {
   savedText: "Saved",
 };
 
-describe("Footer", () => {
+describe("SaveButton", () => {
   it("Renders without errors", () => {
     render(<SaveButton {...SaveButtonProps} />);
     const saveButton = screen.getByTestId("simpler-save-button");

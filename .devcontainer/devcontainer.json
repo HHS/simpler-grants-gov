@@ -1,20 +1,19 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:22",
   "hostRequirements": {
     "cpus": 4
   },
   "waitFor": "onCreateCommand",
-  "updateContentCommand": "cd frontend && npm install && npm run build",
-  "postCreateCommand": "",
+  "postCreateCommand": "cd frontend && npm ci",
+  "updateContentCommand": "sudo apt update && sudo apt install xdg-utils chromium -y",
   "postAttachCommand": {
-    "server": "cd frontend && npm start"
+    "server": "cd frontend && npm run storybook"
   },
-
   "portsAttributes": {
-    "3000": {
+    "6006": {
       "label": "Application",
       "onAutoForward": "openPreview"
     }
   },
-  "forwardPorts": [3000]
+  "forwardPorts": [6006]
 }
