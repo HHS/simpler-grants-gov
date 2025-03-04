@@ -6,6 +6,12 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
+const getSessionMock = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 // test without feature flag functionality
 jest.mock("src/hoc/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),

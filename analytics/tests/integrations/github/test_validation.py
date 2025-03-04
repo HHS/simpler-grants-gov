@@ -2,6 +2,7 @@
 
 import pytest  # noqa: I001
 from pydantic import ValidationError
+from analytics.integrations.github.main import transform_project_data
 from analytics.integrations.github.validation import (
     IssueContent,
     IterationValue,
@@ -40,6 +41,36 @@ VALID_SINGLE_SELECT = {
     "optionId": "456",
     "name": "In Progress",
 }
+
+
+class TestTransformProjectData:
+    """Test cases for the entire transform function."""
+
+    def test_content_none(self) -> None:
+        """Test validating a project item that has none for it's content filters that item out."""
+        data = [
+            {
+                "content": None,
+                "status": None,
+                "sprint": None,
+                "points": None,
+                "quad": None,
+                "pillar": None,
+            },
+            {
+                "content": VALID_ISSUE_CONTENT,
+                "status": VALID_SINGLE_SELECT,
+                "sprint": VALID_ITERATION_VALUE,
+                "points": {"number": 5},
+                "quad": VALID_ITERATION_VALUE,
+                "pillar": VALID_SINGLE_SELECT,
+            },
+        ]
+        result = transform_project_data(data, "test", project=17)
+
+        assert len(result) == 1
+        print(result[0])
+        assert result[0]["issue_title"] == "Test Issue"
 
 
 # #############################################
@@ -121,6 +152,48 @@ class TestProjectItems:
         assert item.quad.iteration_id is None
         assert item.pillar.name is None
         assert item.pillar.option_id is None
+
+    def test_points_as_float_convert_to_int(self) -> None:
+        """Test validating floats for points get converted to int."""
+        float_input = 5.1
+        data = {
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
+            "points": {"number": float_input},
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
+        }
+        item = ProjectItem.model_validate(data)
+        # Check issue content
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
+        # Check sprint fields
+        assert item.sprint.title == "Sprint 1"
+        assert item.points.number == int(float_input)
+        # Check roadmap fields
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
+
+    def test_points_as_none_return_none(self) -> None:
+        """Test validating none for points is handled."""
+        data = {
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
+        }
+        item = ProjectItem.model_validate(data)
+        # Check issue content
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
+        # Check sprint fields
+        assert item.sprint.title == "Sprint 1"
+        assert item.points.number is None
+        # Check roadmap fields
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
 
 
 # #############################################

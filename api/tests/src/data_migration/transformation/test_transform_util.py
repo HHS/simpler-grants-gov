@@ -106,19 +106,6 @@ def test_convert_yn_boolean_unexpected_value(value):
 
 
 @pytest.mark.parametrize(
-    "value,expected_value", [("D", True), ("U", False), ("", False), (" ", False), (None, False)]
-)
-def test_convert_action_type_to_is_deleted(value, expected_value):
-    assert transform_util.convert_action_type_to_is_deleted(value) == expected_value
-
-
-@pytest.mark.parametrize("value", ["A", "B", "d", "u"])
-def test_convert_action_type_to_is_deleted_unexpected_value(value):
-    with pytest.raises(ValueError, match="Unexpected action type value"):
-        transform_util.convert_action_type_to_is_deleted(value)
-
-
-@pytest.mark.parametrize(
     "value,expected_value",
     [
         ("1", 1),

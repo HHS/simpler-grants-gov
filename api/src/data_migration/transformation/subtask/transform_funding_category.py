@@ -10,8 +10,8 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingCategory,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import TfundactcatForecast, TfundactcatForecastHist
-from src.db.models.staging.synopsis import TfundactcatSynopsis, TfundactcatSynopsisHist
+from src.db.models.staging.forecast import TfundactcatForecast
+from src.db.models.staging.synopsis import TfundactcatSynopsis
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,23 @@ class TransformFundingCategory(AbstractTransformSubTask):
         link_table = LinkOpportunitySummaryFundingCategory
         relationship_load_value = OpportunitySummary.link_funding_categories
 
-        logger.info("Processing forecast funding categories")
+        logger.info("Processing deletes for forecast funding categories")
+        delete_forecast_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatForecast,
+            link_table,
+            [
+                TfundactcatForecast.fac_frcst_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_delete=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_categories_group(delete_forecast_funding_category_records)
+
+        logger.info("Processing inserts/updates for forecast funding categories")
         forecast_funding_category_records = self.fetch_with_opportunity_summary(
             TfundactcatForecast,
             link_table,
@@ -32,28 +48,28 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
             ],
             is_forecast=True,
-            is_historical_table=False,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(forecast_funding_category_records)
 
-        logger.info("Processing historical forecast funding categories")
-        forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(
-            TfundactcatForecastHist,
+        logger.info("Processing deletes for synopsis funding categories")
+        delete_synopsis_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatSynopsis,
             link_table,
             [
-                TfundactcatForecastHist.fac_frcst_id
+                TfundactcatSynopsis.fac_syn_id
                 == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
                 OpportunitySummary.opportunity_summary_id
                 == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
             ],
-            is_forecast=True,
-            is_historical_table=True,
+            is_forecast=False,
+            is_delete=True,
             relationship_load_value=relationship_load_value,
         )
-        self.process_link_funding_categories_group(forecast_funding_category_hist_records)
+        self.process_link_funding_categories_group(delete_synopsis_funding_category_records)
 
-        logger.info("Processing synopsis funding categories")
+        logger.info("Processing inserts/updates for synopsis funding categories")
         synopsis_funding_category_records = self.fetch_with_opportunity_summary(
             TfundactcatSynopsis,
             link_table,
@@ -64,26 +80,10 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
             ],
             is_forecast=False,
-            is_historical_table=False,
+            is_delete=False,
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(synopsis_funding_category_records)
-
-        logger.info("Processing historical synopsis funding categories")
-        synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(
-            TfundactcatSynopsisHist,
-            link_table,
-            [
-                TfundactcatSynopsisHist.fac_syn_id
-                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
-            ],
-            is_forecast=False,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_funding_categories_group(synopsis_funding_category_hist_records)
 
     def process_link_funding_categories_group(
         self,
@@ -129,16 +129,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
                 target_funding_category,
                 transform_constants.FUNDING_CATEGORY,
                 extra,
-            )
-
-        # Historical records are linked to other historical records, however
-        # we don't import historical opportunity records, so if the opportunity
-        # was deleted, we won't have created the opportunity summary. Whenever we do
-        # support historical opportunities, we'll have these all marked with a
-        # flag that we can use to reprocess these.
-        elif self._is_orphaned_historical(opportunity_summary, source_funding_category):
-            self._handle_orphaned_historical(
-                source_funding_category, transform_constants.FUNDING_CATEGORY, extra
             )
 
         elif opportunity_summary is None:

@@ -35,6 +35,11 @@ output "github_actions_role_name" {
   value = local.github_actions_role_name
 }
 
+output "aws_services" {
+  description = "AWS services that this project uses"
+  value       = local.aws_services
+}
+
 output "aws_services_security_group_name_prefix" {
   value = local.aws_services_security_group_name_prefix
 }

@@ -30,6 +30,8 @@ locals {
     description = "Database resources for the ${var.environment_name} environment"
   })
 
+  is_temporary = terraform.workspace != "default"
+
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
@@ -81,6 +83,7 @@ module "database" {
   source = "../../modules/database"
 
   name                        = "${local.prefix}${local.database_config.cluster_name}"
+  access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
   # The following are not AWS infra resources and therefore do not need to be
@@ -98,4 +101,5 @@ module "database" {
   database_subnet_group_name     = var.environment_name
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
+  is_temporary                   = local.is_temporary
 }

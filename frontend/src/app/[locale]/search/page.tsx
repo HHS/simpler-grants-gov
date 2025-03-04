@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { LocalizedPageProps } from "src/types/intl";
 import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
@@ -48,7 +49,10 @@ function Search({ searchParams, params }: SearchPageProps) {
 
   return (
     <>
-      <SearchAnalytics params={resolvedSearchParams} />
+      <SearchAnalytics
+        params={resolvedSearchParams}
+        newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
+      />
       <QueryProvider>
         <div className="grid-container">
           <div className="search-bar">

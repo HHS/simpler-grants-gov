@@ -63,29 +63,6 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         opportunity_summary_forecast_hist = f.OpportunitySummaryFactory.create(
             is_forecast=True, revision_number=3, no_link_values=True
         )
-        forecast_hist_insert1 = setup_funding_category(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="DPR",
-        )
-        forecast_hist_insert2 = setup_funding_category(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="ED",
-        )
-        forecast_hist_update1 = setup_funding_category(
-            create_existing=True,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="ELT",
-            funding_category=FundingCategory.EMPLOYMENT_LABOR_AND_TRAINING,
-        )
-        forecast_hist_delete1 = setup_funding_category(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="EN",
-            funding_category=FundingCategory.ENERGY,
-        )
         forecast_hist_delete_already_processed = setup_funding_category(
             create_existing=False,
             is_delete=True,
@@ -144,42 +121,6 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         opportunity_summary_syn_hist = f.OpportunitySummaryFactory.create(
             is_forecast=False, revision_number=21, no_link_values=True
         )
-        syn_hist_insert1 = setup_funding_category(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="LJL",
-        )
-        syn_hist_insert2 = setup_funding_category(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="NR",
-        )
-        syn_hist_insert3 = setup_funding_category(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="OZ",
-        )
-        syn_hist_update1 = setup_funding_category(
-            create_existing=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="RD",
-            funding_category=FundingCategory.REGIONAL_DEVELOPMENT,
-        )
-
-        syn_hist_delete1 = setup_funding_category(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="ST",
-            funding_category=FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
-        )
-        syn_hist_delete2 = setup_funding_category(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="T",
-            funding_category=FundingCategory.TRANSPORTATION,
-        )
         syn_hist_insert_invalid_type = setup_funding_category(
             create_existing=False,
             opportunity_summary=opportunity_summary_syn_hist,
@@ -196,59 +137,23 @@ class TestTransformFundingCategory(BaseTransformTestClass):
             db_session, forecast_insert2, expected_funding_category=FundingCategory.AGRICULTURE
         )
         validate_funding_category(
-            db_session,
-            forecast_hist_insert1,
-            expected_funding_category=FundingCategory.DISASTER_PREVENTION_AND_RELIEF,
-        )
-        validate_funding_category(
-            db_session, forecast_hist_insert2, expected_funding_category=FundingCategory.EDUCATION
-        )
-        validate_funding_category(
             db_session, syn_insert1, expected_funding_category=FundingCategory.FOOD_AND_NUTRITION
         )
         validate_funding_category(
             db_session, syn_insert2, expected_funding_category=FundingCategory.HEALTH
-        )
-        validate_funding_category(
-            db_session,
-            syn_hist_insert1,
-            expected_funding_category=FundingCategory.LAW_JUSTICE_AND_LEGAL_SERVICES,
-        )
-        validate_funding_category(
-            db_session,
-            syn_hist_insert2,
-            expected_funding_category=FundingCategory.NATURAL_RESOURCES,
-        )
-        validate_funding_category(
-            db_session,
-            syn_hist_insert3,
-            expected_funding_category=FundingCategory.OPPORTUNITY_ZONE_BENEFITS,
         )
 
         validate_funding_category(
             db_session, forecast_update1, expected_funding_category=FundingCategory.ARTS
         )
         validate_funding_category(
-            db_session,
-            forecast_hist_update1,
-            expected_funding_category=FundingCategory.EMPLOYMENT_LABOR_AND_TRAINING,
-        )
-        validate_funding_category(
             db_session, syn_update1, expected_funding_category=FundingCategory.HOUSING
-        )
-        validate_funding_category(
-            db_session,
-            syn_hist_update1,
-            expected_funding_category=FundingCategory.REGIONAL_DEVELOPMENT,
         )
 
         validate_funding_category(db_session, forecast_delete1, expect_in_db=False)
         validate_funding_category(db_session, forecast_delete2, expect_in_db=False)
-        validate_funding_category(db_session, forecast_hist_delete1, expect_in_db=False)
         validate_funding_category(db_session, syn_delete1, expect_in_db=False)
         validate_funding_category(db_session, syn_delete2, expect_in_db=False)
-        validate_funding_category(db_session, syn_hist_delete1, expect_in_db=False)
-        validate_funding_category(db_session, syn_hist_delete2, expect_in_db=False)
 
         validate_funding_category(
             db_session,
@@ -274,22 +179,135 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         )
 
         metrics = transform_funding_category.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 22
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 7
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 9
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 11
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
         # Rerunning will only attempt to re-process the errors, so total+errors goes up by 1
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_funding_category.run_subtask()
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 23
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 7
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 9
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 11
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
+
+    def test_process_funding_categories_delete_and_inserts(
+        self, db_session, transform_funding_category
+    ):
+        """Test that if we receive an insert and delete of the same lookup value
+        in a single batch, we'll delete and then insert the record (effectively no meaningful change)
+        """
+        opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
+            is_forecast=True, revision_number=None, no_link_values=True
+        )
+        forecast_insert1 = setup_funding_category(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="BC",
+        )
+        forecast_delete1 = setup_funding_category(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="BC",
+            funding_category=FundingCategory.BUSINESS_AND_COMMERCE,
+        )
+
+        forecast_delete2 = setup_funding_category(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="ED",
+            funding_category=FundingCategory.EDUCATION,
+        )
+        forecast_insert2 = setup_funding_category(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="ED",
+        )
+
+        opportunity_summary_syn = f.OpportunitySummaryFactory.create(
+            is_forecast=False, revision_number=None, no_link_values=True
+        )
+
+        syn_insert1 = setup_funding_category(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="FN",
+        )
+        syn_delete1 = setup_funding_category(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="FN",
+            funding_category=FundingCategory.FOOD_AND_NUTRITION,
+        )
+
+        syn_insert2 = setup_funding_category(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="ISS",
+        )
+        syn_delete2 = setup_funding_category(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="ISS",
+            funding_category=FundingCategory.INCOME_SECURITY_AND_SOCIAL_SERVICES,
+        )
+
+        syn_insert3 = setup_funding_category(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="RD",
+        )
+        syn_delete3 = setup_funding_category(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="RD",
+            funding_category=FundingCategory.REGIONAL_DEVELOPMENT,
+        )
+
+        transform_funding_category.run_subtask()
+
+        validate_funding_category(
+            db_session,
+            forecast_insert1,
+            expected_funding_category=FundingCategory.BUSINESS_AND_COMMERCE,
+        )
+        validate_funding_category(
+            db_session, forecast_insert2, expected_funding_category=FundingCategory.EDUCATION
+        )
+
+        validate_funding_category(
+            db_session, syn_insert1, expected_funding_category=FundingCategory.FOOD_AND_NUTRITION
+        )
+        validate_funding_category(
+            db_session,
+            syn_insert2,
+            expected_funding_category=FundingCategory.INCOME_SECURITY_AND_SOCIAL_SERVICES,
+        )
+        validate_funding_category(
+            db_session, syn_insert3, expected_funding_category=FundingCategory.REGIONAL_DEVELOPMENT
+        )
+
+        # Despite the same lookup values being in the DB, the records were in fact deleted
+        validate_funding_category(db_session, forecast_delete1, expect_in_db=False)
+        validate_funding_category(db_session, forecast_delete2, expect_in_db=False)
+        validate_funding_category(db_session, syn_delete1, expect_in_db=False)
+        validate_funding_category(db_session, syn_delete2, expect_in_db=False)
+        validate_funding_category(db_session, syn_delete3, expect_in_db=False)
+
+        metrics = transform_funding_category.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 10
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 1), (False, 70)]
@@ -357,18 +375,3 @@ class TestTransformFundingCategory(BaseTransformTestClass):
             match="Funding category record cannot be processed as the opportunity summary for it does not exist",
         ):
             transform_funding_category.process_link_funding_category(source_record, None, None)
-
-    @pytest.mark.parametrize(
-        "factory_cls",
-        [f.StagingTfundactcatForecastHistFactory, f.StagingTfundactcatSynopsisHistFactory],
-    )
-    def test_process_funding_category_but_no_opportunity_summary_hist(
-        self,
-        db_session,
-        transform_funding_category,
-        factory_cls,
-    ):
-        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
-        transform_funding_category.process_link_funding_category(source_record, None, None)
-        assert source_record.transformed_at is not None
-        assert source_record.transformation_notes == "orphaned_historical_record"

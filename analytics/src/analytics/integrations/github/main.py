@@ -27,12 +27,21 @@ def transform_project_data(
 ) -> list[dict]:
     """Pluck and reformat relevant fields for each item in the raw data."""
     transformed_data = []
+    count = 0
+    fail = 0
 
     for i, item in enumerate(raw_data):
+        count += 1
         try:
+            # Filter out invalid content from boards local user may not have permission to
+            if item.get("content") is None:
+                message = f"project item {i} has no content; skipping"
+                logger.info(message)
+                logger.debug(item)
+                continue
+
             # Validate and parse the raw item
             validated_item = ProjectItem.model_validate(item)
-
             # Skip excluded issue types
             if validated_item.content.issue_type.name in excluded_types:
                 continue
@@ -67,15 +76,24 @@ def transform_project_data(
                 "quad_end": validated_item.quad.end_date,
             }
             transformed_data.append(transformed)
+
         except ValidationError as err:
-            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
-            logger.debug("Error: %s", err)
+            fail += 1
+            message = f"project item {i} cannot be validated; skipping"
+            logger.info(message)
+            logger.debug(err)
+            logger.debug(item)
             continue
+
+    if count > 0:
+        failure_rate = round(100 * fail / count, 3)
+        message = f"validation failure rate: {failure_rate} %"
+        logger.info(message)
 
     return transformed_data
 
 
-def export_sprint_data(
+def export_sprint_data_to_file(
     client: GitHubGraphqlClient,
     owner: str,
     project: int,
@@ -83,6 +101,27 @@ def export_sprint_data(
     points_field: str,
     output_file: str,
 ) -> None:
+    """Export the issue and project data from a Sprint Board."""
+    transformed_data = export_sprint_data_to_object(
+        client=client,
+        owner=owner,
+        project=project,
+        sprint_field=sprint_field,
+        points_field=points_field,
+    )
+
+    # Write output
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(transformed_data, f, indent=2)
+
+
+def export_sprint_data_to_object(
+    client: GitHubGraphqlClient,
+    owner: str,
+    project: int,
+    sprint_field: str,
+    points_field: str,
+) -> list[dict]:
     """Export the issue and project data from a Sprint Board."""
     # Load query
     query_path = PARENT_DIR / "getSprintData.graphql"
@@ -107,19 +146,15 @@ def export_sprint_data(
     # Transform data
     # And exclude deliverables if they appear on the sprint boards
     # so that we use their status value from the roadmap board instead
-    transformed_data = transform_project_data(
+    return transform_project_data(
         raw_data=data,
         owner=owner,
         project=project,
         excluded_types=("Deliverable",),
     )
 
-    # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
 
-
-def export_roadmap_data(
+def export_roadmap_data_to_file(
     client: GitHubGraphqlClient,
     owner: str,
     project: int,
@@ -127,7 +162,28 @@ def export_roadmap_data(
     pillar_field: str,
     output_file: str,
 ) -> None:
-    """Export the issue and project data from a Roadmap Board."""
+    """Export the epic and deliverable data from GitHub."""
+    transformed_data = export_roadmap_data_to_object(
+        client=client,
+        owner=owner,
+        project=project,
+        quad_field=quad_field,
+        pillar_field=pillar_field,
+    )
+
+    # Write output
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(transformed_data, f, indent=2)
+
+
+def export_roadmap_data_to_object(
+    client: GitHubGraphqlClient,
+    owner: str,
+    project: int,
+    quad_field: str,
+    pillar_field: str,
+) -> list[dict]:
+    """Export the epic and deliverable data from GitHub."""
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
     with open(query_path) as f:
@@ -149,8 +205,4 @@ def export_roadmap_data(
     )
 
     # Transform data
-    transformed_data = transform_project_data(data, owner, project)
-
-    # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
+    return transform_project_data(data, owner, project)
