@@ -1,31 +1,16 @@
 import { ParsedError } from "src/app/[locale]/search/error";
 import { BadRequestError } from "src/errors";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 describe("BadRequestError (as an example of other error types)", () => {
-  const dummySearchInputs: QueryParamData = {
-    status: new Set(["active"]),
-    fundingInstrument: new Set(["grant"]),
-    eligibility: new Set(["public"]),
-    agency: new Set(["NASA"]),
-    category: new Set(["science"]),
-    query: "space exploration",
-    sortby: "relevancy",
-    page: 1,
-  };
 
-  it("serializes search inputs and error message correctly", () => {
-    const error = new BadRequestError("Test Error", {
-      searchInputs: dummySearchInputs,
-    });
+  it("serializes error message correctly", () => {
+    const error = new BadRequestError("Test Error");
     const { cause } = error as Error;
     const errorData = cause as ParsedError;
 
     expect(errorData.type).toEqual("BadRequestError");
     expect(errorData.status).toEqual(400);
     expect(errorData.message).toEqual("Test Error");
-    expect(errorData.searchInputs.status).toContain("active");
-    expect(errorData.searchInputs.fundingInstrument).toContain("grant");
   });
 
   it("handles non-Error inputs correctly", () => {

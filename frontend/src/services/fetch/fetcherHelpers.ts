@@ -15,7 +15,6 @@ import {
   ValidationError,
 } from "src/errors";
 import { APIResponse } from "src/types/apiResponseTypes";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -90,14 +89,11 @@ export function createRequestBody(
  */
 export function fetchErrorToNetworkError(
   error: unknown,
-  searchInputs?: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
   console.error(error);
-  return searchInputs
-    ? new NetworkError(error, searchInputs)
-    : new NetworkError(error);
+  return new NetworkError(error);
 }
 
 export const throwError = (responseBody: APIResponse, url: string) => {
