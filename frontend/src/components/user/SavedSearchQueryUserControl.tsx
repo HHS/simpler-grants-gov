@@ -10,7 +10,7 @@ import SavedSearchQuery from "src/components/search/SavedSearchQuery";
 export const SearchQuerySaveUserControl = () => {
   const path = usePathname();
   const searchParams = useSearchParams();
-  const query = searchParams ? `?${searchParams.toString()}` : "";
+  const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
   const url = `${environment.NEXT_PUBLIC_BASE_URL}${path}${query}`;
   const t = useTranslations("Search.savedQuery");
   return (
