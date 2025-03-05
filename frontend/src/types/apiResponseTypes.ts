@@ -1,5 +1,3 @@
-import { QueryParamData } from "src/types/search/searchRequestTypes";
-
 export interface PaginationInfo {
   order_by: string;
   page_offset: number;
@@ -20,7 +18,6 @@ export interface APIResponse {
 
 export interface FrontendErrorDetails {
   status?: number;
-  searchInputs?: QueryParamData;
   field?: string;
   message?: string;
   type?: string;
