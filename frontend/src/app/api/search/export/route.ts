@@ -1,13 +1,7 @@
-import {
-  NextRequest,
-  NextResponse,
-} from "next/server";
-import {
-  downloadOpportunities,
-} from "src/services/fetch/fetchers/searchFetcher";
-import {
-  convertSearchParamsToProperTypes,
-} from "src/utils/search/convertSearchParamsToProperTypes";
+import { downloadOpportunities } from "src/services/fetch/fetchers/searchFetcher";
+import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
+
+import { NextRequest, NextResponse } from "next/server";
 
 export const revalidate = 0;
 
