@@ -79,7 +79,6 @@ describe("throwError", () => {
         type: "a subtype",
       },
       message: "response message",
-      searchInputs: {},
       status: 401,
       type: "UnauthorizedError",
     });

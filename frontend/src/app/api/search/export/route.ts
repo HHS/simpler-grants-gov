@@ -1,7 +1,13 @@
-import { downloadOpportunities } from "src/services/fetch/fetchers/searchFetcher";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
-
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
+import {
+  downloadOpportunities,
+} from "src/services/fetch/fetchers/searchFetcher";
+import {
+  convertSearchParamsToProperTypes,
+} from "src/utils/search/convertSearchParamsToProperTypes";
 
 export const revalidate = 0;
 
@@ -19,7 +25,7 @@ export const revalidate = 0;
 export async function GET(request: NextRequest) {
   try {
     const searchParams = convertSearchParamsToProperTypes(
-      Object.fromEntries(request.nextUrl.searchParams.entries().toArray()),
+      Object.fromEntries(request.nextUrl.searchParams.entries()),
     );
     const apiResponseBody = await downloadOpportunities(searchParams);
     return new NextResponse(apiResponseBody, {

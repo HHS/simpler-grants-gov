@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-
-import { useTranslations } from "next-intl";
-import {
-  ReadonlyURLSearchParams,
-  useSearchParams,
-} from "next/navigation";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { usePrevious } from "src/hooks/usePrevious";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { ErrorProps } from "src/types/uiTypes";
 
+import { useTranslations } from "next-intl";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Alert } from "@trussworks/react-uswds";
+
+import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 export interface ParsedError {
   message: string;

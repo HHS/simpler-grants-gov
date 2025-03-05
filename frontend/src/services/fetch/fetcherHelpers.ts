@@ -87,9 +87,7 @@ export function createRequestBody(
 /**
  * Handle request errors
  */
-export function fetchErrorToNetworkError(
-  error: unknown,
-) {
+export function fetchErrorToNetworkError(error: unknown) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
   console.error(error);

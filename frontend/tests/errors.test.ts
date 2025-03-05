@@ -2,7 +2,6 @@ import { ParsedError } from "src/app/[locale]/search/error";
 import { BadRequestError } from "src/errors";
 
 describe("BadRequestError (as an example of other error types)", () => {
-
   it("serializes error message correctly", () => {
     const error = new BadRequestError("Test Error");
     const { cause } = error as Error;
