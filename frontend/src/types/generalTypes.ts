@@ -252,5 +252,4 @@ export type UswdsIconNames =
   | "youtube"
   | "zoom_in"
   | "zoom_out_map"
-  | "zoom_out"
-  | string;
+  | "zoom_out";

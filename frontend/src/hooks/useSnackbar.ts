@@ -12,5 +12,9 @@ export const useSnackbar = () => {
     }, visibleTime);
   };
 
-  return { snackbarIsVisible, showSnackbar, Snackbar };
+  const hideSnackbar = () => {
+    setSnackbarIsVisible(false);
+  };
+
+  return { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar };
 };

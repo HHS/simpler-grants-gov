@@ -52,6 +52,7 @@ const mockCopyToClipboardValues = {
   copyToClipboard: async () => Promise.resolve(),
 };
 const mockSnackbarValues = {
+  hideSnackbar: () => undefined,
   snackbarIsVisible: false,
   showSnackbar: () => undefined,
   Snackbar: () => {

@@ -13,7 +13,7 @@ const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
   loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
 });
 
-const SNACKBAR_VISIBLE_TIME = 4000;
+const SNACKBAR_VISIBLE_TIME = 6000;
 
 type SavedSearchQueryProps = {
   copyText: string;
@@ -33,10 +33,11 @@ const SavedSearchQuery = ({
   snackbarMessage,
 }: SavedSearchQueryProps) => {
   const { copied, copying, copyToClipboard } = useCopyToClipboard();
-  const { snackbarIsVisible, showSnackbar, Snackbar } = useSnackbar();
+  const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =
+    useSnackbar();
 
   return (
-    <div className="text-underline border-base-lighter border-1px padding-2 text-primary-darker display-flex">
+    <div className="border-base-lighter border-1px padding-2 flex-align-start text-primary-darker text-underline display-flex">
       <Button
         data-testid="save-search-query"
         type="button"
@@ -61,7 +62,9 @@ const SavedSearchQuery = ({
       >
         <USWDSIcon className="margin-left-1" name="info_outline" />
       </TooltipWrapper>
-      <Snackbar isVisible={snackbarIsVisible}>{snackbarMessage}</Snackbar>
+      <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
+        {snackbarMessage}
+      </Snackbar>
     </div>
   );
 };
