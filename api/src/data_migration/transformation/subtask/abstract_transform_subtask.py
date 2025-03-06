@@ -177,6 +177,7 @@ class AbstractTransformSubTask(SubTask):
                 .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
                 .join(destination_model, and_(*join_clause), isouter=True)
                 .where(source_model.transformed_at.is_(None))
+                .where(source_model.is_deleted.is_(is_delete))
                 .options(selectinload(relationship_load_value))
                 .execution_options(yield_per=5000, populate_existing=True)
             ),

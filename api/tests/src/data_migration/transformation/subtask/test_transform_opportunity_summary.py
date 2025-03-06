@@ -86,6 +86,8 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         validate_opportunity_summary(db_session, synopsis_insert1)
         validate_opportunity_summary(db_session, forecast_update1)
         validate_opportunity_summary(db_session, synopsis_update1)
+        validate_opportunity_summary(db_session, forecast_delete1, expect_in_db=False)
+        validate_opportunity_summary(db_session, synopsis_delete1, expect_in_db=False)
         validate_opportunity_summary(
             db_session, forecast_delete_but_current_missing, expect_in_db=False
         )

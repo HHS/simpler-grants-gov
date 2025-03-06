@@ -70,7 +70,11 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
         extra = transform_util.get_log_extra_summary(source_summary)
         logger.info("Processing opportunity summary", extra=extra)
 
-        if opportunity is None:
+        if source_summary.is_deleted:
+            self._handle_delete(
+                source_summary, target_summary, transform_constants.OPPORTUNITY_SUMMARY, extra
+            )
+        elif opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError(
