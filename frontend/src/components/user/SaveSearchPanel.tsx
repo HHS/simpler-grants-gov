@@ -7,7 +7,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import SavedSearchQuery from "src/components/search/SavedSearchQuery";
 
-export const SearchQuerySaveUserControl = () => {
+export const SaveSearchPanel = () => {
   const path = usePathname();
   const searchParams = useSearchParams();
   const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
