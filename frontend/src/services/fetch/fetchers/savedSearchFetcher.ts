@@ -8,6 +8,7 @@ type SavedSearchResponse = {
   data: object | null;
 };
 
+// make call from server to API to save a search
 export const handleSavedSearch = async (
   token: string,
   userId: string,

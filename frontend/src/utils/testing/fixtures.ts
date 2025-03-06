@@ -1,4 +1,6 @@
 import {
+  PaginationOrderBy,
+  PaginationSortDirection,
   QueryParamData,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
@@ -30,4 +32,15 @@ export const searchFetcherParams: QueryParamData = {
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
+};
+
+export const arbitrarySearchPagination = {
+  sort_order: [
+    {
+      order_by: "opportunity_number" as PaginationOrderBy,
+      sort_direction: "ascending" as PaginationSortDirection,
+    },
+  ],
+  page_offset: 1,
+  page_size: 25,
 };

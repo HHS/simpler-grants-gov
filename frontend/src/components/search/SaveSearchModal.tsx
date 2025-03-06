@@ -1,9 +1,8 @@
 "use client";
 
 import clsx from "clsx";
-import { debounce } from "lodash";
 import { useUser } from "src/services/auth/useUser";
-import { filterSearchParams } from "src/utils/search/searchFormatUtils";
+import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -100,31 +99,6 @@ export function SaveSearchModal() {
   const [loading, setLoading] = useState<boolean>();
   const [saved, setSaved] = useState<boolean>();
 
-  const updateSavedSearchName = debounce(setSavedSearchName, 50);
-
-  const saveSearch = useCallback(
-    async (name: string) => {
-      if (!user?.token) return;
-      setLoading(true);
-      // send up a filtered set of params, converted to an object
-      // we will do the further filter and pagination object building on the server
-      const savedSearchParams = filterSearchParams(
-        Object.fromEntries(searchParams.entries()),
-      );
-      const res = await fetch("/api/user/saved-searches", {
-        method: "POST",
-        body: JSON.stringify({ ...savedSearchParams, name }),
-      });
-      if (res.ok && res.status === 200) {
-        const data = (await res.json()) as { type: string };
-        return data;
-      } else {
-        throw new Error(`Error posting saved search: ${res.status}`);
-      }
-    },
-    [user, searchParams],
-  );
-
   const handleSubmit = useCallback(() => {
     if (validationError) {
       setValidationError(undefined);
@@ -133,7 +107,8 @@ export function SaveSearchModal() {
       setValidationError(t("emptyNameError"));
       return;
     }
-    saveSearch(savedSearchName)
+    setLoading(true);
+    saveSearch(savedSearchName, searchParams, user?.token)
       .then((_data) => {
         setSaved(true);
       })
@@ -144,7 +119,7 @@ export function SaveSearchModal() {
       .finally(() => {
         setLoading(false);
       });
-  }, [validationError, savedSearchName, saveSearch, t]);
+  }, [savedSearchName, user, searchParams, t, validationError]);
 
   const onClose = useCallback(() => {
     setSaved(false);
@@ -162,7 +137,7 @@ export function SaveSearchModal() {
             modalRef={modalRef}
             opener
             className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-            data-testid="sign-in-button"
+            data-testid="open-save-search-modal-button"
           >
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"
@@ -210,10 +185,14 @@ export function SaveSearchModal() {
                 )}
                 <SaveSearchInput
                   validationError={validationError}
-                  updateSavedSearchName={updateSavedSearchName}
+                  updateSavedSearchName={setSavedSearchName}
                 />
                 <ModalFooter>
-                  <Button type={"button"} onClick={handleSubmit}>
+                  <Button
+                    type={"button"}
+                    onClick={handleSubmit}
+                    data-testid="save-search-button"
+                  >
                     {t("saveText")}
                   </Button>
                   <ModalToggleButton
