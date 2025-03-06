@@ -45,6 +45,7 @@ class StoreOpportunityVersionTask(Task):
             )
             .order_by(JobLog.created_at.desc())  # get the latest # add job_status
         ).first()
+
         # Get opportunity ids that were updated after the latest job run
         latest_time = (
             latest_job.created_at
@@ -52,28 +53,30 @@ class StoreOpportunityVersionTask(Task):
             else get_now_us_eastern_datetime() - timedelta(hours=24)
         )  # tbc
 
-        updated_opportunities = self.db_session.scalars(
+        updated_opportunities_change_audit = self.db_session.scalars(
             select(OpportunityChangeAudit).where(OpportunityChangeAudit.updated_at > latest_time)
         ).all()
 
-        for opp in updated_opportunities:
+        for oca in updated_opportunities_change_audit:
+
             # Get Opportunity object
             opportunity = self.db_session.execute(
-                select(Opportunity).where(Opportunity.opportunity_id == opp.opportunity_id)
+                select(Opportunity).where(Opportunity.opportunity_id == oca.opportunity_id)
             ).scalar_one()
+
             # Get Json
             opportunity_v1 = SCHEMA.dump(opportunity)
 
-            # Fetch latest version stored
-            latest_versioned_opp = self.db_session.execute(
+            # Fetch latest opportunity version stored
+            latest_opp_version = self.db_session.execute(
                 select(OpportunityVersion).where(
-                    OpportunityVersion.opportunity_id == opp.opportunity_id
-                )
+                    OpportunityVersion.opportunity_id == oca.opportunity_id
+                ).order_by(OpportunityVersion.created_at.desc())
             ).scalar_one_or_none()
 
             # Store to OpportunityVersion table
-            if latest_versioned_opp:
-                diffs = diff_nested_dicts(opportunity_v1, latest_versioned_opp.opportunity_data)
+            if latest_opp_version:
+                diffs = diff_nested_dicts(opportunity_v1, latest_opp_version.opportunity_data)
                 if diffs:
                     save_opportunity_version(self.db_session, opportunity)
             else:  # assume updated if no versioned record
