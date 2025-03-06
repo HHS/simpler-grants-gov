@@ -4,6 +4,7 @@ import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
 import { useSnackbar } from "src/hooks/useSnackbar";
 
 import dynamic from "next/dynamic";
+import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -19,9 +20,9 @@ type SavedSearchQueryProps = {
   copyText: string;
   copyingText: string;
   copiedText: string;
-  helpText: string;
+  helpText: ReactNode;
   url: string;
-  snackbarMessage: React.ReactNode;
+  snackbarMessage: ReactNode;
 };
 
 const SavedSearchQuery = ({

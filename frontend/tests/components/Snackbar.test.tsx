@@ -19,6 +19,7 @@ describe("Snackbar Component", () => {
     const snackbar = screen.getByTestId("snackbar");
     expect(snackbar).toHaveTextContent("test");
     expect(snackbar).toHaveClass("is-visible");
+    expect(snackbar).toHaveAttribute("aria-hidden", "false");
   });
 
   test("renders with correct invisible attribute", () => {
@@ -29,6 +30,7 @@ describe("Snackbar Component", () => {
     );
     const snackbar = screen.getByTestId("snackbar");
     expect(snackbar).toHaveClass("is-hidden");
+    expect(snackbar).toHaveAttribute("aria-hidden", "true");
   });
 
   test("close button works", () => {

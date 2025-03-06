@@ -18,7 +18,11 @@ export const SearchQuerySaveUserControl = () => {
       copiedText={t("copied")}
       copyingText={t("copying")}
       copyText={t("copy.unauthenticated")}
-      helpText={t("help.unauthenticated")}
+      helpText={
+        <div className="width-card-lg text-wrap">
+          {t("help.unauthenticated")}
+        </div>
+      }
       url={url}
       snackbarMessage={t.rich("snackbar", {
         br: () => (
