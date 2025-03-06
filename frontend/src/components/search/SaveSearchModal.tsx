@@ -44,7 +44,7 @@ function SaveSearchInput({
             "usa-input--error": !!validationError,
           })}
           id="saved-search-input"
-          name="query"
+          name="save-search"
           defaultValue={""}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
@@ -179,7 +179,7 @@ export function SaveSearchModal() {
                   <SimplerAlert
                     alertClick={() => setApiError(false)}
                     buttonId="saveSearchApiError"
-                    messageText="Failed to save search. Please try again."
+                    messageText={t("apiError")}
                     type="error"
                   />
                 )}

@@ -673,6 +673,7 @@ export const messages = {
         successTitle: "Success!",
         successDescription:
           "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+        apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
         copy: {

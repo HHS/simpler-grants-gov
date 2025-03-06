@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SaveSearchModal } from "src/components/search/SaveSearchModal";
@@ -15,7 +15,7 @@ jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
 }));
 jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
-  saveSearch: (...args) => mockSaveSearch(...args),
+  saveSearch: (...args: unknown[]) => mockSaveSearch(...args) as unknown,
 }));
 
 jest.mock("next-intl", () => ({
@@ -90,9 +90,7 @@ describe("SaveSearchModal", () => {
     rerender(<SaveSearchModal />);
 
     // this isn't translated... update after entering real text
-    const error = await screen.findByText(
-      "Failed to save search. Please try again.",
-    );
+    const error = await screen.findByText("apiError");
 
     expect(error).toBeInTheDocument();
   });

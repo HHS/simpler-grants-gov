@@ -28,6 +28,7 @@ export const POST = async (request: Request) => {
     );
     const savedSearch = formatSearchRequestBody(convertedParams);
 
+    // always save searches pointing first page of results
     savedSearch.pagination.page_offset = 1;
 
     const response = await handleSavedSearch(
@@ -45,8 +46,6 @@ export const POST = async (request: Request) => {
     }
     return Response.json({
       message: "Saved search success",
-      TESTING_SAVED_SEARCH_FORMAT: savedSearch,
-      savedSearches: response.data, // tbd but will potentially be useful when updating the list after save
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
