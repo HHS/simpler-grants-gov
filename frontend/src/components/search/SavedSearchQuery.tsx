@@ -57,11 +57,11 @@ const SavedSearchQuery = ({
         {copying ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
       </Button>
       <TooltipWrapper
-        className="text-secondary-darker usa-button--unstyled"
+        className="margin-left-1 text-secondary-darker usa-button--unstyled"
         label={helpText}
         position="top"
       >
-        <USWDSIcon className="margin-left-1" name="info_outline" />
+        <USWDSIcon name="info_outline" />
       </TooltipWrapper>
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
         {snackbarMessage}
