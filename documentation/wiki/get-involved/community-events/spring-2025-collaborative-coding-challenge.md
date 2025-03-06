@@ -26,6 +26,24 @@ Develop simple projects using the Search & Opportunities API that showcase innov
 
 ***
 
+
+
+## Submissions&#x20;
+
+These must be added to this Google Drive folder by midnight EST on March 31st 2025. All submissions must contain the following critera to be accepted.
+
+**A document or slideshow  in a readable format (.docx, .rtf, .txt, .pdf, etc) which contains:**
+
+1. Team / Project Name
+2. Names of all contributors
+3. Link to a code repository that can be accessed by the public (open source)
+4. A short description of the goals of the project
+5. A short demonstration of the project in action.
+
+[Optional Submission Template Link](https://docs.google.com/presentation/d/1F60a_gwmgKEhOpGoZXYx2T22bi0Mn11-O8KIyXSHBrI/edit?usp=sharing)
+
+***
+
 ## Prize Pool
 
 A prize pool will be awarded to winners at the conclusion of the event. Awards will be decided by **community favorite voting** from all participants. Prize money must be divided up equally among all members of the winning team.&#x20;
