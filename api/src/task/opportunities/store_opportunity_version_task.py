@@ -12,7 +12,6 @@ from src.db.models.task_models import JobLog
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util.dict_util import diff_nested_dicts
 
 logger = logging.getLogger(__name__)
 
@@ -51,26 +50,10 @@ class StoreOpportunityVersionTask(Task):
         ).all()
 
         for oca in updated_opportunities_change_audit:
-
             # Get Opportunity object
             opportunity = self.db_session.execute(
                 select(Opportunity).where(Opportunity.opportunity_id == oca.opportunity_id)
             ).scalar_one()
 
-            # Get Json
-            opportunity_v1 = SCHEMA.dump(opportunity)
-
-            # Fetch latest opportunity version stored
-            latest_opp_version = self.db_session.execute(
-                select(OpportunityVersion)
-                .where(OpportunityVersion.opportunity_id == oca.opportunity_id)
-                .order_by(OpportunityVersion.created_at.desc())
-            ).scalar_one_or_none()
-
             # Store to OpportunityVersion table
-            if latest_opp_version:
-                diffs = diff_nested_dicts(opportunity_v1, latest_opp_version.opportunity_data)
-                if diffs:
-                    save_opportunity_version(self.db_session, opportunity)
-            else:  # assume updated if no versioned record
-                save_opportunity_version(self.db_session, opportunity)
+            save_opportunity_version(self.db_session, opportunity)
