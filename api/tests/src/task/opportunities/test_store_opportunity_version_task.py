@@ -74,10 +74,8 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
     def test_with_existing_opportunity_saved_version_no_diff(
         self, db_session, enable_factory_create, store_opportunity_version_task
     ):
-
-        opp = OpportunityFactory.create()
-        OpportunityChangeAuditFactory.create(opportunity=opp)
-        opp_ver_existing = OpportunityVersionFactory.create(opportunity=opp)
+        oca = OpportunityChangeAuditFactory.create()
+        opp_ver_existing = OpportunityVersionFactory.create(opportunity=oca.opportunity)
 
         store_opportunity_version_task.run()
 
@@ -88,14 +86,12 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
     def test_with_existing_opportunity_saved_version_with_diff(
         self, db_session, enable_factory_create, store_opportunity_version_task
     ):
-
-        opp = OpportunityFactory.create()
-        OpportunityChangeAuditFactory.create(opportunity=opp)
-        opp_ver_existing = OpportunityVersionFactory.create(opportunity=opp)
+        oca = OpportunityChangeAuditFactory.create()
+        opp_ver_existing = OpportunityVersionFactory.create(opportunity=oca.opportunity)
 
         # update existing opportunity
-        opp.is_draft = True
-        opp.opportunity_assistance_listings = []
+        oca.opportunity.is_draft = True
+        oca.opportunity.opportunity_assistance_listings = []
         db_session.commit()
 
         store_opportunity_version_task.run()
