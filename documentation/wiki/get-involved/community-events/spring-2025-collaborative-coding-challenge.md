@@ -144,4 +144,4 @@ Our events foster a collaborative, creative community for all participants and g
 * API Setup: [API Development Guide](../../../api/development.md)
 * API Endpoints (Swagger): [API Docs](http://api-dev-1839587515.us-east-1.elb.amazonaws.com/docs)
 
-**Need an API Key?** Reach out to us [directly](https://email:opensource@grants.gov).
+**Need an API Key?** Reach out to us [directly](mailto:opensource@grants.gov).
