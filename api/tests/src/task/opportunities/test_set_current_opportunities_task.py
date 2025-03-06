@@ -483,7 +483,7 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
         is_expected_current=True,
     )
 
-    # a basic forecasted scenario with several past revisions
+    # a basic forecasted scenario with a future non-forecast
     container2 = (
         OpportunityContainer()
         .with_summary(
@@ -491,10 +491,11 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
             post_date=today - timedelta(days=5),
             archive_date=today + timedelta(days=60),
             is_already_current=True,
+            is_expected_current=True,
         )
         .with_summary(
             is_forecast=False,
-            post_date=today - timedelta(days=5),
+            post_date=today + timedelta(days=5),
             archive_date=today + timedelta(days=60),
         )
     )
