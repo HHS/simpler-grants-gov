@@ -7,7 +7,7 @@ import src.adapters.db as db
 from src.adapters.db import flask_db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import JobStatus
-from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit, OpportunityVersion
+from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.db.models.task_models import JobLog
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task

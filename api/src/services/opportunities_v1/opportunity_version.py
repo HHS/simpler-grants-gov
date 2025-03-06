@@ -1,10 +1,10 @@
 import logging
 
+from sqlalchemy import select
+
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
-from sqlalchemy import or_, select
-
 from src.util.dict_util import diff_nested_dicts
 
 logger = logging.getLogger(__name__)
