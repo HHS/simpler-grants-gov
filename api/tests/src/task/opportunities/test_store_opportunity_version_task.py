@@ -1,23 +1,16 @@
-from datetime import timedelta, datetime
-
-import freezegun
-
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-
 import pytest
 from sqlalchemy import delete
 
 from src.constants.lookup_constants import JobStatus
-from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit, OpportunityVersion, \
-    OpportunityAssistanceListing
+from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit, OpportunityVersion
 from src.db.models.task_models import JobLog
 from src.task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
-from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
-    OpportunityAssistanceListingFactory,
+    JobLogFactory,
     OpportunityChangeAuditFactory,
-    OpportunityFactory, JobLogFactory, OpportunityVersionFactory,
+    OpportunityFactory,
+    OpportunityVersionFactory,
 )
 
 
@@ -27,7 +20,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         return StoreOpportunityVersionTask(db_session)
 
     @pytest.fixture(autouse=True)
-    def clean_up_db(self, db_session):
+    def clear_db(self, db_session):
         opportunities = db_session.query(Opportunity).all()
         for opp in opportunities:
             db_session.delete(opp)
@@ -37,7 +30,6 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         db_session.execute(delete(JobLog))
 
         db_session.commit()
-
 
     def test_with_no_prior_job_log(
         self, db_session, enable_factory_create, store_opportunity_version_task
@@ -50,7 +42,6 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         # assert a record in the OpportunityVersion is created
         assert len(opp_vers) == 1
         assert opp_vers[0].opportunity_id == oca.opportunity_id
-
 
     def test_with_prior_job_log_no_updated_opportunity(
         self, db_session, enable_factory_create, store_opportunity_version_task
@@ -66,7 +57,9 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         opp_vers = db_session.query(OpportunityVersion).all()
         assert len(opp_vers) == 0
 
-    def test_with_existing_opportunity_no_saved_version(self, db_session, enable_factory_create, store_opportunity_version_task):
+    def test_with_existing_opportunity_no_saved_version(
+        self, db_session, enable_factory_create, store_opportunity_version_task
+    ):
 
         oca_1 = OpportunityChangeAuditFactory.create()
         oca_2 = OpportunityChangeAuditFactory.create()
@@ -78,8 +71,9 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         assert opp_vers[0].opportunity_id == oca_1.opportunity_id
         assert opp_vers[1].opportunity_id == oca_2.opportunity_id
 
-
-    def test_with_existing_opportunity_saved_version_no_diff(self, db_session, enable_factory_create,store_opportunity_version_task):
+    def test_with_existing_opportunity_saved_version_no_diff(
+        self, db_session, enable_factory_create, store_opportunity_version_task
+    ):
 
         opp = OpportunityFactory.create()
         OpportunityChangeAuditFactory.create(opportunity=opp)
@@ -91,14 +85,17 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         assert len(opp_vers) == 1
         assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
 
-    def test_with_existing_opportunity_saved_version_with_diff(self, db_session, enable_factory_create,store_opportunity_version_task):
+    def test_with_existing_opportunity_saved_version_with_diff(
+        self, db_session, enable_factory_create, store_opportunity_version_task
+    ):
 
         opp = OpportunityFactory.create()
         OpportunityChangeAuditFactory.create(opportunity=opp)
         opp_ver_existing = OpportunityVersionFactory.create(opportunity=opp)
 
         # update existing opportunity
-        opp.is_draft=True
+        opp.is_draft = True
+        opp.opportunity_assistance_listings = []
         db_session.commit()
 
         store_opportunity_version_task.run()
@@ -107,10 +104,3 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         assert len(opp_vers) == 2
         assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
         assert opp_vers[1].opportunity_id == opp_ver_existing.opportunity_id
-
-
-
-
-
-
-

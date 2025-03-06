@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from sqlalchemy import or_, select
 
@@ -12,7 +12,6 @@ from src.db.models.task_models import JobLog
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.dict_util import diff_nested_dicts
 
 logger = logging.getLogger(__name__)
@@ -40,18 +39,12 @@ class StoreOpportunityVersionTask(Task):
         latest_job = self.db_session.scalars(
             select(JobLog)
             .where(JobLog.job_type == self.cls_name())
-            .where(
-                or_(JobLog.job_status == JobStatus.COMPLETED)
-            )
+            .where(or_(JobLog.job_status == JobStatus.COMPLETED))
             .order_by(JobLog.created_at.desc())
         ).first()
 
         # Get opportunity ids that were updated after the latest job run
-        latest_time = (
-            latest_job.created_at
-            if latest_job
-            else datetime(1970, 1, 1)
-        )
+        latest_time = latest_job.created_at if latest_job else datetime(1970, 1, 1)
 
         updated_opportunities_change_audit = self.db_session.scalars(
             select(OpportunityChangeAudit).where(OpportunityChangeAudit.updated_at > latest_time)
@@ -69,9 +62,9 @@ class StoreOpportunityVersionTask(Task):
 
             # Fetch latest opportunity version stored
             latest_opp_version = self.db_session.execute(
-                select(OpportunityVersion).where(
-                    OpportunityVersion.opportunity_id == oca.opportunity_id
-                ).order_by(OpportunityVersion.created_at.desc())
+                select(OpportunityVersion)
+                .where(OpportunityVersion.opportunity_id == oca.opportunity_id)
+                .order_by(OpportunityVersion.created_at.desc())
             ).scalar_one_or_none()
 
             # Store to OpportunityVersion table
