@@ -47,7 +47,13 @@ const mockSummaryData: Summary = {
 
 describe("OpportunityDescription", () => {
   it("renders the opportunity description", () => {
-    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
+    render(
+      <OpportunityDescription
+        opportunityId={1}
+        summary={mockSummaryData}
+        nofoPath=""
+      />,
+    );
 
     const descriptionHeading = screen.getByText("description");
     expect(descriptionHeading).toBeInTheDocument();
@@ -64,6 +70,7 @@ describe("OpportunityDescription", () => {
   it("splits opportunity description after 600 characters if description is longer than 750 characters", () => {
     render(
       <OpportunityDescription
+        opportunityId={1}
         summary={{ ...mockSummaryData, summary_description: longDescription }}
         nofoPath=""
       />,
@@ -89,6 +96,7 @@ describe("OpportunityDescription", () => {
 
     render(
       <OpportunityDescription
+        opportunityId={1}
         summary={{ ...mockSummaryData, summary_description: longDescription }}
         nofoPath=""
       />,
@@ -102,7 +110,13 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders the eligible applicants with mapped values", () => {
-    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
+    render(
+      <OpportunityDescription
+        opportunityId={1}
+        summary={mockSummaryData}
+        nofoPath=""
+      />,
+    );
 
     const eligibleApplicantsHeading = screen.getByText("eligible_applicants");
     expect(eligibleApplicantsHeading).toBeInTheDocument();
@@ -115,7 +129,13 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders additional information on eligibility", () => {
-    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
+    render(
+      <OpportunityDescription
+        opportunityId={1}
+        summary={mockSummaryData}
+        nofoPath=""
+      />,
+    );
 
     const additionalInfoHeading = screen.getByText("additional_info");
     expect(additionalInfoHeading).toBeInTheDocument();
@@ -132,7 +152,13 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders agency contact information", () => {
-    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
+    render(
+      <OpportunityDescription
+        opportunityId={1}
+        summary={mockSummaryData}
+        nofoPath=""
+      />,
+    );
 
     const contactInfoHeading = screen.getByText("contact_info");
     expect(contactInfoHeading).toBeInTheDocument();
@@ -150,6 +176,7 @@ describe("OpportunityDescription", () => {
   it("renders information correctly when null values are present", () => {
     render(
       <OpportunityDescription
+        opportunityId={1}
         summary={{
           ...mockSummaryData,
           applicant_types: [],

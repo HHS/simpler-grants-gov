@@ -21,9 +21,6 @@ module "staging_config" {
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 10
 
-  service_override_extra_environment_variables = {
-    NEW_RELIC_ENABLED = "false"
-  }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
