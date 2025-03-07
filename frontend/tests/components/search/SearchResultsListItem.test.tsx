@@ -1,5 +1,5 @@
 import { axe } from "jest-axe";
-import { mockOpportunity } from "src/utils/testing/opportunityMock";
+import { mockOpportunity } from "src/utils/testing/fixtures";
 import { render, screen, waitFor } from "tests/react-utils";
 
 import React from "react";

@@ -67,6 +67,7 @@ module.exports = {
         "testing-library/prefer-screen-queries": "warn",
         // Prevent unnecessary console statements
         "no-console": ["error", { allow: ["warn", "error"] }],
+        "promise/catch-or-return": ["error", { allowFinally: true }],
       },
     },
   ],

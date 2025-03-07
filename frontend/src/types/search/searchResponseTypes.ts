@@ -64,10 +64,7 @@ export interface SearchAPIResponse extends APIResponse {
   fieldChanged?: string;
 }
 
-export const validSearchQueryParamKeys = [
-  "page",
-  "query",
-  "sortby",
+export const searchFilterNames = [
   "status",
   "fundingInstrument",
   "eligibility",
@@ -75,8 +72,17 @@ export const validSearchQueryParamKeys = [
   "category",
 ] as const;
 
+export const validSearchQueryParamKeys = [
+  ...searchFilterNames,
+  "page",
+  "query",
+  "sortby",
+] as const;
+
 // Only a few defined keys possible
 // URL example => ?query=abcd&status=closed,archived
 export type ValidSearchQueryParam = (typeof validSearchQueryParamKeys)[number];
+
+export type FrontendFilterNames = (typeof searchFilterNames)[number];
 
 export type SearchResponseData = Opportunity[];
