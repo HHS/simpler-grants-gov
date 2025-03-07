@@ -1,10 +1,10 @@
 import { Meta } from "@storybook/react";
 
-import SavedSearchQuery from "src/components/search/SavedSearchQuery";
+import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 
-const meta: Meta<typeof SavedSearchQuery> = {
+const meta: Meta<typeof SearchQueryCopyButton> = {
   title: "Components/Search/SavedSearchQuery",
-  component: SavedSearchQuery,
+  component: SearchQueryCopyButton,
   args: {
     copyText: "Copy this link to your clipboard",
     copiedText: "Copied!",

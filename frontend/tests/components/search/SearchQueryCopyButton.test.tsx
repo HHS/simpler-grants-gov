@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
 import { useSnackbar } from "src/hooks/useSnackbar";
 
-import SavedSearchQuery from "src/components/search/SavedSearchQuery";
+import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 
 const copyText = "copy this";
 const copyingText = "copying";
@@ -34,7 +34,7 @@ const mockedUseSnackBar = useSnackbar as jest.MockedFunction<
   typeof useSnackbar
 >;
 
-const SavedSearchQueryProps = {
+const SearchQueryCopyButtonProps = {
   copyText,
   copyingText,
   copiedText,
@@ -64,7 +64,7 @@ describe("SaveButton", () => {
   it("Renders without errors", () => {
     mockedUseCopyToClipboard.mockReturnValue(mockCopyToClipboardValues);
     mockedUseSnackBar.mockReturnValue(mockSnackbarValues);
-    render(<SavedSearchQuery {...SavedSearchQueryProps} />);
+    render(<SearchQueryCopyButton {...SearchQueryCopyButtonProps} />);
     const copyButton = screen.getByTestId("save-search-query");
     expect(copyButton).toBeInTheDocument();
     expect(screen.getByText(copyText)).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe("SaveButton", () => {
       ...mockCopyToClipboardValues,
       ...{ copied: true },
     });
-    render(<SavedSearchQuery {...SavedSearchQueryProps} />);
+    render(<SearchQueryCopyButton {...SearchQueryCopyButtonProps} />);
     expect(screen.getByText(copiedText)).toBeInTheDocument();
   });
 
@@ -83,14 +83,14 @@ describe("SaveButton", () => {
     mockedUseSnackBar.mockReturnValue({
       ...mockSnackbarValues,
     });
-    render(<SavedSearchQuery {...SavedSearchQueryProps} />);
+    render(<SearchQueryCopyButton {...SearchQueryCopyButtonProps} />);
     expect(screen.getByText(snackbarMessage)).toBeInTheDocument();
   });
 
   // Doesn't work without adding support for dynamic imports
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip("Shows tooltip", () => {
-    render(<SavedSearchQuery {...SavedSearchQueryProps} />);
+    render(<SearchQueryCopyButton {...SearchQueryCopyButtonProps} />);
     expect(screen.getByText(helpText)).toBeInTheDocument();
   });
 });
