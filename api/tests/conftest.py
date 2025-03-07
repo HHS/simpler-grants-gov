@@ -21,6 +21,7 @@ from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGo
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
 from src.db import models
+from src.db.models.agency_models import Agency
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
@@ -450,6 +451,17 @@ class BaseTestClass:
             db_session.delete(opp)
 
         # Force the deletes to the DB
+        db_session.commit()
+
+    @pytest.fixture(scope="class")
+    def truncate_agencies(self, db_session):
+        with db_session.no_autoflush:
+            # Fetch all agencies
+            agencies = db_session.query(Agency).all()
+            # Delete each agency
+            for agency in agencies:
+                db_session.delete(agency)
+
         db_session.commit()
 
     @pytest.fixture(scope="class")
