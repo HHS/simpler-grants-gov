@@ -1,4 +1,4 @@
-import { Opportunity } from "src/types/search/searchResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   getAgencyDisplayName,
   sortFilterOptions,
@@ -140,7 +140,7 @@ describe("getAgencyDisplayName", () => {
     },
     category: "Discretionary",
     category_explanation: "Funds allocated by agency discretion",
-  } as Opportunity;
+  } as BaseOpportunity;
 
   it("returns `--` if agency lookup fails", () => {
     expect(

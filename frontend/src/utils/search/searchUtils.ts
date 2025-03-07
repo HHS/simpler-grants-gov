@@ -1,4 +1,4 @@
-import { Opportunity } from "src/types/search/searchResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
@@ -25,7 +25,7 @@ export const sortFilterOptions = (
 
 // finds human readable agency name by agency code in list of agency filter options
 // agency options will come in pre-flattened
-export const getAgencyDisplayName = (opportunity: Opportunity): string => {
+export const getAgencyDisplayName = (opportunity: BaseOpportunity): string => {
   if (
     opportunity.top_level_agency_name &&
     opportunity.agency_name &&

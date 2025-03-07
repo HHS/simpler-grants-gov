@@ -2,7 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
+import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
@@ -34,7 +34,7 @@ export const handleSavedOpportunity = async (
 export const getSavedOpportunities = async (
   token: string,
   userId: string,
-): Promise<SavedOpportunity[]> => {
+): Promise<MinimalOpportunity[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -64,7 +64,7 @@ export const getSavedOpportunity = async (
   token: string,
   userId: string,
   opportunityId: number,
-): Promise<SavedOpportunity | null> => {
+): Promise<MinimalOpportunity | null> => {
   const savedOpportunities = await getSavedOpportunities(token, userId);
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: number }) =>
@@ -74,7 +74,7 @@ export const getSavedOpportunity = async (
 };
 
 export const fetchSavedOpportunities = async (): Promise<
-  SavedOpportunity[]
+  MinimalOpportunity[]
 > => {
   try {
     const session = await getSession();
