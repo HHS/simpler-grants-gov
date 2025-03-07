@@ -87,7 +87,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         opp_ver_existing = OpportunityVersionFactory.create(opportunity=oca.opportunity)
 
         # update existing opportunity
-        oca.opportunity.is_draft = True
+        oca.opportunity.revision_number = 5
         oca.opportunity.opportunity_assistance_listings = []
         db_session.commit()
 
