@@ -160,7 +160,7 @@ class SetCurrentOpportunitiesTask(Task):
         for summary in opportunity.all_opportunity_summaries:
             if summary.is_forecast:
                 latest_forecasted_summary = summary
-            elif not summary.is_forecast:
+            else:
                 latest_non_forecasted_summary = summary
 
         # We need to make sure the latest can actually be publicly displayed
