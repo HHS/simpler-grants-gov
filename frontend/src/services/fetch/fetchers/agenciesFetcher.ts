@@ -25,7 +25,6 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
       pagination: {
         page_offset: 1,
         page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_direction: "ascending",
         sort_order: [
           {
             order_by: "created_at",
