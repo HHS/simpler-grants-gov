@@ -1,6 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
-import { useSnackbar } from "src/hooks/useSnackbar";
 
 import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 
@@ -20,18 +18,13 @@ jest.mock("src/components/TooltipWrapper", () => {
 });
 
 jest.mock("src/hooks/useCopyToClipboard", () => ({
-  useCopyToClipboard: mockedUseCopyToClipboard,
+  useCopyToClipboard: () => mockedUseCopyToClipboard(),
 }));
-
 jest.mock("src/hooks/useSnackbar", () => ({
-  useSnackbar: mockedUseSnackBar,
+  useSnackbar: () => mockedUseSnackBar(),
 }));
-
-const mockedUseCopyToClipboard = jest.fn() as jest.MockedFunction<
-  typeof useCopyToClipboard
->;
-
-const mockedUseSnackBar = jest.fn() as jest.MockedFunction<typeof useSnackbar>;
+const mockedUseCopyToClipboard = jest.fn();
+const mockedUseSnackBar = jest.fn();
 
 const SearchQueryCopyButtonProps = {
   copyText,
