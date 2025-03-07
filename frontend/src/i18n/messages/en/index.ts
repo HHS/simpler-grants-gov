@@ -672,7 +672,7 @@ export const messages = {
           "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
       },
       snackbar:
-        "This search query was copied to your clipboard.<br></br> Paste it as a link anywhere.",
+        "This search query was copied to your clipboard. Paste it as a link anywhere.",
     },
   },
   Maintenance: {

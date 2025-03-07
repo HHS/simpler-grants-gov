@@ -18,7 +18,7 @@ const Snackbar = ({ children, close, isVisible = false }: SnackbarProps) => {
       role="status"
       data-testid="snackbar"
       className={clsx(
-        "bg-base-darkest display-flex flex-align-start font-sans-2xs position-fixed padding-2 radius-md right-0 text-left text-white top-0 usa-modal-wrapper",
+        "bg-base-darkest display-flex flex-align-start font-sans-2xs maxw-full position-fixed padding-2 radius-md right-0 text-left text-white top-0 usa-modal-wrapper tablet:maxw-mobile-lg tablet:top-2 tablet:right-2",
         {
           "is-hidden": !isVisible,
           "is-visible": isVisible,

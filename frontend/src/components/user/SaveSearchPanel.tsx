@@ -25,13 +25,7 @@ export const SaveSearchPanel = () => {
           </div>
         }
         url={url}
-        snackbarMessage={t.rich("snackbar", {
-          br: () => (
-            <>
-              <br />
-            </>
-          ),
-        })}
+        snackbarMessage={t("snackbar")}
       />
     </div>
   );
