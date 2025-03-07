@@ -7,7 +7,7 @@ import src.data_migration.transformation.transform_constants as transform_consta
 from src.adapters import db
 from src.data_migration.transformation.subtask.transform_agency import (
     TransformAgency,
-    TransformAgencyHierarchy,
+    TransformAgencyHierarchy, ValidateAgencyData,
 )
 from src.data_migration.transformation.subtask.transform_applicant_type import (
     TransformApplicantType,
@@ -91,6 +91,7 @@ class TransformOracleDataTask(Task):
         if self.transform_config.enable_agency:
             TransformAgency(self).run()
             TransformAgencyHierarchy(self).run()
+            ValidateAgencyData(self).run()
 
         if self.transform_config.enable_opportunity_attachment:
             TransformOpportunityAttachment(self).run()

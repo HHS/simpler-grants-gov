@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import StrEnum
 from typing import Any
 
 from pydantic import Field
@@ -319,6 +320,55 @@ class TransformAgencyHierarchy(AbstractTransformSubTask):
         return agency_code.split("-")[0]
 
 
+class ValidateAgencyData(AbstractTransformSubTask):
+    """Validate (but do not modify) agency data
+
+    We simply want to detect if anything with the data seems
+    incorrect as we've noticed some oddities with the agency data.
+    """
+
+    class Metrics(StrEnum):
+        AGENCY_VALIDATED_COUNT = "agency_validated_count"
+        ORPHANED_CHILD_AGENCY_COUNT = "orphaned_child_agency_count"
+        UNEXPECTED_TOP_LEVEL_AGENCY_COUNT = "unexpected_top_level_agency_count"
+        PARENT_WITH_PARENT_AGENCY_COUNT = "parent_with_parent_agency_count"
+
+    def transform_records(self) -> None:
+        agencies = self.db_session.scalars(select(Agency).options(selectinload(Agency.top_level_agency))).all()
+
+        for agency in agencies:
+            self.validate_agency(agency)
+            self.increment(self.Metrics.AGENCY_VALIDATED_COUNT)
+
+    def validate_agency(self, agency: Agency) -> None:
+        top_level_agency: Agency | None = agency.top_level_agency
+
+        log_extra = {
+            "agency_code": agency.agency_code,
+            "is_test_agency": agency.is_test_agency,
+            "top_level_agency_code": top_level_agency.agency_code if top_level_agency else None,
+            "is_parent_test_agency": top_level_agency.is_test_agency if top_level_agency else None,
+        }
+
+        # If an agency has a dash in it, we would expect it to have a parent agency
+        if top_level_agency is None and is_child_agency(agency):
+            logger.warning("Likely child agency is orphaned and has no parent", extra=log_extra)
+            self.increment(self.Metrics.ORPHANED_CHILD_AGENCY_COUNT)
+
+        if top_level_agency is not None:
+            # We expect our process that connects child agencies to top level agencies to function
+            # correctly, but have seen very weird cases where the codes didn't match
+            expected_parent_agency_code = agency.agency_code.split("-")[0]
+            if expected_parent_agency_code != top_level_agency.agency_code:
+                logger.warning("Agency has unexpected top level agency", extra=log_extra)
+                self.increment(self.Metrics.UNEXPECTED_TOP_LEVEL_AGENCY_COUNT)
+
+            # Only a child agency should have a top-level parent agency
+            if not is_child_agency(agency):
+                logger.warning("Agency has a parent, but is not a child agency", extra=log_extra)
+                self.increment(self.Metrics.PARENT_WITH_PARENT_AGENCY_COUNT)
+
+
 ############################
 # Transformation / utility functions
 ############################
@@ -479,3 +529,8 @@ def is_test_agency_code(agency_code: str, agency_config: AgencyConfig) -> bool:
             return True
 
     return False
+
+
+def is_child_agency(agency: Agency) -> bool:
+    """Determine whether an agency looks like a child agency, that is, it has ANY dash ('-') in it"""
+    return "-" in agency.agency_code
