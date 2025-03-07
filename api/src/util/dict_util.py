@@ -74,7 +74,7 @@ def diff_nested_dicts(dict1: dict, dict2: dict) -> list:
 
 def _convert_iterables_to_set(data: Any) -> Any:
     if isinstance(data, (list, tuple)):
-        if data and isinstance(data[0], (dict, list)):  # test with applicant typen
+        if data and isinstance(data[0], (dict, list)):
             return {tuple(d.items()) for d in data}
         return set(data)
     return data

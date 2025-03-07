@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import delete
 
 from src.constants.lookup_constants import JobStatus
-from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit, OpportunityVersion
+from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.task_models import JobLog
 from src.task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
 from tests.conftest import BaseTestClass
@@ -24,8 +24,6 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         for opp in opportunities:
             db_session.delete(opp)
 
-        db_session.execute(delete(OpportunityVersion))
-        db_session.execute(delete(OpportunityChangeAudit))
         db_session.execute(delete(JobLog))
 
         db_session.commit()

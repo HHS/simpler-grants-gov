@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option("--tables-to-load", "-t", help="table to load", multiple=True)
 @click.option(
-    "--store-version/--no-store-version", default=True, help="run StoreOpportunityVersionTask"
+    "--store-version/--no-store-version", default=False, help="run StoreOpportunityVersionTask"
 )
 @flask_db.with_db_session()
 @ecs_background_task(task_name="load-transform")

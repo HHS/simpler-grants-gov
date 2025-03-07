@@ -15,7 +15,7 @@ SCHEMA = OpportunityV1Schema()
 
 def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> None:
     """
-    Saves a new version of an Opportunity record in the OpportunityVersion table if there are changes.
+    Saves a new version of an Opportunity record in the OpportunityVersion table if there are changes and the opportunity is not in draft status.
 
     This function first fetches the most recent version of the Opportunity record stored in the OpportunityVersion table.
     It compares the existing data with the current Opportunity record, and if there are any differences, it creates
@@ -26,27 +26,28 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     :return: This function does not return a value. It saves a new version of the opportunity in the database.
     """
 
-    # Fetch latest opportunity version stored
-    latest_opp_version = db_session.execute(
-        select(OpportunityVersion)
-        .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
-        .order_by(OpportunityVersion.created_at.desc())
-        .options(selectinload("*"))
-    ).scalar_one_or_none()
+    if not opportunity.is_draft:
+        # Fetch latest opportunity version stored
+        latest_opp_version = db_session.execute(
+            select(OpportunityVersion)
+            .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
+            .order_by(OpportunityVersion.created_at.desc())
+            .options(selectinload("*"))
+        ).scalar_one_or_none()
 
-    # Extracts the opportunity data as JSON object
-    opportunity_new = SCHEMA.dump(opportunity)
+        # Extracts the opportunity data as JSON object
+        opportunity_new = SCHEMA.dump(opportunity)
 
-    diffs = []
+        diffs = []
 
-    if latest_opp_version:
-        diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
+        if latest_opp_version:
+            diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
 
-    if diffs or latest_opp_version is None:
-        # Add new OpportunityVersion instance to the database session
-        opportunity_version = OpportunityVersion(
-            opportunity_id=opportunity.opportunity_id,
-            opportunity_data=opportunity_new,
-        )
+        if diffs or latest_opp_version is None:
+            # Add new OpportunityVersion instance to the database session
+            opportunity_version = OpportunityVersion(
+                opportunity_id=opportunity.opportunity_id,
+                opportunity_data=opportunity_new,
+            )
 
-        db_session.add(opportunity_version)
+            db_session.add(opportunity_version)
