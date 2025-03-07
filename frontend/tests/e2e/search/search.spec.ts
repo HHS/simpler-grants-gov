@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { camelCase } from "lodash";
 import {
-  PageProps,
   waitForAnyURLChange,
   waitForUrl,
   waitForURLContainsQueryParam,
@@ -23,6 +22,7 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   validateTopLevelAndNestedSelectedFilterCounts,
+  waitForFilterOptions,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
@@ -49,7 +49,7 @@ test.describe("Search page tests", () => {
     };
     const agencyCheckboxes = {
       EPA: "EPA",
-      AC: "AC",
+      NSF: "NSF",
     };
     const categoryCheckboxes = {
       "category-recovery_act": "recovery_act",
@@ -57,12 +57,18 @@ test.describe("Search page tests", () => {
     };
 
     await waitForSearchResultsInitialLoad(page);
-
     await selectSortBy(page, "agencyDesc");
+    await expectSortBy(page, "agencyDesc");
 
     if (project.name.match(/[Mm]obile/)) {
       await toggleMobileSearchFilters(page);
     }
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
+    await selectSortBy(page, "agencyDesc");
+    await expectSortBy(page, "agencyDesc");
 
     await fillSearchInputAndSubmit(searchTerm, page);
 
@@ -72,7 +78,6 @@ test.describe("Search page tests", () => {
       "status",
       "forecasted,posted",
     );
-
     await clickAccordionWithTitle(page, "Funding instrument");
     await toggleCheckboxes(
       page,
@@ -142,7 +147,10 @@ test.describe("Search page tests", () => {
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
-    await waitForSearchResultsInitialLoad(page);
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
 
     // Verify that page 1 is highlighted
     currentPageButton = page
@@ -156,9 +164,17 @@ test.describe("Search page tests", () => {
 
   test("last result becomes first result when flipping sort order", async ({
     page,
-  }: PageProps) => {
+  }, { project }) => {
     await page.goto("/search");
-    await waitForSearchResultsInitialLoad(page);
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
+
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
 
     await selectSortBy(page, "opportunityTitleDesc");
 
@@ -225,13 +241,17 @@ test.describe("Search page tests", () => {
         // load search page
         await page.goto("/search");
 
-        const initialSearchResultsCount =
-          await getNumberOfOpportunitySearchResults(page);
-
         // open accordion for filter type
         if (project.name.match(/[Mm]obile/)) {
           await toggleMobileSearchFilters(page);
         }
+        await Promise.all([
+          waitForSearchResultsInitialLoad(page),
+          waitForFilterOptions(page, "agency"),
+        ]);
+
+        const initialSearchResultsCount =
+          await getNumberOfOpportunitySearchResults(page);
 
         await clickAccordionWithTitle(page, filterType);
 
@@ -313,13 +333,17 @@ test.describe("Search page tests", () => {
 
       await page.goto("/search");
 
-      const initialSearchResultsCount =
-        await getNumberOfOpportunitySearchResults(page);
-
       // open accordion for filter type
       if (project.name.match(/[Mm]obile/)) {
         await toggleMobileSearchFilters(page);
       }
+      await Promise.all([
+        waitForSearchResultsInitialLoad(page),
+        waitForFilterOptions(page, "agency"),
+      ]);
+
+      const initialSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
 
       await clickAccordionWithTitle(page, "Agency");
 
@@ -351,13 +375,13 @@ test.describe("Search page tests", () => {
 
       await waitForAnyURLChange(page, urlBeforeInteraction);
 
-      // validate that new search results are returned with filtered (smaller number) of results
       const topLevelAndNestedSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);
 
+      // we've selected more agencies, so there should be more results
       expect(
         topLevelAndNestedSelectedNumberOfSearchResults,
-      ).toBeLessThanOrEqual(topLevelSelectedNumberOfSearchResults);
+      ).toBeGreaterThanOrEqual(topLevelSelectedNumberOfSearchResults);
 
       // validate that nested checkboxes are checked
       let checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();

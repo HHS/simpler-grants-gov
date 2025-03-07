@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import Loading from "src/components/Loading";
 import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
+import { SearchError } from "./SearchError";
 import SearchPagination from "./SearchPagination";
 import SearchResultsHeader from "./SearchResultsHeader";
 import SearchResultsList from "./SearchResultsList";
@@ -47,7 +48,14 @@ const ResolvedSearchResults = async ({
   query?: string | null;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) => {
-  const searchResults = await searchResultsPromise;
+  let searchResults: SearchAPIResponse;
+
+  try {
+    searchResults = await searchResultsPromise;
+  } catch (e) {
+    const error = e as Error;
+    return <SearchError error={error} />;
+  }
 
   // if there are no results because we've requested a page beyond the number of total pages
   // update page to the last page to trigger a new search

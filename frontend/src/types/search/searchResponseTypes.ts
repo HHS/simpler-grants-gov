@@ -42,7 +42,7 @@ export interface Summary {
 }
 
 export interface Opportunity {
-  agency: string | null;
+  agency_code: string | null;
   agency_name: string | null;
   category: string | null;
   category_explanation: string | null;
