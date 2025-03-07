@@ -329,6 +329,7 @@ class ValidateAgencyData(AbstractTransformSubTask):
 
     class Metrics(StrEnum):
         AGENCY_VALIDATED_COUNT = "agency_validated_count"
+        TEST_AGENCY_COUNT = "test_agency_count"
         ORPHANED_CHILD_AGENCY_COUNT = "orphaned_child_agency_count"
         UNEXPECTED_TOP_LEVEL_AGENCY_COUNT = "unexpected_top_level_agency_count"
         PARENT_WITH_PARENT_AGENCY_COUNT = "parent_with_parent_agency_count"
@@ -352,6 +353,9 @@ class ValidateAgencyData(AbstractTransformSubTask):
             "is_parent_test_agency": top_level_agency.is_test_agency if top_level_agency else None,
         }
         logger.info("Validating agency", extra=log_extra)
+
+        if agency.is_test_agency:
+            self.increment(self.Metrics.TEST_AGENCY_COUNT)
 
         # If an agency has a dash in it, we would expect it to have a parent agency
         if top_level_agency is None and is_child_agency(agency):
