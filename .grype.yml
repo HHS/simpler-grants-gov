@@ -19,13 +19,6 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # Issue with mimetype logic on Windows only
-  # No exact timeline on a fix
-  # vuln scanning thinks Python 3.14 has a fix, which would be Oct 2025
-  # Last Checked: Mar 7th, 2025
-  # https://github.com/HHS/simpler-grants-gov/pull/4078
-  - vulnerability: CVE-2024-3220
-
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly
   - vulnerability: GHSA-67mh-4wv8-2f99
