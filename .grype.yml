@@ -23,7 +23,7 @@ ignore:
   # No exact timeline on a fix
   # vuln scanning thinks Python 3.14 has a fix, which would be Oct 2025
   # Last Checked: Mar 7th, 2025
-  # TODO Issue
+  # https://github.com/HHS/simpler-grants-gov/pull/4078
   - vulnerability: CVE-2024-3220
 
   # https://github.com/HHS/simpler-grants-gov/issues/3855
