@@ -18,11 +18,13 @@ jest.mock("src/components/TooltipWrapper", () => {
 });
 
 jest.mock("src/hooks/useCopyToClipboard", () => ({
-  useCopyToClipboard: () => mockedUseCopyToClipboard(),
+  useCopyToClipboard: () => mockedUseCopyToClipboard() as unknown,
 }));
+
 jest.mock("src/hooks/useSnackbar", () => ({
-  useSnackbar: () => mockedUseSnackBar(),
+  useSnackbar: () => mockedUseSnackBar() as unknown,
 }));
+
 const mockedUseCopyToClipboard = jest.fn();
 const mockedUseSnackBar = jest.fn();
 
