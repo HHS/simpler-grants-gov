@@ -1,8 +1,6 @@
 "use server";
 
-import { getSession } from "src/services/auth/session";
-import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
-import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
+import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -13,18 +11,6 @@ import ServerErrorAlert from "src/components/ServerErrorAlert";
 interface ServerPageProps {
   searchResults: SearchAPIResponse;
 }
-
-const fetchSavedOpportunities = async (): Promise<SavedOpportunity[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-  const savedOpportunities = await getSavedOpportunities(
-    session.token,
-    session.user_id as string,
-  );
-  return savedOpportunities;
-};
 
 export default async function SearchResultsList({
   searchResults,

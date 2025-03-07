@@ -72,44 +72,6 @@ Arial is installed on your computer.
 
 <figure><img src="../../.gitbook/assets/Simpler Grants Georgia Weights Sample.png" alt=""><figcaption><p>Georgia weights</p></figcaption></figure>
 
-## Don’ts
+## Additional Don’ts
 
-Don't apply effects to type.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont apply effects to type.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't center align type.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont center align type.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't justify text.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont justify text.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't outline the type.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont outline type.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't right align type.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont right alight type.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't set type in all caps.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type in all caps.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't set type in all lowercase.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type in all lower case.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't set type too small.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type too small.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't use low contrast on type.
-
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont use low contrast on type.png" alt=""><figcaption></figcaption></figure></div>
-
-Don't use unapproved typefaces.
-
-<div align="left" data-full-width="false"><figure><img src="../../.gitbook/assets/simpler grants dont use unapproved typefaces.png" alt=""><figcaption></figcaption></figure></div>
+<table data-card-size="large" data-view="cards"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th></tr></thead><tbody><tr><td>Don't apply effects to type.</td><td><a href="../../.gitbook/assets/simpler grants dont apply effects to type.png">simpler grants dont apply effects to type.png</a></td></tr><tr><td>Don't center align type.</td><td><a href="../../.gitbook/assets/simpler grants dont center align type.png">simpler grants dont center align type.png</a></td></tr><tr><td>Don't justify text.</td><td><a href="../../.gitbook/assets/simpler grants dont justify text.png">simpler grants dont justify text.png</a></td></tr><tr><td>Don't outline the type.</td><td><a href="../../.gitbook/assets/simpler grants dont outline type.png">simpler grants dont outline type.png</a></td></tr><tr><td>Don't right align type.</td><td><a href="../../.gitbook/assets/simpler grants dont right alight type.png">simpler grants dont right alight type.png</a></td></tr><tr><td>Don't set type in all caps.</td><td><a href="../../.gitbook/assets/simpler grants dont set type in all caps.png">simpler grants dont set type in all caps.png</a></td></tr><tr><td>Don't set type in all lowercase.</td><td><a href="../../.gitbook/assets/simpler grants dont set type in all lower case.png">simpler grants dont set type in all lower case.png</a></td></tr><tr><td>Don't set type too small.</td><td><a href="../../.gitbook/assets/simpler grants dont set type too small.png">simpler grants dont set type too small.png</a></td></tr><tr><td>Don't use low contrast on type.</td><td><a href="../../.gitbook/assets/simpler grants dont use low contrast on type.png">simpler grants dont use low contrast on type.png</a></td></tr><tr><td>Don't use unapproved typefaces.</td><td><a href="../../.gitbook/assets/simpler grants dont use unapproved typefaces.png">simpler grants dont use unapproved typefaces.png</a></td></tr></tbody></table>

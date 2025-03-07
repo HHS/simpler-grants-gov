@@ -1,13 +1,9 @@
----
-description: User guide for contributing code to our GitHub.
----
-
-# GitHub - Code
+# How to contribute code
 
 GitHub is our primary platform for collaborative software development within the Simpler Grants community. This guide will help you get started and make the most out of your code contribution experience.
 
 {% hint style="info" %}
-**Looking for Work?**
+**Looking for work?**
 
 Our development team curates "help wanted" issues for open source developers like you to help out with on [GitHub](https://github.com/HHS/simpler-grants-gov/labels/help%20wanted).
 {% endhint %}
@@ -63,6 +59,12 @@ Instruction on setting up the local development environment can be found in the 
 API Development Instructions [API Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
 
 Front End Development Instructions [Front End Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
+
+{% hint style="info" %}
+Nee**d help with your local development environment?**\
+\
+Join the Slack workspace if you're having issues so we can walk you through the process of resolving blockers.
+{% endhint %}
 
 ### 3. Make & Commit changes
 

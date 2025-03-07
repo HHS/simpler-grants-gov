@@ -110,9 +110,9 @@ export const OpportunitySaveUserControl = () => {
           <ModalToggleButton
             modalRef={modalRef}
             opener
-            className="simpler-save-button usa-button usa-button--outline"
+            className="usa-button usa-button--outline"
           >
-            <USWDSIcon name="star_outline" />
+            <USWDSIcon name="star_outline" className="button-icon-large" />
             {t("save_button.save")}
           </ModalToggleButton>
           <LoginModal

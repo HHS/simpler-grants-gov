@@ -158,9 +158,9 @@ class SetCurrentOpportunitiesTask(Task):
         # data is structured that we import, we'll only ever have a single
         # null value for forecast and non-forecast respectively
         for summary in opportunity.all_opportunity_summaries:
-            if summary.is_forecast and summary.revision_number is None:
+            if summary.is_forecast:
                 latest_forecasted_summary = summary
-            elif not summary.is_forecast and summary.revision_number is None:
+            else:
                 latest_non_forecasted_summary = summary
 
         # We need to make sure the latest can actually be publicly displayed
@@ -252,14 +252,10 @@ def is_opportunity_changed(
 def get_log_extra_for_summary(summary: OpportunitySummary | None, prefix: str) -> dict[str, Any]:
     return {
         f"{prefix}_opportunity_summary_id": summary.opportunity_summary_id if summary else None,
-        f"{prefix}_opportunity_summary_revision_number": (
-            summary.revision_number if summary else None
-        ),
         f"{prefix}_opportunity_summary_is_forecast": summary.is_forecast if summary else None,
         f"{prefix}_opportunity_summary_post_date": summary.post_date if summary else None,
         f"{prefix}_opportunity_summary_close_date": summary.close_date if summary else None,
         f"{prefix}_opportunity_summary_archive_date": summary.archive_date if summary else None,
-        f"{prefix}_opportunity_summary_is_deleted": summary.is_deleted if summary else None,
         f"{prefix}_opportunity_summary_created_at": summary.created_at if summary else None,
         f"{prefix}_opportunity_summary_updated_at": summary.updated_at if summary else None,
     }

@@ -18,10 +18,19 @@ export async function POST() {
     await deleteSession();
     return Response.json({ message: "logout success" });
   } catch (e) {
-    const { message, status } = readError(e as Error, 500);
-    return Response.json(
-      { message: `Error logging out: ${message}` },
-      { status },
-    );
+    const { message, status, cause } = readError(e as Error, 500);
+    // if token expired, delete session and return 401
+    if (status === 401 && cause?.message === "Token expired") {
+      await deleteSession();
+      return Response.json(
+        { message: "session previously expired" },
+        { status },
+      );
+    } else {
+      return Response.json(
+        { message: `Error logging out: ${message}` },
+        { status },
+      );
+    }
   }
 }

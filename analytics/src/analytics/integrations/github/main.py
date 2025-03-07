@@ -27,12 +27,17 @@ def transform_project_data(
 ) -> list[dict]:
     """Pluck and reformat relevant fields for each item in the raw data."""
     transformed_data = []
+    count = 0
+    fail = 0
 
     for i, item in enumerate(raw_data):
+        count += 1
         try:
             # Filter out invalid content from boards local user may not have permission to
             if item.get("content") is None:
-                logger.info("Row %d is missing the 'content' key, skipping.", i)
+                message = f"project item {i} has no content; skipping"
+                logger.info(message)
+                logger.debug(item)
                 continue
 
             # Validate and parse the raw item
@@ -73,12 +78,17 @@ def transform_project_data(
             transformed_data.append(transformed)
 
         except ValidationError as err:
-            logger.info(
-                "**** Skipping project row %d, skipping. ****  Error: %s",
-                i,
-                err,
-            )
+            fail += 1
+            message = f"project item {i} cannot be validated; skipping"
+            logger.info(message)
+            logger.debug(err)
+            logger.debug(item)
             continue
+
+    if count > 0:
+        failure_rate = round(100 * fail / count, 3)
+        message = f"validation failure rate: {failure_rate} %"
+        logger.info(message)
 
     return transformed_data
 

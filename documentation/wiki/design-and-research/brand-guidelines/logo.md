@@ -14,17 +14,11 @@ layout:
 
 # Logo
 
-## Overview
-
 The logo is our primary identifier. It contains both the star symbol and our name in the wordmark. It should be used most often to represent our brand, positioning Grants.gov as a trusted and innovative organization dedicated to increasing access to grants and improving the grants experience for everyone.
 
 The logo is used most often as it captures more of our brand characters. The symbol and wordmark are next frequently used, while the favicon is reserved only for specific digital applications.
 
 The symbol and wordmark have been carefully scaled, spaced, and aligned to create the logo. Do not alter its construction.
-
-
-
-
 
 <figure><img src="../../.gitbook/assets/Simpler Grants Logo Overview (1).jpg" alt=""><figcaption></figcaption></figure>
 
@@ -56,42 +50,11 @@ Below are some examples of the logo in use.
 
 Do not diminish the value of our identity. Avoid the following treatments.
 
-\
-Do not use unapproved colors.
+<table data-card-size="large" data-view="cards" data-full-width="true"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th></tr></thead><tbody><tr><td>Do not use unapproved colors.</td><td><a href="../../.gitbook/assets/simpler grants logo unapproved colors.png">simpler grants logo unapproved colors.png</a></td></tr><tr><td>Do not apply effects.</td><td><a href="../../.gitbook/assets/simpler grants logo dont apply effects.png">simpler grants logo dont apply effects.png</a></td></tr><tr><td>Do not adjust the spacing.</td><td><a href="../../.gitbook/assets/simpler grants logo dont adjust the spacing.png">simpler grants logo dont adjust the spacing.png</a></td></tr><tr><td>Do not stretch or distort.</td><td><a href="../../.gitbook/assets/simpler grants logo dont stretch or distort.png">simpler grants logo dont stretch or distort.png</a></td></tr><tr><td>Do not outline.</td><td><a href="../../.gitbook/assets/simpler grants logo dont outline.png">simpler grants logo dont outline.png</a></td></tr><tr><td>Do not use low-contrast combinations.</td><td><a href="../../.gitbook/assets/simpler grants logo dont use low contrast combinations.png">simpler grants logo dont use low contrast combinations.png</a></td></tr><tr><td>Do not change the typeface</td><td><a href="../../.gitbook/assets/simpler grants logo dont change the typeface.png">simpler grants logo dont change the typeface.png</a></td></tr><tr><td>Do not adjust the scale.</td><td><a href="../../.gitbook/assets/simpler grants logo dont adjust scale.png">simpler grants logo dont adjust scale.png</a></td></tr></tbody></table>
 
-<figure><img src="../../.gitbook/assets/simpler grants logo unapproved colors.png" alt=""><figcaption></figcaption></figure>
+## Change log
 
-\
-Do not apply effects.
+Major updates to the content of this page will be added here.
 
-<figure><img src="../../.gitbook/assets/simpler grants logo dont apply effects.png" alt=""><figcaption></figcaption></figure>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>01/2025</td><td>Initial Content</td><td>Updated with initial content</td></tr><tr><td>02/25/2025</td><td>Format change</td><td>Reformatted so that "Don'ts" are cards</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
 
-\
-Do not adjust the scale.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont adjust scale.png" alt=""><figcaption></figcaption></figure>
-
-\
-Do not adjust the spacing.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont adjust the spacing.png" alt=""><figcaption></figcaption></figure>
-
-\
-Do not stretch or distort.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont stretch or distort.png" alt=""><figcaption></figcaption></figure>
-
-\
-Do not outline.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont outline.png" alt=""><figcaption></figcaption></figure>
-
-\
-Do not use low-contrast combinations.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont use low contrast combinations.png" alt=""><figcaption></figcaption></figure>
-
-\
-Do not change the typeface.
-
-<figure><img src="../../.gitbook/assets/simpler grants logo dont change the typeface.png" alt=""><figcaption></figcaption></figure>
