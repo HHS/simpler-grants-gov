@@ -54,10 +54,14 @@ describe("obtainAgencies", () => {
     expect(mockfetchAgencies).toHaveBeenCalledWith({
       body: {
         pagination: {
-          order_by: "created_at", // this seems to be the only supported option
           page_offset: 1,
-          page_size: 100, // should fetch them all. db seems to have 74 records as of 1/17/25
-          sort_direction: "ascending",
+          page_size: 1500,
+          sort_order: [
+            {
+              order_by: "created_at",
+              sort_direction: "ascending",
+            },
+          ],
         },
       },
       nextOptions: {

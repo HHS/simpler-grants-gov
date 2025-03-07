@@ -50,6 +50,7 @@ interface OpportunityDocument {
 
 export interface Opportunity {
   agency: string;
+  agency_code: string;
   agency_name: string;
   attachments: OpportunityDocument[];
   top_level_agency_name: string;
