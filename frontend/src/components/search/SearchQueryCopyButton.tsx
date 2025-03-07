@@ -57,11 +57,11 @@ const SearchQueryCopyButton = ({
         {copying ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
       </Button>
       <TooltipWrapper
-        className="margin-left-1 text-secondary-darker usa-button--unstyled"
+        className="margin-left-1 usa-button--unstyled"
         label={helpText}
         position="top"
       >
-        <USWDSIcon name="info_outline" />
+        <USWDSIcon className=" text-secondary-darker" name="info_outline" />
       </TooltipWrapper>
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
         {snackbarMessage}

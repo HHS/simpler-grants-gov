@@ -31,9 +31,7 @@ const mockedUseCopyToClipboard = jest.fn() as jest.MockedFunction<
   typeof useCopyToClipboard
 >;
 
-const mockedUseSnackBar = jest.fn() as jest.MockedFunction<
-  typeof useSnackbar
->;
+const mockedUseSnackBar = jest.fn() as jest.MockedFunction<typeof useSnackbar>;
 
 const SearchQueryCopyButtonProps = {
   copyText,

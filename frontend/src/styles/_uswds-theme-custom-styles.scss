@@ -253,27 +253,27 @@ i.e.
 }
 
 .usa-tooltip__body {
-  background-color: color("secondary-darker");
-  color: white;
+  background-color: color($theme-tooltip-background-color);
+  color: $theme-tooltip-font-color;
   &::after {
-    border-top-color: color("secondary-darker");
+    border-top-color: color($theme-tooltip-background-color);
   }
   &--right {
     &::after {
       border-top-color: transparent;
-      border-right-color: color("secondary-darker");
+      border-right-color: color($theme-tooltip-background-color);
     }
   }
   &--left {
     &::after {
       border-top-color: transparent;
-      border-left-color: color("secondary-darker");
+      border-left-color: color($theme-tooltip-background-color);
     }
   }
   &--bottom {
     &::after {
       border-top-color: transparent;
-      border-bottom-color: color("secondary-darker");
+      border-bottom-color: color($theme-tooltip-background-color);
     }
   }
 }
