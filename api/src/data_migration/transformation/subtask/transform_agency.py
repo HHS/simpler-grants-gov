@@ -334,7 +334,9 @@ class ValidateAgencyData(AbstractTransformSubTask):
         PARENT_WITH_PARENT_AGENCY_COUNT = "parent_with_parent_agency_count"
 
     def transform_records(self) -> None:
-        agencies = self.db_session.scalars(select(Agency).options(selectinload(Agency.top_level_agency))).all()
+        agencies = self.db_session.scalars(
+            select(Agency).options(selectinload(Agency.top_level_agency))
+        ).all()
 
         for agency in agencies:
             self.validate_agency(agency)
@@ -349,6 +351,7 @@ class ValidateAgencyData(AbstractTransformSubTask):
             "top_level_agency_code": top_level_agency.agency_code if top_level_agency else None,
             "is_parent_test_agency": top_level_agency.is_test_agency if top_level_agency else None,
         }
+        logger.info("Validating agency", extra=log_extra)
 
         # If an agency has a dash in it, we would expect it to have a parent agency
         if top_level_agency is None and is_child_agency(agency):

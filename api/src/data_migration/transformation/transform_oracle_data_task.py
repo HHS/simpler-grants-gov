@@ -7,7 +7,8 @@ import src.data_migration.transformation.transform_constants as transform_consta
 from src.adapters import db
 from src.data_migration.transformation.subtask.transform_agency import (
     TransformAgency,
-    TransformAgencyHierarchy, ValidateAgencyData,
+    TransformAgencyHierarchy,
+    ValidateAgencyData,
 )
 from src.data_migration.transformation.subtask.transform_applicant_type import (
     TransformApplicantType,
