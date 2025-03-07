@@ -19,27 +19,15 @@ in the form $setting: value,
   $utilities-use-important: true,
 
   // Layout & grid settings
-  $theme-utility-breakpoints: (
-      "card": false,
-      "card-lg": false,
-      "mobile": false,
-      "mobile-lg": true,
-      "tablet": true,
-      "tablet-lg": true,
-      "desktop": true,
-      "desktop-lg": true,
-      "widescreen": false
+  $flex-settings: (
+      output: true,
+      responsive: true,
+      active: false,
+      focus: false,
+      hover: false,
+      visited: false
     ),
-  $theme-banner-max-width: "desktop-lg",
-  $theme-header-max-width: "desktop-lg",
-  $theme-header-logo-text-width: 27%,
-  $theme-grid-container-max-width: "desktop-lg",
-  $theme-footer-max-width: "desktop-lg",
-  $theme-identifier-max-width: "desktop-lg",
-  $theme-site-alert-max-width: "desktop-lg",
-  $theme-column-gap-desktop: 6,
-  $theme-column-gap-md: 4,
-  $theme-column-gap-lg: 6,
+  $height-settings: (responsive: true),
   $position-settings: (
     output: true,
     responsive: true,
@@ -48,19 +36,31 @@ in the form $setting: value,
     hover: false,
     visited: false
   ),
+  $max-width-settings: (responsive: true),
   $right-settings: (responsive: true),
-  $top-settings: (responsive: true),
-  $height-settings: (responsive: true),
-  $z-index-settings: (responsive: true),
-  $flex-settings: (
-    output: true,
-    responsive: true,
-    active: false,
-    focus: false,
-    hover: false,
-    visited: false
+  $theme-banner-max-width: "desktop-lg",
+  $theme-column-gap-desktop: 6,
+  $theme-column-gap-md: 4,
+  $theme-column-gap-lg: 6,
+  $theme-grid-container-max-width: "desktop-lg",
+  $theme-footer-max-width: "desktop-lg",
+  $theme-header-max-width: "desktop-lg",
+  $theme-header-logo-text-width: 27%,
+  $theme-identifier-max-width: "desktop-lg",
+  $theme-site-alert-max-width: "desktop-lg",
+  $theme-utility-breakpoints: (
+    "card": false,
+    "card-lg": false,
+    "mobile": false,
+    "mobile-lg": true,
+    "tablet": true,
+    "tablet-lg": true,
+    "desktop": true,
+    "desktop-lg": true,
+    "widescreen": false
   ),
-
+  $top-settings: (responsive: true),
+  $z-index-settings: (responsive: true),
   // Typography settings
   $theme-font-type-sans: "public-sans",
   $theme-typeface-tokens: (

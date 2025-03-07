@@ -252,32 +252,6 @@ i.e.
   color: color("orange-40v");
 }
 
-.usa-tooltip__body {
-  background-color: color($theme-tooltip-background-color);
-  color: $theme-tooltip-font-color;
-  &::after {
-    border-top-color: color($theme-tooltip-background-color);
-  }
-  &--right {
-    &::after {
-      border-top-color: transparent;
-      border-right-color: color($theme-tooltip-background-color);
-    }
-  }
-  &--left {
-    &::after {
-      border-top-color: transparent;
-      border-left-color: color($theme-tooltip-background-color);
-    }
-  }
-  &--bottom {
-    &::after {
-      border-top-color: transparent;
-      border-bottom-color: color($theme-tooltip-background-color);
-    }
-  }
-}
-
 // There is no config for setting the current nav item border color
 .usa-header--basic .usa-nav__primary-item > .usa-current::after {
   background-color: color("mint-40");
