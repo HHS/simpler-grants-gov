@@ -1921,8 +1921,5 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
-    job_type = factory.LazyAttribute(
-        lambda _: random.choice(["StoreOpportunityVersionTask", "SetCurrentOpportunitiesTask"])
-    )
-    job_status = factory.Iterator(JobStatus)
+    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None

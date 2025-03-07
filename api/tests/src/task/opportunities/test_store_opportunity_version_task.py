@@ -9,7 +9,6 @@ from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     JobLogFactory,
     OpportunityChangeAuditFactory,
-    OpportunityFactory,
     OpportunityVersionFactory,
 )
 

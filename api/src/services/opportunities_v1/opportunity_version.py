@@ -1,6 +1,7 @@
 import logging
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
@@ -30,14 +31,18 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
         select(OpportunityVersion)
         .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
         .order_by(OpportunityVersion.created_at.desc())
+        .options(selectinload("*"))
     ).scalar_one_or_none()
 
     # Extracts the opportunity data as JSON object
     opportunity_new = SCHEMA.dump(opportunity)
-    opportunity_existing = latest_opp_version.opportunity_data if latest_opp_version else {}
 
-    diffs = diff_nested_dicts(opportunity_new, opportunity_existing)
-    if diffs:
+    diffs = []
+
+    if latest_opp_version:
+        diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
+
+    if diffs or latest_opp_version is None:
         # Add new OpportunityVersion instance to the database session
         opportunity_version = OpportunityVersion(
             opportunity_id=opportunity.opportunity_id,
