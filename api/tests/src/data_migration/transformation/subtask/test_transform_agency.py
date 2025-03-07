@@ -11,6 +11,7 @@ from src.data_migration.transformation.subtask.transform_agency import (
     TgroupAgency,
     TransformAgency,
     TransformAgencyHierarchy,
+    ValidateAgencyData,
     apply_updates,
     transform_agency_download_file_types,
     transform_agency_notify,
@@ -269,6 +270,103 @@ class TestTransformAgency(BaseTransformTestClass):
             )
 
         validate_agency(db_session, insert_that_will_fail, expect_in_db=False)
+
+
+class TestValidateAgencyData(BaseTransformTestClass):
+
+    @pytest.fixture()
+    def validate_agency_data(self, transform_oracle_data_task, truncate_agencies):
+        return ValidateAgencyData(transform_oracle_data_task)
+
+    def test_validate_agency_data_task(self, db_session, validate_agency_data, caplog):
+        # Setup a few agencies without any issues
+        top_level1 = AgencyFactory.create(agency_code="ABC")
+        AgencyFactory.create(agency_code="ABC-123", top_level_agency=top_level1)
+
+        top_level2 = AgencyFactory.create(agency_code="XYZ")
+
+        top_level3 = AgencyFactory.create(agency_code="MNOP")
+        AgencyFactory.create(agency_code="MNOP-222", top_level_agency=top_level3)
+        AgencyFactory.create(agency_code="MNOP-333", top_level_agency=top_level3)
+        AgencyFactory.create(agency_code="MNOP-444", top_level_agency=top_level3)
+
+        # Agencies with a dash, but no parent
+        orphaned_child1 = AgencyFactory.create(agency_code="HELLO-THERE")
+        orphaned_child2 = AgencyFactory.create(agency_code="some-sort-of-agency")
+        orphaned_child3 = AgencyFactory.create(
+            agency_code="ABC-999"
+        )  # ABC is a top-level created above, but it's not connected here
+
+        # Agencies with a top-level but parent agency code isn't exactly the bit before the first dash in the child
+        unexpected_top_level1 = AgencyFactory.create(
+            agency_code="something-ABC", top_level_agency=top_level1
+        )
+        unexpected_top_level2 = AgencyFactory.create(
+            agency_code="123-XYZ-456", top_level_agency=top_level2
+        )
+        unexpected_top_level3 = AgencyFactory.create(
+            agency_code="ZYX-XYZ", top_level_agency=top_level2
+        )
+        unexpected_top_level4 = AgencyFactory.create(
+            agency_code="MNOPXYZ-XYZ", top_level_agency=top_level3
+        )
+
+        # Agencies which look like a child agency shouldn't have a parent
+        # Note that these will also trigger the parent-prefix issue
+        unexpected_agency_with_parent1 = AgencyFactory.create(
+            agency_code="BOB", top_level_agency=top_level1
+        )
+        unexpected_agency_with_parent2 = AgencyFactory.create(
+            agency_code="FRED", top_level_agency=top_level2
+        )
+        unexpected_agency_with_parent3 = AgencyFactory.create(
+            agency_code="JOE", top_level_agency=top_level3
+        )
+
+        validate_agency_data.run_subtask()
+
+        # Pull agencies that hit each scenario out of the logs
+        orphaned_child_agencies = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Likely child agency is orphaned and has no parent"
+        ]
+        agencies_with_unexpected_top_level = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Agency has unexpected top level agency"
+        ]
+        parent_with_parent_agencies = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Agency has a parent, but is not a child agency"
+        ]
+
+        assert set(orphaned_child_agencies) == {
+            orphaned_child1.agency_code,
+            orphaned_child2.agency_code,
+            orphaned_child3.agency_code,
+        }
+        assert set(agencies_with_unexpected_top_level) == {
+            unexpected_top_level1.agency_code,
+            unexpected_top_level2.agency_code,
+            unexpected_top_level3.agency_code,
+            unexpected_top_level4.agency_code,
+            unexpected_agency_with_parent1.agency_code,
+            unexpected_agency_with_parent2.agency_code,
+            unexpected_agency_with_parent3.agency_code,
+        }
+        assert set(parent_with_parent_agencies) == {
+            unexpected_agency_with_parent1.agency_code,
+            unexpected_agency_with_parent2.agency_code,
+            unexpected_agency_with_parent3.agency_code,
+        }
+
+        metrics = validate_agency_data.metrics
+        assert metrics[ValidateAgencyData.Metrics.AGENCY_VALIDATED_COUNT] == 17
+        assert metrics[ValidateAgencyData.Metrics.ORPHANED_CHILD_AGENCY_COUNT] == 3
+        assert metrics[ValidateAgencyData.Metrics.UNEXPECTED_TOP_LEVEL_AGENCY_COUNT] == 7
+        assert metrics[ValidateAgencyData.Metrics.PARENT_WITH_PARENT_AGENCY_COUNT] == 3
 
 
 @pytest.mark.parametrize(
