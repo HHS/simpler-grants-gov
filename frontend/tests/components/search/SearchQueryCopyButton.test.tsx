@@ -10,14 +10,6 @@ const copiedText = "copied";
 const helpText = "click this to copy and share";
 const snackbarMessage = "you did it";
 
-jest.mock("src/hooks/useCopyToClipboard", () => ({
-  useCopyToClipboard: jest.fn(),
-}));
-
-jest.mock("src/hooks/useSnackbar", () => ({
-  useSnackbar: jest.fn(),
-}));
-
 jest.mock("src/components/TooltipWrapper", () => {
   return {
     __esModule: true,
@@ -27,10 +19,19 @@ jest.mock("src/components/TooltipWrapper", () => {
   };
 });
 
-const mockedUseCopyToClipboard = useCopyToClipboard as jest.MockedFunction<
+jest.mock("src/hooks/useCopyToClipboard", () => ({
+  useCopyToClipboard: mockedUseCopyToClipboard,
+}));
+
+jest.mock("src/hooks/useSnackbar", () => ({
+  useSnackbar: mockedUseSnackBar,
+}));
+
+const mockedUseCopyToClipboard = jest.fn() as jest.MockedFunction<
   typeof useCopyToClipboard
 >;
-const mockedUseSnackBar = useSnackbar as jest.MockedFunction<
+
+const mockedUseSnackBar = jest.fn() as jest.MockedFunction<
   typeof useSnackbar
 >;
 
