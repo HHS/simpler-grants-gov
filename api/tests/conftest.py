@@ -25,6 +25,7 @@ from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
+from src.db.models.user_models import UserOpportunityNotificationLog
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
@@ -444,6 +445,10 @@ class BaseTestClass:
         As this is at the class scope, this will only run once for a given
         class implementation.
         """
+
+        notification_logs = db_session.query(UserOpportunityNotificationLog).all()
+        for log in notification_logs:
+            db_session.delete(log)
 
         opportunities = db_session.query(Opportunity).all()
         for opp in opportunities:
