@@ -18,7 +18,6 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
-import { SaveSearchPanel } from "src/components/user/SaveSearchPanel";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -59,7 +58,6 @@ function Search({ searchParams, params }: SearchPageProps) {
         <div className="grid-container">
           <div className="search-bar">
             <SearchBar query={query} />
-            <SaveSearchPanel />
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">
