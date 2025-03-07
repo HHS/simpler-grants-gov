@@ -164,7 +164,6 @@ class AbstractTransformSubTask(SubTask):
         opportunity_summary_join_clause = [
             source_model.opportunity_id == OpportunitySummary.opportunity_id,  # type: ignore[attr-defined]
             OpportunitySummary.is_forecast.is_(is_forecast),
-            OpportunitySummary.revision_number.is_(None),
         ]
 
         return cast(
