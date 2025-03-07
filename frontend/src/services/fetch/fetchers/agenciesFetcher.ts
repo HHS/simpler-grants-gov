@@ -63,20 +63,17 @@ export const agenciesToFilterOptions = (
       label: rawAgency.agency_name,
       value: rawAgency.agency_code,
     };
-    if (
-      !rawAgency.top_level_agency ||
-      rawAgency.top_level_agency.agency_code === rawAgency.agency_code
-    ) {
+    if (isTopLevelAgency(rawAgency)) {
       return [...acc, agencyOption];
     }
     const parent = acc.find(
       (agency: FilterOption) =>
         agency.id === rawAgency.top_level_agency?.agency_code,
     );
-    // parent should always exist because of the pre-sort, if it doesn't just skip the agency
+    // parent should always already exist in the list because of the pre-sort, if it doesn't just skip the agency
     if (!parent) {
       console.error(
-        `Parent agency not found: ${rawAgency.top_level_agency?.agency_code}`,
+        `Parent agency not found: ${rawAgency.top_level_agency?.agency_code || "undefined"}`,
       );
       return acc;
     }
