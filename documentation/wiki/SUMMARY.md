@@ -17,6 +17,7 @@
   * [Incident response protocol](get-involved/policies-and-guidelines/incident-response-protocol.md)
 * [Community events](get-involved/community-events/README.md)
   * [Fall 2024 Coding Challenge](get-involved/community-events/fall-2024-coding-challenge.md)
+  * [Spring 2025 Collaborative Coding Challenge](get-involved/community-events/spring-2025-collaborative-coding-challenge.md)
 * [Communication channels](get-involved/communication-channels/README.md)
   * [Slack - Community chat](get-involved/communication-channels/slack-community-chat/README.md)
     * [Naming Conventions](get-involved/communication-channels/slack-community-chat/naming-conventions.md)
