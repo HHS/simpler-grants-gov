@@ -1,5 +1,4 @@
 import { useMessages, useTranslations } from "next-intl";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import GithubIssueLink, { gitHubLinkForIssue } from "src/components/GithubLink";
 import RoadmapPageSection from "./RoadmapPageSection";
@@ -13,38 +12,36 @@ export default function RoadmapWhatWereWorkingOn() {
     <RoadmapPageSection
       sectionTitle={t("title")}
       sectionContent={
-        <GridContainer className="padding-0">
+        <div className="roadmap-what-were-working-on">
           {contentItems.map((i, j) => (
-            <Grid
-              row
-              className="margin-bottom-0 tablet:margin-bottom-3"
-              key={`roadmap-what-were-working-on-${j}`}
-            >
+            <div className="grid-row" key={`roadmap-what-were-working-on-${j}`}>
               {i.map((k, l) => (
-                <Grid
-                  className="margin-bottom-3 tablet:grid-col-6 tablet:padding-right-7"
+                <div
+                  className="margin-bottom-3 tablet-lg:grid-col-6 tablet-lg:padding-right-7"
                   key={`roadmap-what-were-working-on-${j}-${l}`}
                 >
-                  <h3 className="font-sans-xs margin-0">
+                  <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
                     {t(`contentItems.${j}.${l}.title`)}
                   </h3>
-                  <div className="font-sans-xs margin-top-1">
+                  <div className="font-sans-xs margin-top-1 line-height-sans-4">
                     {t.rich(`contentItems.${j}.${l}.content`, {
-                      p: (chunks) => <p className=" margin-y-05">{chunks}</p>,
+                      p: (chunks) => (
+                        <p className=" font-sans-xs margin-y-05">{chunks}</p>
+                      ),
                       linkGithub3045: gitHubLinkForIssue(3045),
                       linkGithub2875: gitHubLinkForIssue(2875),
                       linkGithub2640: gitHubLinkForIssue(2640),
                       linkGithub3348: gitHubLinkForIssue(3348),
                     })}
                   </div>
-                </Grid>
+                </div>
               ))}
-            </Grid>
+            </div>
           ))}
-          <h3 className="font-sans-xs">
+          <h3 className="font-sans-xs margin-0">
             <GithubIssueLink chunks={t("link")} />
           </h3>
-        </GridContainer>
+        </div>
       }
     />
   );

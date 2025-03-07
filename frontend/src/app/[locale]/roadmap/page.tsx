@@ -1,3 +1,5 @@
+import "./roadmap.scss";
+
 import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 

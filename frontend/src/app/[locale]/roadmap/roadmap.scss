@@ -1,0 +1,69 @@
+// This stylesheet is imported in roadmap page.tsx file
+// and will be applied to all components rendered within this page.
+@import "../../../styles/styles.scss";
+
+.roadmap-page-section {
+  display: flex;
+  flex-direction: column;
+  padding-top: units(4);
+  padding-bottom: units(4);
+
+  // style for the roadmap header section w/ image.
+  &:first-of-type {
+    color: white;
+    background-color: color("primary-darkest");
+  }
+
+  &:not(:first-of-type):nth-of-type(odd) {
+    background-color: color("gray-warm-5");
+  }
+
+  @include at-media("tablet-lg") {
+    flex-direction: row;
+  }
+
+  // each section has 2 items
+  // 1. section header (left/top)
+  // 2. section content (right/bottom)
+  .roadmap-page-section-item {
+    flex: 3;
+
+    &:first-of-type {
+      flex: 1;
+      margin-bottom: units(4);
+    }
+
+    @include at-media("tablet-lg") {
+      margin: 0;
+    }
+  }
+}
+
+.roadmap-section-header {
+  margin: 0;
+  flex: 1;
+  font-size: size("sans", "lg");
+
+  @include at-media("tablet") {
+    font-size: size("sans", "xl");
+  }
+
+  @include at-media("desktop") {
+    max-width: 290px;
+  }
+}
+
+.roadmap-content-item-content {
+  margin: 0 0 units(3) 0;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  // font-sans-xs margin-top-1 margin-bottom-0 line-height-sans-4
+  .roadmap-content-item-content-p {
+    font-size: size("sans", "xs");
+    margin: units(1) 0 0 0;
+    line-height: units(3);
+  }
+}

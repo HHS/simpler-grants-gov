@@ -15,11 +15,16 @@ export default function RoadmapProcess() {
           <p className="margin-top-0">{t("sectionSummary")}</p>
           {Object.keys(contentItems).map((key) => {
             return (
-              <div className="margin-bottom-2" key={`roadmap-process-${key}`}>
-                <h3 className="margin-bottom-1">
+              <div
+                className="roadmap-content-item-content"
+                key={`roadmap-process-${key}`}
+              >
+                <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
                   {t(`contentItems.${key}.title`)}
                 </h3>
-                <p className="margin-0">{t(`contentItems.${key}.content`)}</p>
+                <p className="font-sans-xs margin-0 line-height-sans-4">
+                  {t(`contentItems.${key}.content`)}
+                </p>
               </div>
             );
           })}
