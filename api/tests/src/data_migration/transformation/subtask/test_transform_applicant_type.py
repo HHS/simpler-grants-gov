@@ -21,7 +21,7 @@ class TestTransformApplicantType(BaseTransformTestClass):
     def test_process_applicant_types(self, db_session, transform_applicant_type):
         # Forecast scenarios
         opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
-            is_forecast=True, revision_number=None, no_link_values=True
+            is_forecast=True, no_link_values=True
         )
         forecast_insert1 = setup_applicant_type(
             create_existing=False,
@@ -64,7 +64,7 @@ class TestTransformApplicantType(BaseTransformTestClass):
 
         # Synopsis scenarios
         opportunity_summary_syn = f.OpportunitySummaryFactory.create(
-            is_forecast=False, revision_number=None, no_link_values=True
+            is_forecast=False, no_link_values=True
         )
         syn_insert1 = setup_applicant_type(
             create_existing=False,
@@ -192,7 +192,7 @@ class TestTransformApplicantType(BaseTransformTestClass):
         in a single batch, we'll delete and then insert the record (effectively no meaningful change)
         """
         opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
-            is_forecast=True, revision_number=None, no_link_values=True
+            is_forecast=True, no_link_values=True
         )
         forecast_insert1 = setup_applicant_type(
             create_existing=False,
@@ -220,7 +220,7 @@ class TestTransformApplicantType(BaseTransformTestClass):
         )
 
         opportunity_summary_syn = f.OpportunitySummaryFactory.create(
-            is_forecast=False, revision_number=None, no_link_values=True
+            is_forecast=False, no_link_values=True
         )
         syn_insert1 = setup_applicant_type(
             create_existing=False,
@@ -284,7 +284,7 @@ class TestTransformApplicantType(BaseTransformTestClass):
         is_forecast,
     ):
         opportunity_summary = f.OpportunitySummaryFactory.create(
-            is_forecast=is_forecast, revision_number=None, no_link_values=True
+            is_forecast=is_forecast, no_link_values=True
         )
 
         source_record = setup_applicant_type(
