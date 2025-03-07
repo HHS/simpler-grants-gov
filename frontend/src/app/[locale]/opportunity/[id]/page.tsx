@@ -4,7 +4,7 @@ import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -40,7 +40,7 @@ export async function generateMetadata({
   let title = `${t("OpportunityListing.page_title")}`;
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
-    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
+    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
@@ -103,7 +103,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     return <NotFound />;
   }
 
-  let opportunityData = {} as Opportunity;
+  let opportunityData = {} as OpportunityDetail;
   try {
     const response = await getOpportunityDetails(id);
     opportunityData = response.data;
@@ -118,7 +118,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   breadcrumbs.push({
-    title: `${opportunityData.opportunity_title}: ${opportunityData.opportunity_number}`,
+    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 

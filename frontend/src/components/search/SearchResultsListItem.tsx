@@ -1,6 +1,6 @@
 "use client";
 
-import { Opportunity } from "src/types/search/searchResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
 import { getAgencyDisplayName } from "src/utils/search/searchUtils";
 
@@ -11,7 +11,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import SearchResultListItemStatus from "./SearchResultListItemStatus";
 
 interface SearchResultsListItemProps {
-  opportunity: Opportunity;
+  opportunity: BaseOpportunity;
   saved?: boolean;
 }
 

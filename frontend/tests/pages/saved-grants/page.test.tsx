@@ -1,7 +1,9 @@
 import { axe } from "jest-axe";
 import SavedGrants from "src/app/[locale]/saved-grants/page";
-import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
-import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
+import {
+  MinimalOpportunity,
+  OpportunityApiResponse,
+} from "src/types/opportunity/opportunityResponseTypes";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 import { mockOpportunity } from "src/utils/testing/opportunityMock";
 import { render, screen, waitFor } from "tests/react-utils";
@@ -19,7 +21,7 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   fetchSavedOpportunities: () =>
-    savedOpportunities() as Promise<SavedOpportunity[]>,
+    savedOpportunities() as Promise<MinimalOpportunity[]>,
 }));
 
 describe("Saved Grants page", () => {

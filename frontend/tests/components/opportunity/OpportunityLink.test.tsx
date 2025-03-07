@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Opportunity,
+  BaseOpportunity,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -16,13 +16,13 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
-const mockOpportunityData: Opportunity = {
+const mockOpportunityData: BaseOpportunity = {
   opportunity_title: "Test Opportunity",
   summary: {
     additional_info_url: "https://example.com",
     additional_info_url_description: "Click here for more information",
   } as Summary,
-} as Opportunity;
+} as BaseOpportunity;
 
 describe("OpportunityLink", () => {
   it("renders the link with URL and description", () => {
@@ -36,7 +36,7 @@ describe("OpportunityLink", () => {
   });
 
   it("renders no additional info link if URL is missing", () => {
-    const mockDataWithoutUrl: Opportunity = {
+    const mockDataWithoutUrl: BaseOpportunity = {
       ...mockOpportunityData,
       summary: {
         ...mockOpportunityData.summary,
@@ -51,7 +51,7 @@ describe("OpportunityLink", () => {
   });
 
   it("renders a placeholder if URL description is missing", () => {
-    const mockDataWithoutDescription: Opportunity = {
+    const mockDataWithoutDescription: BaseOpportunity = {
       ...mockOpportunityData,
       summary: {
         ...mockOpportunityData.summary,
@@ -69,7 +69,7 @@ describe("OpportunityLink", () => {
   });
 
   it("renders a fallback when both URL and description are missing", () => {
-    const mockDataWithoutUrlAndDescription: Opportunity = {
+    const mockDataWithoutUrlAndDescription: BaseOpportunity = {
       ...mockOpportunityData,
       summary: {
         additional_info_url: null,

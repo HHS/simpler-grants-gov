@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Opportunity,
+  OpportunityDetail,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -27,7 +27,7 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
-const mockOpportunityData: Opportunity = {
+const mockOpportunityData: OpportunityDetail = {
   summary: {
     estimated_total_program_funding: 5000000,
     expected_number_of_awards: 10,
@@ -41,7 +41,7 @@ const mockOpportunityData: Opportunity = {
   } as Summary,
   category: "Discretionary",
   category_explanation: "Funds allocated by agency discretion",
-} as Opportunity;
+} as OpportunityDetail;
 
 describe("OpportunityAwardInfo", () => {
   it("renders the award information correctly", () => {

@@ -1,9 +1,9 @@
-import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 
 type Props = {
-  opportunityData: Opportunity;
+  opportunityData: BaseOpportunity;
 };
 
 const OpportunityLink = ({ opportunityData }: Props) => {

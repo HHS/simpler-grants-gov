@@ -137,7 +137,7 @@ const OpportunityDescription = ({
         />
         <h2>{t("eligibility")}</h2>
         <h3>{t("eligible_applicants")}</h3>
-        {eligibleApplicantsFormatter(summary.applicant_types)}
+        {eligibleApplicantsFormatter(summary.applicant_types || [])}
         <h3>{t("additional_info")}</h3>
         <div
           dangerouslySetInnerHTML={{

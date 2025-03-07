@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Opportunity,
+  OpportunityDetail,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -24,20 +24,20 @@ jest.mock("next-intl", () => ({
 }));
 
 const createMockOpportunityData = (
-  overrides: Partial<Opportunity>,
-): Opportunity => ({
+  overrides: Partial<OpportunityDetail>,
+): OpportunityDetail => ({
   ...mockOpportunityData,
   ...overrides,
 });
 
-const mockOpportunityData: Opportunity = {
+const mockOpportunityData: OpportunityDetail = {
   opportunity_status: "posted",
   summary: {
     close_date: "2024-12-01",
     archive_date: "2025-01-01",
     close_date_description: "Electronically submitted applications",
   } as Summary,
-} as Opportunity;
+} as OpportunityDetail;
 
 describe("OpportunityStatusWidget", () => {
   it("renders 'Posted' status tag correctly", () => {
