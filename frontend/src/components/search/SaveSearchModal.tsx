@@ -129,25 +129,44 @@ export function SaveSearchModal() {
     setSavedSearchName("");
   }, []);
 
+  /*
+      <Button
+        data-testid="save-search-query"
+        type="button"
+        unstyled
+        onClick={() => {
+          copyToClipboard(url, SNACKBAR_VISIBLE_TIME)
+            .then(() => {
+              showSnackbar(SNACKBAR_VISIBLE_TIME);
+            })
+            .catch((error) => {
+              console.error("Error copying to clipboard:", error);
+            });
+        }}
+      >
+        <USWDSIcon name="content_copy" />
+        {copying ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
+      </Button>
+
+      */
+
   return (
     <>
-      <div className="usa-nav__primary margin-top-0 padding-top-2px text-no-wrap desktop:order-last margin-left-auto">
-        <div className="usa-nav__primary-item border-0">
-          <ModalToggleButton
-            modalRef={modalRef}
-            opener
-            className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-            data-testid="open-save-search-modal-button"
-          >
-            <USWDSIcon
-              className="usa-icon margin-right-05 margin-left-neg-05"
-              name="add_circle_outline"
-              key="save-search"
-            />
-            {t("saveText")}
-          </ModalToggleButton>
-        </div>
-      </div>
+      <ModalToggleButton
+        modalRef={modalRef}
+        opener
+        data-testid="open-save-search-modal-button"
+        type="button"
+        unstyled
+        className="flex-1"
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name="add_circle_outline"
+          key="save-search"
+        />
+        {t("saveText")}
+      </ModalToggleButton>
       <Modal
         ref={modalRef}
         forceAction

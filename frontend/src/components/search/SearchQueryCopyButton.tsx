@@ -23,6 +23,7 @@ type SearchQueryCopyButtonProps = {
   helpText: ReactNode;
   url: string;
   snackbarMessage: ReactNode;
+  // authenticated: boolean;
 };
 
 const SearchQueryCopyButton = ({
@@ -32,13 +33,14 @@ const SearchQueryCopyButton = ({
   helpText,
   url,
   snackbarMessage,
+  // authenticated,
 }: SearchQueryCopyButtonProps) => {
   const { copied, copying, copyToClipboard } = useCopyToClipboard();
   const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =
     useSnackbar();
 
   return (
-    <>
+    <span className="flex-1">
       <Button
         data-testid="save-search-query"
         type="button"
@@ -66,7 +68,7 @@ const SearchQueryCopyButton = ({
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
         {snackbarMessage}
       </Snackbar>
-    </>
+    </span>
   );
 };
 
