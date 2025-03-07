@@ -23,10 +23,15 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
   const response = await fetchAgencies({
     body: {
       pagination: {
-        order_by: "created_at", // this seems to be the only supported option
         page_offset: 1,
-        page_size: 100, // should fetch them all. db seems to have 74 records as of 1/17/25
+        page_size: 1500, // 969 agencies in prod as of 3/7/25
         sort_direction: "ascending",
+        sort_order: [
+          {
+            order_by: "created_at",
+            sort_direction: "ascending",
+          },
+        ],
       },
     },
     nextOptions: {
@@ -69,11 +74,12 @@ export const agenciesToFilterOptions = (
       (agency: FilterOption) =>
         agency.id === rawAgency.top_level_agency?.agency_code,
     );
-    // parent should always exist because of the pre-sort
+    // parent should always exist because of the pre-sort, if it doesn't just skip the agency
     if (!parent) {
-      throw new Error(
+      console.error(
         `Parent agency not found: ${rawAgency.top_level_agency?.agency_code}`,
       );
+      return acc;
     }
     if (!parent.children) {
       parent.children = [];
