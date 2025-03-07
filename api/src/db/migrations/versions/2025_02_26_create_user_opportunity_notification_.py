@@ -1,7 +1,7 @@
 """Create user opportunity notification log table
 
 Revision ID: bbf5ec36a497
-Revises: 20590d71bc20
+Revises: 8f5a763ccc79
 Create Date: 2025-02-26 20:20:41.407603
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "bbf5ec36a497"
-down_revision = "20590d71bc20"
+down_revision = "8f5a763ccc79"
 branch_labels = None
 depends_on = None
 
