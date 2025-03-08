@@ -704,25 +704,25 @@ export const messages = {
             },
             {
               title:
-                "Full support for Opportunity Listing attachments (NOFOs/downloads)",
+                "Full support for opportunity page attachments (NOFOs/downloads)",
               content:
                 "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
             },
           ],
           [
             {
-              title: "Authenticate via Login.gov",
+              title: "Authentication via Login.gov",
               content:
                 "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
             },
             {
-              title: "Search & Opportunity Listing improvements",
+              title: "Search & opportunity page improvements",
               content:
                 "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
             },
           ],
         ],
-        link: "View all of our deliverables on GitHub",
+        link: "View all deliverables on GitHub",
       },
       milestones: {
         title: "Recent milestones reached",
@@ -734,29 +734,29 @@ export const messages = {
               "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
           },
           {
-            title: "Code Challenge pilot",
+            title: "Coding Challenge pilot",
             content:
               "We’re excited to announce the successful pilot of the Collaborative Code & Design Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
           },
           {
             title: "Search UI usability test",
             content:
-              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
           },
           {
-            title: "Co-Design Group recruitment",
-            content:
-              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
-          },
-          {
-            title: "Opportunity Listing",
+            title: "Opportunity page launch",
             content:
               "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
           },
           {
-            title: "Search UI usability testing",
+            title: "First Co-Design Group recruitment",
             content:
-              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
+          },
+          {
+            title: "Search interface launch",
+            content:
+              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
           },
         ],
       },
