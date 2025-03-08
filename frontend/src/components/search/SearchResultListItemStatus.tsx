@@ -32,7 +32,7 @@ const StatusItem = ({
       >
         <strong>{description}</strong>
         {showDate && (
-          <span className="text-no-uppercase">
+          <span className="text-no-uppercase padding-left-05">
             {date ? formatDate(date) : "--"}
           </span>
         )}

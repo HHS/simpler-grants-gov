@@ -66,7 +66,7 @@ class AbstractTransformSubTask(SubTask):
 
     @abc.abstractmethod
     def transform_records(self) -> None:
-        """Abstract method implemented by derived, returns True when done processing"""
+        """Abstract method implemented by derived classes"""
         pass
 
     def _handle_delete(
@@ -155,18 +155,16 @@ class AbstractTransformSubTask(SubTask):
         destination_model: Type[transform_constants.D],
         join_clause: Sequence,
         is_forecast: bool,
+        is_delete: bool,
         relationship_load_value: Any,
     ) -> list[
         Tuple[transform_constants.S, transform_constants.D | None, OpportunitySummary | None]
     ]:
         # setup the join clause for getting the opportunity summary
-
         opportunity_summary_join_clause = [
             source_model.opportunity_id == OpportunitySummary.opportunity_id,  # type: ignore[attr-defined]
             OpportunitySummary.is_forecast.is_(is_forecast),
         ]
-
-        opportunity_summary_join_clause.append(OpportunitySummary.revision_number.is_(None))
 
         return cast(
             list[
@@ -179,6 +177,7 @@ class AbstractTransformSubTask(SubTask):
                 .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
                 .join(destination_model, and_(*join_clause), isouter=True)
                 .where(source_model.transformed_at.is_(None))
+                .where(source_model.is_deleted.is_(is_delete))
                 .options(selectinload(relationship_load_value))
                 .execution_options(yield_per=5000, populate_existing=True)
             ),

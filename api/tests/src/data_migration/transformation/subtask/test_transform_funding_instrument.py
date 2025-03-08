@@ -20,7 +20,7 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
 
     def test_process_funding_instruments(self, db_session, transform_funding_instrument):
         opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
-            is_forecast=True, revision_number=None, no_link_values=True
+            is_forecast=True, no_link_values=True
         )
         forecast_insert1 = setup_funding_instrument(
             create_existing=False,
@@ -49,7 +49,7 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
         )
 
         opportunity_summary_syn = f.OpportunitySummaryFactory.create(
-            is_forecast=False, revision_number=None, no_link_values=True
+            is_forecast=False, no_link_values=True
         )
         syn_insert1 = setup_funding_instrument(
             create_existing=False,
@@ -125,6 +125,135 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
+
+    def test_process_funding_instrument_delete_and_inserts(
+        self, db_session, transform_funding_instrument
+    ):
+        """Test that if we receive an insert and delete of the same lookup value
+        in a single batch, we'll delete and then insert the record (effectively no meaningful change)
+        """
+        opportunity_summary_forecast = f.OpportunitySummaryFactory.create(
+            is_forecast=True, no_link_values=True
+        )
+        forecast_insert1 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="PC",
+        )
+        forecast_insert2 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="CA",
+        )
+        forecast_insert3 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="G",
+        )
+        forecast_delete1 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="PC",
+            funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
+        )
+        forecast_delete2 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="CA",
+            funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
+        )
+        forecast_delete3 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_forecast,
+            legacy_lookup_value="G",
+            funding_instrument=FundingInstrument.GRANT,
+        )
+
+        opportunity_summary_syn = f.OpportunitySummaryFactory.create(
+            is_forecast=False, no_link_values=True
+        )
+        syn_insert1 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="O",
+        )
+        syn_insert2 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="CA",
+        )
+        syn_insert3 = setup_funding_instrument(
+            create_existing=False,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="PC",
+        )
+        syn_delete1 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="O",
+            funding_instrument=FundingInstrument.OTHER,
+        )
+        syn_delete2 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="CA",
+            funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
+        )
+        syn_delete3 = setup_funding_instrument(
+            create_existing=True,
+            is_delete=True,
+            opportunity_summary=opportunity_summary_syn,
+            legacy_lookup_value="PC",
+            funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
+        )
+
+        transform_funding_instrument.run_subtask()
+
+        validate_funding_instrument(
+            db_session,
+            forecast_insert1,
+            expected_funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
+        )
+        validate_funding_instrument(
+            db_session,
+            forecast_insert2,
+            expected_funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
+        )
+        validate_funding_instrument(
+            db_session,
+            forecast_insert3,
+            expected_funding_instrument=FundingInstrument.GRANT,
+        )
+        validate_funding_instrument(
+            db_session, syn_insert1, expected_funding_instrument=FundingInstrument.OTHER
+        )
+        validate_funding_instrument(
+            db_session,
+            syn_insert2,
+            expected_funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
+        )
+        validate_funding_instrument(
+            db_session,
+            syn_insert3,
+            expected_funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
+        )
+
+        validate_funding_instrument(db_session, forecast_delete1, expect_in_db=False)
+        validate_funding_instrument(db_session, forecast_delete2, expect_in_db=False)
+        validate_funding_instrument(db_session, forecast_delete3, expect_in_db=False)
+        validate_funding_instrument(db_session, syn_delete1, expect_in_db=False)
+        validate_funding_instrument(db_session, syn_delete2, expect_in_db=False)
+        validate_funding_instrument(db_session, syn_delete3, expect_in_db=False)
+
+        metrics = transform_funding_instrument.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 12
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 6
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
 
     @pytest.mark.parametrize("is_forecast", [True, False])
     def test_process_funding_instrument_but_current_missing(
