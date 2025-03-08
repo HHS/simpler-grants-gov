@@ -3,7 +3,7 @@ import { Meta } from "@storybook/react";
 import { Button } from "@trussworks/react-uswds";
 
 const meta: Meta<typeof Button> = {
-  title: "Components/Button",
+  title: "Core Components/Button",
   component: Button,
   args: {
     children: "Save",
