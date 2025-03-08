@@ -1,6 +1,6 @@
 import { useMessages, useTranslations } from "next-intl";
 
-import RoadmapPageSection from "./RoadmapPageSection";
+import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 export default function RoadmapProcess() {
   const t = useTranslations("Roadmap.sections.process");
@@ -10,9 +10,12 @@ export default function RoadmapProcess() {
   return (
     <RoadmapPageSection
       sectionTitle={t("title")}
+      extraClasses="bg-white"
       sectionContent={
-        <div>
-          <p className="margin-top-0">{t("sectionSummary")}</p>
+        <>
+          <p className="margin-top-0 line-height-sans-4">
+            {t("sectionSummary")}
+          </p>
           {Object.keys(contentItems).map((key) => {
             return (
               <div
@@ -22,13 +25,13 @@ export default function RoadmapProcess() {
                 <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
                   {t(`contentItems.${key}.title`)}
                 </h3>
-                <p className="font-sans-xs margin-0 line-height-sans-4">
+                <p className="font-sans-xs margin-top-1 line-height-sans-4">
                   {t(`contentItems.${key}.content`)}
                 </p>
               </div>
             );
           })}
-        </div>
+        </>
       }
     />
   );

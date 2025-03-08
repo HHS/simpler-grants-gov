@@ -1,7 +1,7 @@
 import { useMessages, useTranslations } from "next-intl";
 
 import GithubIssueLink, { gitHubLinkForIssue } from "src/components/GithubLink";
-import RoadmapPageSection from "./RoadmapPageSection";
+import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 export default function RoadmapWhatWereWorkingOn() {
   const t = useTranslations("Roadmap.sections.progress");
@@ -11,13 +11,15 @@ export default function RoadmapWhatWereWorkingOn() {
   return (
     <RoadmapPageSection
       sectionTitle={t("title")}
+      extraClasses="bg-white"
       sectionContent={
-        <div className="roadmap-what-were-working-on">
+        <>
+          <div className="margin-top-1" />
           {contentItems.map((i, j) => (
             <div className="grid-row" key={`roadmap-what-were-working-on-${j}`}>
               {i.map((k, l) => (
                 <div
-                  className="margin-bottom-3 tablet-lg:grid-col-6 tablet-lg:padding-right-7"
+                  className="margin-bottom-3 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
                   key={`roadmap-what-were-working-on-${j}-${l}`}
                 >
                   <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
@@ -41,7 +43,7 @@ export default function RoadmapWhatWereWorkingOn() {
           <h3 className="font-sans-xs margin-0">
             <GithubIssueLink chunks={t("link")} />
           </h3>
-        </div>
+        </>
       }
     />
   );

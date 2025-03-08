@@ -1,14 +1,9 @@
-import "./roadmap.scss";
-
 import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
-import RoadmapHeader from "./RoadmapHeader";
-import RoadmapMilestones from "./RoadmapMilestones";
-import RoadmapProcess from "./RoadmapProcess";
-import RoadmapWhatWereWorkingOn from "./RoadmapWhatWereWorkingOn";
+import RoadmapPageSections from "src/components/roadmap/RoadmapSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -21,12 +16,5 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 }
 
 export default function Roadmap() {
-  return (
-    <>
-      <RoadmapHeader />
-      <RoadmapWhatWereWorkingOn />
-      <RoadmapMilestones />
-      <RoadmapProcess />
-    </>
-  );
+  return <RoadmapPageSections />;
 }
