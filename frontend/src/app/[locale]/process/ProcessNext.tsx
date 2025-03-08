@@ -2,7 +2,6 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
-import { ReactNode } from "react";
 import {
   Grid,
   GridContainer,
@@ -12,31 +11,8 @@ import {
   IconListItem,
 } from "@trussworks/react-uswds";
 
+import { gitHubLinkForIssue } from "src/components/GithubLink";
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const GithubIssueLink = ({
-  issueNumber,
-  chunks,
-}: {
-  issueNumber: number;
-  chunks: ReactNode;
-}) => (
-  <Link
-    target="_blank"
-    className="usa-link--external text-bold"
-    href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
-  >
-    {chunks}
-  </Link>
-);
-
-export const gitHubLinkForIssue = (issueNumber: number) => {
-  const PartialIssueLink = (chunks: ReactNode) => (
-    <GithubIssueLink issueNumber={issueNumber} chunks={chunks} />
-  );
-  PartialIssueLink.displayName = "GithubIssueLink";
-  return PartialIssueLink;
-};
 
 const ProcessNext = () => {
   const t = useTranslations("Process.next");
