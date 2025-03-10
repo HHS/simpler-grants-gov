@@ -1,5 +1,6 @@
 import base64
 import logging
+import time
 from enum import StrEnum
 from typing import Iterator, Sequence
 
@@ -48,6 +49,9 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     enable_opportunity_attachment_pipeline: bool = Field(
         default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
     )
+
+    batch_size: int = Field(alias="BATCH_SIZE")
+    max_process_time: int = Field(alias="MAX_PROCESS_TIME")
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -134,56 +138,75 @@ class LoadOpportunitiesToIndex(Task):
             .first()
         )
 
-        # Fetch opportunities that need processing from the queue
-        query = (
-            select(Opportunity)
-            .join(OpportunityChangeAudit)
-            .join(CurrentOpportunitySummary)
-            .where(
-                Opportunity.is_draft.is_(False),
-                CurrentOpportunitySummary.opportunity_status.isnot(None),
-            )
-            .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-        )
+        while True:
+            start_time = time.monotonic()
 
-        # Add timestamp filter
-        if last_successful_job:
-            query = query.where(OpportunityChangeAudit.updated_at > last_successful_job.created_at)
+            # Fetch opportunities that need processing from the queue
+            query = (
+                select(Opportunity)
+                .join(OpportunityChangeAudit)
+                .join(CurrentOpportunitySummary)
+                .where(
+                    Opportunity.is_draft.is_(False),
+                    CurrentOpportunitySummary.opportunity_status.isnot(None),
+                )
+                .order_by(Opportunity.created_at.desc())
+                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+            ).limit(self.config.batch_size)
 
-        queued_opportunities = self.db_session.execute(query).scalars().all()
+            # Add timestamp filter
+            if last_successful_job:
+                query = query.where(
+                    OpportunityChangeAudit.updated_at > last_successful_job.created_at
+                )
 
-        # Process updates and inserts
-        processed_opportunity_ids = set()
-        opportunities_to_index = []
+            queued_opportunities = self.db_session.execute(query).scalars().all()
 
-        for opportunity in queued_opportunities:
-            logger.info(
-                "Processing queued opportunity",
-                extra={
-                    "opportunity_id": opportunity.opportunity_id,
-                    "status": (
-                        "update"
-                        if opportunity.opportunity_id in existing_opportunity_ids
-                        else "insert"
-                    ),
-                },
-            )
+            if len(queued_opportunities) == 0:
+                break
 
-            # Add to index batch if it's indexable
-            opportunities_to_index.append(opportunity)
-            processed_opportunity_ids.add(opportunity.opportunity_id)
+            # Process updates and inserts
+            processed_opportunity_ids = set()
+            opportunities_to_index = []
 
-        # Bulk index the opportunities (handles both inserts and updates)
-        if opportunities_to_index:
-            loaded_ids = self.load_records(opportunities_to_index)
-            logger.info(f"Indexed {len(loaded_ids)} opportunities")
+            for opportunity in queued_opportunities:
+                logger.info(
+                    "Processing queued opportunity",
+                    extra={
+                        "opportunity_id": opportunity.opportunity_id,
+                        "status": (
+                            "update"
+                            if opportunity.opportunity_id in existing_opportunity_ids
+                            else "insert"
+                        ),
+                    },
+                )
 
-            # Update updated_at timestamp instead of deleting records
-            self.db_session.execute(
-                update(OpportunityChangeAudit)
-                .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                .values(updated_at=datetime_util.utcnow())
-            )
+                # Add to index batch if it's indexable
+                opportunities_to_index.append(opportunity)
+                processed_opportunity_ids.add(opportunity.opportunity_id)
+
+            # Bulk index the opportunities (handles both inserts and updates)
+            if opportunities_to_index:
+                loaded_ids = self.load_records(opportunities_to_index)
+                logger.info(f"Indexed {len(loaded_ids)} opportunities")
+
+                # Update updated_at timestamp instead of deleting records
+                self.db_session.execute(
+                    update(OpportunityChangeAudit)
+                    .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
+                    .values(updated_at=datetime_util.utcnow())
+                )
+
+                self.db_session.commit()
+
+            elapsed_time = time.monotonic() - start_time
+
+            if elapsed_time > self.config.max_process_time:
+                logger.info(
+                    f"Elapsed time: {elapsed_time / 60:.2f} minutes exceeded the limit. Stopping batch processing."
+                )
+                break
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
         """Handle deletion of opportunities when running incrementally
