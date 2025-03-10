@@ -132,7 +132,7 @@ class LoadOracleDataTask(src.task.task.Task):
         t0 = time.monotonic()
         insert_chunk_count = []
         logger.info("Fetched records to be inserted, beginning batches", extra=log_extra)
-        for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size):
+        for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size, strict=False):
             insert_from_select_sql = sql.build_insert_select_sql(
                 foreign_table, staging_table, batch_of_new_ids
             )
@@ -176,7 +176,9 @@ class LoadOracleDataTask(src.task.task.Task):
         t0 = time.monotonic()
         update_chunk_count = []
         logger.info("Fetched records to be updated, beginning batches", extra=log_extra)
-        for batch_of_update_ids in itertools.batched(update_ids, self.insert_chunk_size):
+        for batch_of_update_ids in itertools.batched(
+            update_ids, self.insert_chunk_size, strict=False
+        ):
             update_sql = sql.build_update_sql(
                 foreign_table, staging_table, batch_of_update_ids
             ).values(transformed_at=None)

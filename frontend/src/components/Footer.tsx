@@ -1,5 +1,6 @@
 import GrantsLogo from "public/img/grants-logo.svg";
 import { ExternalRoutes } from "src/constants/routes";
+import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -26,7 +27,7 @@ const SocialLink = ({ href, name, icon }: SocialLinkProps) => (
     <USWDSIcon
       className="usa-social-link__icon"
       height="40px"
-      name={icon}
+      name={icon as UswdsIconNames}
       aria-label={name}
     />
   </a>
