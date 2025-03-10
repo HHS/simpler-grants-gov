@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 export default function RoadmapHeader() {
@@ -28,20 +29,25 @@ export default function RoadmapHeader() {
             tablet={{ col: 6 }}
           >
             <div className="display-flex flex-justify-center flex-align-center">
-              <img
+              <Image
                 src="/img/roadmap-header-image.png"
                 className="minh-full maxh-mobile maxw-mobile"
                 alt="Picture of person on a journey"
+                layout="responsive"
+                width={360}
+                height={350}
               />
             </div>
           </Grid>
         </Grid>
       </GridContainer>
-      <div className="mobile-lg:display-none">
-        <img
+      <div className="mobile-lg:display-none width-full">
+        <Image
           src="/img/roadmap-header-image.png"
           alt="Picture of person on a journey"
-          className="minh-full maxh-mobile width-full height-auto"
+          layout="responsive"
+          width={360}
+          height={350}
         />
       </div>
     </div>
