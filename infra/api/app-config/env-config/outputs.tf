@@ -9,11 +9,6 @@ output "search_config" {
   } : null
 }
 
-output "account_name" {
-  value       = var.account_name
-  description = "Name of the AWS account that contains the resources for the application environment."
-}
-
 output "database_config" {
   value = local.database_config
 }
@@ -52,6 +47,14 @@ output "service_config" {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
   }
+}
+
+output "identity_provider_config" {
+  value = local.identity_provider_config
+}
+
+output "notifications_config" {
+  value = local.notifications_config
 }
 
 output "storage_config" {

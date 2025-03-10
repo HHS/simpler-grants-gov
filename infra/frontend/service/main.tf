@@ -28,9 +28,11 @@ data "aws_subnets" "public" {
 }
 
 locals {
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
+  # The prefix is used to create uniquely named resources per terraform workspace, which
+  # are needed in CI/CD for preview environments and tests.
+  #
+  # To isolate changes during infrastructure development by using manually created
+  # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -45,11 +47,26 @@ locals {
   bucket_name  = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
   is_temporary = terraform.workspace != "default"
 
+  build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
+  identity_provider_config                       = local.environment_config.identity_provider_config
+  notifications_config                           = local.environment_config.notifications_config
+
+  network_config = module.project_config.network_configs[local.environment_config.network_name]
+
+  # # Identity provider locals.
+  # # If this is a temporary environment, re-use an existing Cognito user pool.
+  # # Otherwise, create a new one.
+  # identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
+  #   local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
+  # ) : null
+  # identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
+  #   COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
+  #   COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
+  # } : {}
 }
 
 terraform {
@@ -120,8 +137,10 @@ module "service" {
   source       = "../../modules/service"
   service_name = local.service_config.service_name
 
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
+  image_repository_arn = local.build_repository_config.repository_arn
+  image_repository_url = local.build_repository_config.repository_url
+
+  image_tag = local.image_tag
 
   vpc_id             = data.aws_vpc.network.id
   public_subnet_ids  = data.aws_subnets.public.ids
@@ -144,37 +163,38 @@ module "service" {
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   file_upload_jobs = local.service_config.file_upload_jobs
+  scheduled_jobs   = local.environment_config.scheduled_jobs
 
   enable_alb_cdn = true
 
 
-  extra_environment_variables = merge({
-    # FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
-    # BUCKET_NAME           = local.storage_config.bucket_name
-  }, local.service_config.extra_environment_variables)
+  extra_environment_variables = merge(
+    {
+      BUCKET_NAME = local.storage_config.bucket_name
+    },
+    # local.identity_provider_environment_variables,
+    local.service_config.extra_environment_variables
+  )
 
-  secrets = [
-    for secret_name in keys(local.service_config.secrets) : {
+  secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
-    }
-  ]
+    }],
+    module.app_config.enable_identity_provider ? [{
+      # name      = "COGNITO_CLIENT_SECRET"
+      # valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : []
+  )
 
-  extra_policies = {
-    # feature_flags_access = module.feature_flags.access_policy_arn,
-    # storage_access       = module.storage.access_policy_arn
-  }
+  extra_policies = merge(
+    {
+      # storage_access = module.storage.access_policy_arn
+    },
+    module.app_config.enable_identity_provider ? {
+      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {}
+  )
 
   is_temporary = local.is_temporary
-}
-
-module "monitoring" {
-  source = "../../modules/monitoring"
-  #Email subscription list:
-  email_alerts_subscription_list = ["grantsalerts@navapbc.com"]
-
-  # Module takes service and ALB names to link all alerts with corresponding targets
-  service_name                                = local.service_config.service_name
-  load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
-  incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 }

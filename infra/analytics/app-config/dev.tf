@@ -18,6 +18,8 @@ module "dev_config" {
   service_cpu    = 256
   service_memory = 2048
 
+  enable_identity_provider = local.enable_identity_provider
+
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.

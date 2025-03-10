@@ -12,6 +12,12 @@ cd "${script_dir}/.." >/dev/null || exit 1
 
 link_check_config=".github/workflows/markdownlint-config.json"
 
+if command -v markdown-link-check > /dev/null; then
+    link_check_cmd=markdown-link-check
+else
+    link_check_cmd="npx markdown-link-check"
+fi
+
 # Recursively find all markdown files (*.md) in the current directory, excluding node_modules and .venv subfolders.
 # Pass them in as args to the lint command using the handy `xargs` command.
-find . -name \*.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -print0 | xargs -0 -n1 npx markdown-link-check --config $link_check_config
+find . -name \*.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -not -path "*/.terraform/*" -print0 | xargs -0 -I{} sh -c "${link_check_cmd} --quiet --config ${link_check_config} {}"
