@@ -33,7 +33,7 @@ export default function RoadmapHeader() {
           </Grid>
         </Grid>
       </GridContainer>
-      <div className="tablet:display-none">
+      <div className="mobile-lg:display-none">
         <img
           src="/img/roadmap-header-image.png"
           alt="Picture of person on a journey"

@@ -1,11 +1,41 @@
-import { useMessages, useTranslations } from "next-intl";
+import { UswdsIconNames } from "src/types/generalTypes";
+
+import { useTranslations } from "next-intl";
 
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
+import { USWDSIcon } from "src/components/USWDSIcon";
+
+type RoadmapProcessSectionContentProps = {
+  content: string;
+  title: string;
+  iconName: UswdsIconNames;
+};
+
+type RoadmapProcessGrid = RoadmapProcessSectionContentProps[][];
 
 export default function RoadmapProcess() {
   const t = useTranslations("Roadmap.sections.process");
-  const messages = useMessages() as unknown as IntlMessages;
-  const { contentItems } = messages.Roadmap.sections.process;
+  const roadmapProcesSectionGridRows: RoadmapProcessGrid = [
+    [
+      {
+        title: t(`contentItems.${0}.title`),
+        content: t(`contentItems.${0}.content`),
+        iconName: "visibility",
+      },
+      {
+        title: t(`contentItems.${1}.title`),
+        content: t(`contentItems.${1}.content`),
+        iconName: "insights",
+      },
+    ],
+    [
+      {
+        title: t(`contentItems.${2}.title`),
+        content: t(`contentItems.${2}.content`),
+        iconName: "construction",
+      },
+    ],
+  ];
 
   return (
     <RoadmapPageSection
@@ -13,26 +43,41 @@ export default function RoadmapProcess() {
       extraClasses="bg-white"
       sectionContent={
         <>
-          <p className="margin-top-0 line-height-sans-4">
+          <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4">
             {t("sectionSummary")}
           </p>
-          {Object.keys(contentItems).map((key) => {
-            return (
-              <div
-                className="roadmap-content-item-content"
-                key={`roadmap-process-${key}`}
-              >
-                <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
-                  {t(`contentItems.${key}.title`)}
-                </h3>
-                <p className="font-sans-xs margin-top-1 line-height-sans-4">
-                  {t(`contentItems.${key}.content`)}
-                </p>
-              </div>
-            );
-          })}
+          {roadmapProcesSectionGridRows.map((i, k) => (
+            <div className="grid-row" key={`roadmap-process-row-${k}`}>
+              {i.map((j) => (
+                <div
+                  className="grid-col-12 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
+                  key={`roadmap-process-${j.title}`}
+                >
+                  <RoadmapProcessSectionContent {...j} />
+                </div>
+              ))}
+            </div>
+          ))}
         </>
       }
     />
   );
 }
+
+const RoadmapProcessSectionContent = ({
+  title,
+  content,
+  iconName,
+}: RoadmapProcessSectionContentProps) => {
+  return (
+    <div className="margin-top-2">
+      {iconName && <USWDSIcon className="usa-icon" name={iconName} />}
+      <h3 className="font-sans-sm margin-0 margin-top-1 tablet:font-sans-md">
+        {title}
+      </h3>
+      <p className="font-sans-xs margin-top-1 margin-bottom-0 line-height-sans-4">
+        {content}
+      </p>
+    </div>
+  );
+};
