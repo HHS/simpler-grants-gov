@@ -36,7 +36,11 @@ def get_s3_client(
         params["endpoint_url"] = s3_config.s3_endpoint_url
 
     if boto_config is None:
-        boto_config = botocore.config.Config(signature_version="s3v4")
+        boto_config = botocore.config.Config(
+            signature_version="s3v4",
+            request_checksum_calculation="when_required",
+            response_checksum_validation="when_required",
+        )
 
     params["config"] = boto_config
 

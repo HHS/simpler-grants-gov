@@ -213,7 +213,7 @@ class Enum(MixinField):
         super().__init__(**kwargs)
 
         self.enums = enums
-        self.field = original_fields.Field()
+        self.field = Raw()
 
         self.enum_mapping = {}
 
