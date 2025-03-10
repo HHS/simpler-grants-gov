@@ -14,7 +14,7 @@ const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
   loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
 });
 
-const SNACKBAR_VISIBLE_TIME = 60000;
+const SNACKBAR_VISIBLE_TIME = 6000;
 
 type SearchQueryCopyButtonProps = {
   copyText: string;
@@ -49,7 +49,7 @@ const SearchQueryCopyButton = ({
               showSnackbar(SNACKBAR_VISIBLE_TIME);
             })
             .catch((error) => {
-              console.error("Error copying to clipboard:", error);
+              console.error(error);
             });
         }}
       >
