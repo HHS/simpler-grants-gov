@@ -57,16 +57,16 @@ locals {
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
 
-  # Identity provider locals.
-  # If this is a temporary environment, re-use an existing Cognito user pool.
-  # Otherwise, create a new one.
-  identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
-    local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
-  ) : null
-  identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
-    COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
-    COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
-  } : {}
+  # # Identity provider locals.
+  # # If this is a temporary environment, re-use an existing Cognito user pool.
+  # # Otherwise, create a new one.
+  # identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
+  #   local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
+  # ) : null
+  # identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
+  #   COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
+  #   COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
+  # } : {}
 }
 
 terraform {
@@ -172,7 +172,7 @@ module "service" {
     {
       BUCKET_NAME = local.storage_config.bucket_name
     },
-    local.identity_provider_environment_variables,
+    # local.identity_provider_environment_variables,
     local.service_config.extra_environment_variables
   )
 
@@ -182,17 +182,17 @@ module "service" {
       valueFrom = module.secrets[secret_name].secret_arn
     }],
     module.app_config.enable_identity_provider ? [{
-      name      = "COGNITO_CLIENT_SECRET"
-      valueFrom = module.identity_provider_client[0].client_secret_arn
+      # name      = "COGNITO_CLIENT_SECRET"
+      # valueFrom = module.identity_provider_client[0].client_secret_arn
     }] : []
   )
 
   extra_policies = merge(
     {
-      storage_access = module.storage.access_policy_arn
+      # storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
-      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {}
   )
 
