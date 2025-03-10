@@ -16,7 +16,7 @@ type SearchQueryCopyButtonProps = {
   copiedText: string;
   url: string;
   snackbarMessage: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 const SearchQueryCopyButton = ({
@@ -25,7 +25,7 @@ const SearchQueryCopyButton = ({
   copiedText,
   url,
   snackbarMessage,
-  children,
+  children, // to be used for tooltip
 }: SearchQueryCopyButtonProps) => {
   const { copied, copying, copyToClipboard } = useCopyToClipboard();
   const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =

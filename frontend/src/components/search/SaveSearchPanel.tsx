@@ -14,7 +14,9 @@ import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
   ssr: false,
-  loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
+  loading: () => (
+    <USWDSIcon className="margin-left-1 loading" name="info_outline" />
+  ),
 });
 
 const SaveSearchTooltip = ({ text }: { text: string }) => {
@@ -55,6 +57,8 @@ export function SaveSearchPanel() {
     () => checkFeatureFlag("savedSearchesOn") && user?.token,
     [user?.token, checkFeatureFlag],
   );
+
+  console.log("!!! show ui", user?.token, checkFeatureFlag("savedSearchesOn"));
 
   return (
     <div className="border-base-lighter border-1px padding-2 text-primary-darker">

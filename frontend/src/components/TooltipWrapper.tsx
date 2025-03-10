@@ -13,6 +13,7 @@ type TooltipProps = {
 };
 
 export const TooltipWrapper = (props: TooltipProps) => {
+  console.log("~~~ rendering");
   return <Tooltip {...props} />;
 };
 
