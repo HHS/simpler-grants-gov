@@ -13,11 +13,11 @@ import { redirect } from "next/navigation";
 import { use } from "react";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
-import { SaveSearchPanel } from "src/components/user/SaveSearchPanel";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

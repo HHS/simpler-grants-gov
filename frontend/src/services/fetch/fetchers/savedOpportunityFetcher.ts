@@ -1,7 +1,7 @@
 "server-only";
 
 import { getSession } from "src/services/auth/session";
-import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
+import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
 
 export const handleSavedOpportunity = async (
@@ -24,7 +24,7 @@ export const handleSavedOpportunity = async (
           opportunity_id: String(opportunityId),
         }
       : {};
-  return userSavedOpportunity(type)({
+  return fetchUserWithMethod(type)({
     subPath,
     additionalHeaders: ssgToken,
     body,
@@ -51,7 +51,7 @@ export const getSavedOpportunities = async (
     },
   };
   const subPath = `${userId}/saved-opportunities/list`;
-  const resp = await userSavedOpportunity("POST")({
+  const resp = await fetchUserWithMethod("POST")({
     subPath,
     additionalHeaders: ssgToken,
     body,

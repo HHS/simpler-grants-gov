@@ -2,8 +2,8 @@ import { axe } from "jest-axe";
 import SavedGrants from "src/app/[locale]/saved-grants/page";
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
+import { mockOpportunity } from "src/utils/testing/fixtures";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
-import { mockOpportunity } from "src/utils/testing/opportunityMock";
 import { render, screen, waitFor } from "tests/react-utils";
 
 jest.mock("next-intl/server", () => ({
