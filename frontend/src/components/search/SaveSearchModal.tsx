@@ -137,7 +137,7 @@ export function SaveSearchModal() {
           opener
           data-testid="open-save-search-modal-button"
           type="button"
-          className="padding-05"
+          className="padding-1 hover:bg-base-lightest"
           unstyled
         >
           <USWDSIcon

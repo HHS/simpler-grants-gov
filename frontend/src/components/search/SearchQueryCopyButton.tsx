@@ -34,7 +34,7 @@ const SearchQueryCopyButton = ({
   return (
     <span className="flex-1">
       <Button
-        className="padding-05"
+        className="padding-1 hover:bg-base-lightest"
         data-testid="save-search-query"
         type="button"
         unstyled

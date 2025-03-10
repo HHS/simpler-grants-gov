@@ -58,8 +58,6 @@ export function SaveSearchPanel() {
     [user?.token, checkFeatureFlag],
   );
 
-  console.log("!!! show ui", user?.token, checkFeatureFlag("savedSearchesOn"));
-
   return (
     <div className="border-base-lighter border-1px padding-2 text-primary-darker">
       {showSavedSearchUI && (
