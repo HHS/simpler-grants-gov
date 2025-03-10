@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 import * as formSchema from "./formSchema.json"
 import * as uiSchema from "./uiSchema.json"
-import ClientForm from "src/app/[locale]/form/[id]/ClientForm";
+import ClientForm from "src/app/[locale]/form/sf/[id]/ClientForm";
 // import { RJSFSchema } from '@rjsf/utils';
 // import dynamic from "next/dynamic";
 
@@ -18,14 +18,9 @@ type FormProps = {
 } & WithFeatureFlagProps;
 
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string; locale: string }>;
-}) {
-  const { id } = await params;
+export function generateMetadata() {
   const meta: Metadata = {
-    title: `Form test for form ${id}`,
+    title: `Form test for form React JSON Schema`,
     description: "this is the form",
   };
   return meta;
@@ -53,7 +48,7 @@ async function FormPage({ params }: FormProps) {
     <GridContainer>
       <BetaAlert />
       <h1>Form {id}</h1>
-      <ClientForm schema={jsonFormSchema} uiSchema={uiSchemas} />
+      <ClientForm />
     </GridContainer>
   );
 }

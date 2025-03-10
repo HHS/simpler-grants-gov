@@ -29,6 +29,9 @@
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@jsonforms/core": "^3.5.1",
+    "@jsonforms/react": "^3.5.1",
+    "@jsonforms/vanilla-renderers": "^3.5.1",
     "@newrelic/next": "^0.10.0",
     "@next/third-parties": "^15.1.4",
     "@opentelemetry/api": "^1.8.0",
