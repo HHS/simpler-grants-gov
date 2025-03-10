@@ -43,7 +43,7 @@ export default function RoadmapProcess() {
       extraClasses="bg-white"
       sectionContent={
         <>
-          <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4">
+          <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
             {t("sectionSummary")}
           </p>
           {roadmapProcesSectionGridRows.map((i, k) => (

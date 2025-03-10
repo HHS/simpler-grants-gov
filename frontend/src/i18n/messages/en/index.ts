@@ -736,7 +736,7 @@ export const messages = {
           {
             title: "Coding Challenge pilot",
             content:
-              "We’re excited to announce the successful pilot of the Collaborative Code & Design Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
           },
           {
             title: "Search UI usability test",

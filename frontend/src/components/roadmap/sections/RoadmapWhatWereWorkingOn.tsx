@@ -2,6 +2,7 @@ import { useMessages, useTranslations } from "next-intl";
 
 import GithubIssueLink, { gitHubLinkForIssue } from "src/components/GithubLink";
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function RoadmapWhatWereWorkingOn() {
   const t = useTranslations("Roadmap.sections.progress");
@@ -40,9 +41,15 @@ export default function RoadmapWhatWereWorkingOn() {
               ))}
             </div>
           ))}
-          <h3 className="font-sans-xs margin-0">
-            <GithubIssueLink chunks={t("link")} />
-          </h3>
+          <div className="display-flex flex-align-center">
+            <USWDSIcon
+              name="github"
+              className="usa-icon usa-icon--size-3 text-primary-darker margin-right-05"
+            />
+            <p className="font-sans-xs margin-0">
+              <GithubIssueLink chunks={t("link")} />
+            </p>
+          </div>
         </>
       }
     />
