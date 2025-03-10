@@ -5,17 +5,17 @@ import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 const copyText = "copy this";
 const copyingText = "copying";
 const copiedText = "copied";
-const helpText = "click this to copy and share";
+// const helpText = "click this to copy and share";
 const snackbarMessage = "you did it";
 
-jest.mock("src/components/TooltipWrapper", () => {
-  return {
-    __esModule: true,
-    default: () => {
-      return <div>{copyText}</div>;
-    },
-  };
-});
+// jest.mock("src/components/TooltipWrapper", () => {
+//   return {
+//     __esModule: true,
+//     default: () => {
+//       return <div>{copyText}</div>;
+//     },
+//   };
+// });
 
 jest.mock("src/hooks/useCopyToClipboard", () => ({
   useCopyToClipboard: () => mockedUseCopyToClipboard() as unknown,
@@ -32,7 +32,6 @@ const SearchQueryCopyButtonProps = {
   copyText,
   copyingText,
   copiedText,
-  helpText,
   url: "http://example.com/search?query=test",
   snackbarMessage,
 };
@@ -83,8 +82,12 @@ describe("SaveButton", () => {
 
   // Doesn't work without adding support for dynamic imports
   // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("Shows tooltip", () => {
-    render(<SearchQueryCopyButton {...SearchQueryCopyButtonProps} />);
-    expect(screen.getByText(helpText)).toBeInTheDocument();
+  it("Shows children", () => {
+    render(
+      <SearchQueryCopyButton {...SearchQueryCopyButtonProps}>
+        <div data-testid="anything"></div>
+      </SearchQueryCopyButton>,
+    );
+    expect(screen.getByTestId("anything")).toBeInTheDocument();
   });
 });
