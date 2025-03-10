@@ -8,8 +8,11 @@ export default function RoadmapHeader() {
     <div className="text-white bg-primary-darkest padding-top-4 tablet:padding-y-6">
       <GridContainer>
         <Grid row>
-          <Grid tablet={{ col: 6 }}>
-            <h1 className="font-sans-xl margin-0 margin-bottom-4 tablet:font-sans-2xl maxw-2">
+          <Grid
+            tablet={{ col: 6 }}
+            className="display-flex flex-column flex-justify-center"
+          >
+            <h1 className="font-sans-xl margin-0 tablet:font-sans-2xl tablet:maxw-2">
               {t("pageHeaderTitle")}
             </h1>
             <p
@@ -24,9 +27,10 @@ export default function RoadmapHeader() {
             className="display-none tablet:display-flex tablet:flex-justify-center tablet:flex-align-center"
             tablet={{ col: 6 }}
           >
-            <div className="header-image-container">
+            <div className="display-flex flex-justify-center flex-align-center">
               <img
                 src="/img/roadmap-header-image.png"
+                className="minh-full maxh-mobile maxw-mobile"
                 alt="Picture of person on a journey"
               />
             </div>
@@ -37,7 +41,7 @@ export default function RoadmapHeader() {
         <img
           src="/img/roadmap-header-image.png"
           alt="Picture of person on a journey"
-          className="roadmap-header-img"
+          className="minh-full maxh-mobile width-full height-auto"
         />
       </div>
     </div>

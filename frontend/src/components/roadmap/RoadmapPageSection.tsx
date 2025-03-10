@@ -1,5 +1,3 @@
-import "./roadmap.scss";
-
 import React from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
@@ -19,7 +17,7 @@ export default function RoadmapPageSection({
       <GridContainer className="display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6">
         <Grid row>
           <Grid tabletLg={{ col: 4 }}>
-            <h2 className="roadmap-section-header margin-0 font-sans-lg tablet:font-sans-xl">
+            <h2 className="margin-0 font-sans-lg tablet:font-sans-xl tablet-lg:maxw-card-lg">
               {sectionTitle}
             </h2>
           </Grid>
