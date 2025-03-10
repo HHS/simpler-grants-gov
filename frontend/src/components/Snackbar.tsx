@@ -12,6 +12,7 @@ type SnackbarProps = {
 };
 
 const Snackbar = ({ children, close, isVisible = false }: SnackbarProps) => {
+  console.log("~~~ snackbar is visible", isVisible);
   return (
     <div
       aria-hidden={!isVisible}
