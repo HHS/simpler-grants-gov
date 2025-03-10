@@ -3,5 +3,8 @@
       "projectDescription": {
         "ui:widget": "textarea"
       }
+    },
+    "random": {
+      "ui:widget": "textarea"
     }
   }
