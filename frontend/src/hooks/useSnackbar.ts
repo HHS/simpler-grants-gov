@@ -7,7 +7,9 @@ export const useSnackbar = () => {
 
   const showSnackbar = (visibleTime: number) => {
     setSnackbarIsVisible(true);
+    console.log("~~~ setting timeout");
     setTimeout(() => {
+      console.log("~~~ setting not visible");
       setSnackbarIsVisible(false);
     }, visibleTime);
   };

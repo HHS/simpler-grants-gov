@@ -3,16 +3,10 @@
 import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
 import { useSnackbar } from "src/hooks/useSnackbar";
 
-import dynamic from "next/dynamic";
 import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
-  ssr: false,
-  loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
-});
 
 const SNACKBAR_VISIBLE_TIME = 6000;
 
@@ -20,20 +14,18 @@ type SearchQueryCopyButtonProps = {
   copyText: string;
   copyingText: string;
   copiedText: string;
-  helpText: ReactNode;
   url: string;
   snackbarMessage: ReactNode;
-  // authenticated: boolean;
+  children: ReactNode;
 };
 
 const SearchQueryCopyButton = ({
   copyText,
   copyingText,
   copiedText,
-  helpText,
   url,
   snackbarMessage,
-  // authenticated,
+  children,
 }: SearchQueryCopyButtonProps) => {
   const { copied, copying, copyToClipboard } = useCopyToClipboard();
   const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =
@@ -42,6 +34,7 @@ const SearchQueryCopyButton = ({
   return (
     <span className="flex-1">
       <Button
+        className="padding-05"
         data-testid="save-search-query"
         type="button"
         unstyled
@@ -58,13 +51,7 @@ const SearchQueryCopyButton = ({
         <USWDSIcon name="content_copy" />
         {copying ? <>{copyingText}</> : <>{copied ? copiedText : copyText}</>}
       </Button>
-      <TooltipWrapper
-        className="margin-left-1 usa-button--unstyled"
-        label={helpText}
-        position="top"
-      >
-        <USWDSIcon className=" text-secondary-darker" name="info_outline" />
-      </TooltipWrapper>
+      {children}
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
         {snackbarMessage}
       </Snackbar>

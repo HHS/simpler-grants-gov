@@ -4,11 +4,30 @@ import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
+
+const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
+  ssr: false,
+  loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
+});
+
+const SaveSearchTooltip = ({ text }: { text: string }) => {
+  return (
+    <TooltipWrapper
+      className="margin-left-1 usa-button--unstyled"
+      label={<div className="width-card-lg text-wrap">{text}</div>}
+      position="top"
+    >
+      <USWDSIcon className="text-secondary-darker" name="info_outline" />
+    </TooltipWrapper>
+  );
+};
 
 export function SaveSearchPanel() {
   const { checkFeatureFlag } = useFeatureFlags();
@@ -16,7 +35,7 @@ export function SaveSearchPanel() {
   const path = usePathname();
   const searchParams = useSearchParams();
 
-  const t = useTranslations("Search.saveSearch.copySearch");
+  const t = useTranslations("Search.saveSearch");
 
   const url = useMemo(() => {
     const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
@@ -25,27 +44,40 @@ export function SaveSearchPanel() {
   }, [searchParams, path]);
 
   const copyText = useMemo(
-    () => (user?.token ? t("copy.authenticated") : t("copy.unauthenticated")),
+    () =>
+      user?.token
+        ? t("copySearch.copy.authenticated")
+        : t("copySearch.copy.unauthenticated"),
     [user?.token, t],
   );
 
+  const showSavedSearchUI = useMemo(
+    () => checkFeatureFlag("savedSearchesOn") && user?.token,
+    [user?.token, checkFeatureFlag],
+  );
+
   return (
-    <div className="border-base-lighter border-1px padding-2 flex-align-start text-primary-darker text-underline display-flex">
-      {checkFeatureFlag("savedSearchesOn") && user?.token && (
-        <SaveSearchModal />
+    <div className="border-base-lighter border-1px padding-2 text-primary-darker">
+      {showSavedSearchUI && (
+        <div className="margin-bottom-2 display-flex">
+          <span className="text-bold">{t("heading")}</span>
+          <SaveSearchTooltip text={t("help.noSavedQueries")} />
+        </div>
       )}
-      <SearchQueryCopyButton
-        copiedText={t("copied")}
-        copyingText={t("copying")}
-        copyText={copyText}
-        helpText={
-          <div className="width-card-lg text-wrap">
-            {t("help.unauthenticated")}
-          </div>
-        }
-        url={url}
-        snackbarMessage={t("snackbar")}
-      />
+      <div className="display-flex flex-align-start text-underline">
+        {showSavedSearchUI && <SaveSearchModal />}
+        <SearchQueryCopyButton
+          copiedText={t("copySearch.copied")}
+          copyingText={t("copySearch.copying")}
+          copyText={copyText}
+          url={url}
+          snackbarMessage={t("copySearch.snackbar")}
+        >
+          {!showSavedSearchUI && (
+            <SaveSearchTooltip text={t("help.unauthenticated")} />
+          )}
+        </SearchQueryCopyButton>
+      </div>
     </div>
   );
 }
