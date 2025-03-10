@@ -3,6 +3,7 @@ import typing
 
 from apiflask import validators
 from marshmallow import ValidationError
+from marshmallow.validate import _SizedT
 
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
@@ -77,7 +78,7 @@ class Length(validators.Length):
 
         return ValidationError([error_container])
 
-    def __call__(self, value: typing.Sized) -> typing.Sized:
+    def __call__(self, value: _SizedT) -> _SizedT:
         length = len(value)
 
         if self.equal is not None:
