@@ -55,7 +55,7 @@ const NavLinks = ({
     const anonymousNavLinks = [
       { text: t("nav_link_home"), href: "/" },
       getSearchLink(path.includes("/search")),
-      { text: t("nav_link_process"), href: "/process" },
+      { text: t("nav_link_roadmap"), href: "/roadmap" },
       { text: t("nav_link_research"), href: "/research" },
       { text: t("nav_link_subscribe"), href: "/subscribe" },
     ];

@@ -500,7 +500,7 @@ export const messages = {
   },
   Header: {
     nav_link_home: "Home",
-    nav_link_process: "Process",
+    nav_link_roadmap: "Roadmap",
     nav_link_research: "Research",
     nav_link_subscribe: "Subscribe",
     nav_menu_toggle: "Menu",
