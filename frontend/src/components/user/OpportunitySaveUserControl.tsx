@@ -38,9 +38,7 @@ export const OpportunitySaveUserControl = () => {
     try {
       const res = await fetch("/api/user/saved-opportunities", {
         method,
-        headers: {
-          opportunityId,
-        },
+        body: JSON.stringify({ opportunityId }),
       });
       if (res.ok && res.status === 200) {
         const data = (await res.json()) as { type: string };
