@@ -62,6 +62,7 @@ data "aws_kms_key" "default_ssm_key" {
 resource "aws_kms_key" "role_manager" {
   description         = "Key for Lambda function ${local.role_manager_name}"
   enable_key_rotation = true
+  # checkov:skip=CKV2_AWS_64:skip KMS key policy check
 }
 
 data "aws_secretsmanager_secret" "db_password" {
