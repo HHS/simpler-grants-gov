@@ -1,8 +1,3 @@
-variable "name" {
-  type        = string
-  description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
-}
-
 variable "second_octet" {
   type        = number
   description = "Second octet of the VPC CIDR block. Must be between 0 and 255."
