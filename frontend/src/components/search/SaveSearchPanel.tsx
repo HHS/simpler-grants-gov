@@ -10,6 +10,7 @@ import { useMemo } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
+import { SavedSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
@@ -63,16 +64,25 @@ export function SaveSearchPanel() {
     [user?.token, checkFeatureFlag],
   );
 
+  const handleSavedSearchSelect = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    console.log("!!! selected", event?.target?.value);
+  };
+
   return (
     <div className="border-base-lighter border-1px padding-2 text-primary-darker">
       {showSavedSearchUI && (
-        <div className="margin-bottom-2 display-flex">
-          <span className="text-bold">{t("heading")}</span>
-          <SaveSearchTooltip
-            text={t("help.noSavedQueries")}
-            title={t("help.general")}
-          />
-        </div>
+        <>
+          <div className="margin-bottom-2 display-flex">
+            <span className="text-bold">{t("heading")}</span>
+            <SaveSearchTooltip
+              text={t("help.noSavedQueries")}
+              title={t("help.general")}
+            />
+          </div>
+          <SavedSearchSelector handleSelected={handleSavedSearchSelect} />
+        </>
       )}
       <div className="display-flex flex-align-start text-underline">
         {showSavedSearchUI && <SaveSearchModal />}
