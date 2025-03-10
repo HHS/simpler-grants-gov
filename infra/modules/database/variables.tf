@@ -65,12 +65,6 @@ variable "database_subnet_group_name" {
   description = "Name of database subnet group"
 }
 
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection."
-  type        = bool
-  default     = false
-}
-
 variable "migrator_access_policy_name" {
   description = "name of the IAM policy to create that will provide the migration task the ability to connect to the database as a user that will have read/write access."
   type        = string

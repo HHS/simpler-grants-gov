@@ -15,12 +15,6 @@ variable "image_repository_name" {
   default     = null
 }
 
-variable "desired_instance_count" {
-  type        = number
-  description = "The port number on the container that's bound to the user-specified"
-  default     = 8000
-}
-
 variable "cpu" {
   type        = number
   default     = 256
@@ -272,10 +266,7 @@ variable "scheduled_jobs" {
   type = map(object({
     task_command        = list(string)
     schedule_expression = string
-<<<<<<< HEAD
     state               = string
-=======
->>>>>>> b3d96d97 (nava-platform infra update-base --version platform-cli-migration/v0.13.0 .)
   }))
   default = {}
 }
