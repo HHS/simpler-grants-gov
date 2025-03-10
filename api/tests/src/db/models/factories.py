@@ -25,8 +25,10 @@ import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
+import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -35,12 +37,16 @@ from src.constants.lookup_constants import (
     ExtractType,
     FundingCategory,
     FundingInstrument,
+    JobStatus,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
 )
 from src.db.models import agency_models
 from src.util import file_util
+
+# Needed for generating Opportunity Json Blob for OpportunityVersion
+SCHEMA = OpportunityV1Schema()
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -1901,4 +1907,13 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
-    opportunity_data = factory.LazyAttribute(lambda o: o.opportunity_data)
+    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
+
+
+class JobLogFactory(BaseFactory):
+    class Meta:
+        model = task_models.JobLog
+
+    job_id = Generators.UuidObj
+    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
+    metrics = None
