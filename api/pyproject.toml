@@ -85,6 +85,9 @@ line-length = 100
 # assuming we enabled them below
 preview = true
 
+
+target-version = "py313"
+
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
 select = ["B", "C", "E", "F", "W", "B9"]
