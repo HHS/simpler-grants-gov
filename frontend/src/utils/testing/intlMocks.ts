@@ -16,27 +16,6 @@ export const localeParams = new Promise<{ locale: string }>((resolve) => {
 
 // mocking all types of messages, could split by message type in the future
 export const mockMessages = {
-  Process: {
-    intro: {
-      boxes: ["firstKey"],
-    },
-    progress: {
-      list: [
-        {
-          title: "test title",
-          content: "test content",
-        },
-      ],
-    },
-    next: {
-      list: [
-        {
-          title: "test title",
-          content: "test content",
-        },
-      ],
-    },
-  },
   Research: {
     impact: {
       boxes: ["firstKey"],
