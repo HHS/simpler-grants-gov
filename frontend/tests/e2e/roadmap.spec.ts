@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/process");
+  await page.goto("/roadmap");
 });
 
 test.afterEach(async ({ context }) => {
@@ -10,12 +10,10 @@ test.afterEach(async ({ context }) => {
 });
 
 test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle("Process | Simpler.Grants.gov");
+  await expect(page).toHaveTitle("Roadmap | Simpler.Grants.gov");
 });
 
-test("can view banner and return to top after scrolling to the bottom", async ({
-  page,
-}, {
+test("can return to top after scrolling to the bottom", async ({ page }, {
   project: {
     use: { isMobile, defaultBrowserType },
   },
@@ -32,30 +30,28 @@ test("can view banner and return to top after scrolling to the bottom", async ({
     );
   }
 
-  await expect(
-    page.getByRole("heading", {
-      name: /This site is a work in progress, with new features and updates based on your feedback./i,
-    }),
-  ).toBeVisible();
-
   await returnToTopLink.click();
 
   await expect(returnToTopLink).not.toBeInViewport();
   await expect(
-    page.getByRole("heading", { name: "Our open process" }),
+    page.getByRole("heading", { name: "Product roadmap" }),
   ).toBeInViewport();
 });
 
-test("can view the 'Search interface launch'", async ({ page }) => {
-  await page.getByRole("link", { name: "Try the new simpler search" }).click();
+test("can view the 'View all deliverables on Github'", async ({ page }) => {
+  const newTabPromise = page.waitForEvent("popup");
 
-  await expect(page).toHaveURL(/search/);
-});
-
-test("can view the 'get involved' link", async ({ page }) => {
   await page
-    .getByRole("link", { name: "Get involved in our open-source community" })
+    .getByRole("link", { name: "View all deliverables on Github" })
     .click();
 
-  await expect(page).toHaveTitle(/Process | Simpler.Grants.gov/);
+  // Assert user remains on the roadmap page.
+  await expect(page).toHaveTitle(/Roadmap | Simpler.Grants.gov/);
+
+  // Assert that the github issues page for SGG is opened in a new tab.
+  const newTab = await newTabPromise;
+  await newTab.waitForLoadState();
+  await expect(newTab).toHaveURL(
+    "https://github.com/HHS/simpler-grants-gov/issues/?q=is%3Aissue%20type%3ADeliverable%20",
+  );
 });
