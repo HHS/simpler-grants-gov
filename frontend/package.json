@@ -85,7 +85,6 @@
     "jest-axe": "^7.0.0",
     "jest-cli": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
-    "jest-next-dynamic": "^1.0.2",
     "pa11y-ci": "^3.1.0",
     "postcss": "^8.4.31",
     "postcss-loader": "^7.1.0",

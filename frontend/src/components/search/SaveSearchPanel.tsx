@@ -14,9 +14,7 @@ import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
   ssr: false,
-  loading: () => (
-    <USWDSIcon className="margin-left-1 loading" name="info_outline" />
-  ),
+  loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
 });
 
 const SaveSearchTooltip = ({ text }: { text: string }) => {
