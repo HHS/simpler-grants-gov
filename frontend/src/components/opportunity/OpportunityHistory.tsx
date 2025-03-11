@@ -48,6 +48,22 @@ const OpportunityHistory = ({ summary }: Props) => {
         title={t("archive_date")}
         content={formatHistoryDate(summary.archive_date)}
       />
+      <OpportunityHistoryItem
+        title={t("forcasted_award_date")}
+        content={formatHistoryDate(summary.forecasted_award_date)}
+      />
+      <OpportunityHistoryItem
+        title={t("forcasted_post_date")}
+        content={formatHistoryDate(summary.forecasted_post_date)}
+      />
+      <OpportunityHistoryItem
+        title={t("forcasted_close_date")}
+        content={formatHistoryDate(summary.forecasted_close_date)}
+      />
+      <OpportunityHistoryItem
+        title={t("forcasted_close_date_description")}
+        content={summary.forecasted_close_date_description ? summary.forecasted_close_date_description : ""}
+      />
     </div>
   );
 };
