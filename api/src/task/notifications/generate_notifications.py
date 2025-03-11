@@ -30,6 +30,7 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
     app_id: str = Field(alias="PINPOINT_APP_ID")
 
@@ -40,6 +41,7 @@ CONTACT_INFO = (
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
 )
+
 
 @task_blueprint.cli.command(
     "generate-notifications", help="Send notifications for opportunity and search changes"
@@ -223,7 +225,7 @@ class NotificationTask(Task):
                     "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
                     "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
                     "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-                    {CONTACT_INFO}
+                    "{CONTACT_INFO}"
                 )
             elif len(container.closing_opportunities) > 1:
                 # Multiple opportunities closing
@@ -247,7 +249,7 @@ class NotificationTask(Task):
                     "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
                     "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
                     "If you have questions, please contact the Grants.gov Contact Center:\n"
-                    {CONTACT_INFO}
+                    "{CONTACT_INFO}"
                 )
 
             if len(container.closing_opportunities) > 0:
