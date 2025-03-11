@@ -30,11 +30,11 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
 
 const fakeRequestForSavedOpps = (success = true, method: string) => {
   return {
-    headers: {
-      get: jest.fn(() => {
-        return success ? 1 : null;
-      }),
-    },
+    json: jest.fn(() => {
+      return success
+        ? Promise.resolve({ opportunityId: "1" })
+        : Promise.resolve({ opportunityId: null });
+    }),
     method,
   } as unknown as NextRequest;
 };
