@@ -22,7 +22,7 @@ def upgrade():
         "user_opportunity_notification_log",
         sa.Column("user_opportunity_notification_log_id", sa.UUID(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
-        sa.Column("opportunity_id", sa.BigInteger(), nullable=True),
+        sa.Column("opportunity_id", sa.BigInteger()),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),

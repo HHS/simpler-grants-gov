@@ -157,6 +157,6 @@ class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
     user: Mapped[User] = relationship(User)
 
     opportunity_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True, nullable=True
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship("Opportunity")
