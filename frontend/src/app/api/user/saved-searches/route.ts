@@ -39,7 +39,7 @@ export const POST = async (request: Request) => {
     );
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
-        `Error ${request.method} saved opportunity: ${response.message}`,
+        `Error saving search: ${response.message}`,
         "APIRequestError",
         response.status_code,
       );
