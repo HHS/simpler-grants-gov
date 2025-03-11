@@ -8,7 +8,7 @@ locals {
   scheduled_jobs = {
     sprint-reports = {
       task_command        = ["make", "gh-extract-transform-and-load"]
-      schedule_expression = "rate(1 days)"
+      schedule_expression = "rate(8 hours)"
       state               = "ENABLED"
     }
     opportunity-load-csvs = {
