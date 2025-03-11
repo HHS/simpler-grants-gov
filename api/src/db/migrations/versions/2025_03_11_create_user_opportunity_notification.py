@@ -1,8 +1,8 @@
-"""Create user opportunity notification log table
+"""create_user_opportunity_notification
 
-Revision ID: bbf5ec36a497
+Revision ID: 5268c5f97814
 Revises: 8f5a763ccc79
-Create Date: 2025-02-26 20:20:41.407603
+Create Date: 2025-03-11 19:10:06.510988
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "bbf5ec36a497"
+revision = "5268c5f97814"
 down_revision = "8f5a763ccc79"
 branch_labels = None
 depends_on = None
@@ -22,7 +22,7 @@ def upgrade():
         "user_opportunity_notification_log",
         sa.Column("user_opportunity_notification_log_id", sa.UUID(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
-        sa.Column("opportunity_id", sa.BigInteger()),
+        sa.Column("opportunity_id", sa.BigInteger(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -38,7 +38,6 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["opportunity_id"],
             ["api.opportunity.opportunity_id"],
-            nullable=False,
             name=op.f("user_opportunity_notification_log_opportunity_id_opportunity_fkey"),
         ),
         sa.ForeignKeyConstraint(
