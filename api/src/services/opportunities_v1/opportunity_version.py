@@ -26,28 +26,30 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     :return: This function does not return a value. It saves a new version of the opportunity in the database.
     """
 
-    if not opportunity.is_draft:
-        # Fetch latest opportunity version stored
-        latest_opp_version = db_session.execute(
-            select(OpportunityVersion)
-            .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
-            .order_by(OpportunityVersion.created_at.desc())
-            .options(selectinload("*"))
-        ).scalar_one_or_none()
+    if opportunity.is_draft:
+       return
 
-        # Extracts the opportunity data as JSON object
-        opportunity_new = SCHEMA.dump(opportunity)
+    # Fetch latest opportunity version stored
+    latest_opp_version = db_session.execute(
+        select(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
+        .order_by(OpportunityVersion.created_at.desc())
+        .options(selectinload("*"))
+    ).scalar_one_or_none()
 
-        diffs = []
+    # Extracts the opportunity data as JSON object
+    opportunity_new = SCHEMA.dump(opportunity)
 
-        if latest_opp_version:
-            diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
+    diffs = []
 
-        if diffs or latest_opp_version is None:
-            # Add new OpportunityVersion instance to the database session
-            opportunity_version = OpportunityVersion(
-                opportunity_id=opportunity.opportunity_id,
-                opportunity_data=opportunity_new,
-            )
+    if latest_opp_version:
+        diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
 
-            db_session.add(opportunity_version)
+    if diffs or latest_opp_version is None:
+        # Add new OpportunityVersion instance to the database session
+        opportunity_version = OpportunityVersion(
+            opportunity_id=opportunity.opportunity_id,
+            opportunity_data=opportunity_new,
+        )
+
+        db_session.add(opportunity_version)

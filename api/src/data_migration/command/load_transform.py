@@ -43,9 +43,9 @@ def load_transform(
     load: bool,
     transform: bool,
     set_current: bool,
+    store_version: bool,
     insert_chunk_size: int,
     tables_to_load: list[str],
-    store_version: bool,
 ) -> None:
     logger.info("load and transform start")
 
