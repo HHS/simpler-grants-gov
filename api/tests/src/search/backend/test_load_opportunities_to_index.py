@@ -217,7 +217,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         search_client,
         opportunity_index_alias,
         load_opportunities_to_index,
-        monkeypatch,
     ):
 
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
@@ -265,10 +264,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         for opportunity in itertools.chain(opportunities, test_opps):
             OpportunityChangeAuditFactory.create(opportunity=opportunity, updated_at=None)
 
-        import pdb
-
-        pdb.set_trace()
-
         load_opportunities_to_index.run()
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
@@ -284,8 +279,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         # assert correct number of batches processed
         assert load_opportunities_to_index.metrics[
             load_opportunities_to_index.Metrics.BATCHES_PROCESSED
-        ] == math.ceil(len(opportunities + test_opps) / int(os.getenv("BATCH_SIZE")))
-        # pdb.set_trace()
+        ] == math.ceil(
+            len(opportunities + test_opps) / int(os.getenv("INCREMENTAL_LOAD_BATCH_SIZE"))
+        )
 
         # Add a few more opportunities that will be created
         opportunities.extend(

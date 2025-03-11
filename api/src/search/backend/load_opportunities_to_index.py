@@ -181,7 +181,9 @@ class LoadOpportunitiesToIndex(Task):
                 )
 
             queued_opportunities = (
-                self.db_session.execute(query.limit(self.config.incremental_load_batch_size)).scalars().all()
+                self.db_session.execute(query.limit(self.config.incremental_load_batch_size))
+                .scalars()
+                .all()
             )
 
             if len(queued_opportunities) == 0:
