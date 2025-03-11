@@ -50,7 +50,7 @@ def run_notification_task(db_session: db.Session, search_client: search.SearchCl
 class NotificationConstants:
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
-    CLOSING_DATE_REMINDER = "closing_date_reminder"  #
+    CLOSING_DATE_REMINDER = "closing_date_reminder"
 
 
 @dataclass
