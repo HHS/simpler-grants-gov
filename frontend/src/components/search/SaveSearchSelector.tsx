@@ -5,11 +5,12 @@ import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSear
 import { SavedSearch } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Select } from "@trussworks/react-uswds";
 
 import SimplerAlert from "src/components/SimplerAlert";
-import Spinner from "../Spinner";
+import Spinner from "src/components/Spinner";
 
 /* needs to respond to
     * newly added saved search
@@ -23,12 +24,13 @@ export const SavedSearchSelector = ({
   newSavedSearches: string[];
 }) => {
   const t = useTranslations("Search.saveSearch");
+  const { user } = useUser();
+  const searchParams = useSearchParams();
+
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
-
-  const { user } = useUser();
 
   const fetchSavedSearches = useCallback(() => {
     if (user?.token) {
@@ -55,19 +57,25 @@ export const SavedSearchSelector = ({
     console.log("~~~ save search selection", selectedSavedSearch);
   }, [selectedSavedSearch]);
 
+  // fetch saved searches on page load
+  useEffect(() => {
+    fetchSavedSearches();
+  }, [user?.token, fetchSavedSearches]);
+
+  // fetch saved searches on new saved search
   useEffect(() => {
     if (newSavedSearches.length && fetchSavedSearches) {
       fetchSavedSearches().then(() => {
-        console.log("$$$ setting", newSavedSearches[0]);
+        // set the latest saved search as selected
         setSelectedSavedSearch(newSavedSearches[0]);
       });
     }
   }, [newSavedSearches.length]);
 
-  // TODO: will also need to trigger refetch on new saved search
+  // reset saved search selector on search change
   useEffect(() => {
-    fetchSavedSearches();
-  }, [user?.token, fetchSavedSearches]);
+    setSelectedSavedSearch("");
+  }, [searchParams]);
 
   if (loading) {
     return <Spinner />;
