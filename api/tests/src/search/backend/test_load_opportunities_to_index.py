@@ -2,6 +2,7 @@ import itertools
 import math
 import os
 
+import freezegun
 import pytest
 from sqlalchemy import select
 
@@ -19,7 +20,6 @@ from tests.src.db.models.factories import (
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
-import freezegun
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
@@ -199,15 +199,16 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
-    def load_opportunities_to_index(self, db_session, search_client, opportunity_index_alias, monkeypatch_class):
+    def load_opportunities_to_index(
+        self, db_session, search_client, opportunity_index_alias, monkeypatch_class
+    ):
         monkeypatch_class.setenv("BATCH_SIZE", "5")
-        # monkeypatch_class.setenv("MAX_PROCESS_TIME", 2)
         config = LoadOpportunitiesToIndexConfig(
             alias_name=opportunity_index_alias, index_prefix="test-load-opps"
         )
         return LoadOpportunitiesToIndex(db_session, search_client, False, config)
 
-    @freezegun.freeze_time()
+    @freezegun.freeze_time("2024-11-30", tz_offset=0)
     def test_load_opportunities_to_index(
         self,
         truncate_opportunities,
@@ -216,7 +217,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         search_client,
         opportunity_index_alias,
         load_opportunities_to_index,
-        monkeypatch
+        monkeypatch,
     ):
 
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
@@ -264,7 +265,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         for opportunity in itertools.chain(opportunities, test_opps):
             OpportunityChangeAuditFactory.create(opportunity=opportunity, updated_at=None)
 
-        import pdb;pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
 
         load_opportunities_to_index.run()
 
@@ -279,8 +282,10 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         ] == len(test_opps)
 
         # assert correct number of batches processed
-        assert load_opportunities_to_index.metrics[load_opportunities_to_index.Metrics.BATCHES_PROCESSED] == math.ceil(len(opportunities + test_opps) / int(os.getenv("BATCH_SIZE")))
-        pdb.set_trace()
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.BATCHES_PROCESSED
+        ] == math.ceil(len(opportunities + test_opps) / int(os.getenv("BATCH_SIZE")))
+        # pdb.set_trace()
 
         # Add a few more opportunities that will be created
         opportunities.extend(
@@ -372,4 +377,25 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 1
 
-    def test_batch_process(self, db_session, load_opportunities_to_index):
+    @freezegun.freeze_time("2100-03-13", tz_offset=0)
+    def test_batch_process_exceed_time_limit(
+        self, db_session, search_client, load_opportunities_to_index
+    ):
+        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
+            "%Y-%m-%d_%H-%M-%S"
+        )
+        search_client.create_index(index_name)
+        search_client.swap_alias_index(
+            index_name,
+            load_opportunities_to_index.config.alias_name,
+        )
+
+        load_opportunities_to_index.run()
+
+        # assert process exited, no batches processed
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.BATCHES_PROCESSED
+            ]
+            == 0
+        )

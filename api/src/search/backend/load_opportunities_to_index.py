@@ -1,6 +1,5 @@
 import base64
 import logging
-import time
 from enum import StrEnum
 from typing import Iterator, Sequence
 
@@ -25,7 +24,7 @@ from src.db.models.opportunity_models import (
 from src.db.models.task_models import JobLog
 from src.task.task import Task
 from src.util import datetime_util, file_util
-from src.util.datetime_util import get_now_us_eastern_datetime
+from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -81,6 +80,7 @@ class LoadOpportunitiesToIndex(Task):
         else:
             self.index_name = self.config.alias_name
         self.set_metrics({"index_name": self.index_name})
+        self.start_time = utcnow()
 
     def run_task(self) -> None:
         logger.info("Creating multi-attachment pipeline")
@@ -140,10 +140,14 @@ class LoadOpportunitiesToIndex(Task):
         )
 
         last_processed_opportunity: Opportunity | None = None
-
         while True:
-            start_time = time.monotonic()
-
+            # Check elapsed_time before starting new batch processing
+            elapsed_time = utcnow() - self.start_time
+            if elapsed_time.total_seconds() > self.config.max_process_time:
+                logger.info(
+                    f"Elapsed time: {elapsed_time.total_seconds() / 60:.2f} minutes exceeded the limit. Stopping batch processing."
+                )
+                break
             # Fetch opportunities that need processing from the queue
             query = (
                 select(Opportunity)
@@ -220,13 +224,6 @@ class LoadOpportunitiesToIndex(Task):
                 self.increment(self.Metrics.BATCHES_PROCESSED)
 
                 last_processed_opportunity = queued_opportunities[-1]
-
-            elapsed_time = time.monotonic() - start_time
-            if elapsed_time > self.config.max_process_time:
-                logger.info(
-                    f"Elapsed time: {elapsed_time / 60:.2f} minutes exceeded the limit. Stopping batch processing."
-                )
-                break
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
         """Handle deletion of opportunities when running incrementally
