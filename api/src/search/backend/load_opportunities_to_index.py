@@ -7,7 +7,7 @@ from typing import Iterator, Sequence
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import select, update, or_, and_
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.orm import noload, selectinload
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
@@ -59,7 +59,6 @@ class LoadOpportunitiesToIndex(Task):
         RECORDS_LOADED = "records_loaded"
         TEST_RECORDS_SKIPPED = "test_records_skipped"
         BATCHES_PROCESSED = "batches_processed"
-
 
     def __init__(
         self,
@@ -140,13 +139,13 @@ class LoadOpportunitiesToIndex(Task):
             .first()
         )
 
-        last_processed_opportunity = None
+        last_processed_opportunity: Opportunity | None = None
 
         while True:
             start_time = time.monotonic()
 
             # Fetch opportunities that need processing from the queue
-            query = ((
+            query = (
                 select(Opportunity)
                 .join(OpportunityChangeAudit)
                 .join(CurrentOpportunitySummary)
@@ -157,8 +156,7 @@ class LoadOpportunitiesToIndex(Task):
                 .order_by(Opportunity.created_at.desc())
                 .order_by(Opportunity.opportunity_id.desc())
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-            ))
-
+            )
 
             # Use last_processed_id to fetch the next batch of opportunities
             if last_processed_opportunity:
@@ -166,9 +164,9 @@ class LoadOpportunitiesToIndex(Task):
                     or_(
                         Opportunity.created_at < last_processed_opportunity.created_at,
                         and_(
-                            Opportunity.created_at == last_processed_opportunity.created_at ,
+                            Opportunity.created_at == last_processed_opportunity.created_at,
                             Opportunity.opportunity_id < last_processed_opportunity.opportunity_id,
-                        )
+                        ),
                     )
                 )
 
@@ -178,11 +176,12 @@ class LoadOpportunitiesToIndex(Task):
                     OpportunityChangeAudit.updated_at > last_successful_job.created_at
                 )
 
-            queued_opportunities = self.db_session.execute(query.limit(self.config.batch_size)).scalars().all()
+            queued_opportunities = (
+                self.db_session.execute(query.limit(self.config.batch_size)).scalars().all()
+            )
 
             if len(queued_opportunities) == 0:
                 break
-
             # Process updates and inserts
             processed_opportunity_ids = set()
             opportunities_to_index = []
