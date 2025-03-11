@@ -663,6 +663,7 @@ export const messages = {
     saveSearch: {
       heading: "Current search query",
       defaultSelect: "Select saved query",
+      fetchSavedError: "Error loading saved query. Try again later.",
       help: {
         unauthenticated:
           "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",

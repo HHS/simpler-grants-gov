@@ -85,7 +85,7 @@ function SuccessContent({
   );
 }
 
-export function SaveSearchModal() {
+export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalId = "save-search";
 
   const t = useTranslations("Search.saveSearch.modal");
@@ -109,8 +109,10 @@ export function SaveSearchModal() {
     }
     setLoading(true);
     saveSearch(savedSearchName, searchParams, user?.token)
-      .then((_data) => {
+      .then((data) => {
+        console.log("&&& saved the data back here", data);
         setSaved(true);
+        onSave(data.id);
       })
       .catch((error) => {
         setApiError(true);
@@ -119,7 +121,7 @@ export function SaveSearchModal() {
       .finally(() => {
         setLoading(false);
       });
-  }, [savedSearchName, user, searchParams, t, validationError]);
+  }, [savedSearchName, user, searchParams, t, validationError, onSave]);
 
   const onClose = useCallback(() => {
     setSaved(false);

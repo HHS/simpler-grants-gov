@@ -83,3 +83,12 @@ export interface SearchParamsTypes {
   status?: string;
   [key: string]: string | undefined;
 }
+
+export type SavedSearch = {
+  name: string;
+  saved_search_id: string;
+  search_query: {
+    filters: SearchFilterRequestBody;
+    pagination: PaginationRequestBody;
+  };
+};

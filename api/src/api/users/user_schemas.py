@@ -133,6 +133,15 @@ class SavedSearchResponseSchema(Schema):
         metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
     )
 
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(SavedSearchResponseSchema)
+    # data = fields.MixinField(metadata={"example": None})
+    # saved_search_id = fields.UUID(
+    #     metadata={
+    #         "description": "The ID of the saved search",
+    #         "example": "123e4567-e89b-12d3-a456-426614174000",
+    #     }
+    # )
 
 class UserSaveSearchResponseSchema(AbstractResponseSchema):
     data = fields.Nested(SavedSearchResponseSchema)

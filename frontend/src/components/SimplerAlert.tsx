@@ -5,7 +5,8 @@ import { ReactNode } from "react";
 import { USWDSIcon } from "./USWDSIcon";
 
 interface SimplerAlertProps {
-  alertClick: () => void;
+  // in some cases we want the message to be persistent
+  alertClick?: () => void;
   // This is the id which will be tied to the aria-describedby of the alert
   buttonId: string;
   messageText: string | ReactNode;
@@ -57,14 +58,16 @@ const SimplerAlert = ({
         >
           {messageText}
         </div>
-        <button
-          data-testid="simpler-alert-close-button"
-          type="button"
-          className="usa-button usa-button--unstyled font-sans-lg text-black margin-left-2"
-          onClick={alertClick}
-        >
-          <USWDSIcon name="close" />
-        </button>
+        {alertClick && (
+          <button
+            data-testid="simpler-alert-close-button"
+            type="button"
+            className="usa-button usa-button--unstyled font-sans-lg text-black margin-left-2"
+            onClick={alertClick}
+          >
+            <USWDSIcon name="close" />
+          </button>
+        )}
       </div>
     </Wrapper>
   );
