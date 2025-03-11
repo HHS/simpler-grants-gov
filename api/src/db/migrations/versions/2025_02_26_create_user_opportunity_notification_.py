@@ -38,6 +38,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["opportunity_id"],
             ["api.opportunity.opportunity_id"],
+            nullable=False,
             name=op.f("user_opportunity_notification_log_opportunity_id_opportunity_fkey"),
         ),
         sa.ForeignKeyConstraint(
