@@ -31,6 +31,33 @@ const OpportunityHistoryItem = ({
 
 const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
+
+  const ForeCastItems = () => {
+    if(summary.is_forecast) {
+      return (
+        <>
+        <OpportunityHistoryItem
+          title={t("forcasted_award_date")}
+          content={formatHistoryDate(summary.forecasted_award_date)}
+        />
+        <OpportunityHistoryItem
+          title={t("forcasted_post_date")}
+          content={formatHistoryDate(summary.forecasted_post_date)}
+        />
+        <OpportunityHistoryItem
+          title={t("forcasted_close_date")}
+          content={formatHistoryDate(summary.forecasted_close_date)}
+        />
+        <OpportunityHistoryItem
+          title={t("forcasted_close_date_description")}
+          content={summary.forecasted_close_date_description ? summary.forecasted_close_date_description : ""}
+        />
+        </>
+      );
+    }
+    return <></>
+  }
+
   return (
     <div className="usa-prose margin-top-4">
       <h3>{t("history")}</h3>
@@ -48,22 +75,8 @@ const OpportunityHistory = ({ summary }: Props) => {
         title={t("archive_date")}
         content={formatHistoryDate(summary.archive_date)}
       />
-      <OpportunityHistoryItem
-        title={t("forcasted_award_date")}
-        content={formatHistoryDate(summary.forecasted_award_date)}
-      />
-      <OpportunityHistoryItem
-        title={t("forcasted_post_date")}
-        content={formatHistoryDate(summary.forecasted_post_date)}
-      />
-      <OpportunityHistoryItem
-        title={t("forcasted_close_date")}
-        content={formatHistoryDate(summary.forecasted_close_date)}
-      />
-      <OpportunityHistoryItem
-        title={t("forcasted_close_date_description")}
-        content={summary.forecasted_close_date_description ? summary.forecasted_close_date_description : ""}
-      />
+      <ForeCastItems />
+
     </div>
   );
 };
