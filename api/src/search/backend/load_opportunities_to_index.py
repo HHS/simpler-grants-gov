@@ -49,8 +49,8 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
         default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
     )
 
-    batch_size: int = Field(alias="BATCH_SIZE")
-    max_process_time: int = Field(alias="MAX_PROCESS_TIME")
+    incremental_load_batch_size: int = Field(alias="INCREMENTAL_LOAD_BATCH_SIZE")
+    incremental_load_max_process_time: int = Field(alias="INCREMENTAL_LOAD_MAX_PROCESS_TIME")
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -143,7 +143,7 @@ class LoadOpportunitiesToIndex(Task):
         while True:
             # Check elapsed_time before starting new batch processing
             elapsed_time = utcnow() - self.start_time
-            if elapsed_time.total_seconds() > self.config.max_process_time:
+            if elapsed_time.total_seconds() > self.config.incremental_load_max_process_time:
                 logger.info(
                     f"Elapsed time: {elapsed_time.total_seconds() / 60:.2f} minutes exceeded the limit. Stopping batch processing."
                 )
@@ -181,7 +181,7 @@ class LoadOpportunitiesToIndex(Task):
                 )
 
             queued_opportunities = (
-                self.db_session.execute(query.limit(self.config.batch_size)).scalars().all()
+                self.db_session.execute(query.limit(self.config.incremental_load_batch_size)).scalars().all()
             )
 
             if len(queued_opportunities) == 0:
