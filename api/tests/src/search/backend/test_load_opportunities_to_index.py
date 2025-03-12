@@ -1,6 +1,5 @@
 import itertools
 import math
-import os
 
 import freezegun
 import pytest
@@ -26,7 +25,8 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
     def load_opportunities_to_index(self, db_session, search_client, opportunity_index_alias):
         config = LoadOpportunitiesToIndexConfig(
-            alias_name=opportunity_index_alias, index_prefix="test-load-opps"
+            alias_name=opportunity_index_alias,
+            index_prefix="test-load-opps",
         )
         return LoadOpportunitiesToIndex(db_session, search_client, True, config)
 
@@ -202,9 +202,10 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     def load_opportunities_to_index(
         self, db_session, search_client, opportunity_index_alias, monkeypatch_class
     ):
-        monkeypatch_class.setenv("BATCH_SIZE", "5")
         config = LoadOpportunitiesToIndexConfig(
-            alias_name=opportunity_index_alias, index_prefix="test-load-opps"
+            alias_name=opportunity_index_alias,
+            index_prefix="test-load-opps",
+            incremental_load_batch_size=5,
         )
         return LoadOpportunitiesToIndex(db_session, search_client, False, config)
 
@@ -222,6 +223,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
+        search_client.delete_index(index_name)
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -280,7 +282,8 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         assert load_opportunities_to_index.metrics[
             load_opportunities_to_index.Metrics.BATCHES_PROCESSED
         ] == math.ceil(
-            len(opportunities + test_opps) / int(os.getenv("INCREMENTAL_LOAD_BATCH_SIZE"))
+            len(opportunities + test_opps)
+            / int(load_opportunities_to_index.config.incremental_load_batch_size)
         )
 
         # Add a few more opportunities that will be created
@@ -302,6 +305,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
         db_session.commit()
         db_session.expunge_all()
+
         load_opportunities_to_index.run()
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
@@ -327,6 +331,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         self,
         db_session,
         load_opportunities_to_index,
+        enable_factory_create,
     ):
         """Test that a new opportunity in the queue gets indexed"""
         test_opportunity = OpportunityFactory.create(
@@ -352,7 +357,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 0
 
-    def test_draft_opportunity_not_indexed(self, db_session, load_opportunities_to_index):
+    def test_draft_opportunity_not_indexed(
+        self, db_session, load_opportunities_to_index, enable_factory_create
+    ):
         """Test that draft opportunities are not indexed"""
         test_opportunity = OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
 
@@ -380,6 +387,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
+        search_client.delete_index(index_name)
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,

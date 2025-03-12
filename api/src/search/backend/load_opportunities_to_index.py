@@ -6,24 +6,23 @@ from typing import Iterator, Sequence
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import and_, or_, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import noload, selectinload
+from sqlalchemy.sql import Select
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
-from src.db.models.lookup_models import JobStatus
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunityAttachment,
     OpportunityChangeAudit,
 )
-from src.db.models.task_models import JobLog
 from src.task.task import Task
-from src.util import datetime_util, file_util
+from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -125,69 +124,41 @@ class LoadOpportunitiesToIndex(Task):
         # Handle deletes
         self._handle_incremental_delete(existing_opportunity_ids)
 
-    def _handle_incremental_upserts(self, existing_opportunity_ids: set[int]) -> None:
-        """Handle updates/inserts of opportunities into the search index when running incrementally"""
-
-        # Get last successful job timestamp
-        last_successful_job = (
-            self.db_session.query(JobLog)
-            .filter(
-                JobLog.job_type == self.cls_name(),
-                JobLog.job_status == JobStatus.COMPLETED,
+    def _build_opportunities_to_process_query(self) -> Select:
+        # Build query to fetch  opportunities for processing
+        return (
+            select(Opportunity)
+            .join(OpportunityChangeAudit)
+            .join(CurrentOpportunitySummary)
+            .where(
+                Opportunity.is_draft.is_(False),
+                CurrentOpportunitySummary.opportunity_status.isnot(None),
+                OpportunityChangeAudit.is_loaded_to_search.is_(False),
             )
-            .order_by(JobLog.created_at.desc())
-            .first()
+            .order_by(Opportunity.created_at.desc())
+            .order_by(Opportunity.opportunity_id.desc())
+            .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+            .limit(self.config.incremental_load_batch_size)
         )
 
-        last_processed_opportunity: Opportunity | None = None
+    def _handle_incremental_upserts(self, existing_opportunity_ids: set[int]) -> None:
+        """Handle updates/inserts of opportunities into the search index when running incrementally"""
         while True:
             # Check elapsed_time before starting new batch processing
             elapsed_time = utcnow() - self.start_time
+
             if elapsed_time.total_seconds() > self.config.incremental_load_max_process_time:
                 logger.info(
                     f"Elapsed time: {elapsed_time.total_seconds() / 60:.2f} minutes exceeded the limit. Stopping batch processing."
                 )
                 break
+
             # Fetch opportunities that need processing from the queue
-            query = (
-                select(Opportunity)
-                .join(OpportunityChangeAudit)
-                .join(CurrentOpportunitySummary)
-                .where(
-                    Opportunity.is_draft.is_(False),
-                    CurrentOpportunitySummary.opportunity_status.isnot(None),
-                )
-                .order_by(Opportunity.created_at.desc())
-                .order_by(Opportunity.opportunity_id.desc())
-                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-            )
-
-            # Use last_processed_id to fetch the next batch of opportunities
-            if last_processed_opportunity:
-                query = query.where(
-                    or_(
-                        Opportunity.created_at < last_processed_opportunity.created_at,
-                        and_(
-                            Opportunity.created_at == last_processed_opportunity.created_at,
-                            Opportunity.opportunity_id < last_processed_opportunity.opportunity_id,
-                        ),
-                    )
-                )
-
-            # Add timestamp filter
-            if last_successful_job:
-                query = query.where(
-                    OpportunityChangeAudit.updated_at > last_successful_job.created_at
-                )
-
-            queued_opportunities = (
-                self.db_session.execute(query.limit(self.config.incremental_load_batch_size))
-                .scalars()
-                .all()
-            )
+            queued_opportunities = self.db_session.execute(self._build_opportunities_to_process_query()).scalars().all()
 
             if len(queued_opportunities) == 0:
                 break
+
             # Process updates and inserts
             processed_opportunity_ids = set()
             opportunities_to_index = []
@@ -218,14 +189,10 @@ class LoadOpportunitiesToIndex(Task):
                 self.db_session.execute(
                     update(OpportunityChangeAudit)
                     .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                    .values(updated_at=datetime_util.utcnow())
+                    .values(is_loaded_to_search=True)
                 )
 
-                self.db_session.commit()
-
                 self.increment(self.Metrics.BATCHES_PROCESSED)
-
-                last_processed_opportunity = queued_opportunities[-1]
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
         """Handle deletion of opportunities when running incrementally
