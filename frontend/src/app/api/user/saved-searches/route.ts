@@ -33,7 +33,7 @@ export const POST = async (request: Request) => {
 
     const response = await handleSavedSearch(
       session.token,
-      session.user_id as string,
+      session.user_id,
       savedSearch,
       savedSearchBody.name,
     );

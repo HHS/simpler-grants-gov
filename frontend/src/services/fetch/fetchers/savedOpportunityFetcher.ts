@@ -83,7 +83,7 @@ export const fetchSavedOpportunities = async (): Promise<
     }
     const savedOpportunities = await getSavedOpportunities(
       session.token,
-      session.user_id as string,
+      session.user_id,
     );
     return savedOpportunities;
   } catch (e) {
