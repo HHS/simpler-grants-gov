@@ -1,10 +1,8 @@
 import logging
-import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import StrEnum
-from urllib.parse import urlparse
 
 import botocore.client
 from pydantic import Field
@@ -218,10 +216,6 @@ class NotificationTask(Task):
                         "No close date found for opportunity",
                         extra={"opportunity_id": opportunity.opportunity_id},
                     )
-                    continue
-
-                if not base_url:
-                    logger.warning("No base URL found, skipping notification")
                     continue
 
                 subject = "Applications for your bookmarked funding opportunity are due soon"
