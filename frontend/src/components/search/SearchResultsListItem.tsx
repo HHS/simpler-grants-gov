@@ -76,6 +76,7 @@ export default function SearchResultsListItem({
                 <Link
                   href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link"
+                  key={opportunity?.opportunity_id}
                 >
                   {HighlightQueryTerms(opportunity?.opportunity_title)}
                   
