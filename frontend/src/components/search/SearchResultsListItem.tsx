@@ -41,6 +41,29 @@ export default function SearchResultsListItem({
     text-base-darker
   `;
 
+  const HighlightQueryTerms = (title: string) => {
+    const queryItems = new Set<string>(queryTerm.split(" "));
+    const titleItems = title.split(" ");
+
+    const display = titleItems.map((word) => {
+      if(queryItems.has(word)) {
+        return {className: "bg-yellow", data: word}
+      }
+      return {className: "", data: word}
+    })
+
+    const displayFormat = display.map((item) => {
+      const styles = `display-inline ${item.className}`
+      return (
+        <>
+          {item.className === "bg-yellow" ? <span className={styles} key={Math.random()}>{item.data}</span> : ` ${item.data} `}
+        </>
+      )
+    })
+
+    return displayFormat
+  }
+
   return (
     <div className={resultBorderClasses}>
       <div className="grid-row grid-gap">
