@@ -223,7 +223,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
-        search_client.delete_index(index_name)
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -387,7 +386,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
-        search_client.delete_index(index_name)
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
