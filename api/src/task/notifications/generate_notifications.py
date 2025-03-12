@@ -1,4 +1,6 @@
 import logging
+import os
+from urllib.parse import urlparse
 import uuid
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -36,7 +38,7 @@ class GenerateNotificationsConfig(PydanticBaseEnvConfig):
 
 
 CONTACT_INFO = (
-    "support@grants.gov\n"
+    "mailto:support@grants.gov\n"
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
@@ -59,6 +61,29 @@ class NotificationConstants:
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
+
+
+def get_base_url():
+    """
+    Gets the base URL (protocol + hostname) from the LOGIN_FINAL_DESTINATION environment variable.
+    
+    Returns:
+        str: The base URL (e.g., 'http://localhost:8080') or None if the environment variable
+             is not set or cannot be parsed.
+    """
+    login_url = os.environ.get('LOGIN_FINAL_DESTINATION')
+    
+    if not login_url:
+        return None
+    
+    try:
+        parsed_url = urlparse(login_url)
+        # Combine protocol (scheme) and hostname (netloc)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        return base_url
+    except Exception as e:
+        # Log the error if needed
+        return None 
 
 
 @dataclass
@@ -215,10 +240,15 @@ class NotificationTask(Task):
                     )
                     continue
 
+                base_url = get_base_url()
+                if not base_url:
+                    logger.warning("No base URL found, skipping notification")
+                    continue
+
                 subject = "Applications for your bookmarked funding opportunity are due soon"
                 message = (
                     "Applications for the following funding opportunity are due in two weeks:\n\n"
-                    f"[{opportunity.opportunity.opportunity_title}]\n"
+                    f"<a href='{base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity.opportunity_title}</a>\n"
                     f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
                     "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
                     "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
