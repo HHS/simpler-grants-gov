@@ -11,8 +11,6 @@ export const DELETE = async (request: Request) => {
 };
 
 const handleRequest = async (request: Request) => {
-  const headers = request.headers;
-  const opportunityId = headers.get("opportunityId");
   if (request.method !== "POST" && request.method !== "DELETE") {
     return Response.json(
       { message: `Method ${request.method} not allowed` },
@@ -22,6 +20,9 @@ const handleRequest = async (request: Request) => {
   const action = request.method === "POST" ? "save" : "delete";
 
   try {
+    const { opportunityId } = (await request.json()) as {
+      opportunityId: string;
+    };
     const session = await getSession();
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to save opportunity");
@@ -29,7 +30,7 @@ const handleRequest = async (request: Request) => {
     const response = await handleSavedOpportunity(
       request.method,
       session.token,
-      session.user_id as string,
+      session.user_id,
       Number(opportunityId),
     );
     const res = (await response.json()) as {

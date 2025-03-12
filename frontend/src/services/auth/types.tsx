@@ -40,6 +40,7 @@ export interface UserProfile {
   email?: string;
   token: string;
   expiresAt: Date;
+  user_id: string;
 }
 
 // represents client JWT payload
