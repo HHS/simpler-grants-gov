@@ -1,44 +1,51 @@
 import {
-  buildFilters,
-  buildPagination,
   downloadOpportunities,
   searchForOpportunities,
 } from "src/services/fetch/fetchers/searchFetcher";
-import {
-  QueryParamData,
-  SearchFetcherActionType,
-} from "src/types/search/searchRequestTypes";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import { searchFetcherParams } from "src/utils/testing/fixtures";
 
-const searchProps: QueryParamData = {
-  page: 1,
-  status: new Set(["forecasted", "posted"]),
-  fundingInstrument: new Set(["grant", "cooperative_agreement"]),
-  agency: new Set(),
-  category: new Set(),
-  eligibility: new Set(),
-  query: "research",
-  sortby: "opportunityNumberAsc",
-  actionType: "fun" as SearchFetcherActionType,
-  fieldChanged: "baseball",
-};
-
-const mockfetchOpportunitySearch = jest.fn().mockResolvedValue({
+const mockFetchOpportunitySearch = jest.fn().mockResolvedValue({
   json: () => ({
     data: {},
   }),
   body: { data: {} },
 });
 
-jest.mock("react", () => ({
-  ...jest.requireActual<typeof import("react")>("react"),
-  cache: (fn: unknown) => fn,
-}));
+const mockFormatSearchRequestBody = jest.fn();
+
+mockFormatSearchRequestBody.mockReturnValue({
+  filters: {
+    opportunity_status: {
+      one_of: ["forecasted", "posted"],
+    },
+    funding_instrument: {
+      one_of: ["grant", "cooperative_agreement"],
+    },
+  },
+  pagination: {
+    sort_order: [
+      {
+        order_by: "opportunity_number",
+        sort_direction: "ascending",
+      },
+    ], // This should be the actual value being used in the API method
+    page_offset: 1,
+    page_size: 25,
+  },
+  query: "research",
+});
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchOpportunitySearch: (params: QueryParamData) => {
-    return mockfetchOpportunitySearch(params) as SearchAPIResponse;
+    return mockFetchOpportunitySearch(params) as SearchAPIResponse;
   },
+}));
+
+jest.mock("src/utils/search/searchFormatUtils", () => ({
+  formatSearchRequestBody: (...args: unknown[]) =>
+    mockFormatSearchRequestBody(...args) as unknown,
 }));
 
 describe("searchForOpportunities", () => {
@@ -46,9 +53,12 @@ describe("searchForOpportunities", () => {
     jest.clearAllMocks();
   });
   it("calls request function with correct parameters and returns json data from response", async () => {
-    const result = await searchForOpportunities(searchProps);
+    const result = await searchForOpportunities(searchFetcherParams);
 
-    expect(mockfetchOpportunitySearch).toHaveBeenCalledWith({
+    expect(mockFormatSearchRequestBody).toHaveBeenCalledWith(
+      searchFetcherParams,
+    );
+    expect(mockFetchOpportunitySearch).toHaveBeenCalledWith({
       body: {
         pagination: {
           sort_order: [
@@ -85,9 +95,9 @@ describe("downloadOpportunities", () => {
     jest.clearAllMocks();
   });
   it("calls request function with correct parameters and returns response", async () => {
-    const result = await downloadOpportunities(searchProps);
+    const result = await downloadOpportunities(searchFetcherParams);
 
-    expect(mockfetchOpportunitySearch).toHaveBeenCalledWith({
+    expect(mockFetchOpportunitySearch).toHaveBeenCalledWith({
       body: {
         pagination: {
           sort_order: [
@@ -115,135 +125,5 @@ describe("downloadOpportunities", () => {
     expect(result).toEqual({
       data: {},
     });
-  });
-});
-
-describe("buildFilters", () => {
-  it("maps all params to the correct filter names", () => {
-    const filters = buildFilters({
-      ...searchProps,
-      ...{
-        agency: new Set(["agency 1", "agency 2"]),
-        category: new Set(["category 1", "category 2"]),
-        eligibility: new Set(["applicant type 1", "applicant type 2"]),
-      },
-    });
-    expect(filters.opportunity_status).toEqual({
-      one_of: ["forecasted", "posted"],
-    });
-    expect(filters.funding_instrument).toEqual({
-      one_of: ["grant", "cooperative_agreement"],
-    });
-    expect(filters.applicant_type).toEqual({
-      one_of: ["applicant type 1", "applicant type 2"],
-    });
-    expect(filters.agency).toEqual({
-      one_of: ["agency 1", "agency 2"],
-    });
-    expect(filters.funding_category).toEqual({
-      one_of: ["category 1", "category 2"],
-    });
-  });
-  it("does not add filters where params are absent", () => {
-    const filters = buildFilters(searchProps);
-    expect(filters.opportunity_status).toEqual({
-      one_of: ["forecasted", "posted"],
-    });
-    expect(filters.funding_instrument).toEqual({
-      one_of: ["grant", "cooperative_agreement"],
-    });
-    expect(filters.applicant_type).toEqual(undefined);
-    expect(filters.agency).toEqual(undefined);
-    expect(filters.funding_category).toEqual(undefined);
-  });
-});
-
-describe("buildPagination", () => {
-  it("builds correct pagination with defaults", () => {
-    const pagination = buildPagination({
-      ...searchProps,
-      ...{ page: 5, sortby: null },
-    });
-
-    expect(pagination.sort_order[0].order_by).toEqual("relevancy");
-    expect(pagination.page_offset).toEqual(5);
-    expect(pagination.sort_order[0].sort_direction).toEqual("descending");
-  });
-
-  it("builds correct offset based on action type and field changed", () => {
-    const pagination = buildPagination({
-      ...searchProps,
-      ...{ page: 5, actionType: SearchFetcherActionType.Update },
-    });
-
-    expect(pagination.page_offset).toEqual(1);
-
-    const secondPagination = buildPagination({
-      ...searchProps,
-      ...{ page: 5, actionType: SearchFetcherActionType.InitialLoad },
-    });
-
-    expect(secondPagination.page_offset).toEqual(5);
-
-    const thirdPagination = buildPagination({
-      ...searchProps,
-      ...{
-        page: 5,
-        actionType: SearchFetcherActionType.Update,
-        fieldChanged: "pagination",
-      },
-    });
-
-    expect(thirdPagination.page_offset).toEqual(5);
-
-    const fourthPagination = buildPagination({
-      ...searchProps,
-      ...{
-        page: 5,
-        actionType: SearchFetcherActionType.Update,
-        fieldChanged: "not_pagination",
-      },
-    });
-
-    expect(fourthPagination.page_offset).toEqual(1);
-  });
-
-  it("builds correct order_by based on sortby", () => {
-    const pagination = buildPagination({
-      ...searchProps,
-      ...{ sortby: "closeDateAsc" },
-    });
-
-    expect(pagination.sort_order[0].order_by).toEqual("close_date");
-
-    const secondPagination = buildPagination({
-      ...searchProps,
-      ...{ sortby: "postedDateAsc" },
-    });
-
-    expect(secondPagination.sort_order[0].order_by).toEqual("post_date");
-  });
-
-  it("builds correct sort_direction based on sortby", () => {
-    const pagination = buildPagination({
-      ...searchProps,
-      ...{ sortby: "opportunityNumberDesc" },
-    });
-
-    expect(pagination.sort_order[0].sort_direction).toEqual("descending");
-
-    const secondPagination = buildPagination({
-      ...searchProps,
-      ...{ sortby: "postedDateAsc" },
-    });
-
-    expect(secondPagination.sort_order[0].sort_direction).toEqual("ascending");
-
-    const thirdPagination = buildPagination({
-      ...searchProps,
-      ...{ sortby: null },
-    });
-
-    expect(thirdPagination.sort_order[0].sort_direction).toEqual("descending");
   });
 });
