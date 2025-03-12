@@ -9,6 +9,8 @@ from pathlib import Path
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 
+from analytics.datasets.acceptance_criteria import AcceptanceCriteriaDataset
+
 from analytics.datasets.issues import (
     GitHubIssues,
     IssueMetadata,
@@ -16,6 +18,7 @@ from analytics.datasets.issues import (
 )
 from analytics.datasets.utils import load_json_file
 from analytics.integrations import github
+
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +208,13 @@ class GitHubProjectETL:
             quad_field=roadmap.quad_field,
             pillar_field=roadmap.pillar_field,
         )
+
+        # extract acceptance criteria from roadmap json
+        deliverable_json = [d for d in roadmap_json if d["issue_type"] == "Deliverable"]
+        _ = AcceptanceCriteriaDataset.load_from_json_object(
+            json_data=deliverable_json,
+        )
+        # TO DO: include a.c. in function output
 
         # export sprint data
         issues = []
