@@ -9,7 +9,6 @@ const meta: Meta<typeof SearchQueryCopyButton> = {
     copyText: "Copy this link to your clipboard",
     copiedText: "Copied!",
     copyingText: "copying",
-    helpText: "This is a tooltip with some help text",
     url: "https://www.example.com?query=example",
     snackbarMessage: "This is the success message that will let you know",
   },
