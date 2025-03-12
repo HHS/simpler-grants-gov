@@ -38,32 +38,28 @@ export default function RoadmapProcess() {
   ];
 
   return (
-    <RoadmapPageSection
-      sectionTitle={t("title")}
-      extraClasses="bg-white"
-      sectionContent={
-        <>
-          <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
-            {t("sectionSummary")}
-          </p>
-          {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
-            <div
-              className="grid-row"
-              key={`roadmap-process-row-${sectionRoadIdx}`}
-            >
-              {sectionRow.map((sectionRowItem) => (
-                <div
-                  className="grid-col-12 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
-                  key={`roadmap-process-${sectionRowItem.title}`}
-                >
-                  <RoadmapProcessSectionContent {...sectionRowItem} />
-                </div>
-              ))}
-            </div>
-          ))}
-        </>
-      }
-    />
+    <div className={"bg-white"}>
+      <RoadmapPageSection title={t("title")}>
+        <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
+          {t("sectionSummary")}
+        </p>
+        {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
+          <div
+            className="grid-row"
+            key={`roadmap-process-row-${sectionRoadIdx}`}
+          >
+            {sectionRow.map((sectionRowItem) => (
+              <div
+                className="grid-col-12 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
+                key={`roadmap-process-${sectionRowItem.title}`}
+              >
+                <RoadmapProcessSectionContent {...sectionRowItem} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </RoadmapPageSection>
+    </div>
   );
 }
 
