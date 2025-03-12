@@ -10,10 +10,12 @@ import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ServerPageProps {
   searchResults: SearchAPIResponse;
+  queryTerm: string
 }
 
 export default async function SearchResultsList({
   searchResults,
+  queryTerm
 }: ServerPageProps) {
   const t = await getTranslations("Search");
 
@@ -45,6 +47,7 @@ export default async function SearchResultsList({
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem
             opportunity={opportunity}
+            queryTerm={queryTerm}
             saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
           />
         </li>

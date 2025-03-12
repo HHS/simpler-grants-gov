@@ -12,12 +12,14 @@ import SearchResultListItemStatus from "./SearchResultListItemStatus";
 
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
+  queryTerm: string;
   agencyNameLookup?: AgencyNamyLookup;
   saved?: boolean;
 }
 
 export default function SearchResultsListItem({
   opportunity,
+  queryTerm,
   agencyNameLookup,
   saved = false,
 }: SearchResultsListItemProps) {
@@ -75,7 +77,8 @@ export default function SearchResultsListItem({
                   href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link"
                 >
-                  {opportunity?.opportunity_title}
+                  {HighlightQueryTerms(opportunity?.opportunity_title)}
+                  
                 </Link>
               </h2>
             </div>

@@ -84,7 +84,7 @@ const ResolvedSearchResults = async ({
             totalResults={totalResults}
           />
         </div>
-        <SearchResultsList searchResults={searchResults} />
+        <SearchResultsList searchResults={searchResults} queryTerm={query || ""} />
         <SearchPagination
           totalPages={totalPages}
           page={page}
