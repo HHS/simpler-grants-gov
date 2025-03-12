@@ -6,7 +6,6 @@ from sqlalchemy import select
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.task.notifications.generate_notifications import get_base_url
 from src.db.models.user_models import (
     UserNotificationLog,
     UserOpportunityNotificationLog,
@@ -17,6 +16,7 @@ from src.task.notifications.generate_notifications import (
     NotificationConstants,
     NotificationTask,
     _strip_pagination_params,
+    get_base_url,
 )
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
@@ -587,7 +587,9 @@ def test_closing_date_notification_not_sent_twice(
 
 
 def test_get_base_url(monkeypatch):
-    monkeypatch.setenv("LOGIN_FINAL_DESTINATION", "https://www.grants.gov/v1/users/login/result?param=value")
+    monkeypatch.setenv(
+        "LOGIN_FINAL_DESTINATION", "https://www.grants.gov/v1/users/login/result?param=value"
+    )
 
     base_url = get_base_url()
     assert base_url == "https://www.grants.gov"

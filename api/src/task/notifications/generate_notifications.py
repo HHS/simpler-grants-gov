@@ -1,10 +1,10 @@
 import logging
 import os
-from urllib.parse import urlparse
 import uuid
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import StrEnum
+from urllib.parse import urlparse
 
 import botocore.client
 from pydantic import Field
@@ -66,16 +66,16 @@ class NotificationConstants:
 def get_base_url():
     """
     Gets the base URL (protocol + hostname) from the LOGIN_FINAL_DESTINATION environment variable.
-    
+
     Returns:
         str: The base URL (e.g., 'http://localhost:8080') or None if the environment variable
              is not set or cannot be parsed.
     """
-    login_url = os.environ.get('LOGIN_FINAL_DESTINATION')
-    
+    login_url = os.environ.get("LOGIN_FINAL_DESTINATION")
+
     if not login_url:
         return None
-    
+
     try:
         parsed_url = urlparse(login_url)
         # Combine protocol (scheme) and hostname (netloc)
@@ -83,7 +83,7 @@ def get_base_url():
         return base_url
     except Exception as e:
         # Log the error if needed
-        return None 
+        return None
 
 
 @dataclass
