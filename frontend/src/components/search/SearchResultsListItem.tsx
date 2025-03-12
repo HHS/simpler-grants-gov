@@ -58,7 +58,7 @@ export default function SearchResultsListItem({
       const styles = `display-inline ${item.className}`
       return (
         <>
-          {item.className === "bg-yellow" ? <span className={styles} key={Math.random()}>{item.data}</span> : ` ${item.data} `}
+          {item.className === "bg-yellow" ? <span className={styles} key={Math.random()}> {item.data} </span> : ` ${item.data} `}
         </>
       )
     })
