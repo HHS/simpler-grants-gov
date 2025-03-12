@@ -1,8 +1,10 @@
 "use client";
 
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
-import { SavedSearch } from "src/types/search/searchRequestTypes";
+import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
+import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -12,12 +14,6 @@ import { Select } from "@trussworks/react-uswds";
 import SimplerAlert from "src/components/SimplerAlert";
 import Spinner from "src/components/Spinner";
 
-/* needs to respond to
-    * newly added saved search
-      - initiate refetch of saved searches
-    * update to search params
-      - update selected option back to default
-*/
 export const SavedSearchSelector = ({
   newSavedSearches,
 }: {
@@ -25,10 +21,10 @@ export const SavedSearchSelector = ({
 }) => {
   const t = useTranslations("Search.saveSearch");
   const { user } = useUser();
-  const searchParams = useSearchParams();
+  const { searchParams, replaceQueryParams } = useSearchParamUpdater();
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
 
@@ -38,7 +34,6 @@ export const SavedSearchSelector = ({
       setApiError(null);
       return obtainSavedSearches(user.token)
         .then((savedSearches) => {
-          console.log("!!! got some savedSearches", savedSearches);
           setLoading(false);
           setSavedSearches(savedSearches);
         })
@@ -53,9 +48,24 @@ export const SavedSearchSelector = ({
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list
-  useEffect(() => {
-    console.log("~~~ save search selection", selectedSavedSearch);
-  }, [selectedSavedSearch]);
+  const handleSelectChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedId = event?.target?.value;
+      setSelectedSavedSearch(selectedId);
+      if (selectedId) {
+        const searchToApply = savedSearches.find(
+          (search) => search.saved_search_id === selectedId,
+        )?.search_query;
+        if (!searchToApply) {
+          setApiError(new Error("Unable to find saved search"));
+          return;
+        }
+        const searchEntries = searchToQueryParams(searchToApply);
+        replaceQueryParams(searchEntries);
+      }
+    },
+    [savedSearches],
+  );
 
   // fetch saved searches on page load
   useEffect(() => {
@@ -93,7 +103,7 @@ export const SavedSearchSelector = ({
     <Select
       id="search-sort-by-select"
       name="search-sort-by"
-      onChange={(e) => setSelectedSavedSearch(e?.target?.value)}
+      onChange={handleSelectChange}
       className="tablet:display-inline-block tablet:width-auto"
       value={selectedSavedSearch || 1}
     >

@@ -64,6 +64,16 @@ export interface SearchAPIResponse extends APIResponse {
   fieldChanged?: string;
 }
 
+// export const filterNameMap = {
+//   status: "opportunity_status",
+//   fundingInstrument: "funding_instrument",
+//   eligibility: "applicant_type",
+//   agency: "agency",
+//   category: "funding_category",
+// } as const;
+
+// export const frontendSearchFilterNames = Object.keys(filterNameMap);
+
 export const searchFilterNames = [
   "status",
   "fundingInstrument",

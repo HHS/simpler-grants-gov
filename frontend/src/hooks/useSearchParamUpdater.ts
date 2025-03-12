@@ -1,6 +1,11 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
+import {
+  QueryParamData,
+  ValidSearchQueryParamData,
+} from "src/types/search/searchRequestTypes";
+import { toQueryParams } from "src/utils/generalUtils";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -52,9 +57,15 @@ export function useSearchParamUpdater() {
     router.push(newPath, { scroll });
   };
 
+  const replaceQueryParams = (params: ValidSearchQueryParamData) => {
+    console.log("$$$ replacing query params", params);
+    router.push(`${pathname}${toQueryParams(params)}`);
+  };
+
   return {
     searchParams,
     updateQueryParams,
+    replaceQueryParams,
   };
 }
 

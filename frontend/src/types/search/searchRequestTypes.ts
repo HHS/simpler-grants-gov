@@ -1,3 +1,5 @@
+import { ValidSearchQueryParam } from "./searchResponseTypes";
+
 export interface SearchFilterRequestBody {
   opportunity_status?: { one_of: string[] };
   funding_instrument?: { one_of: string[] };
@@ -59,36 +61,37 @@ export type SortOption = {
   value: SortOptions;
 };
 
-export interface QueryParamData {
-  page: number;
-  query?: string | null;
+export interface FilterQueryParamData {
   status: Set<string>;
   fundingInstrument: Set<string>;
   eligibility: Set<string>;
   agency: Set<string>;
   category: Set<string>;
+}
+
+// used for now in the process of performing a search request. To be deprecated.
+export interface QueryParamData extends FilterQueryParamData {
+  page: number;
   sortby: SortOptions | null;
+  query?: string | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }
 
-export interface SearchParamsTypes {
-  agency?: string;
-  category?: string;
-  eligibility?: string;
-  fundingInstrument?: string;
-  page?: string;
-  query?: string;
-  sortby?: string;
-  status?: string;
-  [key: string]: string | undefined;
-}
+// Search definition as formatted for storage as a saved search
+export type SavedSearchQuery = {
+  filters: SearchFilterRequestBody;
+  pagination: PaginationRequestBody;
+  query: string;
+};
 
-export type SavedSearch = {
+// relevant portions of the response payload from fetching a user's saved searches
+export type SavedSearchRecord = {
   name: string;
   saved_search_id: string;
-  search_query: {
-    filters: SearchFilterRequestBody;
-    pagination: PaginationRequestBody;
-  };
+  search_query: SavedSearchQuery;
+};
+
+export type ValidSearchQueryParamData = {
+  [k in ValidSearchQueryParam]?: string;
 };

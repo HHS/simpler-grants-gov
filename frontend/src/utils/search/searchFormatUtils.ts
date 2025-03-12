@@ -1,13 +1,17 @@
+import { Query } from "@testing-library/dom";
 import { pickBy } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import {
+  FilterQueryParamData,
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortOrder,
   QueryParamData,
+  SavedSearchQuery,
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
+  ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
 import {
   FrontendFilterNames,
@@ -29,7 +33,7 @@ const filterNameMap = {
   eligibility: "applicant_type",
   agency: "agency",
   category: "funding_category",
-} as const;
+} as const satisfies Record<FrontendFilterNames, string>;
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
@@ -54,7 +58,7 @@ export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
 // filter out any query params that are not specifically expected for search
 export const filterSearchParams = (
   params: OptionalStringDict,
-): Partial<QueryParamData> => {
+): ValidSearchQueryParamData => {
   return pickBy(params, (_value, key) =>
     (validSearchQueryParamKeys as readonly string[]).includes(key),
   );
@@ -78,6 +82,81 @@ export const buildFilters = (
   );
 };
 
+// sort of the opposite of buildFilters - translates from backend search object to query param object
+export const searchToQueryParams = (
+  searchRecord: SavedSearchQuery,
+): ValidSearchQueryParamData => {
+  const filters = Object.entries(filterNameMap).reduce(
+    (params, [frontendFilterName, backendFilterName]) => {
+      const filterData = searchRecord.filters[backendFilterName]?.one_of;
+      if (filterData) {
+        params[frontendFilterName as keyof ValidSearchQueryParamData] =
+          filterData.join(",");
+      }
+      return params;
+    },
+    {} as ValidSearchQueryParamData,
+  );
+
+  const sortby = paginationToSortby(searchRecord.pagination.sort_order);
+
+  return { ...filters, query: searchRecord.query, ...sortby };
+};
+
+// // sort of the opposite of buildFilters - translates from backend search object to query param object
+// export const searchToQueryParams = (
+//   searchRecord: SavedSearchQuery,
+// ): QueryParamData => {
+//   return Object.entries(filterNameMap).reduce(
+//     (params: QueryParamData, entry: [ValidSearchQueryParam, string]) => {
+//       const [frontendFilterName, backendFilterName] = entry;
+//       const filterData = searchRecord.filters[backendFilterName]?.one_of;
+//       if (filterData) {
+//         params[frontendFilterName] = filterData;
+//       }
+//       return params;
+//     },
+//     {} as QueryParamData,
+//   );
+// };
+
+// sort of the opposite of buildPagination - translates from backend search pagination object to query param sortby
+export const paginationToSortby = (
+  sortOrder: PaginationSortOrder,
+): ValidSearchQueryParamData => {
+  const paginationSortOrderFields = sortOrder.map((entry) => entry.order_by);
+
+  // of shape [<frontend sort field name>, [<backend sort field name>]]
+  const sortFieldMapping = Object.entries(orderByFieldLookup).find(
+    ([_frontend, backend]) => {
+      return (
+        backend.length === paginationSortOrderFields.length &&
+        backend.every(
+          (field, index) => paginationSortOrderFields[index] === field,
+        )
+      );
+    },
+  );
+  if (!sortFieldMapping) {
+    console.error(
+      "Cannot convert backend pagination sort to query param. Sort order not found",
+      paginationSortOrderFields,
+    );
+    return {};
+  }
+  const sortFieldName = sortFieldMapping[0];
+
+  // relevancy is default so no need to specify a param here
+  if (sortFieldName === "relevancy") {
+    return {};
+  }
+  const directionSuffix =
+    sortOrder[0].sort_direction === "descending" ? "Desc" : "Asc";
+  return {
+    sortby: `${sortFieldName}${directionSuffix}`,
+  };
+};
+
 export const buildPagination = (
   searchInputs: QueryParamData,
 ): PaginationRequestBody => {
@@ -88,7 +167,7 @@ export const buildPagination = (
   // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
   // clear the page query param and set the page back to 1.
   // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
-  // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
+  // in convertSearchParamsToProperTypes that keep 1<= page <= max_possible_page
   const page_offset =
     searchInputs.actionType === SearchFetcherActionType.Update &&
     fieldChanged !== "pagination"

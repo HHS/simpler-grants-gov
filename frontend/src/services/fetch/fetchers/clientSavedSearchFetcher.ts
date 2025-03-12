@@ -1,4 +1,4 @@
-import { SavedSearch } from "src/types/search/searchRequestTypes";
+import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
@@ -30,7 +30,7 @@ export const saveSearch = async (
 // make call from client to Next server to fetch saved searches
 export const obtainSavedSearches = async (
   token?: string,
-): Promise<SavedSearch[]> => {
+): Promise<SavedSearchRecord[]> => {
   if (!token) {
     throw new Error("Not logged in, can't fetch saved searches");
   }
@@ -38,7 +38,7 @@ export const obtainSavedSearches = async (
     method: "POST",
   });
   if (res.ok && res.status === 200) {
-    const data = (await res.json()) as SavedSearch[];
+    const data = (await res.json()) as SavedSearchRecord[];
     return data;
   } else {
     throw new Error(`Error fetching saved searches: ${res.status}`);

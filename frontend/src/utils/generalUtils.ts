@@ -4,6 +4,9 @@
 // Note that:
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
+
+import { OptionalStringDict } from "src/types/generalTypes";
+
 // Refer to tests to see how this works in practice
 export const splitMarkup = (
   markupString: string,
@@ -110,4 +113,10 @@ export const saveBlobToFile = (blob: Blob, filename: string) => {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(temporaryLink);
   }, 0);
+};
+
+export const toQueryParams = (dict: OptionalStringDict) => {
+  return Object.entries(dict).reduce((queryString, [key, value]) => {
+    return `${queryString}${key}=${value}&`;
+  }, "?");
 };
