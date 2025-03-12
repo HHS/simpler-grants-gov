@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
     app_id: str = Field(alias="PINPOINT_APP_ID")
+    frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
 
 CONTACT_INFO = (
@@ -63,29 +64,6 @@ class NotificationConstants:
     CLOSING_DATE_REMINDER = "closing_date_reminder"
 
 
-def get_base_url():
-    """
-    Gets the base URL (protocol + hostname) from the LOGIN_FINAL_DESTINATION environment variable.
-
-    Returns:
-        str: The base URL (e.g., 'http://localhost:8080') or None if the environment variable
-             is not set or cannot be parsed.
-    """
-    login_url = os.environ.get("LOGIN_FINAL_DESTINATION")
-
-    if not login_url:
-        return None
-
-    try:
-        parsed_url = urlparse(login_url)
-        # Combine protocol (scheme) and hostname (netloc)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-        return base_url
-    except Exception as e:
-        # Log the error if needed
-        return None
-
-
 @dataclass
 class NotificationContainer:
     """Container for collecting notifications for a single user"""
@@ -111,6 +89,7 @@ class NotificationTask(Task):
         search_client: search.SearchClient,
         pinpoint_client: botocore.client.BaseClient | None = None,
         pinpoint_app_id: str | None = None,
+        frontend_base_url: str | None = None,
     ) -> None:
         super().__init__(db_session)
         self.config = GenerateNotificationsConfig()
@@ -119,6 +98,7 @@ class NotificationTask(Task):
         self.search_client = search_client
         self.pinpoint_client = pinpoint_client
         self.app_id = pinpoint_app_id
+        self.frontend_base_url = frontend_base_url
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
@@ -240,7 +220,6 @@ class NotificationTask(Task):
                     )
                     continue
 
-                base_url = get_base_url()
                 if not base_url:
                     logger.warning("No base URL found, skipping notification")
                     continue
@@ -248,7 +227,7 @@ class NotificationTask(Task):
                 subject = "Applications for your bookmarked funding opportunity are due soon"
                 message = (
                     "Applications for the following funding opportunity are due in two weeks:\n\n"
-                    f"<a href='{base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity.opportunity_title}</a>\n"
+                    f"<a href='{self.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity.opportunity_title}</a>\n"
                     f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
                     "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
                     "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"

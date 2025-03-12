@@ -584,12 +584,3 @@ def test_closing_date_notification_not_sent_twice(
     mock_responses = _get_mock_responses()
     print(mock_responses)
     assert len(mock_responses) == 0
-
-
-def test_get_base_url(monkeypatch):
-    monkeypatch.setenv(
-        "LOGIN_FINAL_DESTINATION", "https://www.grants.gov/v1/users/login/result?param=value"
-    )
-
-    base_url = get_base_url()
-    assert base_url == "https://www.grants.gov"
