@@ -1722,7 +1722,7 @@ class OpportunityChangeAuditFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-    loaded = False
+    is_loaded_to_search = False
 
 
 class UserFactory(BaseFactory):
