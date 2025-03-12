@@ -148,3 +148,21 @@ class ProjectItem(BaseModel):
             values,
             ["sprint", "points", "quad", "pillar", "status"],
         )
+
+# #############################################
+# Top-level Deliverable schemas
+# #############################################
+
+class DeliverableContent(BaseModel):
+    """Schema for the deliverable content item."""
+
+    title: str
+    url: str
+    issue_type: IssueType = Field(alias=ISSUE_TYPE, default_factory=IssueType)
+    body: str | None
+
+class DeliverableItem(BaseModel):
+    """Schema for deliverable items."""
+
+    content: DeliverableContent
+

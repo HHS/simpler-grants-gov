@@ -16,6 +16,8 @@ from analytics.datasets.issues import (
 )
 from analytics.datasets.utils import load_json_file
 from analytics.integrations import github
+from analytics.integrations.github.main import transform_deliverable_data
+from analytics.integrations.github.wrapper import ExportWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -206,6 +208,9 @@ class GitHubProjectETL:
             pillar_field=roadmap.pillar_field,
         )
 
+        
+        deliverable_data = transform_deliverable_data(roadmap_json)
+
         # export sprint data
         issues = []
         for sprint_board in self.config.sprint_projects:
@@ -228,7 +233,7 @@ class GitHubProjectETL:
         # hydrate issue dataset
         dataset = GitHubIssues(pd.DataFrame(data=issues))
 
-        # dump issue dataset to JSON
+        output_data = ExportWrapper(graph_data = dataset.to_dict(), deliverables = deliverable_data)
         return dataset.to_dict()
 
 

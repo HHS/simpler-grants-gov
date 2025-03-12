@@ -8,11 +8,14 @@ we disable writing to disk in https://github.com/HHS/simpler-grants-gov/issues/3
 import json
 import logging
 from pathlib import Path
+import re
+from tabnanny import check
 
+from attr import validate
 from pydantic import ValidationError
 
 from analytics.integrations.github.client import GitHubGraphqlClient
-from analytics.integrations.github.validation import ProjectItem
+from analytics.integrations.github.validation import DeliverableItem, ProjectItem
 
 logger = logging.getLogger(__name__)
 
@@ -204,5 +207,108 @@ def export_roadmap_data_to_object(
         ["organization", "projectV2", "items"],
     )
 
+    deliverable_data = transform_deliverable_data(data)
+
+
     # Transform data
     return transform_project_data(data, owner, project)
+
+def export_deliverable_data_to_object(
+    client: GitHubGraphqlClient,
+    owner: str,
+    project: int,
+) -> list[dict]:
+    """Export checklist data from GitHub."""
+    query_path = PARENT_DIR / "getChecklistData.graphql"
+    with open(query_path) as f:
+        query = f.read()
+
+    # Set query variables
+    variables = {
+        "login": owner,
+        "project": project,
+    }
+
+        # Execute query
+    data = client.execute_paginated_query(
+        query,
+        variables,
+        ["organization", "projectV2", "items"],
+    )
+    return transform_deliverable_data(data)
+
+
+
+def transform_deliverable_data(data: list[dict]) -> list[dict]:
+    """Shape the data to be as expected for the database."""
+    output = []
+
+    for i, item in enumerate(data):
+        try:
+            empty_data = item.get("content") is None
+            if empty_data:
+                message = f"deliverable item {i} has no content; skipping"
+                logger.info(message)
+                logger.debug(item)
+                continue
+
+            validated_data = DeliverableItem.model_validate(item)
+
+            # filter out non deliverable items
+            if validated_data.content.issue_type.name != 'Deliverable':
+                message = f"issue_type not deliverable for item{i}; skipping"
+                logger.info(message)
+                logger.debug(item)
+                continue
+
+            #if body is none skip it
+            if validated_data.content.body is None:
+                continue
+
+            parsed = parse_deliverable_body(validated_data.content.body, validated_data.content.url)
+            if parsed:
+                output.append(parsed)
+
+
+        except ValidationError as err:
+            message = f"deliverable item {i} cannot be validated; skipping"
+            logger.info(message)
+            logger.debug(err)
+            logger.debug(item)
+            continue
+
+
+    return output
+
+
+
+def parse_deliverable_body(body: str, url: str) -> list[dict]:
+    """Parse the body text and returns a list of headers, checkboxes, and their status."""
+    # Regular expression to capture both headers and their corresponding bodies
+    regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
+
+    matches = re.findall(regex, body, re.MULTILINE)
+    output = []
+    for item in matches:
+        #skip if text under header doesn't contain a checkbox
+        if "[x]" not in item[1] or "[ ]" not in item[1]:
+            continue
+
+        #find and capture all checkboxes regardless of state
+        checkbox_regex = r"- \[([ x])\]([^-\n]*)"
+
+        checkboxes = re.findall(checkbox_regex, item[1])
+        #TODO: Add depth
+        for checkbox in checkboxes:
+            checked = "x" in checkbox[0]
+
+            built = {
+                "deliverable_url": url,
+                "item": checkbox[1],
+                "is_checked": checked,
+                "section": item[0],
+            }
+
+            output.append(built.copy())
+
+    return output
