@@ -16,7 +16,6 @@ from src.task.notifications.generate_notifications import (
     NotificationConstants,
     NotificationTask,
     _strip_pagination_params,
-    get_base_url,
 )
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
