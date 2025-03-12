@@ -28,10 +28,10 @@ export default function RoadmapHeader() {
             className="tablet:display-flex tablet:flex-justify-end tablet:flex-align-center tablet:grid-container"
             tablet={{ col: 6 }}
           >
-            <Grid className="display-flex flex-justify-center flex-align-center  ">
+            <Grid className="display-flex flex-justify-center flex-align-center">
               <Image
                 src="/img/roadmap-header-image.png"
-                className="minh-full maxh-mobile width-full tablet:maxw-mobile"
+                className="minh-full width-full tablet:maxw-mobile"
                 alt="Picture of person on a journey"
                 layout="responsive"
                 width={360}
