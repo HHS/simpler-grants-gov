@@ -1,5 +1,3 @@
-"use client";
-
 import RoadmapHeader from "./sections/RoadmapHeader";
 import RoadmapMilestones from "./sections/RoadmapMilestones";
 import RoadmapProcess from "./sections/RoadmapProcess";

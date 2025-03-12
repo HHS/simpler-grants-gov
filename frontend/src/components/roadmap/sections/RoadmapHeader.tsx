@@ -25,7 +25,7 @@ export default function RoadmapHeader() {
             </p>
           </Grid>
           <Grid
-            className="display-none tablet:display-flex tablet:flex-justify-center tablet:flex-align-center"
+            className="display-none tablet:display-flex tablet:flex-justify-end tablet:flex-align-center"
             tablet={{ col: 6 }}
           >
             <div className="display-flex flex-justify-center flex-align-center">
@@ -41,7 +41,7 @@ export default function RoadmapHeader() {
           </Grid>
         </Grid>
       </GridContainer>
-      <div className="mobile-lg:display-none width-full">
+      <div className="tablet:display-none width-full">
         <Image
           src="/img/roadmap-header-image.png"
           alt="Picture of person on a journey"
