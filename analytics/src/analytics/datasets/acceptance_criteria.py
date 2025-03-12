@@ -13,7 +13,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
 
     COLUMN_MAP = {
         "issue_url": "ghid",
-        "issue_bodycontent": "bodycontent",
+        "issue_body": "bodycontent",
     }
 
     @classmethod
