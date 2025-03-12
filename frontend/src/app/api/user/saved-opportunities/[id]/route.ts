@@ -15,7 +15,7 @@ export async function GET(
     }
     const savedOpportunities = await getSavedOpportunity(
       session.token,
-      session.user_id as string,
+      session.user_id,
       Number(opportunityId),
     );
     return new Response(JSON.stringify(savedOpportunities), {
