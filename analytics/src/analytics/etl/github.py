@@ -10,7 +10,6 @@ import pandas as pd
 from pydantic import BaseModel, ValidationError
 
 from analytics.datasets.acceptance_criteria import AcceptanceCriteriaDataset
-
 from analytics.datasets.issues import (
     GitHubIssues,
     IssueMetadata,
@@ -18,7 +17,6 @@ from analytics.datasets.issues import (
 )
 from analytics.datasets.utils import load_json_file
 from analytics.integrations import github
-
 
 logger = logging.getLogger(__name__)
 

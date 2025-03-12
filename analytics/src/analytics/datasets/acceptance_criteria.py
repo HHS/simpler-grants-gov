@@ -81,7 +81,9 @@ class AcceptanceCriteriaDataset(BaseDataset):
         if not isinstance(bodycontent, str) or not bodycontent.strip():
             return []
 
-        # Placeholder for real parsing logic, returning hardcoded criteria
+        # TO DO: insert bodycontent parsing logic
+
+        # return hardcoded criteria until parsing logic is done
         return [
             {"title": "the box is blue", "is_done": False},
             {"title": "the customer is happy", "is_done": False},
