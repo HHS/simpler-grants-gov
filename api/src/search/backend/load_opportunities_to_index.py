@@ -49,8 +49,8 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
         default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
     )
 
-    incremental_load_batch_size: int = Field(alias="INCREMENTAL_LOAD_BATCH_SIZE")
-    incremental_load_max_process_time: int = Field(alias="INCREMENTAL_LOAD_MAX_PROCESS_TIME")
+    incremental_load_batch_size: int = Field(default=1000)
+    incremental_load_max_process_time: int = Field(default=3000)
 
 
 class LoadOpportunitiesToIndex(Task):
