@@ -310,7 +310,7 @@ export const messages = {
       ],
     },
     progress: {
-      title: "Our progress so far",
+      title: "Recent milestones reached",
       list: [
         {
           title: "RESTful API",
@@ -346,7 +346,7 @@ export const messages = {
       ],
     },
     next: {
-      title: "What's happening next",
+      title: "What we're working on right now",
       link: "View all of our deliverables on GitHub",
       list: [
         {
@@ -660,19 +660,40 @@ export const messages = {
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
     },
-    savedQuery: {
-      copy: {
-        unauthenticated: "Copy this seach query",
-        authenticated: "Copy",
-      },
-      copying: "Copying",
-      copied: "Copied!",
+    saveSearch: {
+      heading: "Current search query",
       help: {
         unauthenticated:
           "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
+        noSavedQueries:
+          "Save this frequently used search query to your account. Apply it again later to save time when searching for opportunities.",
+        authenticated:
+          "Manage your saved search queries in your <strong>Workspace</strong>.",
       },
-      snackbar:
-        "This search query was copied to your clipboard. Paste it as a link anywhere.",
+      modal: {
+        title: "Save search query",
+        description:
+          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
+        inputLabel: "Query name",
+        saveText: "Save",
+        cancelText: "Cancel",
+        closeText: "Close",
+        emptyNameError: "Please name this query.",
+        successTitle: "Success!",
+        successDescription:
+          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+        apiError: "Error loading saved query. Try again later.",
+      },
+      copySearch: {
+        copy: {
+          unauthenticated: "Copy this search query",
+          authenticated: "Copy",
+        },
+        copying: "Copying",
+        copied: "Copied!",
+        snackbar:
+          "This search query was copied to your clipboard. Paste it as a link anywhere.",
+      },
     },
   },
   Maintenance: {
@@ -686,5 +707,102 @@ export const messages = {
     noSavedCTA: `To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page`,
     searchButton: "Start a new search",
     title: "Saved Grants | Simpler.Grants.gov",
+  },
+  Roadmap: {
+    pageTitle: "Roadmap",
+    pageHeaderTitle: "Product roadmap",
+    pageHeaderParagraph:
+      "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
+    sections: {
+      progress: {
+        title: "What we're working on right now",
+        contentItems: [
+          [
+            {
+              title: "Simpler application workflow prototype",
+              content:
+                "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+            },
+            {
+              title:
+                "Full support for opportunity page attachments (NOFOs/downloads)",
+              content:
+                "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+            },
+          ],
+          [
+            {
+              title: "Authentication via Login.gov",
+              content:
+                "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+            },
+            {
+              title: "Search & opportunity page improvements",
+              content:
+                "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+            },
+          ],
+        ],
+        link: "View all deliverables on GitHub",
+      },
+      milestones: {
+        title: "Recent milestones reached",
+        contentTitle: "Late 2024",
+        contentItems: [
+          {
+            title: "RESTful API launch",
+            content:
+              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+          },
+          {
+            title: "Coding Challenge pilot",
+            content:
+              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+          },
+          {
+            title: "Search UI usability test",
+            content:
+              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+          },
+          {
+            title: "Opportunity page launch",
+            content:
+              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+          },
+          {
+            title: "First Co-Design Group recruitment",
+            content:
+              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
+          },
+          {
+            title: "Search interface launch",
+            content:
+              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+          },
+        ],
+      },
+      process: {
+        title: "How we work",
+        sectionSummary:
+          "With each iteration of Simpler.Grants.gov, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+        contentItems: [
+          {
+            title: "Transparent",
+            content:
+              "We’re building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
+          },
+          {
+            title: "Agile",
+            content:
+              "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+        ],
+      },
+    },
   },
 };
