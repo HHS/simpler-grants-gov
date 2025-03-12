@@ -456,7 +456,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
-    loaded: Mapped[bool| None]
+    loaded: Mapped[bool | None]
 
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
