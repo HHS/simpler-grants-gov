@@ -1,24 +1,30 @@
 import uuid
-from unittest.mock import patch
 
 import pytest
 from sqlalchemy import select
 
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, Competition
 from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
+
+@pytest.fixture(autouse=True)
+def clear_competitions(db_session):
+    db_session.query(Application).delete()
+    db_session.query(Competition).delete()
+    db_session.commit()
+    yield
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
     """Test successful creation of an application"""
 
-    opportunity = OpportunityFactory.create_batch(3)
-    competition = CompetitionFactory.create(opportunity_id=opportunity[0].opportunity_id)
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/v1/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     # Assert
@@ -36,13 +42,15 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     assert str(application.competition_id) == competition_id
 
 
-def test_application_start_competition_not_found(client, enable_factory_create, db_session, api_auth_token):
+def test_application_start_competition_not_found(
+    client, enable_factory_create, db_session, api_auth_token
+):
     """Test application creation fails when competition doesn't exist"""
     non_existent_competition_id = str(uuid.uuid4())
     request_data = {"competition_id": non_existent_competition_id}
 
     response = client.post(
-        "/v1/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     # Assert
@@ -56,13 +64,16 @@ def test_application_start_competition_not_found(client, enable_factory_create, 
     assert len(applications_count) == 0
 
 
-def test_application_start_unauthorized(client, enable_factory_create, db_session, competition):
+def test_application_start_unauthorized(client, enable_factory_create, db_session):
     """Test application creation fails without proper authentication"""
-    # Arrange
+    
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
+
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
-    response = client.post("/v1/applications/start", json=request_data)
+    response = client.post("/alpha/application_alpha/start", json=request_data, headers={"X-Auth": "123"})
 
     # Assert
     assert response.status_code == 401
@@ -72,13 +83,15 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
     assert len(applications_count) == 0
 
 
-def test_application_start_invalid_request(client, enable_factory_create, db_session, api_auth_token):
+def test_application_start_invalid_request(
+    client, enable_factory_create, db_session, api_auth_token
+):
     """Test application creation fails with invalid request data"""
     # Arrange
     request_data = {}  # Missing required competition_id
 
     response = client.post(
-        "/v1/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     # Assert

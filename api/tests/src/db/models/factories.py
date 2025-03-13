@@ -43,7 +43,6 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models import agency_models
-from src.db.models.competition_models import Competition
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -1918,30 +1917,3 @@ class JobLogFactory(BaseFactory):
     job_id = Generators.UuidObj
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
-
-
-class CompetitionFactory(factory.Factory):
-    class Meta:
-        model = Competition
-
-    competition_id = Generators.UuidObj
-    opportunity_id = factory.Sequence(lambda n: n)
-    competition_title = factory.Sequence(lambda n: f"Test Competition {n}")
-    
-    # Add missing fields
-    public_competition_id = sometimes_none("ABC-134-56789")
-    legacy_competition_id = sometimes_none(factory.Faker("random_int", min=1000, max=9999))
-    legacy_package_id = sometimes_none("PKG-00260155")
-    
-    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.opening_date)
-    )
-    
-    grace_period = factory.Faker("random_int", min=1, max=10)
-    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
-    
-    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
-    )

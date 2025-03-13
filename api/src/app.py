@@ -15,12 +15,8 @@ import src.logging
 import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
-<<<<<<< Updated upstream
 from src.api.application_alpha import application_blueprint
 from src.api.competition_alpha import competition_blueprint
-=======
-from src.api.applications.application_blueprint import application_blueprint
->>>>>>> Stashed changes
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
@@ -54,10 +50,6 @@ class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
-
-
-class ApplyEndpointConfig(PydanticBaseEnvConfig):
-    enable_apply_endpoint: bool = Field(False, alias="ENABLE_APPLY_ENDPOINT")
 
 
 def create_app() -> APIFlask:
@@ -150,8 +142,6 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(agencies_v1_blueprint)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.apply_endpoint_config:
-        app.register_blueprint(application_blueprint)
 
     if endpoint_config.auth_endpoint:
         app.register_blueprint(user_blueprint)
