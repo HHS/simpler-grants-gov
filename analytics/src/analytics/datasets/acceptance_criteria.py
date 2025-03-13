@@ -1,6 +1,7 @@
 """Implement the AcceptanceCriteriaDataset class."""
 
 from dataclasses import dataclass
+import re
 from typing import Self
 
 import pandas as pd
@@ -65,6 +66,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
 
     def get_totals(self, ghid: str) -> AcceptanceCriteriaTotal:
         """Get the total number of acceptance criteria and the total number done."""
+    
         # Ensure required columns exist
         if "ghid" not in self.df.columns or "bodycontent" not in self.df.columns:
             return AcceptanceCriteriaTotal()  # return default instance with 0 values
@@ -85,7 +87,29 @@ class AcceptanceCriteriaDataset(BaseDataset):
             return AcceptanceCriteriaTotal()
 
         # TO DO: insert bodycontent parsing logic
+          # Regular expression to capture headers and their corresponding bodies
+        regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
+
+        matches = re.findall(regex, bodycontent, re.MULTILINE)
+
         total_criteria = 0
         total_done = 0
 
+        for item in matches:
+            #skip if text under header does not contain a checkbox
+            if "[x]" not in item[1] or "[ ]" not in item[1]:
+                continue
+
+            #find and capture all checkboxes regardless of state
+            checkbox_regex = r"- \[([ x])\]([^-\n]*)"
+            checkboxes = re.findall(checkbox_regex, item[1])
+
+            #TODO: Add depth
+            for checkbox in checkboxes:
+                total_criteria += 1
+                total_done = (total_done + 1 if "x" in checkbox[0] else total_done)
+
+
+
         return AcceptanceCriteriaTotal(criteria=total_criteria, done=total_done)
+
