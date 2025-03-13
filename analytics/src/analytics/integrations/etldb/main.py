@@ -148,7 +148,9 @@ def sync_deliverables(
         deliverable_df = dataset.get_deliverable(ghid)
         ac_total = (
             ac.get_totals(
-                ghid, AcceptanceCriteriaType.ALL, AcceptanceCriteriaNestLevel.ALL,
+                ghid,
+                AcceptanceCriteriaType.ALL,
+                AcceptanceCriteriaNestLevel.ALL,
             )
             if ac is not None
             else AcceptanceCriteriaTotal()
