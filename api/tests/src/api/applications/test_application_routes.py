@@ -27,7 +27,6 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
         "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
-    # Assert
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert "application_id" in response.json["data"]
@@ -53,7 +52,6 @@ def test_application_start_competition_not_found(
         "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
-    # Assert
     assert response.status_code == 404
     assert (
         f"Competition with ID {non_existent_competition_id} not found" in response.json["message"]
@@ -75,7 +73,6 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
 
     response = client.post("/alpha/application_alpha/start", json=request_data, headers={"X-Auth": "123"})
 
-    # Assert
     assert response.status_code == 401
 
     # Verify no application was created
@@ -87,14 +84,12 @@ def test_application_start_invalid_request(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application creation fails with invalid request data"""
-    # Arrange
     request_data = {}  # Missing required competition_id
 
     response = client.post(
         "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
-    # Assert
     assert response.status_code == 422  # Validation error
 
     # Verify no application was created
