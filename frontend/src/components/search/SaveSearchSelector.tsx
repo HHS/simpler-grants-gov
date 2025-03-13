@@ -7,7 +7,6 @@ import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Select } from "@trussworks/react-uswds";
 
@@ -27,6 +26,8 @@ export const SavedSearchSelector = ({
   const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
+  const [applyingSavedSearch, setApplyingSavedSearch] =
+    useState<boolean>(false);
 
   const fetchSavedSearches = useCallback(() => {
     if (user?.token) {
@@ -60,8 +61,9 @@ export const SavedSearchSelector = ({
           setApiError(new Error("Unable to find saved search"));
           return;
         }
-        const searchEntries = searchToQueryParams(searchToApply);
-        replaceQueryParams(searchEntries);
+        const searchQueryParams = searchToQueryParams(searchToApply);
+        setApplyingSavedSearch(true);
+        replaceQueryParams(searchQueryParams);
       }
     },
     [savedSearches],
@@ -84,6 +86,10 @@ export const SavedSearchSelector = ({
 
   // reset saved search selector on search change
   useEffect(() => {
+    if (applyingSavedSearch) {
+      setApplyingSavedSearch(false);
+      return;
+    }
     setSelectedSavedSearch("");
   }, [searchParams]);
 

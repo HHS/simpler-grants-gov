@@ -103,30 +103,18 @@ export const searchToQueryParams = (
   return { ...filters, query: searchRecord.query, ...sortby };
 };
 
-// // sort of the opposite of buildFilters - translates from backend search object to query param object
-// export const searchToQueryParams = (
-//   searchRecord: SavedSearchQuery,
-// ): QueryParamData => {
-//   return Object.entries(filterNameMap).reduce(
-//     (params: QueryParamData, entry: [ValidSearchQueryParam, string]) => {
-//       const [frontendFilterName, backendFilterName] = entry;
-//       const filterData = searchRecord.filters[backendFilterName]?.one_of;
-//       if (filterData) {
-//         params[frontendFilterName] = filterData;
-//       }
-//       return params;
-//     },
-//     {} as QueryParamData,
-//   );
-// };
-
-// sort of the opposite of buildPagination - translates from backend search pagination object to query param sortby
+// sort of the opposite of buildPagination - translates from backend search pagination object to "sortby" query param
 export const paginationToSortby = (
   sortOrder: PaginationSortOrder,
 ): ValidSearchQueryParamData => {
+  // relevancy is default so no need to specify a param here
+  if (sortOrder[0].order_by === "relevancy") {
+    return {};
+  }
+
+  // an array of sort order field tuples, of shape [<frontend sort field name>, [<backend sort field name>]]
   const paginationSortOrderFields = sortOrder.map((entry) => entry.order_by);
 
-  // of shape [<frontend sort field name>, [<backend sort field name>]]
   const sortFieldMapping = Object.entries(orderByFieldLookup).find(
     ([_frontend, backend]) => {
       return (
@@ -137,6 +125,7 @@ export const paginationToSortby = (
       );
     },
   );
+
   if (!sortFieldMapping) {
     console.error(
       "Cannot convert backend pagination sort to query param. Sort order not found",
@@ -144,14 +133,13 @@ export const paginationToSortby = (
     );
     return {};
   }
+
+  // just taking the first sorting option for now
   const sortFieldName = sortFieldMapping[0];
 
-  // relevancy is default so no need to specify a param here
-  if (sortFieldName === "relevancy") {
-    return {};
-  }
   const directionSuffix =
     sortOrder[0].sort_direction === "descending" ? "Desc" : "Asc";
+
   return {
     sortby: `${sortFieldName}${directionSuffix}`,
   };

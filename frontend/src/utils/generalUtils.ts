@@ -115,7 +115,7 @@ export const saveBlobToFile = (blob: Blob, filename: string) => {
   }, 0);
 };
 
-export const toQueryParams = (dict: OptionalStringDict) => {
+export const queryParamsToQueryString = (dict: OptionalStringDict) => {
   return Object.entries(dict).reduce((queryString, [key, value]) => {
     return `${queryString}${key}=${value}&`;
   }, "?");
