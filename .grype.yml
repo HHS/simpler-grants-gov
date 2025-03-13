@@ -22,3 +22,6 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly
   - vulnerability: GHSA-67mh-4wv8-2f99
+
+  # test skipping of ignore
+  - vulnerability: CVE-2024-3220
