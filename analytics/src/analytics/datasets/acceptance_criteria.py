@@ -2,6 +2,7 @@
 
 import re
 from dataclasses import dataclass
+from enum import Enum
 from typing import Self
 
 import pandas as pd
@@ -16,6 +17,22 @@ class AcceptanceCriteriaTotal:
 
     criteria: int = 0
     done: int = 0
+
+
+class AcceptanceCriteriaType(Enum):
+    """Define types of acceptance criteria."""
+
+    ALL = "all"
+    MAIN = "Acceptance criteria"  # don't change, this maps to string in body content
+    METRICS = "Metrics"  # don't change, this maps to string in body content
+
+
+class AcceptanceCriteriaNestLevel(Enum):
+    """Define levels of nested acceptance criteria."""
+
+    ALL = 0
+    LEVEL_1 = 1
+    LEVEL_2 = 2
 
 
 class AcceptanceCriteriaDataset(BaseDataset):
@@ -64,48 +81,76 @@ class AcceptanceCriteriaDataset(BaseDataset):
 
         return df
 
-    def get_totals(self, ghid: str) -> AcceptanceCriteriaTotal:
+    def get_totals(
+        self,
+        ghid: str,
+        ac_type: AcceptanceCriteriaType,
+        nest_level: AcceptanceCriteriaNestLevel,
+    ) -> AcceptanceCriteriaTotal:
         """Get the total number of acceptance criteria and the total number done."""
-        # Ensure required columns exist
-        if "ghid" not in self.df.columns or "bodycontent" not in self.df.columns:
-            return AcceptanceCriteriaTotal()  # return default instance with 0 values
-
+        # get row for given ghid
         result = self.df[self.df["ghid"] == ghid]
         if result.empty:
             return AcceptanceCriteriaTotal()  # return default instance with 0 values
 
-        # Safely extract bodycontent
+        # extract raw body content which contains acceptance criteria
         bodycontent = result["bodycontent"].get(result.first_valid_index(), "")
 
-        # Parse and return the acceptance criteria
-        return self._parse_body_content(bodycontent)
+        # parse the raw body content and return the acceptance criteria
+        return self._parse_body_content(bodycontent, ac_type, nest_level)
 
-    def _parse_body_content(self, bodycontent: str) -> AcceptanceCriteriaTotal:
-        """Parse bodycontent into structured acceptance criteria."""
-        if not isinstance(bodycontent, str) or not bodycontent.strip():
+    def _parse_body_content(
+        self,
+        bodycontent: str,
+        ac_type: AcceptanceCriteriaType,
+        target_nest_level: AcceptanceCriteriaNestLevel,
+    ) -> AcceptanceCriteriaTotal:
+        """Parse markup into structured acceptance criteria."""
+        # strip leading and trailing whitespace
+        if not bodycontent.strip():
             return AcceptanceCriteriaTotal()
 
-        # TO DO: insert bodycontent parsing logic
-        # Regular expression to capture headers and their corresponding bodies
-        regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
-
-        matches = re.findall(regex, bodycontent, re.MULTILINE)
-
+        # init counters
         total_criteria = 0
         total_done = 0
 
-        for item in matches:
-            # skip if text under header does not contain a checkbox
-            if "[x]" not in item[1] or "[ ]" not in item[1]:
+        # define regex to capture section headers and bodies
+        regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
+        sections = re.findall(regex, bodycontent, re.MULTILINE)
+
+        # iterate sections
+        for item in sections:
+
+            section_name = item[0]
+            section_body = item[1]
+
+            # determine whether this section should be included in totals
+            if ac_type != AcceptanceCriteriaType.ALL and section_name != ac_type.value:
                 continue
 
-            # find and capture all checkboxes regardless of state
-            checkbox_regex = r"- \[([ x])\]([^-\n]*)"
-            checkboxes = re.findall(checkbox_regex, item[1])
+            # if section does not contain a checkbox then skip it
+            if "[x]" not in section_body or "[ ]" not in section_body:
+                continue
 
-            # TO DO: Add depth
+            # find all checkboxes in section
+            checkbox_regex = r"- \[([ x])\]([^-\n]*)"
+            checkboxes = re.findall(checkbox_regex, section_body)
+
+            # iterate checkboxes
             for checkbox in checkboxes:
+
+                # TO DO: automatically determine nest level
+                # assume nest level 1 until logic is added to determine nest level
+                checkbox_nest_level = AcceptanceCriteriaNestLevel.LEVEL_1
+
+                # determine whether this level of checkbox should be counted
+                if target_nest_level not in {
+                    AcceptanceCriteriaNestLevel.ALL,
+                    checkbox_nest_level,
+                }:
+                    continue
+
                 total_criteria += 1
-                total_done = total_done + 1 if "x" in checkbox[0] else total_done
+                total_done += "x" in checkbox[0]
 
         return AcceptanceCriteriaTotal(criteria=total_criteria, done=total_done)
