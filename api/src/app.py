@@ -15,7 +15,10 @@ import src.logging
 import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
+from src.api.application_alpha import application_blueprint
+from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
+from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.response import restructure_error_response
@@ -43,8 +46,10 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 """
 
 
-class AuthEndpointConfig(PydanticBaseEnvConfig):
+class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
+
+    enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
 
 
 def create_app() -> APIFlask:
@@ -63,8 +68,8 @@ def create_app() -> APIFlask:
     register_robots_txt(app)
     register_search_client(app)
 
-    auth_endpoint_config = AuthEndpointConfig()
-    if auth_endpoint_config.auth_endpoint:
+    endpoint_config = EndpointConfig()
+    if endpoint_config.auth_endpoint:
         initialize_login_gov_config()
         initialize_jwt_auth()
 
@@ -136,9 +141,15 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
 
-    auth_endpoint_config = AuthEndpointConfig()
-    if auth_endpoint_config.auth_endpoint:
+    endpoint_config = EndpointConfig()
+    if endpoint_config.auth_endpoint:
         app.register_blueprint(user_blueprint)
+
+    # Endpoints for apply functionality
+    if endpoint_config.enable_apply_endpoints:
+        app.register_blueprint(application_blueprint)
+        app.register_blueprint(form_blueprint)
+        app.register_blueprint(competition_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)
