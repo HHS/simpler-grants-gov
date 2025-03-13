@@ -53,17 +53,17 @@ export function SaveSearchPanel() {
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const copyText = useMemo(
-    () =>
-      user?.token
-        ? t("copySearch.copy.authenticated")
-        : t("copySearch.copy.unauthenticated"),
-    [user?.token, t],
-  );
-
   const showSavedSearchUI = useMemo(
     () => checkFeatureFlag("savedSearchesOn") && user?.token,
     [user?.token, checkFeatureFlag],
+  );
+
+  const copyText = useMemo(
+    () =>
+      showSavedSearchUI
+        ? t("copySearch.copy.authenticated")
+        : t("copySearch.copy.unauthenticated"),
+    [showSavedSearchUI, t],
   );
 
   const onNewSavedSearch = (id: string) => {
@@ -71,10 +71,10 @@ export function SaveSearchPanel() {
   };
 
   return (
-    <div className="border-base-lighter border-1px padding-2 text-primary-darker">
+    <div className="border-base-lighter border-1px padding-2">
       {showSavedSearchUI && (
         <>
-          <div className="margin-bottom-2 display-flex">
+          <div className="display-flex margin-bottom-2">
             <span className="text-bold">{t("heading")}</span>
             <SaveSearchTooltip
               text={t("help.noSavedQueries")}

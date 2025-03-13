@@ -7,7 +7,7 @@ import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Select } from "@trussworks/react-uswds";
 
 import SimplerAlert from "src/components/SimplerAlert";
@@ -26,8 +26,6 @@ export const SavedSearchSelector = ({
   const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
-  const [applyingSavedSearch, setApplyingSavedSearch] =
-    useState<boolean>(false);
 
   const handleFetchError = useCallback((e: Error) => {
     setLoading(false);
@@ -64,7 +62,6 @@ export const SavedSearchSelector = ({
           return;
         }
         const searchQueryParams = searchToQueryParams(searchToApply);
-        setApplyingSavedSearch(true);
         replaceQueryParams(searchQueryParams);
       }
     },
@@ -90,13 +87,17 @@ export const SavedSearchSelector = ({
 
   // reset saved search selector on search change
   useEffect(() => {
-    if (applyingSavedSearch) {
-      setApplyingSavedSearch(false);
-      return;
+    // we want to display the name of the selected saved search, so opt out of clearing during apply
+    if (selectedSavedSearch) {
+      console.log("!!! resetting saved search");
+      setSelectedSavedSearch("");
     }
-    setSelectedSavedSearch("");
-  }, [searchParams, applyingSavedSearch]);
+  }, [selectedSavedSearch, searchParams]);
 
+  // hide if no saved searches available
+  if (!savedSearches.length) {
+    return;
+  }
   if (loading) {
     return <Spinner />;
   }
@@ -114,7 +115,7 @@ export const SavedSearchSelector = ({
       id="search-sort-by-select"
       name="search-sort-by"
       onChange={handleSelectChange}
-      className="tablet:display-inline-block tablet:width-auto"
+      className="margin-bottom-2"
       value={selectedSavedSearch || 1}
     >
       <option key={1} value={1} disabled>
