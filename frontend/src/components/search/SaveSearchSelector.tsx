@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -7,7 +8,7 @@ import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Select } from "@trussworks/react-uswds";
 
 import SimplerAlert from "src/components/SimplerAlert";
@@ -21,11 +22,16 @@ export const SavedSearchSelector = ({
   const t = useTranslations("Search.saveSearch");
   const { user } = useUser();
   const { searchParams, replaceQueryParams } = useSearchParamUpdater();
+  const prevSearchParams = usePrevious(searchParams);
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
   const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
+
+  // allows us to avoid resetting the select option when params change after selection
+  const [applyingSavedSearch, setApplyingSavedSearch] =
+    useState<boolean>(false);
 
   const handleFetchError = useCallback((e: Error) => {
     setLoading(false);
@@ -62,6 +68,7 @@ export const SavedSearchSelector = ({
           return;
         }
         const searchQueryParams = searchToQueryParams(searchToApply);
+        setApplyingSavedSearch(true);
         replaceQueryParams(searchQueryParams);
       }
     },
@@ -87,12 +94,16 @@ export const SavedSearchSelector = ({
 
   // reset saved search selector on search change
   useEffect(() => {
-    // we want to display the name of the selected saved search, so opt out of clearing during apply
-    if (selectedSavedSearch) {
-      console.log("!!! resetting saved search");
+    // we want to display the name of selected saved search on selection, so opt out of clearing during apply
+    if (!applyingSavedSearch && searchParams !== prevSearchParams) {
       setSelectedSavedSearch("");
     }
-  }, [selectedSavedSearch, searchParams]);
+  }, [searchParams, prevSearchParams, applyingSavedSearch]);
+
+  // clear applying saved flag when searchParams change
+  useEffect(() => {
+    setApplyingSavedSearch(false);
+  }, [searchParams]);
 
   // hide if no saved searches available
   if (!savedSearches.length) {
