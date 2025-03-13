@@ -7,7 +7,10 @@ from pathlib import Path
 
 from sqlalchemy import text
 
-from analytics.datasets.acceptance_criteria import AcceptanceCriteriaDataset
+from analytics.datasets.acceptance_criteria import (
+    AcceptanceCriteriaDataset,
+    AcceptanceCriteriaTotal,
+)
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
 from analytics.integrations.etldb.epic_model import EtlEpicModel
@@ -141,8 +144,8 @@ def sync_deliverables(
     model = EtlDeliverableModel(db)
     for ghid in dataset.get_deliverable_ghids():
         deliverable_df = dataset.get_deliverable(ghid)
-        _ = ac.get_totals(ghid) if ac is not None else None
-        result[ghid], _ = model.sync_deliverable(deliverable_df, ghid_map)
+        ac_total = ac.get_totals(ghid) if ac is not None else AcceptanceCriteriaTotal()
+        result[ghid], _ = model.sync_deliverable(deliverable_df, ghid_map, ac_total)
         if VERBOSE:
             m = f"DELIVERABLE '{ghid}' row_id = {result[ghid]}"
             logger.info(m)

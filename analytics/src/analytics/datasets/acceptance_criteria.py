@@ -1,11 +1,20 @@
 """Implement the AcceptanceCriteriaDataset class."""
 
+from dataclasses import dataclass
 from typing import Self
 
 import pandas as pd
 
 from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df_from_object
+
+
+@dataclass(frozen=True)
+class AcceptanceCriteriaTotal:
+    """Struct to hold total criteria and total completed criteria."""
+
+    criteria: int = 0
+    done: int = 0
 
 
 class AcceptanceCriteriaDataset(BaseDataset):
@@ -54,37 +63,29 @@ class AcceptanceCriteriaDataset(BaseDataset):
 
         return df
 
-    def get_totals(self, ghid: str) -> dict:
+    def get_totals(self, ghid: str) -> AcceptanceCriteriaTotal:
         """Get the total number of acceptance criteria and the total number done."""
         # Ensure required columns exist
         if "ghid" not in self.df.columns or "bodycontent" not in self.df.columns:
-            return {"total_criteria": 0, "total_done": 0}
+            return AcceptanceCriteriaTotal()  # return default instance with 0 values
 
         result = self.df[self.df["ghid"] == ghid]
-
         if result.empty:
-            return {"total_criteria": 0, "total_done": 0}
+            return AcceptanceCriteriaTotal()  # return default instance with 0 values
 
         # Safely extract bodycontent
         bodycontent = result["bodycontent"].get(result.first_valid_index(), "")
 
-        # Parse the acceptance criteria
-        criteria = self._parse_body_content(bodycontent)
+        # Parse and return the acceptance criteria
+        return self._parse_body_content(bodycontent)
 
-        total_criteria = len(criteria)
-        total_done = sum(1 for criterion in criteria if criterion["is_done"])
-
-        return {"total_criteria": total_criteria, "total_done": total_done}
-
-    def _parse_body_content(self, bodycontent: str) -> list[dict]:
+    def _parse_body_content(self, bodycontent: str) -> AcceptanceCriteriaTotal:
         """Parse bodycontent into structured acceptance criteria."""
         if not isinstance(bodycontent, str) or not bodycontent.strip():
-            return []
+            return AcceptanceCriteriaTotal()
 
         # TO DO: insert bodycontent parsing logic
+        total_criteria = 0
+        total_done = 0
 
-        # return hardcoded criteria until parsing logic is done
-        return [
-            {"title": "the box is blue", "is_done": False},
-            {"title": "the customer is happy", "is_done": False},
-        ]
+        return AcceptanceCriteriaTotal(criteria=total_criteria, done=total_done)
