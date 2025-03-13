@@ -7,6 +7,7 @@ from pathlib import Path
 
 from sqlalchemy import text
 
+from analytics.datasets.acceptance_criteria import AcceptanceCriteriaDataset
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
 from analytics.integrations.etldb.epic_model import EtlEpicModel
@@ -74,7 +75,11 @@ def migrate_database() -> None:
     logger.info(m)
 
 
-def sync_data(dataset: EtlDataset, effective: str) -> None:
+def sync_data(
+    dataset: EtlDataset,
+    effective: str,
+    ac: AcceptanceCriteriaDataset | None,
+) -> None:
     """Write github data to etl database."""
     # initialize a map of github id to db row id
     ghid_map: dict[EtlEntityType, dict[str, int]] = {
@@ -104,6 +109,7 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
         db,
         dataset,
         ghid_map,
+        ac,
     )
     m = f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}"
     logger.info(m)
@@ -124,12 +130,18 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
     logger.info(m)
 
 
-def sync_deliverables(db: EtlDb, dataset: EtlDataset, ghid_map: dict) -> dict:
+def sync_deliverables(
+    db: EtlDb,
+    dataset: EtlDataset,
+    ghid_map: dict,
+    ac: AcceptanceCriteriaDataset | None,
+) -> dict:
     """Insert or update (if necessary) a row for each deliverable and return a map of row ids."""
     result = {}
     model = EtlDeliverableModel(db)
     for ghid in dataset.get_deliverable_ghids():
         deliverable_df = dataset.get_deliverable(ghid)
+        _ = ac.get_totals(ghid) if ac is not None else None
         result[ghid], _ = model.sync_deliverable(deliverable_df, ghid_map)
         if VERBOSE:
             m = f"DELIVERABLE '{ghid}' row_id = {result[ghid]}"
