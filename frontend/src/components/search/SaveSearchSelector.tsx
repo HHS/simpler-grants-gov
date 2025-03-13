@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
@@ -123,10 +124,14 @@ export const SavedSearchSelector = ({
   }
   return (
     <Select
-      id="search-sort-by-select"
-      name="search-sort-by"
+      id="save-search-select"
+      name="save-search"
       onChange={handleSelectChange}
-      className="margin-bottom-2"
+      className={clsx({
+        "margin-bottom-2": true,
+        "bg-primary-lightest": !!selectedSavedSearch,
+        "border-primary-dark": !!selectedSavedSearch,
+      })}
       value={selectedSavedSearch || 1}
     >
       <option key={1} value={1} disabled>
