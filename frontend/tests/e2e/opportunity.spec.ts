@@ -20,7 +20,7 @@ test("has page attributes", async ({ page }) => {
 test("can expand and collapse summary", async ({ page }) => {
   await expect(page.getByText("Show full summary")).toBeVisible();
   await expect(
-    page.getByText(/.*From single present little building.*/),
+    page.getByText("From single present little building"),
   ).not.toBeVisible();
   await expect(page.getByText("Hide full description")).not.toBeVisible();
 
@@ -29,7 +29,7 @@ test("can expand and collapse summary", async ({ page }) => {
   // validate that summary has been expanded
   await expect(page.getByText("Show full summary")).not.toBeVisible();
   await expect(
-    page.getByText(/.*From single present little building.*/),
+    page.getByText("From single present little building"),
   ).toBeVisible();
   await expect(page.getByText("Hide full description")).toBeVisible();
 
@@ -38,7 +38,7 @@ test("can expand and collapse summary", async ({ page }) => {
   // validate that summary has been collapsed
   await expect(page.getByText("Show full summary")).toBeVisible();
   await expect(
-    page.getByText(/.*From single present little building.*/),
+    page.getByText("From single present little building"),
   ).not.toBeVisible();
   await expect(page.getByText("Hide full description")).not.toBeVisible();
 });
@@ -46,7 +46,7 @@ test("can expand and collapse summary", async ({ page }) => {
 test("can expand and collapse description", async ({ page }) => {
   await expect(page.getByText("Show full description")).toBeVisible();
   await expect(
-    page.getByText(/.*Year section value bag none clear.*/),
+    page.getByText("Year section value bag none clear"),
   ).not.toBeVisible();
   await expect(page.getByText("Hide full description")).not.toBeVisible();
 
@@ -55,7 +55,7 @@ test("can expand and collapse description", async ({ page }) => {
   // validate that description has been expanded
   await expect(page.getByText("Show full description")).not.toBeVisible();
   await expect(
-    page.getByText(/.*Year section value bag none clear.*/),
+    page.getByText("Year section value bag none clear"),
   ).toBeVisible();
   await expect(page.getByText("Hide full description")).toBeVisible();
 
@@ -64,7 +64,7 @@ test("can expand and collapse description", async ({ page }) => {
   // validate that description has been collapsed
   await expect(page.getByText("Show full description")).toBeVisible();
   await expect(
-    page.getByText(/.*Year section value bag none clear.*/),
+    page.getByText("Year section value bag none clear"),
   ).not.toBeVisible();
   await expect(page.getByText("Hide full description")).not.toBeVisible();
 });
