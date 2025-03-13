@@ -6,7 +6,7 @@ describe("Process Content", () => {
     render(<ProcessProgress />);
     const ProcessH1 = screen.getByRole("heading", {
       level: 2,
-      name: /Our progress/i,
+      name: /Recent milestones reached/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();
