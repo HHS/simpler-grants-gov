@@ -1,8 +1,6 @@
-import { Query } from "@testing-library/dom";
 import { pickBy } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import {
-  FilterQueryParamData,
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortOrder,

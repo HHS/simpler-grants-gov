@@ -44,7 +44,6 @@ export const POST = async (request: Request) => {
         response.status_code,
       );
     }
-    console.log("!!!", response);
     return Response.json({
       message: "Saved search success",
       id: response?.data?.saved_search_id,

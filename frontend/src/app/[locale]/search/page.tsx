@@ -4,7 +4,6 @@ import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
-import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 

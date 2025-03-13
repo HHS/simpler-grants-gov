@@ -14,7 +14,7 @@ export const POST = async (_request: Request) => {
 
     const savedSearches = await fetchSavedSearches(
       session.token,
-      session.user_id as string,
+      session.user_id,
     );
 
     return new Response(JSON.stringify(savedSearches), {

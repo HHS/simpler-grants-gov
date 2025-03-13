@@ -3,7 +3,6 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { omit } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes";
 import {
   setNewRelicCustomAttribute,
@@ -13,7 +12,7 @@ import {
 
 import { useEffect, useState } from "react";
 
-const getCurrentFilters = (params: SearchParamsTypes): string => {
+const getCurrentFilters = (params: OptionalStringDict): string => {
   return JSON.stringify(omit(params, "query", "page"));
 };
 

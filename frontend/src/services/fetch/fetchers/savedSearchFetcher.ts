@@ -1,5 +1,5 @@
 import {
-  SavedSearch,
+  SavedSearchRecord,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
 
@@ -33,7 +33,7 @@ export const handleSavedSearch = async (
 export const fetchSavedSearches = async (
   token: string,
   userId: string,
-): Promise<SavedSearch[]> => {
+): Promise<SavedSearchRecord[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };

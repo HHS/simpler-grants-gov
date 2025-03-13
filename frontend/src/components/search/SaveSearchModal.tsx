@@ -1,5 +1,3 @@
-"use client";
-
 import clsx from "clsx";
 import { useUser } from "src/services/auth/useUser";
 import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -85,6 +83,9 @@ function SuccessContent({
   );
 }
 
+// note that this is client component, but not marked as "use client" because to do so
+// would cause an error when passing the function prop from parent client component see:
+// https://github.com/vercel/next.js/discussions/46795
 export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalId = "save-search";
 
@@ -110,7 +111,9 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
     setLoading(true);
     saveSearch(savedSearchName, searchParams, user?.token)
       .then((data) => {
-        console.log("&&& saved the data back here", data);
+        if (!data?.id) {
+          throw new Error("saved search ID not returned from API");
+        }
         setSaved(true);
         onSave(data.id);
       })

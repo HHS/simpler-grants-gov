@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
+import { ReadonlyURLSearchParams } from "next/navigation";
+
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 
 const mockUseUser = jest.fn();
@@ -17,6 +19,13 @@ jest.mock("src/services/auth/useUser", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
+}));
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    searchParams: new ReadonlyURLSearchParams(),
+    replaceQueryParams: jest.fn(),
+  }),
 }));
 
 describe("SaveSearchPanel", () => {

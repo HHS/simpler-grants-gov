@@ -29,6 +29,12 @@ export const SavedSearchSelector = ({
   const [applyingSavedSearch, setApplyingSavedSearch] =
     useState<boolean>(false);
 
+  const handleFetchError = useCallback((e: Error) => {
+    setLoading(false);
+    console.error("Error fetching saved searches", e);
+    setApiError(e);
+  }, []);
+
   const fetchSavedSearches = useCallback(() => {
     if (user?.token) {
       setLoading(true);
@@ -38,14 +44,10 @@ export const SavedSearchSelector = ({
           setLoading(false);
           setSavedSearches(savedSearches);
         })
-        .catch((e) => {
-          setLoading(false);
-          console.error("Error fetching saved searches", e);
-          setApiError(e as Error);
-        });
+        .catch(handleFetchError);
     }
     return Promise.resolve();
-  }, [user?.token]);
+  }, [user?.token, handleFetchError]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list
@@ -66,23 +68,25 @@ export const SavedSearchSelector = ({
         replaceQueryParams(searchQueryParams);
       }
     },
-    [savedSearches],
+    [savedSearches, replaceQueryParams],
   );
 
-  // fetch saved searches on page load
+  // fetch saved searches on page load or log in
   useEffect(() => {
-    fetchSavedSearches();
-  }, [user?.token, fetchSavedSearches]);
+    fetchSavedSearches().catch(handleFetchError);
+  }, [user?.token, fetchSavedSearches, handleFetchError]);
 
   // fetch saved searches on new saved search
   useEffect(() => {
     if (newSavedSearches.length && fetchSavedSearches) {
-      fetchSavedSearches().then(() => {
-        // set the latest saved search as selected
-        setSelectedSavedSearch(newSavedSearches[0]);
-      });
+      fetchSavedSearches()
+        .then(() => {
+          // set the latest saved search as selected
+          setSelectedSavedSearch(newSavedSearches[0]);
+        })
+        .catch(handleFetchError);
     }
-  }, [newSavedSearches.length]);
+  }, [handleFetchError, fetchSavedSearches, newSavedSearches]);
 
   // reset saved search selector on search change
   useEffect(() => {
@@ -91,7 +95,7 @@ export const SavedSearchSelector = ({
       return;
     }
     setSelectedSavedSearch("");
-  }, [searchParams]);
+  }, [searchParams, applyingSavedSearch]);
 
   if (loading) {
     return <Spinner />;
