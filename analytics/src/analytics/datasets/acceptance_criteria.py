@@ -129,7 +129,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
                 continue
 
             # if section does not contain a checkbox then skip it
-            if "[x]" not in section_body or "[ ]" not in section_body:
+            if "[x]" not in section_body and "[ ]" not in section_body:
                 continue
 
             # find all checkboxes in section
