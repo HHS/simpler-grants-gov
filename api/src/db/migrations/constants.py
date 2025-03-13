@@ -1,4 +1,4 @@
-create_trigger_function = """
+opportunity_search_index_queue_trigger_function = """
 CREATE OR REPLACE FUNCTION update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -23,7 +23,7 @@ BEGIN
     INSERT INTO api.opportunity_change_audit (opportunity_id)
     VALUES (opp_id)
     ON CONFLICT (opportunity_id)
-    DO UPDATE SET is_loaded_to_search = False;
+    DO UPDATE SET updated_at = CURRENT_TIMESTAMP, is_loaded_to_search = FALSE;
 
     RETURN NEW;
 END;
