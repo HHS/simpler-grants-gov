@@ -1,7 +1,7 @@
 """Drop old application form table
 
 Revision ID: 3793197bdd1b
-Revises: 8f5a763ccc79
+Revises: 5268c5f97814
 Create Date: 2025-03-13 15:54:04.363455
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "3793197bdd1b"
-down_revision = "8f5a763ccc79"
+down_revision = "5268c5f97814"
 branch_labels = None
 depends_on = None
 

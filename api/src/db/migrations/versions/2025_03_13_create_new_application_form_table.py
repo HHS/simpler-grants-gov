@@ -8,6 +8,7 @@ Create Date: 2025-03-13 15:58:20.688143
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "919f7866b393"
@@ -27,8 +28,8 @@ def upgrade():
         sa.Column("omb_number", sa.Text(), nullable=True),
         sa.Column("active_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("inactive_at", sa.TIMESTAMP(timezone=True), nullable=True),
-        sa.Column("form_json_schema", sa.JSON(), nullable=False),
-        sa.Column("form_ui_schema", sa.JSON(), nullable=False),
+        sa.Column("form_json_schema", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("form_ui_schema", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -80,7 +81,7 @@ def upgrade():
         sa.Column("application_form_id", sa.UUID(), nullable=False),
         sa.Column("application_id", sa.UUID(), nullable=False),
         sa.Column("form_id", sa.UUID(), nullable=False),
-        sa.Column("application_response", sa.JSON(), nullable=False),
+        sa.Column("application_response", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
