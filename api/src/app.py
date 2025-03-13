@@ -142,7 +142,6 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(agencies_v1_blueprint)
 
     endpoint_config = EndpointConfig()
-
     if endpoint_config.auth_endpoint:
         app.register_blueprint(user_blueprint)
 
