@@ -1,8 +1,8 @@
-"""add is_loaded_to_search opportunity change audit table
+"""add is_loaded_to_search opportinity change audit table
 
-Revision ID: 778ad1c3a865
-Revises: 5268c5f97814
-Create Date: 2025-03-13 17:55:09.729410
+Revision ID: 053ec3fb6069
+Revises: 919f7866b393
+Create Date: 2025-03-13 20:56:30.190977
 
 """
 
@@ -12,8 +12,8 @@ from alembic import op
 from src.db.migrations.constants import opportunity_search_index_queue_trigger_function
 
 # revision identifiers, used by Alembic.
-revision = "778ad1c3a865"
-down_revision = "5268c5f97814"
+revision = "053ec3fb6069"
+down_revision = "919f7866b393"
 branch_labels = None
 depends_on = None
 
@@ -25,8 +25,6 @@ def upgrade():
         sa.Column("is_loaded_to_search", sa.Boolean(), nullable=True),
         schema="api",
     )
-
-    # Update the trigger function
     op.execute(opportunity_search_index_queue_trigger_function)
     # ### end Alembic commands ###
 
