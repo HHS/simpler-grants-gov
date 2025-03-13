@@ -144,3 +144,21 @@ class UserNotificationLog(ApiSchemaTable, TimestampMixin):
 
     notification_reason: Mapped[str]
     notification_sent: Mapped[bool]
+
+
+class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_opportunity_notification_log"
+
+    user_opportunity_notification_log_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User)
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        "Opportunity", back_populates="all_opportunity_notification_logs"
+    )
