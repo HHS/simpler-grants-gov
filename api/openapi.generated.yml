@@ -406,6 +406,44 @@ paths:
       summary: User Get
       security:
       - ApiJwtAuth: []
+  /alpha/application_alpha/start:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStartResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+      tags:
+      - Application Alpha
+      summary: Create a new application for a competition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStartRequest'
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -2028,6 +2066,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationStartRequest:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - competition_id
+    ApplicationStartResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
     OpportunityAttachmentV1:
       type: object
       properties:
