@@ -125,7 +125,6 @@ class LoadOpportunitiesToIndex(Task):
         self._handle_incremental_delete(existing_opportunity_ids)
 
     def _build_opportunities_to_process_query(self) -> Select:
-        # Build query to fetch  opportunities for processing
         return (
             select(Opportunity)
             .join(OpportunityChangeAudit)
@@ -154,7 +153,11 @@ class LoadOpportunitiesToIndex(Task):
                 break
 
             # Fetch opportunities that need processing from the queue
-            queued_opportunities = self.db_session.execute(self._build_opportunities_to_process_query()).scalars().all()
+            queued_opportunities = (
+                self.db_session.execute(self._build_opportunities_to_process_query())
+                .scalars()
+                .all()
+            )
 
             if len(queued_opportunities) == 0:
                 break
