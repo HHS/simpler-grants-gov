@@ -6,6 +6,7 @@ from sqlalchemy import select
 from src.db.models.competition_models import Application, Competition
 from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
+
 @pytest.fixture(autouse=True)
 def clear_competitions(db_session):
     db_session.query(Application).delete()
@@ -64,14 +65,16 @@ def test_application_start_competition_not_found(
 
 def test_application_start_unauthorized(client, enable_factory_create, db_session):
     """Test application creation fails without proper authentication"""
-    
+
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
-    response = client.post("/alpha/application_alpha/start", json=request_data, headers={"X-Auth": "123"})
+    response = client.post(
+        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": "123"}
+    )
 
     assert response.status_code == 401
 
