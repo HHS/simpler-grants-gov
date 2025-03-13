@@ -197,7 +197,7 @@ class GitHubProjectETL:
 
     def extract_and_transform_in_memory(
         self,
-    ) -> tuple[list[dict], AcceptanceCriteriaDataset]:
+    ) -> tuple[list[dict], AcceptanceCriteriaDataset | None]:
         """Export from GitHub and transform to JSON."""
         # export roadmap data
         roadmap = self.config.roadmap_project
@@ -211,10 +211,11 @@ class GitHubProjectETL:
 
         # extract acceptance criteria from roadmap json
         deliverable_json = [d for d in roadmap_json if d["issue_type"] == "Deliverable"]
-        acceptance_criteria = AcceptanceCriteriaDataset.load_from_json_object(
-            json_data=deliverable_json,
+        acceptance_criteria = (
+            AcceptanceCriteriaDataset.load_from_json_object(json_data=deliverable_json)
+            if deliverable_json
+            else None
         )
-        # TO DO: include a.c. in function output
 
         # export sprint data
         issues = []

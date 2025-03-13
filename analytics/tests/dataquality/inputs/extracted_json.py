@@ -3,7 +3,7 @@
 from unittest import mock
 
 
-def mock_extracted_json(_json_data=mock) -> list[dict]:  # noqa: ANN001
+def mock_extracted_json(_json_data=mock) -> tuple[list[dict], None]:  # noqa: ANN001
     """Json input for snapshot testing."""
     return [
         {
@@ -909,4 +909,4 @@ def mock_extracted_json(_json_data=mock) -> list[dict]:  # noqa: ANN001
             "epic_title": None,
             "issue_state": "open",
         },
-    ]
+    ], None
