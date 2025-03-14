@@ -18,10 +18,10 @@ config_name="$2"
 
 # Run terraform init with the named backend config file
 
-backend_config_file="$config_name.s3.tfbackend"
+backend_config_file="${config_name}.s3.tfbackend"
 
 # Note that the backend_config_file path is relative to module_dir, not the current working directory
-terraform -chdir="$module_dir" init \
+terraform -chdir="${module_dir}" init \
   -input=false \
   -reconfigure \
-  -backend-config="$backend_config_file"
+  -backend-config="${backend_config_file}"

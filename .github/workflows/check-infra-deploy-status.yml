@@ -1,0 +1,72 @@
+# This workflow checks the status of infrastructure deployments to see whether
+# infrastructure code configuration matches the actual state of the infrastructure.
+# It does this by checking that Terraform plans show an empty diff (no changes)
+# across all root modules and backend configurations.
+name: Check infra deploy status
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at 07:00 UTC (3am ET, 12am PT) after engineers are likely done with work
+    - cron: "0 7 * * *"
+
+jobs:
+  collect-configs:
+    name: Collect configs
+    runs-on: ubuntu-latest
+    outputs:
+      root_module_configs: ${{ steps.collect-infra-deploy-status-check-configs.outputs.root_module_configs }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect root module configurations
+        id: collect-infra-deploy-status-check-configs
+        run: |
+          root_module_configs="$(./bin/infra-deploy-status-check-configs)"
+          echo "${root_module_configs}"
+          echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
+  check:
+    name: ${{ matrix.root_module_subdir }} ${{ matrix.backend_config_name }}
+    runs-on: ubuntu-latest
+    needs: collect-configs
+
+    # Skip this job if there are no root module configurations to check,
+    # otherwise the GitHub actions will give the error: "Matrix must define at least one vector"
+    if: ${{ needs.collect-configs.outputs.root_module_configs != '[]' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.collect-configs.outputs.root_module_configs) }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.3
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          account_name: ${{ matrix.infra_layer == 'accounts' && matrix.account_name || null }}
+          network_name: ${{ matrix.infra_layer == 'networks' && matrix.backend_config_name || null }}
+          app_name: ${{ contains(fromJSON('["build-repository", "database", "service"]'), matrix.infra_layer) && matrix.app_name || null }}
+          environment: ${{ contains(fromJSON('["build-repository", "database", "service"]'), matrix.infra_layer) && matrix.backend_config_name || null }}
+
+      - name: Check Terraform plan
+        run: |
+          echo "::group::Initialize Terraform"
+          echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
+          terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
+          echo "::endgroup::"
+          
+          echo "::group::Check Terraform plan"
+          echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}
+          terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}
+          echo "::endgroup::"
+        env:
+          TF_IN_AUTOMATION: "true"

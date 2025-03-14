@@ -1,0 +1,53 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Destroy the temporary environment that was created for the pull request.
+#
+# Positional parameters:
+#   app_name (required) – the name of subdirectory of /infra that holds the
+#     application's infrastructure code.
+#   environment - the name of the application environment (e.g. dev, staging, prod)
+#   pr_number - the pull request number in GitHub
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+app_name="$1"
+environment="$2"
+pr_number="$3"
+
+workspace="p-${pr_number}"
+
+echo "::group::Initialize Terraform with backend for environment: ${environment}"
+terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+echo "::endgroup::"
+
+echo "Select Terraform workspace: ${workspace}"
+terraform -chdir="infra/${app_name}/service" workspace select "${workspace}"
+
+echo "::group::Destroy resources"
+terraform -chdir="infra/${app_name}/service" destroy -var="environment_name=${environment}" -input=false -auto-approve
+echo "::endgroup::"
+
+echo "Select default workspace"
+terraform -chdir="infra/${app_name}/service" workspace select default
+
+echo "Delete workspace: ${workspace}"
+terraform -chdir="infra/${app_name}/service" workspace delete "${workspace}"
+
+pr_info=$(cat <<EOF
+<!-- begin PR environment info -->
+## Preview environment
+♻️ Environment destroyed ♻️
+<!-- end PR environment info -->
+EOF
+)
+
+pr_body="$(gh pr view "${pr_number}" --json body | jq --raw-output .body)"
+if [[ $pr_body == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
+  pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->/$pr_info}"
+else
+  pr_body="${pr_body}"$'\n\n'"${pr_info}"
+fi
+
+echo "Update PR description with PR environment info"
+echo "${pr_info}"
+gh pr edit "${pr_number}" --body "${pr_body}"

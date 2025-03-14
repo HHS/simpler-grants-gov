@@ -1,7 +1,10 @@
 locals {
-  app_name     = "analytics"
-  project_name = module.project_config.project_name
+  # app_name is the name of the application, which by convention should match the name of
+  # the folder under /infra that corresponds to the application
+  app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
+
   environments = ["dev", "staging", "prod"]
+  project_name = module.project_config.project_name
 
   # Whether or not the application has a database
   # If enabled:
@@ -19,6 +22,18 @@ locals {
   has_external_non_aws_service = false
 
   has_incident_management_service = false
+
+  # Whether or not the application should deploy an identity provider
+  # If enabled:
+  # 1. Creates a Cognito user pool
+  # 2. Creates a Cognito user pool app client
+  # 3. Adds environment variables for the app client to the service
+  enable_identity_provider = false
+
+  # Whether or not the application should deploy a notification service
+  # Note: This is not yet ready for use.
+  # TODO(https://github.com/navapbc/template-infra/issues/567)
+  enable_notifications = false
 
   environment_configs = {
     dev     = module.dev_config
