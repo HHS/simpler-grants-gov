@@ -1870,6 +1870,21 @@ class CompetitionAssistanceListingFactory(BaseFactory):
         lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
     )
 
+class FormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Form
+
+    form_id = Generators.UuidObj
+    form_name = factory.Faker("bs")
+    form_version = ""
+    agency_code = ""
+
+    form_json_schema = {
+            "type": "object",
+            "properties": {}
+        }
+    form_ui_schema = {}
+
 
 class ApplicationFormFactory(BaseFactory):
     class Meta:
