@@ -22,7 +22,7 @@ class AcceptanceCriteriaTotal:
 class AcceptanceCriteriaType(Enum):
     """Define types of acceptance criteria."""
 
-    ALL = "all"
+    ALL = "all"  # in this context "all" means all of the other types listed below
     MAIN = "Acceptance criteria"  # don't change, this maps to string in body content
     METRICS = "Metrics"  # don't change, this maps to string in body content
 
@@ -114,27 +114,34 @@ class AcceptanceCriteriaDataset(BaseDataset):
         total_criteria = 0
         total_done = 0
 
-        # define regex to capture markdown sections:
-        # - captures section titles that start with "### "
-        # - captures section content until the next "###", EOF, or multiple blank lines
-        section_regex = r"^###\s+(.*?)\n([\s\S]*?)(?=\n###|\Z|\n{2,})"
-        sections = re.findall(section_regex, bodycontent, re.MULTILINE)
+        # init counters
+        total_criteria = 0
+        total_done = 0
 
-        # regex to extract markdown checkboxes:
-        # - captures indentation level for nesting
-        # - captures checkbox marker ("- [x]" or "- [ ]")
-        # - captures checkbox status ("x" if checked, " " if unchecked)
-        # - captures the task text after the checkbox
+        # regex to capture markdown sections delineated by H3 headers
+        sections = re.split(r"###\s*(.+)\n", bodycontent)
+
+        # regex to parse checkboxes and capture the following
+        # - indentation level for nesting
+        # - checkbox marker ("- [x]" or "- [ ]")
+        # - checkbox status ("x" if checked, space if unchecked)
+        # - the text after the checkbox
         checkbox_regex = r"^( *)(- \[([ x])\])\s*(.*)"
 
-        # iterate sections
-        for section_name, section_body in sections:
+        # compile valid section names
+        valid_sections = {item.value for item in AcceptanceCriteriaType}
 
-            # determine whether this section should be included in totals
-            if (
-                ac_type != AcceptanceCriteriaType.ALL
-                and section_name.lstrip("#").strip() != ac_type.value
-            ):
+        # iterate sections
+        for i in range(1, len(sections), 2):
+            section_name = sections[i].strip()
+            section_body = sections[i + 1].strip() if i + 1 < len(sections) else ""
+
+            # skip section if not in valid AcceptanceCriteriaType values
+            if section_name not in valid_sections:
+                continue
+
+            # skip section if it's not what we're looking for
+            if ac_type != AcceptanceCriteriaType.ALL and section_name != ac_type.value:
                 continue
 
             # if section does not contain a checkbox then skip it
