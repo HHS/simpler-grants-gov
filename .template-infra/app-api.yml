@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: platform-cli-migration/v0.10.0
+_commit: platform-cli-migration/v0.13.0
 _src_path: https://github.com/navapbc/template-infra
 app_name: api
 template: app

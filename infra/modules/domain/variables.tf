@@ -1,13 +1,3 @@
-variable "name" {
-  type        = string
-  description = "Fully qualified domain name"
-}
-
-variable "manage_dns" {
-  type        = bool
-  description = "Whether DNS is managed by the project (true) or managed externally (false)"
-}
-
 variable "certificate_configs" {
   type = map(object({
     source           = string
@@ -20,10 +10,10 @@ variable "certificate_configs" {
     For each domain's certificate:
     `source` indicates whether the certificate is managed by the project using AWS
     Certificate Manager (issued) or imported from an external source (imported)
-    
+
     `private_key` and `certificate_body` describe the certificate information for
     imported certificates, which is required if `source` is 'imported'.
-    EOT
+  EOT
 
   validation {
     condition = alltrue([
@@ -48,4 +38,14 @@ variable "certificate_configs" {
     ])
     error_message = "certificate_config.certificate_body is required if certificate_config.source is 'imported'"
   }
+}
+
+variable "manage_dns" {
+  type        = bool
+  description = "Whether DNS is managed by the project (true) or managed externally (false)"
+}
+
+variable "name" {
+  type        = string
+  description = "Fully qualified domain name"
 }
