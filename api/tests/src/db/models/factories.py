@@ -1870,6 +1870,7 @@ class CompetitionAssistanceListingFactory(BaseFactory):
         lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
     )
 
+
 class FormFactory(BaseFactory):
     class Meta:
         model = competition_models.Form
@@ -1879,10 +1880,9 @@ class FormFactory(BaseFactory):
     form_version = ""
     agency_code = ""
 
-    form_json_schema = {
-            "type": "object",
-            "properties": {}
-        }
+    # TODO: https://github.com/HHS/simpler-grants-gov/issues/4168
+    # Update these to be a bit more meaningful
+    form_json_schema = {"type": "object", "properties": {}}
     form_ui_schema = {}
 
 
