@@ -22,6 +22,6 @@ def competition_get(db_session: db.Session, competition_id: uuid.UUID) -> respon
     logger.info("GET /alpha/competitions/:competition_id")
 
     with db_session.begin():
-        form = get_competition(db_session, competition_id)
+        competition = get_competition(db_session, competition_id)
 
-    return response.ApiResponse(message="Success", data=form)
+    return response.ApiResponse(message="Success", data=competition)

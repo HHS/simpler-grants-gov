@@ -30,12 +30,7 @@ class Competition(ApiSchemaTable, TimestampMixin):
 
     competition_forms: Mapped[list["CompetitionForm"]] = relationship("CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan")
 
-    forms: AssociationProxy[list["Form"]] = association_proxy(
-        "competition_forms",
-        "form",
-        creator=lambda obj: CompetitionForm(form=obj),
-    )
-
+    applications: Mapped[list["Application"]] = relationship("Application", uselist=True, back_populates="competition", cascade="all, delete-orphan")
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_instruction"
