@@ -27,7 +27,6 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
     application = Application(application_id=uuid.uuid4(), competition_id=competition_id)
 
     db_session.add(application)
-    db_session.commit()
 
     logger.info(
         "Created new application",
