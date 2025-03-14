@@ -1847,6 +1847,12 @@ class CompetitionFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
+    competition_forms = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.CompetitionFormFactory",
+        factory_related_name="competition",
+        size=lambda: random.randint(1, 2),
+    )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -1907,9 +1913,12 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-    competition_id = Generators.UuidObj
-    application_form = factory.SubFactory(ApplicationFormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
     is_required = False
 
