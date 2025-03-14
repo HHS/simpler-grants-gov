@@ -4,6 +4,7 @@ locals {
     "apigateway",
     "application-autoscaling",
     "autoscaling",
+    "backup",
     "cloudfront",
     "cloudwatch",
     "cognito-idp",
@@ -14,7 +15,6 @@ locals {
     "elasticbeanstalk",
     "elasticloadbalancing",
     "events",
-    "evidently",
     "iam",
     "kms",
     "lambda",
@@ -30,6 +30,7 @@ locals {
     "servicediscovery",
     "sns",
     "ssm",
+    "states",
     "waf-regional",
     "wafv2",
   ]

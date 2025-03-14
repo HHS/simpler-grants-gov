@@ -4,13 +4,13 @@ module "prod_config" {
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "prod"
-  account_name                    = "prod"
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
   enable_https                    = false
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1

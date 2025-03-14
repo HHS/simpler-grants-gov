@@ -1,0 +1,127 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# This script is used by the GitHub Action workflow check-infra-deploy-status.yml
+# to generate the matrix strategy for all the jobs in that workflow.
+# It retrieves all the root modules in the repository, the backend configurations
+# for each of those root modules, information that GitHub Actions needs to
+# authenticate with AWS, and any additional parameters that need to be passed to
+# terraform plan.
+#
+# An example of this script's output is as follows (the actual output is minified JSON,
+# but this is a pretty-printed version to be more readable):
+#
+#   [
+#     {
+#       "backend_config_name": "dev.111111111111",
+#       "infra_layer": "accounts",
+#       "root_module_subdir": "accounts",
+#       "account_name": "dev"
+#     },
+#     {
+#       "backend_config_name": "dev",
+#       "infra_layer": "networks",
+#       "root_module_subdir": "networks",
+#       "extra_params": "-var=\"network_name=dev\""
+#     },
+#     {
+#       "backend_config_name": "shared",
+#       "infra_layer": "build-repository",
+#       "root_module_subdir": "app/build-repository",
+#       "app_name": "app"
+#     },
+#     {
+#       "backend_config_name": "dev",
+#       "infra_layer": "database",
+#       "root_module_subdir": "app/database",
+#       "app_name": "app",
+#       "extra_params": "-var=\"environment_name=dev\""
+#     },
+#     {
+#       "backend_config_name": "dev",
+#       "infra_layer": "service",
+#       "root_module_subdir": "app/service",
+#       "app_name": "app",
+#       "extra_params": "-var=\"environment_name=dev\""
+#     }
+#   ]
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+# Return the names of Terraform backend configuration files in (without the ".s3.tfbackend" suffix)
+# for the root module given by "infra/${root_module_subdir}".
+#
+# Parameters:
+#   - root_module_subdir: The subdirectory of the root module where the backend configuration files are located.
+# Returns:
+#   - The names of the backend configuration files, separated by newlines
+function get_backend_config_names() {
+  local root_module_subdir="$1"
+  local root_module="infra/${root_module_subdir}"
+  if [ -d "${root_module}" ]; then
+    find "${root_module}" -name "*.s3.tfbackend" -exec basename {} .s3.tfbackend \;
+  fi
+}
+
+# Get deploy status check configurations for the given infrastructure layer (and application name if relevant).
+# Parameters:
+#   - infra_layer: The infrastructure layer (one of "accounts", "networks", "build-repository", "database", "service")
+#   - app_name (optional): The application name (only required for the "build-repository", "database", and "service" layers)
+# Returns:
+#   - JSON objects containing backend configuration name, infrastructure layer, and root module subdirectory, separated by newlines
+function get_root_module_configs() {
+  local infra_layer="$1"
+  local app_name
+  local backend_config_names
+  local root_module_subdir
+  if [[ "${infra_layer}" == "build-repository" || "${infra_layer}" == "database" || "${infra_layer}" == "service" ]]; then
+    app_name="$2"
+    root_module_subdir="${app_name}/${infra_layer}"
+  else
+    root_module_subdir="${infra_layer}"
+  fi
+  backend_config_names="$(get_backend_config_names "${root_module_subdir}")"
+  for backend_config_name in ${backend_config_names}; do
+    echo "{\"backend_config_name\": \"${backend_config_name}\", \"infra_layer\": \"${infra_layer}\", \"root_module_subdir\": \"${root_module_subdir}\"}"
+  done
+}
+
+# Retrieve the names of the applications in the repo by listing the directories in the "infra" directory
+# and filtering out the directories that are not applications.
+# Returns: A list of application names.
+function get_app_names() {
+  find "infra" -maxdepth 1 -type d -not -name "infra" -not -name "accounts" -not -name "modules" -not -name "networks" -not -name "project-config" -not -name "test" -exec basename {} \;
+}
+
+function get_account_layer_configs() {
+  local configs
+  configs=$(get_root_module_configs "accounts")
+  echo "${configs}" | jq -c '. + {account_name: (.backend_config_name | split(".")[0])}'
+}
+
+function get_network_layer_configs() {
+  local configs
+  configs=$(get_root_module_configs "networks")
+  echo "${configs}" | jq -c '. + {extra_params: "-var=\"network_name=\(.backend_config_name)\""}'
+}
+
+function get_app_configs() {
+  local app_name="$1"
+  local configs=""
+  for infra_layer in "build-repository" "database" "service"; do
+    configs+="$(get_root_module_configs "${infra_layer}" "${app_name}")"
+    configs+=$'\n'
+  done
+  echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'"${app_name}"'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'"${app_name}"'"} end'
+}
+
+function main() {
+  local root_module_configs
+  root_module_configs="$(get_account_layer_configs)"
+  root_module_configs+="$(get_network_layer_configs)"
+  for app_name in $(get_app_names); do
+    root_module_configs+="$(get_app_configs "${app_name}")"
+  done
+  echo "${root_module_configs}" | jq -s -c .
+}
+
+main
