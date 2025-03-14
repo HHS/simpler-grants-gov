@@ -1,0 +1,66 @@
+{
+  "FederalAgencyHeader": {
+    "type": "section",
+    "label": "1. NAME OF FEDERAL AGENCY",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/FederalAgency"
+      }
+    ]
+  },
+  "CFDANumberHeader": {
+    "type": "section",
+    "label": "2. Assistance Listing Number",
+    "children":[
+      {
+        "type": "field",
+        "definition": "/properties/CFDANumber"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/CFDATitle"
+      }
+    ]
+  },
+  "ApplicantInformationHeader": {
+    "type": "section",
+    "label": "5. APPLICANT INFORMATION",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/PrefixName"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/FirstName"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/MiddleName"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/LastName"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/Suffix"
+      }
+    ]
+  },
+  "FundingOpportunityNumberHeader": {
+    "type": "section",
+    "label": "4. FUNDING OPPORTUNITY NUMBER",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/OpportunityTitle"
+      },
+       {
+        "type": "field",
+        "definition": "/properties/OpportunityID"
+      }
+    ]
+  }
+}

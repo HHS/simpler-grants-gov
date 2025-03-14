@@ -34,11 +34,27 @@
     },
     "OpportunityTitle": {
       "type": "string",
-      "title": ""
+      "title": "Funding Opportunity Title"
     },
-    "AuthorizedRepresentativeName": {
+    "PrefixName": {
       "type": "string",
-      "title": ""
+      "title": "Prefix"
+    },
+    "FirstName": {
+      "type": "string",
+      "title": "First Name"
+    },
+    "MiddleName": {
+      "type": "string",
+      "title": "Middle Name"
+    },
+    "LastName": {
+      "type": "string",
+      "title": "Last Name"
+    },
+    "Suffix": {
+      "type": "string",
+      "title": "Suffix Name"
     },
     "AuthorizedRepresentativeFax": {
       "type": "string",

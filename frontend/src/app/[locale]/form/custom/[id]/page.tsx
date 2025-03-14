@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ClientForm from "src/app/[locale]/form/sf/[id]/ClientForm";
+import ClientForm from "src/app/[locale]/form/custom/[id]/ClientForm";
 import NotFound from "src/app/[locale]/not-found";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
@@ -30,7 +30,7 @@ const getFormDetails = () => {
   return JSON.parse(JSON.stringify(formSchema)) as object;
 };
 
-const getuiSchemas = () => {
+const getuiSchema = () => {
   return JSON.parse(JSON.stringify(uiSchema)) as object;
 };
 
@@ -42,13 +42,13 @@ async function FormPage({ params }: FormProps) {
   }
 
   const jsonFormSchema = getFormDetails();
-  const uiSchemas = getuiSchemas();
+  const uiSchema = getuiSchema();
 
   return (
     <GridContainer>
       <BetaAlert />
       <h1>Form {id}</h1>
-      <ClientForm jsonFormSchema={jsonFormSchema} />
+      <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );
 }

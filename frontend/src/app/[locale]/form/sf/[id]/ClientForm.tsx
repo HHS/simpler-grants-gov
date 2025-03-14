@@ -1,67 +1,59 @@
 "use client";
-import React, { useState } from 'react';
-import { JsonForms } from '@jsonforms/react';
-import { vanillaCells, vanillaRenderers } from '@jsonforms/vanilla-renderers';
 
-const schema = {
-  type: 'object',
-  properties: {
-    name: {
-      type: 'string',
-      minLength: 1,
-    },
-    done: {
-      type: 'boolean',
-    },
-    due_date: {
-      type: 'string',
-      format: 'date',
-    },
-    recurrence: {
-      type: 'string',
-      enum: ['Never', 'Daily', 'Weekly', 'Monthly'],
-    },
-  },
-  required: ['name', 'due_date'],
-};
+import { JsonForms } from "@jsonforms/react";
+import { vanillaCells, vanillaRenderers } from "@jsonforms/vanilla-renderers";
+
+import React, { useState } from "react";
+
+import TextCell from "./renderers/TextCell";
+import TextCellControlTester from "./renderers/TextCellControlTester";
+
 const uischema = {
-  type: 'VerticalLayout',
+  type: "VerticalLayout",
   elements: [
     {
-      type: 'Control',
-      label: false,
-      scope: '#/properties/done',
+      type: "Control",
+      label: true,
+      scope: "#/properties/CFDANumber",
     },
     {
-      type: 'Control',
-      scope: '#/properties/name',
+      type: "Control",
+      label: true,
+      scope: "#/properties/FederalAgency",
     },
+
     {
-      type: 'HorizontalLayout',
+      type: "HorizontalLayout",
       elements: [
         {
-          type: 'Control',
-          scope: '#/properties/due_date',
+          type: "Control",
+          scope: "#/properties/OpportunityID",
         },
         {
-          type: 'Control',
-          scope: '#/properties/recurrence',
+          type: "Control",
+          scope: "#/properties/OpportunityTitle",
         },
       ],
     },
   ],
 };
 
-function ClientForm() {
+const renderers = [
+  ...vanillaRenderers,
+  //register custom renderers
+  { tester: TextCellControlTester, renderer: TextCell },
+];
+console.log(renderers);
+function ClientForm({ jsonFormSchema }: { jsonFormSchema: object }) {
   const [formData, setFormData] = useState({});
   console.log(formData);
 
   return (
     <JsonForms
-      schema={schema}
+      schema={jsonFormSchema}
       uischema={uischema}
       data={formData}
-      renderers={vanillaRenderers}
+      renderers={renderers}
       cells={vanillaCells}
       onChange={({ data, _errors }) => setFormData(data)}
     />

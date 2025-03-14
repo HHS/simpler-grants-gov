@@ -1,118 +1,108 @@
 {
-    "type": "object",
-    "title": "Application For Federal Assistance SF 424 - Individual",
-    "description": "Please fill out the questions below.",
-    "required": [
-      "agencyName",
-      "opportunity"
-    ],
-    "properties": {
-      "agencyName": {
-        "type": "string",
-        "title": "Name of Federal Agency"
-      },
-      "agencyListing": {
-        "type": "object",
-        "title": "Assistance Listing",
-        "properties": {
-          "agencyListingAssistanceNumber": {
-            "type": "number",
-            "title": "Agency Listing Number"
-          },
-          "agencyListingTitle": {
-            "type": "string",
-            "title": "Assistance Listing Title"
-          }
-        }
-      },
-      "opportunity": {
-        "title": "Opportunity",
-        "$ref": "#/definitions/opportunity"
-      },
-      "applicantInformation": {
-        "type": "object",
-        "title": "Applicant information",
-        "properties": {
-          "name": {
-            "title": "Name and contact information",
-            "$ref": "#/definitions/name"
-          },
-          "address": {
-            "title": "Address",
-            "$ref": "#/definitions/address"
-          }
-        }
-      },
-      "projectInformation": {
-        "type": "object",
-        "title": "Project information",
-        "properties": {
-          "projectTitle": {
-            "type": "string",
-            "title": "Project title"
-          },
-          "projectDescription": {
-            "type": "string",
-            "title": "Project description"
-          }
-        }
-      }
+  "type": "object",
+  "title": "Application For Federal Assistance SF 424 - Individual",
+  "description": "Please fill out the questions below.",
+  "required": [
+    "FederalAgency",
+    "Date_Received",
+    "OpportunityID",
+    "OpportunityTitle",
+    "AuthorizedRepresentativePhoneNumber",
+    "AuthorizedRepresentativeEmail"
+  ],
+  "properties": {
+    "FederalAgency": {
+      "type": "string",
+      "title": "Name of Federal Agency"
     },
-    "definitions": {
-      "opportunity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "title": "Funding opportunity number",
-            "type": "number"
-          },
-          "title": {
-            "title": "Funding opportunity title",
-            "type": "string"
-          }
-        }
-      },
-      "name": {
-        "type": "object",
-        "required": [
-          "firstName",
-          "lastName"
-        ],
-        "properties": {
-          "prefix": {
-            "type": "string"
-          },
-          "firstName": {
-            "title": "First Name",
-            "type": "string"
-          },
-          "lastName": {
-            "title": "Last Name",
-            "type": "string"
-          },
-          "Suffix": {
-            "type": "string"
-          }
-        }
-      },
-      "address": {
-        "type": "object",
-        "properties": {
-          "street_address": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "street_address",
-          "city",
-          "state"
-        ]
-      }
+    "CFDANumber": {
+      "type": "number",
+      "title": "Agency Listing Number"
+    },
+    "CFDATitle": {
+      "type": "string",
+      "title": "Assistance Listing Title"
+    },
+    "Date_Received": {
+      "type": "string",
+      "title": "Date Received"
+    },
+    "OpportunityID": {
+      "title": "Funding Opportunity Number",
+      "type": "string"
+    },
+    "OpportunityTitle": {
+      "type": "string",
+      "title": ""
+    },
+    "AuthorizedRepresentativeName": {
+      "type": "string",
+      "title": ""
+    },
+    "AuthorizedRepresentativeFax": {
+      "type": "string",
+      "title": ""
+    },
+    "AuthorizedRepresentativeEmail": {
+      "type": "string",
+      "title": ""
+    },
+    "AuthorizedRepresentativePhoneNumber": {
+      "type": "string",
+      "title": ""
+    },
+    "EveningPhone": {
+      "type": "string",
+      "title": ""
+    },
+    "AuthorizedRepresentativeAddress": {
+      "type": "string",
+      "title": ""
+    },
+    "citizenship": {
+      "type": "string",
+      "title": ""
+    },
+    "AlienRegistrationNumber": {
+      "type": "string",
+      "title": ""
+    },
+
+    "CountryofOrigin": {
+      "type": "string",
+      "title": ""
+    },
+    "VisitDate": {
+      "type": "string",
+      "title": ""
+    },
+    "ProjectTitle": {
+      "type": "string",
+      "title": ""
+    },
+    "ProjectDescription": {
+      "type": "string",
+      "title": ""
+    },
+    "FundingPeriodStartDate": {
+      "type": "string",
+      "title": ""
+    },
+    "FundingPeriodEndDate": {
+      "type": "string",
+      "title": ""
+    },
+    "ApplicationCertification": {
+      "type": "string",
+      "title": ""
+    },
+    "AORSignature": {
+      "type": "string",
+      "title": ""
+    },
+    "AORDate": {
+      "type": "string",
+      "title": ""
     }
   }
+}
