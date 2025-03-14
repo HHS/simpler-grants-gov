@@ -128,8 +128,12 @@ class AcceptanceCriteriaDataset(BaseDataset):
         # - the text after the checkbox
         checkbox_regex = r"^( *)(- \[([ x])\])\s*(.*)"
 
-        # compile valid section names
-        valid_sections = {item.value for item in AcceptanceCriteriaType}
+        # compile valid section names, excluding AcceptanceCriteriaType.ALL
+        valid_sections = {
+            item.value
+            for item in AcceptanceCriteriaType
+            if item != AcceptanceCriteriaType.ALL
+        }
 
         # iterate sections
         for i in range(1, len(sections), 2):
