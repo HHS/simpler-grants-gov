@@ -114,20 +114,26 @@ class AcceptanceCriteriaDataset(BaseDataset):
         total_criteria = 0
         total_done = 0
 
-        # define regex to capture section headers and bodies
-        regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
-        sections = re.findall(regex, bodycontent, re.MULTILINE)
+        # define regex to capture markdown sections:
+        # - captures section titles that start with "### "
+        # - captures section content until the next "###", EOF, or multiple blank lines
+        section_regex = r"^###\s+(.*?)\n([\s\S]*?)(?=\n###|\Z|\n{2,})"
+        sections = re.findall(section_regex, bodycontent, re.MULTILINE)
 
-        # regex to match checkboxes and capture indentation
-        checkbox_regex = r"^( *)(- \[([ x])\])([^-\n]*)"
+        # regex to extract markdown checkboxes:
+        # - captures indentation level for nesting
+        # - captures checkbox marker ("- [x]" or "- [ ]")
+        # - captures checkbox status ("x" if checked, " " if unchecked)
+        # - captures the task text after the checkbox
+        checkbox_regex = r"^( *)(- \[([ x])\])\s*(.*)"
 
         # iterate sections
-        for section_name, section_body, _ in sections:
+        for section_name, section_body in sections:
 
             # determine whether this section should be included in totals
             if (
                 ac_type != AcceptanceCriteriaType.ALL
-                and section_name.strip() != ac_type.value
+                and section_name.lstrip("#").strip() != ac_type.value
             ):
                 continue
 
@@ -161,7 +167,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
             # determine nest level based on indentation
             checkbox_nest_level = (
                 AcceptanceCriteriaNestLevel.LEVEL_2
-                if len(indentation) > 0
+                if indentation and len(indentation) > 0
                 else AcceptanceCriteriaNestLevel.LEVEL_1
             )
 
