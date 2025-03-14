@@ -86,16 +86,7 @@ def test_application_start_invalid_request(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application creation fails with invalid request data"""
-    request_data = {
-        "my_field": {
-            "a": 1,
-            "b": [
-                {
-                  "c": "hello"
-                }
-            ]
-        }
-    }
+    request_data = {"my_field": {"a": 1, "b": [{"c": "hello"}]}}
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
