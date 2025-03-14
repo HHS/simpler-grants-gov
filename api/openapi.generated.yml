@@ -406,6 +406,44 @@ paths:
       summary: User Get
       security:
       - ApiJwtAuth: []
+  /alpha/applications/start:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStartResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+      tags:
+      - Application Alpha
+      summary: Create a new application for a competition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStartRequest'
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -2024,6 +2062,38 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/User'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationStartRequest:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - competition_id
+    ApplicationStartResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationStartResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStartResponseData'
         status_code:
           type: integer
           description: The HTTP status code
