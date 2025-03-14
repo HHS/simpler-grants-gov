@@ -27,7 +27,7 @@ from src.db.models.lookup_models import (
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
-    from src.db.models.user_models import UserSavedOpportunity
+    from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -80,6 +80,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     all_opportunity_summaries: Mapped[list["OpportunitySummary"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
+    all_opportunity_notification_logs: Mapped[list["UserOpportunityNotificationLog"]] = (
+        relationship(back_populates="opportunity", uselist=True, cascade="all, delete-orphan")
     )
 
     saved_opportunities_by_users: Mapped[list["UserSavedOpportunity"]] = relationship(

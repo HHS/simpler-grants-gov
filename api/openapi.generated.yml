@@ -25,6 +25,9 @@ tags:
 - name: Extract v1
 - name: Agency v1
 - name: User v1
+- name: Application Alpha
+- name: Form Alpha
+- name: Competition Alpha
 servers: .
 paths:
   /health:
