@@ -1,15 +1,19 @@
 import logging
+from uuid import UUID
 
 import src.adapters.db as db
 from src.adapters.db import flask_db
 from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (
+    ApplicationFormUpdateRequestSchema,
+    ApplicationFormUpdateResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
 )
 from src.auth.api_key_auth import api_key_auth
 from src.services.applications.create_application import create_application
+from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
 
@@ -31,4 +35,26 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
+    )
+
+
+@application_blueprint.put("/applications/<uuid:application_id>/forms/<uuid:form_id>")
+@application_blueprint.input(ApplicationFormUpdateRequestSchema, location="json")
+@application_blueprint.output(ApplicationFormUpdateResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_key_auth)
+@flask_db.with_db_session()
+def application_form_update(
+    db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update an application form response"""
+    logger.info(f"PUT /alpha/applications/{application_id}/forms/{form_id}")
+
+    application_response = json_data["application_response"]
+
+    # Call the service to update the application form
+    _, warnings = update_application_form(db_session, application_id, form_id, application_response)
+
+    return response.ApiResponse(
+        message="Success", data={"application_id": application_id}, warnings=warnings
     )
