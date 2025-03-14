@@ -2248,6 +2248,29 @@ components:
           - $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
     UserSaveSearchResponse:
       type: object
       properties:
@@ -2256,7 +2279,10 @@ components:
           description: The message to return
           example: Success
         data:
-          example: null
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2341,29 +2367,6 @@ components:
           - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
       required:
       - pagination
-    SavedSearchResponse:
-      type: object
-      properties:
-        saved_search_id:
-          type: string
-          format: uuid
-          description: The ID of the saved search
-          example: 123e4567-e89b-12d3-a456-426614174000
-        name:
-          type: string
-          description: Name of the saved search
-          example: Grant opportunities in California
-        search_query:
-          description: The saved search query parameters
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
-        created_at:
-          type: string
-          format: date-time
-          description: When the search was saved
-          example: '2024-01-01T00:00:00Z'
     UserSavedSearchesResponse:
       type: object
       properties:
