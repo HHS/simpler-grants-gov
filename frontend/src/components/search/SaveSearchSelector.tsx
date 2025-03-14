@@ -19,7 +19,7 @@ import { Select } from "@trussworks/react-uswds";
 import SimplerAlert from "src/components/SimplerAlert";
 import Spinner from "src/components/Spinner";
 
-export const SavedSearchSelector = ({
+export const SaveSearchSelector = ({
   newSavedSearches,
   savedSearches,
   setSavedSearches,
@@ -48,17 +48,14 @@ export const SavedSearchSelector = ({
   }, []);
 
   const fetchSavedSearches = useCallback(() => {
-    if (user?.token) {
-      setLoading(true);
-      setApiError(null);
-      return obtainSavedSearches(user.token)
-        .then((savedSearches) => {
-          setLoading(false);
-          setSavedSearches(savedSearches);
-        })
-        .catch(handleFetchError);
-    }
-    return Promise.resolve();
+    setLoading(true);
+    setApiError(null);
+    return obtainSavedSearches(user?.token)
+      .then((savedSearches) => {
+        setLoading(false);
+        setSavedSearches(savedSearches);
+      })
+      .catch(handleFetchError);
   }, [user?.token, handleFetchError, setSavedSearches]);
 
   // note that selected value will be the search id since select values
@@ -84,9 +81,10 @@ export const SavedSearchSelector = ({
   );
 
   // fetch saved searches on page load or log in
+  // not explicitly dependent on user changes, but fetchSavedSearches is, so will still fire
   useEffect(() => {
     fetchSavedSearches().catch(handleFetchError);
-  }, [user?.token, fetchSavedSearches, handleFetchError]);
+  }, [fetchSavedSearches, handleFetchError]);
 
   // fetch saved searches on new saved search
   useEffect(() => {
@@ -113,13 +111,6 @@ export const SavedSearchSelector = ({
     setApplyingSavedSearch(false);
   }, [searchParams]);
 
-  // hide if no saved searches available
-  if (!savedSearches.length) {
-    return;
-  }
-  if (loading) {
-    return <Spinner />;
-  }
   if (apiError) {
     return (
       <SimplerAlert
@@ -128,6 +119,13 @@ export const SavedSearchSelector = ({
         messageText={t("fetchSavedError")}
       />
     );
+  }
+  if (loading) {
+    return <Spinner />;
+  }
+  // hide if no saved searches available
+  if (!savedSearches.length) {
+    return;
   }
   return (
     <Select

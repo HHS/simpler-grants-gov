@@ -14,7 +14,8 @@ jest.mock("src/services/auth/session", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/savedSearchFetcher", () => ({
-  fetchSavedSearches: (...args: unknown[]) => mockFetchSavedSearches(...args),
+  fetchSavedSearches: (...args: unknown[]) =>
+    mockFetchSavedSearches(...args) as unknown,
 }));
 
 const fakeSavedSearches = [

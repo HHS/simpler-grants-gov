@@ -11,7 +11,7 @@ import { ReactNode, useMemo, useState } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
-import { SavedSearchSelector } from "./SaveSearchSelector";
+import { SaveSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
@@ -91,7 +91,7 @@ export function SaveSearchPanel() {
               title={t("help.general")}
             />
           </div>
-          <SavedSearchSelector
+          <SaveSearchSelector
             newSavedSearches={newSavedSearches}
             savedSearches={savedSearches}
             setSavedSearches={setSavedSearches}
