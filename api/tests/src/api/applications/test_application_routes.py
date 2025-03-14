@@ -12,7 +12,6 @@ def clear_competitions(db_session):
     db_session.query(Application).delete()
     db_session.query(Competition).delete()
     db_session.commit()
-    yield
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
@@ -25,7 +24,7 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     assert response.status_code == 200
@@ -50,7 +49,7 @@ def test_application_start_competition_not_found(
     request_data = {"competition_id": non_existent_competition_id}
 
     response = client.post(
-        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     assert response.status_code == 404
@@ -73,7 +72,7 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": "123"}
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": "123"}
     )
 
     assert response.status_code == 401
@@ -87,10 +86,19 @@ def test_application_start_invalid_request(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application creation fails with invalid request data"""
-    request_data = {}  # Missing required competition_id
+    request_data = {
+        "my_field": {
+            "a": 1,
+            "b": [
+                {
+                  "c": "hello"
+                }
+            ]
+        }
+    }
 
     response = client.post(
-        "/alpha/application_alpha/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
     assert response.status_code == 422  # Validation error

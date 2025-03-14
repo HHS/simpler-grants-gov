@@ -32,8 +32,8 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
     logger.info(
         "Created new application",
         extra={
-            "application_id": str(application.application_id),
-            "competition_id": str(competition_id),
+            "application_id": application.application_id,
+            "competition_id": competition_id,
         },
     )
 

@@ -14,7 +14,7 @@ from src.services.applications.create_application import create_application
 logger = logging.getLogger(__name__)
 
 
-@application_blueprint.post("/application_alpha/start")
+@application_blueprint.post("/applications/start")
 @application_blueprint.input(ApplicationStartRequestSchema, location="json")
 @application_blueprint.output(ApplicationStartResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
@@ -22,12 +22,13 @@ logger = logging.getLogger(__name__)
 @flask_db.with_db_session()
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
-    logger.info("POST /alpha/application_alpha/start")
+    logger.info("POST /alpha/applications/start")
 
     competition_id = json_data["competition_id"]
 
-    application = create_application(db_session, competition_id)
+    with db_session.begin():
+        application = create_application(db_session, competition_id)
 
     return response.ApiResponse(
-        message="Success", data={"application_id": str(application.application_id)}
+        message="Success", data={"application_id": application.application_id}
     )
