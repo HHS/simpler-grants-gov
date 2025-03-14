@@ -3,7 +3,7 @@
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 
 import { JSX, useState } from "react";
-import { FormGroup, Label, TextInput } from "@trussworks/react-uswds";
+import { FormGroup, Label, Fieldset, TextInput } from "@trussworks/react-uswds";
 
 interface FormData {
   [key: string]: FormDataEntryValue;
@@ -50,12 +50,11 @@ const createTextField = (fieldName: string, title: string, type: TextTypes) => {
 
 const wrapSection = (label: string, fieldName: string, tree: JSX.Element[]) => {
   return (
-    <FormGroup className="border-1px padding-2" key={`${fieldName}-row`}>
+    <Fieldset key={`${fieldName}-row`}> <FormGroup key={`${fieldName}-group`}>
       <Label htmlFor={fieldName}>{label}</Label>
       {tree.map((field) => field)}
-    </FormGroup>
+  </FormGroup>  </Fieldset>
   );
-  // return <FormGroup><Label htmlFor={fieldName}>{label}</Label>{tree}</FormGroup>
 };
 
 const createField = (fieldName: string, title: string, type: string) => {
