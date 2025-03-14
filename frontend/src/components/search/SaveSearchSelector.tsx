@@ -1,5 +1,3 @@
-"use client";
-
 import clsx from "clsx";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
@@ -9,7 +7,13 @@ import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { Select } from "@trussworks/react-uswds";
 
 import SimplerAlert from "src/components/SimplerAlert";
@@ -17,8 +21,12 @@ import Spinner from "src/components/Spinner";
 
 export const SavedSearchSelector = ({
   newSavedSearches,
+  savedSearches,
+  setSavedSearches,
 }: {
   newSavedSearches: string[];
+  savedSearches: SavedSearchRecord[];
+  setSavedSearches: Dispatch<SetStateAction<SavedSearchRecord[]>>;
 }) => {
   const t = useTranslations("Search.saveSearch");
   const { user } = useUser();
@@ -26,7 +34,6 @@ export const SavedSearchSelector = ({
   const prevSearchParams = usePrevious(searchParams);
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
-  const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
 
@@ -52,7 +59,7 @@ export const SavedSearchSelector = ({
         .catch(handleFetchError);
     }
     return Promise.resolve();
-  }, [user?.token, handleFetchError]);
+  }, [user?.token, handleFetchError, setSavedSearches]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list

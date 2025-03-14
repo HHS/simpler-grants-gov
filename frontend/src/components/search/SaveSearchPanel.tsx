@@ -2,11 +2,12 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
@@ -22,7 +23,7 @@ const SaveSearchTooltip = ({
   text,
   title,
 }: {
-  text: string;
+  text: string | ReactNode;
   title: string;
 }) => {
   return (
@@ -46,6 +47,7 @@ export function SaveSearchPanel() {
   const t = useTranslations("Search.saveSearch");
 
   const [newSavedSearches, setNewSavedSearches] = useState<string[]>([]);
+  const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
 
   const url = useMemo(() => {
     const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
@@ -66,6 +68,14 @@ export function SaveSearchPanel() {
     [showSavedSearchUI, t],
   );
 
+  const authenticatedTooltipText = useMemo(() => {
+    return savedSearches.length
+      ? t.rich("help.authenticated", {
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })
+      : t("help.noSavedQueries");
+  }, [savedSearches, t]);
+
   const onNewSavedSearch = (id: string) => {
     setNewSavedSearches([id, ...newSavedSearches]);
   };
@@ -77,11 +87,15 @@ export function SaveSearchPanel() {
           <div className="display-flex margin-bottom-2">
             <span className="text-bold">{t("heading")}</span>
             <SaveSearchTooltip
-              text={t("help.noSavedQueries")}
+              text={authenticatedTooltipText}
               title={t("help.general")}
             />
           </div>
-          <SavedSearchSelector newSavedSearches={newSavedSearches} />
+          <SavedSearchSelector
+            newSavedSearches={newSavedSearches}
+            savedSearches={savedSearches}
+            setSavedSearches={setSavedSearches}
+          />
         </>
       )}
       <div className="display-flex flex-align-start text-underline">
