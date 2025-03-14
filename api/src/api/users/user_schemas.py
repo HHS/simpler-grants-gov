@@ -133,8 +133,6 @@ class SavedSearchResponseSchema(Schema):
         metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
     )
 
-class UserSaveSearchResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(SavedSearchResponseSchema)
 
 class UserSaveSearchResponseSchema(AbstractResponseSchema):
     data = fields.Nested(SavedSearchResponseSchema)
