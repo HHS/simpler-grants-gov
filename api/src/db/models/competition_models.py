@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+
 
 class Competition(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition"
@@ -28,9 +28,6 @@ class Competition(ApiSchemaTable, TimestampMixin):
     grace_period: Mapped[int | None] = mapped_column(BigInteger)
     contact_info: Mapped[str | None]
 
-    competition_forms: Mapped[list["CompetitionForm"]] = relationship("CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan")
-
-    applications: Mapped[list["Application"]] = relationship("Application", uselist=True, back_populates="competition", cascade="all, delete-orphan")
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_instruction"
@@ -81,12 +78,9 @@ class Form(ApiSchemaTable, TimestampMixin):
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_form"
 
-    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Competition.competition_id), primary_key=True)
-    competition: Mapped[Competition] = relationship(Competition)
-
+    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), primary_key=True)
     form: Mapped[Form] = relationship(Form)
-
     is_required: Mapped[bool]
 
 

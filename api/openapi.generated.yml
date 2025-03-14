@@ -406,21 +406,22 @@ paths:
       summary: User Get
       security:
       - ApiJwtAuth: []
-  /alpha/forms/{form_id}:
-    get:
-      parameters:
-      - in: path
-        name: form_id
-        schema:
-          type: string
-        required: true
+  /alpha/applications/start:
+    post:
+      parameters: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormResponseAlpha'
+                $ref: '#/components/schemas/ApplicationStartResponse'
           description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
         '401':
           content:
             application/json:
@@ -432,10 +433,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
+          description: Not Found
       tags:
-      - Form Alpha
-      summary: Form Get
+      - Application Alpha
+      summary: Create a new application for a competition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStartRequest'
       security:
       - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
@@ -529,38 +535,6 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
-  /alpha/competitions/{competition_id}:
-    get:
-      parameters:
-      - in: path
-        name: competition_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CompetitionResponseAlpha'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - Competition Alpha
-      summary: Competition Get
-      security:
-      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
@@ -774,6 +748,54 @@ paths:
       summary: User Delete Saved Search
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/forms/{form_id}:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an application form response
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationFormUpdateRequest'
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -2092,29 +2114,23 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    FormAlpha:
+    ApplicationStartRequest:
       type: object
       properties:
-        form_id:
+        competition_id:
           type: string
           format: uuid
-          description: The primary key ID of the form
           example: 123e4567-e89b-12d3-a456-426614174000
-        form_name:
+      required:
+      - competition_id
+    ApplicationStartResponseData:
+      type: object
+      properties:
+        application_id:
           type: string
-          description: The name of the form
-          example: ABC Project Form
-        form_json_schema:
-          type: object
-          description: The JSON Schema representation of the form
-          example:
-            type: object
-            properties: {}
-        form_ui_schema:
-          type: object
-          description: The UI Schema of the form for front-end rendering
-          example: {}
-    FormResponseAlpha:
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationStartResponse:
       type: object
       properties:
         message:
@@ -2125,7 +2141,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/FormAlpha'
+          - $ref: '#/components/schemas/ApplicationStartResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2289,51 +2305,6 @@ components:
           example: Success
         data:
           example: null
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    CompetitionFormAlpha:
-      type: object
-      properties:
-        is_required:
-          type: boolean
-          description: ''
-        form:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/FormAlpha'
-    CompetitionAlpha:
-      type: object
-      properties:
-        competition_id:
-          type: string
-          format: uuid
-          description: ''
-          example: 123e4567-e89b-12d3-a456-426614174000
-        opportunity_id:
-          type: integer
-          description: ''
-        competition_forms:
-          type: array
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/CompetitionFormAlpha'
-    CompetitionResponseAlpha:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2621,6 +2592,29 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationFormUpdateRequest:
+      type: object
+      properties:
+        application_response:
+          type: object
+      required:
+      - application_response
+    ApplicationFormUpdateResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+        data:
+          type: object
     UserDeleteSavedOpportunityResponse:
       type: object
       properties:
