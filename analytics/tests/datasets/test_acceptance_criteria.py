@@ -21,7 +21,7 @@ Lorem ipsum
 
 ### Press release
 
-Lorem ipsum
+Lorem ipsum dolor sit amet
 
 ### Acceptance criteria
 
@@ -42,6 +42,7 @@ Lorem ipsum
 
 - **Develop product strategy** by doing xyz
 - **Propose a governance structure** for abc123
+- [ ] Random checkbox placement
 
 ### Assumptions and dependencies
 
