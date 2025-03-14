@@ -157,7 +157,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
         total_done = 0
 
         # iterate checkboxes
-        for indentation, _, is_checked, _ in checkboxes: 
+        for indentation, _, is_checked, _ in checkboxes:
             # determine nest level based on indentation
             checkbox_nest_level = (
                 AcceptanceCriteriaNestLevel.LEVEL_2
