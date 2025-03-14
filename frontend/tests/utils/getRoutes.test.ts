@@ -35,6 +35,7 @@ describe("getNextRoutes", () => {
       "/",
       "/process",
       "/research",
+      "/roadmap",
       "/saved-grants",
       "/search",
       "/subscribe/confirmation",

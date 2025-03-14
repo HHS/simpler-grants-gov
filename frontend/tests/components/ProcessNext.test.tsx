@@ -1,14 +1,14 @@
-import ProcessNext, {
-  gitHubLinkForIssue,
-} from "src/app/[locale]/process/ProcessNext";
+import ProcessNext from "src/app/[locale]/process/ProcessNext";
 import { render, screen } from "tests/react-utils";
+
+import { gitHubLinkForIssue } from "src/components/GithubLink";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {
     render(<ProcessNext />);
     const ProcessH1 = screen.getByRole("heading", {
       level: 2,
-      name: /What's happening/i,
+      name: /What we're working on right now/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();

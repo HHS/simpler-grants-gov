@@ -39,6 +39,14 @@ resource "aws_wafv2_web_acl" "waf" {
 
           name = "NoUserAgent_HEADER"
         }
+
+        rule_action_override {
+          action_to_use {
+            count {}
+          }
+
+          name = "SizeRestrictions_QUERYSTRING"
+        }
       }
     }
     visibility_config {

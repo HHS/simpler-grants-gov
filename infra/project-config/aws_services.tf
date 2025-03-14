@@ -5,6 +5,7 @@ locals {
     "application-autoscaling",
     "autoscaling",
     "backup",
+    "cloudfront",
     "cloudwatch",
     "cognito-idp",
     "dynamodb",
