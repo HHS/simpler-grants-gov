@@ -1877,8 +1877,9 @@ class FormFactory(BaseFactory):
 
     form_id = Generators.UuidObj
     form_name = factory.Faker("bs")
-    form_version = ""
-    agency_code = ""
+    # Form version will be like 1.0, 4.5, etc.
+    form_version = factory.Faker("pystr_format", string_format="#.#")
+    agency_code = factory.Faker("agency_code")
 
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/4168
     # Update these to be a bit more meaningful
