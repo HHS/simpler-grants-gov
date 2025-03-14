@@ -1,5 +1,6 @@
 import itertools
 import math
+from datetime import datetime, timedelta
 
 import freezegun
 import pytest
@@ -379,10 +380,12 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 1
 
-    @freezegun.freeze_time("2100-03-14", tz_offset=0)
+    @freezegun.freeze_time(datetime.now() + timedelta(hours=2), tz_offset=0)
     def test_batch_process_exceed_time_limit(
-        self, db_session, search_client, load_opportunities_to_index
+        self, db_session, search_client, load_opportunities_to_index, enable_factory_create
     ):
+        OpportunityChangeAuditFactory.create()
+
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
@@ -407,7 +410,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         self, db_session, load_opportunities_to_index, enable_factory_create
     ):
         # Add new opportunities
-        oca_1 = OpportunityChangeAuditFactory.create(is_loaded_to_search=False)
+        oca_1 = OpportunityChangeAuditFactory.create()
         OpportunityChangeAuditFactory.create(is_loaded_to_search=True)
         oca_3 = OpportunityChangeAuditFactory.create(is_loaded_to_search=None)
 
