@@ -96,7 +96,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
         # extract raw body content which contains acceptance criteria
         bodycontent = result["bodycontent"].get(result.first_valid_index(), "")
 
-        # parse the raw body content and return the acceptance criteria
+        # parse the raw body content and return the acceptance criteria totals
         return self._parse_body_content(bodycontent, ac_type, nest_level)
 
     def _parse_body_content(
@@ -118,14 +118,17 @@ class AcceptanceCriteriaDataset(BaseDataset):
         regex = r"^(###\s+.*)(\n([\s\S]*?))(?=\n###|\Z)"
         sections = re.findall(regex, bodycontent, re.MULTILINE)
 
-        # iterate sections
-        for item in sections:
+        # regex to match checkboxes and capture indentation
+        checkbox_regex = r"^( *)(- \[([ x])\])([^-\n]*)"
 
-            section_name = item[0]
-            section_body = item[1]
+        # iterate sections
+        for section_name, section_body, _ in sections:
 
             # determine whether this section should be included in totals
-            if ac_type != AcceptanceCriteriaType.ALL and section_name != ac_type.value:
+            if (
+                ac_type != AcceptanceCriteriaType.ALL
+                and section_name.strip() != ac_type.value
+            ):
                 continue
 
             # if section does not contain a checkbox then skip it
@@ -133,24 +136,43 @@ class AcceptanceCriteriaDataset(BaseDataset):
                 continue
 
             # find all checkboxes in section
-            checkbox_regex = r"- \[([ x])\]([^-\n]*)"
-            checkboxes = re.findall(checkbox_regex, section_body)
+            checkboxes = re.findall(checkbox_regex, section_body, re.MULTILINE)
 
-            # iterate checkboxes
-            for checkbox in checkboxes:
+            # process checkboxes
+            criteria, done = self._count_checkboxes(checkboxes, target_nest_level)
 
-                # TO DO: automatically determine nest level
-                # assume nest level 1 until logic is added to determine nest level
-                checkbox_nest_level = AcceptanceCriteriaNestLevel.LEVEL_1
-
-                # determine whether this level of checkbox should be counted
-                if target_nest_level not in {
-                    AcceptanceCriteriaNestLevel.ALL,
-                    checkbox_nest_level,
-                }:
-                    continue
-
-                total_criteria += 1
-                total_done += "x" in checkbox[0]
+            # accumulate totals
+            total_criteria += criteria
+            total_done += done
 
         return AcceptanceCriteriaTotal(criteria=total_criteria, done=total_done)
+
+    def _count_checkboxes(
+        self,
+        checkboxes: list[tuple[str, str, str, str]],
+        target_nest_level: AcceptanceCriteriaNestLevel,
+    ) -> tuple[int, int]:
+        """Count checkboxes and determine nesting levels."""
+        total_criteria = 0
+        total_done = 0
+
+        # iterate checkboxes
+        for indentation, _, is_checked, _ in checkboxes: 
+            # determine nest level based on indentation
+            checkbox_nest_level = (
+                AcceptanceCriteriaNestLevel.LEVEL_2
+                if len(indentation) > 0
+                else AcceptanceCriteriaNestLevel.LEVEL_1
+            )
+
+            # determine whether this level of checkbox should be counted
+            if target_nest_level not in {
+                AcceptanceCriteriaNestLevel.ALL,
+                checkbox_nest_level,
+            }:
+                continue
+
+            total_criteria += 1
+            total_done += is_checked == "x"
+
+        return total_criteria, total_done
