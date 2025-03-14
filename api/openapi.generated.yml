@@ -2075,13 +2075,25 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
       required:
       - competition_id
+    ApplicationStartResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
     ApplicationStartResponse:
       type: object
       properties:
         message:
           type: string
+          description: The message to return
+          example: Success
         data:
-          type: object
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStartResponseData'
         status_code:
           type: integer
           description: The HTTP status code
