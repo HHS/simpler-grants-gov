@@ -669,6 +669,7 @@ export const messages = {
           "Save this frequently used search query to your account. Apply it again later to save time when searching for opportunities.",
         authenticated:
           "Manage your saved search queries in your <strong>Workspace</strong>.",
+        general: "About saved searches",
       },
       modal: {
         title: "Save search query",
