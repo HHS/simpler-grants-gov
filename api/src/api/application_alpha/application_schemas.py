@@ -7,7 +7,8 @@ class ApplicationStartRequestSchema(Schema):
 
 
 class ApplicationStartResponseDataSchema(Schema):
-     application_id = fields.UUID()
+    application_id = fields.UUID()
+
 
 class ApplicationStartResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationStartResponseDataSchema())
