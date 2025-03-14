@@ -1,22 +1,13 @@
 import { Metadata } from "next";
-import ClientForm from "src/app/[locale]/form/sf/[id]/ClientForm";
-import NotFound from "src/app/[locale]/not-found";
+import ClientForm from "./ClientForm";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
-
 import { redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
+import { GridContainer, Label } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import * as formSchema from "./formSchema.json";
 import * as uiSchema from "./uiSchema.json";
-
-// import { RJSFSchema } from '@rjsf/utils';
-// import dynamic from "next/dynamic";
-
-type FormProps = {
-  params: Promise<{ id: string }>;
-} & WithFeatureFlagProps;
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -30,30 +21,26 @@ const getFormDetails = () => {
   return JSON.parse(JSON.stringify(formSchema)) as object;
 };
 
-const getuiSchemas = () => {
+const getuiSchema = () => {
   return JSON.parse(JSON.stringify(uiSchema)) as object;
 };
 
-async function FormPage({ params }: FormProps) {
-  const { id } = await params;
-  const idForParsing = Number(id);
-  if (isNaN(idForParsing) || idForParsing < 1) {
-    return <NotFound />;
-  }
+function FormPage() {
 
   const jsonFormSchema = getFormDetails();
-  const uiSchemas = getuiSchemas();
+  const uiSchema = getuiSchema();
 
   return (
     <GridContainer>
       <BetaAlert />
-      <h1>Form {id}</h1>
-      <ClientForm jsonFormSchema={jsonFormSchema} />
+      <h1>Form Demo</h1>
+      <Label htmlFor="client-form">The following is a demo of the SFS 424 Individual form.</Label>
+      <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );
 }
 
-export default withFeatureFlag<FormProps, never>(
+export default withFeatureFlag<WithFeatureFlagProps, never>(
   FormPage,
   "opportunityOff",
   () => redirect("/maintenance"),

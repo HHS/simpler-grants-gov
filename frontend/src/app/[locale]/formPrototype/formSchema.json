@@ -13,8 +13,9 @@
   "properties": {
     "FederalAgency": {
       "type": "string",
-      "label": "1. NAME OF FEDERAL AGENCY",
-      "title": "Name of Federal Agency"
+      "title": "Name of Federal Agency",
+      "maxLength": 60,
+      "minLength": 1
     },
     "CFDANumber": {
       "type": "number",
@@ -34,27 +35,69 @@
     },
     "OpportunityTitle": {
       "type": "string",
-      "title": ""
+      "title": "Funding Opportunity Title"
     },
-    "AuthorizedRepresentativeName": {
+    "PrefixName": {
       "type": "string",
-      "title": ""
+      "title": "Prefix",
+      "enum": ["Mr.", "Mrs.", "Miss", "Ms", "Dr.", "Rev."]
     },
+    "FirstName": {
+      "type": "string",
+      "title": "First Name"
+    },
+    "MiddleName": {
+      "type": "string",
+      "title": "Middle Name"
+    },
+    "LastName": {
+      "type": "string",
+      "title": "Last Name"
+    },
+    "Suffix": {
+      "type": "string",
+      "title": "Suffix Name"
+    },
+    "Street1": {
+      "type": "string",
+      "title": "Street1"
+    },
+    "Street2": {
+      "type": "string",
+      "title": "Street2"
+    },
+    "City": {
+      "type": "string",
+      "title": "City"
+    },
+    "State": {
+      "type": "string",
+      "title": "State"
+    },
+    "Province": {
+      "type": "string",
+      "title": "Province"
+    },
+    "Country": {
+      "type": "string",
+      "title": "Country"
+    },
+
     "AuthorizedRepresentativeFax": {
       "type": "string",
-      "title": ""
+      "title": "Fax Number"
     },
     "AuthorizedRepresentativeEmail": {
       "type": "string",
-      "title": ""
+      "title": "Email"
     },
     "AuthorizedRepresentativePhoneNumber": {
       "type": "string",
-      "title": ""
+      "title": "Daytime Phone Number"
     },
     "EveningPhone": {
       "type": "string",
-      "title": ""
+      "title": "Evening Phone Number"
     },
     "AuthorizedRepresentativeAddress": {
       "type": "string",
@@ -106,3 +149,4 @@
     }
   }
 }
+
