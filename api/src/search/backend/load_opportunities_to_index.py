@@ -132,10 +132,9 @@ class LoadOpportunitiesToIndex(Task):
             .where(
                 Opportunity.is_draft.is_(False),
                 CurrentOpportunitySummary.opportunity_status.isnot(None),
-                OpportunityChangeAudit.is_loaded_to_search.is_(False),
+                OpportunityChangeAudit.is_loaded_to_search.isnot(True),
             )
             .order_by(Opportunity.created_at.desc())
-            .order_by(Opportunity.opportunity_id.desc())
             .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
             .limit(self.config.incremental_load_batch_size)
         )
@@ -164,7 +163,6 @@ class LoadOpportunitiesToIndex(Task):
 
             # Process updates and inserts
             processed_opportunity_ids = set()
-            opportunities_to_index = []
 
             for opportunity in queued_opportunities:
                 logger.info(
@@ -179,23 +177,20 @@ class LoadOpportunitiesToIndex(Task):
                     },
                 )
 
-                # Add to index batch if it's indexable
-                opportunities_to_index.append(opportunity)
                 processed_opportunity_ids.add(opportunity.opportunity_id)
 
             # Bulk index the opportunities (handles both inserts and updates)
-            if opportunities_to_index:
-                loaded_ids = self.load_records(opportunities_to_index)
-                logger.info(f"Indexed {len(loaded_ids)} opportunities")
+            loaded_ids = self.load_records(queued_opportunities)
+            logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
-                # Update updated_at timestamp instead of deleting records
-                self.db_session.execute(
-                    update(OpportunityChangeAudit)
-                    .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                    .values(is_loaded_to_search=True)
-                )
+            # Update updated_at timestamp instead of deleting records
+            self.db_session.execute(
+                update(OpportunityChangeAudit)
+                .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
+                .values(is_loaded_to_search=True)
+            )
 
-                self.increment(self.Metrics.BATCHES_PROCESSED)
+            self.increment(self.Metrics.BATCHES_PROCESSED)
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
         """Handle deletion of opportunities when running incrementally
@@ -374,8 +369,9 @@ class LoadOpportunitiesToIndex(Task):
 
             loaded_opportunity_ids.add(record.opportunity_id)
 
-        self.search_client.bulk_upsert(
-            self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
-        )
+        if json_records:
+            self.search_client.bulk_upsert(
+                self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
+            )
 
         return loaded_opportunity_ids

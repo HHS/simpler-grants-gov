@@ -386,6 +386,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
+
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -401,3 +402,21 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             ]
             == 0
         )
+
+    def test_opportunities_to_process_query(
+        self, db_session, load_opportunities_to_index, enable_factory_create
+    ):
+        # Add new opportunities
+        oca_1 = OpportunityChangeAuditFactory.create(is_loaded_to_search=False)
+        OpportunityChangeAuditFactory.create(is_loaded_to_search=True)
+        oca_3 = OpportunityChangeAuditFactory.create(is_loaded_to_search=None)
+
+        query = load_opportunities_to_index._build_opportunities_to_process_query()
+
+        queued_opportunities = db_session.execute(query).scalars().all()
+
+        # assert only opportunities (new/updated) not loaded to search are fetched sorted by latest opportunities
+        assert len(queued_opportunities) == 2
+        assert [oca_3.opportunity_id, oca_1.opportunity_id] == [
+            opp.opportunity_id for opp in queued_opportunities
+        ]
