@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { noop } from "lodash";
-import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 

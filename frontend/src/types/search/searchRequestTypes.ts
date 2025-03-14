@@ -14,7 +14,7 @@ export type PaginationOrderBy =
   | "opportunity_number"
   | "opportunity_title"
   | "agency_name"
-  | "top_level_agency_code"
+  | "top_level_agency_name"
   | "post_date"
   | "close_date";
 export type PaginationSortDirection = "ascending" | "descending";
