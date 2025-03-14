@@ -23,12 +23,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.68.0"
     }
+    newrelic = {
+      source  = "newrelic/newrelic"
+      version = "~> 3.57"
+    }
   }
 
   backend "s3" {
     encrypt = "true"
   }
 }
+
+provider "newrelic" {}
 
 provider "aws" {
   region = local.region
