@@ -62,5 +62,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-login-redirect-url"
     }
+
+    FRONTEND_BASE_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/frontend-base-url"
+    }
   }
 }
