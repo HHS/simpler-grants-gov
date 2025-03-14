@@ -30,6 +30,7 @@ locals {
     "servicediscovery",
     "sns",
     "ssm",
+    "states",
     "waf-regional",
     "wafv2",
   ]
