@@ -6,7 +6,7 @@ import freezegun
 import pytest
 from sqlalchemy import select
 
-from src.db.models.opportunity_models import OpportunityChangeAudit
+from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
@@ -389,7 +389,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
-
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -409,6 +408,10 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     def test_opportunities_to_process_query(
         self, db_session, load_opportunities_to_index, enable_factory_create
     ):
+        opportunities = db_session.query(Opportunity).all()
+        for opp in opportunities:
+            db_session.delete(opp)
+
         # Add new opportunities
         oca_1 = OpportunityChangeAuditFactory.create()
         OpportunityChangeAuditFactory.create(is_loaded_to_search=True)
