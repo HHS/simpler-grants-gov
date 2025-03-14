@@ -119,3 +119,25 @@ After the next deployment in an environment, we should be using the new keys, an
 Prod login.gov does not update immediately, and you must [request a deployment](https://developers.login.gov/production/#changes-to-production-applications) to get a certificate rotated.
 
 For Prod, assume it will take at least two weeks from creating the certificate, before it is available for the API, and until it is, do not change the API's configured key.
+
+## New Relic
+
+There are three ways to interact with New Relic: UI, CLI, or API. Most interactions will be done via the UI.
+
+### New Relic API via Terraform
+
+We use the New Relic via means of Terraform. [You can via the New Relic Terraform API documentation here](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/guides/getting_started). To setup Terraform for New Relic, perform the following steps:
+
+1. [Login to New Relic](https://one.newrelic.com)
+2. [Navigate to the API keys page](https://one.newrelic.com/admin-portal/api-keys/home)
+3. Create a key of key type "user"
+4. Copy the key value
+5. Set the key value, region,  in your `.zshrc` `.bashrc` or similar:
+
+```bash
+export NEW_RELIC_ACCOUNT_ID=1234 # Found in the URL among other places. eg. https://one.newrelic.com/nr1-core?account=< ACCOUNT ID HERE>
+export NEW_RELIC_API_KEY="EXAMPLE"
+export NEW_RELIC_REGION="US" # Always "US".
+```
+
+You will then be able to interact with New Relic via Terraform. There's some New Relic Terraform configuration inside of the `infra/accounts/` folder for example. From this point you can use normal Terraform CLI commands to interact with New Relic, `terraform init` `terraform apply` etc.
