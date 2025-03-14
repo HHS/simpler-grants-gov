@@ -1,10 +1,5 @@
 {
-    "projectInformation": {
-      "projectDescription": {
-        "ui:widget": "textarea"
-      }
-    },
-    "random": {
-      "ui:widget": "textarea"
-    }
+  "ProjectTitle": {
+    "ui:widget": "textarea"
   }
+}
