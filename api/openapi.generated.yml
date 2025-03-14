@@ -406,7 +406,7 @@ paths:
       summary: User Get
       security:
       - ApiJwtAuth: []
-  /alpha/application_alpha/start:
+  /alpha/applications/start:
     post:
       parameters: []
       responses:
@@ -2082,8 +2082,10 @@ components:
           type: string
         data:
           type: object
-          additionalProperties:
-            type: string
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     OpportunityAttachmentV1:
       type: object
       properties:
