@@ -218,7 +218,9 @@ def test_deeply_nested_checkboxes_all_levels(
 """
 
     totals = acceptance_criteria_dataset.parse_body_content(
-        deep_nesting_body, AcceptanceCriteriaType.MAIN, AcceptanceCriteriaNestLevel.ALL,
+        deep_nesting_body,
+        AcceptanceCriteriaType.MAIN,
+        AcceptanceCriteriaNestLevel.ALL,
     )
 
     assert totals.criteria == 4
@@ -259,7 +261,9 @@ Some introductory text.
 """
 
     totals = acceptance_criteria_dataset.parse_body_content(
-        mixed_headers_body, AcceptanceCriteriaType.ALL, AcceptanceCriteriaNestLevel.ALL,
+        mixed_headers_body,
+        AcceptanceCriteriaType.ALL,
+        AcceptanceCriteriaNestLevel.ALL,
     )
 
     assert totals.criteria == 4
