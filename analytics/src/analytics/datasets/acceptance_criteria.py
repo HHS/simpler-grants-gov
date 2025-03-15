@@ -97,9 +97,9 @@ class AcceptanceCriteriaDataset(BaseDataset):
         bodycontent = result["bodycontent"].get(result.first_valid_index(), "")
 
         # parse the raw body content and return the acceptance criteria totals
-        return self._parse_body_content(bodycontent, ac_type, nest_level)
+        return self.parse_body_content(bodycontent, ac_type, nest_level)
 
-    def _parse_body_content(
+    def parse_body_content(
         self,
         bodycontent: str,
         ac_type: AcceptanceCriteriaType,
@@ -130,14 +130,14 @@ class AcceptanceCriteriaDataset(BaseDataset):
 
         # compile valid section names, excluding AcceptanceCriteriaType.ALL
         valid_sections = {
-            item.value
+            item.value.lower()
             for item in AcceptanceCriteriaType
             if item != AcceptanceCriteriaType.ALL
         }
 
         # iterate sections
         for i in range(1, len(sections), 2):
-            section_name = sections[i].strip()
+            section_name = sections[i].strip().lower()
             section_body = sections[i + 1].strip() if i + 1 < len(sections) else ""
 
             # skip section if not in valid AcceptanceCriteriaType values
@@ -145,7 +145,10 @@ class AcceptanceCriteriaDataset(BaseDataset):
                 continue
 
             # skip section if it's not what we're looking for
-            if ac_type != AcceptanceCriteriaType.ALL and section_name != ac_type.value:
+            if (
+                ac_type != AcceptanceCriteriaType.ALL
+                and section_name != ac_type.value.lower()
+            ):
                 continue
 
             # if section does not contain a checkbox then skip it
