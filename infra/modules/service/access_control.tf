@@ -33,8 +33,6 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "task_executor" {
-  # checkov:skip=CKV_AWS_111:Ignore some IAM policy checks for the task executor role
-
   # Allow ECS to log to Cloudwatch.
   statement {
     actions = [
@@ -42,9 +40,7 @@ data "aws_iam_policy_document" "task_executor" {
       "logs:PutLogEvents",
       "logs:DescribeLogStreams"
     ]
-    resources = [
-      "${aws_cloudwatch_log_group.service_logs.arn}:*",
-    ]
+    resources = ["${aws_cloudwatch_log_group.service_logs.arn}:*"]
   }
 
   # Allow ECS to authenticate with ECR
@@ -57,17 +53,14 @@ data "aws_iam_policy_document" "task_executor" {
   }
 
   # Allow ECS to download images.
-  dynamic "statement" {
-    for_each = var.image_repository_name != null ? [1] : []
-    content {
-      sid = "ECRPullAccess"
-      actions = [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer",
-      ]
-      resources = [data.aws_ecr_repository.app[0].arn]
-    }
+  statement {
+    sid = "ECRPullAccess"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+    ]
+    resources = [var.image_repository_arn]
   }
 
   dynamic "statement" {
