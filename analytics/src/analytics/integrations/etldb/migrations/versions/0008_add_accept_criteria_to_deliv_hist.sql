@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS gh_deliverable_history ADD COLUMN IF NOT EXISTS accept_criteria_done INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE IF EXISTS gh_deliverable_history ADD COLUMN IF NOT EXISTS accept_criteria_total INTEGER NOT NULL DEFAULT 0;

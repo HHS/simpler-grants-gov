@@ -54,6 +54,7 @@ def transform_project_data(
                 # issue metadata
                 "issue_title": validated_item.content.title,
                 "issue_url": validated_item.content.url,
+                "issue_body": None,
                 "issue_parent": validated_item.content.parent.url,
                 "issue_type": validated_item.content.issue_type.name,
                 "issue_status": validated_item.status.name,
@@ -75,6 +76,9 @@ def transform_project_data(
                 "quad_length": validated_item.quad.duration,
                 "quad_end": validated_item.quad.end_date,
             }
+            if transformed["issue_type"] == "Deliverable":
+                transformed["issue_body"] = validated_item.content.body
+
             transformed_data.append(transformed)
 
         except ValidationError as err:

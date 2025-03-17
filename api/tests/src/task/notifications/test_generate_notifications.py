@@ -48,13 +48,6 @@ def clear_notification_logs(db_session):
     db_session.query(UserOpportunityNotificationLog).delete()
 
 
-def test_via_cli(cli_runner, db_session, enable_factory_create, user, user_with_email):
-    """Simple test that verifies we can invoke the notification task via CLI"""
-    result = cli_runner.invoke(args=["task", "generate-notifications"])
-
-    assert result.exit_code == 0
-
-
 def test_search_notifications_cli(
     cli_runner,
     db_session,

@@ -19,6 +19,7 @@ ISSUE_TYPE = "issueType"
 CLOSED_AT = "closedAt"
 CREATED_AT = "createdAt"
 PARENT = "parent"
+BODY = "body"
 # Iteration aliases
 ITERATION_ID = "iterationId"
 START_DATE = "startDate"
@@ -68,6 +69,7 @@ class IssueContent(BaseModel):
     closed_at: str | None = Field(alias=CLOSED_AT, default=None)
     issue_type: IssueType = Field(alias=ISSUE_TYPE, default_factory=IssueType)
     parent: IssueParent = Field(default_factory=IssueParent)
+    body: str | None = Field(alias=BODY, default=None)
 
     @model_validator(mode="before")
     def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805

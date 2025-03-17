@@ -18,6 +18,7 @@ def mock_graphql_roadmap_data(
                 "issueType": {
                     "name": "Deliverable",
                 },
+                "body": "markdown goes here",
                 "closed": True,
                 "createdAt": "2024-09-24T22:55:24Z",
                 "closedAt": "2024-12-12T19:05:18Z",
