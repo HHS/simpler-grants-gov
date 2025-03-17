@@ -117,6 +117,7 @@ export const SaveSearchSelector = ({
         type="error"
         buttonId={"saved-search-api-error"}
         messageText={t("fetchSavedError")}
+        alertClick={() => setApiError(null)}
       />
     );
   }
