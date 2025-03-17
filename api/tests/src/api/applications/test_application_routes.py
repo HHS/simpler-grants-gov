@@ -9,8 +9,9 @@ from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
 @pytest.fixture(autouse=True)
 def clear_competitions(db_session):
-    db_session.query(Application).delete()
-    db_session.query(Competition).delete()
+    competitions = db_session.query(Competition).all()
+    for competition in competitions:
+        db_session.delete(competition)
     db_session.commit()
 
 

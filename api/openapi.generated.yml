@@ -567,6 +567,38 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/competitions/{competition_id}:
+    get:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Competition Get
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
@@ -2327,6 +2359,51 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    CompetitionFormAlpha:
+      type: object
+      properties:
+        is_required:
+          type: boolean
+          description: Whether the form is required for all applications to the competition
+        form:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FormAlpha'
+    CompetitionAlpha:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_id:
+          type: integer
+          description: The opportunity ID that the competition is associated with
+        competition_forms:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/CompetitionFormAlpha'
+    CompetitionResponseAlpha:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
