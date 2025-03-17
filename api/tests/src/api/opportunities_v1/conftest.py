@@ -6,6 +6,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
+from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import (
     Opportunity,
     OpportunityAssistanceListing,
@@ -19,6 +20,15 @@ def truncate_opportunities(db_session):
     # Note that we can't just do db_session.query(Opportunity).delete() as the cascade deletes won't work automatically:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-queryguide-update-delete-caveats
     # but if we do it individually they will
+
+    application_forms = db_session.query(ApplicationForm).all()
+    for application_form in application_forms:
+        db_session.delete(application_form)
+
+    opportunity_summary = db_session.query(OpportunitySummary).all()
+    for opp_summary in opportunity_summary:
+        db_session.delete(opp_summary)
+    
     opportunities = db_session.query(Opportunity).all()
     for opp in opportunities:
         db_session.delete(opp)

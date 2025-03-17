@@ -22,6 +22,7 @@ from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.agency_models import Agency
+from src.db.models.competition_models import ApplicationForm
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
@@ -446,6 +447,10 @@ class BaseTestClass:
         class implementation.
         """
 
+        applcations_forms = db_session.query(ApplicationForm).all()
+        for application_form in applcations_forms:
+            db_session.delete(application_form)
+        
         opportunities = db_session.query(Opportunity).all()
         for opp in opportunities:
             db_session.delete(opp)

@@ -3,12 +3,16 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from src.db.models.competition_models import Application, ApplicationForm, Competition, Form
+from src.db.models.competition_models import Application, ApplicationForm, Competition
 from tests.src.db.models.factories import CompetitionFactory, FormFactory, OpportunityFactory
 
 
 @pytest.fixture(autouse=True)
 def clear_competitions(db_session):
+    applcations_forms = db_session.query(ApplicationForm).all()
+    for application_form in applcations_forms:
+        db_session.delete(application_form)
+
     competitions = db_session.query(Competition).all()
     for competition in competitions:
         db_session.delete(competition)
