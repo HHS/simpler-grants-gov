@@ -159,6 +159,7 @@ class LoadOpportunitiesToIndex(Task):
             )
 
             if len(queued_opportunities) == 0:
+                logger.info("No opportunities remain in queue, exiting processing")
                 break
 
             # Process updates and inserts
