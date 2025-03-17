@@ -559,9 +559,19 @@ export const messages = {
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
+  SavedSearches: {
+    heading: "Saved search queries",
+    noSavedCTA:
+      "You don’t have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+    searchButton: "Start a new search",
+    title: "Saved Search Queries | Simpler.Grants.gov",
+    error:
+      "We encountered an issue while loading your saved search queries. If this keeps happening, please email simpler@grants.gov for help.",
+  },
   SavedGrants: {
     heading: "Saved grants",
-    noSavedCTA: `To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page`,
+    noSavedCTA:
+      "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
     title: "Saved Grants | Simpler.Grants.gov",
   },
