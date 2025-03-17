@@ -19,6 +19,16 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
+  # These vulnerabilities should be fixed in the next version of Debian
+  # Doing installs directly on them in our Dockerfile doesn't seem to
+  # pick up the changes, so we'll have to wait until the base images
+  # of our Docker images are updated, usually around the start of the month
+  #
+  # Last checked: March 17th, 2025
+  - vulnerability: CVE-2025-0395
+  - vulnerability: CVE-2025-1094
+  - vulnerability: CVE-2024-38428
+
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly
   - vulnerability: GHSA-67mh-4wv8-2f99
