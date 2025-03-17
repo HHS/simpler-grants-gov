@@ -1,11 +1,12 @@
 import { Metadata } from "next";
-import ClientForm from "./ClientForm";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
+
 import { redirect } from "next/navigation";
 import { GridContainer, Label } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
+import ClientForm from "./ClientForm";
 import * as formSchema from "./formSchema.json";
 import * as uiSchema from "./uiSchema2.json";
 
@@ -26,7 +27,6 @@ const getuiSchema = () => {
 };
 
 function FormPage() {
-
   const jsonFormSchema = getFormDetails();
   const uiSchema = getuiSchema();
 
@@ -34,7 +34,9 @@ function FormPage() {
     <GridContainer>
       <BetaAlert />
       <h1>Form Demo</h1>
-      <Label htmlFor="client-form">The following is a demo of the SFS 424 Individual form.</Label>
+      <Label htmlFor="client-form">
+        The following is a demo of the SFS 424 Individual form.
+      </Label>
       <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );

@@ -1,152 +1,294 @@
 {
   "type": "object",
   "title": "Application For Federal Assistance SF 424 - Individual",
-  "description": "Please fill out the questions below.",
-  "required": [
-    "FederalAgency",
-    "Date_Received",
-    "OpportunityID",
-    "OpportunityTitle",
-    "AuthorizedRepresentativePhoneNumber",
-    "AuthorizedRepresentativeEmail"
-  ],
   "properties": {
     "FederalAgency": {
-      "type": "string",
       "title": "Name of Federal Agency",
-      "maxLength": 60,
-      "minLength": 1
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "60",
+      "name": "FederalAgency",
+      "fieldImplementation": "Field"
     },
     "CFDANumber": {
-      "type": "number",
-      "title": "Agency Listing Number"
+      "title": "Assistance Listing Number",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "15",
+      "name": "CFDANumber",
+      "fieldImplementation": "Field"
     },
     "CFDATitle": {
+      "title": "Assistance Listing Title",
       "type": "string",
-      "title": "Assistance Listing Title"
-    },
-    "Date_Received": {
-      "type": "string",
-      "title": "Date Received"
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "120",
+      "name": "CFDATitle",
+      "fieldImplementation": "Field"
     },
     "OpportunityID": {
       "title": "Funding Opportunity Number",
-      "type": "string"
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "40",
+      "name": "OpportunityID",
+      "fieldImplementation": "Field"
     },
     "OpportunityTitle": {
+      "title": "Funding Opportunity Title",
       "type": "string",
-      "title": "Funding Opportunity Title"
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "255",
+      "name": "OpportunityTitle",
+      "fieldImplementation": "Field"
     },
     "PrefixName": {
-      "type": "string",
       "title": "Prefix",
-      "enum": ["Mr.", "Mrs.", "Miss", "Ms", "Dr.", "Rev."]
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "10",
+      "name": "PrefixName",
+      "fieldImplementation": "Popup"
     },
     "FirstName": {
+      "title": "First Name",
       "type": "string",
-      "title": "First Name"
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "35",
+      "name": "FirstName",
+      "fieldImplementation": "Field"
     },
     "MiddleName": {
+      "title": "Middle Name",
       "type": "string",
-      "title": "Middle Name"
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "25",
+      "name": "MiddleName",
+      "fieldImplementation": "Field"
     },
     "LastName": {
+      "title": "Last Name",
       "type": "string",
-      "title": "Last Name"
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "60",
+      "name": "LastName",
+      "fieldImplementation": "Field"
     },
     "Suffix": {
+      "title": "Suffix",
       "type": "string",
-      "title": "Suffix Name"
-    },
-    "Street1": {
-      "type": "string",
-      "title": "Street1"
-    },
-    "Street2": {
-      "type": "string",
-      "title": "Street2"
-    },
-    "City": {
-      "type": "string",
-      "title": "City"
-    },
-    "State": {
-      "type": "string",
-      "title": "State"
-    },
-    "Province": {
-      "type": "string",
-      "title": "Province"
-    },
-    "Country": {
-      "type": "string",
-      "title": "Country"
-    },
-
-    "AuthorizedRepresentativeFax": {
-      "type": "string",
-      "title": "Fax Number"
-    },
-    "AuthorizedRepresentativeEmail": {
-      "type": "string",
-      "title": "Email"
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "10",
+      "name": "Suffix",
+      "fieldImplementation": "Popup"
     },
     "AuthorizedRepresentativePhoneNumber": {
+      "title": "Daytime Phone Number",
       "type": "string",
-      "title": "Daytime Phone Number"
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "25",
+      "name": "AuthorizedRepresentativePhoneNumber",
+      "fieldImplementation": "Field"
     },
     "EveningPhone": {
+      "title": "Evening Phone Number",
       "type": "string",
-      "title": "Evening Phone Number"
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "25",
+      "name": "EveningPhone",
+      "fieldImplementation": "Field"
     },
-    "AuthorizedRepresentativeAddress": {
+    "AuthorizedRepresentativeFax": {
+      "title": "Fax Number",
       "type": "string",
-      "title": ""
+      "required": "No",
+      "minLength": "1",
+      "maxLength": "25",
+      "name": "AuthorizedRepresentativeFax",
+      "fieldImplementation": "Field"
+    },
+    "AuthorizedRepresentativeEmail": {
+      "title": "Email",
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "60",
+      "name": "AuthorizedRepresentativeEmail",
+      "fieldImplementation": "Field"
+    },
+    "Street1": {
+      "title": "Street1",
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "55",
+      "name": "Street1",
+      "fieldImplementation": "Field"
+    },
+    "Street2": {
+      "title": "Street2",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "55",
+      "name": "Street2",
+      "fieldImplementation": "Field"
+    },
+    "City": {
+      "title": "City",
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "35",
+      "name": "City",
+      "fieldImplementation": "Field"
+    },
+    "County": {
+      "title": "County/Parish",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "30",
+      "name": "County",
+      "fieldImplementation": "Field"
+    },
+    "State": {
+      "title": "State",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "55",
+      "name": "State",
+      "fieldImplementation": "Popup"
+    },
+    "Province": {
+      "title": "Province",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "30",
+      "name": "Province",
+      "fieldImplementation": "Field"
+    },
+    "Country": {
+      "title": "Country",
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "49",
+      "name": "Country",
+      "fieldImplementation": "Popup"
+    },
+    "ZipPostalCode": {
+      "title": "Zip/Postal Code",
+      "type": "string",
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "30",
+      "name": "ZipPostalCode",
+      "fieldImplementation": "Field"
     },
     "citizenship": {
+      "title": "U.S. Citizenship",
       "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "",
+      "maxLength": "",
+      "name": "citizenship",
+      "fieldImplementation": "Radio Group"
     },
     "AlienRegistrationNumber": {
+      "title": "Alien Registration Number",
       "type": "string",
-      "title": ""
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "14",
+      "name": "AlienRegistrationNumber",
+      "fieldImplementation": "Field"
     },
     "CountryofOrigin": {
+      "title": "Citizenship Country",
       "type": "string",
-      "title": ""
+      "required": "No",
+      "minLength": "0",
+      "maxLength": "49",
+      "name": "CountryofOrigin",
+      "fieldImplementation": "Popup"
     },
     "VisitDate": {
+      "title": "Residency Start Date",
       "type": "string",
-      "title": ""
+      "required": "No",
+      "minLength": "",
+      "maxLength": "",
+      "name": "VisitDate",
+      "fieldImplementation": "Field"
+    },
+    "CongressionalDistrictApplicant": {
+      "title": "Congressional District of Applicant",
+      "type": "string",
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "6",
+      "name": "CongressionalDistrictApplicant",
+      "fieldImplementation": "Field"
     },
     "ProjectTitle": {
+      "title": "Project Title",
       "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "200",
+      "name": "ProjectTitle",
+      "fieldImplementation": "Field"
     },
-    "ProjectDescription": {
+    "ProjectDecription": {
+      "title": "Project Description",
       "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "1",
+      "maxLength": "1000",
+      "name": "ProjectDecription",
+      "fieldImplementation": "Field"
     },
     "FundingPeriodStartDate": {
+      "title": "Proposed Project Start Date",
       "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "",
+      "maxLength": "",
+      "name": "FundingPeriodStartDate",
+      "fieldImplementation": "Field"
     },
     "FundingPeriodEndDate": {
+      "title": "Proposed Project End Date",
       "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "",
+      "maxLength": "",
+      "name": "FundingPeriodEndDate",
+      "fieldImplementation": "Field"
     },
     "ApplicationCertification": {
+      "title": "I Agree",
       "type": "string",
-      "title": ""
-    },
-    "AORSignature": {
-      "type": "string",
-      "title": ""
-    },
-    "AORDate": {
-      "type": "string",
-      "title": ""
+      "required": "Yes",
+      "minLength": "",
+      "maxLength": "",
+      "name": "ApplicationCertification",
+      "fieldImplementation": "Check"
     }
   }
 }
-
