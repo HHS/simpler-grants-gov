@@ -80,23 +80,20 @@ export const SaveSearchSelector = ({
     [savedSearches, replaceQueryParams],
   );
 
-  // fetch saved searches on page load or log in
+  // fetch saved searches on page load, log in, or on any new saved search
   // not explicitly dependent on user changes, but fetchSavedSearches is, so will still fire
   useEffect(() => {
-    fetchSavedSearches().catch(handleFetchError);
-  }, [fetchSavedSearches, handleFetchError]);
-
-  // fetch saved searches on new saved search
-  useEffect(() => {
-    if (newSavedSearches.length && fetchSavedSearches) {
-      fetchSavedSearches()
-        .then(() => {
-          // set the latest saved search as selected
+    fetchSavedSearches()
+      .then(() => {
+        if (newSavedSearches.length) {
+          // this works now but may not if once we introduce token refreshes.
+          // if a token changes without clearing the newSavedSearches list on the parent
+          // we could accidentally select a saved search on token refresh
           setSelectedSavedSearch(newSavedSearches[0]);
-        })
-        .catch(handleFetchError);
-    }
-  }, [handleFetchError, fetchSavedSearches, newSavedSearches]);
+        }
+      })
+      .catch(handleFetchError);
+  }, [fetchSavedSearches, handleFetchError, newSavedSearches]);
 
   // reset saved search selector on search change
   useEffect(() => {
