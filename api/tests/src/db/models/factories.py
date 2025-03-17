@@ -1934,15 +1934,3 @@ class JobLogFactory(BaseFactory):
     job_id = Generators.UuidObj
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
-
-
-class FormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Form
-
-    form_id = Generators.UuidObj
-    form_name = factory.Faker("word")
-    form_version = factory.Faker("numerify", text="#.#")
-    agency_code = factory.Faker("agency_code")
-    form_json_schema = factory.LazyFunction(lambda: {"type": "object"})
-    form_ui_schema = factory.LazyFunction(lambda: {})
