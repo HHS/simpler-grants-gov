@@ -1908,9 +1908,11 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-    competition_id = Generators.UuidObj
-    application_form = factory.SubFactory(ApplicationFormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
     is_required = False
 
