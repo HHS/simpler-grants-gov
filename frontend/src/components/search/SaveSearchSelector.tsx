@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { noop } from "lodash";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
@@ -41,12 +42,6 @@ export const SaveSearchSelector = ({
   const [applyingSavedSearch, setApplyingSavedSearch] =
     useState<boolean>(false);
 
-  const handleFetchError = useCallback((e: Error) => {
-    setLoading(false);
-    console.error("Error fetching saved searches", e);
-    setApiError(e);
-  }, []);
-
   const fetchSavedSearches = useCallback(() => {
     setLoading(true);
     setApiError(null);
@@ -55,8 +50,12 @@ export const SaveSearchSelector = ({
         setLoading(false);
         setSavedSearches(savedSearches);
       })
-      .catch(handleFetchError);
-  }, [user?.token, handleFetchError, setSavedSearches]);
+      .catch((e) => {
+        setLoading(false);
+        console.error("Error fetching saved searches", e);
+        setApiError(e as Error);
+      });
+  }, [user?.token, setSavedSearches]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list
@@ -92,8 +91,8 @@ export const SaveSearchSelector = ({
           setSelectedSavedSearch(newSavedSearches[0]);
         }
       })
-      .catch(handleFetchError);
-  }, [fetchSavedSearches, handleFetchError, newSavedSearches]);
+      .catch(noop);
+  }, [fetchSavedSearches, newSavedSearches]);
 
   // reset saved search selector on search change
   useEffect(() => {
