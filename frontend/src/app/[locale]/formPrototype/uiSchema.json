@@ -1,7 +1,7 @@
 {
   "FederalAgencyHeader": {
     "type": "section",
-    "label": "1. NAME OF FEDERAL AGENCY",
+    "label": "xxxxx",
     "children": {
       "FederalAgency": {
         "type": "field",

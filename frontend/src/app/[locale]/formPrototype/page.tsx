@@ -7,7 +7,7 @@ import { GridContainer, Label } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import * as formSchema from "./formSchema.json";
-import * as uiSchema from "./uiSchema.json";
+import * as uiSchema from "./uiSchema2.json";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -22,7 +22,7 @@ const getFormDetails = () => {
 };
 
 const getuiSchema = () => {
-  return JSON.parse(JSON.stringify(uiSchema)) as object;
+  return uiSchema.default as object;
 };
 
 function FormPage() {
