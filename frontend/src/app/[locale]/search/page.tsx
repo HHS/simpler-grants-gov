@@ -57,7 +57,7 @@ function Search({ searchParams, params }: SearchPageProps) {
       <QueryProvider>
         <div className="grid-container">
           <div className="search-bar">
-            <SearchBar query={query} />
+            <SearchBar queryTermFromParent={query} />
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">

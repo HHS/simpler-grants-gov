@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
@@ -12,6 +13,7 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -33,6 +35,7 @@ export const SaveSearchSelector = ({
   const { user } = useUser();
   const { searchParams, replaceQueryParams } = useSearchParamUpdater();
   const prevSearchParams = usePrevious(searchParams);
+  const { updateQueryTerm } = useContext(QueryContext);
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -74,9 +77,10 @@ export const SaveSearchSelector = ({
         const searchQueryParams = searchToQueryParams(searchToApply);
         setApplyingSavedSearch(true);
         replaceQueryParams(searchQueryParams);
+        updateQueryTerm(searchQueryParams.query || "");
       }
     },
-    [savedSearches, replaceQueryParams],
+    [savedSearches, replaceQueryParams, updateQueryTerm],
   );
 
   // fetch saved searches on page load, log in, or on any new saved search
