@@ -4,14 +4,20 @@ from src.api.schemas.response_schema import AbstractResponseSchema
 
 
 class CompetitionFormAlphaSchema(Schema):
-    is_required = fields.Boolean(metadata={"description": ""})
+    is_required = fields.Boolean(
+        metadata={
+            "description": "Whether the form is required for all applications to the competition"
+        }
+    )
     form = fields.Nested(FormAlphaSchema())
 
 
 class CompetitionAlphaSchema(Schema):
-    competition_id = fields.UUID(metadata={"description": ""})
+    competition_id = fields.UUID(metadata={"description": "The competition ID"})
 
-    opportunity_id = fields.Integer(metadata={"description": ""})
+    opportunity_id = fields.Integer(
+        metadata={"description": "The opportunity ID that the competition is associated with"}
+    )
 
     competition_forms = fields.List(fields.Nested(CompetitionFormAlphaSchema()))
 

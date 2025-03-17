@@ -379,7 +379,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 1
 
-    @freezegun.freeze_time(get_now_us_eastern_datetime() + timedelta(hours=2), tz_offset=0)
+    @freezegun.freeze_time(get_now_us_eastern_datetime() + timedelta(days=2), tz_offset=0)
     def test_batch_process_exceed_time_limit(
         self, db_session, search_client, load_opportunities_to_index, enable_factory_create
     ):
