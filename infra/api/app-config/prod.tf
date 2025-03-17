@@ -52,11 +52,14 @@ module "prod_config" {
     LOAD_OPP_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT     = 0
-    LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
-    LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
-    LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
-    LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
+    ENABLE_AUTH_ENDPOINT = 1
+    # We are temporarily unsetting these values to use the defaults which
+    # point to the lower integration environment, uncomment these when
+    # we use the real production login.gov
+    #LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
+    #LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
+    #LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
+    #LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
   }
   instance_cpu    = 1024
   instance_memory = 4096
