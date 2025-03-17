@@ -24,7 +24,7 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
-- name: User v1
+- name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
@@ -143,7 +143,7 @@ paths:
               schema: {}
           description: Found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Login
       description: '
 
@@ -177,7 +177,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Logout
       security:
       - ApiJwtAuth: []
@@ -198,7 +198,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Refresh
       security:
       - ApiJwtAuth: []
@@ -402,7 +402,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get
       security:
       - ApiJwtAuth: []
@@ -558,7 +558,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Search
       requestBody:
         content:
@@ -601,7 +601,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Opportunity
       requestBody:
         content:
@@ -644,7 +644,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get Saved Searches
       requestBody:
         content:
@@ -687,7 +687,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get Saved Opportunities
       requestBody:
         content:
@@ -735,7 +735,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Update Saved Search
       requestBody:
         content:
@@ -776,7 +776,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Search
       security:
       - ApiJwtAuth: []
@@ -813,7 +813,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
