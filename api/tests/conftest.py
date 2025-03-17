@@ -450,7 +450,7 @@ class BaseTestClass:
         applcations_forms = db_session.query(ApplicationForm).all()
         for application_form in applcations_forms:
             db_session.delete(application_form)
-        
+
         opportunities = db_session.query(Opportunity).all()
         for opp in opportunities:
             db_session.delete(opp)

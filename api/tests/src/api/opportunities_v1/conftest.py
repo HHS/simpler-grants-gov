@@ -28,7 +28,7 @@ def truncate_opportunities(db_session):
     opportunity_summary = db_session.query(OpportunitySummary).all()
     for opp_summary in opportunity_summary:
         db_session.delete(opp_summary)
-    
+
     opportunities = db_session.query(Opportunity).all()
     for opp in opportunities:
         db_session.delete(opp)
