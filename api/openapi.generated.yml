@@ -25,6 +25,9 @@ tags:
 - name: Extract v1
 - name: Agency v1
 - name: User v1
+- name: Application Alpha
+- name: Form Alpha
+- name: Competition Alpha
 servers: .
 paths:
   /health:
@@ -403,6 +406,76 @@ paths:
       summary: User Get
       security:
       - ApiJwtAuth: []
+  /alpha/applications/start:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStartResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+      tags:
+      - Application Alpha
+      summary: Create a new application for a competition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStartRequest'
+      security:
+      - ApiKeyAuth: []
+  /alpha/forms/{form_id}:
+    get:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Get
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -2025,6 +2098,76 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationStartRequest:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - competition_id
+    ApplicationStartResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationStartResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStartResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FormAlpha:
+      type: object
+      properties:
+        form_id:
+          type: string
+          format: uuid
+          description: The primary key ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+          example: ABC Project Form
+        form_json_schema:
+          type: object
+          description: The JSON Schema representation of the form
+          example:
+            type: object
+            properties: {}
+        form_ui_schema:
+          type: object
+          description: The UI Schema of the form for front-end rendering
+          example: {}
+    FormResponseAlpha:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FormAlpha'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     OpportunityAttachmentV1:
       type: object
       properties:
@@ -2493,3 +2636,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
