@@ -1913,7 +1913,6 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
