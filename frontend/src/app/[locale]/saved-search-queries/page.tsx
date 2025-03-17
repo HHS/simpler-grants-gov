@@ -1,15 +1,23 @@
 import clsx from "clsx";
+import { omit } from "lodash";
 import { Metadata } from "next";
 import { getSession } from "src/services/auth/session";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
+import { ValidSearchQueryParamData } from "src/types/search/searchRequestTypes";
+import {
+  ValidSearchQueryParam,
+  validSearchQueryParamKeys,
+} from "src/types/search/searchResponseTypes";
+import { queryParamsToQueryString } from "src/utils/generalUtils";
+import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
+import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -24,15 +32,39 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 const SavedSearchesList = ({
   savedSearches,
+  paramDisplayMapping,
 }: {
-  savedSearches: SavedSearchRecord[];
+  savedSearches: {
+    name: string;
+    id: string;
+    searchParams: ValidSearchQueryParamData;
+  }[];
+  paramDisplayMapping: { [key in ValidSearchQueryParam]: string };
 }) => {
   return (
     <ul className="usa-prose usa-list--unstyled">
       {savedSearches.map((savedSearch) => (
-        <>
-          <li key={savedSearch.saved_search_id}>{savedSearch.name}</li>
-        </>
+        <li key={savedSearch.id}>
+          <Link
+            href={`/search${queryParamsToQueryString(savedSearch.searchParams)}`}
+          >
+            {savedSearch.name}
+          </Link>
+          {Object.entries(omit(paramDisplayMapping, "page")).map(
+            ([key, paramDisplay]) => {
+              const value =
+                savedSearch.searchParams[key as ValidSearchQueryParam];
+              return value ? (
+                <div key={key}>
+                  <span>{paramDisplay}:</span>
+                  <span>
+                    {savedSearch.searchParams[key as ValidSearchQueryParam]}
+                  </span>
+                </div>
+              ) : null;
+            },
+          )}
+        </li>
       ))}
     </ul>
   );
@@ -65,21 +97,48 @@ export default async function SavedSearchQueries({
   params,
 }: LocalizedPageProps) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
+  const t = await getTranslations({ locale, namespace: "SavedSearches" });
   const session = await getSession();
+  let savedSearches;
+
+  const paramDisplayMapping = validSearchQueryParamKeys.reduce(
+    (mapping, key) => {
+      mapping[key] = t(`parameterNames.${key}`);
+      return mapping;
+    },
+    {} as { [key in ValidSearchQueryParam]: string },
+  );
+
   if (!session || !session.token) {
     redirect("/unauthorized");
   }
-  const savedSearches = await fetchSavedSearches(
-    session.token,
-    session.user_id,
-  );
+
+  try {
+    savedSearches = await fetchSavedSearches(session.token, session.user_id);
+  } catch (e) {
+    return (
+      <>
+        <GridContainer>
+          <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
+            {t("heading")}
+          </h1>
+        </GridContainer>
+        <ServerErrorAlert callToAction={t("error")} />
+      </>
+    );
+  }
+
+  const formattedSavedSearches = savedSearches.map((search) => ({
+    searchParams: searchToQueryParams(search.search_query),
+    name: search.name,
+    id: search.saved_search_id,
+  }));
 
   return (
     <>
       <GridContainer>
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-          {t("SavedGrants.heading")}
+          {t("heading")}
         </h1>
       </GridContainer>
       <div
@@ -89,10 +148,13 @@ export default async function SavedSearchQueries({
       >
         <div className="grid-container padding-y-5 display-flex">
           {savedSearches.length > 0 ? (
-            <SavedSearchesList savedSearches={savedSearches} />
+            <SavedSearchesList
+              savedSearches={formattedSavedSearches}
+              paramDisplayMapping={paramDisplayMapping}
+            />
           ) : (
             <NoSavedSearches
-              noSavedCTA={t.rich("SavedSearches.noSavedCTA", {
+              noSavedCTA={t.rich("noSavedCTA", {
                 br: () => (
                   <>
                     <br />
@@ -100,7 +162,7 @@ export default async function SavedSearchQueries({
                   </>
                 ),
               })}
-              searchButtonText={t("SavedSearches.searchButton")}
+              searchButtonText={t("searchButton")}
             />
           )}
         </div>
