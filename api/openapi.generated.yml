@@ -2368,7 +2368,7 @@ components:
       properties:
         is_required:
           type: boolean
-          description: ''
+          description: Whether the form is required for all applications to the competition
         form:
           type:
           - object
@@ -2380,11 +2380,11 @@ components:
         competition_id:
           type: string
           format: uuid
-          description: ''
+          description: The competition ID
           example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_id:
           type: integer
-          description: ''
+          description: The opportunity ID that the competition is associated with
         competition_forms:
           type: array
           items:
@@ -2713,3 +2713,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
