@@ -3,7 +3,7 @@
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 
 import { JSX, useState } from "react";
-import { FormGroup, Label, Fieldset, TextInput } from "@trussworks/react-uswds";
+import { Fieldset, FormGroup, Label, TextInput } from "@trussworks/react-uswds";
 
 interface FormData {
   [key: string]: FormDataEntryValue;
@@ -37,7 +37,12 @@ type TextTypes =
   | "tel"
   | "url";
 
-const createTextField = (fieldName: string, title: string, type: TextTypes, parentId: string) => {
+const createTextField = (
+  fieldName: string,
+  title: string,
+  type: TextTypes,
+  parentId: string,
+) => {
   return (
     <div key={`wrapper-for-${fieldName}`} id={parentId}>
       <Label key={`label-for-${fieldName}`} htmlFor={fieldName}>
@@ -50,20 +55,27 @@ const createTextField = (fieldName: string, title: string, type: TextTypes, pare
 
 const wrapSection = (label: string, fieldName: string, tree: JSX.Element) => {
   return (
-    <Fieldset key={`${fieldName}-row`}> <FormGroup key={`${fieldName}-group`}>
-      <Label htmlFor={`${fieldName}-fields`}>{label}</Label>
-      {tree}
-  </FormGroup>  </Fieldset>
+    <Fieldset key={`${fieldName}-row`}>
+      <FormGroup key={`${fieldName}-group`}>
+        <Label key={`${fieldName}-fields`} htmlFor={`${fieldName}-fields`}>{label}</Label>
+        {tree}
+      </FormGroup>
+    </Fieldset>
   );
 };
 
-const createField = (fieldName: string, title: string, type: string, parentId: string) => {
+const createField = (
+  fieldName: string,
+  title: string,
+  type: string,
+  parentId: string,
+) => {
   switch (type) {
     case "string":
-      return createTextField(fieldName, title, "text",parentId);
+      return createTextField(fieldName, title, "text", parentId);
       break;
     case "number":
-      return createTextField(fieldName, title, type,parentId);
+      return createTextField(fieldName, title, type, parentId);
       break;
     default:
       throw new Error(`Error rendering field ${fieldName}`);
@@ -73,22 +85,42 @@ const createField = (fieldName: string, title: string, type: string, parentId: s
 const parentHasChild = (acc, uiSchema): boolean => {
   // TODO: check JSX elements
   return false;
+};
+
+const buildField = (definition:string, schema:object, parentName: string) => {
+  const name = definition.split("/")[2];
+  const { title, type } = getSchemaObjectFromPointer(
+    schema,
+    definition,
+  ) as SchemaField;
+  return createField(name, title, type, `${parentName}-fields`);
 }
 
-function buildFormTreeClosure(schema: object, uiSchema: object, formData: FormData) {
-  let acc: JSX.Element | JSX.Element[] = <></>;
+function buildFormTreeClosure(
+  schema: object,
+  uiSchema: object,
+) {
+  let acc: JSX.Element | JSX.Element[] = [];
 
   const buildFormTree = (
     uiSchema: uiSchemaType,
-    parent: {label: string, name: string} | null,
+    parent: { label: string; name: string } | null,
   ) => {
-    if (typeof uiSchema === 'object' && uiSchema.children) {
-      buildFormTree(uiSchema.children, {label: uiSchema.label, name: uiSchema.name});
-    }
-    else if (Array.isArray(uiSchema)) {
+    if (typeof uiSchema === "object" && uiSchema.children) {
+      buildFormTree(uiSchema.children, {
+        label: uiSchema.label,
+        name: uiSchema.name,
+      });
+    } else if (Array.isArray(uiSchema)) {
       for (const i in uiSchema) {
         if (uiSchema[i].children) {
-          buildFormTree(uiSchema[i].children, {label: uiSchema[i].label, name: uiSchema[i].name});
+          buildFormTree(uiSchema[i].children, {
+            label: uiSchema[i].label,
+            name: uiSchema[i].name,
+          });
+        }
+        else if (!parent) {
+          acc = [acc, buildField(uiSchema[i].definition as string, schema, "fields")];
         }
       }
       if (parent) {
@@ -96,23 +128,18 @@ function buildFormTreeClosure(schema: object, uiSchema: object, formData: FormDa
           if (node.children) {
             // TODO: test
             return acc;
-          }
-          else {
+          } else {
             const { definition } = node as { definition: string };
-            const name = definition?.split('/')[2];
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            const { title, type } = getSchemaObjectFromPointer(
-              schema,
-              definition,
-            ) as SchemaField;
-            const field = createField(name, title, type, `${parent.name}-fields`);
-            return field;
+            const name = definition?.split("/")[2];
+            return buildField(definition, schema, parent.name);
           }
         });
-        acc = parentHasChild(acc, uiSchema) ?  wrapSection(parent.label, parent.name, row) : [acc,wrapSection(parent.label, parent.name, row)];  
+        acc = parentHasChild(acc, uiSchema)
+          ? wrapSection(parent.label, parent.name, row)
+          : [acc, wrapSection(parent.label, parent.name, row)];
       }
     }
-  }
+  };
   buildFormTree(uiSchema, null);
   return acc;
 }
@@ -136,10 +163,12 @@ const ClientForm = ({
   schema: object;
   uiSchema: object;
 }) => {
-  const [formData, setFormData] = useState({});
-  const fields = buildFormTreeClosure(schema, uiSchema as uiSchemaType, formData);
+  const fields = buildFormTreeClosure(
+    schema,
+    uiSchema as uiSchemaType,
+  );
   return (
-    <form onChange={handleSubmit(setFormData)}>
+    <form>
       <FormGroup>{fields}</FormGroup>
     </form>
   );
