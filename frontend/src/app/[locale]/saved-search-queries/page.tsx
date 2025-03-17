@@ -20,6 +20,15 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+const resultBorderClasses = `
+border-1px
+border-base-lighter
+padding-x-2
+padding-y-105
+margin-bottom-2
+text-base-darker
+`;
+
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -33,6 +42,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 const SavedSearchesList = ({
   savedSearches,
   paramDisplayMapping,
+  editText,
+  deleteText,
 }: {
   savedSearches: {
     name: string;
@@ -40,30 +51,66 @@ const SavedSearchesList = ({
     searchParams: ValidSearchQueryParamData;
   }[];
   paramDisplayMapping: { [key in ValidSearchQueryParam]: string };
+  editText: string;
+  deleteText: string;
 }) => {
   return (
-    <ul className="usa-prose usa-list--unstyled">
+    <ul className="usa-prose usa-list--unstyled grid-container">
       {savedSearches.map((savedSearch) => (
         <li key={savedSearch.id}>
-          <Link
-            href={`/search${queryParamsToQueryString(savedSearch.searchParams)}`}
-          >
-            {savedSearch.name}
-          </Link>
-          {Object.entries(omit(paramDisplayMapping, "page")).map(
-            ([key, paramDisplay]) => {
-              const value =
-                savedSearch.searchParams[key as ValidSearchQueryParam];
-              return value ? (
-                <div key={key}>
-                  <span>{paramDisplay}:</span>
-                  <span>
-                    {savedSearch.searchParams[key as ValidSearchQueryParam]}
-                  </span>
+          <div className="border-1px border-base-lighter padding-x-2 padding-y-105 margin-bottom-2 text-base-darker">
+            <div className="grid-row grid-gap">
+              <div className="desktop:grid-col-fill">
+                <div className="grid-row padding-right-2">
+                  <div className="tablet:grid-col-8">
+                    <h2 className="margin-y-105 line-height-sans-2">
+                      <Link
+                        href={`/search${queryParamsToQueryString(savedSearch.searchParams)}`}
+                        className="margin-right-05"
+                      >
+                        {savedSearch.name}
+                      </Link>
+                      <USWDSIcon name="search" />
+                    </h2>
+                  </div>
+                  <div className="grid-col margin-top-2 text-right">
+                    <div className="grid-row">
+                      <div className="grid-col">
+                        <Button type="button" unstyled>
+                          <USWDSIcon name="edit" />
+                          {editText}
+                        </Button>
+                      </div>
+                      <div className="grid-col">
+                        <Button type="button" unstyled>
+                          <USWDSIcon name="delete" />
+                          {deleteText}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ) : null;
-            },
-          )}
+                <div className="grid-row flex-column">
+                  <div>
+                    {Object.entries(omit(paramDisplayMapping, "page")).map(
+                      ([key, paramDisplay]) => {
+                        const value =
+                          savedSearch.searchParams[
+                            key as ValidSearchQueryParam
+                          ];
+                        return value ? (
+                          <div key={key}>
+                            <span className="text-bold">{paramDisplay}: </span>
+                            <span>{value.replaceAll(",", ", ")}</span>
+                          </div>
+                        ) : null;
+                      },
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </li>
       ))}
     </ul>
@@ -146,11 +193,13 @@ export default async function SavedSearchQueries({
           "bg-base-lightest": savedSearches.length === 0,
         })}
       >
-        <div className="grid-container padding-y-5 display-flex">
+        <div className="padding-y-5">
           {savedSearches.length > 0 ? (
             <SavedSearchesList
               savedSearches={formattedSavedSearches}
               paramDisplayMapping={paramDisplayMapping}
+              editText={t("edit")}
+              deleteText={t("delete")}
             />
           ) : (
             <NoSavedSearches

@@ -567,6 +567,8 @@ export const messages = {
     title: "Saved Search Queries | Simpler.Grants.gov",
     error:
       "We encountered an issue while loading your saved search queries. If this keeps happening, please email simpler@grants.gov for help.",
+    edit: "Edit name",
+    delete: "Delete",
     // keys need to match exactly against keys defined in validSearchQueryParamKeys
     parameterNames: {
       status: "Status",
