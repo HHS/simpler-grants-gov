@@ -93,6 +93,7 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), primary_key=True)
     form: Mapped[Form] = relationship(Form)
+
     is_required: Mapped[bool]
 
 

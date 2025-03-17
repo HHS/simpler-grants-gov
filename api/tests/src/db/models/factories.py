@@ -1848,6 +1848,12 @@ class CompetitionFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
+    competition_forms = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.CompetitionFormFactory",
+        factory_related_name="competition",
+        size=lambda: random.randint(1, 2),
+    )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
