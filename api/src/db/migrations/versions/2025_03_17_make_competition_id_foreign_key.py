@@ -1,16 +1,16 @@
 """make competition id foreign key
 
-Revision ID: 8f6d2a88efec
-Revises: 919f7866b393
-Create Date: 2025-03-14 14:56:58.589610
+Revision ID: 98c3c10c1242
+Revises: 053ec3fb6069
+Create Date: 2025-03-17 12:30:44.410640
 
 """
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "8f6d2a88efec"
-down_revision = "919f7866b393"
+revision = "98c3c10c1242"
+down_revision = "053ec3fb6069"
 branch_labels = None
 depends_on = None
 

@@ -1,6 +1,7 @@
 import itertools
 import math
-from datetime import datetime, timedelta
+import uuid
+from datetime import timedelta
 
 import freezegun
 import pytest
@@ -221,9 +222,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         load_opportunities_to_index,
     ):
 
-        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
-            "%Y-%m-%d_%H-%M-%S"
-        )
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -380,15 +379,14 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 1
 
-    @freezegun.freeze_time(datetime.now() + timedelta(hours=2), tz_offset=0)
+    @freezegun.freeze_time(get_now_us_eastern_datetime() + timedelta(hours=2), tz_offset=0)
     def test_batch_process_exceed_time_limit(
         self, db_session, search_client, load_opportunities_to_index, enable_factory_create
     ):
         OpportunityChangeAuditFactory.create()
 
-        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
-            "%Y-%m-%d_%H-%M-%S"
-        )
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
+
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
