@@ -58,7 +58,7 @@ const SavedSearchesList = ({
                   <div className="tablet:grid-col-8 grid-col-6">
                     <h2 className="margin-y-105 line-height-sans-2">
                       <Link
-                        href={`/search${queryParamsToQueryString(savedSearch.searchParams)}`}
+                        href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
                         className="margin-right-05"
                       >
                         {savedSearch.name}
