@@ -18,6 +18,5 @@ class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
 
 
-class ApplicationFormUpdateResponseSchema(WarningMixinSchema):
-    message = fields.String()
-    data = fields.Dict()
+class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(something)
