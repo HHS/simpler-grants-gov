@@ -48,7 +48,8 @@ def application_form_update(
     db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Update an application form response"""
-    logger.info(f"PUT /alpha/applications/{application_id}/forms/{form_id}")
+    add_extra_data_to_current_request_logs({"application.application_id": application_id, "form.form_id": form_id})
+    logger.info("PUT /alpha/applications/:application_id/forms/:form_id")
 
     application_response = json_data["application_response"]
 
