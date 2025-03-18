@@ -43,11 +43,12 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # Initialize the metrics
             self.initialize_metrics()
 
-            # Run the actual task
-            self.run_task()
-
+            # Start the timer
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
+
+            # Run the actual task
+            self.run_task()
 
             # Calculate and set a duration
             end = time.perf_counter()
