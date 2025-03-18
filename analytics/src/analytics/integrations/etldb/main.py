@@ -149,7 +149,7 @@ def sync_deliverables(
         ac_total = (
             ac.get_totals(
                 ghid,
-                AcceptanceCriteriaType.ALL,
+                AcceptanceCriteriaType.MAIN,
                 AcceptanceCriteriaNestLevel.ALL,
             )
             if ac is not None
