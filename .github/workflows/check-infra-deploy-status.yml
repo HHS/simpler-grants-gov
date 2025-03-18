@@ -44,10 +44,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.8.3
-          terraform_wrapper: false
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
@@ -70,3 +69,12 @@ jobs:
           echo "::endgroup::"
         env:
           TF_IN_AUTOMATION: "true"
+  notify:
+    name: Notify
+    needs: check
+    if: failure()
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "🔍 [Infrastructure state differs from configuration](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

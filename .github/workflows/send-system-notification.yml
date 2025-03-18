@@ -1,0 +1,72 @@
+name: "Send system notification"
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Name of channel to use. Must be defined in /infra/project-config/system_notifications.tf"
+        required: true
+        type: string
+      message:
+        description: "Message to send"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      channel:
+        description: "Name of channel to use. Must be defined in /infra/project-config"
+        required: true
+        type: string
+      message:
+        description: "Message to send"
+        required: true
+        type: string
+
+jobs:
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Get channel configuration
+        id: get-channel-type
+        run: |
+          echo "Get channel type for channel=${{ inputs.channel }}"
+
+          terraform -chdir="infra/project-config" init > /dev/null
+          terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
+
+          channel_config="$(terraform -chdir="infra/project-config" output -json system_notifications_config | jq -r '.channels."${{ inputs.channel }}"')"
+
+          channel_type="$(echo "${channel_config}" | jq -r ".type")"
+          echo "Channel type: ${channel_type}"
+          echo "channel_type=${channel_type}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${channel_type}" == "slack" ]]; then
+            channel_id_secret_name="$(echo "${channel_config}" | jq -r ".channel_id_secret_name")"
+            echo "Channel ID secret name: ${channel_id_secret_name}"
+            echo "CHANNEL_ID_SECRET_NAME=${channel_id_secret_name}" >> "$GITHUB_ENV"
+
+            slack_token_secret_name="$(echo "${channel_config}" | jq -r ".slack_token_secret_name")"
+            echo "Slack token secret name: ${slack_token_secret_name}"
+            echo "SLACK_TOKEN_SECRET_NAME=${slack_token_secret_name}" >> "$GITHUB_ENV"
+
+            # Convert Markdown links in message [text](url) to Slack format <url|text>
+            echo "Convert message from Markdown to Slack format"
+            echo "SLACK_MESSAGE=$(echo "${{ inputs.message }}" | sed -E 's/\[(.+)\]\((.+)\)/<\2|\1>/g')" >> "$GITHUB_ENV"
+          fi
+        shell: bash
+
+      - name: Send Slack message
+        if: ${{ steps.get-channel-type.outputs.channel_type == 'slack' }}
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets[env.SLACK_TOKEN_SECRET_NAME] }}
+          payload: |
+            channel: ${{ secrets[env.CHANNEL_ID_SECRET_NAME] }}
+            text: ${{ env.SLACK_MESSAGE }}
