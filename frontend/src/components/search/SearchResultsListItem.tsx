@@ -2,7 +2,7 @@
 
 import { Opportunity } from "src/types/search/searchResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
-import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
+import { getAgencyDisplayName } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -12,34 +12,33 @@ import SearchResultListItemStatus from "./SearchResultListItemStatus";
 
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
-  agencyNameLookup?: AgencyNamyLookup;
   saved?: boolean;
 }
 
+const metadataBorderClasses = `
+  display-block
+  tablet:display-inline-block
+  tablet:border-left-1px
+  tablet:padding-x-1
+  tablet:margin-left-neg-1
+  tablet:margin-right-1
+  tablet:border-base-lighter
+  `;
+
+const resultBorderClasses = `
+  border-1px
+  border-base-lighter
+  padding-x-2
+  padding-y-105
+  margin-bottom-2
+  text-base-darker
+  `;
+
 export default function SearchResultsListItem({
   opportunity,
-  agencyNameLookup,
   saved = false,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
-
-  const metadataBorderClasses = `
-    tablet:display-inline-block
-    tablet:border-left-1px
-    tablet:padding-x-1
-    tablet:margin-left-neg-1
-    tablet:margin-right-1
-    tablet:border-base-lighter
-  `;
-
-  const resultBorderClasses = `
-    border-1px
-    border-base-lighter
-    padding-x-2
-    padding-y-105
-    margin-bottom-2
-    text-base-darker
-  `;
 
   return (
     <div className={resultBorderClasses}>
@@ -86,16 +85,10 @@ export default function SearchResultsListItem({
               <div className="width-full tablet:width-auto" />
             </div>
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
-              <strong>{t("resultsListItem.summary.agency")}</strong>
-              {opportunity?.top_level_agency_name &&
-              opportunity?.agency_name &&
-              opportunity?.top_level_agency_name !== opportunity?.agency_name
-                ? `${opportunity?.top_level_agency_name} - ${opportunity?.agency_name}`
-                : opportunity?.agency_name ||
-                  (agencyNameLookup && opportunity?.summary?.agency_code
-                    ? // Use same exact label we're using for the agency filter list
-                      agencyNameLookup[opportunity?.summary?.agency_code]
-                    : "--")}
+              <span className={metadataBorderClasses}>
+                <strong>{t("resultsListItem.summary.agency")}</strong>
+                {getAgencyDisplayName(opportunity)}
+              </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
               <strong>{t("resultsListItem.opportunity_number")}</strong>
