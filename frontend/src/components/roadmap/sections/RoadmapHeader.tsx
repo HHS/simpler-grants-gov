@@ -11,14 +11,14 @@ export default function RoadmapHeader() {
         <Grid row>
           <Grid
             tablet={{ col: 6 }}
-            className="grid-container display-flex flex-column flex-justify-center"
+            className="grid-container display-flex flex-column"
           >
-            <h1 className="font-sans-xl margin-0 tablet:font-sans-2xl tablet:maxw-2">
+            <h1 className="font-sans-xl margin-0 tablet:font-sans-3xl tablet-lg:font-sans-3xl tablet:maxw-2">
               {t("pageHeaderTitle")}
             </h1>
             <p
               className={
-                "font-sans-sm line-height-sans-4 margin-bottom-4 tablet:padding-right-2 tablet:margin-bottom-0"
+                "font-sans-sm line-height-sans-4 margin-bottom-4 tablet:font-sans-md tablet:padding-right-1 tablet:margin-bottom-0 tablet-lg:font-sans-lg"
               }
             >
               {t("pageHeaderParagraph")}
@@ -31,9 +31,8 @@ export default function RoadmapHeader() {
             <Grid className="display-flex flex-justify-center flex-align-center">
               <Image
                 src="/img/roadmap-header-image.png"
-                className="minh-full width-full tablet:maxw-mobile"
+                className="minh-full width-full desktop:padding-right-2"
                 alt="Picture of person on a journey"
-                layout="responsive"
                 width={360}
                 height={350}
               />
