@@ -321,9 +321,6 @@ export const messages = {
       "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph_1:
       "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
-    heading: "Learn more",
-    paragraph_2:
-      "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -334,9 +331,6 @@ export const messages = {
       "You will no longer receive project updates from Simpler.Grants.gov. ",
     paragraph_1: "Did you unsubscribe by accident? Sign up again.",
     button_resub: "Re-subscribe",
-    heading: "Learn more",
-    paragraph_2:
-      "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
