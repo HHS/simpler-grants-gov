@@ -30,6 +30,23 @@ export const handleSavedSearch = async (
   return (await response.json()) as SavedSearchResponse;
 };
 
+// make call from server to API to update a saved search
+export const handleUpdateSavedSearch = async (
+  token: string,
+  userId: string,
+  searchId: string,
+  name: string,
+): Promise<SavedSearchResponse> => {
+  const response = await fetchUserWithMethod("PUT")({
+    subPath: `${userId}/saved-searches/${searchId}`,
+    additionalHeaders: {
+      "X-SGG-Token": token,
+    },
+    body: { name },
+  });
+  return await response.json();
+};
+
 export const fetchSavedSearches = async (
   token: string,
   userId: string,

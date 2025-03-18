@@ -580,6 +580,24 @@ export const messages = {
       page: "Page",
       sortby: "Sort by",
     },
+    editModal: {
+      title: "Edit name of search query",
+      description:
+        "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
+      inputLabel: "Query name (required)",
+      saveText: "Save",
+      cancelText: "Cancel",
+      closeText: "Close",
+      emptyNameError: "Please name this query.",
+      successTitle: "Query successfully updated",
+      apiError: "Error updating saved query. Try again later.",
+    },
+    deleteModal: {
+      title: "Delete saved query?",
+      deleteText: "Yes, delete",
+      cancelText: "Cancel",
+      apiError: "Error deleting saved query. Try again later.",
+    },
   },
   SavedGrants: {
     heading: "Saved grants",

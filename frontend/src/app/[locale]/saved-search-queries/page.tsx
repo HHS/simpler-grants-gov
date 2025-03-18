@@ -19,15 +19,7 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const resultBorderClasses = `
-border-1px
-border-base-lighter
-padding-x-2
-padding-y-105
-margin-bottom-2
-text-base-darker
-`;
+import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -62,7 +54,7 @@ const SavedSearchesList = ({
             <div className="grid-row grid-gap">
               <div className="desktop:grid-col-fill">
                 <div className="grid-row padding-right-2">
-                  <div className="tablet:grid-col-8">
+                  <div className="tablet:grid-col-8 grid-col-6">
                     <h2 className="margin-y-105 line-height-sans-2">
                       <Link
                         href={`/search${queryParamsToQueryString(savedSearch.searchParams)}`}
@@ -76,10 +68,10 @@ const SavedSearchesList = ({
                   <div className="grid-col margin-top-2 text-right">
                     <div className="grid-row">
                       <div className="grid-col">
-                        <Button type="button" unstyled>
-                          <USWDSIcon name="edit" />
-                          {editText}
-                        </Button>
+                        <EditSavedSearchModal
+                          savedSearchId={savedSearch.id}
+                          editText={editText}
+                        />
                       </div>
                       <div className="grid-col">
                         <Button type="button" unstyled>
