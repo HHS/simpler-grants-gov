@@ -22,6 +22,7 @@ from src.search.search_models import (
 )
 from src.services.opportunities_v1.experimental_constant import (
     AGENCY,
+    ATTACHMENT,
     DEFAULT,
     EXPANDED,
     ScoringRule,
@@ -59,6 +60,7 @@ FILTER_RULE_MAPPING = {
     ScoringRule.EXPANDED: EXPANDED,
     ScoringRule.AGENCY: AGENCY,
     ScoringRule.DEFAULT: DEFAULT,
+    ScoringRule.ATTACHMENT: ATTACHMENT,
 }
 
 STATIC_PAGINATION = {

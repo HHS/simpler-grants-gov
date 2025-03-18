@@ -51,7 +51,7 @@ ATTACHMENT = [
     "summary.summary_description",
     "opportunity_assistance_listings.assistance_listing_number^10",
     "opportunity_assistance_listings.program_title^4",
-    "attachments.attachment.content"
+    "attachments.attachment.content",
 ]
 
 
