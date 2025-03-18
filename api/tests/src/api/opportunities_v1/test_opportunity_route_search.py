@@ -1532,10 +1532,18 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 query="literacy",
                 experimental={"scoring_rule": "expanded"},
             ),
+            # attachment scoring rule
+            get_search_request(
+                query="hello",
+                experimental={"scoring_rule": "attachment"}
+
+            )
         ],
     )
     def test_search_experimental_200(self, client, api_auth_token, search_request):
         # We are only testing for 200 responses when adding the experimental field into the request body.
+        import pdb;pdb.set_trace()
+
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
