@@ -17,6 +17,7 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture(autouse=True)
 def clear_competitions(db_session):
+    cascade_delete_from_db_table(db_session, ApplicationForm)
     cascade_delete_from_db_table(db_session, Competition)
 
 
