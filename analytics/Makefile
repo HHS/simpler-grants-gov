@@ -93,6 +93,9 @@ release-build:
 		$(OPTS) \
 		.
 
+update-docker-digest:
+	../template-only-bin/update-docker-digest Dockerfile
+
 #########
 # Tests #
 #########
@@ -179,4 +182,3 @@ gh-data-export:
 	--config-file $(PROJECT_CONFIG_FILE) \
 	--output-file $(ISSUE_FILE) \
 	--temp-dir $(OUTPUT_DIR)
-
