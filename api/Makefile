@@ -117,6 +117,9 @@ check: format-check lint db-check-migrations test
 
 remake-backend: volume-recreate db-seed-local populate-search-opportunities ## Completely recreate API services, load data into the DB and search index
 
+update-docker-digest:
+	../template-only-bin/update-docker-digest Dockerfile
+
 ##################################################
 # DB & migrations
 ##################################################
