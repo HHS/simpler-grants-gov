@@ -12,6 +12,7 @@ from src.api.application_alpha.application_schemas import (
     ApplicationStartResponseSchema,
 )
 from src.auth.api_key_auth import api_key_auth
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.update_application_form import update_application_form
 
@@ -48,14 +49,18 @@ def application_form_update(
     db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Update an application form response"""
-    add_extra_data_to_current_request_logs({"application.application_id": application_id, "form.form_id": form_id})
+    add_extra_data_to_current_request_logs(
+        {"application.application_id": application_id, "form.form_id": form_id}
+    )
     logger.info("PUT /alpha/applications/:application_id/forms/:form_id")
 
     application_response = json_data["application_response"]
 
     with db_session.begin():
         # Call the service to update the application form
-        _, warnings = update_application_form(db_session, application_id, form_id, application_response)
+        _, warnings = update_application_form(
+            db_session, application_id, form_id, application_response
+        )
 
     return response.ApiResponse(
         message="Success", data={"application_id": application_id}, warnings=warnings

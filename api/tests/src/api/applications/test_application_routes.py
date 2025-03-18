@@ -4,7 +4,14 @@ import pytest
 from sqlalchemy import select
 
 from src.db.models.competition_models import Application, ApplicationForm, Competition
-from tests.src.db.models.factories import CompetitionFactory, FormFactory, OpportunityFactory
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationFormFactory,
+    CompetitionFactory,
+    CompetitionFormFactory,
+    FormFactory,
+    OpportunityFactory,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -112,15 +119,17 @@ def test_application_form_update_success_create(
     competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
 
     # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
+    application = ApplicationFactory.create(competition=competition)
 
     # Create form
     form = FormFactory.create(
         form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
         form_ui_schema={"name": {"ui:widget": "text"}},
+    )
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
     )
 
     application_id = str(application.application_id)
@@ -156,27 +165,25 @@ def test_application_form_update_success_update(
 ):
     """Test successful update of an existing application form response"""
     opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
+    competition = CompetitionFactory.create(opportunity=opportunity)
 
     # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
+    application = ApplicationFactory.create(competition=competition)
 
     form = FormFactory.create(
         form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
         form_ui_schema={"name": {"ui:widget": "text"}},
     )
-    db_session.add(form)
 
-    existing_form = ApplicationForm(
-        application_id=application.application_id,
-        form_id=form.form_id,
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
         application_response={"name": "Original Name"},
     )
-    db_session.add(existing_form)
-    db_session.commit()
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
+    )
 
     application_id = str(application.application_id)
     form_id = str(form.form_id)
@@ -346,23 +353,26 @@ def test_application_form_update_complex_json(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application form update with complex JSON data"""
-    # Arrange
     opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
+    competition = CompetitionFactory.create(opportunity=opportunity)
 
     # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
+    application = ApplicationFactory.create(competition=competition)
 
-    # Create form
     form = FormFactory.create(
         form_json_schema={"type": "object"},
         form_ui_schema={},
     )
-    db_session.add(form)
-    db_session.commit()
+
+    application_form = ApplicationFormFactory.create(
+        application_id=application.application_id,
+        form_id=form.form_id,
+    )
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
+    )
 
     application_id = str(application.application_id)
     form_id = str(form.form_id)

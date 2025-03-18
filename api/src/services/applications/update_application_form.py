@@ -41,7 +41,6 @@ def update_application_form(
     competition_form = db_session.execute(
         select(Form)
         .join(CompetitionForm, Form.form_id == CompetitionForm.form_id)
-        # Technically don't even need to join to the competition table, competition_form is enough I think?
         .where(CompetitionForm.competition_id == application.competition_id)
         .where(Form.form_id == form_id)
     ).scalar_one_or_none()

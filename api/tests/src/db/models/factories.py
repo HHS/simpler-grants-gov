@@ -1898,15 +1898,10 @@ class ApplicationFormFactory(BaseFactory):
     class Meta:
         model = competition_models.ApplicationForm
 
-    form_id = Generators.UuidObj
-    form_name = fake.bs()
-    form_version = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
-    agency_code = factory.Faker("agency_code")
-    active_at = sometimes_none(factory.Faker("date_time_between", start_date="-3y", end_date="-1d"))
-    inactive_at = sometimes_none(
-        factory.LazyAttribute(
-            lambda o: fake.date_time_between(start_date=o.active_at) if o.active_at else None
-        )
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+    application_response = factory.LazyFunction(
+        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
     )
 
 
@@ -1942,3 +1937,27 @@ class JobLogFactory(BaseFactory):
     job_id = Generators.UuidObj
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
+
+
+class ApplicationFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Application
+
+    application_id = Generators.UuidObj
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+    class Params:
+        with_forms = factory.Trait(
+            application_forms=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationFormFactory",
+                factory_related_name="application",
+                size=lambda: random.randint(1, 3),
+            )
+        )
