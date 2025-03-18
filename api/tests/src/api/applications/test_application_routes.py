@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from src.db.models.competition_models import Application, ApplicationForm, Competition
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -16,14 +17,7 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture(autouse=True)
 def clear_competitions(db_session):
-    applcations_forms = db_session.query(ApplicationForm).all()
-    for application_form in applcations_forms:
-        db_session.delete(application_form)
-
-    competitions = db_session.query(Competition).all()
-    for competition in competitions:
-        db_session.delete(competition)
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, Competition)
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):

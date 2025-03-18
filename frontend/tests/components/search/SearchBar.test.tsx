@@ -29,7 +29,7 @@ describe("SearchBar", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <QueryProvider>
-        <SearchBar query={initialQueryParams} />
+        <SearchBar queryTermFromParent={initialQueryParams} />
       </QueryProvider>,
     );
     const results = await axe(container);
@@ -39,7 +39,7 @@ describe("SearchBar", () => {
   it("updates the input value when typing in the search field", () => {
     render(
       <QueryProvider>
-        <SearchBar query={initialQueryParams} />
+        <SearchBar queryTermFromParent={initialQueryParams} />
       </QueryProvider>,
     );
 
@@ -52,7 +52,7 @@ describe("SearchBar", () => {
   it("calls updateQueryParams with the correct argument when submitting the form", () => {
     render(
       <QueryProvider>
-        <SearchBar query={initialQueryParams} />
+        <SearchBar queryTermFromParent={initialQueryParams} />
       </QueryProvider>,
     );
 
@@ -72,7 +72,7 @@ describe("SearchBar", () => {
   it("raises a validation error on submit if search term is > 99 characters, then clears error on successful search", () => {
     render(
       <QueryProvider>
-        <SearchBar query={initialQueryParams} />
+        <SearchBar queryTermFromParent={initialQueryParams} />
       </QueryProvider>,
     );
 

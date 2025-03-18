@@ -22,7 +22,6 @@ from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
@@ -30,6 +29,7 @@ from src.db.models.staging import metadata as staging_metadata
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
+from tests.lib.db_testing import cascade_delete_from_db_table
 
 logger = logging.getLogger(__name__)
 
@@ -446,28 +446,11 @@ class BaseTestClass:
         As this is at the class scope, this will only run once for a given
         class implementation.
         """
-
-        applcations_forms = db_session.query(ApplicationForm).all()
-        for application_form in applcations_forms:
-            db_session.delete(application_form)
-
-        opportunities = db_session.query(Opportunity).all()
-        for opp in opportunities:
-            db_session.delete(opp)
-
-        # Force the deletes to the DB
-        db_session.commit()
+        cascade_delete_from_db_table(db_session, Opportunity)
 
     @pytest.fixture(scope="class")
     def truncate_agencies(self, db_session):
-        with db_session.no_autoflush:
-            # Fetch all agencies
-            agencies = db_session.query(Agency).all()
-            # Delete each agency
-            for agency in agencies:
-                db_session.delete(agency)
-
-        db_session.commit()
+        cascade_delete_from_db_table(db_session, Agency)
 
     @pytest.fixture(scope="class")
     def truncate_staging_tables(self, db_session, test_staging_schema):

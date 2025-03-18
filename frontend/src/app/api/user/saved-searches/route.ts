@@ -46,6 +46,7 @@ export const POST = async (request: Request) => {
     }
     return Response.json({
       message: "Saved search success",
+      id: response?.data?.saved_search_id,
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
