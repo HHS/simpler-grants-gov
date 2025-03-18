@@ -18,5 +18,9 @@ class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
 
 
+class ApplicationFormUpdateResponseDataSchema(Schema):
+    application_id = fields.UUID()
+
+
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
-    data = fields.Nested(something)
+    data = fields.Nested(ApplicationFormUpdateResponseDataSchema())
