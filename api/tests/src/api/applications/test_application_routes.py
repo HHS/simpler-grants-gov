@@ -122,8 +122,6 @@ def test_application_form_update_success_create(
         form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
         form_ui_schema={"name": {"ui:widget": "text"}},
     )
-    db_session.add(form)
-    db_session.commit()
 
     application_id = str(application.application_id)
     form_id = str(form.form_id)
