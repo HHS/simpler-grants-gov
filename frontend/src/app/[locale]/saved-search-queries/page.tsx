@@ -19,13 +19,14 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("SavedGrants.title"),
+    title: t("SavedSearches.title"),
     description: t("Index.meta_description"),
   };
   return meta;
@@ -74,10 +75,10 @@ const SavedSearchesList = ({
                         />
                       </div>
                       <div className="grid-col">
-                        <Button type="button" unstyled>
-                          <USWDSIcon name="delete" />
-                          {deleteText}
-                        </Button>
+                        <DeleteSavedSearchModal
+                          savedSearchId={savedSearch.id}
+                          deleteText={deleteText}
+                        />
                       </div>
                     </div>
                   </div>

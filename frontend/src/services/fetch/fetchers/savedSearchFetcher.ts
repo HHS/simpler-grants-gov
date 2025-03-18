@@ -1,3 +1,4 @@
+import { APIResponse } from "src/types/apiResponseTypes";
 import {
   SavedSearchRecord,
   SearchRequestBody,
@@ -5,13 +6,11 @@ import {
 
 import { fetchUserWithMethod } from "./fetchers";
 
-type SavedSearchResponse = {
-  status_code: number;
-  message: string;
+interface SavedSearchResponse extends APIResponse {
   data: {
     saved_search_id?: string;
-  } | null;
-};
+  };
+}
 
 // make call from server to API to save a search
 export const handleSavedSearch = async (
@@ -36,7 +35,7 @@ export const handleUpdateSavedSearch = async (
   userId: string,
   searchId: string,
   name: string,
-): Promise<SavedSearchResponse> => {
+): Promise<APIResponse> => {
   const response = await fetchUserWithMethod("PUT")({
     subPath: `${userId}/saved-searches/${searchId}`,
     additionalHeaders: {
@@ -44,7 +43,22 @@ export const handleUpdateSavedSearch = async (
     },
     body: { name },
   });
-  return await response.json();
+  return (await response.json()) as APIResponse;
+};
+
+// make call from server to API to update a saved search
+export const handleDeleteSavedSearch = async (
+  token: string,
+  userId: string,
+  searchId: string,
+): Promise<APIResponse> => {
+  const response = await fetchUserWithMethod("DELETE")({
+    subPath: `${userId}/saved-searches/${searchId}`,
+    additionalHeaders: {
+      "X-SGG-Token": token,
+    },
+  });
+  return (await response.json()) as APIResponse;
 };
 
 export const fetchSavedSearches = async (

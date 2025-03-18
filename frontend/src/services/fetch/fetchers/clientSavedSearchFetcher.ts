@@ -56,9 +56,19 @@ export const editSavedSearchName = async (
     method: "PUT",
     body: JSON.stringify({ name, searchId }),
   });
-  if (res.ok && res.status === 200) {
-    return;
-  } else {
+  if (!res.ok || res.status !== 200) {
     throw new Error(`Error updating saved search: ${res.status}`);
+  }
+};
+
+// make call from client to Next server to initiate deleting a saved search
+export const deleteSavedSearch = async (searchId: string, token?: string) => {
+  if (!token) return;
+  const res = await fetch("/api/user/saved-searches", {
+    method: "DELETE",
+    body: JSON.stringify({ searchId }),
+  });
+  if (!res.ok || res.status !== 200) {
+    throw new Error(`Error deleting saved search: ${res.status}`);
   }
 };

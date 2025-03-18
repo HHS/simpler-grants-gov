@@ -7,6 +7,7 @@ import {
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
+  handleDeleteSavedSearch,
   handleSavedSearch,
   handleUpdateSavedSearch,
 } from "src/services/fetch/fetchers/savedSearchFetcher";
@@ -97,6 +98,44 @@ export const PUT = async (request: Request) => {
     return Response.json(
       {
         message: `Error attempting to save search: ${message}`,
+      },
+      { status },
+    );
+  }
+};
+
+export const DELETE = async (request: Request) => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      throw new UnauthorizedError("No active session to save opportunity");
+    }
+    const savedSearchBody = (await request.json()) as OptionalStringDict;
+
+    if (!savedSearchBody.searchId) {
+      throw new BadRequestError("No search id provided to delete saved search");
+    }
+
+    const response = await handleDeleteSavedSearch(
+      session.token,
+      session.user_id,
+      savedSearchBody.searchId,
+    );
+    if (!response || response.status_code !== 200) {
+      throw new ApiRequestError(
+        `Error deleting search: ${response.message}`,
+        "APIRequestError",
+        response.status_code,
+      );
+    }
+    return Response.json({
+      message: "Delete search success",
+    });
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to delete search: ${message}`,
       },
       { status },
     );
