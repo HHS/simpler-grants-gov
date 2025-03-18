@@ -58,6 +58,9 @@ storybook: # Run the Storybook local dev server in Docker
 stop:
 	docker compose down
 
+update-docker-digest:
+	../template-only-bin/update-docker-digest Dockerfile
+
 ##################################################
 # Load testing
 ##################################################
