@@ -15,42 +15,42 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-module_dir=$1
-backend_config_name=$2
-tf_state_key="${3:-$module_dir/$backend_config_name.tfstate}"
+module_dir="$1"
+backend_config_name="$2"
+tf_state_key="${3:-${module_dir}/${backend_config_name}.tfstate}"
 
 # The local tfbackend config file that will store the terraform backend config
-backend_config_file="$module_dir/$backend_config_name.s3.tfbackend"
+backend_config_file="${module_dir}/${backend_config_name}.s3.tfbackend"
 
 # Get the name of the S3 bucket that was created to store the tf state
 # and the name of the DynamoDB table that was created for tf state locks.
 # This will be used to configure the S3 backends in all the application
 # modules
-tf_state_bucket_name=$(terraform -chdir=infra/accounts output -raw tf_state_bucket_name)
-tf_locks_table_name=$(terraform -chdir=infra/accounts output -raw tf_locks_table_name)
-region=$(terraform -chdir=infra/accounts output -raw region)
+tf_state_bucket_name=$(terraform -chdir="infra/accounts" output --raw tf_state_bucket_name)
+tf_locks_table_name=$(terraform -chdir="infra/accounts" output --raw tf_locks_table_name)
+region=$(terraform -chdir="infra/accounts" output --raw region)
 
 echo "===================================="
 echo "Create terraform backend config file"
 echo "===================================="
 echo "Input parameters"
-echo "  module_dir=$module_dir"
-echo "  backend_config_name=$backend_config_name"
+echo "  module_dir=${module_dir}"
+echo "  backend_config_name=${backend_config_name}"
 echo
 
 # Create output file from example file
-cp infra/example.s3.tfbackend "$backend_config_file"
+cp infra/example.s3.tfbackend "${backend_config_file}"
 
 # Replace the placeholder values
-sed -i.bak "s/<TF_STATE_BUCKET_NAME>/$tf_state_bucket_name/g" "$backend_config_file"
-sed -i.bak "s|<TF_STATE_KEY>|$tf_state_key|g" "$backend_config_file"
-sed -i.bak "s/<TF_LOCKS_TABLE_NAME>/$tf_locks_table_name/g" "$backend_config_file"
-sed -i.bak "s/<REGION>/$region/g" "$backend_config_file"
+sed -i.bak "s/<TF_STATE_BUCKET_NAME>/${tf_state_bucket_name}/g" "${backend_config_file}"
+sed -i.bak "s|<TF_STATE_KEY>|${tf_state_key}|g" "${backend_config_file}"
+sed -i.bak "s/<TF_LOCKS_TABLE_NAME>/${tf_locks_table_name}/g" "${backend_config_file}"
+sed -i.bak "s/<REGION>/${region}/g" "${backend_config_file}"
 
 # Remove the backup file created by sed
-rm "$backend_config_file.bak"
+rm "${backend_config_file}.bak"
 
-echo "Created file: $backend_config_file"
+echo "Created file: ${backend_config_file}"
 echo "------------------ file contents ------------------"
-cat "$backend_config_file"
+cat "${backend_config_file}"
 echo "----------------------- end -----------------------"

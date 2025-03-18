@@ -17,12 +17,19 @@ const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
   loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
 });
 
-const SaveSearchTooltip = ({ text }: { text: string }) => {
+const SaveSearchTooltip = ({
+  text,
+  title,
+}: {
+  text: string;
+  title: string;
+}) => {
   return (
     <TooltipWrapper
       className="margin-left-1 usa-button--unstyled"
       label={<div className="width-card-lg text-wrap">{text}</div>}
       position="top"
+      title={title}
     >
       <USWDSIcon className="text-secondary-darker" name="info_outline" />
     </TooltipWrapper>
@@ -61,7 +68,10 @@ export function SaveSearchPanel() {
       {showSavedSearchUI && (
         <div className="margin-bottom-2 display-flex">
           <span className="text-bold">{t("heading")}</span>
-          <SaveSearchTooltip text={t("help.noSavedQueries")} />
+          <SaveSearchTooltip
+            text={t("help.noSavedQueries")}
+            title={t("help.general")}
+          />
         </div>
       )}
       <div className="display-flex flex-align-start text-underline">
@@ -74,7 +84,10 @@ export function SaveSearchPanel() {
           snackbarMessage={t("copySearch.snackbar")}
         >
           {!showSavedSearchUI && (
-            <SaveSearchTooltip text={t("help.unauthenticated")} />
+            <SaveSearchTooltip
+              text={t("help.unauthenticated")}
+              title={t("help.general")}
+            />
           )}
         </SearchQueryCopyButton>
       </div>
