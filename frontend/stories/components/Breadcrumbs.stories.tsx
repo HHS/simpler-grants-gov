@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import { PROCESS_CRUMBS, RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
+import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 
@@ -25,12 +25,5 @@ export const Research = {
   parameters: Home.parameters,
   args: {
     breadcrumbList: RESEARCH_CRUMBS,
-  },
-};
-
-export const Process = {
-  parameters: Home.parameters,
-  args: {
-    breadcrumbList: PROCESS_CRUMBS,
   },
 };
