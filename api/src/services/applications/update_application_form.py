@@ -70,8 +70,6 @@ def update_application_form(
         )
         db_session.add(application_form)
 
-    db_session.commit()
-
     # In a future PR, validation will be added here
     warnings: list[ValidationErrorDetail] = []
 
