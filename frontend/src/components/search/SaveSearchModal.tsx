@@ -1,5 +1,3 @@
-"use client";
-
 import clsx from "clsx";
 import { useUser } from "src/services/auth/useUser";
 import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -85,7 +83,10 @@ function SuccessContent({
   );
 }
 
-export function SaveSearchModal() {
+// note that this is client component, but not marked as "use client" because to do so
+// would cause an error when passing the function prop from parent client component see:
+// https://github.com/vercel/next.js/discussions/46795
+export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalId = "save-search";
 
   const t = useTranslations("Search.saveSearch.modal");
@@ -109,8 +110,12 @@ export function SaveSearchModal() {
     }
     setLoading(true);
     saveSearch(savedSearchName, searchParams, user?.token)
-      .then((_data) => {
+      .then((data) => {
+        if (!data?.id) {
+          throw new Error("saved search ID not returned from API");
+        }
         setSaved(true);
+        onSave(data.id);
       })
       .catch((error) => {
         setApiError(true);
@@ -119,7 +124,7 @@ export function SaveSearchModal() {
       .finally(() => {
         setLoading(false);
       });
-  }, [savedSearchName, user, searchParams, t, validationError]);
+  }, [savedSearchName, user, searchParams, t, validationError, onSave]);
 
   const onClose = useCallback(() => {
     setSaved(false);

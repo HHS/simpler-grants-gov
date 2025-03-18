@@ -2,14 +2,16 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { ReactNode, useMemo, useState } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
+import { SaveSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
@@ -21,7 +23,7 @@ const SaveSearchTooltip = ({
   text,
   title,
 }: {
-  text: string;
+  text: string | ReactNode;
   title: string;
 }) => {
   return (
@@ -44,38 +46,60 @@ export function SaveSearchPanel() {
 
   const t = useTranslations("Search.saveSearch");
 
+  const [newSavedSearches, setNewSavedSearches] = useState<string[]>([]);
+  const [savedSearches, setSavedSearches] = useState<SavedSearchRecord[]>([]);
+
   const url = useMemo(() => {
     const query = searchParams?.toString() ? `?${searchParams.toString()}` : "";
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const copyText = useMemo(
-    () =>
-      user?.token
-        ? t("copySearch.copy.authenticated")
-        : t("copySearch.copy.unauthenticated"),
-    [user?.token, t],
-  );
-
   const showSavedSearchUI = useMemo(
     () => checkFeatureFlag("savedSearchesOn") && user?.token,
     [user?.token, checkFeatureFlag],
   );
 
+  const copyText = useMemo(
+    () =>
+      showSavedSearchUI
+        ? t("copySearch.copy.authenticated")
+        : t("copySearch.copy.unauthenticated"),
+    [showSavedSearchUI, t],
+  );
+
+  const authenticatedTooltipText = useMemo(() => {
+    return savedSearches.length
+      ? t.rich("help.authenticated", {
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })
+      : t("help.noSavedQueries");
+  }, [savedSearches, t]);
+
+  const onNewSavedSearch = (id: string) => {
+    setNewSavedSearches([id, ...newSavedSearches]);
+  };
+
   return (
-    <div className="border-base-lighter border-1px padding-2 text-primary-darker">
+    <div className="border-base-lighter border-1px padding-2">
       {showSavedSearchUI && (
-        <div className="margin-bottom-2 display-flex">
-          <span className="text-bold">{t("heading")}</span>
-          <SaveSearchTooltip
-            text={t("help.noSavedQueries")}
-            title={t("help.general")}
+        <>
+          <div className="display-flex margin-bottom-2">
+            <span className="text-bold">{t("heading")}</span>
+            <SaveSearchTooltip
+              text={authenticatedTooltipText}
+              title={t("help.general")}
+            />
+          </div>
+          <SaveSearchSelector
+            newSavedSearches={newSavedSearches}
+            savedSearches={savedSearches}
+            setSavedSearches={setSavedSearches}
           />
-        </div>
+        </>
       )}
       <div className="display-flex flex-align-start text-underline">
-        {showSavedSearchUI && <SaveSearchModal />}
+        {showSavedSearchUI && <SaveSearchModal onSave={onNewSavedSearch} />}
         <SearchQueryCopyButton
           copiedText={t("copySearch.copied")}
           copyingText={t("copySearch.copying")}

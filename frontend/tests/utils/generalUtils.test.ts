@@ -1,4 +1,8 @@
-import { findFirstWhitespace, splitMarkup } from "src/utils/generalUtils";
+import {
+  findFirstWhitespace,
+  queryParamsToQueryString,
+  splitMarkup,
+} from "src/utils/generalUtils";
 
 describe("splitMarkup", () => {
   it("handles case where markdown string is shorter than split point", () => {
@@ -93,5 +97,20 @@ describe("findFirstWhitespace", () => {
         3,
       ),
     ).toEqual(8);
+  });
+});
+
+describe("queryParamsToQueryString", () => {
+  it("will give you a question mark for nothing", () => {
+    expect(queryParamsToQueryString({})).toEqual("?");
+  });
+  it("puts each provided key that has a value into a query string format", () => {
+    expect(
+      queryParamsToQueryString({
+        status: "archived,closed",
+        agency: "",
+        eligibility: "individual",
+      }),
+    ).toEqual("?status=archived,closed&eligibility=individual&");
   });
 });
