@@ -6,7 +6,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import Application, ApplicationForm, Competition, Form
+from src.db.models.competition_models import Application, ApplicationForm, CompetitionForm, Form
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,9 @@ def update_application_form(
     # Check if form exists and is attached to the competition
     competition_form = db_session.execute(
         select(Form)
-        .join(Competition, Competition.competition_id == application.competition_id)
+        .join(CompetitionForm, Form.form_id == CompetitionForm.form_id)
+        # Technically don't even need to join to the competition table, competition_form is enough I think?
+        .where(CompetitionForm.competition_id == application.competition_id)
         .where(Form.form_id == form_id)
     ).scalar_one_or_none()
 
