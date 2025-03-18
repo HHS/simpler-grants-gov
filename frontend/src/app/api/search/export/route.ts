@@ -19,7 +19,7 @@ export const revalidate = 0;
 export async function GET(request: NextRequest) {
   try {
     const searchParams = convertSearchParamsToProperTypes(
-      Object.fromEntries(request.nextUrl.searchParams.entries().toArray()),
+      Object.fromEntries(request.nextUrl.searchParams.entries()),
     );
     const apiResponseBody = await downloadOpportunities(searchParams);
     return new NextResponse(apiResponseBody, {
