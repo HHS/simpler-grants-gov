@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { editSavedSearchName } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
@@ -83,15 +84,10 @@ function SuccessContent({
   );
 }
 
-// note that this is client component, but not marked as "use client" because to do so
-// would cause an error when passing the function prop from parent client component see:
-// https://github.com/vercel/next.js/discussions/46795
 export function EditSavedSearchModal({
-  // onSave,
   savedSearchId,
   editText,
 }: {
-  // onSave: () => void;
   savedSearchId: string;
   editText: string;
 }) {
@@ -103,6 +99,7 @@ export function EditSavedSearchModal({
   const t = useTranslations("SavedSearches.editModal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
+  const { replaceQueryParams } = useSearchParamUpdater();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -122,7 +119,9 @@ export function EditSavedSearchModal({
     editSavedSearchName(savedSearchName, savedSearchId, user?.token)
       .then(() => {
         setUpdated(true);
-        // onSave();
+        // this should trigger a page refresh, which will trigger refetching saved searches,
+        // which will update the name in the list
+        replaceQueryParams({ status: `${savedSearchId}-${Date.now()}` });
       })
       .catch((error) => {
         setApiError(true);
