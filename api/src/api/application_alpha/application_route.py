@@ -53,8 +53,9 @@ def application_form_update(
 
     application_response = json_data["application_response"]
 
-    # Call the service to update the application form
-    _, warnings = update_application_form(db_session, application_id, form_id, application_response)
+    with db_session.begin():
+        # Call the service to update the application form
+        _, warnings = update_application_form(db_session, application_id, form_id, application_response)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application_id}, warnings=warnings
