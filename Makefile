@@ -28,16 +28,14 @@ __check_defined = \
 
 .PHONY : \
 	e2e-build \
-	e2e-clean \
-	e2e-clean-image \
 	e2e-clean-report \
+	e2e-delete-image \
 	e2e-merge-reports \
 	e2e-setup-ci \
 	e2e-setup-native \
 	e2e-show-report \
 	e2e-test \
 	e2e-test-native \
-	e2e-test-native-ui \
 	help \
 	infra-check-app-database-roles \
 	infra-check-compliance-checkov \
@@ -75,44 +73,37 @@ __check_defined = \
 ## End-to-end (E2E) Testing ##
 ##############################
 
-# Include project name in image name so that image name
-# does not conflict with other images during local development.
-# The e2e test image includes the test suite for all apps and therefore isn't specific to each app.
-E2E_IMAGE_NAME := $(PROJECT_ROOT)-e2e
-
 e2e-build: ## Build the e2e Docker image, if not already built, using ./e2e/Dockerfile
-	docker build -t $(E2E_IMAGE_NAME) -f ./e2e/Dockerfile .
+	docker build -t playwright-e2e -f ./e2e/Dockerfile .
 
-e2e-clean: ## Clean both the e2e reports and e2e Docker image
-e2e-clean: e2e-clean-report e2e-clean-image
-
-e2e-clean-image: ## Clean the Docker image for e2e tests
-	docker rmi -f $(E2E_IMAGE_NAME) 2>/dev/null || echo "Docker image $(E2E_IMAGE_NAME) does not exist, skipping."
-
-e2e-clean-report: ## Remove the local e2e report folders and content
+e2e-clean-report: ## Remove the local ./e2e/playwright-report and ./e2e/test-results folder and their contents
 	rm -rf ./e2e/playwright-report
 	rm -rf ./e2e/blob-report
 	rm -rf ./e2e/test-results
 
-e2e-merge-reports: ## Merge E2E blob reports from multiple shards into an HTML report
-	cd e2e && npm run e2e-merge-reports
+e2e-delete-image: ## Delete the Docker image for e2e tests
+	@docker rmi -f playwright-e2e 2>/dev/null || echo "Docker image playwright-e2e does not exist, skipping."
+
+e2e-merge-reports: ## Merge Playwright blob reports from multiple shards into an HTML report
+	@cd e2e && npx playwright merge-reports --reporter html blob-report
 
 e2e-setup-ci: ## Setup end-to-end tests for CI
-	cd e2e && npm run e2e-setup
+	@cd e2e && npm ci
+	@cd e2e && npx playwright install --with-deps
 
 e2e-setup-native: ## Setup end-to-end tests
-	cd e2e && npm install
-	cd e2e && npm run e2e-setup
+	@cd e2e && npm install
+	@cd e2e && npx playwright install --with-deps
 
-e2e-show-report: ## Show the E2E report
-	cd e2e && npm run e2e-show-report
+e2e-show-report: ## Show the ./e2e/playwright-report
+	@cd e2e && npx playwright show-report
 
-e2e-test: ## Run E2E tests in a Docker container and copy the report locally
+e2e-test: ## Run E2E Playwright tests in a Docker container and copy the report locally
 e2e-test: e2e-build
 	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
 	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	docker run --rm\
-		--name $(E2E_IMAGE_NAME)-container \
+		--name playwright-e2e-container \
 		-e APP_NAME=$(APP_NAME) \
 		-e BASE_URL=$(BASE_URL) \
 		-e CURRENT_SHARD=$(CURRENT_SHARD) \
@@ -120,19 +111,13 @@ e2e-test: e2e-build
 		-e CI=$(CI) \
 		-v $(PWD)/e2e/playwright-report:/e2e/playwright-report \
 		-v $(PWD)/e2e/blob-report:/e2e/blob-report \
-		$(E2E_IMAGE_NAME) \
-		$(E2E_ARGS)
-	@echo "Run 'make e2e-show-report' to view the test report"
+		playwright-e2e
 
-e2e-test-native: ## Run end-to-end tests natively
+e2e-test-native: ## Run end-to-end tests
 	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
+	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	@echo "Running e2e tests with CI=${CI}, APP_NAME=${APP_NAME}, BASE_URL=${BASE_URL}"
-	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm run e2e-test -- $(E2E_ARGS)
-
-e2e-test-native-ui: ## Run end-to-end tests natively in UI mode
-	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
-	@echo "Running e2e UI tests natively with APP_NAME=$(APP_NAME), BASE_URL=$(BASE_URL)"
-	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm run e2e-test:ui -- $(E2E_ARGS)
+	@cd e2e/$(APP_NAME) && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npx playwright test $(E2E_ARGS)
 
 ###########
 ## Infra ##
