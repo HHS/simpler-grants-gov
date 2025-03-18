@@ -57,20 +57,7 @@ describe("SaveSearchPanel", () => {
 
   // not able to reliably test this due to dynamic imports
   // was able to get things to work locally using jest-next-dynamic, but this did not work in CI
-  it.skip("displays a tooltip next to copy button when not authenticated", async () => {
-    mockUseUser.mockImplementation(() => ({
-      user: {
-        token: undefined,
-      },
-    }));
-    render(<SaveSearchPanel />);
-    const tooltipWrapper = screen.getByTestId("tooltipWrapper");
-    await waitFor(() => expect(tooltipWrapper).toBeInTheDocument());
-    // eslint-disable-next-line
-    expect(tooltipWrapper.previousElementSibling).toHaveTextContent(
-      "copySearch.copy.unauthenticated",
-    );
-  });
+
   it.skip("displays a tooltip next to description text when authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {

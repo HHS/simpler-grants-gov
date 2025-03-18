@@ -663,8 +663,7 @@ export const messages = {
     saveSearch: {
       heading: "Current search query",
       help: {
-        unauthenticated:
-          "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
+        
         noSavedQueries:
           "Save this frequently used search query to your account. Apply it again later to save time when searching for opportunities.",
         authenticated:
