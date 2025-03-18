@@ -2749,6 +2749,13 @@ components:
           type: object
       required:
       - application_response
+    ApplicationFormUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -2763,8 +2770,17 @@ components:
             - $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
+          description: The message to return
+          example: Success
         data:
-          type: object
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserDeleteSavedOpportunityResponse:
       type: object
       properties:
