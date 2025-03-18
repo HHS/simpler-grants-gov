@@ -85,7 +85,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
 
 
 def add_extra_data_to_current_request_logs(
-    data: dict[str, str | int | float | bool | None]
+    data: dict[str, str | int | float | bool | uuid.UUID | None]
 ) -> None:
     """Add data to every log record for the current request."""
     assert flask.has_request_context(), "Must be in a request context"

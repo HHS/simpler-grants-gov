@@ -112,10 +112,6 @@ class UserSaveSearchRequestSchema(Schema):
     search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
 
 
-class UserSaveSearchResponseSchema(AbstractResponseSchema):
-    data = fields.MixinField(metadata={"example": None})
-
-
 class SavedSearchResponseSchema(Schema):
     saved_search_id = fields.UUID(
         metadata={
@@ -136,6 +132,10 @@ class SavedSearchResponseSchema(Schema):
     created_at = fields.DateTime(
         metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
     )
+
+
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(SavedSearchResponseSchema)
 
 
 class UserSavedSearchesRequestSchema(Schema):

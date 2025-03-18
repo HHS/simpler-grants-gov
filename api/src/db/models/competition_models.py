@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 
 from sqlalchemy import BigInteger, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.models.base import ApiSchemaTable, TimestampMixin
@@ -27,6 +27,14 @@ class Competition(ApiSchemaTable, TimestampMixin):
     closing_date: Mapped[date | None]
     grace_period: Mapped[int | None] = mapped_column(BigInteger)
     contact_info: Mapped[str | None]
+
+    competition_forms: Mapped[list["CompetitionForm"]] = relationship(
+        "CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan"
+    )
+
+    applications: Mapped[list["Application"]] = relationship(
+        "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
+    )
 
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
@@ -61,8 +69,8 @@ class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
     )
 
 
-class ApplicationForm(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "application_form"
+class Form(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "form"
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_name: Mapped[str]
@@ -71,14 +79,46 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     omb_number: Mapped[str | None]
     active_at: Mapped[datetime | None]
     inactive_at: Mapped[datetime | None]
+    form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_form"
 
-    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    form_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(ApplicationForm.form_id), primary_key=True
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    application_form: Mapped[ApplicationForm] = relationship(ApplicationForm)
+    competition: Mapped[Competition] = relationship(Competition)
+
+    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), primary_key=True)
+    form: Mapped[Form] = relationship(Form)
+
     is_required: Mapped[bool]
+
+
+class Application(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application"
+
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Competition.competition_id), nullable=False, index=True
+    )
+    competition: Mapped[Competition] = relationship(Competition)
+
+
+class ApplicationForm(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_form"
+
+    application_form_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Application.application_id), nullable=False
+    )
+    application: Mapped[Application] = relationship(Application)
+
+    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), nullable=False)
+    form: Mapped[Form] = relationship(Form)
+    application_response: Mapped[dict] = mapped_column(JSONB, nullable=False)
