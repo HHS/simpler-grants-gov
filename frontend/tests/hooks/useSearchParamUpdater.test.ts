@@ -4,6 +4,8 @@ import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 const mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
+const mockQueryParamsToQueryString = jest.fn((..._args) => "?hi=there");
+
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(() => "/test") as jest.Mock<string>,
   useRouter: () => ({
@@ -14,43 +16,67 @@ jest.mock("next/navigation", () => ({
   ) as jest.Mock<URLSearchParams>,
 }));
 
+jest.mock("src/utils/generalUtils", () => ({
+  queryParamsToQueryString: (...args: unknown[]) =>
+    mockQueryParamsToQueryString(...args) as unknown,
+}));
+
 describe("useSearchParamUpdater", () => {
-  it("updates a singular param and pushes new path", async () => {
-    const { result } = renderHook(() => useSearchParamUpdater());
+  describe("updateQueryParams", () => {
+    it("updates a singular param and pushes new path", async () => {
+      const { result } = renderHook(() => useSearchParamUpdater());
 
-    result.current.updateQueryParams("", "query", "testQuery");
+      result.current.updateQueryParams("", "query", "testQuery");
 
-    await waitFor(() => {
-      expect(routerPush).toHaveBeenCalledWith("/test?query=testQuery", {
-        scroll: false,
+      await waitFor(() => {
+        expect(routerPush).toHaveBeenCalledWith("/test?query=testQuery", {
+          scroll: false,
+        });
+      });
+    });
+
+    it("updates multiple params and pushes new path", async () => {
+      const { result } = renderHook(() => useSearchParamUpdater());
+      const statuses = new Set(["forecasted", "posted"]);
+
+      result.current.updateQueryParams(statuses, "status", "test", true);
+
+      await waitFor(() => {
+        expect(routerPush).toHaveBeenCalledWith(
+          "/test?status=forecasted,posted&query=test",
+          { scroll: true },
+        );
+      });
+    });
+
+    it("clears the status param when no statuses are selected", async () => {
+      const { result } = renderHook(() => useSearchParamUpdater());
+      const statuses: Set<string> = new Set();
+
+      result.current.updateQueryParams(statuses, "status", "test");
+
+      await waitFor(() => {
+        expect(routerPush).toHaveBeenCalledWith("/test?query=test", {
+          scroll: false,
+        });
       });
     });
   });
+  describe("replaceQueryParams", () => {
+    it("calls push with new params", () => {
+      const { result } = renderHook(() => useSearchParamUpdater());
+      const fakeQueryParams = {
+        status: "Archived",
+        fundingInstrument: "Grant",
+        eligibility: "Individual",
+      };
 
-  it("updates multiple params and pushes new path", async () => {
-    const { result } = renderHook(() => useSearchParamUpdater());
-    const statuses = new Set(["forecasted", "posted"]);
+      result.current.replaceQueryParams(fakeQueryParams);
 
-    result.current.updateQueryParams(statuses, "status", "test", true);
-
-    await waitFor(() => {
-      expect(routerPush).toHaveBeenCalledWith(
-        "/test?status=forecasted,posted&query=test",
-        { scroll: true },
+      expect(mockQueryParamsToQueryString).toHaveBeenCalledWith(
+        fakeQueryParams,
       );
-    });
-  });
-
-  it("clears the status param when no statuses are selected", async () => {
-    const { result } = renderHook(() => useSearchParamUpdater());
-    const statuses: Set<string> = new Set();
-
-    result.current.updateQueryParams(statuses, "status", "test");
-
-    await waitFor(() => {
-      expect(routerPush).toHaveBeenCalledWith("/test?query=test", {
-        scroll: false,
-      });
+      expect(routerPush).toHaveBeenCalledWith("/test?hi=there");
     });
   });
 });

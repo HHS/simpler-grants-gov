@@ -1,5 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
+
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 
@@ -17,6 +20,17 @@ jest.mock("src/services/auth/useUser", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
+}));
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    searchParams: new ReadonlyURLSearchParams(),
+    replaceQueryParams: jest.fn(),
+  }),
+}));
+
+jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
+  obtainSavedSearches: () => Promise.resolve([fakeSavedSearch]),
 }));
 
 describe("SaveSearchPanel", () => {
@@ -53,6 +67,18 @@ describe("SaveSearchPanel", () => {
     render(<SaveSearchPanel />);
     const saveButton = screen.getByTestId("open-save-search-modal-button");
     expect(saveButton).toBeInTheDocument();
+  });
+  it("renders a select for saved searches when authenticated and saved searches exist", async () => {
+    mockUseUser.mockImplementation(() => ({
+      user: {
+        token: "a token",
+      },
+    }));
+    render(<SaveSearchPanel />);
+    await waitFor(() => {
+      const select = screen.getByTestId("Select");
+      return expect(select).toBeInTheDocument();
+    });
   });
 
   // not able to reliably test this due to dynamic imports

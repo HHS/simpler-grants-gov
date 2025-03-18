@@ -2,6 +2,7 @@ import pytest
 
 from src.db.models.agency_models import Agency
 from tests.conftest import BaseTestClass
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import AgencyFactory
 
 
@@ -9,16 +10,7 @@ class TestAgenciesRoutes(BaseTestClass):
     @pytest.fixture(autouse=True)
     def cleanup_agencies(self, db_session):
         yield
-
-        # Use no_autoflush to prevent premature flushes
-        with db_session.no_autoflush:
-            # Fetch all agencies
-            agencies = db_session.query(Agency).all()
-            # Delete each agency
-            for agency in agencies:
-                db_session.delete(agency)
-
-        db_session.commit()
+        cascade_delete_from_db_table(db_session, Agency)
 
     def test_agencies_get_default_dates(
         self, client, api_auth_token, enable_factory_create, db_session
