@@ -4,7 +4,6 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import Link from "next/link";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
