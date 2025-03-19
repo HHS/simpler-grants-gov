@@ -11,19 +11,21 @@ from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df_from_object
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class AcceptanceCriteriaTotal:
     """Struct to hold total criteria and total completed criteria."""
 
-    criteria: int = 0
-    done: int = 0
+    criteria_done: int = 0
+    criteria_total: int = 0
+    metrics_done: int = 0
+    metrics_total: int = 0
 
 
 class AcceptanceCriteriaType(Enum):
     """Define types of acceptance criteria."""
 
     ALL = "all"  # in this context "all" means all of the other types listed below
-    MAIN = "Acceptance criteria"  # don't change, this maps to string in body content
+    CRITERIA = "Acceptance criteria"  # don't change, this maps to string in body
     METRICS = "Metrics"  # don't change, this maps to string in body content
 
 
@@ -84,7 +86,6 @@ class AcceptanceCriteriaDataset(BaseDataset):
     def get_totals(
         self,
         ghid: str,
-        ac_type: AcceptanceCriteriaType,
         nest_level: AcceptanceCriteriaNestLevel,
     ) -> AcceptanceCriteriaTotal:
         """Get the total number of acceptance criteria and the total number done."""
@@ -97,12 +98,11 @@ class AcceptanceCriteriaDataset(BaseDataset):
         bodycontent = result["bodycontent"].get(result.first_valid_index(), "")
 
         # parse the raw body content and return the acceptance criteria totals
-        return self.parse_body_content(bodycontent, ac_type, nest_level)
+        return self.parse_body_content(bodycontent, nest_level)
 
     def parse_body_content(
         self,
         bodycontent: str,
-        ac_type: AcceptanceCriteriaType,
         target_nest_level: AcceptanceCriteriaNestLevel,
     ) -> AcceptanceCriteriaTotal:
         """Parse markup into structured acceptance criteria."""
@@ -111,12 +111,7 @@ class AcceptanceCriteriaDataset(BaseDataset):
             return AcceptanceCriteriaTotal()
 
         # init counters
-        total_criteria = 0
-        total_done = 0
-
-        # init counters
-        total_criteria = 0
-        total_done = 0
+        result = AcceptanceCriteriaTotal()
 
         # regex to capture markdown sections delineated by H3 headers
         sections = re.split(r"###\s*(.+)\n", bodycontent)
@@ -144,13 +139,6 @@ class AcceptanceCriteriaDataset(BaseDataset):
             if section_name not in valid_sections:
                 continue
 
-            # skip section if it's not what we're looking for
-            if (
-                ac_type != AcceptanceCriteriaType.ALL
-                and section_name != ac_type.value.lower()
-            ):
-                continue
-
             # if section does not contain a checkbox then skip it
             if "[x]" not in section_body and "[ ]" not in section_body:
                 continue
@@ -159,13 +147,17 @@ class AcceptanceCriteriaDataset(BaseDataset):
             checkboxes = re.findall(checkbox_regex, section_body, re.MULTILINE)
 
             # process checkboxes
-            criteria, done = self._count_checkboxes(checkboxes, target_nest_level)
+            total, done = self._count_checkboxes(checkboxes, target_nest_level)
 
             # accumulate totals
-            total_criteria += criteria
-            total_done += done
+            if section_name == AcceptanceCriteriaType.CRITERIA.value.lower():
+                result.criteria_done += done
+                result.criteria_total += total
+            elif section_name == AcceptanceCriteriaType.METRICS.value.lower():
+                result.metrics_done += done
+                result.metrics_total += total
 
-        return AcceptanceCriteriaTotal(criteria=total_criteria, done=total_done)
+        return result
 
     def _count_checkboxes(
         self,

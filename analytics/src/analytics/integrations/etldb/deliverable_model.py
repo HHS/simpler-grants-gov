@@ -119,18 +119,28 @@ class EtlDeliverableModel:
             text(
                 "insert into gh_deliverable_history"
                 "(deliverable_id, status, d_effective, "
-                "accept_criteria_total, accept_criteria_done) "
-                "values (:deliverable_id, :status, :effective, :ac_total, :ac_done) "
-                "on conflict(deliverable_id, d_effective) do update "
-                "set (status, t_modified, accept_criteria_total, accept_criteria_done) = "
-                "(:status, current_timestamp, :ac_total, :ac_done) returning id",
+                "accept_criteria_total, accept_criteria_done, "
+                "accept_metrics_total, accept_metrics_done) "
+                "values "
+                "(:deliverable_id, :status, :effective, "
+                ":criteria_total, :criteria_done, "
+                ":metrics_total, :metrics_done) "
+                "on conflict(deliverable_id, d_effective) "
+                "do update set (status, t_modified, "
+                "accept_criteria_total, accept_criteria_done, "
+                "accept_metrics_total, accept_metrics_done) = "
+                "(:status, current_timestamp, "
+                ":criteria_total, :criteria_done, "
+                ":metrics_total, :metrics_done) returning id",
             ),
             {
                 "deliverable_id": deliverable_id,
                 "status": deliverable_df["deliverable_status"],
                 "effective": self.dbh.effective_date,
-                "ac_total": ac_total.criteria,
-                "ac_done": ac_total.done,
+                "criteria_total": ac_total.criteria_total,
+                "criteria_done": ac_total.criteria_done,
+                "metrics_total": ac_total.metrics_total,
+                "metrics_done": ac_total.metrics_done,
             },
         )
         row = result.fetchone()
