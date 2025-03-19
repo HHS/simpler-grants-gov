@@ -224,17 +224,17 @@ def test_user_get_only_own_saved_opportunities(
     # Create an opportunity and save it for the current user
     user_opportunity = OpportunityFactory.create(opportunity_title="User's Opportunity")
     UserSavedOpportunityFactory.create(user=user, opportunity=user_opportunity)
-    
+
     # Create another user with their own saved opportunity
     other_user = UserFactory.create()
     other_opportunity = OpportunityFactory.create(opportunity_title="Other User's Opportunity")
     UserSavedOpportunityFactory.create(user=other_user, opportunity=other_opportunity)
-    
+
     # Create a third opportunity saved by both users
     shared_opportunity = OpportunityFactory.create(opportunity_title="Shared Opportunity")
     UserSavedOpportunityFactory.create(user=user, opportunity=shared_opportunity)
     UserSavedOpportunityFactory.create(user=other_user, opportunity=shared_opportunity)
-    
+
     # Make the request for the current user
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
@@ -246,19 +246,19 @@ def test_user_get_only_own_saved_opportunities(
             }
         },
     )
-    
+
     # Verify the response
     assert response.status_code == 200
     assert len(response.json["data"]) == 2  # User should see only their 2 saved opportunities
-    
+
     # Get the opportunity IDs from the response
     opportunity_ids = [opp["opportunity_id"] for opp in response.json["data"]]
-    
+
     # Verify that the user sees their own opportunities but not the other user's
     assert user_opportunity.opportunity_id in opportunity_ids
     assert shared_opportunity.opportunity_id in opportunity_ids
     assert other_opportunity.opportunity_id not in opportunity_ids
-    
+
     # Verify the opportunity titles
     opportunity_titles = [opp["opportunity_title"] for opp in response.json["data"]]
     assert "User's Opportunity" in opportunity_titles
