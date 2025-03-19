@@ -1,5 +1,6 @@
 import base64
 import csv
+import uuid
 from datetime import date
 
 import pytest
@@ -1554,26 +1555,37 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert resp.status_code == 200
 
 
+@pytest.fixture
+def opportunity_index_alias_func(search_client, monkeypatch):
+    # Note we don't actually create anything, this is just a random name
+    alias = f"test-opportunity-search-index-alias-{uuid.uuid4().int}"
+    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    return alias
+
+
 def test_search_experimental_attachment_200(
     client,
     api_auth_token,
     search_client,
-    opportunity_index,
-    opportunity_index_alias,
     mock_s3_bucket,
     enable_factory_create,
+    opportunity_index_alias_func,
+    opportunity_index,
 ):
     # Create Opportunity Attachments
     attachments = [
-        ("test_file_one.txt", "Testing querying attachment"),
-        ("test_file_two.txt", "Opportunity should not be returned"),
+        (DOC_MANUFACTURING, "test_file_one.txt", "Testing querying attachment"),
+        (DOC_SPACE_COAST, "test_file_two.txt", "Opportunity should not be returned"),
     ]
 
     opp_attachments = []
-    for file_name, file_content in attachments:
+    for opportunity, file_name, file_content in attachments:
         file_loc = f"s3://{mock_s3_bucket}/{file_name}"
         opp_attachment = OpportunityAttachmentFactory.create(
-            file_location=file_loc, file_contents=file_content, file_name=file_name
+            file_location=file_loc,
+            file_contents=file_content,
+            file_name=file_name,
+            opportunity=opportunity,
         )
         opp_attachments.append(opp_attachment)
 
@@ -1593,15 +1605,16 @@ def test_search_experimental_attachment_200(
         ]
 
     # Load into the search index
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias_func)
+
     search_client.bulk_upsert(
         opportunity_index,
         json_records,
         primary_key_field="opportunity_id",
         pipeline="multi-attachment",
     )
-
-    # Swap the search index alias
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
     # Prepare the search request
     search_request = get_search_request(
