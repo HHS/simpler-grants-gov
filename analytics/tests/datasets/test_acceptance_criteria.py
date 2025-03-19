@@ -6,7 +6,6 @@ from analytics.datasets.acceptance_criteria import (
     AcceptanceCriteriaDataset,
     AcceptanceCriteriaNestLevel,
     AcceptanceCriteriaTotal,
-    AcceptanceCriteriaType,
 )
 
 
@@ -118,11 +117,12 @@ def test_checkboxes_in_unrelated_sections_ignored(
     """Ensure checkboxes in non-relevant sections are ignored."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/789",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 2  # Only the valid acceptance criteria should count
-    assert totals.done == 1  # One valid checkbox is checked
+    assert totals.criteria_total == 2  # Only the valid acceptance criteria should count
+    assert totals.criteria_done == 1  # One valid checkbox is checked
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_missing_criteria_section(
@@ -131,11 +131,12 @@ def test_missing_criteria_section(
     """Ensure an issue without an acceptance criteria section returns zero counts."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/456",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 0
-    assert totals.done == 0
+    assert totals.criteria_total == 0
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 2
+    assert totals.metrics_done == 1
 
 
 def test_malformed_checkboxes_ignored(
@@ -149,11 +150,12 @@ def test_malformed_checkboxes_ignored(
 """
     totals = acceptance_criteria_dataset.parse_body_content(
         malformed_body,
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 0
-    assert totals.done == 0
+    assert totals.criteria_total == 0
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_case_insensitive_section_headers(
@@ -167,11 +169,12 @@ def test_case_insensitive_section_headers(
 """
     totals = acceptance_criteria_dataset.parse_body_content(
         case_variation_body,
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 2
-    assert totals.done == 1
+    assert totals.criteria_total == 2
+    assert totals.criteria_done == 1
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_empty_body_content(
@@ -180,11 +183,12 @@ def test_empty_body_content(
     """Ensure an empty body content does not cause errors and returns zero counts."""
     totals = acceptance_criteria_dataset.parse_body_content(
         "",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 0
-    assert totals.done == 0
+    assert totals.criteria_total == 0
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_whitespace_in_section_headers(
@@ -198,11 +202,12 @@ def test_whitespace_in_section_headers(
 """
     totals = acceptance_criteria_dataset.parse_body_content(
         whitespace_variation_body,
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
-    assert totals.criteria == 2
-    assert totals.done == 1
+    assert totals.criteria_total == 2
+    assert totals.criteria_done == 1
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_deeply_nested_checkboxes_all_levels(
@@ -219,12 +224,13 @@ def test_deeply_nested_checkboxes_all_levels(
 
     totals = acceptance_criteria_dataset.parse_body_content(
         deep_nesting_body,
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
 
-    assert totals.criteria == 4
-    assert totals.done == 1
+    assert totals.criteria_total == 4
+    assert totals.criteria_done == 1
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_h2_h4_headers_dont_break_parsing(
@@ -262,12 +268,13 @@ Some introductory text.
 
     totals = acceptance_criteria_dataset.parse_body_content(
         mixed_headers_body,
-        AcceptanceCriteriaType.ALL,
         AcceptanceCriteriaNestLevel.ALL,
     )
 
-    assert totals.criteria == 4
-    assert totals.done == 2
+    assert totals.criteria_total == 2
+    assert totals.criteria_done == 1
+    assert totals.metrics_total == 2
+    assert totals.metrics_done == 1
 
 
 def test_get_totals_with_no_data() -> None:
@@ -277,13 +284,14 @@ def test_get_totals_with_no_data() -> None:
 
     totals = dataset.get_totals(
         "org/repo/issues/123",
-        AcceptanceCriteriaType.ALL,
         AcceptanceCriteriaNestLevel.ALL,
     )
 
     assert isinstance(totals, AcceptanceCriteriaTotal)
-    assert totals.criteria == 0
-    assert totals.done == 0
+    assert totals.criteria_total == 0
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_get_totals_with_valid_data(
@@ -292,13 +300,14 @@ def test_get_totals_with_valid_data(
     """Test get_totals with a valid issue URL."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/123",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.ALL,
     )
 
     assert isinstance(totals, AcceptanceCriteriaTotal)
-    assert totals.criteria == 6
-    assert totals.done == 3
+    assert totals.criteria_total == 6
+    assert totals.criteria_done == 3
+    assert totals.metrics_total == 3
+    assert totals.metrics_done == 0
 
 
 def test_get_totals_nested_level_1(
@@ -307,12 +316,13 @@ def test_get_totals_nested_level_1(
     """Test get_totals filtering by Level 1 checkboxes only."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/123",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.LEVEL_1,
     )
 
-    assert totals.criteria == 3
-    assert totals.done == 0
+    assert totals.criteria_total == 3
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 3
+    assert totals.metrics_done == 0
 
 
 def test_get_totals_nested_level_2(
@@ -321,12 +331,13 @@ def test_get_totals_nested_level_2(
     """Test get_totals filtering by Level 2 checkboxes only."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/123",
-        AcceptanceCriteriaType.MAIN,
         AcceptanceCriteriaNestLevel.LEVEL_2,
     )
 
-    assert totals.criteria == 3
-    assert totals.done == 3
+    assert totals.criteria_total == 3
+    assert totals.criteria_done == 3
+    assert totals.metrics_total == 0
+    assert totals.metrics_done == 0
 
 
 def test_get_totals_with_metrics_section(
@@ -335,9 +346,10 @@ def test_get_totals_with_metrics_section(
     """Test get_totals with a different section (Metrics)."""
     totals = acceptance_criteria_dataset.get_totals(
         "org/repo/issues/456",
-        AcceptanceCriteriaType.METRICS,
         AcceptanceCriteriaNestLevel.ALL,
     )
 
-    assert totals.criteria == 2
-    assert totals.done == 1
+    assert totals.criteria_total == 0
+    assert totals.criteria_done == 0
+    assert totals.metrics_total == 2
+    assert totals.metrics_done == 1
