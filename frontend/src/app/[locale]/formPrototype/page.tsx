@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import ClientForm from "./ClientForm";
+import ClientForm from "./ApplyForm";
 import * as formSchema from "./formSchema.json";
 import * as uiSchema from "./uiSchema.json";
 
@@ -34,15 +34,22 @@ function FormPage() {
   return (
     <GridContainer>
       <BetaAlert />
-      <h1>Form Demo: Applicaction for Federal Assistance SF 424 - Individual</h1>
+      <h1>
+        Form Demo: Applicaction for Federal Assistance SF 424 - Individual
+      </h1>
       <legend className="usa-legend">
         The following is a demo of the SF 424 Individual form.
       </legend>
       <p>
-      Required fields are marked with an asterisk (<abbr title="required" className="usa-hint usa-hint--required text-no-underline
-
-">*</abbr>).
-    </p>
+        Required fields are marked with an asterisk (
+        <abbr
+          title="required"
+          className="usa-hint usa-hint--required text-no-underline"
+        >
+          *
+        </abbr>
+        ).
+      </p>
       <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );
