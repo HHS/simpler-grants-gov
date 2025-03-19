@@ -225,10 +225,7 @@
       "title": "I Agree",
       "type": "string",
       "name": "ApplicationCertification",
-      "enum": [
-        "Yes",
-        "No"
-      ]
+      "enum": ["Yes", "No"]
     },
     "AORSignature": {
       "title": "Signature",
