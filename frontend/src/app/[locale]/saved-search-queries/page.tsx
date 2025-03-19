@@ -118,10 +118,10 @@ const NoSavedSearches = ({
   searchButtonText: string;
 }) => {
   return (
-    <>
+    <div className="grid-container display-flex">
       <USWDSIcon
-        name="star_outline"
-        className="grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+        name="filter_list"
+        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
         <p className="usa-intro ">{noSavedCTA}</p>{" "}
@@ -129,7 +129,7 @@ const NoSavedSearches = ({
           <Button type="button">{searchButtonText}</Button>
         </Link>
       </div>
-    </>
+    </div>
   );
 };
 
