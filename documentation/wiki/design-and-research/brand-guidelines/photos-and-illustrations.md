@@ -17,8 +17,6 @@ layout:
 
 # Photos and illustrations
 
-## Overview
-
 The impact of Grants.gov's purposeful investments comes alive in our compelling photo library.
 
 Each image paints a vivid picture of how Grants.gov is successfully empowering individuals and organizations across the world and delivering real-world results. The photos highlight the multifaceted nature of the grants ecosystem – from students pursuing innovative research, to community initiatives tackling the lack of clean water, to organizations improving outcomes for seniors. Photos are organized around the following categories:
