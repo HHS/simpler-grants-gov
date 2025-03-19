@@ -97,7 +97,38 @@ class AgencyConfig(PydanticBaseEnvConfig):
     # TODO - we might want to put this somewhere more central
     #        as we might want to filter these out in other places
     test_agency_config: set[str] = Field(
-        default={"GDIT", "IVV", "IVPDF", "0001", "FGLT", "NGMS", "NGMS-Sub1", "SECSCAN"}
+        default={
+            "GDIT",
+            "IVV",
+            "IVPDF",
+            "0001",
+            "FGLT",
+            "NGMS",
+            "NGMS-Sub1",
+            "SECSCAN",
+            "MH",
+            "TX",
+            "MN",
+            "MMC",
+            "WWC",
+            "SCRC",
+            "NRC",
+            "JL04022024",
+            "JUSFC",
+            "JMM",
+            "IAF",
+            "USIP",
+            "GCERC",
+            "ARPAH",
+            "ORD",
+            "DC",
+            "SCC800",
+            "BBG",
+            "ACR",
+            "ECP",
+            "MC",
+            "CCFF",
+        }
     )
 
 
