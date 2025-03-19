@@ -1,6 +1,6 @@
 # Communication channels
 
-We collaborate on the project using various public and private channels. The tables below describe the information you'll find in each.
+We collaborate on the project using various public and private channels. Find out what information or conversations you'll find in each.
 
 {% hint style="danger" %}
 **Warning**
@@ -32,12 +32,12 @@ Zoom is our primary tool for virtual meetings within the Simpler Grants communit
 
 <summary>Getting started with Zoom</summary>
 
-#### 1. Joining Zoom Meetings <a href="#id-1.-joining-zoom-meetings" id="id-1.-joining-zoom-meetings"></a>
+#### 1. Joining Zoom meetings <a href="#id-1.-joining-zoom-meetings" id="id-1.-joining-zoom-meetings"></a>
 
 * Click on the Zoom meeting link provided by the meeting organizer.
 * If it's your first time using Zoom, you may be prompted to download and install the Zoom application. Follow the on-screen instructions to do so.
 
-#### 2. Testing Audio and Video <a href="#id-2.-testing-audio-and-video" id="id-2.-testing-audio-and-video"></a>
+#### 2. Testing audio and video <a href="#id-2.-testing-audio-and-video" id="id-2.-testing-audio-and-video"></a>
 
 * Before joining a meeting, test your audio and video settings to ensure they're working correctly.
 * Click on "Test Speaker & Microphone" or "Test Video" in the Zoom settings menu to check your audio and video devices.
@@ -48,16 +48,16 @@ Zoom is our primary tool for virtual meetings within the Simpler Grants communit
 
 <details>
 
-<summary>Using Zoom for Meetings</summary>
+<summary>Using Zoom for meetings</summary>
 
-#### Meeting Etiquette <a href="#id-1.-meeting-etiquette" id="id-1.-meeting-etiquette"></a>
+#### Meeting etiquette <a href="#id-1.-meeting-etiquette" id="id-1.-meeting-etiquette"></a>
 
 * Follow the[ code of conduct](https://wiki.simpler.grants.gov/get-involved/policies-and-guidelines) that has been set by the Simpler Grants community
 * Keep discussions relevant to the meeting agenda and avoid disruptive behavior.
 * Mute your microphone when not speaking to minimize background noise.
 * Use the "Raise Hand" feature to indicate when you want to speak or have a question.
 
-#### 2. Participating in Discussions <a href="#id-2.-participating-in-discussions" id="id-2.-participating-in-discussions"></a>
+#### 2. Participating in discussions <a href="#id-2.-participating-in-discussions" id="id-2.-participating-in-discussions"></a>
 
 * Contribute actively to discussions by sharing your insights and ideas.
 * Use the chat feature to ask questions or provide feedback in text format during the meeting.
