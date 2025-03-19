@@ -3,7 +3,7 @@ from typing import Sequence, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import asc, desc, nulls_last, select
+from sqlalchemy import asc, desc, nulls_last, select, and_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
@@ -57,7 +57,10 @@ def get_saved_opportunities(
     stmt = (
         select(Opportunity)
         .join(
-            UserSavedOpportunity, UserSavedOpportunity.opportunity_id == Opportunity.opportunity_id
+            UserSavedOpportunity, and_(
+                UserSavedOpportunity.opportunity_id == Opportunity.opportunity_id,
+                UserSavedOpportunity.user_id == user_id
+            )
         )
         .join(
             CurrentOpportunitySummary,
