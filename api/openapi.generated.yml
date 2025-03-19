@@ -1628,7 +1628,7 @@ components:
           - default
           - expanded
           - agency
-          - attachment
+          - attachment_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
@@ -2279,6 +2279,10 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
+        file_location:
+          type: string
+          description: The S3 location of the attachment
+          example: S3://bucket/my_attachment.pdf
     OpportunityWithAttachmentsV1:
       type: object
       properties:
