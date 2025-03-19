@@ -23,7 +23,10 @@ Our official method and source of truth for tracking changes is GitBook’s [com
 
 * When submitting the CR, follow this naming convention:
   * `[GitHub issue #]: Short description`
-  * Example: `#1234: Altered format of images in brand guidelines`
+  * Example: `#1234: Altered format of images in brand guidelines`&#x20;
+
+<figure><img src=".gitbook/assets/CR Title (1).png" alt=""><figcaption><p>Rename your change request in the top left of the header</p></figcaption></figure>
+
 * You may omit the GitHub issue If none is associated with the CR.
   * Example: `Altered format of images in brand guidelines`&#x20;
 * Note: GitBook automatically generates a default title for the CR as `[Name’s] [Date] changes`. You will have to change it according to the convention above.
