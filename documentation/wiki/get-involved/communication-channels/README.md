@@ -14,7 +14,7 @@ Prohibited activity (e.g., violations of our Code of Conduct or the Federal Hatc
 
 Our primary platform for discussing open-source development is Discourse.
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th></tr></thead><tbody><tr><td>Visit Discourse</td><td><a href="../../.gitbook/assets/Discourse logo.png">Discourse logo.png</a></td></tr></tbody></table>
+<table data-view="cards" data-full-width="false"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td>Visit Discourse</td><td><a href="../../.gitbook/assets/Discourse logo.png">Discourse logo.png</a></td><td><a href="https://simplergrants.discourse.group/">https://simplergrants.discourse.group/</a></td></tr></tbody></table>
 
 ### All public channels
 
