@@ -58,21 +58,22 @@ export const SavedSearchesList = ({
                 </div>
               </div>
             </div>
-            <div className="grid-row flex-column">
-              <div>
-                {Object.entries(omit(paramDisplayMapping, "page")).map(
-                  ([key, paramDisplay]) => {
-                    const value =
-                      savedSearch.searchParams[key as ValidSearchQueryParam];
-                    return value ? (
-                      <div key={key}>
-                        <span className="text-bold">{paramDisplay}: </span>
-                        <span>{value.replaceAll(",", ", ")}</span>
-                      </div>
-                    ) : null;
-                  },
-                )}
-              </div>
+            <div
+              className="grid-row flex-column"
+              data-testid="saved-search-definition"
+            >
+              {Object.entries(omit(paramDisplayMapping, "page")).map(
+                ([key, paramDisplay]) => {
+                  const value =
+                    savedSearch.searchParams[key as ValidSearchQueryParam];
+                  return value ? (
+                    <div key={key}>
+                      <span className="text-bold">{paramDisplay}: </span>
+                      <span>{value.replaceAll(",", ", ")}</span>
+                    </div>
+                  ) : null;
+                },
+              )}
             </div>
           </div>
         </li>
