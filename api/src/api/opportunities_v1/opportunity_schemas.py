@@ -322,6 +322,12 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
             "example": "The full announcement NOFO",
         }
     )
+    file_location = fields.String(
+        metadata={
+            "description": "The S3 location of the attachment",
+            "example": "S3://bucket/my_attachment.pdf",
+        }
+    )
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):

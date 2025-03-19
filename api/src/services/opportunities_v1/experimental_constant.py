@@ -42,15 +42,7 @@ AGENCY = [
     "summary.agency_phone_number.keyword",
 ]
 
-ATTACHMENT = [
-    "agency^16",
-    "agency.keyword^16",
-    "opportunity_title^2",
-    "opportunity_number^12",
-    "opportunity_number.keyword^12",
-    "summary.summary_description",
-    "opportunity_assistance_listings.assistance_listing_number^10",
-    "opportunity_assistance_listings.program_title^4",
+ATTACHMENT_ONLY = [
     "attachments.attachment.content",
 ]
 
@@ -59,4 +51,4 @@ class ScoringRule(StrEnum):
     DEFAULT = "default"
     EXPANDED = "expanded"
     AGENCY = "agency"
-    ATTACHMENT = "attachment"
+    ATTACHMENT_ONLY = "attachment_only"

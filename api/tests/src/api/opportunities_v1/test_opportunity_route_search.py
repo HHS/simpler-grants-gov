@@ -1,9 +1,13 @@
+import base64
 import csv
 from datetime import date
 
 import pytest
 
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunityV1Schema,
+    OpportunityWithAttachmentsV1Schema,
+)
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -12,12 +16,14 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
+from src.util import file_util
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -1532,23 +1538,83 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 query="literacy",
                 experimental={"scoring_rule": "expanded"},
             ),
-            # attachment scoring rule
-            get_search_request(query="hello", experimental={"scoring_rule": "attachment"}),
         ],
     )
     def test_search_experimental_200(self, client, api_auth_token, search_request):
         # We are only testing for 200 responses when adding the experimental field into the request body.
-        import pdb
-
-        pdb.set_trace()
-
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
+        import pdb
 
+        pdb.set_trace()
         search_request["format"] = "csv"
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
+
+
+def test_search_experimental_attachment_200(
+    client,
+    api_auth_token,
+    search_client,
+    opportunity_index,
+    opportunity_index_alias,
+    mock_s3_bucket,
+    enable_factory_create,
+):
+    # Create Opportunity Attachments
+    attachments = [
+        ("test_file_one.txt", "Testing querying attachment"),
+        ("test_file_two.txt", "Opportunity should not be returned"),
+    ]
+
+    opp_attachments = []
+    for file_name, file_content in attachments:
+        file_loc = f"s3://{mock_s3_bucket}/{file_name}"
+        opp_attachment = OpportunityAttachmentFactory.create(
+            file_location=file_loc, file_contents=file_content, file_name=file_name
+        )
+        opp_attachments.append(opp_attachment)
+
+    # Serialize opportunity into json records
+    schema = OpportunityWithAttachmentsV1Schema()
+    json_records = [schema.dump(opp_att.opportunity) for opp_att in opp_attachments]
+
+    for record in json_records:
+        record["attachments"] = [
+            {
+                "filename": att["file_name"],
+                "data": base64.b64encode(
+                    file_util.open_stream(att["file_location"], "rb").read()
+                ).decode("utf-8"),
+            }
+            for att in record["attachments"]
+        ]
+
+    # Load into the search index
+    search_client.bulk_upsert(
+        opportunity_index,
+        json_records,
+        primary_key_field="opportunity_id",
+        pipeline="multi-attachment",
+    )
+
+    # Swap the search index alias
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+
+    # Prepare the search request
+    search_request = get_search_request(
+        query="Testing", experimental={"scoring_rule": "attachment_only"}
+    )
+
+    resp = client.post(
+        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+    )
+    data = resp.json["data"]
+
+    assert resp.status_code == 200
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == opp_attachments[0].opportunity_id
