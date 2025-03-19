@@ -1516,6 +1516,7 @@ components:
           - default
           - expanded
           - agency
+          - attachment
           type:
           - string
     SortOrderOpportunityPaginationV1:
