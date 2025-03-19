@@ -121,3 +121,7 @@
 ## REFERENCES
 
 * [Glossary](references/terminology.md)
+
+***
+
+* [How to edit the wiki](how-to-edit-the-wiki.md)
