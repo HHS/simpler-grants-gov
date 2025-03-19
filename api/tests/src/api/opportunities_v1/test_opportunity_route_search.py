@@ -1546,9 +1546,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
-        import pdb
 
-        pdb.set_trace()
         search_request["format"] = "csv"
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
