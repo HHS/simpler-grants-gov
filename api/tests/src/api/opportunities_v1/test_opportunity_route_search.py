@@ -1558,7 +1558,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
 @pytest.fixture
 def opportunity_index_alias_func(search_client, monkeypatch):
     # Note we don't actually create anything, this is just a random name
-    alias = f"test-opportunity-search-index-alias-{uuid.uuid4().int}"
+    alias = f"test-attachment-opportunity-index-alias-{uuid.uuid4().int}"
     monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
@@ -1607,7 +1607,6 @@ def test_search_experimental_attachment_200(
     # Load into the search index
     index_name = f"test-opportunity-index-{uuid.uuid4().int}"
     search_client.create_index(index_name)
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias_func)
 
     search_client.bulk_upsert(
         opportunity_index,
@@ -1615,6 +1614,7 @@ def test_search_experimental_attachment_200(
         primary_key_field="opportunity_id",
         pipeline="multi-attachment",
     )
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias_func)
 
     # Prepare the search request
     search_request = get_search_request(
