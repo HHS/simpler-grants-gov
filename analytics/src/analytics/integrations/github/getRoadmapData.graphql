@@ -43,6 +43,7 @@ fragment issueContent on Issue {
   issueType {
     name
   }
+  body
   # information about issue open/closed status
   closed
   createdAt

@@ -155,7 +155,7 @@ def transform_and_load(
     start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
     # sync data to db
-    etldb.sync_data(dataset, datestamp)
+    etldb.sync_data(dataset, datestamp, None)
     end_time = time.perf_counter()
     logger.info(
         "transform and load is done after %.5f seconds",
@@ -187,7 +187,9 @@ def extract_transform_and_load(
     # extract data from GitHub
     logger.info("extracting data from GitHub")
     start_time = time.perf_counter()
-    extracted_json = GitHubProjectETL(config).extract_and_transform_in_memory()
+    extracted_json, acceptance_criteria = GitHubProjectETL(
+        config,
+    ).extract_and_transform_in_memory()
     end_time = time.perf_counter()
     logger.info("extract executed in %.5f seconds", float(end_time - start_time))
 
@@ -196,7 +198,7 @@ def extract_transform_and_load(
     start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
     # sync dataset to db
-    etldb.sync_data(dataset, datestamp)
+    etldb.sync_data(dataset, datestamp, acceptance_criteria)
     end_time = time.perf_counter()
     logger.info(
         "transform and load executed in %.5f seconds",

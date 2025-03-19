@@ -44,3 +44,17 @@ export const arbitrarySearchPagination = {
   page_offset: 1,
   page_size: 25,
 };
+
+const fakeSearchFilterRequestBody = {
+  opportunity_status: { one_of: ["Archived"] },
+  funding_instrument: { one_of: ["Cooperative Agreement"] },
+  applicant_type: { one_of: ["Individuals"] },
+  agency: { one_of: ["Economic Development Administration"] },
+  funding_category: { one_of: ["Recovery Act"] },
+};
+
+export const fakeSavedSearch = {
+  filters: fakeSearchFilterRequestBody,
+  pagination: arbitrarySearchPagination,
+  query: "something to search for",
+};

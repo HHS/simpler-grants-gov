@@ -24,7 +24,7 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
-- name: User v1
+- name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
@@ -143,7 +143,7 @@ paths:
               schema: {}
           description: Found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Login
       description: '
 
@@ -177,7 +177,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Logout
       security:
       - ApiJwtAuth: []
@@ -198,7 +198,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Refresh
       security:
       - ApiJwtAuth: []
@@ -402,7 +402,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get
       security:
       - ApiJwtAuth: []
@@ -442,6 +442,38 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicationStartRequest'
+      security:
+      - ApiKeyAuth: []
+  /alpha/forms/{form_id}:
+    get:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Get
       security:
       - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
@@ -526,7 +558,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Search
       requestBody:
         content:
@@ -535,6 +567,38 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/competitions/{competition_id}:
+    get:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Competition Get
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
@@ -569,7 +633,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Opportunity
       requestBody:
         content:
@@ -612,7 +676,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get Saved Searches
       requestBody:
         content:
@@ -655,7 +719,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get Saved Opportunities
       requestBody:
         content:
@@ -703,7 +767,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Update Saved Search
       requestBody:
         content:
@@ -744,10 +808,58 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Search
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/forms/{form_id}:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an application form response
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationFormUpdateRequest'
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -781,7 +893,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
@@ -2099,6 +2211,44 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    FormAlpha:
+      type: object
+      properties:
+        form_id:
+          type: string
+          format: uuid
+          description: The primary key ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+          example: ABC Project Form
+        form_json_schema:
+          type: object
+          description: The JSON Schema representation of the form
+          example:
+            type: object
+            properties: {}
+        form_ui_schema:
+          type: object
+          description: The UI Schema of the form for front-end rendering
+          example: {}
+    FormResponseAlpha:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FormAlpha'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     OpportunityAttachmentV1:
       type: object
       properties:
@@ -2249,6 +2399,29 @@ components:
           - $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
     UserSaveSearchResponse:
       type: object
       properties:
@@ -2257,7 +2430,55 @@ components:
           description: The message to return
           example: Success
         data:
-          example: null
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    CompetitionFormAlpha:
+      type: object
+      properties:
+        is_required:
+          type: boolean
+          description: Whether the form is required for all applications to the competition
+        form:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FormAlpha'
+    CompetitionAlpha:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_id:
+          type: integer
+          description: The opportunity ID that the competition is associated with
+        competition_forms:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/CompetitionFormAlpha'
+    CompetitionResponseAlpha:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2342,29 +2563,6 @@ components:
           - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
       required:
       - pagination
-    SavedSearchResponse:
-      type: object
-      properties:
-        saved_search_id:
-          type: string
-          format: uuid
-          description: The ID of the saved search
-          example: 123e4567-e89b-12d3-a456-426614174000
-        name:
-          type: string
-          description: Name of the saved search
-          example: Grant opportunities in California
-        search_query:
-          description: The saved search query parameters
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
-        created_at:
-          type: string
-          format: date-time
-          description: When the search was saved
-          example: '2024-01-01T00:00:00Z'
     UserSavedSearchesResponse:
       type: object
       properties:
@@ -2541,6 +2739,45 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormUpdateRequest:
+      type: object
+      properties:
+        application_response:
+          type: object
+      required:
+      - application_response
+    ApplicationFormUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationFormUpdateResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code

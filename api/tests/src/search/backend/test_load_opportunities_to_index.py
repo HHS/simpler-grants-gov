@@ -1,6 +1,7 @@
 import itertools
 import math
-from datetime import datetime, timedelta
+import uuid
+from datetime import timedelta
 
 import freezegun
 import pytest
@@ -14,6 +15,7 @@ from src.search.backend.load_opportunities_to_index import (
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAttachmentFactory,
@@ -221,9 +223,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         load_opportunities_to_index,
     ):
 
-        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
-            "%Y-%m-%d_%H-%M-%S"
-        )
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -380,15 +380,14 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 1
 
-    @freezegun.freeze_time(datetime.now() + timedelta(hours=2), tz_offset=0)
+    @freezegun.freeze_time(get_now_us_eastern_datetime() + timedelta(days=2), tz_offset=0)
     def test_batch_process_exceed_time_limit(
         self, db_session, search_client, load_opportunities_to_index, enable_factory_create
     ):
         OpportunityChangeAuditFactory.create()
 
-        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
-            "%Y-%m-%d_%H-%M-%S"
-        )
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
+
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -408,9 +407,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     def test_opportunities_to_process_query(
         self, db_session, load_opportunities_to_index, enable_factory_create
     ):
-        opportunities = db_session.query(Opportunity).all()
-        for opp in opportunities:
-            db_session.delete(opp)
+        cascade_delete_from_db_table(db_session, Opportunity)
 
         # Add new opportunities
         oca_1 = OpportunityChangeAuditFactory.create()

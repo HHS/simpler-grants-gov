@@ -2,7 +2,7 @@
 
 import { sendGAEvent } from "@next/third-parties/google";
 import { omit } from "lodash";
-import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes";
 import {
   setNewRelicCustomAttribute,
@@ -12,7 +12,7 @@ import {
 
 import { useEffect, useState } from "react";
 
-const getCurrentFilters = (params: SearchParamsTypes): string => {
+const getCurrentFilters = (params: OptionalStringDict): string => {
   return JSON.stringify(omit(params, "query", "page"));
 };
 
@@ -21,7 +21,7 @@ function SearchAnalytics({
   params,
   newRelicEnabled,
 }: {
-  params: SearchParamsTypes;
+  params: OptionalStringDict;
   newRelicEnabled: boolean;
 }) {
   const [newRelicInitialized, setNewRelicInitialized] = useState(false);

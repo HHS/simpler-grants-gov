@@ -1848,6 +1848,12 @@ class CompetitionFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
+    competition_forms = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.CompetitionFormFactory",
+        factory_related_name="competition",
+        size=lambda: random.randint(1, 2),
+    )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -1872,19 +1878,30 @@ class CompetitionAssistanceListingFactory(BaseFactory):
     )
 
 
+class FormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Form
+
+    form_id = Generators.UuidObj
+    form_name = factory.Faker("bs")
+    # Form version will be like 1.0, 4.5, etc.
+    form_version = factory.Faker("pystr_format", string_format="#.#")
+    agency_code = factory.Faker("agency_code")
+
+    # TODO: https://github.com/HHS/simpler-grants-gov/issues/4168
+    # Update these to be a bit more meaningful
+    form_json_schema = {"type": "object", "properties": {}}
+    form_ui_schema = {}
+
+
 class ApplicationFormFactory(BaseFactory):
     class Meta:
         model = competition_models.ApplicationForm
 
-    form_id = Generators.UuidObj
-    form_name = fake.bs()
-    form_version = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
-    agency_code = factory.Faker("agency_code")
-    active_at = sometimes_none(factory.Faker("date_time_between", start_date="-3y", end_date="-1d"))
-    inactive_at = sometimes_none(
-        factory.LazyAttribute(
-            lambda o: fake.date_time_between(start_date=o.active_at) if o.active_at else None
-        )
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+    application_response = factory.LazyFunction(
+        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
     )
 
 
@@ -1892,9 +1909,11 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-    competition_id = Generators.UuidObj
-    application_form = factory.SubFactory(ApplicationFormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
     is_required = False
 
@@ -1918,3 +1937,27 @@ class JobLogFactory(BaseFactory):
     job_id = Generators.UuidObj
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
+
+
+class ApplicationFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Application
+
+    application_id = Generators.UuidObj
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+    class Params:
+        with_forms = factory.Trait(
+            application_forms=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationFormFactory",
+                factory_related_name="application",
+                size=lambda: random.randint(1, 3),
+            )
+        )
