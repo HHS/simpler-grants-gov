@@ -3,12 +3,12 @@ import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { redirect } from "next/navigation";
-import { GridContainer, Label } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import ClientForm from "./ClientForm";
 import * as formSchema from "./formSchema.json";
-import * as uiSchema from "./uiSchema2.json";
+import * as uiSchema from "./uiSchema.json";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -23,7 +23,8 @@ const getFormDetails = () => {
 };
 
 const getuiSchema = () => {
-  return uiSchema.default as object;
+  // eslint-disable-next-line
+  return uiSchema.default as undefined;
 };
 
 function FormPage() {
@@ -33,10 +34,15 @@ function FormPage() {
   return (
     <GridContainer>
       <BetaAlert />
-      <h1>Form Demo</h1>
-      <Label htmlFor="client-form">
-        The following is a demo of the SFS 424 Individual form.
-      </Label>
+      <h1>Form Demo: Applicaction for Federal Assistance SF 424 - Individual</h1>
+      <legend className="usa-legend">
+        The following is a demo of the SF 424 Individual form.
+      </legend>
+      <p>
+      Required fields are marked with an asterisk (<abbr title="required" className="usa-hint usa-hint--required text-no-underline
+
+">*</abbr>).
+    </p>
       <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );

@@ -1,9 +1,8 @@
-"use client";
 
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 
-import { JSX, useState } from "react";
-import { Fieldset, FormGroup, Label, TextInput } from "@trussworks/react-uswds";
+import { JSX } from "react";
+import { Fieldset, FormGroup, Label, TextInput, Textarea } from "@trussworks/react-uswds";
 
 interface FormData {
   [key: string]: FormDataEntryValue;
@@ -13,20 +12,36 @@ interface SetFormDataFunction {
   (data: FormData): void;
 }
 
-type uiSchemaType = Record<
-  string,
-  {
-    type: string;
-    label?: string;
-    children?: uiSchemaType;
-    definition?: string;
-  }
->;
+interface UiSchemaField {
+  type: "field";
+  definition: string;
+}
+
+interface UiSchemaSection {
+  type: "section";
+  label: string;
+  name: string;
+  number: string;
+  children: (UiSchemaField | UiSchemaSection)[];
+}
+
+type UiSchema = (UiSchemaField | UiSchemaSection) | (UiSchemaField | UiSchemaSection)[];
 
 type SchemaField = {
   type: string;
   title: string;
+  minLength?: number;
+  maxLength?: number;
+  format?: string;
 };
+
+interface FormSchema  {
+  title: string;
+  description?: string;
+  properties: [SchemaField];
+  required: [string]
+}
+
 
 type TextTypes =
   | "text"
@@ -37,28 +52,66 @@ type TextTypes =
   | "tel"
   | "url";
 
-const createTextField = (
+
+const createFieldLabel  = (
+  fieldName: string,
+  title: string,
+  required: boolean,
+) => {
+  return (
+      <Label key={`label-for-${fieldName}`} htmlFor={fieldName}>
+        {title}
+          {required && (
+            <span className="usa-hint usa-hint--required text-no-underline">
+              *
+            </span>
+          )}
+      </Label>
+  )
+}
+
+const createTextInputField = (
   fieldName: string,
   title: string,
   type: TextTypes,
   parentId: string,
+  required = false,
+  minLength: number | null = null,
+  maxLength: number | null = null,
 ) => {
+  const label = createFieldLabel(fieldName, title, required)
   return (
     <div key={`wrapper-for-${fieldName}`} id={parentId}>
-      <Label key={`label-for-${fieldName}`} htmlFor={fieldName}>
-        {title}
-      </Label>
-      <TextInput id={fieldName} key={fieldName} type={type} name={title} />
+      {label}
+      <TextInput minLength={minLength ?? undefined} maxLength={maxLength ?? undefined} id={fieldName} key={fieldName} type={type} name={title} />
     </div>
   );
 };
 
-const wrapSection = (label: string, fieldName: string, tree: JSX.Element) => {
+const createTextAreaField = (
+  fieldName: string,
+  title: string,
+  type: TextTypes,
+  parentId: string,
+  required = false,
+  minLength: number | null = null,
+  maxLength: number | null = null,
+) => {
+  const label = createFieldLabel(fieldName, title, required)
+  return (
+    <div key={`wrapper-for-${fieldName}`} id={parentId}>
+      {label}
+      <Textarea minLength={minLength ?? undefined} maxLength={maxLength ?? undefined} id={fieldName} key={fieldName} name={title} />
+    </div>
+  );
+};
+
+const wrapSection = (label: string, fieldName: string, tree: JSX.Element | undefined) => {
   return (
     <Fieldset key={`${fieldName}-row`}>
       <FormGroup key={`${fieldName}-group`}>
-        <Label key={`${fieldName}-fields`} htmlFor={`${fieldName}-fields`}>{label}</Label>
-        {tree}
+        <legend key={`${fieldName}-legend`} className="usa-legend usa-legend--large">{label}</legend>
+          {tree}
       </FormGroup>
     </Fieldset>
   );
@@ -68,75 +121,92 @@ const createField = (
   fieldName: string,
   title: string,
   type: string,
+  format: string | undefined,
   parentId: string,
+  required = false,
+  minLength: number | null = null,
+  maxLength: number | null = null,
 ) => {
   switch (type) {
     case "string":
-      return createTextField(fieldName, title, "text", parentId);
+      if (maxLength && Number(maxLength) > 255) {
+        return createTextAreaField(fieldName, title, type as TextTypes, parentId, required, minLength, maxLength);
+      }
+      type = format === "email" ? "email" : "text"
+      return createTextInputField(fieldName, title, type as TextTypes, parentId, required, minLength, maxLength);
       break;
     case "number":
-      return createTextField(fieldName, title, type, parentId);
+      return createTextInputField(fieldName, title, type, parentId, required, minLength, maxLength);
       break;
     default:
       throw new Error(`Error rendering field ${fieldName}`);
   }
 };
 
-const parentHasChild = (acc, uiSchema): boolean => {
-  // TODO: check JSX elements
+/** 
+const parentHasChild = (uiSchema): boolean => {
   return false;
+  // const hasChild = uiSchema.find((node) => node.hasOwnProperty("children")) !== undefined ? true : false;
+  // console.log("acc", acc, "ui", uiSchema, "parent", parent, "row", row, "child?", hasChild)
+  /// return hasChild;
+  // TODO: check JSX elements
+  // return false;
 };
+ */
 
-const buildField = (definition:string, schema:object, parentName: string) => {
+const buildField = (definition:string, schema: FormSchema) => {
   const name = definition.split("/")[2];
-  const { title, type } = getSchemaObjectFromPointer(
+  const { title, type, format, minLength, maxLength } = getSchemaObjectFromPointer(
     schema,
     definition,
   ) as SchemaField;
-  return createField(name, title, type, `${parentName}-fields`);
+
+  return createField(name, title, type, format, `${name}-fields`, schema.required.includes(name), minLength, maxLength);
 }
 
 function buildFormTreeClosure(
-  schema: object,
-  uiSchema: object,
+  schema: FormSchema,
+  uiSchema: UiSchema, 
 ) {
-  let acc: JSX.Element | JSX.Element[] = [];
+  let acc: JSX.Element[] = [];
 
   const buildFormTree = (
-    uiSchema: uiSchemaType,
+    uiSchema: UiSchema,
     parent: { label: string; name: string } | null,
   ) => {
-    if (typeof uiSchema === "object" && uiSchema.children) {
+    if (!Array.isArray(uiSchema) && typeof uiSchema === "object" && uiSchema.type === "section")
+     {
+     if (uiSchema.children) {
       buildFormTree(uiSchema.children, {
         label: uiSchema.label,
         name: uiSchema.name,
       });
+    }
     } else if (Array.isArray(uiSchema)) {
-      for (const i in uiSchema) {
-        if (uiSchema[i].children) {
-          buildFormTree(uiSchema[i].children, {
-            label: uiSchema[i].label,
-            name: uiSchema[i].name,
+      uiSchema.forEach((node) => {
+        if ('children' in node) {
+          buildFormTree(node.children, {
+            label: node.label,
+            name: node.name,
           });
         }
-        else if (!parent) {
-          acc = [acc, buildField(uiSchema[i].definition as string, schema, "fields")];
+        else if (!parent && 'definition' in node) {
+          acc = [...acc, buildField(node.definition, schema)];
         }
-      }
+      });
       if (parent) {
+        // eslint-disable-next-line array-callback-return
         const row = uiSchema.map((node) => {
-          if (node.children) {
-            // TODO: test
-            return acc;
+          if ('children' in node) {
+            // TODO: remove children from acc
+            // return children from acc;
           } else {
             const { definition } = node as { definition: string };
-            const name = definition?.split("/")[2];
-            return buildField(definition, schema, parent.name);
+            return buildField(definition, schema);
           }
         });
-        acc = parentHasChild(acc, uiSchema)
-          ? wrapSection(parent.label, parent.name, row)
-          : [acc, wrapSection(parent.label, parent.name, row)];
+        acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+        // acc = parentHasChild(uiSchema) ? wrapSection(parent.label, parent.name, row) : [acc, wrapSection(parent.label, parent.name, row)];
       }
     }
   };
@@ -144,6 +214,15 @@ function buildFormTreeClosure(
   return acc;
 }
 
+/**  
+ * 
+ * [{ field: name, rendered: JSX }, { field: name, rendered: JSX }]
+ * 
+ * 
+ * 
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleSubmit =
   (setFormData: SetFormDataFunction): React.FormEventHandler<HTMLFormElement> =>
   (event: React.FormEvent<HTMLFormElement>) => {
@@ -164,8 +243,8 @@ const ClientForm = ({
   uiSchema: object;
 }) => {
   const fields = buildFormTreeClosure(
-    schema,
-    uiSchema as uiSchemaType,
+    schema as FormSchema,
+    uiSchema as UiSchema,
   );
   return (
     <form>
