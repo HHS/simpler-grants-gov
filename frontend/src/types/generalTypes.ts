@@ -1,3 +1,5 @@
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
+
 export interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{
@@ -253,3 +255,11 @@ export type UswdsIconNames =
   | "zoom_in"
   | "zoom_out_map"
   | "zoom_out";
+
+export interface ParsedError {
+  message?: string;
+  searchInputs?: OptionalStringDict;
+  status?: number;
+  type?: string;
+  details?: FrontendErrorDetails;
+}
