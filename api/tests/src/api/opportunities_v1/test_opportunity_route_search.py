@@ -1581,12 +1581,12 @@ def test_search_experimental_attachment_200(
     schema = OpportunityWithAttachmentsV1Schema()
     json_records = [schema.dump(opp_att.opportunity) for opp_att in opp_attachments]
 
-    for record in json_records:
+    for index, record in enumerate(json_records):
         record["attachments"] = [
             {
                 "filename": att["file_name"],
                 "data": base64.b64encode(
-                    file_util.open_stream(att["file_location"], "rb").read()
+                    file_util.open_stream(opp_attachments[index].file_location, "rb").read()
                 ).decode("utf-8"),
             }
             for att in record["attachments"]
