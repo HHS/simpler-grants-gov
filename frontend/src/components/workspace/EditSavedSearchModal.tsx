@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { editSavedSearchName } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -100,6 +101,9 @@ export function EditSavedSearchModal({
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const { replaceQueryParams } = useSearchParamUpdater();
+  // The Modal component throws an error during SSR unless we specify that it should not "render to portal"
+  // this hook allows us to opt out of that rendering behavior on the server
+  const isSSR = useIsSSR();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -161,6 +165,7 @@ export function EditSavedSearchModal({
         {editText}
       </ModalToggleButton>
       <Modal
+        renderToPortal={!isSSR}
         ref={modalRef}
         forceAction
         className="text-wrap"

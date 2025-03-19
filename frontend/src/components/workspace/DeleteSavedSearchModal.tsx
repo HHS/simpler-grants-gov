@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { deleteSavedSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -63,6 +64,7 @@ export function DeleteSavedSearchModal({
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const { replaceQueryParams } = useSearchParamUpdater();
+  const isSSR = useIsSSR();
 
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -106,6 +108,7 @@ export function DeleteSavedSearchModal({
         {deleteText}
       </ModalToggleButton>
       <Modal
+        renderToPortal={!isSSR}
         ref={modalRef}
         forceAction
         className="text-wrap"
