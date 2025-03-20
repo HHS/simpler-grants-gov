@@ -1,4 +1,5 @@
 import logging
+import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
@@ -96,39 +97,14 @@ REQUIRED_FIELDS = {
 class AgencyConfig(PydanticBaseEnvConfig):
     # TODO - we might want to put this somewhere more central
     #        as we might want to filter these out in other places
-    test_agency_config: set[str] = Field(
-        default={
-            "GDIT",
-            "IVV",
-            "IVPDF",
-            "0001",
-            "FGLT",
-            "NGMS",
-            "NGMS-Sub1",
-            "SECSCAN",
-            "MH",
-            "TX",
-            "MN",
-            "MMC",
-            "WWC",
-            "SCRC",
-            "NRC",
-            "JL04022024",
-            "JUSFC",
-            "JMM",
-            "IAF",
-            "USIP",
-            "GCERC",
-            "ARPAH",
-            "ORD",
-            "DC",
-            "SCC800",
-            "BBG",
-            "ACR",
-            "ECP",
-            "MC",
-            "CCFF",
-        }
+    prefix_env: str | None = os.getenv("TEST_AGENCY_PREFIXES")
+
+    test_agency_config: list[str] = Field(
+        default=(
+            prefix_env.split(",")
+            if prefix_env is not None
+            else ["GDIT", "IVV", "IVPDF", "0001", "FGLT", "NGMS", "NGMS-Sub1", "SECSCAN"]
+        )
     )
 
 
