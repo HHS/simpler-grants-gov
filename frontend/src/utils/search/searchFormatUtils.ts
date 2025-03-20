@@ -12,6 +12,7 @@ import {
   ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
 import {
+  BackendFilterNames,
   FrontendFilterNames,
   validSearchQueryParamKeys,
 } from "src/types/search/searchResponseTypes";
@@ -31,7 +32,7 @@ const filterNameMap = {
   eligibility: "applicant_type",
   agency: "agency",
   category: "funding_category",
-} as const satisfies Record<FrontendFilterNames, string>;
+} as const satisfies Record<FrontendFilterNames, BackendFilterNames>;
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
