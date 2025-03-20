@@ -162,3 +162,40 @@ class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="all_opportunity_notification_logs"
     )
+
+
+class UserAccountMapper(ApiSchemaTable):
+    __tablename__ = "TUSER_ACCOUNT_MAPPER"
+
+    USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
+    SOURCE_TYPE: Mapped[str]
+    EXT_USER_ID: Mapped[str]
+    EXT_ISSUER: Mapped[str]
+    LAST_AUTH_DATE: Mapped[datetime]
+    CREATED_DATE: Mapped[datetime | None]
+    CREATOR_ID: Mapped[str | None]
+    LAST_UPD_DATE: Mapped[datetime | None]
+    LAST_UPD_ID: Mapped[str | None]
+
+
+class UserAccount(ApiSchemaTable):
+    __tablename__ = "TUSER_ACCOUNT"
+
+    USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
+    USER_ID: Mapped[str]
+    FULL_NAME: Mapped[str | None]
+    EMAIL_ADDRESS: Mapped[str | None]
+    PHONE_NUMBER: Mapped[str | None]
+    FIRST_NAME: Mapped[str | None]
+    MIDDLE_NAME: Mapped[str | None]
+    LAST_NAME: Mapped[str | None]
+    IS_DELETED: Mapped[str]
+    IS_DUPLICATE: Mapped[str]
+    IS_ACTIVE: Mapped[str]
+    CREATED_DATE: Mapped[datetime]
+    CREATOR_ID: Mapped[str | None]
+    LAST_UPD_DATE: Mapped[datetime | None]
+    LAST_UPD_ID: Mapped[str | None]
+    IS_EMAIL_CONFIRM_PENDING: Mapped[str | None]
+    DEACTIVATED_DATE: Mapped[datetime | None]
+    MOBILE_NUMBER: Mapped[str | None]
