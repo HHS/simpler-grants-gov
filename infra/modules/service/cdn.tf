@@ -3,7 +3,7 @@ locals {
   # We do not currently do this, though.
   default_origin_id        = "default"
   ssl_protocols            = ["TLSv1.2"]
-  minimum_protocol_version = "TLSv1.2_2021"
+  minimum_protocol_version = "TLSv1"
   enable_cdn               = var.enable_alb_cdn || var.enable_s3_cdn
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
@@ -122,7 +122,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
     # There's also a `max_ttl` option, which can be used to override the above headers.
     min_ttl     = 0
-    default_ttl = 3600
+    default_ttl = 0
   }
 
   restrictions {
@@ -135,7 +135,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     acm_certificate_arn            = var.cert_arn == null ? null : var.cert_arn
     cloudfront_default_certificate = var.cert_arn == null ? true : false
     minimum_protocol_version       = local.minimum_protocol_version
-    ssl_support_method             = "sni-only"
   }
 
   depends_on = [
