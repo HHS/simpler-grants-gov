@@ -2,7 +2,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
-const mockSearchParams = new URLSearchParams();
+let mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
 const mockQueryParamsToQueryString = jest.fn((..._args) => "?hi=there");
 
@@ -22,6 +22,9 @@ jest.mock("src/utils/generalUtils", () => ({
 }));
 
 describe("useSearchParamUpdater", () => {
+  afterEach(() => {
+    mockSearchParams = new URLSearchParams();
+  });
   describe("updateQueryParams", () => {
     it("updates a singular param and pushes new path", async () => {
       const { result } = renderHook(() => useSearchParamUpdater());
@@ -77,6 +80,14 @@ describe("useSearchParamUpdater", () => {
         fakeQueryParams,
       );
       expect(routerPush).toHaveBeenCalledWith("/test?hi=there");
+    });
+  });
+  describe("removeQueryParam", () => {
+    it("calls push with new params with specified param removed", () => {
+      mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
+      const { result } = renderHook(() => useSearchParamUpdater());
+      result.current.removeQueryParam("removeMe");
+      expect(routerPush).toHaveBeenCalledWith("/test?keepMe=cool");
     });
   });
 });
