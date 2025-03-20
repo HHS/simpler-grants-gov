@@ -94,10 +94,5 @@ def application_form_get(
     # Return the application form data
     return response.ApiResponse(
         message="Success",
-        data={
-            "application_form_id": application_form.application_form_id,
-            "application_id": application_form.application_id,
-            "form_id": application_form.form_id,
-            "application_response": application_form.application_response,
-        },
+        data=application_form,
     )
