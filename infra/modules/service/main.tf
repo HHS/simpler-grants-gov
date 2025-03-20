@@ -122,27 +122,6 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name                   = "${local.container_name}-fluent-bit"
-      image                  = local.new_relic_fluent_bit_version,
-      memory                 = 256,
-      cpu                    = 1024,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-        }
-      }
-      secrets = [
-        {
-          name      = "apiKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
-        }
-      ]
-    },
-    {
       name                   = local.container_name,
       image                  = local.image_url,
       memory                 = var.memory,
