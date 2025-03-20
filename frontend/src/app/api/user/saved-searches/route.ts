@@ -110,6 +110,8 @@ export const DELETE = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to save opportunity");
     }
+    // using a body on a delete request technically works but isn't to spec. Doing it for now, but
+    // will fix this up to take the id as a path param later on
     const savedSearchBody = (await request.json()) as OptionalStringDict;
 
     if (!savedSearchBody.searchId) {
