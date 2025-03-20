@@ -575,7 +575,7 @@ export const messages = {
       fundingInstrument: "Funding instrument",
       eligibility: "Eligibility",
       agency: "Agency",
-      category: "Catgory",
+      category: "Category",
       query: "Search terms",
       page: "Page",
       sortby: "Sort by",

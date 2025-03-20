@@ -237,7 +237,7 @@ describe("deleteSavedSearch", () => {
       json: () => Promise.resolve({ arbitrary: "data" }),
     });
     const expectedError = await wrapForExpectedError(() =>
-      deleteSavedSearch("a name", "id", "faketoken"),
+      deleteSavedSearch("id", "faketoken"),
     );
 
     expect(expectedError).toBeInstanceOf(Error);

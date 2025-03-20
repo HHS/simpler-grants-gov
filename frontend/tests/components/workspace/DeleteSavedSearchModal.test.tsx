@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";

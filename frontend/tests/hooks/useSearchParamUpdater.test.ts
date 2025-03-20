@@ -2,8 +2,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
-import { ReadonlyURLSearchParams } from "next/navigation";
-
 let mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
 const mockQueryParamsToQueryString = jest.fn((..._args) => "?hi=there");
