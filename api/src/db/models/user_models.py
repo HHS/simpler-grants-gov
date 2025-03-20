@@ -206,7 +206,7 @@ class StagingUserAccount(Base):
 
 class TransferUserAccountMapper(Base):
     __tablename__ = "TUSER_ACCOUNT_MAPPER"
-    __table_args__ = {"schema": Schemas.TRANSFER}
+    __table_args__ = {"schema": Schemas.LEGACY}
 
     USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
     SOURCE_TYPE: Mapped[str]
@@ -221,7 +221,7 @@ class TransferUserAccountMapper(Base):
 
 class TransferUserAccount(Base):
     __tablename__ = "TUSER_ACCOUNT"
-    __table_args__ = {"schema": Schemas.TRANSFER}
+    __table_args__ = {"schema": Schemas.LEGACY}
 
     USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
     USER_ID: Mapped[str]
