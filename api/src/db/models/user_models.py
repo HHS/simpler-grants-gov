@@ -8,7 +8,8 @@ from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.constants.schema import Schemas
+from src.db.models.base import ApiSchemaTable, Base, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
@@ -164,8 +165,9 @@ class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
     )
 
 
-class UserAccountMapper(ApiSchemaTable):
+class StagingUserAccountMapper(Base):
     __tablename__ = "TUSER_ACCOUNT_MAPPER"
+    __table_args__ = {"schema": Schemas.STAGING}
 
     USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
     SOURCE_TYPE: Mapped[str]
@@ -178,8 +180,48 @@ class UserAccountMapper(ApiSchemaTable):
     LAST_UPD_ID: Mapped[str | None]
 
 
-class UserAccount(ApiSchemaTable):
+class StagingUserAccount(Base):
     __tablename__ = "TUSER_ACCOUNT"
+    __table_args__ = {"schema": Schemas.STAGING}
+
+    USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
+    USER_ID: Mapped[str]
+    FULL_NAME: Mapped[str | None]
+    EMAIL_ADDRESS: Mapped[str | None]
+    PHONE_NUMBER: Mapped[str | None]
+    FIRST_NAME: Mapped[str | None]
+    MIDDLE_NAME: Mapped[str | None]
+    LAST_NAME: Mapped[str | None]
+    IS_DELETED: Mapped[str]
+    IS_DUPLICATE: Mapped[str]
+    IS_ACTIVE: Mapped[str]
+    CREATED_DATE: Mapped[datetime]
+    CREATOR_ID: Mapped[str | None]
+    LAST_UPD_DATE: Mapped[datetime | None]
+    LAST_UPD_ID: Mapped[str | None]
+    IS_EMAIL_CONFIRM_PENDING: Mapped[str | None]
+    DEACTIVATED_DATE: Mapped[datetime | None]
+    MOBILE_NUMBER: Mapped[str | None]
+
+
+class TransferUserAccountMapper(Base):
+    __tablename__ = "TUSER_ACCOUNT_MAPPER"
+    __table_args__ = {"schema": Schemas.TRANSFER}
+
+    USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
+    SOURCE_TYPE: Mapped[str]
+    EXT_USER_ID: Mapped[str]
+    EXT_ISSUER: Mapped[str]
+    LAST_AUTH_DATE: Mapped[datetime]
+    CREATED_DATE: Mapped[datetime | None]
+    CREATOR_ID: Mapped[str | None]
+    LAST_UPD_DATE: Mapped[datetime | None]
+    LAST_UPD_ID: Mapped[str | None]
+
+
+class TransferUserAccount(Base):
+    __tablename__ = "TUSER_ACCOUNT"
+    __table_args__ = {"schema": Schemas.TRANSFER}
 
     USER_ACCOUNT_ID: Mapped[int] = mapped_column(primary_key=True)
     USER_ID: Mapped[str]
