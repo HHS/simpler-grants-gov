@@ -78,6 +78,11 @@ export const messages = {
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",
+      forcasted_award_date: "Forcasted Award Date",
+      forcasted_post_date: "Forcasted Post Date",
+      forcasted_close_date: "Forcasted Close Date",
+      forcasted_close_date_description: "Forcasted Close Date Description",
+
       version: "Version",
     },
     link: {
