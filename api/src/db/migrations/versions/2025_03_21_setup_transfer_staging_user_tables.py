@@ -1,8 +1,8 @@
 """Setup transfer staging user tables
 
-Revision ID: 023129f28461
+Revision ID: 27a1ed587690
 Revises: 98c3c10c1242
-Create Date: 2025-03-21 21:02:22.035198
+Create Date: 2025-03-21 21:04:52.253682
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "023129f28461"
+revision = "27a1ed587690"
 down_revision = "98c3c10c1242"
 branch_labels = None
 depends_on = None
@@ -70,6 +70,7 @@ def upgrade():
         sa.Column("ext_user_id", sa.Text(), nullable=False),
         sa.Column("ext_issuer", sa.Text(), nullable=False),
         sa.Column("last_auth_date", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("ext_subject", sa.Text(), nullable=True),
         sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("creator_id", sa.Text(), nullable=True),
         sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=True),
