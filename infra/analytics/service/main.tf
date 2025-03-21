@@ -55,17 +55,6 @@ locals {
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
-
-  # # Identity provider locals.
-  # # If this is a temporary environment, re-use an existing Cognito user pool.
-  # # Otherwise, create a new one.
-  # identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
-  #   local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
-  # ) : null
-  # identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
-  #   COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
-  #   COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
-  # } : {}
 }
 
 terraform {
@@ -74,7 +63,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
+      version = ">= 5.81.0, < 6.0.0"
     }
   }
 
@@ -189,8 +178,9 @@ module "service" {
       BUCKET_NAME = local.storage_config.bucket_name
       "ENVIRONMENT" : var.environment_name
     },
-    local.service_config.extra_environment_variables,
-    local.api_analytics_bucket_environment_variables,
+    # local.identity_provider_environment_variables,
+    local.notifications_environment_variables,
+    local.service_config.extra_environment_variables
   )
 
   secrets = concat(
