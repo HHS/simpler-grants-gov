@@ -1888,10 +1888,32 @@ class FormFactory(BaseFactory):
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
 
-    # TODO: https://github.com/HHS/simpler-grants-gov/issues/4168
-    # Update these to be a bit more meaningful
-    form_json_schema = {"type": "object", "properties": {}}
-    form_ui_schema = {}
+    form_json_schema = {
+        "type": "object",
+        "title": "Test form for testing",
+        "properties": {
+            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
+            "Description": {
+                "title": "Description for application",
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 15,
+            },
+            "ApplicationNumber": {
+                "title": "Application number",
+                "type": "number",
+                "minLength": 1,
+                "maxLength": 120,
+            },
+            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
+        },
+    }
+    form_ui_schema = [
+        {"type": "field", "definition": "/properties/Title"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Date"},
+    ]
 
 
 class ApplicationFormFactory(BaseFactory):
