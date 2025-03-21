@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 @declarative_mixin
 class TuserAccountMapperMixin:
     user_account_id: Mapped[int] = mapped_column(primary_key=True)
-    source_type: Mapped[str]
     ext_user_id: Mapped[str]
     ext_issuer: Mapped[str]
     last_auth_date: Mapped[datetime]
@@ -14,6 +13,7 @@ class TuserAccountMapperMixin:
     creator_id: Mapped[str | None]
     last_upd_date: Mapped[datetime | None]
     last_upd_id: Mapped[str | None]
+    source_type: Mapped[str] = mapped_column(primary_key=True)
 
 
 @declarative_mixin

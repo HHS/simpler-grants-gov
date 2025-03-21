@@ -1,8 +1,8 @@
 """Setup transfer staging user tables
 
-Revision ID: 6fe6dae921af
+Revision ID: 2dfc4bd38a85
 Revises: 98c3c10c1242
-Create Date: 2025-03-21 20:08:52.593428
+Create Date: 2025-03-21 20:56:02.706526
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "6fe6dae921af"
+revision = "2dfc4bd38a85"
 down_revision = "98c3c10c1242"
 branch_labels = None
 depends_on = None
@@ -67,7 +67,6 @@ def upgrade():
     op.create_table(
         "tuser_account_mapper",
         sa.Column("user_account_id", sa.BigInteger(), nullable=False),
-        sa.Column("source_type", sa.Text(), nullable=False),
         sa.Column("ext_user_id", sa.Text(), nullable=False),
         sa.Column("ext_issuer", sa.Text(), nullable=False),
         sa.Column("last_auth_date", sa.TIMESTAMP(timezone=True), nullable=False),
@@ -75,6 +74,7 @@ def upgrade():
         sa.Column("creator_id", sa.Text(), nullable=True),
         sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("last_upd_id", sa.Text(), nullable=True),
+        sa.Column("source_type", sa.Text(), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("transformed_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
@@ -91,7 +91,9 @@ def upgrade():
         ),
         sa.Column("deleted_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("transformation_notes", sa.Text(), nullable=True),
-        sa.PrimaryKeyConstraint("user_account_id", name=op.f("tuser_account_mapper_pkey")),
+        sa.PrimaryKeyConstraint(
+            "user_account_id", "source_type", name=op.f("tuser_account_mapper_pkey")
+        ),
         schema="staging",
     )
     op.create_index(
