@@ -35,7 +35,7 @@ There are some issues when utilizing the WSDLs and xsd schemas directly from the
         -v $PWD/mock-soap-services/applicants/:/opt/imposter/config \
         outofcoffee/imposter
     ```
-3. Send the following POST request:
+3. Send the following POST request to execute `GetOpportunityList` operation:
     ```bash
     curl -X POST "http://localhost:8082/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort/" \
         -H 'Content-Type: application/soap+xml' \
@@ -89,3 +89,22 @@ There are some issues when utilizing the WSDLs and xsd schemas directly from the
     </env:Envelope>
     ```
     - Note: On subsequent requests, you should see certain values that are randomized such as `OpeningDate`.
+5. To test the `GetApplicationList` operation send the following request:
+    ```bash
+    curl -X POST "http://localhost:8082/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort/" \
+        -H 'Content-Type: application/soap+xml' \
+        -d '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <app:GetApplicationListRequest>
+                <!--Zero or more repetitions:-->
+                <gran:ApplicationFilter>
+                    <!--Optional:-->
+                    <gran:Filter>?</gran:Filter>
+                    <!--Optional:-->
+                    <gran:FilterValue>?</gran:FilterValue>
+                </gran:ApplicationFilter>
+            </app:GetApplicationListRequest>
+        </soapenv:Body>
+   </soapenv:Envelope>'
+    ```
