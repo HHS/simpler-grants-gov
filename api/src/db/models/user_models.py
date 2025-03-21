@@ -8,8 +8,7 @@ from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType
-from src.constants.schema import Schemas
-from src.db.models.base import ApiSchemaTable, Base, TimestampMixin
+from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
