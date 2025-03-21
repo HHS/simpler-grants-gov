@@ -1,8 +1,8 @@
 """Setup transfer staging user tables
 
-Revision ID: 2dfc4bd38a85
+Revision ID: 023129f28461
 Revises: 98c3c10c1242
-Create Date: 2025-03-21 20:56:02.706526
+Create Date: 2025-03-21 21:02:22.035198
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2dfc4bd38a85"
+revision = "023129f28461"
 down_revision = "98c3c10c1242"
 branch_labels = None
 depends_on = None
@@ -31,7 +31,7 @@ def upgrade():
         sa.Column("is_deleted_legacy", sa.Text(), nullable=False),
         sa.Column("is_duplicate", sa.Text(), nullable=False),
         sa.Column("is_active", sa.Text(), nullable=False),
-        sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("creator_id", sa.Text(), nullable=True),
         sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("last_upd_id", sa.Text(), nullable=True),
