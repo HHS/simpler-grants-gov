@@ -100,7 +100,7 @@ class AgencyConfig(PydanticBaseEnvConfig):
     prefix_env: str = Field(
         default="GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN", alias="TEST_AGENCY_PREFIXES"
     )
-    test_agency_config: set[str] = Field(default=[])
+    test_agency_config: set[str] = Field(default=set())
 
     def model_post_init(self, _context: typing.Any) -> None:
         """Run after __init__ sets above values from env vars"""
