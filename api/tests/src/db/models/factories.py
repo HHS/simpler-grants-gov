@@ -422,6 +422,18 @@ class OpportunityFactory(BaseFactory):
         )
 
 
+class OpportunityVersionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityVersion
+
+    opportunity_version_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
+
+
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
@@ -1916,17 +1928,6 @@ class FormFactory(BaseFactory):
     ]
 
 
-class ApplicationFormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.ApplicationForm
-
-    form = factory.SubFactory(FormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
-    application_response = factory.LazyFunction(
-        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
-    )
-
-
 class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
@@ -1938,27 +1939,6 @@ class CompetitionFormFactory(BaseFactory):
     form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
     is_required = False
-
-
-class OpportunityVersionFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityVersion
-
-    opportunity_version_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
-
-
-class JobLogFactory(BaseFactory):
-    class Meta:
-        model = task_models.JobLog
-
-    job_id = Generators.UuidObj
-    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
-    metrics = None
 
 
 class ApplicationFactory(BaseFactory):
@@ -1983,3 +1963,27 @@ class ApplicationFactory(BaseFactory):
                 size=lambda: random.randint(1, 3),
             )
         )
+
+
+class ApplicationFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationForm
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+
+    application_response = factory.LazyFunction(
+        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
+    )
+
+
+class JobLogFactory(BaseFactory):
+    class Meta:
+        model = task_models.JobLog
+
+    job_id = Generators.UuidObj
+    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
+    metrics = None
