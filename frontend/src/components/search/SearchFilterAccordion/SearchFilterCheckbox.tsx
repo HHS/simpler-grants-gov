@@ -25,7 +25,6 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
 
   const getNameAttribute = () =>
     accordionTitle === "Agency" ? `agency-${option.id}` : option.id;
-  console.log("###", option);
   const facetCount = facetCounts[option.value];
 
   if (!facetCount) {
@@ -35,7 +34,12 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
   return (
     <FilterCheckbox
       id={option.id}
-      label={`${option.label} [${facetCount}]`}
+      label={
+        <>
+          <span>{option.label}</span>
+          <span className="text-base-dark padding-left-05">[{facetCount}]</span>
+        </>
+      }
       name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
       checked={query.has(option.value)}
