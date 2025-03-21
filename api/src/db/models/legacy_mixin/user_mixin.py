@@ -29,7 +29,7 @@ class TuserAccountMixin:
     is_deleted_legacy: Mapped[str]
     is_duplicate: Mapped[str]
     is_active: Mapped[str]
-    created_date: Mapped[datetime]
+    created_date: Mapped[datetime | None]
     creator_id: Mapped[str | None]
     last_upd_date: Mapped[datetime | None]
     last_upd_id: Mapped[str | None]
