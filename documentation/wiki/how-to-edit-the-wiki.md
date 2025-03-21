@@ -38,3 +38,16 @@ Change logs have historically existed on each wiki page. However, as of March 20
 * Existing change logs will stay, and anyone can add change logs to pages that don’t have one.
 * Any contributor may add entries to the logs if desired.
 * Tip: Log significant changes (such as updating out-of-date, stale content, or deleting large sections) but not minor changes (such as improvements to spelling, formatting, or clarity). Generally speaking, significant changes provide helpful context to the reader.
+
+### How to use GitBook to make edits
+
+1. Log in to GitBook: [https://app.gitbook.com/](https://app.gitbook.com/)
+2. In the top left corner, it should say "Simpler Grants." If not, you're in the wrong workspace—click it to switch to the correct workspace.
+3. Go to “Public Wiki” under the ’Spaces’ section of the left nav
+4. Click “Edit”
+5. Make changes
+6. Name the change using the instructions in "Git commit history" above
+7. Click the arrow next to “Merge” to open the option to "Request a review"
+8. Add reviewers using the "content owners" table above
+9. When you receive an email that your change was reviewed, use the "Merge" button.
+
