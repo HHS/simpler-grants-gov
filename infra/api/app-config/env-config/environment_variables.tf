@@ -21,6 +21,8 @@ locals {
     LOGIN_GOV_TOKEN_ENDPOINT = "https://idp.int.identitysandbox.gov/api/openid_connect/token"
     API_JWT_ISSUER           = "simpler-grants-api-${var.environment}"
     API_JWT_AUDIENCE         = "simpler-grants-api-${var.environment}"
+
+    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
   }
 
   # Configuration for secrets
