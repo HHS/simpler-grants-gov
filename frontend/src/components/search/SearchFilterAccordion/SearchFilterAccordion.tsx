@@ -35,6 +35,7 @@ export interface SearchFilterAccordionProps {
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
   filterOptions: FilterOption[];
+  facetCounts: { [key: string]: number };
 }
 
 export interface FilterOptionWithChildren {
@@ -69,6 +70,7 @@ const AccordionContent = ({
   title,
   queryParamKey,
   query,
+  facetCounts,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
@@ -133,6 +135,7 @@ const AccordionContent = ({
                 accordionTitle={title}
                 isSectionAllSelected={areSetsEqual}
                 isSectionNoneSelected={() => query.size === 0}
+                facetCounts={facetCounts}
               />
             ) : (
               <SearchFilterCheckbox
@@ -140,6 +143,7 @@ const AccordionContent = ({
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
+                facetCounts={facetCounts}
               />
             )}
           </li>
@@ -154,6 +158,7 @@ export function SearchFilterAccordion({
   title,
   queryParamKey,
   query,
+  facetCounts,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -164,6 +169,7 @@ export function SearchFilterAccordion({
           title={title}
           queryParamKey={queryParamKey}
           query={query}
+          facetCounts={facetCounts}
         />
       ),
       expanded: !!query.size,

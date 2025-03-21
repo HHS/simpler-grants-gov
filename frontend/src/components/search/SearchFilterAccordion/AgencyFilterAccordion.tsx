@@ -10,9 +10,11 @@ import SearchFilterAccordion, {
 export async function AgencyFilterAccordion({
   query,
   agencyOptionsPromise,
+  facetCounts,
 }: {
   query: Set<string>;
   agencyOptionsPromise: Promise<FilterOption[]>;
+  facetCounts: { [key: string]: number };
 }) {
   const t = useTranslations("Search");
 
@@ -30,6 +32,7 @@ export async function AgencyFilterAccordion({
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
+      facetCounts={facetCounts}
     />
   );
 }

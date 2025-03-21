@@ -23,9 +23,10 @@ interface SearchFilterSectionProps {
   isSectionNoneSelected: (query: Set<string>) => boolean;
   query: Set<string>;
   value: string;
+  facetCounts: { [key: string]: number };
 }
 
-const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
+const SearchFilterSection = ({
   option,
   updateCheckedOption,
   toggleSelectAll,
@@ -34,7 +35,8 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   isSectionAllSelected,
   isSectionNoneSelected,
   value,
-}) => {
+  facetCounts,
+}: SearchFilterSectionProps) => {
   const [childrenVisible, setChildrenVisible] = useState<boolean>(false);
   const searchParams = useSearchParams();
 
@@ -99,6 +101,7 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
                   query={query}
                   updateCheckedOption={updateCheckedOption}
                   accordionTitle={accordionTitle}
+                  facetCounts={facetCounts}
                 />
               </li>
             ))}

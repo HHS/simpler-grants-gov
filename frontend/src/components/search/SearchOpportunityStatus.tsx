@@ -16,6 +16,7 @@ interface StatusOption {
 
 interface SearchOpportunityStatusProps {
   query: Set<string>;
+  facetCounts: { [key: string]: number };
 }
 
 export default function SearchOpportunityStatus({
