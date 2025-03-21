@@ -195,7 +195,7 @@ resource "aws_ecs_task_definition" "app" {
   ])
 
   # Take the larger of the two values for CPU and Memory and multiply by 2
-  # We need to do this because the task definition requires a value for CPU and Memory.
+  # We need to do this because the task definition requires an aggregate value for CPU and Memory.
   # We can't simply add them together, because the resulting value needs to be on this list
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
   cpu    = var.cpu > local.new_relic_fluent_bit_cpu ? var.cpu * 2 : local.new_relic_fluent_bit_cpu * 2
