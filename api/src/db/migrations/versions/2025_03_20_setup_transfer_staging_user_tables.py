@@ -65,7 +65,7 @@ def upgrade():
         sa.Column("FIRST_NAME", sa.Text(), nullable=True),
         sa.Column("MIDDLE_NAME", sa.Text(), nullable=True),
         sa.Column("LAST_NAME", sa.Text(), nullable=True),
-        sa.Column("IS_DELETED", sa.Text(), nullable=False),
+        sa.Column("IS_DELETED_LEGACY", sa.Text(), nullable=False),
         sa.Column("IS_DUPLICATE", sa.Text(), nullable=False),
         sa.Column("IS_ACTIVE", sa.Text(), nullable=False),
         sa.Column("CREATED_DATE", sa.TIMESTAMP(timezone=True), nullable=False),
