@@ -109,13 +109,15 @@ export default function SearchResults({
   searchParams,
   query,
   loadingMessage,
+  searchResultsPromise,
 }: {
   searchParams: QueryParamData;
   query?: string | null;
   loadingMessage: string;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const { page, sortby } = searchParams;
-  const searchResultsPromise = searchForOpportunities(searchParams);
+  // const searchResultsPromise = searchForOpportunities(searchParams);
   const suspenseKey = Object.entries(searchParams).join(",");
 
   return (

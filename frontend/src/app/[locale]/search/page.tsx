@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
+import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { Breakpoints } from "src/types/uiTypes";
@@ -48,6 +49,8 @@ function Search({ searchParams, params }: SearchPageProps) {
     resolvedSearchParams.page = "1";
   }
 
+  const searchResultsPromise = searchForOpportunities(convertedSearchParams);
+
   return (
     <>
       <SearchAnalytics
@@ -74,6 +77,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                   category={category}
                   fundingInstrument={fundingInstrument}
                   agency={agency}
+                  searchResultsPromise={searchResultsPromise}
                 />
               </ContentDisplayToggle>
             </div>
@@ -82,6 +86,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                 searchParams={convertedSearchParams}
                 query={query}
                 loadingMessage={t("loading")}
+                searchResultsPromise={searchResultsPromise}
               ></SearchResults>
             </div>
           </div>

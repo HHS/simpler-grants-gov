@@ -8,6 +8,7 @@ interface SearchFilterCheckboxProps {
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
   accordionTitle: string;
   query: Set<string>;
+  facetCounts: { [key: string]: number };
 }
 
 const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
@@ -15,6 +16,7 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
   updateCheckedOption,
   accordionTitle,
   query,
+  facetCounts,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
@@ -23,11 +25,17 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
 
   const getNameAttribute = () =>
     accordionTitle === "Agency" ? `agency-${option.id}` : option.id;
+  console.log("###", option);
+  const facetCount = facetCounts[option.value];
+
+  if (!facetCount) {
+    return;
+  }
 
   return (
     <FilterCheckbox
       id={option.id}
-      label={option.label}
+      label={`${option.label} [${facetCount}]`}
       name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
       checked={query.has(option.value)}
