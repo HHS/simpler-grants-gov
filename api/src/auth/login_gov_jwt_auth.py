@@ -54,6 +54,8 @@ class LoginGovConfig(PydanticBaseEnvConfig):
         alias="LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY"
     )
 
+    login_gov_redirect_scheme: str = Field(alias="LOGIN_GOV_REDIRECT_SCHEME", default="http")
+
 
 # Initialize a config at startup
 _config: LoginGovConfig | None = None
@@ -131,7 +133,9 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
 
     # Ask Flask for its own URI - specifying we want the callback route
     # .user_login_callback points to the function itself defined in user_routes.py
-    redirect_uri = flask.url_for(".user_login_callback", _external=True)
+    redirect_uri = flask.url_for(
+        ".user_login_callback", _external=True, _scheme=config.login_gov_redirect_scheme
+    )
 
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
