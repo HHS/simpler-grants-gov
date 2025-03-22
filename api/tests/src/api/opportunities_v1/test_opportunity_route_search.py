@@ -1,9 +1,14 @@
+import base64
 import csv
+import uuid
 from datetime import date
 
 import pytest
 
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunityV1Schema,
+    OpportunityWithAttachmentsV1Schema,
+)
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -12,12 +17,14 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
+from src.util import file_util
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -1546,3 +1553,76 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
+
+
+@pytest.fixture
+def opportunity_index_alias_func(search_client, monkeypatch):
+    # Note we don't actually create anything, this is just a random name
+    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
+    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    return alias
+
+
+def test_search_experimental_attachment_200(
+    client,
+    api_auth_token,
+    search_client,
+    mock_s3_bucket,
+    enable_factory_create,
+    opportunity_index_alias_func,
+    opportunity_index,
+):
+    # Create Opportunity Attachments
+    attachments = [
+        (DOC_MANUFACTURING, "test_file_one.txt", "Testing querying attachment"),
+        (DOC_SPACE_COAST, "test_file_two.txt", "Opportunity should not be returned"),
+    ]
+
+    opp_attachments = []
+    for opportunity, file_name, file_content in attachments:
+        file_loc = f"s3://{mock_s3_bucket}/{file_name}"
+        opp_attachment = OpportunityAttachmentFactory.create(
+            file_location=file_loc,
+            file_contents=file_content,
+            file_name=file_name,
+            opportunity=opportunity,
+        )
+        opp_attachments.append(opp_attachment)
+
+    # Serialize opportunity into json records
+    schema = OpportunityWithAttachmentsV1Schema()
+    json_records = [schema.dump(opp_att.opportunity) for opp_att in opp_attachments]
+
+    for index, record in enumerate(json_records):
+        record["attachments"] = [
+            {
+                "filename": att["file_name"],
+                "data": base64.b64encode(
+                    file_util.open_stream(opp_attachments[index].file_location, "rb").read()
+                ).decode("utf-8"),
+            }
+            for att in record["attachments"]
+        ]
+
+    # Load into the search index
+    search_client.bulk_upsert(
+        opportunity_index,
+        json_records,
+        primary_key_field="opportunity_id",
+        pipeline="multi-attachment",
+    )
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias_func)
+
+    # Prepare the search request
+    search_request = get_search_request(
+        query="Testing", experimental={"scoring_rule": "attachment_only"}
+    )
+
+    resp = client.post(
+        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+    )
+    data = resp.json["data"]
+
+    assert resp.status_code == 200
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == opp_attachments[0].opportunity_id
