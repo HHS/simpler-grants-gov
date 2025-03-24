@@ -67,6 +67,7 @@ const fakeOptions = [
 describe("AgencyFilterAccordion", () => {
   it("is accessible", async () => {
     const component = await AgencyFilterAccordion({
+      facetCounts: {},
       agencyOptionsPromise: Promise.resolve(fakeOptions),
       query: new Set(),
     });
@@ -78,6 +79,7 @@ describe("AgencyFilterAccordion", () => {
   // just want to confirm it renders
   it("renders async component (asserting on mock suspended state)", async () => {
     const component = await AgencyFilterAccordion({
+      facetCounts: {},
       agencyOptionsPromise: Promise.resolve(fakeOptions),
       query: new Set(),
     });

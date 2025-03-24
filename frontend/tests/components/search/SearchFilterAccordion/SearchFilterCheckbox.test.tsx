@@ -19,6 +19,7 @@ describe("SearchFilterCheckbox", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchFilterCheckbox
+        facetCounts={{}}
         option={option}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}
@@ -32,6 +33,7 @@ describe("SearchFilterCheckbox", () => {
   it("calls the appropriate handlers when the checkbox is clicked", async () => {
     render(
       <SearchFilterCheckbox
+        facetCounts={{}}
         option={option}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}

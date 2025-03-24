@@ -52,6 +52,7 @@ const defaultProps = {
   accordionTitle: "Default Title",
   query: new Set(""),
   value: "",
+  facetCounts: {},
 };
 
 describe("SearchFilterSection", () => {

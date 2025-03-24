@@ -1,8 +1,5 @@
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
-import {
-  FacetCounts,
-  SearchAPIResponse,
-} from "src/types/search/searchResponseTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";

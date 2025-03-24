@@ -33,6 +33,8 @@ const initialFilterOptions: FilterOption[] = [
   },
 ];
 
+const fakeFacetCounts = {};
+
 const mockUpdateQueryParams = jest.fn();
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -52,6 +54,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={new Set()}
+        facetCounts={fakeFacetCounts}
       />,
     );
     const results = await axe(container);
@@ -65,6 +68,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={new Set()}
+        facetCounts={fakeFacetCounts}
       />,
     );
 
@@ -81,6 +85,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={new Set()}
+        facetCounts={fakeFacetCounts}
       />,
     );
 
@@ -102,6 +107,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={updatedQuery}
+        facetCounts={fakeFacetCounts}
       />,
     );
     expect(selectAllButton).toBeEnabled();
@@ -115,6 +121,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={"status"}
         query={new Set()}
+        facetCounts={fakeFacetCounts}
       />,
     );
 
@@ -138,6 +145,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={new Set("")}
+        facetCounts={fakeFacetCounts}
       />,
     );
 
@@ -152,6 +160,7 @@ describe("SearchFilterAccordion", () => {
         title={title}
         queryParamKey={queryParamKey}
         query={updatedQuery}
+        facetCounts={fakeFacetCounts}
       />,
     );
 

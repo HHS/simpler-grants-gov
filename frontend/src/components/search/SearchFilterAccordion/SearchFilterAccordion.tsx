@@ -36,6 +36,7 @@ export interface SearchFilterAccordionProps {
   title: string; // Title in header of accordion
   filterOptions: FilterOption[];
   facetCounts: { [key: string]: number };
+  defaultEmptySelection?: Set<string>;
 }
 
 export interface FilterOptionWithChildren {
@@ -71,14 +72,20 @@ const AccordionContent = ({
   queryParamKey,
   query,
   facetCounts,
+  defaultEmptySelection,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
-    const updated = new Set(query);
-    isChecked ? updated.add(value) : updated.delete(value);
-    updateQueryParams(updated, queryParamKey, queryTerm);
+    const newParamValue = new Set(query);
+    isChecked ? newParamValue.add(value) : newParamValue.delete(value);
+    // handle status filter custom behavior to set param when all options are unselected
+    const updatedParamValue =
+      !newParamValue.size && defaultEmptySelection?.size
+        ? defaultEmptySelection
+        : newParamValue;
+    updateQueryParams(updatedParamValue, queryParamKey, queryTerm);
   };
 
   // all top level selectable filter options
@@ -106,7 +113,9 @@ const AccordionContent = ({
       ]);
       updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
     } else {
-      const clearedSelections = newSelections || new Set<string>();
+      const clearedSelections = newSelections?.size
+        ? newSelections
+        : new Set<string>();
       updateQueryParams(clearedSelections, queryParamKey, queryTerm);
     }
   };
@@ -115,7 +124,7 @@ const AccordionContent = ({
     <>
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true, allSelected)}
-        onClearAll={() => toggleSelectAll(false)}
+        onClearAll={() => toggleSelectAll(false, defaultEmptySelection)}
         isAllSelected={areSetsEqual(allSelected, query)}
         isNoneSelected={query.size === 0}
       />
@@ -159,6 +168,7 @@ export function SearchFilterAccordion({
   queryParamKey,
   query,
   facetCounts,
+  defaultEmptySelection,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -170,6 +180,7 @@ export function SearchFilterAccordion({
           queryParamKey={queryParamKey}
           query={query}
           facetCounts={facetCounts}
+          defaultEmptySelection={defaultEmptySelection}
         />
       ),
       expanded: !!query.size,

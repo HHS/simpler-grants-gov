@@ -37,7 +37,6 @@ const SearchFilterSection = ({
   value,
   facetCounts,
 }: SearchFilterSectionProps) => {
-  console.log("$$$", facetCounts);
   const [childrenVisible, setChildrenVisible] = useState<boolean>(false);
   const searchParams = useSearchParams();
 

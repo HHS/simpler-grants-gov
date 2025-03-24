@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
+import { fakeSearchAPIResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { Accordion } from "@trussworks/react-uswds";
@@ -85,10 +86,10 @@ describe("SearchFilters", () => {
         agency={new Set()}
         category={new Set()}
         opportunityStatus={new Set()}
+        searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}
       />,
     );
 
-    // making weird use of the mocked translation behavior to make sure that things render correctly, but w/e
     const component = screen.getByText("accordion.titles.funding");
     expect(component).toBeInTheDocument();
   });
