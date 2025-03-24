@@ -32,10 +32,10 @@ export type SchemaField = {
 };
 
 export interface FormSchema {
-  title: string;
-  description?: string;
-  properties: [SchemaField];
-  required: [string];
+  $schema: string;
+  type: string;
+  properties: Record<string, SchemaField>;
+  required?: string[];
 }
 
 export type TextTypes =

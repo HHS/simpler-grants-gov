@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
+import TopLevelError from "src/app/[locale]/error/page";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import ApplyForm from "src/services/applyForm/ApplyForm";
@@ -11,6 +12,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
+import { validateUiSchema, validateFormSchema } from "src/services/applyForm/validate";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -34,6 +36,14 @@ async function FormPage() {
   }
 
   const { form_json_schema, form_ui_schema } = formData;
+  try {
+    validateUiSchema(form_ui_schema);
+    validateFormSchema(form_json_schema);
+  }
+  catch (error) {
+    console.error("Error validating", error)
+    return <TopLevelError />;
+  }
 
   return (
     <GridContainer>

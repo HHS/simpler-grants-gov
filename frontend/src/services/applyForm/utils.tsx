@@ -22,14 +22,12 @@ export function buildFormTreeClosure(schema: FormSchema, uiSchema: UiSchema) {
       if (
         !Array.isArray(uiSchema) &&
         typeof uiSchema === "object" &&
-        uiSchema.type === "section"
+        "children" in uiSchema
       ) {
-        if (uiSchema.children) {
           buildFormTree(uiSchema.children, {
             label: uiSchema.label,
             name: uiSchema.name,
           });
-        }
       } else if (Array.isArray(uiSchema)) {
         uiSchema.forEach((node) => {
           if ("children" in node) {
@@ -67,7 +65,7 @@ export function buildFormTreeClosure(schema: FormSchema, uiSchema: UiSchema) {
     type: string,
     format: string | undefined,
     parentId: string,
-    required = false,
+    required: boolean | undefined = false,
     minLength: number | null = null,
     maxLength: number | null = null,
   ) => {
@@ -77,7 +75,6 @@ export function buildFormTreeClosure(schema: FormSchema, uiSchema: UiSchema) {
           return createTextAreaField(
             fieldName,
             title,
-            type as TextTypes,
             parentId,
             required,
             minLength,
@@ -133,7 +130,7 @@ export function buildFormTreeClosure(schema: FormSchema, uiSchema: UiSchema) {
       type,
       format,
       `${name}-fields`,
-      schema.required.includes(name),
+      (schema.required ?? []).includes(name),
       minLength,
       maxLength,
     );

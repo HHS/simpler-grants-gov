@@ -52,7 +52,6 @@ export const createTextInputField = (
  export const createTextAreaField = (
     fieldName: string,
     title: string,
-    type: TextTypes,
     parentId: string,
     required = false,
     minLength: number | null = null,
