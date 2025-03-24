@@ -217,6 +217,8 @@ resource "aws_ecs_task_definition" "app" {
   network_mode = "awsvpc"
 
   depends_on = [
+    aws_cloudwatch_log_group.service_logs,
+    aws_cloudwatch_log_group.fluentbit,
     aws_iam_role_policy.task_executor,
     aws_iam_role_policy_attachment.extra_policies,
   ]
