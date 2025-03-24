@@ -1,3 +1,12 @@
+/*
+  this page is not being tested because:
+    * this page component doesn't do very much on its own, largely an entry point into other component behavior
+    * underlying behavior of search functionality (filters, search results, etc.) are fully unit tested within smaller compoonents
+    * use of suspendced and unsuspended async behavior in child components makes testing that behavior here very difficult,
+      since suspense needs to be mocked for use with testing library
+    * integrated behavior of thie page is better tested using Playwright
+*/
+
 import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { environment } from "src/constants/environments";

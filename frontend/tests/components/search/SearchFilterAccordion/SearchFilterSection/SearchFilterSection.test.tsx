@@ -35,13 +35,13 @@ const defaultProps = {
         id: "1-1",
         label: "Child 1",
         isChecked: false,
-        value: "1st child value",
+        value: "1st-child-value",
       },
       {
         id: "1-2",
         label: "Child 2",
         isChecked: true,
-        value: "2nd child value",
+        value: "2nd-child-value",
       },
     ],
   },
@@ -52,7 +52,10 @@ const defaultProps = {
   accordionTitle: "Default Title",
   query: new Set(""),
   value: "",
-  facetCounts: {},
+  facetCounts: {
+    "1st-child-value": 1,
+    "2nd-child-value": 2,
+  },
 };
 
 describe("SearchFilterSection", () => {
@@ -79,7 +82,7 @@ describe("SearchFilterSection", () => {
     expect(screen.getByText("Select All")).toBeInTheDocument();
     expect(screen.getByText("Clear All")).toBeInTheDocument();
     expect(
-      screen.getByRole("checkbox", { name: "Child 1" }),
+      screen.getByRole("checkbox", { name: "Child 1 [1]" }),
     ).toBeInTheDocument();
   });
 

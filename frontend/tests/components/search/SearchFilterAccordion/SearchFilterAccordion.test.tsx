@@ -33,7 +33,12 @@ const initialFilterOptions: FilterOption[] = [
   },
 ];
 
-const fakeFacetCounts = {};
+const fakeFacetCounts = {
+  grant: 1,
+  other: 1,
+  procurement_contract: 1,
+  cooperative_agreement: 1,
+};
 
 const mockUpdateQueryParams = jest.fn();
 

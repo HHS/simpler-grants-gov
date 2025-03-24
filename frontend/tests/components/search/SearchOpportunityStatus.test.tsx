@@ -33,7 +33,12 @@ describe("SearchOpportunityStatus", () => {
   it("component renders with checkboxes", () => {
     render(
       <SearchOpportunityStatus
-        facetCounts={fakeFacetCounts.opportunity_status}
+        facetCounts={{
+          posted: 1,
+          forecasted: 1,
+          closed: 1,
+          archived: 1,
+        }}
         query={new Set()}
       />,
     );
@@ -57,7 +62,7 @@ describe("SearchOpportunityStatus", () => {
     );
 
     const forecastedCheckbox = screen.getByRole("checkbox", {
-      name: "Forecasted",
+      name: "Forecasted [1]",
     });
 
     fireEvent.click(forecastedCheckbox);

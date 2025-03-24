@@ -84,7 +84,8 @@ const fakePaginationInfo: PaginationInfo = {
 
 export const fakeFacetCounts = {
   opportunity_status: {
-    arbitraryKey: 1,
+    posted: 1,
+    forecasted: 1,
   },
   funding_instrument: {
     arbitraryKey: 1,
@@ -101,7 +102,10 @@ export const fakeFacetCounts = {
 };
 
 export const fakeSearchAPIResponse: SearchAPIResponse = {
-  data: [mockOpportunity],
+  data: [
+    mockOpportunity,
+    { ...mockOpportunity, opportunity_status: "forecasted" },
+  ],
   pagination_info: fakePaginationInfo,
   facet_counts: fakeFacetCounts,
   message: "anything",

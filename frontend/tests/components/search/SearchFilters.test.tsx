@@ -77,20 +77,24 @@ jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
     ]),
 }));
 
-describe("SearchFilters", () => {
-  it("Renders without errors", () => {
-    render(
-      <SearchFilters
-        fundingInstrument={new Set()}
-        eligibility={new Set()}
-        agency={new Set()}
-        category={new Set()}
-        opportunityStatus={new Set()}
-        searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}
-      />,
-    );
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
 
-    const component = screen.getByText("accordion.titles.funding");
-    expect(component).toBeInTheDocument();
+describe("SearchFilters", () => {
+  it("Renders without errors", async () => {
+    const component = await SearchFilters({
+      fundingInstrument: new Set(),
+      eligibility: new Set(),
+      agency: new Set(),
+      category: new Set(),
+      opportunityStatus: new Set(),
+      searchResultsPromise: Promise.resolve(fakeSearchAPIResponse),
+    });
+    render(component);
+
+    const title = await screen.findByText("accordion.titles.funding");
+    expect(title).toBeInTheDocument();
   });
 });
