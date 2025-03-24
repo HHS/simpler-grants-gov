@@ -4,6 +4,7 @@ from datetime import date, datetime
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 

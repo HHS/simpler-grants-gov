@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from sqlalchemy import select
+
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (

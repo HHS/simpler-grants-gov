@@ -1,8 +1,9 @@
 from uuid import UUID
 
-import src.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
+import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application
 
