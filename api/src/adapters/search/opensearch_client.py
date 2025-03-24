@@ -100,7 +100,7 @@ class SearchClient:
         Bulk upsert records to an index
 
         See: https://opensearch.org/docs/latest/api-reference/document-apis/bulk/ for details
-        In this method we only use the "update" operation which updates or upsert a record
+        In this method we only use the "index" operation which updates or upsert a record
         based on the id value.
         """
 
@@ -108,11 +108,11 @@ class SearchClient:
 
         for record in records:
             # For each record, we create two entries in the bulk operation list
-            # which includes update operation with the unique ID + the actual record on separate lines
+            # which include the unique ID + the actual record on separate lines
             # When this is sent to the search index, this will send two lines like:
             #
-            # {"update": {"_id": 123}}
-            # {"doc": {"opportunity_id": 123, "opportunity_title": "example title", ...}}
+            # {"index": {"_id": 123}}
+            # {"opportunity_id": 123, "opportunity_title": "example title", ...}}
             bulk_operations.append({"index": {"_id": record[primary_key_field]}})
             bulk_operations.append(record)
 

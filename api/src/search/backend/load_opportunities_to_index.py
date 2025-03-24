@@ -52,8 +52,9 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
 
     incremental_load_batch_size: int = Field(default=1000)
     incremental_load_max_process_time: int = Field(default=3000)
-    # Configurable max worker. Set default to ThreaPoolExecutor default. See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-    incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)  # default
+    # Configurable max worker. Set default to ThreaPoolExecutor default.
+    # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+    incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
 
 
 class LoadOpportunitiesToIndex(Task):
