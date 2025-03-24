@@ -437,45 +437,15 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
 
 
 def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
-    application = ApplicationFactory.create(competition=competition)
-
-    form_1 = FormFactory.create(
-        form_name="Test Form",
-        form_version="1.0",
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-
-    application_form_1 = ApplicationFormFactory.create(
-        application=application,
-        form=form_1,
-        application_response={"name": "John Doe"},
-    )
-
-    CompetitionFormFactory.create(
-        competition=competition,
-        form=form_1,
-    )
-
-    form_2 = FormFactory.create(
-        form_name="Test Form 2",
-        form_version="1.0",
-        form_json_schema={"type": "object", "properties": {"other": {"type": "string"}}},
-        form_ui_schema={"other": {"ui:widget": "text"}},
-    )
-
-    application_form_2 = ApplicationFormFactory.create(
-        application=application,
-        form=form_2,
-        application_response={"other": "Some Value"},
-    )
-
-    CompetitionFormFactory.create(
-        competition=competition,
-        form=form_2,
+    application = ApplicationFactory.create(with_forms=True)
+    application_forms = (
+        db_session.execute(
+            select(ApplicationForm).where(
+                ApplicationForm.application_id == application.application_id
+            )
+        )
+        .scalars()
+        .all()
     )
 
     response = client.get(
@@ -486,21 +456,17 @@ def test_application_get_success(client, enable_factory_create, db_session, api_
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
-    assert response.json["data"]["competition_id"] == str(competition.competition_id)
-    assert len(response.json["data"]["application_forms"]) == 2
-
-    assert response.json["data"]["application_forms"][0] == {
-        "application_form_id": str(application_form_1.application_form_id),
-        "application_id": str(application.application_id),
-        "form_id": str(form_1.form_id),
-        "application_response": {"name": "John Doe"},
-    }
-    assert response.json["data"]["application_forms"][1] == {
-        "application_form_id": str(application_form_2.application_form_id),
-        "application_id": str(application.application_id),
-        "form_id": str(form_2.form_id),
-        "application_response": {"other": "Some Value"},
-    }
+    assert response.json["data"]["competition_id"] == str(application.competition_id)
+    assert len(response.json["data"]["application_forms"]) == len(application_forms)
+    for application_form, application_form_response in zip(
+        application_forms, response.json["data"]["application_forms"], strict=False
+    ):
+        assert application_form_response == {
+            "application_form_id": str(application_form.application_form_id),
+            "application_id": str(application.application_id),
+            "form_id": str(application_form.form_id),
+            "application_response": application_form.application_response,
+        }
 
 
 def test_application_get_application_not_found(
@@ -520,19 +486,7 @@ def test_application_get_application_not_found(
 
 
 def test_application_get_unauthorized(client, enable_factory_create, db_session):
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
-    application = ApplicationFactory.create(competition=competition)
-
-    ApplicationFormFactory.create(
-        application=application,
-        form=FormFactory.create(
-            form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-            form_ui_schema={"name": {"ui:widget": "text"}},
-        ),
-        application_response={"name": "John Doe"},
-    )
+    application = ApplicationFactory.create()
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
