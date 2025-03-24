@@ -46,3 +46,7 @@ output "owner" {
 output "project_name" {
   value = local.project_name
 }
+
+output "system_notifications_config" {
+  value = local.system_notifications_config
+}
