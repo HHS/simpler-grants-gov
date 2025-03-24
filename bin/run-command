@@ -62,10 +62,6 @@ echo
 cluster_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_cluster_name)
 service_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_name)
 
-# Get the log group and log stream prefix so that we can print out the ECS task's logs after running the task
-log_group=$(terraform -chdir="infra/${app_name}/service" output -raw application_log_group)
-log_stream_prefix=$(terraform -chdir="infra/${app_name}/service" output -raw application_log_stream_prefix)
-
 service_task_definition_arn=$(aws ecs describe-services --no-cli-pager --cluster "${cluster_name}" --services "${service_name}" --query "services[0].taskDefinition" --output text)
 # For subsequent commands, use the task definition family rather than the service's task definition ARN
 # because in the case of migrations, we'll deploy a new task definition revision before updating the
@@ -98,9 +94,6 @@ fi
 if [ -n "${task_role_arn}" ]; then
   overrides=$(echo "${overrides}" | jq ".taskRoleArn |= \"${task_role_arn}\"")
 fi
-
-task_start_time=$(date +%s)
-task_start_time_millis=$((task_start_time * 1000))
 
 aws_args=(
   ecs run-task
