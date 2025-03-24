@@ -122,10 +122,10 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name                   = "${local.container_name}-fluent-bit"
+      name                   = "${local.container_name}-fluentbit"
       image                  = local.fluent_bit_image_url,
-      memory                 = 512,
-      cpu                    = 1024,
+      memory                 = 256,
+      cpu                    = 512,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
@@ -135,6 +135,14 @@ resource "aws_ecs_task_definition" "app" {
           enable-ecs-log-metadata = "true"
           config-file-type        = "file"
           config-file-value       = "/fluent-bit/etc/fluent-bit.conf"
+        }
+      }
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-region"        = data.aws_region.current.name,
+          "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
       secrets = [
