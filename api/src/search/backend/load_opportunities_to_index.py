@@ -376,16 +376,17 @@ class LoadOpportunitiesToIndex(Task):
                 continue
 
             json_record = schema.dump(record)
-            try:
-                if self.config.enable_opportunity_attachment_pipeline:
+
+            if self.config.enable_opportunity_attachment_pipeline:
+                try:
                     json_record["attachments"] = self.get_attachment_json_for_opportunity(
                         record.opportunity_attachments
                     )
-            except Exception:
-                logger.exception(
-                    "Error preparing opportunity attachment for search index", extra=log_extra
-                )
-                continue
+                except Exception:
+                    logger.exception(
+                        "Error preparing opportunity attachment for search index", extra=log_extra
+                    )
+                    continue
 
             self.increment(self.Metrics.RECORDS_LOADED)
             batch_json_records.append(json_record)
