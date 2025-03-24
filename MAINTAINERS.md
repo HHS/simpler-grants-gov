@@ -10,10 +10,12 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Bruk Abebe
 * Doug Schrashun
 * Freddie Yebra
+* Josh Osborne
 * Kai Siren
 * Matt Dragon
 * Michael Chouinard
 * Mike Huneke
+
 
 ## Content and Design
 
