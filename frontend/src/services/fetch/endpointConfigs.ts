@@ -15,6 +15,15 @@ export const opportunitySearchEndpoint = {
   method: "POST" as ApiMethod,
 };
 
+export const fetchFormEndpoint = {
+  // TODO: update when API is ready
+  // basePath: environment.API_URL
+  basePath: "http://localhost:3000/api",
+  version: "",
+  namespace: "forms",
+  method: "GET" as ApiMethod,
+};
+
 export const fetchOpportunityEndpoint = {
   basePath: environment.API_URL,
   version: "v1",

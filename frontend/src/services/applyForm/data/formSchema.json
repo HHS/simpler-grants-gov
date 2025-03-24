@@ -1,0 +1,266 @@
+{
+  "type": "object",
+  "title": "Application For Federal Assistance SF 424 - Individual",
+  "properties": {
+    "FederalAgency": {
+      "title": "Name of Federal Agency",
+      "type": "string",
+      "name": "FederalAgency",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "CFDANumber": {
+      "title": "Assistance Listing Number",
+      "type": "string",
+      "name": "CFDANumber",
+      "minLength": 0,
+      "maxLength": 15
+    },
+    "CFDATitle": {
+      "title": "Assistance Listing Title",
+      "type": "string",
+      "name": "CFDATitle",
+      "minLength": 0,
+      "maxLength": 120
+    },
+    "Date_Received": {
+      "title": "Date Received ",
+      "type": "string",
+      "name": "Date_Received",
+      "format": "date"
+    },
+    "OpportunityID": {
+      "title": "Funding Opportunity Number",
+      "type": "number",
+      "name": "OpportunityID",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "OpportunityTitle": {
+      "title": "Funding Opportunity Title",
+      "type": "string",
+      "name": "OpportunityTitle",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "PrefixName": {
+      "title": "Prefix",
+      "type": "string",
+      "name": "PrefixName",
+      "minLength": 0,
+      "maxLength": 10
+    },
+    "FirstName": {
+      "title": "First Name",
+      "type": "string",
+      "name": "FirstName",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "MiddleName": {
+      "title": "Middle Name",
+      "type": "string",
+      "name": "MiddleName",
+      "minLength": 0,
+      "maxLength": 25
+    },
+    "LastName": {
+      "title": "Last Name",
+      "type": "string",
+      "name": "LastName",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "Suffix": {
+      "title": "Suffix",
+      "type": "string",
+      "name": "Suffix",
+      "minLength": 0,
+      "maxLength": 10
+    },
+    "AuthorizedRepresentativePhoneNumber": {
+      "title": "Daytime Phone Number",
+      "type": "string",
+      "name": "AuthorizedRepresentativePhoneNumber",
+      "minLength": 1,
+      "maxLength": 25
+    },
+    "EveningPhone": {
+      "title": "Evening Phone Number",
+      "type": "string",
+      "name": "EveningPhone",
+      "minLength": 0,
+      "maxLength": 25
+    },
+    "AuthorizedRepresentativeFax": {
+      "title": "Fax Number",
+      "type": "string",
+      "name": "AuthorizedRepresentativeFax",
+      "minLength": 1,
+      "maxLength": 25
+    },
+    "AuthorizedRepresentativeEmail": {
+      "title": "Email",
+      "type": "string",
+      "name": "AuthorizedRepresentativeEmail",
+      "minLength": 1,
+      "maxLength": 60,
+      "format": "email"
+    },
+    "Street1": {
+      "title": "Street1",
+      "type": "string",
+      "name": "Street1",
+      "minLength": 1,
+      "maxLength": 55
+    },
+    "Street2": {
+      "title": "Street2",
+      "type": "string",
+      "name": "Street2",
+      "minLength": 0,
+      "maxLength": 55
+    },
+    "City": {
+      "title": "City",
+      "type": "string",
+      "name": "City",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "County": {
+      "title": "County/Parish",
+      "type": "string",
+      "name": "County",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "State": {
+      "title": "State",
+      "type": "string",
+      "name": "State",
+      "minLength": 0,
+      "maxLength": 55
+    },
+    "Province": {
+      "title": "Province",
+      "type": "string",
+      "name": "Province",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "Country": {
+      "title": "Country",
+      "type": "string",
+      "name": "Country",
+      "minLength": 1,
+      "maxLength": 49
+    },
+    "ZipPostalCode": {
+      "title": "Zip/Postal Code",
+      "type": "string",
+      "name": "ZipPostalCode",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "citizenship": {
+      "title": "U.S. Citizenship",
+      "type": "string",
+      "name": "citizenship"
+    },
+    "AlienRegistrationNumber": {
+      "title": "Alien Registration Number",
+      "type": "string",
+      "name": "AlienRegistrationNumber",
+      "minLength": 0,
+      "maxLength": 14
+    },
+    "CountryofOrigin": {
+      "title": "Citizenship Country",
+      "type": "string",
+      "name": "CountryofOrigin",
+      "minLength": 0,
+      "maxLength": 49
+    },
+    "VisitDate": {
+      "title": "Residency Start Date",
+      "type": "string",
+      "name": "VisitDate",
+      "format": "date"
+    },
+    "CongressionalDistrictApplicant": {
+      "title": "Congressional District of Applicant",
+      "type": "string",
+      "name": "CongressionalDistrictApplicant",
+      "minLength": 1,
+      "maxLength": 6
+    },
+    "ProjectTitle": {
+      "title": "Project Title",
+      "type": "string",
+      "name": "ProjectTitle",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "ProjectDecription": {
+      "title": "Project Description",
+      "type": "string",
+      "name": "ProjectDecription",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "FundingPeriodStartDate": {
+      "title": "Proposed Project Start Date",
+      "type": "string",
+      "name": "FundingPeriodStartDate",
+      "format": "date"
+    },
+    "FundingPeriodEndDate": {
+      "title": "Proposed Project End Date",
+      "type": "string",
+      "name": "FundingPeriodEndDate",
+      "format": "date"
+    },
+    "ApplicationCertification": {
+      "title": "I Agree",
+      "type": "string",
+      "name": "ApplicationCertification",
+      "enum": ["Yes", "No"]
+    },
+    "AORSignature": {
+      "title": "Signature",
+      "type": "string",
+      "name": "AORSignature",
+      "minLength": 1,
+      "maxLength": 144
+    },
+    "AORDate": {
+      "title": "Date Signed",
+      "type": "string",
+      "name": "AORDate",
+      "format": "date"
+    }
+  },
+  "required": [
+    "FederalAgency",
+    "Date_Received",
+    "OpportunityID",
+    "OpportunityTitle",
+    "FirstName",
+    "LastName",
+    "AuthorizedRepresentativePhoneNumber",
+    "AuthorizedRepresentativeEmail",
+    "Street1",
+    "City",
+    "Country",
+    "citizenship",
+    "CongressionalDistrictApplicant",
+    "ProjectTitle",
+    "ProjectDecription",
+    "FundingPeriodStartDate",
+    "FundingPeriodEndDate",
+    "ApplicationCertification",
+    "AORSignature",
+    "AORDate"
+  ]
+}

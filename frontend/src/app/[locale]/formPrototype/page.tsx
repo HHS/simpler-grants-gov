@@ -1,14 +1,16 @@
 import { Metadata } from "next";
+import NotFound from "src/app/[locale]/not-found";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
+import ApplyForm from "src/services/applyForm/ApplyForm";
+import { getFormDetails } from "src/services/fetch/fetchers/formFetcher";
+import { formDetail } from "src/types/formResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import ApplyForm from "src/services/applyForm/ApplyForm";
-import * as formSchema from "src/services/applyForm/data/formSchema.json";
-import * as uiSchema from "src/services/applyForm/data/uiSchema.json";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -18,18 +20,20 @@ export function generateMetadata() {
   return meta;
 }
 
-const getFormDetails = () => {
-  return JSON.parse(JSON.stringify(formSchema)) as object;
-};
+async function FormPage() {
+  let formData = {} as formDetail;
+  const id = "anyform";
+  try {
+    const response = await getFormDetails(id);
+    formData = response.data;
+  } catch (error) {
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      return <NotFound />;
+    }
+    throw error;
+  }
 
-const getuiSchema = () => {
-  // eslint-disable-next-line
-  return uiSchema.default as undefined;
-};
-
-function FormPage() {
-  const jsonFormSchema = getFormDetails();
-  const uiSchema = getuiSchema();
+  const { form_json_schema, form_ui_schema } = formData;
 
   return (
     <GridContainer>
@@ -50,7 +54,7 @@ function FormPage() {
         </abbr>
         ).
       </p>
-      <ApplyForm schema={jsonFormSchema} uiSchema={uiSchema} />
+      <ApplyForm formSchema={form_json_schema} uiSchema={form_ui_schema} />
     </GridContainer>
   );
 }
