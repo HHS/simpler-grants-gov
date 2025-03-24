@@ -14,7 +14,7 @@ from src.task.ecs_background_task import ecs_background_task
 )
 @click.option(
     "--full-refresh/--incremental",
-    default=False,
+    default=True,
     help="Whether to run a full refresh, or only incrementally update opportunities",
 )
 @flask_db.with_db_session()
