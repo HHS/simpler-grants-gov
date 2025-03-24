@@ -225,9 +225,6 @@ test: ## Run all tests except for audit logging tests
 test-audit: ## Run audit logging tests
 	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
-test-watch: ## Run tests continually and watch for changes
-	$(PY_RUN_CMD) pytest-watch --clear $(args)
-
 test-coverage: ## Run tests and generate coverage report
 	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
 	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)

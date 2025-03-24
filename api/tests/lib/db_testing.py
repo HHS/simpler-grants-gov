@@ -72,6 +72,7 @@ def cascade_delete_from_db_table(db_session: db.Session, table_model) -> None:
     with whatever data might exist in a given table.
     """
 
+    db_session.expunge_all()
     with db_session.no_autoflush:
         records = db_session.scalars(select(table_model).options(selectinload("*")))
 
