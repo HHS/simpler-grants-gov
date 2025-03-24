@@ -368,7 +368,7 @@ class LoadOpportunitiesToIndex(Task):
         ),  # Retry on TransportError (including timeouts)
     )
     def load_records(self, batch: Sequence[Opportunity]) -> set[int]:
-        logger.info("Started loading batch of opportunities...")
+        logger.info("Loading batch of opportunities...")
 
         schema = OpportunityV1Schema()
 
@@ -389,7 +389,7 @@ class LoadOpportunitiesToIndex(Task):
                         extra=log_extra | {"agency": record.agency_code},
                     )
                     self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
-                    #
+                    # Add the skipped opportunity IDs to batch_processed_opp_ids to ensure they are not re-queued in the next cycle.
                     batch_processed_opp_ids.add(record.opportunity_id)
                     continue
 
