@@ -11,7 +11,6 @@ from analytics.datasets.acceptance_criteria import (
     AcceptanceCriteriaDataset,
     AcceptanceCriteriaNestLevel,
     AcceptanceCriteriaTotal,
-    AcceptanceCriteriaType,
 )
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
@@ -149,7 +148,6 @@ def sync_deliverables(
         ac_total = (
             ac.get_totals(
                 ghid,
-                AcceptanceCriteriaType.ALL,
                 AcceptanceCriteriaNestLevel.ALL,
             )
             if ac is not None

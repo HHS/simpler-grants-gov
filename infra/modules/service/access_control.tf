@@ -63,6 +63,17 @@ data "aws_iam_policy_document" "task_executor" {
     resources = [var.image_repository_arn]
   }
 
+  # Allow ECS to download images for New Relic
+  statement {
+    sid = "ECRPullAccessNewRelic"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+    ]
+    resources = [local.new_relic_fluent_bit_repo_arn]
+  }
+
   dynamic "statement" {
     for_each = length(var.secrets) > 0 ? [1] : []
     content {

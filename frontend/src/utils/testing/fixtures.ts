@@ -1,12 +1,12 @@
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   PaginationOrderBy,
   PaginationSortDirection,
   QueryParamData,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
-import { Opportunity } from "src/types/search/searchResponseTypes";
 
-export const mockOpportunity: Opportunity = {
+export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
   opportunity_status: "posted",
@@ -19,7 +19,7 @@ export const mockOpportunity: Opportunity = {
     award_floor: 10000,
   },
   opportunity_number: "OPP-12345",
-} as Opportunity;
+} as BaseOpportunity;
 
 export const searchFetcherParams: QueryParamData = {
   page: 1,
@@ -43,4 +43,18 @@ export const arbitrarySearchPagination = {
   ],
   page_offset: 1,
   page_size: 25,
+};
+
+const fakeSearchFilterRequestBody = {
+  opportunity_status: { one_of: ["Archived"] },
+  funding_instrument: { one_of: ["Cooperative Agreement"] },
+  applicant_type: { one_of: ["Individuals"] },
+  agency: { one_of: ["Economic Development Administration"] },
+  funding_category: { one_of: ["Recovery Act"] },
+};
+
+export const fakeSavedSearch = {
+  filters: fakeSearchFilterRequestBody,
+  pagination: arbitrarySearchPagination,
+  query: "something to search for",
 };

@@ -3,8 +3,13 @@ import {
   buildFilters,
   buildPagination,
   formatSearchRequestBody,
+  paginationToSortby,
+  searchToQueryParams,
 } from "src/utils/search/searchFormatUtils";
-import { searchFetcherParams } from "src/utils/testing/fixtures";
+import {
+  fakeSavedSearch,
+  searchFetcherParams,
+} from "src/utils/testing/fixtures";
 
 describe("formatSearchRequestBody", () => {
   it("does not add filters if no filters are present", () => {
@@ -167,5 +172,50 @@ describe("buildPagination", () => {
     });
 
     expect(thirdPagination.sort_order[0].sort_direction).toEqual("descending");
+  });
+});
+
+describe("searchToQueryParams", () => {
+  it("translates filters properly and passes along query string", () => {
+    const queryParams = searchToQueryParams(fakeSavedSearch);
+    expect(queryParams.query).toEqual("something to search for");
+    expect(queryParams.agency).toEqual("Economic Development Administration");
+    expect(queryParams.category).toEqual("Recovery Act");
+    expect(queryParams.eligibility).toEqual("Individuals");
+    expect(queryParams.fundingInstrument).toEqual("Cooperative Agreement");
+    expect(queryParams.status).toEqual("Archived");
+  });
+  it("comma separates multiple values", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: { opportunity_status: { one_of: ["Archived", "Closed"] } },
+    });
+    expect(queryParams.status).toEqual("Archived,Closed");
+  });
+});
+
+describe("paginationToSortBy", () => {
+  it("returns early if ordering by default relevancy", () => {
+    expect(
+      paginationToSortby([
+        { order_by: "relevancy", sort_direction: "ascending" },
+      ]),
+    ).toEqual({});
+  });
+  it("returns early if the backend sort order can't be translated into a frontend one", () => {
+    expect(
+      paginationToSortby([
+        { order_by: "opportunity_id", sort_direction: "ascending" },
+        { order_by: "post_date", sort_direction: "ascending" },
+      ]),
+    ).toEqual({});
+  });
+  it("returns translation of first ordering with direction appended", () => {
+    expect(
+      paginationToSortby([
+        { order_by: "top_level_agency_name", sort_direction: "ascending" },
+        { order_by: "agency_name", sort_direction: "ascending" },
+      ]),
+    ).toEqual({ sortby: "agencyAsc" });
   });
 });
