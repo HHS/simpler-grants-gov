@@ -76,7 +76,7 @@ network_config=$(aws ecs describe-services --no-cli-pager --cluster "${cluster_n
 current_region=$(./bin/current-region)
 aws_user_id=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
 
-container_name=$(aws ecs describe-task-definition --task-definition "${task_definition_family}" --query "taskDefinition.containerDefinitions[0].name" --output text)
+container_name=$(aws ecs describe-task-definition --task-definition "${task_definition_family}" --query "taskDefinition.containerDefinitions[?name == '${service_name}'].name" --output text)
 
 overrides=$(
   cat <<EOF
