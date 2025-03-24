@@ -1,4 +1,5 @@
 import base64
+import itertools
 import logging
 import os
 import time
@@ -124,17 +125,8 @@ class LoadOpportunitiesToIndex(Task):
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
-        start_time = time.time()
         # Handle updates/inserts
         self._handle_incremental_upserts(existing_opportunity_ids)
-
-        # Refresh index
-        self.search_client.refresh_index(self.index_name)
-
-        end_time = time.time()
-
-        elapsed_time = end_time - start_time
-        logger.error(f"processing time {elapsed_time:.2f}")
 
         # Handle deletes
         self._handle_incremental_delete(existing_opportunity_ids)
@@ -199,10 +191,8 @@ class LoadOpportunitiesToIndex(Task):
             opportunities_per_thread = max(
                 len(queued_opportunities) // self.config.incremental_load_max_workers, 1
             )
-            batches = [
-                queued_opportunities[i : i + opportunities_per_thread]
-                for i in range(0, len(queued_opportunities), opportunities_per_thread)
-            ]
+            thread_count =  self.config.incremental_load_max_workers
+            batches = itertools.batched(queued_opportunities, thread_count, strict=False)
 
             # Create a thread pool for processing and uploading batch of opportunities in parallel
             with ThreadPoolExecutor(
@@ -367,14 +357,14 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def load_records(self, batch: Sequence[Opportunity]) -> set[int]:
+    def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
 
         schema = OpportunityV1Schema()
 
         batch_json_records = []
         batch_processed_opp_ids = set()
-        for record in batch:
+        for record in records:
             try:
                 log_extra = {
                     "opportunity_id": record.opportunity_id,
@@ -403,9 +393,10 @@ class LoadOpportunitiesToIndex(Task):
                 batch_json_records.append(json_record)
                 batch_processed_opp_ids.add(record.opportunity_id)
 
-            except Exception as e:
-                logger.error(f"Error processing opportunity {record.opportunity_id}: {e}")
+            except Exception:
+                logger.exception("Error preparing opportunity for search index", extra = log_extra)
 
+        # Bulk upsert for the current batch
         if batch_json_records:
             self.search_client.bulk_upsert(
                 self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment"
