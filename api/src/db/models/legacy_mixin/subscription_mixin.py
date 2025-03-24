@@ -19,10 +19,10 @@ class TsubscriptionMixin:
     all_new_opps: Mapped[str | None]
     opportunities: Mapped[str | None]
     saved_searches: Mapped[str | None]
-    created_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
-    creator_id: Mapped[str] = mapped_column(nullable=False)
-    last_upd_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
-    last_upd_id: Mapped[str] = mapped_column(nullable=False)
+    created_date: Mapped[datetime.datetime]
+    creator_id: Mapped[str]
+    last_upd_date: Mapped[datetime.datetime]
+    last_upd_id: Mapped[str]
 
 
 @declarative_mixin
