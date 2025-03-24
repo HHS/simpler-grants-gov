@@ -2,7 +2,6 @@ import base64
 import itertools
 import logging
 import os
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
 from typing import Iterator, Sequence
@@ -57,7 +56,6 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     # Configurable max worker. Set default to ThreaPoolExecutor default.
     # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
     incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
-    batch_size_for_processing: int = Field(default=100)
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -185,13 +183,8 @@ class LoadOpportunitiesToIndex(Task):
                     },
                 )
 
-                processed_opportunity_ids.add(opportunity.opportunity_id)
-
             # Determine how many opportunities each thread will process
-            opportunities_per_thread = max(
-                len(queued_opportunities) // self.config.incremental_load_max_workers, 1
-            )
-            thread_count =  self.config.incremental_load_max_workers
+            thread_count = self.config.incremental_load_max_workers
             batches = itertools.batched(queued_opportunities, thread_count, strict=False)
 
             # Create a thread pool for processing and uploading batch of opportunities in parallel
@@ -365,41 +358,46 @@ class LoadOpportunitiesToIndex(Task):
         batch_json_records = []
         batch_processed_opp_ids = set()
         for record in records:
+            log_extra = {
+                "opportunity_id": record.opportunity_id,
+                "opportunity_status": record.opportunity_status,
+            }
+            logger.info("Preparing opportunity for upload to search index", extra=log_extra)
+
+            # Skip opportunity if associated with a test agency
+            if record.agency_record and record.agency_record.is_test_agency:
+                logger.info(
+                    "Skipping upload of opportunity as agency is a test agency",
+                    extra=log_extra | {"agency": record.agency_code},
+                )
+                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                # Add the skipped opportunity IDs to batch_processed_opp_ids to ensure they are not re-queued in the next cycle.
+                batch_processed_opp_ids.add(record.opportunity_id)
+                continue
+
+            json_record = schema.dump(record)
             try:
-                log_extra = {
-                    "opportunity_id": record.opportunity_id,
-                    "opportunity_status": record.opportunity_status,
-                }
-                logger.info("Preparing opportunity for upload to search index", extra=log_extra)
-
-                # Skip opportunity if associated with a test agency
-                if record.agency_record and record.agency_record.is_test_agency:
-                    logger.info(
-                        "Skipping upload of opportunity as agency is a test agency",
-                        extra=log_extra | {"agency": record.agency_code},
-                    )
-                    self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
-                    # Add the skipped opportunity IDs to batch_processed_opp_ids to ensure they are not re-queued in the next cycle.
-                    batch_processed_opp_ids.add(record.opportunity_id)
-                    continue
-
-                json_record = schema.dump(record)
                 if self.config.enable_opportunity_attachment_pipeline:
                     json_record["attachments"] = self.get_attachment_json_for_opportunity(
                         record.opportunity_attachments
                     )
-
-                self.increment(self.Metrics.RECORDS_LOADED)
-                batch_json_records.append(json_record)
-                batch_processed_opp_ids.add(record.opportunity_id)
-
             except Exception:
-                logger.exception("Error preparing opportunity for search index", extra = log_extra)
+                logger.exception(
+                    "Error preparing opportunity attachment for search index", extra=log_extra
+                )
+                continue
+
+            self.increment(self.Metrics.RECORDS_LOADED)
+            batch_json_records.append(json_record)
+            batch_processed_opp_ids.add(record.opportunity_id)
 
         # Bulk upsert for the current batch
         if batch_json_records:
             self.search_client.bulk_upsert(
                 self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment"
             )
+
+        # refresh index after batch is processed
+        self.search_client.refresh_index(self.index_name)
 
         return batch_processed_opp_ids
