@@ -124,7 +124,7 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = "${local.container_name}-fluent-bit"
       image                  = local.fluent_bit_image_url,
-      memory                 = 256,
+      memory                 = 512,
       cpu                    = 1024,
       networkMode            = "awsvpc",
       essential              = true,
