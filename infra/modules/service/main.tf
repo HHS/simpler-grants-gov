@@ -155,6 +155,7 @@ resource "aws_ecs_task_definition" "app" {
         { name : "aws_region", value : data.aws_region.current.name },
         { name : "container_name", value : local.container_name },
         { name : "log_group_name", value : local.log_group_name },
+        { name : "FLB_LOG_LEVEL", value : "debug" },
       ],
     },
     {
