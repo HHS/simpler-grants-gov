@@ -48,9 +48,9 @@ class TsubscriptionMixin:
     all_new_opps: Mapped[str | None]
     opportunities: Mapped[str | None]
     saved_searches: Mapped[str | None]
-    created_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    created_date: Mapped[datetime] = mapped_column(nullable=False)
     creator_id: Mapped[str] = mapped_column(nullable=False)
-    last_upd_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
     last_upd_id: Mapped[str] = mapped_column(nullable=False)
 
 
@@ -60,9 +60,9 @@ class TsubscriptionSearchMixin:
     subscription_id: Mapped[int | None]
     search_name: Mapped[str | None]
     search_params: Mapped[str | None]
-    created_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    created_date: Mapped[datetime] = mapped_column(nullable=False)
     creator_id: Mapped[str] = mapped_column(nullable=False)
-    last_upd_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
     last_upd_id: Mapped[str] = mapped_column(nullable=False)
 
 
@@ -72,7 +72,7 @@ class TsubscriptionOpportunityMixin:
     subscription_id: Mapped[int | None]
     opportunity_id: Mapped[int | None]
     is_opp_deleted: Mapped[str | None]
-    created_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    created_date: Mapped[datetime] = mapped_column(nullable=False)
     creator_id: Mapped[str] = mapped_column(nullable=False)
-    last_upd_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
     last_upd_id: Mapped[str] = mapped_column(nullable=False)
