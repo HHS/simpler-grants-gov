@@ -2,15 +2,17 @@ from uuid import UUID
 
 import src.adapters.db as db
 from sqlalchemy import select
-
-from api.src.api.route_utils import raise_flask_error
-from api.src.db.models.competition_models import Application
+from sqlalchemy.orm import selectinload
+from src.api.route_utils import raise_flask_error
+from src.db.models.competition_models import Application
 
 
 def get_application(db_session: db.Session, application_id: UUID) -> Application:
     # Check if application exists
     application = db_session.execute(
-        select(Application).where(Application.application_id == application_id)
+        select(Application)
+        .options(selectinload(Application.application_forms))  # Fetch the application forms
+        .where(Application.application_id == application_id)
     ).scalar_one_or_none()
 
     if not application:

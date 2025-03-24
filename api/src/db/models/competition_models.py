@@ -4,7 +4,6 @@ from datetime import date, datetime
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
@@ -105,6 +104,10 @@ class Application(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Competition.competition_id), nullable=False, index=True
     )
     competition: Mapped[Competition] = relationship(Competition)
+
+    application_forms: Mapped[list["ApplicationForm"]] = relationship(
+        "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
+    )
 
 
 class ApplicationForm(ApiSchemaTable, TimestampMixin):
