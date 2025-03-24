@@ -60,14 +60,14 @@ IF_THEN_FORM = FormFactory.build(
         ),
         # Bad format
         (
-                {"StrField": "not an email"},
-                [
-                    ValidationErrorDetail(
-                        message="'not an email' is not a 'email'",
-                        type="format",
-                        field="$.StrField",
-                    )
-                ],
+            {"StrField": "not an email"},
+            [
+                ValidationErrorDetail(
+                    message="'not an email' is not a 'email'",
+                    type="format",
+                    field="$.StrField",
+                )
+            ],
         ),
         # Bad types
         (

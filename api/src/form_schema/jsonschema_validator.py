@@ -21,9 +21,6 @@ def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
         json_schema, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER
     )
 
-    # TODO
-    validator.check_schema(json_schema)
-
     return validator
 
 
