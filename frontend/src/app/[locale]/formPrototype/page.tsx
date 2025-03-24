@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import ClientForm from "./ApplyForm";
-import * as formSchema from "./formSchema.json";
-import * as uiSchema from "./uiSchema.json";
+import ApplyForm from "src/services/applyForm/ApplyForm";
+import * as formSchema from "src/services/applyForm/data/formSchema.json";
+import * as uiSchema from "src/services/applyForm/data/uiSchema.json";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -50,7 +50,7 @@ function FormPage() {
         </abbr>
         ).
       </p>
-      <ClientForm schema={jsonFormSchema} uiSchema={uiSchema} />
+      <ApplyForm schema={jsonFormSchema} uiSchema={uiSchema} />
     </GridContainer>
   );
 }
