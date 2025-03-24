@@ -1,5 +1,3 @@
-from typing import Literal
-
 import requests
 
 from src.adapters.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
