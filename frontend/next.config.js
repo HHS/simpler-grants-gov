@@ -104,6 +104,15 @@ const nextConfig = {
   experimental: {
     testProxy: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/process",
+        destination: "/roadmap",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
