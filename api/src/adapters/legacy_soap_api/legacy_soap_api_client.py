@@ -4,8 +4,6 @@ import requests
 
 from src.adapters.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 
-SoapServiceName = Literal["grantsws-applicant", "grantsws-agency"]
-
 
 class LegacySOAPClient:
     def __init__(self) -> None:
