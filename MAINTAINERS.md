@@ -16,7 +16,6 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Michael Chouinard
 * Mike Huneke
 
-
 ## Content and Design
 
 * Andy Cochran
