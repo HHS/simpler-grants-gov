@@ -211,8 +211,8 @@ class LoadOpportunitiesToIndex(Task):
                 futures = {executor.submit(self.load_records, batch) for batch in batches}
 
                 for future in as_completed(futures):
-                    batch_loaded_opportunity_ids = future.result()
-                    processed_opportunity_ids.update(batch_loaded_opportunity_ids)
+                    batch_processed_opp_ids = future.result()
+                    processed_opportunity_ids.update(batch_processed_opp_ids)
 
             logger.info(f"Indexed {len(processed_opportunity_ids)} opportunities")
 
