@@ -2,7 +2,6 @@ import uuid
 
 import pytest
 from sqlalchemy import select
-
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -504,6 +503,112 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-Auth": "invalid-token"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity=opportunity)
+
+    application = ApplicationFactory.create(competition=competition)
+
+    form_1 = FormFactory.create(
+        form_name="Test Form",
+        form_version="1.0",
+        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
+        form_ui_schema={"name": {"ui:widget": "text"}},
+    )
+
+    application_form_1 = ApplicationFormFactory.create(
+        application=application,
+        form=form_1,
+        application_response={"name": "John Doe"},
+    )
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form_1,
+    )
+
+    form_2 = FormFactory.create(
+        form_name="Test Form 2",
+        form_version="1.0",
+        form_json_schema={"type": "object", "properties": {"other": {"type": "string"}}},
+        form_ui_schema={"other": {"ui:widget": "text"}},
+    )
+
+    application_form_2 = ApplicationFormFactory.create(
+        application=application,
+        form=form_2,
+        application_response={"other": "Some Value"},
+    )
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form_2,
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == str(application.application_id)
+    assert response.json["data"]["competition_id"] == str(competition.competition_id)
+    assert len(response.json["data"]["application_forms"]) == 2
+
+    assert response.json["data"]["application_forms"][0] == {
+        "application_form_id": str(application_form_1.application_form_id),
+        "application_id": str(application.application_id),
+        "form_id": str(form_1.form_id),
+        "application_response": {"name": "John Doe"},
+    }
+    assert response.json["data"]["application_forms"][1] == {
+        "application_form_id": str(application_form_2.application_form_id),
+        "application_id": str(application.application_id),
+        "form_id": str(form_2.form_id),
+        "application_response": {"other": "Some Value"},
+    }
+
+
+def test_application_get_application_not_found(
+    client, enable_factory_create, db_session, api_auth_token
+):
+    non_existent_application_id = str(uuid.uuid4())
+
+    response = client.get(
+        f"/alpha/applications/{non_existent_application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        f"Application with ID {non_existent_application_id} not found" in response.json["message"]
+    )
+
+
+def test_application_get_unauthorized(client, enable_factory_create, db_session):
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity=opportunity)
+
+    application = ApplicationFactory.create(competition=competition)
+
+    ApplicationFormFactory.create(
+        application=application,
+        form=FormFactory.create(
+            form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
+            form_ui_schema={"name": {"ui:widget": "text"}},
+        ),
+        application_response={"name": "John Doe"},
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
         headers={"X-Auth": "invalid-token"},
     )
 
