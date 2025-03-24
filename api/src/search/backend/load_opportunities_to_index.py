@@ -1,10 +1,9 @@
 import base64
 import logging
 import os
-
-from enum import StrEnum
-from typing import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from enum import StrEnum
+from typing import Any, Iterator, Sequence
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -54,7 +53,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     incremental_load_batch_size: int = Field(default=1000)
     incremental_load_max_process_time: int = Field(default=3000)
     # Configurable max worker. Set default to ThreaPoolExecutor default. See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-    incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4) # default
+    incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)  # default
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -126,12 +125,11 @@ class LoadOpportunitiesToIndex(Task):
         # Handle updates/inserts
         self._handle_incremental_upserts(existing_opportunity_ids)
 
-        #Refresh index
+        # Refresh index
         self.search_client.refresh_index(self.index_name)
 
         # Handle deletes
         self._handle_incremental_delete(existing_opportunity_ids)
-
 
     def _build_opportunities_to_process_query(self) -> Select:
         return (
@@ -353,42 +351,52 @@ class LoadOpportunitiesToIndex(Task):
         loaded_opportunity_ids = set()
 
         # This will run in parallel
-        def process_opportunities(record: Opportunity):
-            log_extra = {
-                "opportunity_id": record.opportunity_id,
-                "opportunity_status": record.opportunity_status,
-            }
-            logger.info("Preparing opportunity for upload to search index", extra=log_extra)
+        def process_opportunities(record: Opportunity) -> tuple[dict[str, Any], int] | None:
+            try:
+                log_extra = {
+                    "opportunity_id": record.opportunity_id,
+                    "opportunity_status": record.opportunity_status,
+                }
+                logger.info("Preparing opportunity for upload to search index", extra=log_extra)
 
-            # If the opportunity has a test agency, skip uploading it to the index
-            if record.agency_record and record.agency_record.is_test_agency:
-                logger.info(
-                    "Skipping upload of opportunity as agency is a test agency",
-                    extra=log_extra | {"agency": record.agency_code},
-                )
-                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                # If the opportunity has a test agency, skip uploading it to the index
+                if record.agency_record and record.agency_record.is_test_agency:
+                    logger.info(
+                        "Skipping upload of opportunity as agency is a test agency",
+                        extra=log_extra | {"agency": record.agency_code},
+                    )
+                    self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                    return None
+
+                json_record = schema.dump(record)
+                if self.config.enable_opportunity_attachment_pipeline:
+                    json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                        record.opportunity_attachments
+                    )
+
+                self.increment(self.Metrics.RECORDS_LOADED)
+                return json_record, record.opportunity_id
+
+            except Exception as e:
+                logger.error(f"Error processing opportunity {record.opportunity_id}: {e}")
                 return None
 
-            json_record = schema.dump(record)
-            if self.config.enable_opportunity_attachment_pipeline:
-                json_record["attachments"] = self.get_attachment_json_for_opportunity(
-                    record.opportunity_attachments
-                )
-
-            self.increment(self.Metrics.RECORDS_LOADED)
-            return json_record, record.opportunity_id
-
-        # Create a thread pool for loading opportunities in parallel
+        # Create a thread pool for preparing opportunities in parallel
         with ThreadPoolExecutor(max_workers=self.config.incremental_load_max_workers) as executor:
             futures = []
             for record in records:
                 futures.append(executor.submit(process_opportunities, record))
 
-            for future in futures:
-                result = future.result()
+            for future in as_completed(futures):
+                result = future.result()  # will raise the exception if worker thread fails
                 if result:
                     json_record, opportunity_id = result
                     json_records.append(json_record)
-                    loaded_opportunity_ids.add(opportunity_id)
+                    loaded_opportunity_ids.add(record.opportunity_id)
+
+        if json_records:
+            self.search_client.bulk_upsert(
+                self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
+            )
 
         return loaded_opportunity_ids
