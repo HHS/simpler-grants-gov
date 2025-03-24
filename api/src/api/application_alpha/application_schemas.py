@@ -24,3 +24,14 @@ class ApplicationFormUpdateResponseDataSchema(Schema):
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationFormUpdateResponseDataSchema())
+
+
+class ApplicationFormGetResponseDataSchema(Schema):
+    application_form_id = fields.UUID()
+    application_id = fields.UUID()
+    form_id = fields.UUID()
+    application_response = fields.Dict()
+
+
+class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())

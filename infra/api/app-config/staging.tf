@@ -11,6 +11,7 @@ module "staging_config" {
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
+  enable_notifications            = local.enable_notifications
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
