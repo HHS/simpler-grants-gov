@@ -135,5 +135,6 @@ if [[ "${container_exit_code}" == "null" || "${container_exit_code}" != "0" ]]; 
   task_status=$(aws ecs describe-tasks --cluster "${cluster_name}" --tasks "${task_arn}" --query "tasks[0].[lastStatus,stopCode,stoppedAt,stoppedReason]" --output text)
 
   echo "Container status (lastStatus, exitCode, reason): ${container_status}" >&2
+fi
   echo "Task status (lastStatus, stopCode, stoppedAt, stoppedReason): ${task_status}" >&2
   exit 1
