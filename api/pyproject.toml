@@ -44,7 +44,6 @@ Faker = "^28.0.0"
 factory-boy = "^3.3.0"
 bandit = "^1.7.5"
 pytest = "^8.0.0"
-pytest-watch = "^4.2.0"
 types-pyyaml = "^6.0.12.11"
 setuptools = "^75.0.0"
 pydot = "3.0.4"
@@ -148,7 +147,7 @@ disallow_untyped_defs = false
 # library, we can remove the ignore filter for that library.
 filterwarnings = [
   "ignore::DeprecationWarning:botocore.*",
-] # pytest-watch errors if the closing bracket is on it's own line
+]
 
 markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests",
