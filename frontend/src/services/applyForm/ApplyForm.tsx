@@ -1,17 +1,11 @@
-"use client"
-import { buildFormTreeClosure } from "./utils";
-import { submitApplyForm } from "./actions";
-import { useActionState } from "react";
-import {
-  Button,
-  FormGroup,
-} from "@trussworks/react-uswds";
+"use client";
 
-import {
-  FormSchema,
-  SetFormDataFunction,
-  UiSchema,
-} from "./types";
+import { useActionState } from "react";
+import { Button, FormGroup } from "@trussworks/react-uswds";
+
+import { submitApplyForm } from "./actions";
+import { FormSchema, SetFormDataFunction, UiSchema } from "./types";
+import { buildFormTreeClosure } from "./utils";
 
 /**
  *
@@ -43,13 +37,13 @@ const ApplyForm = ({
 }) => {
   const fields = buildFormTreeClosure(formSchema, uiSchema);
   const [state, formAction] = useActionState(submitApplyForm, {
-      errorMessage: "",
-      validationErrors: "",
+    errorMessage: "",
+    validationErrors: "",
   });
-  
+
   return (
     <form action={formAction}>
-      { state?.errorMessage }
+      {state?.errorMessage}
       <FormGroup>{fields}</FormGroup>
       <Button type="submit">Submit</Button>
     </form>

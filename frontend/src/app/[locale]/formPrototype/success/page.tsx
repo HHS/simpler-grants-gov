@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
-import Link from "next/link";
 
 import BetaAlert from "src/components/BetaAlert";
 
@@ -17,15 +17,13 @@ export function generateMetadata() {
 }
 
 function FormSuccess() {
-
-
   return (
     <GridContainer>
       <BetaAlert />
-      <h1>
-        Form Demo Success
-      </h1>
-      <Link className="usa-button" type="link" href="/formPrototype">Back</Link>
+      <h1>Form Demo Success</h1>
+      <Link className="usa-button" type="link" href="/formPrototype">
+        Back
+      </Link>
     </GridContainer>
   );
 }
