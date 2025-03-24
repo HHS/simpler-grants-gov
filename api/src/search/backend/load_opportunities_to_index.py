@@ -1,7 +1,12 @@
 import base64
 import logging
+import multiprocessing
+import time
+import threading
+from asyncio import as_completed
 from enum import StrEnum
 from typing import Iterator, Sequence
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -48,7 +53,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
         default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
     )
 
-    incremental_load_batch_size: int = Field(default=1000)
+    incremental_load_batch_size: int = Field(default=50)
     incremental_load_max_process_time: int = Field(default=3000)
 
 
@@ -76,6 +81,7 @@ class LoadOpportunitiesToIndex(Task):
         if is_full_refresh:
             current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
             self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
+            self.index_name_attachment = f"{self.config.index_prefix}-attachment-{current_timestamp}"
         else:
             self.index_name = self.config.alias_name
         self.set_metrics({"index_name": self.index_name})
@@ -116,13 +122,22 @@ class LoadOpportunitiesToIndex(Task):
         self.search_client.put_pipeline(pipeline, "multi-attachment")
 
     def incremental_updates_and_deletes(self) -> None:
+        start_time = time.time()
+
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
 
         # Handle updates/inserts
         self._handle_incremental_upserts(existing_opportunity_ids)
 
+        #Refresh index
+        self.search_client.refresh_index(self.index_name)
+
+        elapsed_time = time.time() - start_time
+        logger.error(elapsed_time) #106
+
         # Handle deletes
         self._handle_incremental_delete(existing_opportunity_ids)
+
 
     def _build_opportunities_to_process_query(self) -> Select:
         return (
@@ -180,7 +195,7 @@ class LoadOpportunitiesToIndex(Task):
 
                 processed_opportunity_ids.add(opportunity.opportunity_id)
 
-            # Bulk index the opportunities (handles both inserts and updates)
+            # Bulk upsert the opportunities (handles both inserts and updates)
             loaded_ids = self.load_records(queued_opportunities)
             logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
@@ -240,6 +255,12 @@ class LoadOpportunitiesToIndex(Task):
             replica_count=self.config.replica_count,
         )
 
+        self.search_client.create_index(
+            self.index_name_attachment,
+            shard_count=self.config.shard_count,
+            replica_count=self.config.replica_count,
+        )
+
         # load the records
         for opp_batch in self.fetch_opportunities():
             self.load_records(opp_batch)
@@ -248,10 +269,11 @@ class LoadOpportunitiesToIndex(Task):
         self.search_client.swap_alias_index(
             self.index_name,
             self.config.alias_name,
+            attachment_index=self.index_name_attachment
         )
 
         # cleanup old indexes
-        self.search_client.cleanup_old_indices(self.config.index_prefix, [self.index_name])
+        self.search_client.cleanup_old_indices(self.config.index_prefix, [self.index_name, self.index_name_attachment])
 
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """
@@ -313,6 +335,7 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
+            start_time = time.perf_counter()
             if self.filter_attachment(att):
                 with file_util.open_stream(
                     att.file_location,
@@ -325,6 +348,46 @@ class LoadOpportunitiesToIndex(Task):
                             "data": base64.b64encode(file_content).decode("utf-8"),
                         }
                     )
+            end_time = time.perf_counter()
+            logger.error(f"It took {end_time - start_time:.4f} seconds")
+
+        return attachments
+
+    def get_attachment_json_for_opportunity_parallel(
+        self, opp_attachments: list[OpportunityAttachment]
+    ) -> list[dict]:
+
+        attachments = []
+        def process_attachment(attachment: OpportunityAttachment):
+            start_time = time.perf_counter()
+            if self.filter_attachment(attachment):
+                with file_util.open_stream(
+                    attachment.file_location,
+                    "rb",
+                ) as file:
+                    file_content = file.read()
+                    end_time = time.perf_counter()
+                    logger.error(f"{threading.current_thread().name} took {end_time - start_time:.4f} seconds")
+                    return {
+                            "filename": attachment.file_name,
+                            "data": base64.b64encode(file_content).decode("utf-8"),
+                        }
+            return None
+
+
+        num_cpus = multiprocessing.cpu_count()
+        max_workers = min(num_cpus * 2, 16)
+        logger.error(max_workers)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for att in opp_attachments:
+                futures.append(executor.submit(process_attachment, att))
+
+            for future in as_completed(futures):
+                result = future.result()
+                if result:
+                    attachments.append(result)
 
         return attachments
 
@@ -360,10 +423,11 @@ class LoadOpportunitiesToIndex(Task):
                 continue
 
             json_record = schema.dump(record)
-            if self.config.enable_opportunity_attachment_pipeline:
-                json_record["attachments"] = self.get_attachment_json_for_opportunity(
-                    record.opportunity_attachments
-                )
+
+            start_time = time.perf_counter()
+
+            end_time = time.perf_counter()
+            logger.error(f"For each record it took {end_time - start_time:.4f} seconds")
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
@@ -374,5 +438,84 @@ class LoadOpportunitiesToIndex(Task):
             self.search_client.bulk_upsert(
                 self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
             )
+
+            self.just_attachments(records, loaded_opportunity_ids)
+
+            # if self.config.enable_opportunity_attachment_pipeline:
+            #     json_record["attachments"] = self.get_attachment_json_for_opportunity_parallel(
+            #         record.opportunity_attachments
+            #     )
+            #
+            #
+        return loaded_opportunity_ids
+
+    def just_attachments(self, records: Sequence[Opportunity], loaded_opportunity_ids) -> None:
+        # import pdb;pdb.set_trace()
+        # create the index
+        # self.search_client.delete_index("opportunity-index-attachment")
+
+        attachment_json =[]
+        for record in records:
+            if record.opportunity_id in loaded_opportunity_ids:
+                attachment={}
+                attachment["opportunity_id"] = record.opportunity_id
+                attachment["attachments"] = self.get_attachment_json_for_opportunity_parallel(
+                    record.opportunity_attachments
+                )
+
+                attachment_json.append(attachment)
+
+        self.search_client.bulk_upsert(
+            self.index_name_attachment, attachment_json, "opportunity_id", pipeline="multi-attachment"
+        )
+
+# need to account for delete (query for opp id join with queued opp ids)
+
+    def load_records_parralel(self, records: Sequence[Opportunity]) -> set[int]:
+        logger.info("Loading batch of opportunities...")
+
+        schema = OpportunityV1Schema()
+        json_records = []
+
+        loaded_opportunity_ids = set()
+
+        # This will run in parallel
+        def process_attachments(record):
+            log_extra = {
+                "opportunity_id": record.opportunity_id,
+                "opportunity_status": record.opportunity_status,
+            }
+            logger.info("Preparing opportunity for upload to search index", extra=log_extra)
+
+            # If the opportunity has a test agency, skip uploading it to the index
+            if record.agency_record and record.agency_record.is_test_agency:
+                logger.info(
+                    "Skipping upload of opportunity as agency is a test agency",
+                    extra=log_extra | {"agency": record.agency_code},
+                )
+                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                return None
+
+            json_record = schema.dump(record)
+            if self.config.enable_opportunity_attachment_pipeline:
+                json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                    record.opportunity_attachments
+                )
+
+            self.increment(self.Metrics.RECORDS_LOADED)
+            return json_record, record.opportunity_id
+
+        # Create a thread pool for fetching attachments in parallel
+        with ThreadPoolExecutor(max_workers=50) as executor:
+            futures = []
+            for record in records:
+                futures.append(executor.submit(process_attachments, record))
+
+            for future in futures:
+                result = future.result()  # Wait for the result
+                if result:
+                    json_record, opportunity_id = result
+                    json_records.append(json_record)
+                    loaded_opportunity_ids.add(opportunity_id)
 
         return loaded_opportunity_ids

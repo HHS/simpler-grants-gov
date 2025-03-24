@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 from typing import Any, Generator, Iterable
 
@@ -87,20 +88,76 @@ class SearchClient:
                 f"Failed to create pipeline {pipeline_name}: {error_message}. Status code: {status_code}"
             )
 
+    def generate_actions(self, records, index_name, primary_key_field):
+        for record in records:
+            yield {
+                "_op_type": "index",  # Indexing new or updating existing documents
+                "_index": index_name,
+                "_id": record[primary_key_field],  # Use primary key field for unique document ID
+                "_source": record  # Document to be indexed
+            }
+
+    def bulk_upsert_in_parallel(self, records, index_name, primary_key_field, refresh=True, pipeline=None,
+                                num_threads=4):
+        """
+        Perform bulk upsert in parallel by splitting the records across multiple threads.
+        """
+
+        # Split records into chunks (one chunk for each thread)
+        chunk_size = len(records) // num_threads
+        chunks = [records[i:i + chunk_size] for i in range(0, len(records), chunk_size)]
+
+        # Use ThreadPoolExecutor to run multiple bulk operations in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+            futures = []
+            for chunk in chunks:
+                future = executor.submit(self._bulk_upsert, chunk, index_name, primary_key_field, refresh, pipeline)
+                futures.append(future)
+
+            # Wait for all futures to complete and check for failures
+            results = [future.result() for future in futures]
+
+            # Aggregate the results from all futures
+            total_success = sum(result[0] for result in results)
+            total_failed = sum(result[1] for result in results)
+
+            logger.info(
+                f"Parallel bulk operation completed: {total_success} successful, {total_failed} failed.",
+                extra={"index_name": index_name}
+            )
+
+        return total_success, total_failed
+
+    def parallel_bulk_upsert(self, index_name, records: Iterable[dict[str, Any]], primary_key_field: str,*,  refresh: bool =True, pipeline :str | None = None):
+        """
+        Perform a bulk upsert for a chunk of records.
+        """
+        bulk_args = {
+            "client": self._client,
+            "actions": self.generate_actions(records, index_name, primary_key_field),
+            "refresh": refresh
+        }
+
+        if pipeline:
+            bulk_args["pipeline"] = pipeline
+
+        success, failed = opensearchpy.helpers.bulk(**bulk_args)
+        return success, failed
+
     def bulk_upsert(
         self,
         index_name: str,
         records: Iterable[dict[str, Any]],
         primary_key_field: str,
         *,
-        refresh: bool = True,
+        refresh: bool = False,
         pipeline: str | None = None,
     ) -> None:
         """
         Bulk upsert records to an index
 
         See: https://opensearch.org/docs/latest/api-reference/document-apis/bulk/ for details
-        In this method we only use the "index" operation which creates or updates a record
+        In this method we only use the "update" operation which updates or upsert a record
         based on the id value.
         """
 
@@ -108,11 +165,14 @@ class SearchClient:
 
         for record in records:
             # For each record, we create two entries in the bulk operation list
-            # which include the unique ID + the actual record on separate lines
+            # which includes update operation with the unique ID + the actual record on separate lines
             # When this is sent to the search index, this will send two lines like:
             #
-            # {"index": {"_id": 123}}
-            # {"opportunity_id": 123, "opportunity_title": "example title", ...}
+            # {"update": {"_id": 123}}
+            # {"doc": {"opportunity_id": 123, "opportunity_title": "example title", ...}}
+            # bulk_operations.append({"update": {"_id": record[primary_key_field]}})
+            # bulk_operations.append({"doc": record, "doc_as_upsert": True})
+
             bulk_operations.append({"index": {"_id": record[primary_key_field]}})
             bulk_operations.append(record)
 
@@ -181,7 +241,15 @@ class SearchClient:
         for index in old_indexes:
             self.delete_index(index)
 
-    def swap_alias_index(self, index_name: str, alias_name: str) -> None:
+    def refresh_index(self, index_name: str) -> None:
+        """
+        Refresh index
+        """
+        logger.info("Refreshing index %s", index_name, extra={"index_name": index_name})
+
+        self._client.indices.refresh(index_name)
+
+    def swap_alias_index(self, index_name: str | None, alias_name: str, attachment_index: str | None) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
         attached to the alias, remove them from the alias.
@@ -198,7 +266,7 @@ class SearchClient:
             "Found existing indexes", extra=extra | {"existing_indexes": ",".join(existing_indexes)}
         )
 
-        actions = [{"add": {"index": index_name, "alias": alias_name}}]
+        actions = [{"add":{"index": attachment_index, "alias": alias_name}}, {"add": {"index": index_name, "alias": alias_name}}]
 
         for index in existing_indexes:
             actions.append({"remove": {"index": index, "alias": alias_name}})
