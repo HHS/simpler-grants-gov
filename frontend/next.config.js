@@ -109,7 +109,7 @@ const nextConfig = {
       {
         source: "/process",
         destination: "/roadmap",
-        permanent: true,
+        permanent: false,
       },
     ];
   },
