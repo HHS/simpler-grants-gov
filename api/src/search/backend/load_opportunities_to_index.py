@@ -1,9 +1,10 @@
 import base64
 import logging
 import os
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
-from typing import Any, Iterator, Sequence
+from typing import Iterator, Sequence
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -55,6 +56,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     # Configurable max worker. Set default to ThreaPoolExecutor default.
     # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
     incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
+    batch_size_for_processing: int = Field(default=100)
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -122,12 +124,17 @@ class LoadOpportunitiesToIndex(Task):
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
-
+        start_time = time.time()
         # Handle updates/inserts
         self._handle_incremental_upserts(existing_opportunity_ids)
 
         # Refresh index
         self.search_client.refresh_index(self.index_name)
+
+        end_time = time.time()
+
+        elapsed_time = end_time - start_time
+        logger.error(f"processing time {elapsed_time:.2f}")
 
         # Handle deletes
         self._handle_incremental_delete(existing_opportunity_ids)
@@ -188,9 +195,26 @@ class LoadOpportunitiesToIndex(Task):
 
                 processed_opportunity_ids.add(opportunity.opportunity_id)
 
-            # Bulk index the opportunities (handles both inserts and updates)
-            loaded_ids = self.load_records(queued_opportunities)
-            logger.info(f"Indexed {len(loaded_ids)} opportunities")
+            # Determine how many opportunities each thread will process
+            opportunities_per_thread = max(
+                len(queued_opportunities) // self.config.incremental_load_max_workers, 1
+            )
+            batches = [
+                queued_opportunities[i : i + opportunities_per_thread]
+                for i in range(0, len(queued_opportunities), opportunities_per_thread)
+            ]
+
+            # Create a thread pool for processing and uploading batch of opportunities in parallel
+            with ThreadPoolExecutor(
+                max_workers=self.config.incremental_load_max_workers
+            ) as executor:
+                futures = {executor.submit(self.load_records, batch) for batch in batches}
+
+                for future in as_completed(futures):
+                    batch_loaded_opportunity_ids = future.result()
+                    processed_opportunity_ids.update(batch_loaded_opportunity_ids)
+
+            logger.info(f"Indexed {len(processed_opportunity_ids)} opportunities")
 
             # Update updated_at timestamp instead of deleting records
             self.db_session.execute(
@@ -343,16 +367,14 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def load_records(self, records: Sequence[Opportunity]) -> set[int]:
-        logger.info("Loading batch of opportunities...")
+    def load_records(self, batch: Sequence[Opportunity]) -> set[int]:
+        logger.info("Started loading batch of opportunities...")
 
         schema = OpportunityV1Schema()
-        json_records = []
 
-        loaded_opportunity_ids = set()
-
-        # This will run in parallel
-        def process_opportunities(record: Opportunity) -> tuple[dict[str, Any], int] | None:
+        batch_json_records = []
+        batch_processed_opp_ids = set()
+        for record in batch:
             try:
                 log_extra = {
                     "opportunity_id": record.opportunity_id,
@@ -360,14 +382,16 @@ class LoadOpportunitiesToIndex(Task):
                 }
                 logger.info("Preparing opportunity for upload to search index", extra=log_extra)
 
-                # If the opportunity has a test agency, skip uploading it to the index
+                # Skip opportunity if associated with a test agency
                 if record.agency_record and record.agency_record.is_test_agency:
                     logger.info(
                         "Skipping upload of opportunity as agency is a test agency",
                         extra=log_extra | {"agency": record.agency_code},
                     )
                     self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
-                    return None
+                    #
+                    batch_processed_opp_ids.add(record.opportunity_id)
+                    continue
 
                 json_record = schema.dump(record)
                 if self.config.enable_opportunity_attachment_pipeline:
@@ -376,28 +400,15 @@ class LoadOpportunitiesToIndex(Task):
                     )
 
                 self.increment(self.Metrics.RECORDS_LOADED)
-                return json_record, record.opportunity_id
+                batch_json_records.append(json_record)
+                batch_processed_opp_ids.add(record.opportunity_id)
 
             except Exception as e:
                 logger.error(f"Error processing opportunity {record.opportunity_id}: {e}")
-                return None
 
-        # Create a thread pool for preparing opportunities in parallel
-        with ThreadPoolExecutor(max_workers=self.config.incremental_load_max_workers) as executor:
-            futures = []
-            for record in records:
-                futures.append(executor.submit(process_opportunities, record))
-
-            for future in as_completed(futures):
-                result = future.result()  # will raise the exception if worker thread fails
-                if result:
-                    json_record, opportunity_id = result
-                    json_records.append(json_record)
-                    loaded_opportunity_ids.add(record.opportunity_id)
-
-        if json_records:
+        if batch_json_records:
             self.search_client.bulk_upsert(
-                self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
+                self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment"
             )
 
-        return loaded_opportunity_ids
+        return batch_processed_opp_ids
