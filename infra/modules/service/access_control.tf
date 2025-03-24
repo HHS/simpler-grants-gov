@@ -63,15 +63,15 @@ data "aws_iam_policy_document" "task_executor" {
     resources = [var.image_repository_arn]
   }
 
-  # Allow ECS to download images for New Relic
+  # Allow ECS to download images for fluentbit
   statement {
-    sid = "ECRPullAccessNewRelic"
+    sid = "ECRPullAccessFluentbit"
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
       "ecr:GetDownloadUrlForLayer",
     ]
-    resources = [local.new_relic_fluent_bit_repo_arn]
+    resources = [local.fluent_bit_repo_arn]
   }
 
   dynamic "statement" {

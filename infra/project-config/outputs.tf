@@ -50,3 +50,7 @@ output "project_name" {
 output "system_notifications_config" {
   value = local.system_notifications_config
 }
+
+output "latest_fluent_bit_commit" {
+  value = local.latest_fluent_bit_commit
+}

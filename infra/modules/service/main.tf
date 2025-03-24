@@ -5,6 +5,10 @@ data "aws_ecr_repository" "app" {
   name  = var.image_repository_name
 }
 
+module "project_config" {
+  source = "../../project-config"
+}
+
 data "external" "whoami" {
   program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
@@ -19,19 +23,15 @@ data "external" "deploy_github_sha" {
 }
 
 locals {
-  # The image is via https://docs.newrelic.com/install/aws-logs/?service=ECS&forward_ECS=sidecar_firelens
-  # 533243300146 is an AWS account belonging to New Relic.
-  # Use the following command to get a list of available versions:
-  # aws ecr list-images --repository-name newrelic/logging-firelens-fluentbit --registry-id 533243300146 --query "imageIds[].imageTag" --output text
-  new_relic_fluent_bit_repo_arn = "arn:aws:ecr:${data.aws_region.current.name}:533243300146:repository/newrelic/logging-firelens-fluentbit"
-  new_relic_fluent_bit_version  = "533243300146.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/newrelic/logging-firelens-fluentbit:2.3.0"
-
   alb_name                = var.service_name
   cluster_name            = var.service_name
   container_name          = var.service_name
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
+  fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
+  fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
+  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${module.project_config.latest_fluent_bit_commit}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
@@ -123,7 +123,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name                   = "${local.container_name}-fluent-bit"
-      image                  = local.new_relic_fluent_bit_version,
+      image                  = local.fluent_bit_image_url,
       memory                 = 256,
       cpu                    = 1024,
       networkMode            = "awsvpc",
@@ -133,14 +133,21 @@ resource "aws_ecs_task_definition" "app" {
         type = "fluentbit",
         options = {
           enable-ecs-log-metadata = "true"
+          config-file-type        = "file"
+          config-file-value       = "/fluent-bit/etc/fluent-bit.conf"
         }
       }
       secrets = [
         {
-          name      = "apiKey",
+          name      = "licenseKey",
           valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
         }
       ]
+      environment = [
+        { name : "aws_region", value : data.aws_region.current.name },
+        { name : "container_name", value : local.container_name },
+        { name : "log_group_name", value : local.log_group_name },
+      ],
     },
     {
       name                   = local.container_name,
