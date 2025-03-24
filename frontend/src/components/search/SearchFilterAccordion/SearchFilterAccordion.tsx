@@ -77,6 +77,7 @@ const AccordionContent = ({
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
+  // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const newParamValue = new Set(query);
     isChecked ? newParamValue.add(value) : newParamValue.delete(value);
@@ -100,6 +101,7 @@ const AccordionContent = ({
   const allSelected = new Set(allOptionValues);
 
   // need to add any existing relevant search params to the passed in set
+  // TODO: split this into two functions andimplement within the components where they're used to make it more testable
   const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
     if (all && newSelections) {
       // get existing current selected options for this accordion from url

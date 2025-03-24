@@ -94,4 +94,16 @@ describe("SearchFilterSection", () => {
     expect(hiddenInput).toBeInTheDocument();
     expect(hiddenInput).toHaveAttribute("name", "1-2");
   });
+  it("does not render if there are no children with facetCounts > 0", () => {
+    render(
+      <SearchFilterSection
+        {...defaultProps}
+        facetCounts={{
+          "1st-child-value": 0,
+          "2nd-child-value": 0,
+        }}
+      />,
+    );
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
 });
