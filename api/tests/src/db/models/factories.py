@@ -323,6 +323,11 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
+###################
+# Opportunity Factories
+###################
+
+
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
@@ -420,6 +425,18 @@ class OpportunityFactory(BaseFactory):
                 size=lambda: random.randint(1, 2),
             )
         )
+
+
+class OpportunityVersionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityVersion
+
+    opportunity_version_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
 class OpportunitySummaryFactory(BaseFactory):
@@ -806,6 +823,268 @@ class OpportunityAttachmentFactory(BaseFactory):
         return attachment
 
 
+class OpportunityChangeAuditFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityChangeAudit
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+    is_loaded_to_search = False
+
+
+###################
+# User & Auth Factories
+###################
+
+
+class UserFactory(BaseFactory):
+    class Meta:
+        model = user_models.User
+
+    user_id = Generators.UuidObj
+
+
+class LinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
+
+    email = factory.Faker("email")
+
+
+class UserNotificationLogFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationLog
+
+    user_notification_log_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    notification_reason = "test"
+    notification_sent = True
+
+
+class LoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = user_models.LoginGovState
+
+    login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
+class UserTokenSessionFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserTokenSession
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    token_id = Generators.UuidObj
+
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
+
+    is_valid = True
+
+
+class UserSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunity
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class UserSavedSearchFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedSearch
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    saved_search_id = Generators.UuidObj
+
+    name = factory.Faker("sentence")
+
+    search_query = factory.LazyAttribute(lambda s: s.search_query)
+
+    last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+
+    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+
+
+###################
+# Competition & Form Factories
+###################
+
+
+class CompetitionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Competition
+
+    competition_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    public_competition_id = sometimes_none("ABC-134-56789")
+    legacy_package_id = sometimes_none("PKG-00260155")
+
+    competition_title = sometimes_none(factory.Faker("sentence"))
+
+    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
+    closing_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.opening_date)
+    )
+
+    grace_period = factory.Faker("random_int", min=1, max=10)
+    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+    )
+
+    competition_forms = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.CompetitionFormFactory",
+        factory_related_name="competition",
+        size=lambda: random.randint(1, 2),
+    )
+
+
+class CompetitionInstructionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionInstruction
+
+    competition_instruction_id = Generators.UuidObj
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+    file_location = "file_location"
+
+
+class CompetitionAssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionAssistanceListing
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
+    opportunity_assistance_listing_id = factory.LazyAttribute(
+        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
+    )
+
+
+class FormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Form
+
+    form_id = Generators.UuidObj
+    form_name = factory.Faker("bs")
+    # Form version will be like 1.0, 4.5, etc.
+    form_version = factory.Faker("pystr_format", string_format="#.#")
+    agency_code = factory.Faker("agency_code")
+
+    form_json_schema = {
+        "type": "object",
+        "title": "Test form for testing",
+        "properties": {
+            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
+            "Description": {
+                "title": "Description for application",
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 15,
+            },
+            "ApplicationNumber": {
+                "title": "Application number",
+                "type": "number",
+                "minLength": 1,
+                "maxLength": 120,
+            },
+            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
+        },
+    }
+    form_ui_schema = [
+        {"type": "field", "definition": "/properties/Title"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Date"},
+    ]
+
+
+class CompetitionFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionForm
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+
+    is_required = False
+
+
+###################
+# Application Factories
+###################
+
+
+class ApplicationFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Application
+
+    application_id = Generators.UuidObj
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+    class Params:
+        with_forms = factory.Trait(
+            application_forms=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationFormFactory",
+                factory_related_name="application",
+                size=lambda: random.randint(1, 3),
+            )
+        )
+
+
+class ApplicationFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationForm
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+
+    application_response = factory.LazyFunction(
+        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
+    )
+
+
+###################
+# Agency Factories
+###################
+
+
 class AgencyContactInfoFactory(BaseFactory):
     class Meta:
         model = agency_models.AgencyContactInfo
@@ -867,6 +1146,30 @@ class AgencyFactory(BaseFactory):
     agency_contact_info_id = factory.LazyAttribute(
         lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
     )
+
+
+###################
+# Misc Factories
+###################
+
+
+class ExtractMetadataFactory(BaseFactory):
+    class Meta:
+        model = extract_models.ExtractMetadata
+
+    extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
+    file_name = factory.Faker("file_name")
+    file_path = "s3://bucket/key"
+    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
+
+
+class JobLogFactory(BaseFactory):
+    class Meta:
+        model = task_models.JobLog
+
+    job_id = Generators.UuidObj
+    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
+    metrics = None
 
 
 ####################################
@@ -1714,250 +2017,3 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
-
-
-class OpportunityChangeAuditFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityChangeAudit
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-    is_loaded_to_search = False
-
-
-class UserFactory(BaseFactory):
-    class Meta:
-        model = user_models.User
-
-    user_id = Generators.UuidObj
-
-
-class LinkExternalUserFactory(BaseFactory):
-    class Meta:
-        model = user_models.LinkExternalUser
-
-    link_external_user_id = Generators.UuidObj
-    external_user_id = Generators.UuidObj
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
-
-    email = factory.Faker("email")
-
-
-class UserNotificationLogFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserNotificationLog
-
-    user_notification_log_id = Generators.UuidObj
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    notification_reason = "test"
-    notification_sent = True
-
-
-class LoginGovStateFactory(BaseFactory):
-    class Meta:
-        model = user_models.LoginGovState
-
-    login_gov_state_id = Generators.UuidObj
-    nonce = Generators.UuidObj
-
-
-class ExtractMetadataFactory(BaseFactory):
-    class Meta:
-        model = extract_models.ExtractMetadata
-
-    extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
-    file_name = factory.Faker("file_name")
-    file_path = "s3://bucket/key"
-    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
-
-
-class UserTokenSessionFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserTokenSession
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    token_id = Generators.UuidObj
-
-    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
-
-    is_valid = True
-
-
-class UserSavedOpportunityFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserSavedOpportunity
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-
-class UserSavedSearchFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserSavedSearch
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    saved_search_id = Generators.UuidObj
-
-    name = factory.Faker("sentence")
-
-    search_query = factory.LazyAttribute(lambda s: s.search_query)
-
-    last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-
-    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
-
-
-class CompetitionFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Competition
-
-    competition_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-    public_competition_id = sometimes_none("ABC-134-56789")
-    legacy_package_id = sometimes_none("PKG-00260155")
-
-    competition_title = sometimes_none(factory.Faker("sentence"))
-
-    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.opening_date)
-    )
-
-    grace_period = factory.Faker("random_int", min=1, max=10)
-    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
-
-    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
-    )
-
-    competition_forms = factory.RelatedFactoryList(
-        "tests.src.db.models.factories.CompetitionFormFactory",
-        factory_related_name="competition",
-        size=lambda: random.randint(1, 2),
-    )
-
-
-class CompetitionInstructionFactory(BaseFactory):
-    class Meta:
-        model = competition_models.CompetitionInstruction
-
-    competition_instruction_id = Generators.UuidObj
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-    file_location = "file_location"
-
-
-class CompetitionAssistanceListingFactory(BaseFactory):
-    class Meta:
-        model = competition_models.CompetitionAssistanceListing
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
-    opportunity_assistance_listing_id = factory.LazyAttribute(
-        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
-    )
-
-
-class FormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Form
-
-    form_id = Generators.UuidObj
-    form_name = factory.Faker("bs")
-    # Form version will be like 1.0, 4.5, etc.
-    form_version = factory.Faker("pystr_format", string_format="#.#")
-    agency_code = factory.Faker("agency_code")
-
-    # TODO: https://github.com/HHS/simpler-grants-gov/issues/4168
-    # Update these to be a bit more meaningful
-    form_json_schema = {"type": "object", "properties": {}}
-    form_ui_schema = {}
-
-
-class ApplicationFormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.ApplicationForm
-
-    form = factory.SubFactory(FormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
-    application_response = factory.LazyFunction(
-        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
-    )
-
-
-class CompetitionFormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.CompetitionForm
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    form = factory.SubFactory(FormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
-
-    is_required = False
-
-
-class OpportunityVersionFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityVersion
-
-    opportunity_version_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
-
-
-class JobLogFactory(BaseFactory):
-    class Meta:
-        model = task_models.JobLog
-
-    job_id = Generators.UuidObj
-    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
-    metrics = None
-
-
-class ApplicationFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Application
-
-    application_id = Generators.UuidObj
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
-    )
-
-    class Params:
-        with_forms = factory.Trait(
-            application_forms=factory.RelatedFactoryList(
-                "tests.src.db.models.factories.ApplicationFormFactory",
-                factory_related_name="application",
-                size=lambda: random.randint(1, 3),
-            )
-        )
