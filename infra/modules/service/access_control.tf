@@ -40,7 +40,10 @@ data "aws_iam_policy_document" "task_executor" {
       "logs:PutLogEvents",
       "logs:DescribeLogStreams"
     ]
-    resources = ["${aws_cloudwatch_log_group.service_logs.arn}:*"]
+    resources = [
+      "${aws_cloudwatch_log_group.service_logs.arn}:*",
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:service/${var.service_name}-fluentbit:log-stream:${var.service_name}/${var.service_name}-fluentbit/*"
+    ]
   }
 
   # Allow ECS to authenticate with ECR
