@@ -4,6 +4,7 @@ import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { isCurrentPath } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -33,6 +34,24 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+const NavLink = ({
+  href = "",
+  classes,
+  onClick,
+  text,
+}: {
+  href?: string;
+  classes?: string;
+  onClick: () => void;
+  text: string;
+}) => {
+  return (
+    <Link href={href} key={href} className={classes}>
+      <div onClick={onClick}>{text}</div>
+    </Link>
+  );
+};
 
 const NavLinks = ({
   mobileExpanded,
@@ -97,17 +116,10 @@ const NavLinks = ({
           }
           // mark as current if any child page is active
           return children.some((child) => {
-            return (
-              child?.href &&
-              currentPath.match(
-                new RegExp(`^(?:/e[ns])?${child.href.split("?")[0]}`),
-              )
-            );
+            return child?.href && isCurrentPath(child.href, currentPath);
           });
         } else {
-          return currentPath.match(
-            new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`),
-          );
+          return isCurrentPath(href, currentPath);
         }
       });
       // account for home path as default / not found
@@ -124,6 +136,12 @@ const NavLinks = ({
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
   }, [path, getCurrentNavItemIndex]);
 
+  const closeMobileNav = useCallback(() => {
+    if (mobileExpanded) {
+      onToggleMobileNav();
+    }
+  }, [mobileExpanded, onToggleMobileNav]);
+
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text) {
@@ -135,17 +153,12 @@ const NavLinks = ({
             return <></>;
           }
           return (
-            <Link href={childLink.href || ""} key={childLink.href}>
-              <div
-                onClick={() => {
-                  if (mobileExpanded) {
-                    onToggleMobileNav();
-                  }
-                }}
-              >
-                {childLink.text}
-              </div>
-            </Link>
+            <NavLink
+              href={childLink.href}
+              key={childLink.href}
+              onClick={closeMobileNav}
+              text={childLink.text}
+            />
           );
         });
         return (
@@ -170,33 +183,19 @@ const NavLinks = ({
         );
       }
       return (
-        <Link
-          href={link.href || ""}
+        <NavLink
+          href={link.href}
           key={link.href}
-          className={clsx({
+          onClick={closeMobileNav}
+          text={link.text}
+          classes={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
           })}
-        >
-          <div
-            onClick={() => {
-              if (mobileExpanded) {
-                onToggleMobileNav();
-              }
-            }}
-          >
-            {link.text}
-          </div>
-        </Link>
+        />
       );
     });
-  }, [
-    navLinkList,
-    currentNavItemIndex,
-    mobileExpanded,
-    onToggleMobileNav,
-    secondaryNavOpen,
-  ]);
+  }, [navLinkList, currentNavItemIndex, secondaryNavOpen, closeMobileNav]);
 
   return (
     <PrimaryNav

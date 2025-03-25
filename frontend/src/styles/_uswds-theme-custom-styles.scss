@@ -448,18 +448,6 @@ button.usa-pagination__button.usa-button {
       }
     }
   }
-  // .simpler-subnav-open::after {
-  //   // color: red;
-  //   background-color: #5abf95;
-  //   border-radius: 0;
-  //   content: "";
-  //   display: block;
-  //   position: absolute;
-  //   height: 0.25rem;
-  //   left: 1rem;
-  //   right: 1rem;
-  //   bottom: -0.25rem;
-  // }
   .usa-accordion__button[aria-expanded="true"]::after {
     background-color: color("mint-60");
     border-radius: 0;
