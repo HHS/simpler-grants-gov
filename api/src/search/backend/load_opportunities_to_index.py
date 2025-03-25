@@ -260,7 +260,7 @@ class LoadOpportunitiesToIndex(Task):
 
         # load the records
         for opp_batch in self.fetch_opportunities():
-            self.load_records(opp_batch)
+            self.load_records(opp_batch, refresh=True)
 
         # handle aliasing of endpoints
         self.search_client.swap_alias_index(
@@ -353,7 +353,7 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def load_records(self, records: Sequence[Opportunity]) -> set[int]:
+    def load_records(self, records: Sequence[Opportunity], refresh: bool = False) -> set[int]:
         logger.info("Loading batch of opportunities...")
 
         schema = OpportunityV1Schema()
@@ -392,7 +392,11 @@ class LoadOpportunitiesToIndex(Task):
         # Bulk upsert for the current batch
         if batch_json_records:
             self.search_client.bulk_upsert(
-                self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment", refresh=False
+                self.index_name,
+                batch_json_records,
+                "opportunity_id",
+                pipeline="multi-attachment",
+                refresh=refresh,
             )
 
         return batch_processed_opp_ids
