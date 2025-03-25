@@ -93,7 +93,7 @@ class SearchClient:
         records: Iterable[dict[str, Any]],
         primary_key_field: str,
         *,
-        refresh: bool = False,
+        refresh: bool = True,
         pipeline: str | None = None,
     ) -> None:
         """

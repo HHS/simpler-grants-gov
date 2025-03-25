@@ -199,6 +199,9 @@ class LoadOpportunitiesToIndex(Task):
 
             logger.info(f"Indexed {len(processed_opportunity_ids)} opportunities")
 
+            # refresh index
+            self.search_client.refresh_index(self.index_name)
+
             # Update updated_at timestamp instead of deleting records
             self.db_session.execute(
                 update(OpportunityChangeAudit)
@@ -378,15 +381,9 @@ class LoadOpportunitiesToIndex(Task):
             json_record = schema.dump(record)
 
             if self.config.enable_opportunity_attachment_pipeline:
-                try:
-                    json_record["attachments"] = self.get_attachment_json_for_opportunity(
-                        record.opportunity_attachments
-                    )
-                except Exception:
-                    logger.exception(
-                        "Error preparing opportunity attachment for search index", extra=log_extra
-                    )
-                    continue
+                json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                    record.opportunity_attachments
+                )
 
             self.increment(self.Metrics.RECORDS_LOADED)
             batch_json_records.append(json_record)
@@ -395,10 +392,7 @@ class LoadOpportunitiesToIndex(Task):
         # Bulk upsert for the current batch
         if batch_json_records:
             self.search_client.bulk_upsert(
-                self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment"
+                self.index_name, batch_json_records, "opportunity_id", pipeline="multi-attachment", refresh=False
             )
-
-        # refresh index after batch is processed
-        self.search_client.refresh_index(self.index_name)
 
         return batch_processed_opp_ids
