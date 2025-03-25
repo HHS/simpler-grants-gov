@@ -114,7 +114,7 @@ echo
 
 ecs_task_id=$(basename "${task_arn}")
 
-echo "Task information"a
+echo "Task information"
 echo "  task_arn=${task_arn}"
 echo "  task_id=${ecs_task_id}"
 
