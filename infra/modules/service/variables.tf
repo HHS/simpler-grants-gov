@@ -3,12 +3,6 @@ variable "aws_services_security_group_id" {
   description = "Security group ID for VPC endpoints that access AWS Services"
 }
 
-variable "certificate_arn" {
-  type        = string
-  description = "The ARN of the certificate to use for the application"
-  default     = null
-}
-
 variable "image_repository_name" {
   type        = string
   description = "The name of the container image repository"

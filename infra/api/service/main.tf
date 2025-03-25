@@ -155,8 +155,6 @@ module "service" {
   cert_arn       = local.service_config.domain_name != null ? data.aws_acm_certificate.cert[0].arn : null
   domain_name    = local.service_config.domain_name
   hosted_zone_id = null
-  # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
-  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory
