@@ -172,7 +172,7 @@ resource "aws_ecs_task_definition" "app" {
       volumesFrom    = []
     },
     {
-      name                   = "${local.container_name}-fluent-bit"
+      name                   = "${local.container_name}-fluentbit"
       image                  = local.new_relic_fluent_bit_version,
       memory                 = local.new_relic_fluent_bit_memory,
       cpu                    = local.new_relic_fluent_bit_cpu,
