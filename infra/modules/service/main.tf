@@ -19,6 +19,15 @@ data "external" "deploy_github_sha" {
 }
 
 locals {
+  # The image is via https://docs.newrelic.com/install/aws-logs/?service=ECS&forward_ECS=sidecar_firelens
+  # 533243300146 is an AWS account belonging to New Relic.
+  # Use the following command to get a list of available versions:
+  # aws ecr list-images --repository-name newrelic/logging-firelens-fluentbit --registry-id 533243300146 --query "imageIds[].imageTag" --output text
+  new_relic_fluent_bit_repo_arn = "arn:aws:ecr:${data.aws_region.current.name}:533243300146:repository/newrelic/logging-firelens-fluentbit"
+  new_relic_fluent_bit_version  = "533243300146.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/newrelic/logging-firelens-fluentbit:2.3.0"
+  new_relic_fluent_bit_cpu      = 256
+  new_relic_fluent_bit_memory   = 1024
+
   alb_name                = var.service_name
   cluster_name            = var.service_name
   container_name          = var.service_name
@@ -149,21 +158,48 @@ resource "aws_ecs_task_definition" "app" {
         initProcessEnabled = true
       } : null,
       logConfiguration = {
-        logDriver = "awslogs",
+        logDriver = "awsfirelens",
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.service_logs.name,
-          "awslogs-region"        = data.aws_region.current.name,
-          "awslogs-stream-prefix" = local.log_stream_prefix
-        }
+          Name = "newrelic",
+        },
+        secretOptions = [{
+          name      = "apiKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
+        }]
       }
       mountPoints    = []
       systemControls = []
       volumesFrom    = []
-    }
+    },
+    {
+      name                   = "${local.container_name}-fluent-bit"
+      image                  = local.new_relic_fluent_bit_version,
+      memory                 = local.new_relic_fluent_bit_memory,
+      cpu                    = local.new_relic_fluent_bit_cpu,
+      networkMode            = "awsvpc",
+      essential              = true,
+      readonlyRootFilesystem = false,
+      firelensConfiguration = {
+        type = "fluentbit",
+        options = {
+          enable-ecs-log-metadata = "true"
+        }
+      }
+      secrets = [
+        {
+          name      = "apiKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
+        }
+      ]
+    },
   ])
 
-  cpu    = var.cpu
-  memory = var.memory
+  # Take the larger of the two values for CPU and Memory and multiply by 2
+  # We need to do this because the task definition requires an aggregate value for CPU and Memory.
+  # We can't simply add them together, because the resulting value needs to be on this list
+  # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
+  cpu    = var.cpu > local.new_relic_fluent_bit_cpu ? var.cpu * 2 : local.new_relic_fluent_bit_cpu * 2
+  memory = var.memory > local.new_relic_fluent_bit_memory ? var.memory * 2 : local.new_relic_fluent_bit_memory * 2
 
   requires_compatibilities = ["FARGATE"]
 

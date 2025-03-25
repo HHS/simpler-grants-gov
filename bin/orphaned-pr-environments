@@ -1,0 +1,45 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# This script checks for orphaned PR environments by listing all PR workspaces
+# and checking if the associated PR is closed. If the PR is closed the
+# resources in the workspace should have been destroyed and the workspace
+# deleted, so existing workspaces for closed PRs are considered orphaned.
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+app_name="$1"
+
+echo "::group::Initialize Terraform"
+echo terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+echo "::endgroup::"
+
+echo "::group::List PRs with PR environments"
+echo terraform -chdir="infra/${app_name}/service" workspace list
+workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
+pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+' | sed 's/p-//')"
+echo "PRs"
+echo "${pr_nums}"
+echo "::endgroup::"
+
+echo "::group::Check status of each PR"
+closed_prs=()
+for pr_num in $pr_nums; do
+  pr_status="$(gh pr view "$pr_num" --json state --jq ".state")"
+  echo "PR ${pr_num}: ${pr_status}"
+
+  if [ "$pr_status" == "CLOSED" ]; then
+    closed_prs+=("$pr_num")
+  fi
+done
+echo "::endgroup::"
+
+# if closed_prs is not empty exit with 1 otherwise exit with 0
+if [ ${#closed_prs[@]} -gt 0 ]; then
+  echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}"
+  echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}" >> "${GITHUB_STEP_SUMMARY}"
+  exit 1
+fi
+
+echo "No orphaned PR environments"
+echo "No orphaned PR environments" >> "${GITHUB_STEP_SUMMARY}"

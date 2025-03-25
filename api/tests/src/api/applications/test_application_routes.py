@@ -1,31 +1,20 @@
 import uuid
 
-import pytest
 from sqlalchemy import select
 
-from src.db.models.competition_models import Application, ApplicationForm, Competition
-from tests.lib.db_testing import cascade_delete_from_db_table
+from src.db.models.competition_models import Application, ApplicationForm
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
-    OpportunityFactory,
 )
-
-
-@pytest.fixture(autouse=True)
-def clear_competitions(db_session):
-    cascade_delete_from_db_table(db_session, ApplicationForm)
-    cascade_delete_from_db_table(db_session, Competition)
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
     """Test successful creation of an application"""
-
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
+    competition = CompetitionFactory.create()
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
@@ -65,15 +54,20 @@ def test_application_start_competition_not_found(
     )
 
     # Verify no application was created
-    applications_count = db_session.execute(select(Application)).scalars().all()
+    applications_count = (
+        db_session.execute(
+            select(Application).where(Application.competition_id == non_existent_competition_id)
+        )
+        .scalars()
+        .all()
+    )
     assert len(applications_count) == 0
 
 
 def test_application_start_unauthorized(client, enable_factory_create, db_session):
     """Test application creation fails without proper authentication"""
 
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
+    competition = CompetitionFactory.create()
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
@@ -85,7 +79,11 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
     assert response.status_code == 401
 
     # Verify no application was created
-    applications_count = db_session.execute(select(Application)).scalars().all()
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
     assert len(applications_count) == 0
 
 
@@ -93,6 +91,8 @@ def test_application_start_invalid_request(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application creation fails with invalid request data"""
+    application_count_before = len(db_session.execute(select(Application)).scalars().all())
+
     request_data = {"my_field": {"a": 1, "b": [{"c": "hello"}]}}
 
     response = client.post(
@@ -103,32 +103,20 @@ def test_application_start_invalid_request(
 
     # Verify no application was created
     applications_count = db_session.execute(select(Application)).scalars().all()
-    assert len(applications_count) == 0
+    assert len(applications_count) == application_count_before
 
 
 def test_application_form_update_success_create(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test successful creation of an application form response"""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
-
     # Create application
-    application = ApplicationFactory.create(competition=competition)
+    application = ApplicationFactory.create()
 
-    # Create form
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-
-    CompetitionFormFactory.create(
-        competition=competition,
-        form=form,
-    )
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     application_id = str(application.application_id)
-    form_id = str(form.form_id)
+    form_id = str(competition_form.form_id)
     request_data = {"application_response": {"name": "John Doe"}}
 
     response = client.put(
@@ -147,7 +135,7 @@ def test_application_form_update_success_create(
     application_form = db_session.execute(
         select(ApplicationForm).where(
             ApplicationForm.application_id == application.application_id,
-            ApplicationForm.form_id == form.form_id,
+            ApplicationForm.form_id == competition_form.form_id,
         )
     ).scalar_one_or_none()
 
@@ -159,29 +147,20 @@ def test_application_form_update_success_update(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test successful update of an existing application form response"""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
     # Create application
-    application = ApplicationFactory.create(competition=competition)
-
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
+    application = ApplicationFactory.create()
 
     existing_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
         application_response={"name": "Original Name"},
     )
     CompetitionFormFactory.create(
-        competition=competition,
-        form=form,
+        competition=application.competition,
+        form=existing_form.form,
     )
 
     application_id = str(application.application_id)
-    form_id = str(form.form_id)
+    form_id = str(existing_form.form_id)
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
@@ -203,12 +182,7 @@ def test_application_form_update_application_not_found(
 ):
     """Test application form update fails when application doesn't exist"""
     # Create form
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-    db_session.add(form)
-    db_session.commit()
+    form = FormFactory.create()
 
     non_existent_application_id = str(uuid.uuid4())
     form_id = str(form.form_id)
@@ -227,7 +201,11 @@ def test_application_form_update_application_not_found(
     )
 
     # Verify no application form was created
-    application_forms = db_session.execute(select(ApplicationForm)).scalars().all()
+    application_forms = (
+        db_session.execute(select(ApplicationForm).where(ApplicationForm.form_id == form_id))
+        .scalars()
+        .all()
+    )
     assert len(application_forms) == 0
 
 
@@ -235,15 +213,9 @@ def test_application_form_update_form_not_found(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application form update fails when form doesn't exist"""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
 
     # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
-    db_session.commit()
+    application = ApplicationFactory.create()
 
     application_id = str(application.application_id)
     non_existent_form_id = str(uuid.uuid4())
@@ -261,36 +233,25 @@ def test_application_form_update_form_not_found(
     assert "not found or not attached" in response.json["message"]
 
     # Verify no application form was created
-    application_forms = db_session.execute(select(ApplicationForm)).scalars().all()
+    application_forms = (
+        db_session.execute(
+            select(ApplicationForm).where(ApplicationForm.application_id == application_id)
+        )
+        .scalars()
+        .all()
+    )
     assert len(application_forms) == 0
 
 
 def test_application_form_update_unauthorized(client, enable_factory_create, db_session):
     """Test application form update fails without proper authentication"""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
-
-    # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
-
-    # Create form
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-    db_session.add(form)
-    db_session.commit()
-
-    application_id = str(application.application_id)
-    form_id = str(form.form_id)
     request_data = {"application_response": {"name": "John Doe"}}
+
+    application = ApplicationFactory.create()
 
     # Act
     response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}",
+        f"/alpha/applications/{application.application_id}/forms/{uuid.uuid4()}",
         json=request_data,
         headers={"X-Auth": "invalid-token"},
     )
@@ -299,7 +260,15 @@ def test_application_form_update_unauthorized(client, enable_factory_create, db_
     assert response.status_code == 401
 
     # Verify no application form was created
-    application_forms = db_session.execute(select(ApplicationForm)).scalars().all()
+    application_forms = (
+        db_session.execute(
+            select(ApplicationForm).where(
+                ApplicationForm.application_id == application.application_id
+            )
+        )
+        .scalars()
+        .all()
+    )
     assert len(application_forms) == 0
 
 
@@ -307,31 +276,13 @@ def test_application_form_update_invalid_request(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application form update fails with invalid request data"""
-    # Arrange
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity_id=opportunity.opportunity_id)
-
-    # Create application
-    application = Application(
-        application_id=uuid.uuid4(), competition_id=competition.competition_id
-    )
-    db_session.add(application)
-
-    # Create form
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-    db_session.add(form)
-    db_session.commit()
-
-    application_id = str(application.application_id)
-    form_id = str(form.form_id)
     request_data = {}  # Missing required application_response
+
+    application = ApplicationFactory.create()
 
     # Act
     response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}",
+        f"/alpha/applications/{application.application_id}/forms/{uuid.uuid4()}",
         json=request_data,
         headers={"X-Auth": api_auth_token},
     )
@@ -340,7 +291,15 @@ def test_application_form_update_invalid_request(
     assert response.status_code == 422  # Validation error
 
     # Verify no application form was created
-    application_forms = db_session.execute(select(ApplicationForm)).scalars().all()
+    application_forms = (
+        db_session.execute(
+            select(ApplicationForm).where(
+                ApplicationForm.application_id == application.application_id
+            )
+        )
+        .scalars()
+        .all()
+    )
     assert len(application_forms) == 0
 
 
@@ -348,29 +307,20 @@ def test_application_form_update_complex_json(
     client, enable_factory_create, db_session, api_auth_token
 ):
     """Test application form update with complex JSON data"""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
     # Create application
-    application = ApplicationFactory.create(competition=competition)
-
-    form = FormFactory.create(
-        form_json_schema={"type": "object"},
-        form_ui_schema={},
-    )
+    application = ApplicationFactory.create()
 
     application_form = ApplicationFormFactory.create(
-        application_id=application.application_id,
-        form_id=form.form_id,
+        application=application,
     )
 
     CompetitionFormFactory.create(
-        competition=competition,
-        form=form,
+        competition=application.competition,
+        form=application_form.form,
     )
 
     application_id = str(application.application_id)
-    form_id = str(form.form_id)
+    form_id = str(application_form.form_id)
     complex_json = {
         "personal_info": {
             "name": "John Doe",
@@ -399,10 +349,11 @@ def test_application_form_update_complex_json(
     assert response.json["message"] == "Success"
 
     # Verify application form was created with complex JSON
+    db_session.expunge_all()
     application_form = db_session.execute(
         select(ApplicationForm).where(
             ApplicationForm.application_id == application.application_id,
-            ApplicationForm.form_id == form.form_id,
+            ApplicationForm.form_id == application_form.form_id,
         )
     ).scalar_one_or_none()
 
@@ -411,39 +362,25 @@ def test_application_form_update_complex_json(
 
 
 def test_application_form_get_success(client, enable_factory_create, db_session, api_auth_token):
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
-    application = ApplicationFactory.create(competition=competition)
-
-    form = FormFactory.create(
-        form_name="Test Form",
-        form_version="1.0",
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
-
     application_form = ApplicationFormFactory.create(
-        application=application,
-        form=form,
         application_response={"name": "John Doe"},
     )
 
     CompetitionFormFactory.create(
-        competition=competition,
-        form=form,
+        competition=application_form.application.competition,
+        form=application_form.form,
     )
 
     response = client.get(
-        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
         headers={"X-Auth": api_auth_token},
     )
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
-    assert response.json["data"]["application_id"] == str(application.application_id)
-    assert response.json["data"]["form_id"] == str(form.form_id)
+    assert response.json["data"]["application_id"] == str(application_form.application_id)
+    assert response.json["data"]["form_id"] == str(application_form.form_id)
     assert response.json["data"]["application_response"] == {"name": "John Doe"}
 
 
@@ -467,10 +404,7 @@ def test_application_form_get_application_not_found(
 def test_application_form_get_form_not_found(
     client, enable_factory_create, db_session, api_auth_token
 ):
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
-    application = ApplicationFactory.create(competition=competition)
+    application = ApplicationFactory.create()
 
     non_existent_app_form_id = str(uuid.uuid4())
 
@@ -486,24 +420,71 @@ def test_application_form_get_form_not_found(
 
 
 def test_application_form_get_unauthorized(client, enable_factory_create, db_session):
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
 
-    application = ApplicationFactory.create(competition=competition)
-
-    form = FormFactory.create(
-        form_json_schema={"type": "object", "properties": {"name": {"type": "string"}}},
-        form_ui_schema={"name": {"ui:widget": "text"}},
-    )
+    application = ApplicationFactory.create()
 
     application_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
         application_response={"name": "John Doe"},
     )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-Auth": "invalid-token"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
+    application = ApplicationFactory.create(with_forms=True)
+    application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == str(application.application_id)
+    assert response.json["data"]["competition_id"] == str(application.competition_id)
+    response_application_forms = sorted(
+        response.json["data"]["application_forms"], key=lambda x: x["application_form_id"]
+    )
+    assert len(response_application_forms) == len(application_forms)
+    for application_form, application_form_response in zip(
+        application_forms, response_application_forms, strict=True
+    ):
+        assert application_form_response == {
+            "application_form_id": str(application_form.application_form_id),
+            "application_id": str(application.application_id),
+            "form_id": str(application_form.form_id),
+            "application_response": application_form.application_response,
+        }
+
+
+def test_application_get_application_not_found(
+    client, enable_factory_create, db_session, api_auth_token
+):
+    non_existent_application_id = str(uuid.uuid4())
+
+    response = client.get(
+        f"/alpha/applications/{non_existent_application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        f"Application with ID {non_existent_application_id} not found" in response.json["message"]
+    )
+
+
+def test_application_get_unauthorized(client, enable_factory_create, db_session):
+    application = ApplicationFactory.create()
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
         headers={"X-Auth": "invalid-token"},
     )
 

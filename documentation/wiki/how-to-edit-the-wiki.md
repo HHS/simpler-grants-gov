@@ -1,10 +1,10 @@
 # How to edit the wiki
 
+The Simpler.Grants.gov public wiki is a collaborative resource. Any internal team member may submit a change request (CR) to update or add content to the wiki. We created a protocol everyone should follow to ensure the wiki aligns with our needs and quality standards.
+
 ### Change requests
 
-The Simpler.Grants.gov public wiki is a collaborative resource. Any internal team member may submit a change request (CR) to update or add content to the wiki. We created a protocol everyone must follow to ensure the wiki aligns with our needs and quality standards.
-
-* **Before merging the changes, you must request a review from at least one content owner.** GitBook will email you when the content owner has approved the CR. At that point, you can merge the changes. Use the following table to identify the correct content owner to tag in your request:
+* **Before merging changes, you must request a review from at least one content owner.** GitBook will email you when the content owner has approved the CR. At that point, you can merge the changes. Use the following table to identify the correct content owner to tag in your request:
 
 <table><thead><tr><th width="218.8125">Type of content</th><th width="245.98046875">Content owners / CR approvers</th><th>Content owners by name</th></tr></thead><tbody><tr><td><strong>Welcome</strong> page</td><td>Nava Content Strategist</td><td>Michelle M.</td></tr><tr><td><strong>Get involved</strong> section</td><td>Nava Open Source Evangelist<br>Nava Content Strategist</td><td>Brandon T.<br>Michelle M.</td></tr><tr><td><strong>Product</strong> section</td><td>Nava Product Manager</td><td>Max K.<br>Chris W.</td></tr><tr><td><strong>Design &#x26; Research</strong> section</td><td>Nava Design Lead<br>Nava Content Strategist</td><td>Andy C.<br>Michelle M.</td></tr><tr><td><strong>References</strong> section</td><td>Nava Content Strategist</td><td>Michelle M.</td></tr></tbody></table>
 
@@ -19,17 +19,17 @@ The Simpler.Grants.gov public wiki is a collaborative resource. Any internal tea
 
 ### Git commit history
 
-Our official method and source of truth for tracking changes is GitBook’s [commit history](https://github.com/HHS/simpler-grants-gov/commits/main/documentation/wiki). This process automatically captures the person’s name, the changes, and the date/time of the change.
+Our official method and source of truth for tracking changes is GitBook’s [commit history](https://github.com/HHS/simpler-grants-gov/commits/main/documentation/wiki). This process automatically captures the person’s name, the changes, and the date/time of the change.\
+\
+GitBook will generate a default title for the CR as `[Name’s] [Date] changes`. You need to re-title it to match our naming convention.
 
-* When submitting the CR, follow this naming convention:
+* Naming convention:
   * `[GitHub issue #]: Short description`
-  * Example: `#1234: Altered format of images in brand guidelines`&#x20;
+    * Example: `#1234: Altered format of images in brand guidelines`&#x20;
+  * Omit the GitHub issue number if none is associated with your changes.
+    * Example: `Altered format of images in brand guidelines`&#x20;
 
-<figure><img src=".gitbook/assets/CR Title (1).png" alt=""><figcaption><p>Rename your change request in the top left of the header</p></figcaption></figure>
-
-* You may omit the GitHub issue If none is associated with the CR.
-  * Example: `Altered format of images in brand guidelines`&#x20;
-* Note: GitBook automatically generates a default title for the CR as `[Name’s] [Date] changes`. You will have to change it according to the convention above.
+<figure><img src=".gitbook/assets/CR Title (1).png" alt="Header of the wiki&#x27;s editor with an arrow pointing to the field where the CR should be re-titled"><figcaption><p>Rename your change request in the top left of the header</p></figcaption></figure>
 
 ### Change logs
 
@@ -42,12 +42,12 @@ Change logs have historically existed on each wiki page. However, as of March 20
 ### How to use GitBook to make edits
 
 1. Log in to GitBook: [https://app.gitbook.com/](https://app.gitbook.com/)
-2. In the top left corner, it should say "Simpler Grants." If not, you're in the wrong workspace—click it to switch to the correct workspace.
-3. Go to “Public Wiki” under the ’Spaces’ section of the left nav
-4. Click “Edit”
-5. Make changes
-6. Name the change using the instructions in "Git commit history" above
-7. Click the arrow next to “Merge” to open the option to "Request a review"
-8. Add reviewers using the "content owners" table above
-9. When you receive an email that your change was reviewed, use the "Merge" button.
+2. In the top left corner, it should say **Simpler Grants**. If not, you're in the wrong workspace—click it to switch to the correct workspace. If you don't see the option, ask Michelle M. or anyone from A6 to give you 'reviewer' permissions.
+3. Go to `Public Wiki` , under the `Spaces` section of the left nav.
+4. Click `Edit` .
+5. Make your changes.
+6. Name the change using the instructions in "Git commit history" above.
+7. Click the arrow next to `Merge` to open the option to `Request a review` .
+8. Add reviewers using the "content owners" table above.
+9. When you receive an email that your change was reviewed, use the `Merge` button to publish your changes.
 

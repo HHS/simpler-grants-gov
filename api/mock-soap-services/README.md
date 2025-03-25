@@ -31,9 +31,7 @@ There are some issues when utilizing the WSDLs and xsd schemas directly from the
 1. Navigate to `/api` directory.
 2. Run the following command
     ```bash
-    docker run --rm -ti -p 8082:8080 \
-        -v $PWD/mock-soap-services/applicants/:/opt/imposter/config \
-        outofcoffee/imposter
+    make start-mock-soap-services
     ```
 3. Send the following POST request to execute `GetOpportunityList` operation:
     ```bash
