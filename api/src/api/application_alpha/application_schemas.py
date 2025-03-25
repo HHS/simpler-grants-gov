@@ -35,3 +35,13 @@ class ApplicationFormGetResponseDataSchema(Schema):
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationGetResponseDataSchema(Schema):
+    application_id = fields.UUID()
+    competition_id = fields.UUID()
+    application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
+
+
+class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(ApplicationGetResponseDataSchema())
