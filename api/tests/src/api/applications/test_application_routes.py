@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import select
+
 from src.db.models.competition_models import Application, ApplicationForm
 from tests.src.db.models.factories import (
     ApplicationFactory,
