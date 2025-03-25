@@ -897,6 +897,43 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/application_form/{app_form_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: app_form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Get an application form by ID
+      security:
+      - ApiKeyAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -2228,11 +2265,38 @@ components:
           description: The JSON Schema representation of the form
           example:
             type: object
-            properties: {}
+            title: Test form for testing
+            properties:
+              Title:
+                title: Title
+                type: string
+                minLength: 1
+                maxLength: 60
+              Description:
+                title: Description for application
+                type: string
+                minLength: 0
+                maxLength: 15
+              ApplicationNumber:
+                title: Application number
+                type: number
+                minLength: 1
+                maxLength: 120
+              Date:
+                title: 'Date of application '
+                type: string
+                format: date
         form_ui_schema:
-          type: object
           description: The UI Schema of the form for front-end rendering
-          example: {}
+          example:
+          - type: field
+            definition: /properties/Title
+          - type: field
+            definition: /properties/Description
+          - type: field
+            definition: /properties/ApplicationNumber
+          - type: field
+            definition: /properties/Date
     FormResponseAlpha:
       type: object
       properties:
@@ -2765,7 +2829,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type:
+            type: &id007
             - object
             allOf:
             - $ref: '#/components/schemas/ValidationIssue'
@@ -2791,6 +2855,47 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormGetResponseData:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_response:
+          type: object
+    ApplicationFormGetResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: *id007
+            allOf:
+            - $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code

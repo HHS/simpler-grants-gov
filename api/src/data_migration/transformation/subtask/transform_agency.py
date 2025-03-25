@@ -1,4 +1,5 @@
 import logging
+import typing
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
@@ -96,9 +97,15 @@ REQUIRED_FIELDS = {
 class AgencyConfig(PydanticBaseEnvConfig):
     # TODO - we might want to put this somewhere more central
     #        as we might want to filter these out in other places
-    test_agency_config: set[str] = Field(
-        default={"GDIT", "IVV", "IVPDF", "0001", "FGLT", "NGMS", "NGMS-Sub1", "SECSCAN"}
+    prefix_env: str = Field(
+        default="GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN", alias="TEST_AGENCY_PREFIXES"
     )
+    test_agency_config: set[str] = Field(default=set())
+
+    def model_post_init(self, _context: typing.Any) -> None:
+        """Run after __init__ sets above values from env vars"""
+
+        self.test_agency_config = set(self.prefix_env.split(","))
 
 
 @dataclass
