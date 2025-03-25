@@ -111,7 +111,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
 class LinkAgencyDownloadFileType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_agency_download_file_type"
 
-    agency_id: Mapped[int] = mapped_column(
+    agency_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey(Agency.agency_id),
         primary_key=True,
