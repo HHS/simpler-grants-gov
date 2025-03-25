@@ -94,6 +94,78 @@ notable constraint of OpenSearch, relative to ECS and the Database.
 
 We manage several secret values that need to be rotated yearly.
 
+### Application Certificates
+
+#### Application Certificates: Part 1: Generate A Cert
+
+The process starts by generating a cert like so. You will need to generate the certs one at a time.
+
+```bash
+# api.simpler.grants.gov example
+
+$ openssl genrsa -out api_simpler_grants_gov.key 2048
+$ openssl req -new \
+    -key api_simpler_grants_gov.key \
+    -out api_simpler_grants_gov.csr \
+    -subj "/C=US/O=Simpler Grants Gov/CN=api.simpler.grants.gov" \
+    -addext "subjectAltName=DNS:api.simpler.grants.gov"
+
+# simpler.grants.gov example
+
+$ openssl genrsa -out simpler_grants_gov.key 2048
+$ openssl req -new \
+    -key simpler_grants_gov.key \
+    -out simpler_grants_gov.csr \
+    -subj "/C=US/O=Simpler Grants Gov/CN=simpler.grants.gov" \
+    -addext "subjectAltName=DNS:simpler.grants.gov"
+```
+
+You give the `{url}.csr` file to HHS so that they can perform the next step. When they get back to you, proceed to part 2a
+
+#### Application Certificates: Part 2a: Upload A Single Cert
+
+You will get a zip file back from HHS containing the certificate. Inside the zip there will be a file. If it isn't called `{url}.key` then rename it so that that's its name.
+
+```bash
+# api.simpler.grants.gov example
+
+$ aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+$ aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+If you get the following error...
+
+> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
+
+...then go on to part 2b. If not, then go to part 3
+
+#### Application Certificates: Part 2b: Upload Multiple Certs
+
+If there are multiple certificates (eg. a chain certificate is included) then there will be another file called something like `{url}_chain.key` the command looks more like this
+
+```bash
+# api.simpler.grants.gov example
+
+$ aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+    --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+$ aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+    --certificate-chain fileb://simpler_grants_gov_chain.pem \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+#### Application Certificates: Part 3
+
+TODO
+
 ### Login.gov Certificates
 
 *These certificates were last updated in December 2024*
