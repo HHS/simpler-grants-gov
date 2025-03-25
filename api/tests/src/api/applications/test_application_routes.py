@@ -1,7 +1,6 @@
 import uuid
 
 from sqlalchemy import select
-
 from src.db.models.competition_models import Application, ApplicationForm
 from tests.src.db.models.factories import (
     ApplicationFactory,
@@ -438,15 +437,7 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
 
 def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
     application = ApplicationFactory.create(with_forms=True)
-    application_forms = (
-        db_session.execute(
-            select(ApplicationForm).where(
-                ApplicationForm.application_id == application.application_id
-            )
-        )
-        .scalars()
-        .all()
-    )
+    application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -457,9 +448,12 @@ def test_application_get_success(client, enable_factory_create, db_session, api_
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
     assert response.json["data"]["competition_id"] == str(application.competition_id)
-    assert len(response.json["data"]["application_forms"]) == len(application_forms)
+    response_application_forms = sorted(
+        response.json["data"]["application_forms"], key=lambda x: x["application_form_id"]
+    )
+    assert len(response_application_forms) == len(application_forms)
     for application_form, application_form_response in zip(
-        application_forms, response.json["data"]["application_forms"], strict=False
+        application_forms, response_application_forms, strict=True
     ):
         assert application_form_response == {
             "application_form_id": str(application_form.application_form_id),
