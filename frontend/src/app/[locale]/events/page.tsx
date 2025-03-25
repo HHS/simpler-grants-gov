@@ -14,18 +14,26 @@ export default function Events() {
       data-testid="events-hero"
       className="events-hero bg-primary-darkest text-white"
     >
+      <Breadcrumbs breadcrumbList={EVENTS_CRUMBS} />
       <GridContainer
-        className=""
+        className="padding-bottom-6 padding-x-6"
       >
-        <Grid>
-          <Breadcrumbs breadcrumbList={EVENTS_CRUMBS} />
-          <h1>Events</h1>
-          <p>From new developments to upcoming opportunities, we want you to be a part of the journey.</p>
-          <Image
-            alt="events-img"
-            className="height-auto position-relative"
-            src={EventsHeroImg}
-          />
+        <Grid row>
+          <Grid tablet={{
+            col: true
+          }}>
+            <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">Events</h1>
+            <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance">From new developments to upcoming opportunities, we want you to be a part of the journey.</p>
+          </Grid>
+          <Grid tablet={{
+            col: true
+          }}>
+            <Image
+              alt="events-img"
+              className="height-auto position-relative"
+              src={EventsHeroImg}
+            />
+          </Grid>
         </Grid>
       </GridContainer>
     </div>
