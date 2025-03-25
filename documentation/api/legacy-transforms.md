@@ -10,14 +10,16 @@ broadly works like so:
 * We copy over all records, and any that are missing we mark as deleted
 * For each table, we have a separate transformation process for handling the conversion from the existing system to ours (very custom)
 
-# Table Setup
+# Staging & Foreign Table Setup
 For each table we want to copy, we create a table definition in SQLAlchemy
 that is then used for both a "staging" table where we'll copy the data (unchanged)
 and another table is used for a foreign data wrapper to Oracle - [oracle_fdw](https://github.com/laurenz/oracle_fdw).
 
+**The order that columns are defined must match exactly to what is defined in Oracle**
+
 Let us assume we want to copy the following Oracle table:
 ```sql
-CREATE TABLE example(
+CREATE TABLE texample(
     example_id NUMBER(6) NOT NULL,
     name     VARCHAR2(45) NOT NULL,
     email    VARCHAR2(30),
@@ -25,16 +27,256 @@ CREATE TABLE example(
     PRIMARY KEY(example_id)
 );
 ```
-We want to create an equivalent
+We would create a mixin class like so:
+```py
+import datetime
+
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+
+@declarative_mixin
+class TExampleMixin:
+    user_account_id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    email: Mapped[str | None]
+    created_date: Mapped[datetime]
+```
+
+And then create two separate class definitions, one for the staging table, and one for the legacy/foreign data wrapper table.
+```py
+# Create this in api/src/db/models/staging
+from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
+
+class TExample(StagingBase, TExampleMixin, StagingParamMixin):
+    __tablename__ = "texample"
+```
+and
+```py
+# Create this in api/src/db/models/foreign
+from . import foreignbase
+
+class TExample(foreignbase.ForeignBase, TExampleMixin):
+    __tablename__ = "texample"
+```
+
+We don't need to perfectly match everything about the Oracle system, it's fine to do the following:
+* Different column types - see [Type Mapping](#type-mapping) for details
+*
 
 ## Type Mapping
 The oracle_fdw handles most type conversions for us which means we don't
 need to match the types as exactly as you might think. Here are a few general type
 mappings you can follow:
-* VARCHAR(x) -> TEXT
+* VARCHAR(x)/VARCHAR2(x) -> TEXT
 * CHAR(x) -> TEXT
 * NUMBER(x) -> Generally Integer/BigInteger, if it is defined as "Number(x,y)" that means it's a floating point number and should not be an int
 * DATE -> TIMESTAMP, the date type in Oracle stores time info as well, so can convert to timestamp
+* BLOB -> Depends on what the blob represents, if it's a file, BYTEA works
 
-# Create Foreign Data Wrappers
-TODO - talk about the script
+For anything else, consult the [oracle_fdw](https://github.com/laurenz/oracle_fdw?tab=readme-ov-file#data-types) docs.
+
+## How are these tables used?
+
+### Foreign / Legacy Tables
+These tables don't get created in migrations, instead they need to be created
+by running the `setup-foreign-tables` command. When run non-locally will create
+a foreign table connection to the Oracle database for every table derived from the
+`ForeignBase` class.
+
+See [Create Foreign Data Wrapper Script](#create-foreign-data-wrappers-script) for more detail on how this works.
+
+### Staging
+These tables will get created in our usual Alembic DB migrations.
+
+These tables are effectively Postgres equivalents of the Oracle DB tables
+and contain a few extra columns our transformation process will use (all added via `StagingParamMixin`):
+* `transformed_at` - If null, the transform process will pick up the row, when it completes processing, it will set to the current timestamp. If a new update comes in, the copy-oracle-data process will null the column out again.
+* `is_deleted` - Whether the row was deleted in the Oracle database. If true, the transform process will delete the record from our system.
+* `transformation_notes` - Freeform text field for putting notes about the transformation if an odd circumstance was hit. Occasionally set for certain scenarios in transformations.
+* `created_at`/`updated_at`/`deleted_at` - just metadata auditing columns, not directly used in the process
+
+# Create Foreign Data Wrappers Script
+Running locally: `make cmd args="data-migration setup-foreign-tables"`
+Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "setup-foreign-tables"]`
+
+[setup_foreign_tables.py](/api/src/data_migration/setup_foreign_tables.py) is a script that
+will go through each table that is derived from the `ForeignBase` class and automatically generate
+a command to create the table.
+
+**This command assumes we've already setup a Foreign Data Wrapper to connect to the Oracle database
+in a given environment. If we ever setup a new environment, we would need to redo that setup**
+
+For each table it will create a command roughly like:
+```postgresql
+        CREATE FOREIGN TABLE IF NOT EXISTS foreign_example_table
+        (ID integer OPTIONS (key 'true') NOT NULL,DESCRIPTION text)
+        SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'EXAMPLE_TABLE')
+```
+With any of the columns you defined included in the create command.
+
+Whenever we manually run this job, it runs the command for every table, including
+ones that already exist.
+
+If we ever need to fix a table we created, we first need to drop the foreign table
+and then run the command to generate it again. No data is stored in these "tables"
+as they're just a sort of view (may not be a literal DB view) wrapper around the
+Oracle DB tables.
+
+**Locally we have no Oracle database, so instead of creating foreign tables, it just creates Postgres tables**
+
+# Load-transform job
+Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
+Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--no-transform", "--no-set-current", "--no-store-version"]`
+
+Note that these example commands disable all parts of the job, running
+the above commands will just spin up the script and do nothing.
+
+The job itself is made up of 4 parts which will be described in further detail below
+* LoadOracleData - For each configured table, copy data from the Oracle tables to our staging tables, figuring out inserts/updates/deletes
+* TransformOracleData - For each configured table, transform the data according to custom logic and create records in our API tables
+* SetCurrentOpportunities - Iterate over all opportunities and determine the opportunity status / current opportunity summary for the opportunity
+* StoreOpportunityVersion - Iterate over all recently changed opportunities and create versioned opportunity data
+
+## Load-transform options
+Each of these jobs runs as part of the same script sequentially and each part can be enabled
+by configuring the following parameters:
+* `--load/--no-load` - Whether to run LoadOracleData
+* `--transform/--no-transform` - Whether to run TransformOracleData
+* `--set-current/--no-set-current` - Whether to run SetCurrentOpportunities
+* `--store-version/--no-store-version` - Whether to run StoreOpportunityVersion
+
+Additionally, we can set the following command line parameters:
+* `--insert-chunk-size` (default 800) - Determines how many records LoadOracleData will process at a time.
+* `--tables-to-load` (default declared in LoadOracleDataTask) - Determines which tables you want LoadOracleData to process - useful to set if we're setting up a new table and just want to populate it
+
+There are more configuration options present as environment variables that will be discussed
+in the relevant part of the job.
+
+## LoadOracleData
+[LoadOracleData](/api/src/data_migration/load/load_oracle_data_task.py) handles
+getting data from the Oracle database into our equivalent staging table for every
+table we have configured.
+
+Unless the `--tables-to-load` parameter is set, it will process the tables that
+are configured in the TABLES_TO_LOAD value defined in the file.
+
+For each table it figures out the following:
+* Updates - What rows already exist in our system, but have a greater `last_upd_date` than our staging table has
+* Inserts - What rows (based on primary key) don't exist in our staging table at all
+* Deletes - What rows exist in our staging table, but don't exist in the Oracle DB
+
+It uses the primary keys of the given table in order to link data in the Oracle DB
+with data in our system and handles any multi-column primary keys.
+
+### Developer Notes
+The `--insert-chunk-size` parameter exists as it might be necessary
+to lower the number of rows we copy over as Oracle has a limitation
+to the number of columns you can select in a single query. If we're
+copying a table with a lot of columns, we might need to lower this value
+while we get the bulk of the data imported. This is less important for
+hour-to-hour runs because we rarely get more than a handful of records
+for any table in any single hour.
+
+When we first setup a new table we want to import, it is recommended
+that we manually run the load command for a given table outside of the normal
+hourly job. This is both because the load might take a while to run
+and just to give us time to investigate any issues that might result.
+Passing in the `--tables-to-process <whatever table>` parameter will
+limit the job to just processing the chosen table.
+
+## TransformOracleData
+[TransformOracleData](/api/src/data_migration/transformation/transform_oracle_data_task.py)
+is actually made up of several separate `SubTask` classes that each handle
+the transformation of a single table.
+
+Each of these subtasks can be turned on/off by an environment variable (for example: `TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY=false` would disable transform opportunities).
+
+The order that the jobs runs is important as it makes sure data is setup
+for any foreign keys we need to create (eg. we transform opportunities before the opportunity attachments)
+
+Each transformation process is fairly custom, but follows the same general
+approach of copying data from staging (AKA Source) tables to our API (AKA Destination) tables:
+* Fetch all rows for a given table where `transformed_at` is null
+* Fetch the row in our destination table if it exists
+* Fetch any other relevant records in the query that might need to be linked to (eg. when processing most records, we need to also fetch the opportunity)
+* For each row, if the source record is marked to be deleted, delete it from our destination table
+* Otherwise, transform the record and insert/update it accordingly
+
+## Developer Notes
+If we ever have issues processing an individual row because the data is setup
+in a way we do not expect, we'll error that row, but continue processing. That row
+will then get picked up and processed again on each subsequent run. There are two common causes for this:
+* Our transformation job was running right as an opportunity was created in the Oracle DB, we didn't pick up the opportunity row, but did pick up another part of it. These sort themselves out the following hour automatically when we pull the rest of the data.
+* We genuinely hit a case we didn't account for (most often null fields, or fields with unexpected values) - we have to address these on a case-by-case basis. These are common in the lower environments, but fairly rare in production.
+
+If a source row is marked for deletion, but does not exist in our destination table
+we generally are okay with that. This happens very often with things that must be connected
+to an opportunity. If we first delete an opportunity record, we also delete opportunity summary,
+opportunity attachments, and so on. If when we later are processing the opportunity summary transformations
+and need to delete one, it would have already been deleted. These "orphan deletes" happen very frequently
+and to be safe we set the transformation_notes on the row in the source table to `orphaned_delete_record`
+
+Inserts and updates have to have a very specific implementation. In our transformations that will look
+roughly like:
+```py
+is_insert = target_record is None
+
+transformed_record = transform_util.transform_record(source_record, target_record)
+# Note that transform_record will always do something like "Record(...)" and make
+# a completely new record, not updating the target_record directly even if it's not null
+
+if is_insert:
+    db_session.add(transformed_record)
+else:
+    db_session.merge(transformed_record)
+```
+This strange pattern is purely for the update scenario (inserts work uneventfully). In the event
+that attempting to transform a record fails, we don't want to apply any updates to the target record.
+This means we can't do any `target_record.x = "something"` because if the next line were to hit an issue
+we'd need some way to undo that. Rather than have to solve that problem, we instead make a new object
+and tell SQLAlchemy to [merge](https://docs.sqlalchemy.org/en/20/orm/session_state_management.html#merging) it in
+which effectively makes it copy anything we did to the new record into the target record, but all at once.
+
+## SetCurrentOpportunities
+[SetCurrentOpportunities](/api/src/task/opportunities/set_current_opportunities_task.py)
+isn't strictly a part of transformations, but makes sense to run immediately after transformations complete.
+
+This job runs on every opportunity and does the following:
+* Determines the "current opportunity summary"
+* Determines the opportunity status for an opportunity
+
+An opportunity can have between 0 and 2 opportunity summary objects because
+we allow up to two opportunity summaries to exist (one forecast, one non-forecast).
+This job handles figuring out which one (if any) should be seen as the "current"
+and relevant one.
+
+The logic to determine the opportunity summary is as follows:
+* If the opportunity is a draft, it gets no current opportunity summary
+* If an opportunity summary has a non-forecast opportunity summary after its post date, choose that one
+* If an opportunity summary has a forecast opportunity summary after its post date, choose that one
+* Otherwise, no current opportunity summary
+
+Along with deciding the current opportunity summary, we figure out the opportunity status. The status
+effectively goes with the current opportunity summary, if there is no current opportunity summary there is no status.
+The statuses are based on the post_date, close_date, and archive_date as follows:
+* Current date > archive_date -> Archived
+* Current date > close_date -> Closed (note that forecasted summaries never set the close date)
+* is_forecast=True -> Forecasted
+* is_forecast=False -> Posted
+
+Note that the last bit there effectively includes "Current date >= post_date" as we would have filtered
+the summary out entirely otherwise.
+
+### Developer Notes
+We run this job hourly on _all_ opportunities because we have to handle two scenarios:
+* An opportunity was recently modified in a way that would affect these values
+* The current_date just changed, so we might have reached the post/close/archive data for a given opportunity
+
+While we could in theory have some sort of DB trigger to know what opportunities changed
+recently to catch the first scenario, the second scenario is based on data changing outside
+of the system (eg. the passage of time).
+
+The job is setup to be very efficient and won't even do updates if the values won't change.
+While it seems inefficient to reprocess 80k+ opportunities hourly, this takes less than 2 minutes right now.
+
+## StoreOpportunityVersion
+x
