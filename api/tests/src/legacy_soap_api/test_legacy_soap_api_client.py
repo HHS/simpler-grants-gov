@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.adapters.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
+from src.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
 
 
 class TestLegacySoapAPIClient(TestCase):
