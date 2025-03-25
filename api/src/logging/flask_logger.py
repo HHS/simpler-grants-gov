@@ -23,6 +23,8 @@ import time
 import uuid
 
 import flask
+import newrelic.agent
+import newrelic.api.time_trace
 
 from src.util.deploy_metadata import get_deploy_metadata_config
 
@@ -57,6 +59,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     for handler in app_logger.handlers:
         handler.addFilter(_add_global_context_info_to_log_record)
         handler.addFilter(_add_request_context_info_to_log_record)
+        handler.addFilter(_add_new_relic_context_to_log_record)
 
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule
@@ -185,3 +188,27 @@ def _get_request_context_info(request: flask.Request) -> dict:
     for key, value in request.args.items():
         data[f"request.query.{key}"] = value
     return data
+
+
+def _add_new_relic_context_to_log_record(record: logging.LogRecord) -> bool:
+    """Add New Relic tracing info to our log record."""
+
+    # This is not the recommended way of implementing this, but the alternatives
+    # either change the structure of our logging to not be JSON, or would
+    # entirely replace the formatter we have for outputting logs.
+    #
+    # The NewRelicContextFormatter calls this function internally when it
+    # creates the output object.
+    #
+    # This sets the following fields:
+    # entity.type
+    # entity.name
+    # entity.guid
+    # hostname
+    # span.id
+    # trace.id
+    newrelic_metadata = newrelic.api.time_trace.get_linking_metadata()
+
+    record.__dict__ |= newrelic_metadata
+
+    return True
