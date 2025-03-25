@@ -1,4 +1,5 @@
 import logging
+from flask import request
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -42,9 +43,12 @@ examples = {
 def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: AgencyListParams = AgencyListParams.model_validate(raw_list_params)
 
+    # Retrieve query parameter
+    active = request.args.get('active', False)
+
     # Call service with params to get results
     with db_session.begin():
-        results, pagination_info = get_agencies(db_session, list_params)
+        results, pagination_info = get_agencies(db_session, list_params, active)
 
     add_extra_data_to_current_request_logs(
         {
