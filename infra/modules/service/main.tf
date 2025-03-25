@@ -25,6 +25,8 @@ locals {
   # aws ecr list-images --repository-name newrelic/logging-firelens-fluentbit --registry-id 533243300146 --query "imageIds[].imageTag" --output text
   new_relic_fluent_bit_repo_arn = "arn:aws:ecr:${data.aws_region.current.name}:533243300146:repository/newrelic/logging-firelens-fluentbit"
   new_relic_fluent_bit_version  = "533243300146.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/newrelic/logging-firelens-fluentbit:2.3.0"
+  new_relic_fluent_bit_cpu      = 256
+  new_relic_fluent_bit_memory   = 1024
 
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -172,8 +174,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = "${local.container_name}-fluent-bit"
       image                  = local.new_relic_fluent_bit_version,
-      memory                 = 256,
-      cpu                    = 1024,
+      memory                 = local.new_relic_fluent_bit_memory,
+      cpu                    = local.new_relic_fluent_bit_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
@@ -192,9 +194,12 @@ resource "aws_ecs_task_definition" "app" {
     },
   ])
 
-  # Variable input values for the primary container, plus extra for the firelense sidecar
-  cpu    = var.cpu * 2
-  memory = var.memory * 2
+  # Take the larger of the two values for CPU and Memory and multiply by 2
+  # We need to do this because the task definition requires an aggregate value for CPU and Memory.
+  # We can't simply add them together, because the resulting value needs to be on this list
+  # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
+  cpu    = var.cpu > local.new_relic_fluent_bit_cpu ? var.cpu * 2 : local.new_relic_fluent_bit_cpu * 2
+  memory = var.memory > local.new_relic_fluent_bit_memory ? var.memory * 2 : local.new_relic_fluent_bit_memory * 2
 
   requires_compatibilities = ["FARGATE"]
 
