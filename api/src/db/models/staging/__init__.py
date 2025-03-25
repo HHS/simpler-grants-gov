@@ -1,4 +1,4 @@
-from . import attachment, forecast, opportunity, staging_base, subscription, synopsis, tgroups, user
+from . import attachment, forecast, opportunity, staging_base, synopsis, tgroups, user
 
 metadata = staging_base.metadata
 
@@ -10,5 +10,4 @@ __all__ = [
     "tgroups",
     "attachment",
     "user",
-    "subscription",
 ]
