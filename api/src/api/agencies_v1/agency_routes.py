@@ -1,4 +1,5 @@
 import logging
+
 from flask import request
 
 import src.adapters.db as db
@@ -44,7 +45,7 @@ def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiR
     list_params: AgencyListParams = AgencyListParams.model_validate(raw_list_params)
 
     # Retrieve query parameter
-    active = request.args.get('active', False)
+    active = request.args.get("active", False)
 
     # Call service with params to get results
     with db_session.begin():
