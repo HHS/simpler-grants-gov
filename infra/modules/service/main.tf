@@ -174,8 +174,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = "${local.container_name}-fluent-bit"
       image                  = local.new_relic_fluent_bit_version,
-      memory                 = 256,
-      cpu                    = 1024,
+      memory                 = local.new_relic_fluent_bit_memory,
+      cpu                    = local.new_relic_fluent_bit_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
