@@ -72,6 +72,9 @@ const NavLinks = ({
     [t],
   );
   const { user } = useUser();
+  const { checkFeatureFlag } = useFeatureFlags();
+  const showSavedSearch = checkFeatureFlag("savedSearchesOn");
+  const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
 
   // if we introduce more than one secondary nav this could be expanded to use an index rather than boolean
   const [secondaryNavOpen, setSecondaryNavOpen] = useState<boolean>(false);
@@ -84,24 +87,29 @@ const NavLinks = ({
       { text: t("research"), href: "/research" },
       { text: t("subscribe"), href: "/subscribe" },
     ];
-    if (!user?.token) {
+    if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
       return anonymousNavLinks;
+    }
+
+    const workspaceSubNavs = [];
+    if (showSavedOpportunities) {
+      workspaceSubNavs.push({
+        text: t("savedGrants"),
+        href: "/saved-grants",
+      });
+    }
+    if (showSavedSearch) {
+      workspaceSubNavs.push({
+        text: t("savedSearches"),
+        href: "/saved-search-queries",
+      });
     }
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
       text: t("workspace"),
-      children: [
-        {
-          text: t("savedGrants"),
-          href: "/saved-grants",
-        },
-        {
-          text: t("savedSearches"),
-          href: "/saved-search-queries",
-        },
-      ],
+      children: workspaceSubNavs,
     });
-  }, [t, path, getSearchLink, user]);
+  }, [t, path, getSearchLink, user, showSavedOpportunities, showSavedSearch]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
