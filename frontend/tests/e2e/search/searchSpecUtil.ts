@@ -15,8 +15,14 @@ export function getSearchInput(page: Page) {
 
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
+  const submitButton = page.locator(".usa-search > button[type='submit']");
+  // const count = await searchInput.count();
+  // const buttonCount = await searchInput.count();
+  // console.log("!!! searchinput", count, buttonCount);
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   await searchInput.fill(term);
-  await page.click(".usa-search > button[type='submit']");
+  await expect(searchInput).toHaveValue(term);
+  await submitButton.click();
 }
 
 export function expectURLContainsQueryParam(
