@@ -1,4 +1,5 @@
 import logging
+import pdb
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -7,6 +8,8 @@ from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.db.models.agency_models import Agency
+from src.db.models.lookup_models import LkOpportunityCategory, LkOpportunityStatus
+from src.db.models.opportunity_models import Opportunity, CurrentOpportunitySummary
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.services.service_utils import apply_sorting
@@ -26,14 +29,27 @@ class AgencyListParams(BaseModel):
 
 
 def get_agencies(
-    db_session: db.Session, list_params: AgencyListParams
+    db_session: db.Session, list_params: AgencyListParams, active: bool | None = None
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
 
+    import pdb; pdb.set_trace()
+
     stmt = (
-        select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
-        # Exclude test agencies
-        .where(Agency.is_test_agency.isnot(True))
+    select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
+    # Exclude test agencies
+    .where(Agency.is_test_agency.isnot(True))
     )
+
+    if active:
+        stmt = (
+            select(Agency)
+            .join(Opportunity, onclause=Agency.agency_code==Opportunity.agency_code)
+            .join(CurrentOpportunitySummary)
+            .join(LkOpportunityStatus)
+            .where(Agency.is_test_agency.isnot(True)) # Exclude test agencies
+            .where(LkOpportunityStatus.opportunity_status_id.in_([1,2])) # Opportunities associated with posted or forecasted status
+            .options(joinedload(Agency.top_level_agency), joinedload("*"))
+        )
 
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
 
