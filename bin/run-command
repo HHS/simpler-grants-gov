@@ -118,6 +118,9 @@ echo "Task information"
 echo "  task_arn=${task_arn}"
 echo "  task_id=${ecs_task_id}"
 
+echo
+echo "Waiting for task to complete"
+
 aws ecs wait tasks-stopped --cluster "${cluster_name}" --tasks "${task_arn}"
 
 container_exit_code=$(
@@ -139,3 +142,6 @@ if [[ "${container_exit_code}" == "null" || "${container_exit_code}" != "0" ]]; 
   echo "Task status (lastStatus, stopCode, stoppedAt, stoppedReason): ${task_status}" >&2
   exit 1
 fi
+
+echo
+echo "Task complete, container exit code: ${container_exit_code}"
