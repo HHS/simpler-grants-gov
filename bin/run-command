@@ -112,6 +112,8 @@ task_arn=$(aws --no-cli-pager "${aws_args[@]}" --query "tasks[0].taskArn" --outp
 echo "::endgroup::"
 echo
 
+aws ecs wait tasks-stopped --cluster "${cluster_name}" --tasks "${task_arn}"
+
 container_exit_code=$(
   aws ecs describe-tasks \
     --cluster "${cluster_name}" \
