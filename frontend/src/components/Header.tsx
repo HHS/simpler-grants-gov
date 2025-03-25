@@ -12,6 +12,8 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
+  Menu,
+  NavDropDownButton,
   NavMenuButton,
   PrimaryNav,
   Title,
@@ -23,6 +25,7 @@ import { UserControl } from "./user/UserControl";
 type PrimaryLink = {
   text?: string;
   href?: string;
+  children?: PrimaryLink[];
 };
 
 type Props = {
@@ -38,12 +41,12 @@ const NavLinks = ({
   mobileExpanded: boolean;
   onToggleMobileNav: () => void;
 }) => {
-  const t = useTranslations("Header");
+  const t = useTranslations("Header.navLinks");
   const path = usePathname();
   const getSearchLink = useCallback(
     (onSearch: boolean) => {
       return {
-        text: t("nav_link_search"),
+        text: t("search"),
         href: onSearch ? "/search?refresh=true" : "/search",
       };
     },
@@ -51,21 +54,33 @@ const NavLinks = ({
   );
   const { user } = useUser();
 
+  // if we introduce more than one secondary nav this could be expanded to use an index rather than boolean
+  const [secondaryNavOpen, setSecondaryNavOpen] = useState<boolean>(false);
+
   const navLinkList = useMemo(() => {
-    const anonymousNavLinks = [
-      { text: t("nav_link_home"), href: "/" },
+    const anonymousNavLinks: PrimaryLink[] = [
+      { text: t("home"), href: "/" },
       getSearchLink(path.includes("/search")),
-      { text: t("nav_link_roadmap"), href: "/roadmap" },
-      { text: t("nav_link_research"), href: "/research" },
-      { text: t("nav_link_subscribe"), href: "/subscribe" },
+      { text: t("roadmap"), href: "/roadmap" },
+      { text: t("research"), href: "/research" },
+      { text: t("subscribe"), href: "/subscribe" },
     ];
     if (!user?.token) {
       return anonymousNavLinks;
     }
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
-      text: t("nav_link_saved_grants"),
-      href: "/saved-grants",
+      text: t("workspace"),
+      children: [
+        {
+          text: t("savedGrants"),
+          href: "/saved-grants",
+        },
+        {
+          text: t("savedSearches"),
+          href: "/saved-search-queries",
+        },
+      ],
     });
   }, [t, path, getSearchLink, user]);
 
@@ -75,9 +90,25 @@ const NavLinks = ({
       if (currentPath.match(homeRegexp)) {
         return 0;
       }
-      const index = navLinkList.slice(1).findIndex(({ href }) => {
-        const baseHref = href.split("?")[0];
-        return currentPath.match(new RegExp(`^(?:/e[ns])?${baseHref}`));
+      const index = navLinkList.slice(1).findIndex(({ href, children }) => {
+        if (!href) {
+          if (!children?.length) {
+            return false;
+          }
+          // mark as current if any child page is active
+          return children.some((child) => {
+            return (
+              child?.href &&
+              currentPath.match(
+                new RegExp(`^(?:/e[ns])?${child.href.split("?")[0]}`),
+              )
+            );
+          });
+        } else {
+          return currentPath.match(
+            new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`),
+          );
+        }
       });
       // account for home path as default / not found
       return index === -1 ? index : index + 1;
@@ -95,12 +126,52 @@ const NavLinks = ({
 
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {
-      if (!link.text || !link.href) {
+      if (!link.text) {
         return <></>;
+      }
+      if (link.children) {
+        const items = link.children.map((childLink) => {
+          if (!childLink.text) {
+            return <></>;
+          }
+          return (
+            <Link href={childLink.href || ""} key={childLink.href}>
+              <div
+                onClick={() => {
+                  if (mobileExpanded) {
+                    onToggleMobileNav();
+                  }
+                }}
+              >
+                {childLink.text}
+              </div>
+            </Link>
+          );
+        });
+        return (
+          <>
+            <NavDropDownButton
+              label={link.text}
+              menuId={link.text}
+              isOpen={secondaryNavOpen}
+              onToggle={() => setSecondaryNavOpen(!secondaryNavOpen)}
+              className={clsx({
+                "usa-current": currentNavItemIndex === index,
+                "simpler-subnav-open": secondaryNavOpen,
+              })}
+            />
+            <Menu
+              id={link.text}
+              items={items}
+              isOpen={secondaryNavOpen}
+              className="margin-top-05"
+            />
+          </>
+        );
       }
       return (
         <Link
-          href={link.href}
+          href={link.href || ""}
           key={link.href}
           className={clsx({
             "usa-nav__link": true,
@@ -119,7 +190,13 @@ const NavLinks = ({
         </Link>
       );
     });
-  }, [navLinkList, currentNavItemIndex, mobileExpanded, onToggleMobileNav]);
+  }, [
+    navLinkList,
+    currentNavItemIndex,
+    mobileExpanded,
+    onToggleMobileNav,
+    secondaryNavOpen,
+  ]);
 
   return (
     <PrimaryNav
@@ -197,7 +274,7 @@ const Header = ({ locale }: Props) => {
           <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
+              label={t("navLinks.menuToggle")}
               className="usa-menu-btn"
             />
           </div>

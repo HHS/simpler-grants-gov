@@ -448,6 +448,29 @@ button.usa-pagination__button.usa-button {
       }
     }
   }
+  // .simpler-subnav-open::after {
+  //   // color: red;
+  //   background-color: #5abf95;
+  //   border-radius: 0;
+  //   content: "";
+  //   display: block;
+  //   position: absolute;
+  //   height: 0.25rem;
+  //   left: 1rem;
+  //   right: 1rem;
+  //   bottom: -0.25rem;
+  // }
+  .usa-accordion__button[aria-expanded="true"]::after {
+    background-color: color("mint-60");
+    border-radius: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    height: 0.25rem;
+    bottom: -0.25rem;
+    left: 0;
+    right: 0;
+  }
 }
 
 // revert to behavior before upgrade https://github.com/uswds/uswds/commit/2785b67e58ae19f161101f4859afff0e9664fbda
