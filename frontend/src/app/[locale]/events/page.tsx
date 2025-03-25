@@ -12,12 +12,10 @@ export default function Events() {
   return (
     <div
       data-testid="events-hero"
-      className="events-hero bg-primary-darkest text-white"
+      className="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
     >
       <Breadcrumbs breadcrumbList={EVENTS_CRUMBS} />
-      <GridContainer
-        className="padding-bottom-6 padding-x-6"
-      >
+      <GridContainer>
         <Grid row>
           <Grid tablet={{
             col: true
@@ -30,7 +28,7 @@ export default function Events() {
           }}>
             <Image
               alt="events-img"
-              className="height-auto position-relative"
+              className="height-auto position-relative padding-top-2 padding-bottom-4 padding-x-6"
               src={EventsHeroImg}
             />
           </Grid>
