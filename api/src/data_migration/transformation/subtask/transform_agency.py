@@ -314,7 +314,9 @@ class TransformAgencyHierarchy(AbstractTransformSubTask):
             # Recalculate whether an agency is a test agency on each run
             # in case we update the config values
             # This same function is called whenever we create/update an agency that has other updates
-            is_test_agency = is_test_agency_code((agency.top_level_agency or agency).agency_code, self.agency_config)
+            is_test_agency = is_test_agency_code(
+                (agency.top_level_agency or agency).agency_code, self.agency_config
+            )
             logger.info(
                 "Determined whether agency is a test agency",
                 extra=log_extra | {"is_test_agency": is_test_agency},
@@ -539,11 +541,7 @@ def is_test_agency_code(top_level_agency_code: str, agency_config: AgencyConfig)
 
     If the top_level_agency_code matches one of the configured values, it is a test agency
     """
-    for test_agency in agency_config.test_agency_config:
-        if top_level_agency_code == test_agency:
-            return True
-
-    return False
+    return top_level_agency_code in agency_config.test_agency_config
 
 
 def is_child_agency(agency: Agency) -> bool:
