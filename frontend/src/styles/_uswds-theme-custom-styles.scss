@@ -286,6 +286,13 @@ i.e.
   }
 }
 
+// Events Hero 
+.events-hero {
+  .events-hero--container {
+    padding-top: 65px;
+  }
+}
+
 // Footer
 .usa-footer__primary-section {
   background-color: color("mint-5");
@@ -443,4 +450,9 @@ button.usa-pagination__button.usa-button {
       padding: 0 0 units(0.5) units(1);
     }
   }
+}
+
+.usa-breadcrumb {
+  background-color: inherit;
+  color: inherit;
 }

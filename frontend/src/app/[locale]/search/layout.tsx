@@ -1,13 +1,12 @@
-import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import { LayoutProps } from "src/types/generalTypes";
+import { use } from "react";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { use } from "react";
-
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
+import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
+import { LayoutProps } from "src/types/generalTypes";
 
 export default function SearchLayout({ children, params }: LayoutProps) {
   const { locale } = use(params);
