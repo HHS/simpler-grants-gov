@@ -2,10 +2,11 @@ import logging
 import uuid
 from typing import Sequence, Tuple
 
-import src.adapters.db as db
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+
+import src.adapters.db as db
 from src.db.models.agency_models import Agency
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
