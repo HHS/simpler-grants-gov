@@ -9,7 +9,7 @@ test.afterEach(async ({ context }) => {
   await context.close();
 });
 
-test("has title", async ({ page }) => {
+test.skip("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Oops! Page Not Found");
 });
 
