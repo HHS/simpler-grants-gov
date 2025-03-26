@@ -1,13 +1,11 @@
 import pytest
 
-from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
-    CurrentOpportunitySummaryFactory,
     OpportunityFactory,
 )
 
@@ -121,54 +119,57 @@ class TestAgenciesRoutes(BaseTestClass):
         assert data[1]["agency_code"] > data[2]["agency_code"]
 
     def test_agencies_active(self, client, api_auth_token, enable_factory_create, db_session):
-        # Setup data
-        hhs = AgencyFactory.create(agency_name="HHS", agency_code="DOI")
-        crees = AgencyFactory.create(agency_name="CSREE", agency_code="USDA-CSREE")
-        darpa = AgencyFactory.create(agency_name="DARPA", agency_code="DOD-DARPA-MTO")
+        # Create top-level agencies
+        hhs = AgencyFactory.create(agency_name="HHS")
+        usda = AgencyFactory.create(agency_name="USDA")
+        darpa = AgencyFactory.create(agency_name="DARPA")
+
+        doi_hhs = AgencyFactory.create(
+            agency_name="HHS", agency_code="DOI-HHS", top_level_agency=hhs
+        )
+        usda_crees = AgencyFactory.create(
+            agency_name="USDA-CSREE", agency_code="USDA-CSREE-FDO", top_level_agency=usda
+        )
+        dod_darpa = AgencyFactory.create(
+            agency_name="DARPA-CHS", agency_code="DOD-DARPA-MTO", top_level_agency=darpa
+        )
 
         # HHS
-        OpportunityFactory.create(agency_code=hhs.agency_code)  # POSTED
-        OpportunityFactory.create(agency_code=hhs.agency_code)  # POSTED
+        OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
+        OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
 
         # CREES
-        opp_2 = OpportunityFactory.create(
-            agency_code=crees.agency_code, current_opportunity_summary=None
+        OpportunityFactory.create(
+            agency_code=usda_crees.agency_code, is_closed_summary=True
         )
-        opp_3 = OpportunityFactory.create(
-            agency_code=crees.agency_code, current_opportunity_summary=None
-        )
-        CurrentOpportunitySummaryFactory.create(
-            opportunity=opp_2, opportunity_status=OpportunityStatus.CLOSED
-        )
-        CurrentOpportunitySummaryFactory.create(
-            opportunity=opp_3, opportunity_status=OpportunityStatus.FORECASTED
+        OpportunityFactory.create(
+            agency_code=usda_crees.agency_code, is_forecasted_summary=True
         )
 
         # DARPA
-        opp_4 = OpportunityFactory.create(
-            agency_code=darpa.agency_code, current_opportunity_summary=None
-        )
-        CurrentOpportunitySummaryFactory.create(
-            opportunity=opp_4, opportunity_status=OpportunityStatus.ARCHIVED
+        OpportunityFactory.create(
+            agency_code=dod_darpa.agency_code, is_archived_non_forecast_summary=True  # archived
         )
 
         # Make request
         payload = {
-            "filters": {},
+            "filters": {"active": "True"},
             "pagination": {
                 "page_size": 10,
                 "page_offset": 1,
             },
         }
 
-        response = client.post(
-            "/v1/agencies?active=True", headers={"X-Auth": api_auth_token}, json=payload
-        )
+        response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
         assert response.status_code == 200
         data = response.json["data"]
 
-        # only agency associated with opportunity of posted/forecast status is returned
-        assert len(data) == 2
-        assert [agency["agency_code"] for agency in data] == [
-            opp.agency_code for opp in [hhs, crees]
-        ]
+        import pdb
+
+        pdb.set_trace()
+        # only agency associated with opportunity of posted/forecast status is returned and the respective top_level_agencies
+        assert len(data) == 4
+
+        assert set([agency["agency_code"] for agency in data]) == set(
+            [opp.agency_code for opp in [doi_hhs, usda_crees, hhs, usda]]
+        )

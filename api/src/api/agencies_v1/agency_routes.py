@@ -1,7 +1,5 @@
 import logging
 
-from flask import request
-
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.agencies_v1.agency_schema as agency_schema

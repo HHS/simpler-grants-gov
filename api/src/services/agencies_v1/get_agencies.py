@@ -49,16 +49,13 @@ def get_agencies(
                     [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
                 )
             )
-        ).alias('active')
+        ).alias("active")
 
-        stmt =  (
-            stmt
-            .join(active_stmt,
-                  (Agency.agency_id == active_stmt.c.top_level_agency_id) |
-                  (Agency.agency_id == active_stmt.c.agency_id))
-            .distinct()
-
-        )
+        stmt = stmt.join(
+            active_stmt,
+            (Agency.agency_id == active_stmt.c.top_level_agency_id)
+            | (Agency.agency_id == active_stmt.c.agency_id),
+        ).distinct()
 
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
 
