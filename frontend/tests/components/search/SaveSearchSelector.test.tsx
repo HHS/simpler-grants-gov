@@ -14,6 +14,7 @@ const fakeSavedSearchRecord = {
   saved_search_id: "an id",
   search_query: fakeSavedSearch,
 };
+let fakeSearchParams = new ReadonlyURLSearchParams();
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: (): unknown => mockUseUser(),
@@ -25,8 +26,9 @@ jest.mock("next-intl", () => ({
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
-    searchParams: new ReadonlyURLSearchParams(),
+    searchParams: fakeSearchParams,
     replaceQueryParams: jest.fn(),
+    removeQueryParam: jest.fn(),
   }),
 }));
 
@@ -37,6 +39,7 @@ jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
 describe("SaveSearchSelector", () => {
   beforeEach(() => {
     mockUseUser.mockReturnValue({ user: { token: "a token" } });
+    fakeSearchParams = new ReadonlyURLSearchParams();
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -95,7 +98,8 @@ describe("SaveSearchSelector", () => {
     mockObtainSavedSearches.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
     render(
       <SaveSearchSelector
-        newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
+        // newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
+        newSavedSearches={[]}
         savedSearches={[fakeSavedSearchRecord]}
         setSavedSearches={noop}
       />,
@@ -106,6 +110,20 @@ describe("SaveSearchSelector", () => {
     expect((options[0] as HTMLOptionElement).selected).toEqual(true);
     expect(options[0]).toHaveTextContent("defaultSelect");
     expect(options[1]).toHaveTextContent(fakeSavedSearchRecord.name);
+  });
+
+  it("selects new saved search option when present", async () => {
+    mockObtainSavedSearches.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
+    render(
+      <SaveSearchSelector
+        newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
+        savedSearches={[fakeSavedSearchRecord]}
+        setSavedSearches={noop}
+      />,
+    );
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(2);
+    expect((options[1] as HTMLOptionElement).selected).toEqual(true);
   });
   it("selects correct saved search on select", async () => {
     mockObtainSavedSearches.mockResolvedValue([]);
@@ -158,5 +176,23 @@ describe("SaveSearchSelector", () => {
     );
 
     expect(mockObtainSavedSearches).toHaveBeenCalledTimes(3);
+  });
+  it("sets selected search based on savedSearch query parameter", async () => {
+    mockUseUser.mockReturnValue({ user: { token: "first token" } });
+    mockObtainSavedSearches.mockResolvedValue([]);
+    fakeSearchParams = new ReadonlyURLSearchParams(
+      `savedSearch=${fakeSavedSearchRecord.saved_search_id}`,
+    );
+    render(
+      <SaveSearchSelector
+        newSavedSearches={[]}
+        savedSearches={[fakeSavedSearchRecord]}
+        setSavedSearches={noop}
+      />,
+    );
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(2);
+    const selectedOption = screen.getByRole("option", { selected: true });
+    expect(selectedOption).toHaveTextContent(fakeSavedSearchRecord.name);
   });
 });

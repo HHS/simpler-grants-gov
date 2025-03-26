@@ -36,3 +36,6 @@ export const getAgencyDisplayName = (opportunity: BaseOpportunity): string => {
 
   return opportunity.agency_name || opportunity.agency_code || "--";
 };
+
+export const areSetsEqual = (a: Set<string>, b: Set<string>) =>
+  a.size === b.size && [...a].every((value) => b.has(value));
