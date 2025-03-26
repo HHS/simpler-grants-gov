@@ -4,10 +4,7 @@ from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    OpportunityFactory,
-)
+from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
 class TestAgenciesRoutes(BaseTestClass):
@@ -139,12 +136,8 @@ class TestAgenciesRoutes(BaseTestClass):
         OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
 
         # CREES
-        OpportunityFactory.create(
-            agency_code=usda_crees.agency_code, is_closed_summary=True
-        )
-        OpportunityFactory.create(
-            agency_code=usda_crees.agency_code, is_forecasted_summary=True
-        )
+        OpportunityFactory.create(agency_code=usda_crees.agency_code, is_closed_summary=True)
+        OpportunityFactory.create(agency_code=usda_crees.agency_code, is_forecasted_summary=True)
 
         # DARPA
         OpportunityFactory.create(
@@ -164,9 +157,6 @@ class TestAgenciesRoutes(BaseTestClass):
         assert response.status_code == 200
         data = response.json["data"]
 
-        import pdb
-
-        pdb.set_trace()
         # only agency associated with opportunity of posted/forecast status is returned and the respective top_level_agencies
         assert len(data) == 4
 

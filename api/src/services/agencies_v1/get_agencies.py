@@ -2,7 +2,7 @@ import logging
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import select, Select
 from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
@@ -27,6 +27,39 @@ class AgencyListParams(BaseModel):
 
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
 
+def _construct_active_query(stmt: Select) -> Select:
+    active_agency = (
+        select(Agency.agency_id)
+        .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
+        .join(CurrentOpportunitySummary)
+        .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
+        .where(
+            CurrentOpportunitySummary.opportunity_status.in_(
+                [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
+            )
+        )
+    )
+
+    active_top_level_agency = (
+        (
+            select(Agency.top_level_agency_id)
+            .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
+            .join(CurrentOpportunitySummary)
+            .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
+            .where(
+                CurrentOpportunitySummary.opportunity_status.in_(
+                    [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
+                )
+            )
+        )
+        .union(active_agency)
+        .subquery()
+    )
+
+    agency_id_stmt = select(active_top_level_agency).distinct
+
+    return stmt.where(Agency.agency_id.in_(agency_id_stmt))
+
 
 def get_agencies(
     db_session: db.Session, list_params: AgencyListParams
@@ -38,24 +71,8 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    if list_params.filters.active:
-        active_stmt = (
-            select(Agency.agency_id, Agency.top_level_agency_id)
-            .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
-            .join(CurrentOpportunitySummary)
-            .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
-            .where(
-                CurrentOpportunitySummary.opportunity_status.in_(
-                    [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
-                )
-            )
-        ).alias("active")
-
-        stmt = stmt.join(
-            active_stmt,
-            (Agency.agency_id == active_stmt.c.top_level_agency_id)
-            | (Agency.agency_id == active_stmt.c.agency_id),
-        ).distinct()
+    if list_params.filters and list_params.filters.active:
+        stmt = _construct_active_query(stmt)
 
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
 
