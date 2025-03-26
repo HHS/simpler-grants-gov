@@ -24,6 +24,9 @@ locals {
     API_JWT_AUDIENCE          = "simpler-grants-api-${var.environment}"
 
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
+
+    # grants.gov services/applications URI.
+    GRANTS_GOV_URI = "https://trainingws.grants.gov:443"
   }
 
   # Configuration for secrets
