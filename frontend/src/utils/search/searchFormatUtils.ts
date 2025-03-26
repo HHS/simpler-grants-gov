@@ -84,21 +84,24 @@ export const buildFilters = (
 export const searchToQueryParams = (
   searchRecord: SavedSearchQuery,
 ): ValidSearchQueryParamData => {
-  const filters = Object.entries(filterNameMap).reduce(
-    (params, [frontendFilterName, backendFilterName]) => {
-      const filterData = searchRecord.filters[backendFilterName]?.one_of;
-      if (filterData) {
-        params[frontendFilterName as keyof ValidSearchQueryParamData] =
-          filterData.join(",");
-      }
-      return params;
-    },
-    {} as ValidSearchQueryParamData,
-  );
+  const filters =
+    searchRecord.filters && Object.keys(searchRecord.filters).length
+      ? Object.entries(filterNameMap).reduce(
+          (params, [frontendFilterName, backendFilterName]) => {
+            const filterData = searchRecord.filters[backendFilterName]?.one_of;
+            if (filterData) {
+              params[frontendFilterName as keyof ValidSearchQueryParamData] =
+                filterData.join(",");
+            }
+            return params;
+          },
+          {} as ValidSearchQueryParamData,
+        )
+      : {};
 
-  const sortby = paginationToSortby(searchRecord.pagination.sort_order);
+  const sortby = paginationToSortby(searchRecord?.pagination?.sort_order || []);
 
-  return { ...filters, query: searchRecord.query, ...sortby };
+  return { ...filters, query: searchRecord.query || "", ...sortby };
 };
 
 // sort of the opposite of buildPagination - translates from backend search pagination object to "sortby" query param
@@ -106,7 +109,11 @@ export const paginationToSortby = (
   sortOrder: PaginationSortOrder,
 ): ValidSearchQueryParamData => {
   // relevancy is default so no need to specify a param here
-  if (sortOrder[0].order_by === "relevancy") {
+  if (
+    !sortOrder[0] ||
+    !sortOrder[0].order_by ||
+    sortOrder[0].order_by === "relevancy"
+  ) {
     return {};
   }
 
