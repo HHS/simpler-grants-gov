@@ -2,12 +2,22 @@ import "server-only";
 
 import { UnauthorizedError } from "src/errors";
 import {
-  // createRequestUrl,
   createRequestPath,
   createRequestQueryParams,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
+
+const mockQueryParamsToQueryString = jest
+  .fn()
+  .mockReturnValue("?a=query&string=test&");
+
+jest.mock("src/utils/generalUtils", () => ({
+  ...jest.requireActual<typeof import("src/utils/generalUtils")>(
+    "src/utils/generalUtils",
+  ),
+  queryParamsToQueryString: () => mockQueryParamsToQueryString() as unknown,
+}));
 
 describe("createRequestPath", () => {
   it("combines inputs into a path string", () => {
@@ -24,6 +34,39 @@ describe("createRequestPath", () => {
     expect(createRequestPath("basePath", "", "namespace", "subpath")).toEqual(
       "basePath/namespace/subpath",
     );
+  });
+});
+
+describe("createRequestQueryParams", () => {
+  it("returns result of queryParamsToQueryString if no body and query params passed", () => {
+    expect(
+      createRequestQueryParams({
+        queryParams: { any: "thing", like: "this" },
+      }),
+    ).toEqual("?a=query&string=test&");
+  });
+  it("returns string based on passed body on GET requests", () => {
+    expect(
+      createRequestQueryParams({
+        method: "GET",
+        body: { any: "thing", like: "this" },
+      }),
+    ).toEqual("?any=thing&like=this");
+  });
+  it("returns empty string if no body and no query params", () => {
+    expect(
+      createRequestQueryParams({
+        method: "GET",
+      }),
+    ).toEqual("");
+  });
+  it("returns empty string if no query params and non-GET request", () => {
+    expect(
+      createRequestQueryParams({
+        method: "POST",
+        body: { any: "thing", like: "this" },
+      }),
+    ).toEqual("");
   });
 });
 

@@ -13,7 +13,6 @@ import {
   createRequestBody,
   createRequestPath,
   createRequestQueryParams,
-  createRequestUrl,
   fetchErrorToNetworkError,
   getDefaultHeaders,
   HeadersDict,
@@ -57,8 +56,6 @@ export function requesterForEndpoint({
       ...getDefaultHeaders(),
       ...additionalHeaders,
     };
-
-    console.log("@@@ fetching", url);
 
     let response;
     try {

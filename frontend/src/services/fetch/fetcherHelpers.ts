@@ -71,19 +71,12 @@ export function createRequestQueryParams({
       newBody[key] = stringValue;
     });
 
-    return new URLSearchParams(newBody).toString();
+    return `?${new URLSearchParams(newBody).toString()}`;
   }
   if (queryParams) {
     return queryParamsToQueryString(queryParams);
   }
   return "";
-}
-
-/**
- * Remove leading slash
- */
-function removeLeadingSlash(path: string) {
-  return path.replace(/^\//, "");
 }
 
 /**

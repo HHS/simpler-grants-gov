@@ -67,6 +67,9 @@ describe("obtainAgencies", () => {
       nextOptions: {
         revalidate: 604800,
       },
+      queryParams: {
+        active: "true",
+      },
     });
 
     expect(result).toEqual(fakeAgencyResponseData);

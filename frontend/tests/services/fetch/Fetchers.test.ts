@@ -1,8 +1,8 @@
 import { EndpointConfig } from "src/services/fetch/endpointConfigs";
 import { requesterForEndpoint } from "src/services/fetch/fetchers/fetchers";
 
-const createRequestUrlMock = jest.fn(
-  (_method, _basePath, _version, _namespace, subPath: string, _body) => {
+const createRequestPathMock = jest.fn(
+  (_basePath, _version, _namespace, subPath: string) => {
     if (subPath) {
       return `fakeurl/${subPath}`;
     }
@@ -25,29 +25,22 @@ const fakeResponse = {
 const fetchMock = jest.fn().mockResolvedValue(fakeResponse);
 
 const createRequestBodyMock = jest.fn((obj) => JSON.stringify(obj));
+const createRequestQueryParamsMock = jest.fn().mockReturnValue("?a=queryParam");
 const getDefaultHeadersMock = jest.fn(() => ({
   "Content-Type": "application/json",
 }));
 const throwErrorMock = jest.fn();
 
 jest.mock("src/services/fetch/fetcherHelpers", () => ({
-  createRequestUrl: (
-    _method: unknown,
+  createRequestPath: (
     _basePath: unknown,
     _version: unknown,
     _namespace: unknown,
     subPath: string,
-    _body: unknown,
-  ) =>
-    createRequestUrlMock(
-      _method,
-      _basePath,
-      _version,
-      _namespace,
-      subPath,
-      _body,
-    ),
-  createRequestBody: (arg: unknown) => createRequestBodyMock(arg),
+  ) => createRequestPathMock(_basePath, _version, _namespace, subPath),
+  createRequestQueryParams: (...args: unknown[]) =>
+    createRequestQueryParamsMock(...args) as unknown,
+  createRequestBody: (arg: unknown) => createRequestBodyMock(arg) as unknown,
   getDefaultHeaders: () => getDefaultHeadersMock(),
   throwError: (...args: unknown[]): unknown => throwErrorMock(...args),
 }));
@@ -80,28 +73,48 @@ describe("requesterForEndpoint", () => {
     expect(typeof requesterForEndpoint(basicEndpoint)).toBe("function");
   });
 
-  it("returns a function that calls `createRequestUrl` and `fetch` with the expected arguments", async () => {
+  it("returns a function that calls `createRequestPath`, `createRequestQueryParams` and `fetch` with the expected arguments", async () => {
     const requester = requesterForEndpoint(basicEndpoint);
     await requester({
       subPath: "1",
       body: { key: "value" },
       additionalHeaders: { "Header-Name": "headerValue" },
     });
-    expect(createRequestUrlMock).toHaveBeenCalledWith(
-      "POST",
+    expect(createRequestPathMock).toHaveBeenCalledWith(
       "hello.org",
       "some-strange-version",
       "sure",
       "1",
-      { key: "value" },
     );
-    expect(fetchMock).toHaveBeenCalledWith("fakeurl/1", {
+    expect(createRequestQueryParamsMock).toHaveBeenCalledWith({
+      method: "POST",
+      body: { key: "value" },
+      queryParams: undefined,
+    });
+    expect(fetchMock).toHaveBeenCalledWith("fakeurl/1?a=queryParam", {
       body: JSON.stringify({ key: "value" }),
       headers: {
         "Content-Type": "application/json",
         "Header-Name": "headerValue",
       },
       method: "POST",
+    });
+  });
+  it("returns a function that calls `createRequestQueryParams` with passed params", async () => {
+    const requester = requesterForEndpoint(basicEndpoint);
+    await requester({
+      subPath: "1",
+      additionalHeaders: { "Header-Name": "headerValue" },
+      queryParams: {
+        extra: "param",
+      },
+    });
+    expect(createRequestQueryParamsMock).toHaveBeenCalledWith({
+      method: "POST",
+      queryParams: {
+        extra: "param",
+      },
+      body: undefined,
     });
   });
   it("returns a function that returns a fetch response", async () => {
@@ -129,6 +142,9 @@ describe("requesterForEndpoint", () => {
       additionalHeaders: { "Header-Name": "headerValue" },
     });
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
-    expect(throwErrorMock).toHaveBeenCalledWith(fakeJsonBody, "fakeurl/1");
+    expect(throwErrorMock).toHaveBeenCalledWith(
+      fakeJsonBody,
+      "fakeurl/1?a=queryParam",
+    );
   });
 });
