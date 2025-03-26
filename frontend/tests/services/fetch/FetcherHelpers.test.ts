@@ -2,52 +2,27 @@ import "server-only";
 
 import { UnauthorizedError } from "src/errors";
 import {
-  createRequestUrl,
+  // createRequestUrl,
+  createRequestPath,
+  createRequestQueryParams,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-describe("createRequestUrl", () => {
-  it("creates the correct url without search params", () => {
-    const method = "GET";
-    let basePath = "";
-    let version = "";
-    let namespace = "";
-    let subpath = "";
-
+describe("createRequestPath", () => {
+  it("combines inputs into a path string", () => {
     expect(
-      createRequestUrl(method, basePath, version, namespace, subpath),
-    ).toEqual("");
-
-    basePath = "basePath";
-    version = "version";
-    namespace = "namespace";
-    subpath = "subpath";
-
-    expect(
-      createRequestUrl(method, basePath, version, namespace, subpath),
+      createRequestPath("basePath", "version", "namespace", "subpath"),
     ).toEqual("basePath/version/namespace/subpath");
-
-    // note that leading slashes are removed but trailing slashes are not
-    basePath = "/basePath";
-    version = "/version";
-    namespace = "/namespace";
-    subpath = "/subpath/";
-
+  });
+  it("removes trailing slashes (but not leading slashes)", () => {
     expect(
-      createRequestUrl(method, basePath, version, namespace, subpath),
+      createRequestPath("/basePath", "/version", "/namespace", "/subpath/"),
     ).toEqual("basePath/version/namespace/subpath/");
   });
-
-  it("creates the correct url with search params", () => {
-    const method = "GET";
-    const body = {
-      simpleParam: "simpleValue",
-      complexParam: { nestedParam: ["complex", "values", 1] },
-    };
-
-    expect(createRequestUrl(method, "", "", "", "", body)).toEqual(
-      "?simpleParam=simpleValue&complexParam=%7B%22nestedParam%22%3A%5B%22complex%22%2C%22values%22%2C1%5D%7D",
+  it("removes any falsey path elements", () => {
+    expect(createRequestPath("basePath", "", "namespace", "subpath")).toEqual(
+      "basePath/namespace/subpath",
     );
   });
 });
