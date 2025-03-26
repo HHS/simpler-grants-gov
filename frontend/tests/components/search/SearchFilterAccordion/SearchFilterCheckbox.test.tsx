@@ -52,37 +52,4 @@ describe("SearchFilterCheckbox", () => {
       expect(mockUpdateCheckedOption).toHaveBeenCalledWith(option.value, true);
     });
   });
-
-  it("hides checkbox if filter count is 0", async () => {
-    const { rerender } = render(
-      <SearchFilterCheckbox
-        facetCounts={{ test: 1 }}
-        option={option}
-        updateCheckedOption={mockUpdateCheckedOption}
-        accordionTitle={"Test Accordion"}
-        query={new Set()}
-      />,
-    );
-
-    const checkboxOne = await screen.findByRole("checkbox", {
-      name: `${option.label} [1]`,
-    });
-    await waitFor(() => {
-      expect(checkboxOne).toBeInTheDocument();
-    });
-    rerender(
-      <SearchFilterCheckbox
-        facetCounts={{ test: 0 }}
-        option={option}
-        updateCheckedOption={mockUpdateCheckedOption}
-        accordionTitle={"Test Accordion"}
-        query={new Set()}
-      />,
-    );
-
-    const checkboxZero = screen.queryByRole("checkbox");
-    await waitFor(() => {
-      expect(checkboxZero).not.toBeInTheDocument();
-    });
-  });
 });

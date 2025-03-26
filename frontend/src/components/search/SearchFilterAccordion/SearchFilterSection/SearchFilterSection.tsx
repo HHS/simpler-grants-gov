@@ -68,14 +68,6 @@ const SearchFilterSection = ({
     toggleSelectAll(false, currentSelections);
   }, [toggleSelectAll, accordionTitle, searchParams, allSectionOptions]);
 
-  const childOptionsWithFacetCounts = option.children.filter((child) => {
-    return facetCounts[child.value];
-  });
-
-  if (!childOptionsWithFacetCounts.length) {
-    return;
-  }
-
   return (
     <div>
       <button
@@ -102,7 +94,7 @@ const SearchFilterSection = ({
             isNoneSelected={isSectionNoneSelected(sectionQuery)}
           />
           <ul className="usa-list usa-list--unstyled margin-left-4">
-            {childOptionsWithFacetCounts?.map((child) => (
+            {option.children?.map((child) => (
               <li key={child.id}>
                 <SearchFilterCheckbox
                   option={child}
