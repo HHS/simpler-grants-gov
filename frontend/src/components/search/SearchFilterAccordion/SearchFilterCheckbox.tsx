@@ -33,7 +33,7 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
         <>
           <span>{option.label}</span>
           <span className="text-base-dark padding-left-05">
-            [{facetCounts[option.value]}]
+            [{facetCounts[option.value] || 0}]
           </span>
         </>
       }
