@@ -128,6 +128,7 @@ services:
 
   mock-applicants-soap-api:
     image: outofcoffee/imposter
+    container_name: mock-applicants-soap-api
     ports:
       - "8082:8080"
     volumes:

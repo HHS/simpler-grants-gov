@@ -29,6 +29,7 @@ from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.legacy_soap_api import legacy_soap_api_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
@@ -155,6 +156,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
+    app.register_blueprint(legacy_soap_api_blueprint)
 
 
 def get_project_root_dir() -> str:
