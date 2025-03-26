@@ -2,11 +2,45 @@
 
 ## Deployment
 
+### Deploying Every Service
+
+This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located)
+
+```bash
+terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/api/service" apply -var "environment_name=dev"
+```
+
+```bash
+terraform -chdir="infra/api/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/api/service" apply -var "environment_name=staging"
+```
+
+```bash
+terraform -chdir="infra/frontend/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/frontend/service" apply -var "environment_name=dev"
+```
+
+```bash
+terraform -chdir="infra/frontend/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/frontend/service" apply -var "environment_name=staging"
+```
+
+```bash
+terraform -chdir="infra/analytics/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/analytics/service" apply -var "environment_name=dev"
+```
+
+```bash
+terraform -chdir="infra/analytics/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/analytics/service" apply -var "environment_name=staging"
+```
+
 ### Updating to our Terraform Version
 
 1. Install `tfenv`
 2. Get the terraform version to install from `terraform_version` this file: https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/deploy.yml
-3. Follow `tfenv` instructions to instsall and utilize the given terraform version
+3. Follow `tfenv` instructions to install and utilize the given terraform version
 
 ### Terraform State Locks
 
