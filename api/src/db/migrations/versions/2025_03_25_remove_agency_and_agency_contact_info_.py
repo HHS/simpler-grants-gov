@@ -1,7 +1,7 @@
 """Remove agency and agency contact info tables
 
 Revision ID: ca3a21e9c44f
-Revises: 27a1ed587690
+Revises: 661a773a8478
 Create Date: 2025-03-24 23:17:53.235144
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "ca3a21e9c44f"
-down_revision = "27a1ed587690"
+down_revision = "661a773a8478"
 branch_labels = None
 depends_on = None
 
