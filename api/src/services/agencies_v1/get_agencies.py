@@ -37,9 +37,11 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
+    import pdb; pdb.set_trace()
+
     if active:
-        stmt = (
-            select(Agency)
+        active_stmt = (
+            select(Agency.agency_id, Agency.top_level_agency_id)
             .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
             .join(CurrentOpportunitySummary)
             .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
@@ -48,6 +50,14 @@ def get_agencies(
                     [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
                 )
             )
+        ).alias('active')
+
+        stmt = (
+            select(Agency)
+            .join(active_stmt,
+                  (Agency.agency_id == active_stmt.c.top_level_agency_id) |
+                  (Agency.agency_id == active_stmt.c.agency_id))
+            .distinct()
             .options(joinedload(Agency.top_level_agency), joinedload("*"))
         )
 
