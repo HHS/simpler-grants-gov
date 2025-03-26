@@ -44,17 +44,9 @@ examples = {
 def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: AgencyListParams = AgencyListParams.model_validate(raw_list_params)
 
-    # Retrieve query parameter
-    active_str = request.args.get("active", None)
-    active: bool
-    if active_str in ["True", "true"]:
-        active = True
-    else:
-        active = False
-
     # Call service with params to get results
     with db_session.begin():
-        results, pagination_info = get_agencies(db_session, list_params, active)
+        results, pagination_info = get_agencies(db_session, list_params)
 
     add_extra_data_to_current_request_logs(
         {

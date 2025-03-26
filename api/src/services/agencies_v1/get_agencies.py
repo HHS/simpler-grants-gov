@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class AgencyFilters(BaseModel):
     agency_id: int | None = None
     agency_name: str | None = None
+    active: bool | None = None
 
 
 class AgencyListParams(BaseModel):
@@ -28,7 +29,7 @@ class AgencyListParams(BaseModel):
 
 
 def get_agencies(
-    db_session: db.Session, list_params: AgencyListParams, active: bool | None = None
+    db_session: db.Session, list_params: AgencyListParams
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
 
     stmt = (
@@ -37,7 +38,7 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    if active:
+    if list_params.filters.active:
         active_stmt = (
             select(Agency.agency_id, Agency.top_level_agency_id)
             .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
@@ -50,13 +51,13 @@ def get_agencies(
             )
         ).alias('active')
 
-        stmt = (
-            select(Agency)
+        stmt =  (
+            stmt
             .join(active_stmt,
                   (Agency.agency_id == active_stmt.c.top_level_agency_id) |
                   (Agency.agency_id == active_stmt.c.agency_id))
             .distinct()
-            .options(joinedload(Agency.top_level_agency), joinedload("*"))
+
         )
 
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
