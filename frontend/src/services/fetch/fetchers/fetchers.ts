@@ -11,6 +11,8 @@ import {
 } from "src/services/fetch/endpointConfigs";
 import {
   createRequestBody,
+  createRequestPath,
+  createRequestQueryParams,
   createRequestUrl,
   fetchErrorToNetworkError,
   getDefaultHeaders,
@@ -19,6 +21,7 @@ import {
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 
 import { cache } from "react";
 
@@ -37,21 +40,25 @@ export function requesterForEndpoint({
       body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
       nextOptions?: NextFetchRequestConfig;
+      queryParams?: OptionalStringDict;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
-    const url = createRequestUrl(
-      method,
-      basePath,
-      version,
-      namespace,
-      subPath,
+    const {
+      additionalHeaders = {},
       body,
-    );
+      subPath,
+      nextOptions,
+      queryParams,
+    } = options;
+    const path = createRequestPath(basePath, version, namespace, subPath);
+    const queryString = createRequestQueryParams({ method, body, queryParams });
+    const url = `${path}${queryString}`;
     const headers: HeadersDict = {
       ...getDefaultHeaders(),
       ...additionalHeaders,
     };
+
+    console.log("@@@ fetching", url);
 
     let response;
     try {

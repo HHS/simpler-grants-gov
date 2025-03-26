@@ -36,6 +36,9 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
     nextOptions: {
       revalidate: 604800,
     },
+    queryParams: {
+      active: "true",
+    },
   });
   const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
   return data;
@@ -72,7 +75,7 @@ export const agenciesToFilterOptions = (
     );
     // parent should always already exist in the list because of the pre-sort, if it doesn't just skip the agency
     if (!parent) {
-      console.error(
+      console.debug(
         `Parent agency not found: ${rawAgency.top_level_agency?.agency_code || "undefined"}`,
       );
       return acc;

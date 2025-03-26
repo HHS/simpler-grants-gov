@@ -15,7 +15,9 @@ import {
   ValidationError,
 } from "src/errors";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { queryParamsToQueryString } from "src/utils/generalUtils";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -37,19 +39,29 @@ export function getDefaultHeaders(): HeadersDict {
   return headers;
 }
 
-export function createRequestUrl(
-  method: ApiMethod,
+export function createRequestPath(
   basePath: string,
   version: string,
   namespace: string,
   subPath = "",
-  body?: JSONRequestBody,
-) {
-  // Remove leading slash
+): string {
   const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
-    removeLeadingSlash,
+    (path: string) => {
+      return path.replace(/^\//, "");
+    },
   );
-  let url = [...cleanedPaths].join("/");
+  return [...cleanedPaths].join("/");
+}
+
+export function createRequestQueryParams({
+  method,
+  body,
+  queryParams,
+}: {
+  method?: string;
+  body?: JSONRequestBody;
+  queryParams?: OptionalStringDict;
+}): string {
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const newBody: { [key: string]: string } = {};
@@ -59,10 +71,12 @@ export function createRequestUrl(
       newBody[key] = stringValue;
     });
 
-    const params = new URLSearchParams(newBody).toString();
-    url = `${url}?${params}`;
+    return new URLSearchParams(newBody).toString();
   }
-  return url;
+  if (queryParams) {
+    return queryParamsToQueryString(queryParams);
+  }
+  return "";
 }
 
 /**
