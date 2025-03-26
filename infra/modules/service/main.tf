@@ -164,7 +164,7 @@ resource "aws_ecs_task_definition" "app" {
         },
         secretOptions = [{
           name      = "apiKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
         }]
       }
       mountPoints    = []
@@ -172,7 +172,7 @@ resource "aws_ecs_task_definition" "app" {
       volumesFrom    = []
     },
     {
-      name                   = "${local.container_name}-fluent-bit"
+      name                   = "${local.container_name}-fluentbit"
       image                  = local.new_relic_fluent_bit_version,
       memory                 = local.new_relic_fluent_bit_memory,
       cpu                    = local.new_relic_fluent_bit_cpu,
@@ -184,11 +184,19 @@ resource "aws_ecs_task_definition" "app" {
         options = {
           enable-ecs-log-metadata = "true"
         }
+      },
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-region"        = data.aws_region.current.name,
+          "awslogs-stream-prefix" = local.log_stream_prefix
+        }
       }
       secrets = [
         {
           name      = "apiKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
         }
       ]
     },
@@ -207,6 +215,8 @@ resource "aws_ecs_task_definition" "app" {
   network_mode = "awsvpc"
 
   depends_on = [
+    aws_cloudwatch_log_group.service_logs,
+    aws_cloudwatch_log_group.fluentbit,
     aws_iam_role_policy.task_executor,
     aws_iam_role_policy_attachment.extra_policies,
   ]
