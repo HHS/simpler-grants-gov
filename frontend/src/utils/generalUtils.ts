@@ -120,3 +120,7 @@ export const queryParamsToQueryString = (dict: OptionalStringDict) => {
     return value ? `${queryString}${key}=${value}&` : queryString;
   }, "?");
 };
+
+// note that the regexp is taking into account /en & /es localized pathnames
+export const isCurrentPath = (href: string, currentPath: string): boolean =>
+  !!currentPath.match(new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`));
