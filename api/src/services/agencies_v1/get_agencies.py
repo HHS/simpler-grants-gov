@@ -37,8 +37,6 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    import pdb; pdb.set_trace()
-
     if active:
         active_stmt = (
             select(Agency.agency_id, Agency.top_level_agency_id)
