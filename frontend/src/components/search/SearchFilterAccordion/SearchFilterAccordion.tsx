@@ -35,7 +35,7 @@ export interface SearchFilterAccordionProps {
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
   filterOptions: FilterOption[];
-  facetCounts: { [key: string]: number };
+  facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
 }
 

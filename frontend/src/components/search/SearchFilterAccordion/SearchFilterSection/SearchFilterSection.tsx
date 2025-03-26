@@ -23,7 +23,7 @@ interface SearchFilterSectionProps {
   isSectionNoneSelected: (query: Set<string>) => boolean;
   query: Set<string>;
   value: string;
-  facetCounts: { [key: string]: number };
+  facetCounts?: { [key: string]: number };
 }
 
 const SearchFilterSection = ({

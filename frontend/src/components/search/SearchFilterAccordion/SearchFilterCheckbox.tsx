@@ -8,7 +8,7 @@ interface SearchFilterCheckboxProps {
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
   accordionTitle: string;
   query: Set<string>;
-  facetCounts: { [key: string]: number };
+  facetCounts?: { [key: string]: number };
 }
 
 const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
@@ -32,9 +32,11 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
       label={
         <>
           <span>{option.label}</span>
-          <span className="text-base-dark padding-left-05">
-            [{facetCounts[option.value] || 0}]
-          </span>
+          {!!facetCounts && (
+            <span className="text-base-dark padding-left-05">
+              [{facetCounts[option.value] || 0}]
+            </span>
+          )}
         </>
       }
       name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)

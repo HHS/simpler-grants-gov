@@ -90,7 +90,6 @@ export default async function SearchFilters({
         <AgencyFilterAccordion
           query={agency}
           agencyOptionsPromise={agenciesPromise}
-          facetCounts={facetCounts.agency || {}}
         />
       </Suspense>
       <SearchFilterAccordion
