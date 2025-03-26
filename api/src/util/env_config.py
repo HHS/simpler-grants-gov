@@ -18,4 +18,5 @@ class PydanticBaseEnvConfig(BaseSettings):
 
     @property
     def is_prod(self) -> bool:
-        return self.model_config == "prod"
+        print(self.environment)
+        return self.environment == "prod"
