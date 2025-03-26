@@ -42,7 +42,7 @@ const NoSavedSearches = ({
         className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
-        <p className="usa-intro ">{noSavedCTA}</p>{" "}
+        <p className="usa-intro ">{noSavedCTA}</p>
         <Link href="/search">
           <Button type="button">{searchButtonText}</Button>
         </Link>
