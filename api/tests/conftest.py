@@ -1,5 +1,6 @@
 import logging
 import uuid
+from os import path
 
 import _pytest.monkeypatch
 import boto3
@@ -465,3 +466,27 @@ class BaseTestClass:
             db_session.execute(text(f"TRUNCATE TABLE {test_foreign_schema}.{table.name}"))
 
         db_session.commit()
+
+
+###################
+# File fixtures
+###################
+
+
+@pytest.fixture
+def fixture_from_file():
+    """
+    Fixture to read a fixture file content based given a file path relative to
+     the tests/fixtures/ directory.
+
+    Example:
+    def test_foo(fixture_from_file):
+        mock_data = fixture_from_file("/fix/data.json")
+    """
+    fixtures_dir = path.join(path.dirname(__file__), ".", "fixtures")
+
+    def _file_reader(file_path: str):
+        with open(f"{fixtures_dir}{file_path}", "r") as f:
+            return f.read()
+
+    return _file_reader

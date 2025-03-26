@@ -9,11 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 @legacy_soap_api_blueprint.post("/<service_name>/services/v2/ApplicantWebServicesSoapPort")
-def soap_api_operations_handler(service_name: str) -> str:
-    """SOAP API Handler
+def soap_api_operations_handler(service_name: str) -> tuple:
+    """SOAP API Operations Handler
 
-    Since all SOAP requests are POST for operations, this will be
-    the router responsible for handling all operations for both
+    All SOAP requests come in as POST for operations. This will be
+    the router responsible for handling all SOAP operations for both
     the applicants and grantors SOAP API requests.
     """
     logger.info(f"SOAP: POST {service_name}")
