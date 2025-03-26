@@ -53,6 +53,7 @@ describe("obtainAgencies", () => {
 
     expect(mockfetchAgencies).toHaveBeenCalledWith({
       body: {
+        filters: { active: true },
         pagination: {
           page_offset: 1,
           page_size: 1500,
