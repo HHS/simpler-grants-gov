@@ -156,7 +156,11 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
-    app.register_blueprint(legacy_soap_api_blueprint)
+
+    # Only enable in lower envs until https://github.com/HHS/simpler-grants-gov/issues/4345
+    # has been resolved.
+    if not endpoint_config.is_prod:
+        app.register_blueprint(legacy_soap_api_blueprint)
 
 
 def get_project_root_dir() -> str:

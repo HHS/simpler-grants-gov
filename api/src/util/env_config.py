@@ -1,5 +1,6 @@
 import os
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 import src
@@ -13,3 +14,8 @@ env_file = os.path.join(
 
 class PydanticBaseEnvConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=env_file)
+    environment: str = Field(alias="ENVIRONMENT")
+
+    @property
+    def is_prod(self) -> bool:
+        return self.model_config == "prod"

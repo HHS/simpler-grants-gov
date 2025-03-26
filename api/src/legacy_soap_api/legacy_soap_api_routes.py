@@ -24,4 +24,5 @@ def soap_api_operations_handler(service_name: str) -> tuple:
         headers=dict(request.headers),
         body=request.data,
     )
+    # This format will preserve the response data from SOAP API.
     return proxy_response.content, proxy_response.status_code, proxy_response.headers.items()
