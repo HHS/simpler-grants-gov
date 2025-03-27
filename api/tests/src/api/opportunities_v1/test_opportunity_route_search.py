@@ -1611,8 +1611,10 @@ def test_search_experimental_attachment_200(
 
     # Prepare the search request
     search_request = get_search_request(
-        query="Testing", experimental={"scoring_rule": "attachment_only"}  #test-opportunity-index-135913555100790159966361273604570755388'
-
+        query="Testing",
+        experimental={
+            "scoring_rule": "attachment_only"
+        },  # test-opportunity-index-135913555100790159966361273604570755388'
     )
 
     resp = client.post(
