@@ -13,14 +13,13 @@ locals {
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
-    # local.service_config not var because we want if the service is HTTPS not if this endpoint is HTTPS
     ENABLE_AUTH_ENDPOINT      = 0
     LOGIN_GOV_CLIENT_ID       = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-${var.environment}-simpler-grants-gov"
     LOGIN_GOV_ENDPOINT        = "https://idp.int.identitysandbox.gov/"
     LOGIN_GOV_JWK_ENDPOINT    = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT   = "https://idp.int.identitysandbox.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT  = "https://idp.int.identitysandbox.gov/api/openid_connect/token"
-    LOGIN_GOV_REDIRECT_SCHEME = local.service_config.enable_https ? "https" : "http"
+    LOGIN_GOV_REDIRECT_SCHEME = var.enable_https ? "https" : "http"
     API_JWT_ISSUER            = "simpler-grants-api-${var.environment}"
     API_JWT_AUDIENCE          = "simpler-grants-api-${var.environment}"
 
