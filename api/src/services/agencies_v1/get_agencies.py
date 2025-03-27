@@ -1,8 +1,8 @@
 import logging
-from typing import Sequence, Tuple
+from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select, Select
+from sqlalchemy import InstrumentedAttribute, Select, select
 from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
@@ -27,9 +27,10 @@ class AgencyListParams(BaseModel):
 
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
 
-def _construct_active_query(stmt: Select) -> Select:
-    active_agency = (
-        select(Agency.agency_id)
+
+def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
+    return (
+        select(field)
         .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
         .join(CurrentOpportunitySummary)
         .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
@@ -39,26 +40,6 @@ def _construct_active_query(stmt: Select) -> Select:
             )
         )
     )
-
-    active_top_level_agency = (
-        (
-            select(Agency.top_level_agency_id)
-            .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
-            .join(CurrentOpportunitySummary)
-            .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
-            .where(
-                CurrentOpportunitySummary.opportunity_status.in_(
-                    [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
-                )
-            )
-        )
-        .union(active_agency)
-        .subquery()
-    )
-
-    agency_id_stmt = select(active_top_level_agency).distinct
-
-    return stmt.where(Agency.agency_id.in_(agency_id_stmt))
 
 
 def get_agencies(
@@ -72,13 +53,18 @@ def get_agencies(
     )
 
     if list_params.filters and list_params.filters.active:
-        stmt = _construct_active_query(stmt)
+        active_agency_subquery = (
+            _construct_active_inner_query(Agency.agency_id)
+            .union(_construct_active_inner_query(Agency.top_level_agency_id))
+            .subquery()
+        )
 
+        agency_id_stmt = select(active_agency_subquery).distinct()
+
+        stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
+
+    # Sort
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
-
-    if list_params.filters:
-        if list_params.filters.agency_name:
-            stmt = stmt.where(Agency.agency_name == list_params.filters.agency_name)
 
     # Apply pagination after processing
     paginator: Paginator[Agency] = Paginator(

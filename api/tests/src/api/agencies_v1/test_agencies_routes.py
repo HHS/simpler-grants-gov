@@ -134,6 +134,7 @@ class TestAgenciesRoutes(BaseTestClass):
         # HHS
         OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
         OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
+        OpportunityFactory.create(agency_code=doi_hhs.agency_code)
 
         # CREES
         OpportunityFactory.create(agency_code=usda_crees.agency_code, is_closed_summary=True)
@@ -163,3 +164,42 @@ class TestAgenciesRoutes(BaseTestClass):
         assert set([agency["agency_code"] for agency in data]) == set(
             [opp.agency_code for opp in [doi_hhs, usda_crees, hhs, usda]]
         )
+
+    def test_agencies_active_no_duplicate(
+        self, client, api_auth_token, enable_factory_create, db_session
+    ):
+        # Create top-level agencies
+        hhs = AgencyFactory.create(agency_name="HHS")
+
+        # Create sub-level agencies
+        hhs_1 = AgencyFactory.create(
+            agency_name="HHS-STE", agency_code="HHS-DOC", top_level_agency=hhs
+        )
+        hhs_2 = AgencyFactory.create(
+            agency_name="HHS-EST", agency_code="HHS-TMP", top_level_agency=hhs
+        )
+        hhs_3 = AgencyFactory.create(
+            agency_name="HHS-CHS", agency_code="HHS-STE", top_level_agency=hhs
+        )
+
+        # Create opportunities
+        OpportunityFactory.create(agency_code=hhs.agency_code)
+        OpportunityFactory.create(agency_code=hhs_1.agency_code)
+        OpportunityFactory.create(agency_code=hhs_2.agency_code)
+        OpportunityFactory.create(agency_code=hhs_3.agency_code)
+
+        # Make request
+        payload = {
+            "filters": {"active": "True"},
+            "pagination": {
+                "page_size": 10,
+                "page_offset": 1,
+            },
+        }
+
+        response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
+        assert response.status_code == 200
+        data = response.json["data"]
+
+        # assert no duplicate agencies are returned
+        assert len(data) == 4
