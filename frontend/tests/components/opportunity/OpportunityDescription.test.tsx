@@ -48,11 +48,7 @@ const mockSummaryData: Summary = {
 describe("OpportunityDescription", () => {
   it("renders the opportunity description", () => {
     render(
-      <OpportunityDescription
-        opportunityId={1}
-        summary={mockSummaryData}
-        nofoPath=""
-      />,
+      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
     const descriptionHeading = screen.getByText("description");
@@ -70,9 +66,8 @@ describe("OpportunityDescription", () => {
   it("splits opportunity description after 600 characters if description is longer than 750 characters", () => {
     render(
       <OpportunityDescription
-        opportunityId={1}
         summary={{ ...mockSummaryData, summary_description: longDescription }}
-        nofoPath=""
+        attachments={[]}
       />,
     );
 
@@ -96,9 +91,8 @@ describe("OpportunityDescription", () => {
 
     render(
       <OpportunityDescription
-        opportunityId={1}
         summary={{ ...mockSummaryData, summary_description: longDescription }}
-        nofoPath=""
+        attachments={[]}
       />,
     );
 
@@ -111,11 +105,7 @@ describe("OpportunityDescription", () => {
 
   it("renders the eligible applicants with mapped values", () => {
     render(
-      <OpportunityDescription
-        opportunityId={1}
-        summary={mockSummaryData}
-        nofoPath=""
-      />,
+      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
     const eligibleApplicantsHeading = screen.getByText("eligible_applicants");
@@ -130,11 +120,7 @@ describe("OpportunityDescription", () => {
 
   it("renders additional information on eligibility", () => {
     render(
-      <OpportunityDescription
-        opportunityId={1}
-        summary={mockSummaryData}
-        nofoPath=""
-      />,
+      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
     const additionalInfoHeading = screen.getByText("additional_info");
@@ -153,11 +139,7 @@ describe("OpportunityDescription", () => {
 
   it("renders agency contact information", () => {
     render(
-      <OpportunityDescription
-        opportunityId={1}
-        summary={mockSummaryData}
-        nofoPath=""
-      />,
+      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
     const contactInfoHeading = screen.getByText("contact_info");
@@ -176,7 +158,6 @@ describe("OpportunityDescription", () => {
   it("renders information correctly when null values are present", () => {
     render(
       <OpportunityDescription
-        opportunityId={1}
         summary={{
           ...mockSummaryData,
           applicant_types: [],
@@ -186,7 +167,7 @@ describe("OpportunityDescription", () => {
           agency_email_address_description: null,
           summary_description: null,
         }}
-        nofoPath=""
+        attachments={[]}
       />,
     );
 

@@ -1,13 +1,8 @@
+import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { Link, Table } from "@trussworks/react-uswds";
-
-interface OpportunityDocument {
-  file_name: string;
-  download_path: string;
-  updated_at: string;
-}
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
@@ -25,6 +20,7 @@ const DocumentTable = ({
       <thead>
         <tr>
           <th scope="col">{t("table_col_file_name")}</th>
+          <th scope="col">{t("table_col_description")}</th>
           <th scope="col">{t("table_col_last_updated")}</th>
         </tr>
       </thead>
@@ -39,6 +35,9 @@ const DocumentTable = ({
               >
                 {document.file_name}
               </Link>
+            </td>
+            <td data-label={t("table_col_description")}>
+              <div>{document.file_description}</div>
             </td>
             <td data-label={t("table_col_last_updated")}>
               {/* https://day.js.org/docs/en/display/format */}
@@ -63,7 +62,7 @@ const OpportunityDocuments = ({
     <>
       <h2 id="opportunity_documents">{t("title")}</h2>
       {documents.length > 0 ? (
-        <Table>
+        <Table className="width-full">
           <DocumentTable documents={documents} opportunityId={opportunityId} />
         </Table>
       ) : (

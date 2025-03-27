@@ -7,11 +7,11 @@ export interface OpportunityAssistanceListing {
   program_title: string;
 }
 
-interface OpportunityDocument {
-  opportunity_attachment_type: string;
+export interface OpportunityDocument {
   file_name: string;
   download_path: string;
   updated_at: string;
+  file_description?: string;
 }
 
 interface MinimalSummary {
