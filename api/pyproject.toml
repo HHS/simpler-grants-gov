@@ -33,6 +33,7 @@ tenacity = "^8.0"
 jsonschema = { extras = ["format-nongpl"], version = "^4.23.0" }
 pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
+xlrd = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
