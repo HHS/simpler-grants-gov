@@ -3,6 +3,7 @@ import logging
 import re
 from typing import Any
 
+from src.form_schema.field_info import FieldInfo
 from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
 logger = logging.getLogger(__name__)
@@ -22,48 +23,25 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
     schema_builder = JsonSchemaBuilder()
 
     # Group fields by section for better organization
-    sections: dict[str, list[dict[str, Any]]] = {}
+    sections: dict[str, list[FieldInfo]] = {}
     current_section = None
 
     reader = csv.DictReader(csv_content.splitlines())
 
     for row in reader:
-        field_id = row.get("Field ID", "").strip()
-        field_label = row.get("Field Label", "").strip()
-        field_type = row.get("Field Type", "").strip()
-        required = row.get("Required?", "").strip().lower() == "yes"
-        data_type = row.get("Data Type", "").strip()
-        min_value = row.get("Min  # of Chars or Min Value", "").strip()
-        max_value = row.get("Max # of Chars or Max Value", "").strip()
-        list_of_values = row.get("List of Values", "").strip()
-        business_rules = row.get("Business Rules", "").strip()
-        help_tip = row.get("Help Tip", "").strip()
-        min_occurrences = row.get("Minimum Occurrences", "").strip()
+        field_info = FieldInfo.from_dict(row)
 
         # Skip headers and non-data rows
-        if not field_id or field_id == "Field ID" or field_type in ["Label", "Button"]:
+        if (
+            not field_info.id
+            or field_info.id == "Field ID"
+            or field_info.type in ["Label", "Button"]
+        ):
             # Check if this might be a section header
-            if field_label and "Header" in field_type:
-                current_section = field_label.replace(" Header", "")
+            if field_info.label and "Header" in field_info.label:
+                current_section = field_info.label.replace(" Header", "")
                 sections[current_section] = []
             continue
-
-        is_nullable = min_occurrences == "0"
-
-        # Track the field for later addition to appropriate section
-        field_info = {
-            "id": field_id,
-            "label": field_label,
-            "type": field_type,
-            "required": required,
-            "data_type": data_type,
-            "min_value": min_value,
-            "max_value": max_value,
-            "list_of_values": list_of_values,
-            "business_rules": business_rules,
-            "help_tip": help_tip,
-            "is_nullable": is_nullable,
-        }
 
         if current_section:
             sections.setdefault(current_section, []).append(field_info)
@@ -92,29 +70,20 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
     return schema_builder.build()
 
 
-def add_field_to_builder(builder: JsonSchemaBuilder, field_info: dict[str, Any]) -> None:
+def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> None:
     """Add a field to the appropriate JsonSchemaBuilder based on its type."""
-    field_id = field_info["id"]
-    required = field_info["required"]
-    data_type = field_info["data_type"]
-    field_type = field_info["type"]
-    min_value = field_info["min_value"]
-    max_value = field_info["max_value"]
-    list_of_values = field_info["list_of_values"]
-    help_tip = field_info["help_tip"]
-    is_nullable = field_info["is_nullable"]
+    field_id = field_info.id
+    required = field_info.required
+    data_type = field_info.data_type
+    field_type = field_info.type
+    min_value = field_info.min_value
+    max_value = field_info.max_value
+    list_of_values = field_info.list_of_values
+    help_tip = field_info.help_tip
+    is_nullable = field_info.is_nullable
 
     # Use field_label as the title
-    title = field_info["label"]
-
-    # Get properly typed min/max values
-    min_length = int(min_value) if min_value and min_value.isdigit() else None
-    max_length = int(max_value) if max_value and max_value.isdigit() else None
-
-    # Create enum list if available
-    enum_values = None
-    if list_of_values:
-        enum_values = [v.strip() for v in list_of_values.split(";") if v.strip()]
+    title = field_info.label
 
     # Determine field format
     format_value = None
@@ -131,17 +100,17 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: dict[str, Any])
         return
 
     # Add appropriate property based on type
-    if field_type == "Radio Group" or data_type == "LIST" or enum_values:
+    if field_type == "Radio Group" or data_type == "LIST" or list_of_values:
         builder.add_string_property(
             field_id,
             is_nullable=is_nullable,
             is_required=required,
             title=title,
             description=help_tip,
-            min_length=min_length,
-            max_length=max_length,
+            min_length=min_value,
+            max_length=max_value,
             format=format_value,
-            enum=enum_values,
+            enum=list_of_values,
         )
     elif data_type == "DATE":
         builder.add_string_property(
@@ -159,8 +128,8 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: dict[str, Any])
             is_required=required,
             title=title,
             description=help_tip,
-            min_length=min_length,
-            max_length=max_length,
+            min_length=min_value,
+            max_length=max_value,
             format=format_value,
         )
     else:
@@ -171,8 +140,8 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: dict[str, Any])
             is_required=required,
             title=title,
             description=help_tip,
-            min_length=min_length,
-            max_length=max_length,
+            min_length=min_value,
+            max_length=max_value,
             format=format_value,
         )
 
