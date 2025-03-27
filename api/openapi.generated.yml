@@ -1252,6 +1252,8 @@ components:
       properties:
         agency_id:
           type: integer
+        active:
+          type: boolean
     SortOrderAgencyPaginationV1:
       type: object
       properties:

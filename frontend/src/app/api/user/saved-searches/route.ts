@@ -6,7 +6,11 @@ import {
   UnauthorizedError,
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { handleSavedSearch } from "src/services/fetch/fetchers/savedSearchFetcher";
+import {
+  handleDeleteSavedSearch,
+  handleSavedSearch,
+  handleUpdateSavedSearch,
+} from "src/services/fetch/fetchers/savedSearchFetcher";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
@@ -53,6 +57,87 @@ export const POST = async (request: Request) => {
     return Response.json(
       {
         message: `Error attempting to save search: ${message}`,
+      },
+      { status },
+    );
+  }
+};
+
+export const PUT = async (request: Request) => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      throw new UnauthorizedError("No active session to save opportunity");
+    }
+    const savedSearchBody = (await request.json()) as OptionalStringDict;
+
+    if (!savedSearchBody.name || !savedSearchBody.searchId) {
+      throw new BadRequestError(
+        "Necessary fields not supplied to update saved search",
+      );
+    }
+
+    const response = await handleUpdateSavedSearch(
+      session.token,
+      session.user_id,
+      savedSearchBody.searchId,
+      savedSearchBody.name,
+    );
+    if (!response || response.status_code !== 200) {
+      throw new ApiRequestError(
+        `Error updating search: ${response.message}`,
+        "APIRequestError",
+        response.status_code,
+      );
+    }
+    return Response.json({
+      message: "Update search success",
+    });
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to save search: ${message}`,
+      },
+      { status },
+    );
+  }
+};
+
+export const DELETE = async (request: Request) => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      throw new UnauthorizedError("No active session to save opportunity");
+    }
+    // using a body on a delete request technically works but isn't to spec. Doing it for now, but
+    // will fix this up to take the id as a path param later on
+    const savedSearchBody = (await request.json()) as OptionalStringDict;
+
+    if (!savedSearchBody.searchId) {
+      throw new BadRequestError("No search id provided to delete saved search");
+    }
+
+    const response = await handleDeleteSavedSearch(
+      session.token,
+      session.user_id,
+      savedSearchBody.searchId,
+    );
+    if (!response || response.status_code !== 200) {
+      throw new ApiRequestError(
+        `Error deleting search: ${response.message}`,
+        "APIRequestError",
+        response.status_code,
+      );
+    }
+    return Response.json({
+      message: "Delete search success",
+    });
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to delete search: ${message}`,
       },
       { status },
     );

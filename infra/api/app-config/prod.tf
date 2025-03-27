@@ -6,7 +6,7 @@ module "prod_config" {
   environment                     = "prod"
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
-  enable_https                    = false
+  enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
@@ -62,7 +62,7 @@ module "prod_config" {
     #LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     #LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
 
-    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,GSA,FCC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF"
+    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
   }
   instance_cpu    = 1024
   instance_memory = 4096
