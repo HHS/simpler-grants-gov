@@ -70,6 +70,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
+        zero_metrics_dict["task_class"] = self.cls_name()
         self.set_metrics(zero_metrics_dict)
 
     def set_metrics(self, metrics: dict[str, Any]) -> None:

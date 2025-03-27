@@ -103,7 +103,7 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const fetchUserWithMethod = (type: "POST" | "DELETE") =>
+export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);

@@ -1555,23 +1555,15 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert resp.status_code == 200
 
 
-@pytest.fixture
-def opportunity_index_alias_func(search_client, monkeypatch):
-    # Note we don't actually create anything, this is just a random name
-    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
-    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
-    return alias
-
-
 def test_search_experimental_attachment_200(
     client,
     api_auth_token,
     search_client,
     mock_s3_bucket,
     enable_factory_create,
-    opportunity_index_alias_func,
-    opportunity_index,
+    opportunity_index_alias,
 ):
+
     # Create Opportunity Attachments
     attachments = [
         (DOC_MANUFACTURING, "test_file_one.txt", "Testing querying attachment"),
@@ -1604,18 +1596,23 @@ def test_search_experimental_attachment_200(
             for att in record["attachments"]
         ]
 
+    # Create search index
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
     # Load into the search index
     search_client.bulk_upsert(
-        opportunity_index,
+        index_name,
         json_records,
         primary_key_field="opportunity_id",
         pipeline="multi-attachment",
     )
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias_func)
+    search_client.swap_alias_index(index_name, opportunity_index_alias)
 
     # Prepare the search request
     search_request = get_search_request(
-        query="Testing", experimental={"scoring_rule": "attachment_only"}
+        query="Testing", experimental={"scoring_rule": "attachment_only"}  #test-opportunity-index-135913555100790159966361273604570755388'
+
     )
 
     resp = client.post(

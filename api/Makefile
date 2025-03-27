@@ -322,3 +322,11 @@ load-test-staging: # Load test the staging environment in aws
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
 	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml
+
+
+
+#########################
+# Mock SOAP services
+#########################
+start-mock-soap-services:
+	docker compose up --detach mock-applicants-soap-api 	# start applicants soap api
