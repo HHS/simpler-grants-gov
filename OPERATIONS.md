@@ -103,8 +103,8 @@ The process starts by generating a cert like so. You will need to generate the c
 ```bash
 # api.simpler.grants.gov example
 
-$ openssl genrsa -out api_simpler_grants_gov.key 2048
-$ openssl req -new \
+openssl genrsa -out api_simpler_grants_gov.key 2048
+openssl req -new \
     -key api_simpler_grants_gov.key \
     -out api_simpler_grants_gov.csr \
     -subj "/C=US/O=Simpler Grants Gov/CN=api.simpler.grants.gov" \
@@ -112,8 +112,8 @@ $ openssl req -new \
 
 # simpler.grants.gov example
 
-$ openssl genrsa -out simpler_grants_gov.key 2048
-$ openssl req -new \
+openssl genrsa -out simpler_grants_gov.key 2048
+openssl req -new \
     -key simpler_grants_gov.key \
     -out simpler_grants_gov.csr \
     -subj "/C=US/O=Simpler Grants Gov/CN=simpler.grants.gov" \
@@ -129,12 +129,12 @@ You will get a zip file back from HHS containing the certificate. Inside the zip
 ```bash
 # api.simpler.grants.gov example
 
-$ aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
     --private-key fileb://api_simpler_grants_gov.key
 
 # simpler.grants.gov example
 
-$ aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
     --private-key fileb://simpler_grants_gov.key
 ```
 
@@ -146,25 +146,70 @@ If you get the following error...
 
 #### Application Certificates: Part 2b: Upload Multiple Certs
 
-If there are multiple certificates (eg. a chain certificate is included) then there will be another file called something like `{url}_chain.key` the command looks more like this
+If there are multiple certificates (eg. a chain certificate is included) then there will be given another file called something like `{url}_chain.key` and the command looks more like this
 
 ```bash
 # api.simpler.grants.gov example
 
-$ aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
     --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
     --private-key fileb://api_simpler_grants_gov.key
 
 # simpler.grants.gov example
 
-$ aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
     --certificate-chain fileb://simpler_grants_gov_chain.pem \
     --private-key fileb://simpler_grants_gov.key
 ```
 
+But if you got this error
+
+> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
+
+And don't have 3 certs, then you need to create the chain certs, via part 2c
+
+#### Application Certificates: Part 2c: Split Out and Upload Multiple Certs (Allegedly)
+
+This is the case where you'll need to extra the chain certs from the primary cert so you can upload them separately. You can split the certs via first running the following command,
+
+```bash
+# api.simpler.grants.gov example
+
+openssl x509 -inform DER \
+    -in api_simpler_grants_gov.cer \
+    -out api_simpler_grants_gov.pem
+
+# simpler.grants.gov example
+
+openssl x509 -inform DER \
+    -in simpler_grants_gov.cer \
+    -out simpler_grants_gov.pem
+```
+
+After that you can inspect the cert to split it out. Allegedly there should be multiple certs in there... but... in my tests there was not. So there's 2 things to do here:
+
+1. Just upload the new single cert plain text file
+2. Split out the certs so you can upload the chain cert
+
+When this document was originally written, it was case 1 above, so there was only 1 cert to actually upload. The command to do that was:
+
+```bash
+# api.simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://simpler_grants_gov.pem \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+**_(when someone gets an actual chain cert, they should update this documentation)_**
+
 #### Application Certificates: Part 3
 
-TODO
+At this point your cert should be uploaded. The next step is to deploy the load balancers so they pick up the new cert. This should be a normal deploy, the same way you do your deploys in every other circumstance.
 
 ### Login.gov Certificates
 
