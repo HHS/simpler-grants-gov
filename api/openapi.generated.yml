@@ -1003,8 +1003,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/HealthcheckMetadata'
+          $ref: '#/components/schemas/HealthcheckMetadata'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1044,8 +1043,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         internal_request_id:
           type: string
           description: An internal tracking ID
@@ -1082,8 +1080,7 @@ components:
         created_at:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/DateRange'
+          $ref: '#/components/schemas/DateRange'
     SortOrderExtractMetadataPaginationV1:
       type: object
       properties:
@@ -1113,8 +1110,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
+            $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1146,13 +1142,11 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
+          $ref: '#/components/schemas/ExtractMetadataFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
+          $ref: '#/components/schemas/ExtractMetadataPaginationV1'
       required:
       - pagination
     SortOrder:
@@ -1194,8 +1188,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrder'
+            $ref: '#/components/schemas/SortOrder'
     ExtractMetadataResponse:
       type: object
       properties:
@@ -1229,8 +1222,7 @@ components:
           description: The pagination information for paginated endpoints
           type: &id001
           - object
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1241,8 +1233,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ExtractMetadataResponse'
+            $ref: '#/components/schemas/ExtractMetadataResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1286,8 +1277,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
+            $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1308,13 +1298,11 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyFilterV1'
+          $ref: '#/components/schemas/AgencyFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyPaginationV1'
+          $ref: '#/components/schemas/AgencyPaginationV1'
       required:
       - pagination
     AgencyResponse:
@@ -1329,8 +1317,7 @@ components:
         top_level_agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyResponse'
+          $ref: '#/components/schemas/AgencyResponse'
         created_at:
           type: string
           format: date-time
@@ -1343,8 +1330,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1355,8 +1341,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/AgencyResponse'
+            $ref: '#/components/schemas/AgencyResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1624,68 +1609,55 @@ components:
         funding_instrument:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingInstrumentFilterV1'
+          $ref: '#/components/schemas/FundingInstrumentFilterV1'
         funding_category:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingCategoryFilterV1'
+          $ref: '#/components/schemas/FundingCategoryFilterV1'
         applicant_type:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicantTypeFilterV1'
+          $ref: '#/components/schemas/ApplicantTypeFilterV1'
         opportunity_status:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityStatusFilterV1'
+          $ref: '#/components/schemas/OpportunityStatusFilterV1'
         agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencySearchFilterV1'
+          $ref: '#/components/schemas/AgencySearchFilterV1'
         assistance_listing_number:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
+          $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
         is_cost_sharing:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/IsCostSharingFilterV1'
+          $ref: '#/components/schemas/IsCostSharingFilterV1'
         expected_number_of_awards:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
+          $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
         award_floor:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardFloorFilterV1'
+          $ref: '#/components/schemas/AwardFloorFilterV1'
         award_ceiling:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardCeilingFilterV1'
+          $ref: '#/components/schemas/AwardCeilingFilterV1'
         estimated_total_program_funding:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
+          $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
         post_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/PostDateFilterV1'
+          $ref: '#/components/schemas/PostDateFilterV1'
         close_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/CloseDateFilterV1'
+          $ref: '#/components/schemas/CloseDateFilterV1'
     ExperimentalV1:
       type: object
       properties:
@@ -1739,8 +1711,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
+            $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1777,18 +1748,15 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+          $ref: '#/components/schemas/OpportunitySearchFilterV1'
         experimental:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExperimentalV1'
+          $ref: '#/components/schemas/ExperimentalV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityPaginationV1'
+          $ref: '#/components/schemas/OpportunityPaginationV1'
         format:
           default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
           - json
@@ -2115,13 +2083,11 @@ components:
           items:
             type: &id003
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: &id004
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2192,8 +2158,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -2210,8 +2175,7 @@ components:
           description: Counts of filter/facet values in the full response
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityFacetV1'
+          $ref: '#/components/schemas/OpportunityFacetV1'
     User:
       type: object
       properties:
@@ -2241,8 +2205,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/User'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2273,8 +2236,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationStartResponseData'
+          $ref: '#/components/schemas/ApplicationStartResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2317,6 +2279,7 @@ components:
                 title: 'Date of application '
                 type: string
                 format: date
+          additionalProperties: {}
         form_ui_schema:
           description: The UI Schema of the form for front-end rendering
           example:
@@ -2338,8 +2301,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FormAlpha'
+          $ref: '#/components/schemas/FormAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2436,12 +2398,10 @@ components:
           type: array
           items:
             type: *id003
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: *id004
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2462,8 +2422,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAttachmentV1'
+            $ref: '#/components/schemas/OpportunityAttachmentV1'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -2474,8 +2433,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
+          $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2490,8 +2448,7 @@ components:
         search_query:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
     SavedSearchResponse:
@@ -2510,8 +2467,7 @@ components:
           description: The saved search query parameters
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
         created_at:
           type: string
           format: date-time
@@ -2527,8 +2483,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/SavedSearchResponse'
+          $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2550,6 +2505,7 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
         application_response:
           type: object
+          additionalProperties: {}
     ApplicationGetResponseData:
       type: object
       properties:
@@ -2566,8 +2522,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ApplicationFormGetResponseData'
+            $ref: '#/components/schemas/ApplicationFormGetResponseData'
     ApplicationGetResponse:
       type: object
       properties:
@@ -2578,8 +2533,7 @@ components:
           items:
             type: &id007
             - object
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
           description: The message to return
@@ -2587,8 +2541,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationGetResponseData'
+          $ref: '#/components/schemas/ApplicationGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2602,8 +2555,7 @@ components:
         form:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FormAlpha'
+          $ref: '#/components/schemas/FormAlpha'
     CompetitionAlpha:
       type: object
       properties:
@@ -2620,8 +2572,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/CompetitionFormAlpha'
+            $ref: '#/components/schemas/CompetitionFormAlpha'
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -2632,8 +2583,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/CompetitionAlpha'
+          $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2692,8 +2642,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
+            $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -2714,8 +2663,7 @@ components:
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
+          $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
       required:
       - pagination
     UserSavedSearchesResponse:
@@ -2731,8 +2679,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SavedSearchResponse'
+            $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2772,8 +2719,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
+            $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -2794,8 +2740,7 @@ components:
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
+          $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
       required:
       - pagination
     SavedOpportunitySummaryV1:
@@ -2842,8 +2787,7 @@ components:
         summary:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+          $ref: '#/components/schemas/SavedOpportunitySummaryV1'
     UserSavedOpportunitiesResponse:
       type: object
       properties:
@@ -2857,8 +2801,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
+            $ref: '#/components/schemas/SavedOpportunityResponseV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2903,6 +2846,7 @@ components:
       properties:
         application_response:
           type: object
+          additionalProperties: {}
       required:
       - application_response
     ApplicationFormUpdateResponseData:
@@ -2921,8 +2865,7 @@ components:
             aware of, but did not prevent handling of the request
           items:
             type: *id007
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
           description: The message to return
@@ -2930,8 +2873,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2958,8 +2900,7 @@ components:
             aware of, but did not prevent handling of the request
           items:
             type: *id007
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
           description: The message to return
@@ -2967,8 +2908,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationFormGetResponseData'
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
