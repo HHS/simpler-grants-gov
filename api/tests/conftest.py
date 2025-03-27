@@ -483,10 +483,10 @@ def fixture_from_file():
     def test_foo(fixture_from_file):
         mock_data = fixture_from_file("/fix/data.json")
     """
-    fixtures_dir = path.join(path.dirname(__file__), ".", "fixtures")
 
     def _file_reader(file_path: str):
-        with open(f"{fixtures_dir}{file_path}", "r") as f:
+        full_file_path = path.join(path.dirname(__file__), ".", "fixtures", file_path.lstrip("/"))
+        with open(full_file_path, "r") as f:
             return f.read()
 
     return _file_reader

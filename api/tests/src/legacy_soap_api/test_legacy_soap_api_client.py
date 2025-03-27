@@ -1,11 +1,12 @@
-from unittest import TestCase
+import pytest
 
 from src.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
 
 
-class TestLegacySoapAPIClient(TestCase):
-    def setUp(cls) -> None:
-        cls.client = LegacySOAPClient()
+class TestSOAPClient:
+     @pytest.fixture(scope="class")
+     def legacy_soap_client(self):
+        return LegacySOAPClient()
 
-    def test_can_instantiate(cls) -> None:
-        assert isinstance(cls.client, LegacySOAPClient)
+     def test_can_instantiate(self, legacy_soap_client) -> None:
+        assert isinstance(legacy_soap_client, LegacySOAPClient)

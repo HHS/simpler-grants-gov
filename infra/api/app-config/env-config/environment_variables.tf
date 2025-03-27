@@ -28,6 +28,7 @@ locals {
 
     # grants.gov services/applications URI.
     GRANTS_GOV_URI = "https://trainingws.grants.gov:443"
+    ENABLE_SOAP_API = 1
   }
 
   # Configuration for secrets
