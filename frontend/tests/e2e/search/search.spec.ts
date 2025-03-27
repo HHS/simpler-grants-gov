@@ -30,8 +30,6 @@ test.describe("Search page tests", () => {
   test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
-    await page.goto("/search");
-
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
@@ -47,18 +45,12 @@ test.describe("Search page tests", () => {
       "eligibility-state_governments": "state_governments",
       "eligibility-county_governments": "county_governments",
     };
-    const agencyCheckboxes = {
-      EPA: "EPA",
-      NSF: "NSF",
-    };
+    const agencyCheckboxes: { [key: string]: string } = {};
     const categoryCheckboxes = {
       "category-recovery_act": "recovery_act",
       "category-agriculture": "agriculture",
     };
-
-    await waitForSearchResultsInitialLoad(page);
-    await selectSortBy(page, "agencyDesc");
-    await expectSortBy(page, "agencyDesc");
+    await page.goto("/search");
 
     if (project.name.match(/[Mm]obile/)) {
       await toggleMobileSearchFilters(page);
@@ -89,6 +81,21 @@ test.describe("Search page tests", () => {
     await toggleCheckboxes(page, eligibilityCheckboxes, "eligibility");
 
     await clickAccordionWithTitle(page, "Agency");
+    const subAgencyExpander = page.locator(
+      "#opportunity-filter-agency ul li:first-child",
+    );
+    await subAgencyExpander.click();
+    const firstSubAgency = page.locator(
+      "#opportunity-filter-agency ul ul li:first-child .usa-checkbox:first-child input",
+    );
+
+    const agencyId = await firstSubAgency.getAttribute("id");
+    expect(agencyId).toBeTruthy();
+    if (!agencyId) {
+      test.fail();
+      return;
+    }
+    agencyCheckboxes[agencyId] = agencyId;
     await toggleCheckboxes(page, agencyCheckboxes, "agency");
 
     await clickAccordionWithTitle(page, "Category");
@@ -99,6 +106,10 @@ test.describe("Search page tests", () => {
     /***********************************************************/
 
     await refreshPageWithCurrentURL(page);
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
 
     // Expect search inputs are retained in the new tab
     await expectSortBy(page, "agencyDesc");
@@ -115,6 +126,7 @@ test.describe("Search page tests", () => {
     for (const [checkboxID] of Object.entries(eligibilityCheckboxes)) {
       await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
+    await subAgencyExpander.click();
     for (const [checkboxID] of Object.entries(agencyCheckboxes)) {
       await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
