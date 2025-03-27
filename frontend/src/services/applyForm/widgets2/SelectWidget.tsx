@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ariaDescribedByIds,
   enumOptionsIndexForValue,
@@ -5,11 +6,11 @@ import {
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
+  WidgetProps,
 } from "@rjsf/utils";
-import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, SyntheticEvent, useCallback } from "react";
-import { ErrorMessage, Label, Select } from "@trussworks/react-uswds";
+import { Select } from "@trussworks/react-uswds";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -27,9 +28,9 @@ function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
  * @param props - The `WidgetProps` for this component
  */
 function SelectWidget<
-  T = unknown,
+  T = any,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
+  F extends FormContextType = any,
 >({
   schema,
   id,
@@ -40,15 +41,12 @@ function SelectWidget<
   readonly,
   multiple = false,
   autofocus = false,
-  rawErrors = [],
-  // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
-}: UswdsWidgetProps<T, S, F>) {
+}: WidgetProps<T, S, F>) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
-  const { title } = schema;
   const emptyValue = multiple ? [] : undefined;
 
   const handleFocus = useCallback(
@@ -59,7 +57,8 @@ function SelectWidget<
         enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
       );
     },
-    [onFocus, id, multiple, enumOptions, optEmptyVal],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onFocus, id, schema, multiple, enumOptions, optEmptyVal],
   );
 
   const handleBlur = useCallback(
@@ -70,7 +69,8 @@ function SelectWidget<
         enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
       );
     },
-    [onBlur, id, multiple, enumOptions, optEmptyVal],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onBlur, id, schema, multiple, enumOptions, optEmptyVal],
   );
 
   const handleChange = useCallback(
@@ -80,7 +80,8 @@ function SelectWidget<
         enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
       );
     },
-    [onChange, multiple, enumOptions, optEmptyVal],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onChange, schema, multiple, enumOptions, optEmptyVal],
   );
 
   const selectedIndexes = enumOptionsIndexForValue<S>(
@@ -88,19 +89,9 @@ function SelectWidget<
     enumOptions,
     multiple,
   );
-  const error = rawErrors.length ? true : undefined;
 
   return (
     <div key={`wrapper-for-${id}`}>
-      <Label key={`label-for-${id}`} htmlFor={id}>
-        {title}
-        {required && (
-          <span className="usa-hint usa-hint--required text-no-underline">
-            *
-          </span>
-        )}
-      </Label>
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <Select
         id={id}
         name={id}
@@ -118,7 +109,8 @@ function SelectWidget<
       >
         {Array.isArray(enumOptions) &&
           enumOptions.map(({ value, label }, i) => {
-            const disabled = enumDisabled && enumDisabled.indexOf(value as TextTypes) !== -1;
+            const disabled =
+              enumDisabled && enumDisabled.indexOf(String(value)) !== -1;
             return (
               <option key={i} value={String(i)} disabled={disabled}>
                 {label}

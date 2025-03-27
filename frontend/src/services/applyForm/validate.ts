@@ -1,7 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { JTDDataType } from "ajv/dist/core";
 
 import { UiSchema } from "./types";
 import { formSchemaValidate, uiSchemaValidate } from "./validations";
@@ -14,10 +13,7 @@ export const validateUiSchema = (data: UiSchema) => {
   return uiSchemaValidate.parse(data);
 };
 
-export const validateData = (
-  data: object,
-  schema: RJSFSchema,
-) => {
+export const validateData = (data: object, schema: RJSFSchema) => {
   const ajv = new Ajv({ allErrors: true });
   addFormats(ajv);
   const validate = ajv.compile(schema);

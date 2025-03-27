@@ -1,3 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/widgets/TextareaWidget.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
 import {
@@ -9,16 +13,18 @@ import {
 import { UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, Label, Textarea } from "@trussworks/react-uswds";
+import { Label, Textarea } from "@trussworks/react-uswds";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.
  *
  * @param props - The `WidgetProps` for this component
  */
 function TextareaWidget<
-  T = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T = any,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  F extends FormContextType = any,
 >({
   id,
   options = {},
@@ -28,7 +34,6 @@ function TextareaWidget<
   readonly,
   autofocus = false,
   schema,
-  rawErrors = [],
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
@@ -52,8 +57,6 @@ function TextareaWidget<
       onFocus(id, target && target.value),
     [id, onFocus],
   );
-  const error = rawErrors.length ? true : undefined;
-
   return (
     <div key={`wrapper-for-${id}`}>
       <Label key={`label-for-${id}`} htmlFor={id}>
@@ -64,7 +67,6 @@ function TextareaWidget<
           </span>
         )}
       </Label>
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

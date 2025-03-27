@@ -1,7 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
 import {
@@ -14,18 +10,21 @@ import {
 import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, FormGroup, Label, TextInput } from "@trussworks/react-uswds";
+import {
+  ErrorMessage,
+  FormGroup,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
  * @param props - The `WidgetProps` for this component
  */
 function TextWidget<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T = any,
+  T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  F extends FormContextType = any,
+  F extends FormContextType = never,
 >({
   id,
   value,
@@ -65,6 +64,8 @@ function TextWidget<
     inputType = "number";
   } else if (format === "password") {
     inputType = "password";
+  } else if (format === "date") {
+    inputType = "date";
   }
 
   const _onChange = useCallback(
@@ -83,8 +84,7 @@ function TextWidget<
       onFocus(id, target && target.value),
     [onFocus, id],
   );
-  const error = rawErrors.length ? true: undefined;
-  console.log('!!!!', rawErrors)
+  const error = rawErrors.length ? true : undefined;
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
@@ -96,7 +96,7 @@ function TextWidget<
           </span>
         )}
       </Label>
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage> }
+      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <TextInput
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

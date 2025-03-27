@@ -1,5 +1,3 @@
-import Ajv, { JSONSchemaType } from "ajv";
-import addFormats from "ajv-formats";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";

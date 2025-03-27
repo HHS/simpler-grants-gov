@@ -1,17 +1,24 @@
-import { ThemeProps } from "@rjsf/core";
-import { RJSFSchema, WidgetProps } from "@rjsf/utils";
+import { RJSFSchema } from "@rjsf/utils";
+import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
+import { get } from "lodash";
 
 import { JSX } from "react";
 
 import { wrapSection } from "./fields";
-import { UiSchema, UswdsWidgetProps } from "./types";
+import {
+  UiSchema,
+} from "./types";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
-import { get } from "lodash";
 
-export function buildFormTreeClosure(schema: RJSFSchema, uiSchema: UiSchema, errors: string[], formData: object) {
+export function buildFormTreeClosure(
+  schema: RJSFSchema,
+  uiSchema: UiSchema,
+  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
+  formData: object,
+) {
   let acc: JSX.Element[] = [];
 
   const buildFormTree = (
@@ -68,7 +75,7 @@ const createField = (
   maxLength: number | null = null,
   schema: RJSFSchema,
   rawErrors: string[],
-  value: string | number | undefined
+  value: string | number | undefined,
 ) => {
   if (maxLength && Number(maxLength) > 255) {
     return TextareaWidget({
@@ -79,7 +86,7 @@ const createField = (
       options: {},
       schema,
       rawErrors,
-      value
+      value,
     });
   } else if (schema.enum?.length) {
     return SelectWidget({
@@ -95,7 +102,7 @@ const createField = (
       },
       schema,
       rawErrors,
-      value
+      value,
     });
   } else {
     return TextWidget({
@@ -106,118 +113,26 @@ const createField = (
       options: {},
       schema,
       rawErrors,
-      value
+      value,
     });
   }
 };
 
-/** 
-  const parentHasChild = (uiSchema): boolean => {
-    return false;
-    // const hasChild = uiSchema.find((node) => node.hasOwnProperty("children")) !== undefined ? true : false;
-    // console.log("acc", acc, "ui", uiSchema, "parent", parent, "row", row, "child?", hasChild)
-    /// return hasChild;
-    // TODO: check JSX elements
-    // return false;
-  };
-   */
-
-//
-
-/**
- * 
- * provides defaults
- *   ui: title, ui: widget, ui:description, ui: help
- * 
- * 
- * 
- * 
- * 1. default to definition
- *    title, type, description, format, minLength, maxLength
- * 2. override with ui:widget
- * 
- * 
-
-
-
-const getDefinitions= (definition: string, schema: FormSchema) => {
-    const name = definition.split("/")[2];
-    if (name) {
-        return {}
-    }
-}
- */
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const theme: ThemeProps = {
-  widgets: {
-    textarea: ({
-      id,
-      required,
-      minLength,
-      maxLength,
-      schema,
-    }: UswdsWidgetProps) =>
-      TextareaWidget({
-        id,
-        required,
-        minLength,
-        maxLength,
-        options: {},
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        schema,
-      }),
-    textInput: ({
-      id,
-      required,
-      minLength,
-      maxLength,
-      schema,
-    }: UswdsWidgetProps) =>
-      TextWidget({
-        id,
-        required,
-        minLength,
-        maxLength,
-        options: {},
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        schema,
-      }),
-    select: ({
-      id,
-      required,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      schema,
-    }: WidgetProps) =>
-      SelectWidget({
-        id,
-        required,
-        options: {
-          enumOptions:
-            schema.enum?.map((label, index) => ({
-              value: index,
-              label: String(label),
-            })) ?? [],
-        },
-        schema,
-      }),
-    // processField
-    // select
-    // radio / checkbox
-    //
-  },
-};
-
-
-export const buildField = (definition: string, formSchema: RJSFSchema, errors: string[], formData: object) => {
+export const buildField = (
+  definition: string,
+  formSchema: RJSFSchema,
+  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
+  formData: object,
+) => {
   const name = definition.split("/")[2];
   const schema = getSchemaObjectFromPointer(
     formSchema,
     definition,
   ) as RJSFSchema;
-  const rawErrors = errors.find((error) => definition === `/properties${error.instancePath}`);
-  // console.log(name, formData)
-  const value = get(formData, name) ?? undefined;
+  const rawErrors = errors.find(
+    (error) => definition === `/properties${error.instancePath}`,
+  );
+  const value = get(formData, name) as string | number | undefined;
 
   return createField(
     name,
@@ -225,7 +140,25 @@ export const buildField = (definition: string, formSchema: RJSFSchema, errors: s
     schema.minLength,
     schema.maxLength,
     schema,
-    rawErrors ? [rawErrors.message] :[],
+    rawErrors ? [rawErrors.message ?? ""] : [],
     value,
   );
 };
+
+export function getWrappersForNav(
+  schema: UiSchema,
+): { href: string; text: string }[] {
+  const results: { href: string; text: string }[] = [];
+
+  if (!Array.isArray(schema)) return results;
+  for (const item of schema) {
+    if ("children" in item && item.children && item.children.length > 0) {
+      if (item.name && item.label) {
+        results.push({ href: item.name, text: item.label });
+      }
+      results.push(...getWrappersForNav(item.children));
+    }
+  }
+
+  return results;
+}

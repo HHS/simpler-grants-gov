@@ -59,11 +59,9 @@ export type TextTypes =
   | "url";
 
 export interface UswdsWidgetProps<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T = any,
+  T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  F extends FormContextType = any,
+  F extends FormContextType = never,
 > extends GenericObjectType,
     Pick<
       HTMLAttributes<HTMLElement>,
@@ -73,6 +71,7 @@ export interface UswdsWidgetProps<
   value?: string | unknown;
   type?: string;
   minLength?: number;
+  schema: RJSFSchema;
   maxLength?: number;
   required?: boolean;
   disabled?: boolean;
@@ -83,8 +82,13 @@ export interface UswdsWidgetProps<
   options: NonNullable<UIOptionsType<T, S, F>> & {
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
+    enumDisabled?: unknown;
+    emptyValue?: string;
   };
   hideLabel?: boolean;
   multiple?: boolean;
   rawErrors?: string[];
+  onChange?: (value: unknown) => void;
+onBlur?: (id: string, value: unknown) => void;
+onFocus?: (id: string, value: unknown) => void
 }

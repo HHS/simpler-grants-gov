@@ -1,17 +1,18 @@
 "use server";
 
+import { ErrorObject } from "ajv";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { getFormDetails } from "src/services/fetch/fetchers/formFetcher";
+import { formDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
-import { getFormDetails } from "../fetch/fetchers/formFetcher";
 import { validateData } from "./validate";
-import { ErrorObject } from "ajv";
 
 type applyFormResponse = {
   errorMessage: string;
-  validationErrors: ErrorObject<string, Record<string, any>, unknown>[];
-  formData: object
+  validationErrors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  formData: object;
 };
 
 export async function submitApplyForm(_prevState: unknown, formData: FormData) {
@@ -20,7 +21,7 @@ export async function submitApplyForm(_prevState: unknown, formData: FormData) {
     return {
       errorMessage,
       validationErrors,
-      formData
+      formData,
     };
   } else {
     redirect(`/formPrototype/success`);
@@ -30,7 +31,7 @@ export async function submitApplyForm(_prevState: unknown, formData: FormData) {
 export async function applyFormAction(
   formData: FormData,
 ): Promise<applyFormResponse> {
-  let formSchema = {};
+  let formSchema = <formDetail>{};
   try {
     const response = await getFormDetails("test");
     formSchema = response.data;
@@ -47,13 +48,13 @@ export async function applyFormAction(
     return {
       validationErrors: errors,
       errorMessage: "You got issues",
-      formData
+      formData,
     };
   } else {
     return {
       validationErrors: [],
       errorMessage: "",
-      formData
+      formData,
     };
   }
 }
