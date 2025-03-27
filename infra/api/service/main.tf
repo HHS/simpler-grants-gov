@@ -143,9 +143,9 @@ module "service" {
   public_subnet_ids  = data.aws_subnets.public.ids
   private_subnet_ids = data.aws_subnets.private.ids
 
-  cert_arn       = local.service_config.domain_name != null ? data.aws_acm_certificate.cert[0].arn : null
-  domain_name    = local.service_config.domain_name
-  hosted_zone_id = null
+  certificate_arn = local.service_config.domain_name != null ? data.aws_acm_certificate.cert[0].arn : null
+  domain_name     = local.service_config.domain_name
+  hosted_zone_id  = null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

@@ -98,7 +98,7 @@ variable "extra_policies" {
   default     = {}
 }
 
-variable "cert_arn" {
+variable "certificate_arn" {
   description = "The ARN for the TLS certificate passed in from the app service layer"
   type        = string
   default     = null

@@ -59,7 +59,7 @@ resource "aws_lb_listener" "alb_listener_http" {
 }
 
 resource "aws_lb_listener_rule" "redirect_http_to_https" {
-  count = var.cert_arn != null ? 1 : 0
+  count = var.certificate_arn != null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http[0].arn
   priority     = 101
@@ -99,12 +99,12 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 }
 
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.cert_arn != null ? 1 : 0
+  count = var.certificate_arn != null ? 1 : 0
 
   load_balancer_arn = aws_lb.alb[0].arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = var.cert_arn
+  certificate_arn   = var.certificate_arn
 
   # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
   ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
@@ -121,7 +121,7 @@ resource "aws_lb_listener" "alb_listener_https" {
 }
 
 resource "aws_lb_listener_rule" "app_https_forward" {
-  count = var.cert_arn != null ? 1 : 0
+  count = var.certificate_arn != null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_https[0].arn
   priority     = 91
