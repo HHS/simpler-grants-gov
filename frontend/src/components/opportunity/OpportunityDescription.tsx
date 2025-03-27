@@ -1,5 +1,8 @@
 import DOMPurify from "isomorphic-dompurify";
-import { Summary } from "src/types/opportunity/opportunityResponseTypes";
+import {
+  OpportunityDocument,
+  Summary,
+} from "src/types/opportunity/opportunityResponseTypes";
 import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
@@ -9,7 +12,7 @@ import OpportunityDownload from "src/components/opportunity/OpportunityDownload"
 
 type OpportunityDescriptionProps = {
   summary: Summary;
-  nofoPath: string;
+  attachments: OpportunityDocument[];
   opportunityId: number;
 };
 
@@ -108,7 +111,7 @@ const SummaryDescriptionDisplay = ({
 
 const OpportunityDescription = ({
   summary,
-  nofoPath,
+  attachments,
   opportunityId,
 }: OpportunityDescriptionProps) => {
   const t = useTranslations("OpportunityListing.description");
@@ -127,10 +130,7 @@ const OpportunityDescription = ({
     <>
       <div className="usa-prose margin-top-3">
         <h2>{t("title")}</h2>
-        <OpportunityDownload
-          nofoPath={nofoPath}
-          opportunityId={opportunityId}
-        />
+        <OpportunityDownload attachments={attachments} />
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}

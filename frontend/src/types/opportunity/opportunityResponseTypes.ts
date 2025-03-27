@@ -7,7 +7,7 @@ export interface OpportunityAssistanceListing {
   program_title: string;
 }
 
-interface OpportunityDocument {
+export interface OpportunityDocument {
   opportunity_attachment_type: string;
   file_name: string;
   download_path: string;
