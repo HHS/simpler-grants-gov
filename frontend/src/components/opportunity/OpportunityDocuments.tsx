@@ -68,7 +68,7 @@ const OpportunityDocuments = ({
     <>
       <h2 id="opportunity_documents">{t("title")}</h2>
       {documents.length > 0 ? (
-        <Table>
+        <Table className="width-full">
           <DocumentTable documents={documents} opportunityId={opportunityId} />
         </Table>
       ) : (
