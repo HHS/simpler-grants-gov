@@ -228,7 +228,6 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
   await filterButton.click();
-  // expect(page.locator(`input[name="${filterType}-*"]`)).toBeTruthy();
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);
   await filterOptions.isVisible();
   await filterButton.click();

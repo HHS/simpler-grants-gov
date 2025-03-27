@@ -27,12 +27,11 @@ import {
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
-  // flaky
+  // Set all inputs, then refresh the page. Those same inputs should be
+  // set from query params.
   test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
-    // Set all inputs, then refresh the page. Those same inputs should be
-    // set from query params.
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-closed": "closed",
@@ -60,6 +59,7 @@ test.describe("Search page tests", () => {
       waitForSearchResultsInitialLoad(page),
       waitForFilterOptions(page, "agency"),
     ]);
+
     await selectSortBy(page, "agencyDesc");
     await expectSortBy(page, "agencyDesc");
 
