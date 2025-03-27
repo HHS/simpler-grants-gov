@@ -5,6 +5,7 @@ from src.pagination.pagination_schema import generate_pagination_schema
 
 class AgencyFilterV1Schema(Schema):
     agency_id = fields.Integer()
+    active = fields.Boolean()
 
 
 class AgencyListRequestSchema(Schema):
