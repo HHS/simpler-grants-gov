@@ -221,6 +221,7 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
+
 def _generate_rsa_key_pair():
     # Rather than define a private/public key, generate one for the tests
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
