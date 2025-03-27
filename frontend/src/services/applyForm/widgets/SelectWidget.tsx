@@ -118,7 +118,8 @@ function SelectWidget<
       >
         {Array.isArray(enumOptions) &&
           enumOptions.map(({ value, label }, i) => {
-            const disabled = enumDisabled && enumDisabled.indexOf(value as TextTypes) !== -1;
+            const disabled =
+              enumDisabled && enumDisabled.indexOf(value as TextTypes) !== -1;
             return (
               <option key={i} value={String(i)} disabled={disabled}>
                 {label}

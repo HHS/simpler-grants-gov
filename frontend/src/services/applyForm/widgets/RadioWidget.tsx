@@ -1,15 +1,16 @@
-import { FocusEvent, useCallback } from "react";
 import {
   ariaDescribedByIds,
   enumOptionsIsSelected,
   enumOptionsValueForIndex,
-  optionId,
   FormContextType,
+  optionId,
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-import { ErrorMessage, Fieldset, Label, Radio } from "@trussworks/react-uswds";
 import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
+
+import { FocusEvent, useCallback } from "react";
+import { ErrorMessage, Fieldset, Label, Radio } from "@trussworks/react-uswds";
 
 /** The `RadioWidget` is a widget for rendering a radio group.
  *  It is typically used with a string property constrained with enum options.
@@ -88,21 +89,21 @@ function RadioWidget<
           const handleChange = () => onChange(option.value);
 
           return (
-              <Radio
-                label={option.label}
-                id={optionId(id, i)}
-                checked={checked}
-                name={id}
-                required={required}
-                key={optionId(id, i)}
-                value={String(i)}
-                disabled={disabled || itemDisabled || readonly}
-                autoFocus={autofocus && i === 0}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                onFocus={handleFocus}
-                aria-describedby={ariaDescribedByIds<T>(id)}
-              />
+            <Radio
+              label={option.label}
+              id={optionId(id, i)}
+              checked={checked}
+              name={id}
+              required={required}
+              key={optionId(id, i)}
+              value={String(i)}
+              disabled={disabled || itemDisabled || readonly}
+              autoFocus={autofocus && i === 0}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onFocus={handleFocus}
+              aria-describedby={ariaDescribedByIds<T>(id)}
+            />
           );
         })}
     </Fieldset>

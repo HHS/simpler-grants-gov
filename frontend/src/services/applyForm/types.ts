@@ -89,6 +89,6 @@ export interface UswdsWidgetProps<
   multiple?: boolean;
   rawErrors?: string[];
   onChange?: (value: unknown) => void;
-onBlur?: (id: string, value: unknown) => void;
-onFocus?: (id: string, value: unknown) => void
+  onBlur?: (id: string, value: unknown) => void;
+  onFocus?: (id: string, value: unknown) => void;
 }

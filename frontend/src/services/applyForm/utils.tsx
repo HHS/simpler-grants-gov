@@ -6,9 +6,7 @@ import { get } from "lodash";
 import { JSX } from "react";
 
 import { wrapSection } from "./fields";
-import {
-  UiSchema,
-} from "./types";
+import { UiSchema } from "./types";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
