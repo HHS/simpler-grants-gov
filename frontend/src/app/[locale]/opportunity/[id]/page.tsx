@@ -122,11 +122,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
-  const nofoPath =
-    opportunityData.attachments.length === 1
-      ? opportunityData.attachments[0]?.download_path
-      : "";
-
   return (
     <div>
       <BetaAlert />
@@ -144,7 +139,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
-              opportunityId={opportunityData.opportunity_id}
               attachments={opportunityData.attachments}
             />
             <OpportunityDocuments

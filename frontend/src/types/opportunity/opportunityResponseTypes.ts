@@ -8,10 +8,10 @@ export interface OpportunityAssistanceListing {
 }
 
 export interface OpportunityDocument {
-  opportunity_attachment_type: string;
   file_name: string;
   download_path: string;
   updated_at: string;
+  file_description?: string;
 }
 
 interface MinimalSummary {

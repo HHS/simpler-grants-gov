@@ -1,14 +1,8 @@
+import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { Link, Table } from "@trussworks/react-uswds";
-
-interface OpportunityDocument {
-  file_name: string;
-  download_path: string;
-  updated_at: string;
-  file_description?: string;
-}
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
