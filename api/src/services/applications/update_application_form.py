@@ -7,6 +7,7 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, ApplicationForm, CompetitionForm, Form
+from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +39,14 @@ def update_application_form(
         raise_flask_error(404, f"Application with ID {application_id} not found")
 
     # Check if form exists and is attached to the competition
-    competition_form = db_session.execute(
+    form = db_session.execute(
         select(Form)
         .join(CompetitionForm, Form.form_id == CompetitionForm.form_id)
         .where(CompetitionForm.competition_id == application.competition_id)
         .where(Form.form_id == form_id)
     ).scalar_one_or_none()
 
-    if not competition_form:
+    if not form:
         raise_flask_error(
             404,
             f"Form with ID {form_id} not found or not attached to this application's competition",
@@ -64,14 +65,16 @@ def update_application_form(
     else:
         # Create new application form
         application_form = ApplicationForm(
-            application_id=application_id,
-            form_id=form_id,
+            application=application,
+            form=form,
             application_response=application_response,
         )
         db_session.add(application_form)
 
     # In a future PR, validation will be added here
-    warnings: list[ValidationErrorDetail] = []
+    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
+        application_response, form
+    )
 
     logger.info(
         "Updated application form response",

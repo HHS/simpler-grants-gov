@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from sqlalchemy import select
 
 from src.db.models.competition_models import Application, ApplicationForm
@@ -10,6 +11,16 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
 )
+
+# Simple JSON schema used for tests below
+SIMPLE_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer", "maximum": 200},
+    },
+    "required": ["name"],
+}
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
@@ -150,13 +161,17 @@ def test_application_form_update_success_update(
     # Create application
     application = ApplicationFactory.create()
 
-    existing_form = ApplicationFormFactory.create(
-        application=application,
-        application_response={"name": "Original Name"},
-    )
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
     CompetitionFormFactory.create(
         competition=application.competition,
-        form=existing_form.form,
+        form=form,
+    )
+
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
     )
 
     application_id = str(application.application_id)
@@ -171,10 +186,71 @@ def test_application_form_update_success_update(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+    assert response.json["warnings"] == []
 
     # Verify application form was updated in the database
     db_session.refresh(existing_form)
     assert existing_form.application_response == {"name": "Updated Name"}
+
+
+@pytest.mark.parametrize(
+    "application_response,expected_warnings",
+    [
+        # Missing required field
+        ({}, [{"field": "$", "message": "'name' is a required property", "type": "required"}]),
+        # Validation on age field
+        (
+            {"name": "bob", "age": 500},
+            [
+                {
+                    "field": "$.age",
+                    "message": "500 is greater than the maximum of 200",
+                    "type": "maximum",
+                }
+            ],
+        ),
+        # Extra fields are fine with our setup
+        ({"name": "bob", "age": 50, "something_else": ""}, []),
+    ],
+)
+def test_application_form_update_with_validation_warnings(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+    application_response,
+    expected_warnings,
+):
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
+    )
+
+    request_data = {"application_response": application_response}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["warnings"] == expected_warnings
+
+    # Verify application form was updated in the database
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == application_response
 
 
 def test_application_form_update_application_not_found(
