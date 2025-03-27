@@ -7,6 +7,8 @@ WITH
       ghid  
     FROM  
       gh_deliverable  
+    WHERE
+      ghid not in ('HHS/simpler-grants-gov/issues/3174')
   ),  
 
   -- Get latest state snapshot for each deliverable  
