@@ -95,7 +95,7 @@ data "aws_rds_cluster" "db_cluster" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count       = local.service_config.domain_name != null ? 1 : 0
+  count       = local.service_config.enable_https != null ? 1 : 0
   domain      = local.service_config.domain_name
   most_recent = true
 }
