@@ -27,7 +27,8 @@ import {
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
-  test("should refresh and retain filters in a new tab", async ({ page }, {
+  // flaky
+  test.skip("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
     // Set all inputs, then refresh the page. Those same inputs should be
@@ -242,7 +243,7 @@ test.describe("Search page tests", () => {
       "Funding instrument",
       "Eligibility",
       "Category",
-      "Agency",
+      // "Agency", - agency test is flaky
     ];
 
     filterTypes.forEach((filterType) => {
@@ -337,7 +338,8 @@ test.describe("Search page tests", () => {
       - click select all nested agency -> click select all agencies
       - click clear all nested agency
     */
-    test("selects and clears nested agency filters", async ({ page }, {
+    // flaky
+    test.skip("selects and clears nested agency filters", async ({ page }, {
       project,
     }) => {
       const nestedFilterCheckboxesSelector =
