@@ -2,8 +2,8 @@ import logging
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import InstrumentedAttribute, Select, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import Select, select
+from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityStatus
