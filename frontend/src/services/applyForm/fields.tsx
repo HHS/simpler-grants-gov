@@ -7,15 +7,15 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { TextTypes } from "./types";
+import { TextTypes, UswdsWidgetProps } from "./types";
 
-export const createFieldLabel = (
-  fieldName: string,
+export const fieldLabel = (
+  name: string,
   title: string,
-  required: boolean,
+  required: boolean | undefined,
 ) => {
   return (
-    <Label key={`label-for-${fieldName}`} htmlFor={fieldName}>
+    <Label key={`label-for-${name}`} htmlFor={name}>
       {title}
       {required && (
         <span className="usa-hint usa-hint--required text-no-underline">*</span>
@@ -24,49 +24,49 @@ export const createFieldLabel = (
   );
 };
 
-export const createTextInputField = (
-  fieldName: string,
-  title: string,
-  type: TextTypes,
-  parentId: string,
-  required = false,
-  minLength: number | null = null,
-  maxLength: number | null = null,
-) => {
-  const label = createFieldLabel(fieldName, title, required);
+export const textInputField = ({
+  name,
+  label,
+  type,
+  id,
+  required,
+  minLength,
+  maxLength,
+}: UswdsWidgetProps) => {
+  const renderedLabel = fieldLabel(name, label, required);
   return (
-    <div key={`wrapper-for-${fieldName}`} id={parentId}>
-      {label}
+    <div key={`wrapper-for-${name}`}>
+      {renderedLabel}
       <TextInput
-        minLength={minLength ?? undefined}
-        maxLength={maxLength ?? undefined}
-        id={fieldName}
-        key={fieldName}
-        type={type}
-        name={title}
+        minLength={(minLength as number) ?? undefined}
+        maxLength={(maxLength as number) ?? undefined}
+        id={id}
+        key={id}
+        type={type as TextTypes}
+        name={name}
       />
     </div>
   );
 };
 
-export const createTextAreaField = (
-  fieldName: string,
-  title: string,
-  parentId: string,
-  required = false,
-  minLength: number | null = null,
-  maxLength: number | null = null,
-) => {
-  const label = createFieldLabel(fieldName, title, required);
+export const textAreaField = ({
+  name,
+  label,
+  id,
+  required,
+  minLength,
+  maxLength,
+}: UswdsWidgetProps) => {
+  const renderedLabel = fieldLabel(name, label, required);
   return (
-    <div key={`wrapper-for-${fieldName}`} id={parentId}>
-      {label}
+    <div key={`wrapper-for-${name}`}>
+      {renderedLabel}
       <Textarea
-        minLength={minLength ?? undefined}
-        maxLength={maxLength ?? undefined}
-        id={fieldName}
-        key={fieldName}
-        name={title}
+        minLength={(minLength as number) ?? undefined}
+        maxLength={(maxLength as number) ?? undefined}
+        id={id}
+        key={name}
+        name={name}
       />
     </div>
   );

@@ -1,35 +1,59 @@
 "use server";
 
-import { isEmpty } from "lodash";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 
 import { redirect } from "next/navigation";
 
+import { getFormDetails } from "../fetch/fetchers/formFetcher";
+import { validateData } from "./validate";
+import { ErrorObject } from "ajv";
+
 type applyFormResponse = {
-  validationErrors: string;
   errorMessage: string;
+  validationErrors: ErrorObject<string, Record<string, any>, unknown>[];
+  formData: object
 };
 
 export async function submitApplyForm(_prevState: unknown, formData: FormData) {
-  const { errorMessage, validationErrors } = await applyFormlAction(formData);
-  if (errorMessage || !isEmpty(validationErrors)) {
+  const { validationErrors, errorMessage } = await applyFormAction(formData);
+  if (validationErrors.length) {
     return {
       errorMessage,
       validationErrors,
+      formData
     };
+  } else {
+    redirect(`/formPrototype/success`);
   }
-  // Navigate to the sub confirmation page if no error returns short circuit the function
-  redirect(`/formPrototype/success`);
 }
 
-export async function applyFormlAction(
+export async function applyFormAction(
   formData: FormData,
 ): Promise<applyFormResponse> {
-  await new Promise((resolve) => setTimeout(resolve, 1));
+  let formSchema = {};
+  try {
+    const response = await getFormDetails("test");
+    formSchema = response.data;
+  } catch (error) {
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      throw new Error();
+    }
+    throw error;
+  }
+  const formObject = Object.fromEntries(formData.entries());
 
-  console.error(formData);
-
-  return {
-    errorMessage: "",
-    validationErrors: "",
-  };
+  const errors = validateData(formObject, formSchema.form_json_schema);
+  if (errors) {
+    return {
+      validationErrors: errors,
+      errorMessage: "You got issues",
+      formData
+    };
+  } else {
+    return {
+      validationErrors: [],
+      errorMessage: "",
+      formData
+    };
+  }
 }

@@ -1,11 +1,9 @@
-import Ajv, { JSONSchemaType } from "ajv";
-import addFormats from "ajv-formats";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
-import ApplyForm from "src/services/applyForm/ApplyForm";
+import ApplyForm from "src/services/applyForm/ApplyForm2";
 import {
   validateFormSchema,
   validateUiSchema,

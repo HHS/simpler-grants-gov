@@ -1,11 +1,14 @@
 "use client";
 
+import { RJSFSchema } from "@rjsf/utils";
+
 import { useActionState } from "react";
-import { Button, FormGroup } from "@trussworks/react-uswds";
+import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { submitApplyForm } from "./actions";
-import { FormSchema, SetFormDataFunction, UiSchema } from "./types";
+import { SetFormDataFunction, UiSchema } from "./types";
 import { buildFormTreeClosure } from "./utils";
+import { useFormStatus } from "react-dom";
 
 /**
  *
@@ -32,20 +35,27 @@ const ApplyForm = ({
   formSchema,
   uiSchema,
 }: {
-  formSchema: FormSchema;
+  formSchema: RJSFSchema;
   uiSchema: UiSchema;
 }) => {
-  const fields = buildFormTreeClosure(formSchema, uiSchema);
-  const [state, formAction] = useActionState(submitApplyForm, {
+  const {pending} = useFormStatus()
+
+  const [formState, formAction] = useActionState(submitApplyForm, {
     errorMessage: "",
-    validationErrors: "",
+    validationErrors: [],
+    formData: new FormData()
   });
+  const formObject = Object.fromEntries(formState.formData.entries());
+  console.log(formState.validationErrors);
+  const fields = buildFormTreeClosure(formSchema, uiSchema, formState.validationErrors, formObject);
 
   return (
     <form action={formAction}>
-      {state?.errorMessage}
+      {formState.errorMessage.length > 0 && 
+            <Alert heading="oops" headingLevel="h3" type="error">{formState.errorMessage}</Alert>
+      }
       <FormGroup>{fields}</FormGroup>
-      <Button type="submit">Submit</Button>
+      <Button type="submit">{pending ? 'Submitting...' : 'Submit'}</Button>
     </form>
   );
 };

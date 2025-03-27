@@ -1,3 +1,14 @@
+import {
+  EnumOptionsType,
+  FormContextType,
+  GenericObjectType,
+  RJSFSchema,
+  StrictRJSFSchema,
+  UIOptionsType,
+} from "@rjsf/utils";
+
+import { HTMLAttributes } from "react";
+
 export interface FormData {
   [key: string]: FormDataEntryValue;
 }
@@ -46,3 +57,34 @@ export type TextTypes =
   | "search"
   | "tel"
   | "url";
+
+export interface UswdsWidgetProps<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  F extends FormContextType = any,
+> extends GenericObjectType,
+    Pick<
+      HTMLAttributes<HTMLElement>,
+      Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
+    > {
+  id: string;
+  value?: string | unknown;
+  type?: string;
+  minLength?: number;
+  maxLength?: number;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  hideError?: boolean;
+  autofocus?: boolean;
+  placeholder?: string;
+  options: NonNullable<UIOptionsType<T, S, F>> & {
+    /** The enum options list for a type that supports them */
+    enumOptions?: EnumOptionsType<S>[];
+  };
+  hideLabel?: boolean;
+  multiple?: boolean;
+  rawErrors?: string[];
+}
