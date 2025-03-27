@@ -22,22 +22,15 @@ TABLES_TO_LOAD = [
     "topportunity",
     "topportunity_cfda",
     "tsynopsis",
-    "tsynopsis_hist",
     "tforecast",
-    "tforecast_hist",
     "tapplicanttypes_forecast",
-    "tapplicanttypes_forecast_hist",
     "tapplicanttypes_synopsis",
-    "tapplicanttypes_synopsis_hist",
     "tfundactcat_forecast",
-    "tfundactcat_forecast_hist",
     "tfundactcat_synopsis",
-    "tfundactcat_synopsis_hist",
     "tfundinstr_forecast",
-    "tfundinstr_forecast_hist",
     "tfundinstr_synopsis",
-    "tfundinstr_synopsis_hist",
     "tgroups",
+    "tsynopsisattachment",
 ]
 
 
