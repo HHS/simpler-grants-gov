@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { fakeFacetCounts } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SearchResultsList from "src/components/search/SearchResultsList";
@@ -35,6 +36,7 @@ const makeSearchResults = (overrides = {}) => ({
     total_records: 1,
   },
   message: "",
+  facet_counts: fakeFacetCounts,
   ...overrides,
 });
 

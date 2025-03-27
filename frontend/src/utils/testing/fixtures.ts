@@ -1,3 +1,4 @@
+import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   PaginationOrderBy,
@@ -6,6 +7,7 @@ import {
   SearchFetcherActionType,
   ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,
@@ -69,4 +71,43 @@ export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   category: "Recovery Act",
   page: "1",
   sortby: "relevancy",
+};
+
+const fakePaginationInfo: PaginationInfo = {
+  order_by: "opportunity_number",
+  page_offset: 1,
+  page_size: 10,
+  sort_direction: "ascending",
+  total_pages: 1,
+  total_records: 10,
+};
+
+export const fakeFacetCounts = {
+  opportunity_status: {
+    posted: 1,
+    forecasted: 1,
+  },
+  funding_instrument: {
+    arbitraryKey: 1,
+  },
+  applicant_type: {
+    arbitraryKey: 1,
+  },
+  agency: {
+    arbitraryKey: 1,
+  },
+  funding_category: {
+    arbitraryKey: 1,
+  },
+};
+
+export const fakeSearchAPIResponse: SearchAPIResponse = {
+  data: [
+    mockOpportunity,
+    { ...mockOpportunity, opportunity_status: "forecasted" },
+  ],
+  pagination_info: fakePaginationInfo,
+  facet_counts: fakeFacetCounts,
+  message: "anything",
+  status_code: 200,
 };

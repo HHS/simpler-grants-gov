@@ -2,6 +2,7 @@ import "@testing-library/jest-dom/extend-expect";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { fakeFacetCounts } from "src/utils/testing/fixtures";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
@@ -18,14 +19,29 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 
 describe("SearchOpportunityStatus", () => {
   it("passes accessibility scan", async () => {
-    const { container } = render(<SearchOpportunityStatus query={new Set()} />);
+    const { container } = render(
+      <SearchOpportunityStatus
+        facetCounts={fakeFacetCounts.opportunity_status}
+        query={new Set()}
+      />,
+    );
     const results = await axe(container);
 
     expect(results).toHaveNoViolations();
   });
 
   it("component renders with checkboxes", () => {
-    render(<SearchOpportunityStatus query={new Set()} />);
+    render(
+      <SearchOpportunityStatus
+        facetCounts={{
+          posted: 1,
+          forecasted: 1,
+          closed: 1,
+          archived: 1,
+        }}
+        query={new Set()}
+      />,
+    );
 
     expect(screen.getByText("Forecasted")).toBeEnabled();
     expect(screen.getByText("Posted")).toBeEnabled();
@@ -38,10 +54,15 @@ describe("SearchOpportunityStatus", () => {
     query.add("test");
     const combined = new Set("");
     combined.add("test").add("forecasted");
-    render(<SearchOpportunityStatus query={query} />);
+    render(
+      <SearchOpportunityStatus
+        facetCounts={fakeFacetCounts.opportunity_status}
+        query={query}
+      />,
+    );
 
     const forecastedCheckbox = screen.getByRole("checkbox", {
-      name: "Forecasted",
+      name: "Forecasted [1]",
     });
 
     fireEvent.click(forecastedCheckbox);

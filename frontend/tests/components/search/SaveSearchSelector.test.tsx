@@ -98,7 +98,6 @@ describe("SaveSearchSelector", () => {
     mockObtainSavedSearches.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
     render(
       <SaveSearchSelector
-        // newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
         newSavedSearches={[]}
         savedSearches={[fakeSavedSearchRecord]}
         setSavedSearches={noop}
