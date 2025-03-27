@@ -28,7 +28,6 @@ tags:
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
-- name: Legacy SOAP API
 servers: .
 paths:
   /health:
@@ -761,34 +760,6 @@ paths:
               $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
       security:
       - ApiJwtAuth: []
-  /{service_name}/services/v2/ApplicantWebServicesSoapPort:
-    post:
-      parameters:
-      - in: path
-        name: service_name
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful response
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - Legacy SOAP API
-      summary: SOAP API Operations Handler
-      description: 'All SOAP requests come in as POST for operations. This will be
-
-        the router responsible for handling all SOAP operations for both
-
-        the applicants and grantors SOAP API requests.'
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
