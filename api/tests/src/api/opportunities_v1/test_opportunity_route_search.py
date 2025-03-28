@@ -1,14 +1,10 @@
 import base64
 import csv
-import uuid
 from datetime import date
 
 import pytest
 
-from src.api.opportunities_v1.opportunity_schemas import (
-    OpportunityV1Schema,
-    OpportunityWithAttachmentsV1Schema,
-)
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -17,14 +13,12 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
-from src.util import file_util
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
-    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -360,21 +354,34 @@ def search_scenario_id_fnc(val):
 
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
-    def setup_search_data(self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline):
+    def setup_search_data(
+        self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline
+    ):
         # Load into the search index
         schema = OpportunityV1Schema()
         json_records = []
-        for opportunity in OPPORTUNITIES:
+        for opportunity in [
+            NASA_SPACE_FELLOWSHIP,
+            NASA_INNOVATIONS,
+            NASA_K12_DIVERSITY,
+            NASA_SUPERSONIC,
+        ]:
             json_record = schema.dump(opportunity)
-            json_record["attachments"] = [{
-                "filename": "filename.csv",
-                "data": base64.b64encode(
-                    b"testing"
-                ).decode("utf-8"),
-            }]
+            json_record["attachments"] = [
+                {
+                    "filename": "filename.csv",
+                    "data": base64.b64encode(b"space").decode("utf-8"),
+                }
+            ]
             json_records.append(json_record)
 
-        search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id", pipeline=search_attachment_pipeline, refresh=True)
+        search_client.bulk_upsert(
+            opportunity_index,
+            json_records,
+            "opportunity_id",
+            pipeline=search_attachment_pipeline,
+            refresh=True,
+        )
 
         # Swap the search index alias
         search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
@@ -1564,21 +1571,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
         )
         assert resp.status_code == 200
 
-
-    def test_search_experimental_attachment_200(self,
-        client,
-        api_auth_token,
-        search_client,
-        opportunity_index_alias
+    def test_search_experimental_attachment_200(
+        self, client, api_auth_token, search_client, opportunity_index_alias
     ):
-        a= opportunity_index_alias
-
         # Prepare the search request
         search_request = get_search_request(
-            query="Testing",
-            experimental={
-                "scoring_rule": "attachment_only"
-            },
+            query="Space",
+            experimental={"scoring_rule": "attachment_only"},
         )
 
         resp = client.post(
@@ -1586,6 +1585,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         )
         data = resp.json["data"]
 
+        # Assert only NASA opportunities are returned
         assert resp.status_code == 200
-        assert len(data) == 1
-        # assert data[0]["opportunity_id"] == opp_attachments[0].opportunity_id
+        assert len(data) == 4
+
+        assert [opp["opportunity_id"] for opp in data] == [
+            opp.opportunity_id for opp in OPPORTUNITIES[:4]
+        ]

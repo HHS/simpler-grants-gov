@@ -196,28 +196,33 @@ def search_client() -> search.SearchClient:
         # all indexes at the end of a run that start with test
         client.delete_index("test-*")
 
+
 @pytest.fixture(scope="session")
 def search_attachment_pipeline(search_client) -> str:
     pipeline_name = "test-multi-attachment"
-    search_client.put_pipeline({
-        "description": "Extract attachment information",
-        "processors": [
-            {
-                "foreach": {
-                    "field": "attachments",
-                    "processor": {
-                        "attachment": {
-                            "target_field": "_ingest._value.attachment",
-                            "field": "_ingest._value.data",
-                        }
-                    },
-                    "ignore_missing": True,
+    search_client.put_pipeline(
+        {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                        "ignore_missing": True,
+                    }
                 }
-            }
-        ],
-    }, pipeline_name=pipeline_name)
+            ],
+        },
+        pipeline_name=pipeline_name,
+    )
 
     return pipeline_name
+
 
 @pytest.fixture(scope="session")
 def opportunity_index(search_client):
