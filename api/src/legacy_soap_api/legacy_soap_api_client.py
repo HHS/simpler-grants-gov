@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
@@ -15,5 +17,5 @@ class LegacySOAPClient:
         This method handles proxying requests to grants.gov SOAP API and retrieving
         and returning the xml data as is from the existing SOAP API.
         """
-        url = f"{self.config.grants_gov_uri}{full_path}"
+        url = os.path.join(self.config.grants_gov_uri, full_path.lstrip("/"))
         return requests.request(method, url, data=body, headers=headers)
