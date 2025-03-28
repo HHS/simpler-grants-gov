@@ -60,7 +60,12 @@ def _build_opportunities(
     default=1,
     help="Number of sets of opportunities to create, note that several are created per iteration",
 )
-def seed_local_db(iterations: int, cover_all_agencies: bool = True) -> None:
+@click.option(
+    "--cover_all_agencies",
+    default="false",
+    help="Should the seed include an opportunity assigned to each agency?",
+)
+def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
