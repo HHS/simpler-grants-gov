@@ -109,6 +109,7 @@ export const generateRandomString = (desiredPattern: number[]) => {
 // this will be remedied by https://github.com/HHS/simpler-grants-gov/issues/3791
 // after which we can reenable sign in related tests
 export const performSignIn = async (page: Page, project: FullProject) => {
+  const redirectUrl = page.url();
   const signInButton = page.locator('button[data-testid="sign-in-button"]');
   await expect(signInButton).toHaveText("Sign in");
   await signInButton.click();
@@ -124,7 +125,7 @@ export const performSignIn = async (page: Page, project: FullProject) => {
   await requiredInput.fill(randomUserName);
   await submitButton.click();
 
-  await waitForUrl(page, "http://localhost:3000/");
+  await waitForUrl(page, redirectUrl);
 
   if (project.name.match(/[Mm]obile/)) {
     const userDropdown = page.locator(
