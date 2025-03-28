@@ -206,6 +206,16 @@ start-localstack:
 setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
 
+
+##################################################
+# Form Schema
+# Example usage:
+# make dat-to-jsonschema args="tests/src/form_schema/SF424_Individual_2_0-V2.0_F668.xls"
+##################################################
+
+dat-to-jsonschema:
+	$(PY_RUN_CMD) dat-to-jsonschema $(args)
+
 ##################################################
 # Mock Oauth Server
 ##################################################

@@ -31,7 +31,9 @@ newrelic = "10.7.0"
 jinja2 = ">=3.1.5"
 tenacity = "^8.0"
 jsonschema = { extras = ["format-nongpl"], version = "^4.23.0" }
-
+pandas = "^2.0.3"
+pandas-stubs = "^2.0.2.230605"
+xlrd = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -68,6 +70,7 @@ db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
 setup-localstack = "bin.setup_localstack:main"
+dat-to-jsonschema = "src.form_schema.dat_to_jsonschema_cli:main"
 
 [tool.black]
 line-length = 100
