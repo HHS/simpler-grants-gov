@@ -47,7 +47,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_funding_instrument: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_INSTRUMENT
     enable_agency: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_AGENCY
     enable_opportunity_attachment: bool = (
-        False  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
+        True  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
     )
 
 
