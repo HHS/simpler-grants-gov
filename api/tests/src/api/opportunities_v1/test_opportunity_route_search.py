@@ -89,7 +89,6 @@ def build_opp(
     award_ceiling: int | None,
     estimated_total_program_funding: int | None,
     agency_phone_number: str | None = "123-456-7890",
-    has_attachments: bool = False,
 ) -> Opportunity:
     opportunity = OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -361,21 +360,21 @@ def search_scenario_id_fnc(val):
 
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
-    def setup_search_data(self, opportunity_index, opportunity_index_alias, search_client):
+    def setup_search_data(self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline):
         # Load into the search index
         schema = OpportunityV1Schema()
         json_records = []
         for opportunity in OPPORTUNITIES:
             json_record = schema.dump(opportunity)
-            json_record["attachments"] = {
+            json_record["attachments"] = [{
                 "filename": "filename.csv",
                 "data": base64.b64encode(
                     b"testing"
                 ).decode("utf-8"),
-            }
+            }]
             json_records.append(json_record)
 
-        search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+        search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id", pipeline=search_attachment_pipeline, refresh=True)
 
         # Swap the search index alias
         search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
@@ -1570,7 +1569,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         client,
         api_auth_token,
         search_client,
+        opportunity_index_alias
     ):
+        a= opportunity_index_alias
 
         # Prepare the search request
         search_request = get_search_request(
