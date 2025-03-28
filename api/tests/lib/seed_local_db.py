@@ -30,6 +30,8 @@ def _build_opportunities(db_session: db.Session, iterations: int) -> None:
         factories.OpportunityFactory.create_batch(
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
+        for agency in factories.CustomProvider.AGENCIES:
+          factories.OpportunityFactory.create(agency_code=agency)
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
