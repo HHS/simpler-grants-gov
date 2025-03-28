@@ -171,7 +171,7 @@ db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
 db-seed-local: ## Generate records into your local database
-	$(PY_RUN_CMD) db-seed-local $(args)
+	$(PY_RUN_CMD) db-seed-local --cover_all_agencies=true $(args)
 
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)

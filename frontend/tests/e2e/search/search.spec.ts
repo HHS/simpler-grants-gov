@@ -28,7 +28,7 @@ import {
 
 test.describe("Search page tests", () => {
   // flaky
-  test.skip("should refresh and retain filters in a new tab", async ({ page }, {
+  test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
     // Set all inputs, then refresh the page. Those same inputs should be
@@ -243,7 +243,7 @@ test.describe("Search page tests", () => {
       "Funding instrument",
       "Eligibility",
       "Category",
-      // "Agency", - agency test is flaky
+      "Agency",
     ];
 
     filterTypes.forEach((filterType) => {
@@ -339,7 +339,7 @@ test.describe("Search page tests", () => {
       - click clear all nested agency
     */
     // flaky
-    test.skip("selects and clears nested agency filters", async ({ page }, {
+    test("selects and clears nested agency filters", async ({ page }, {
       project,
     }) => {
       const nestedFilterCheckboxesSelector =
