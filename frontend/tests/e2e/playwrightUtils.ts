@@ -116,7 +116,8 @@ export const performSignIn = async (page: Page, project: FullProject) => {
   const secondSignInButton = page.locator(".usa-modal__footer a");
   await secondSignInButton.click();
 
-  await waitForAnyURLChange(page, "/");
+  console.error("--- waiting for redirect to login page");
+  await waitForAnyURLChange(page, redirectUrl);
 
   const requiredInput = page.locator('input[type="text"]');
   const submitButton = page.locator('input[type="submit"]');
@@ -125,6 +126,7 @@ export const performSignIn = async (page: Page, project: FullProject) => {
   await requiredInput.fill(randomUserName);
   await submitButton.click();
 
+  console.error("--- waiting for redirect back to app", page.url());
   await waitForUrl(page, redirectUrl);
 
   if (project.name.match(/[Mm]obile/)) {
