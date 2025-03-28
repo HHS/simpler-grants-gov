@@ -63,6 +63,10 @@ module "prod_config" {
     #LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
 
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
+
+    # grants.gov services/applications URI.
+    GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
+    ENABLE_SOAP_API = 0
   }
   instance_cpu    = 1024
   instance_memory = 4096
