@@ -24,20 +24,14 @@ def expected_schema_keys():
 
 
 @pytest.fixture
-def expected_sections():
-    # Expected sections based on the CSV headers
-    return ["Applicant Information Header", "Project Information Header"]
-
-
-@pytest.fixture
 def expected_fields():
     # A sample of fields we expect to find in the schema
     return [
-        "First Name",
-        "Last Name",
+        "FirstName",
+        "LastName",
         "City",
         "Country",
-        "U.S. Citizenship",
+        "citizenship",
     ]
 
 
@@ -56,21 +50,11 @@ def test_csv_to_jsonschema_creates_valid_schema(csv_file_content, expected_schem
     assert isinstance(schema["required"], list)
 
 
-def test_csv_to_jsonschema_contains_expected_sections(csv_file_content, expected_sections):
-    """Test that the generated schema contains the expected sections."""
-    schema = csv_to_jsonschema(csv_file_content)
-
-    for section in expected_sections:
-        assert section in schema["properties"]
-        print(schema["properties"][section])
-        assert "type" in schema["properties"][section]
-        assert "title" in schema["properties"][section]
-
-
 def test_csv_to_jsonschema_contains_expected_fields(csv_file_content, expected_fields):
     """Test that the generated schema contains expected fields."""
     schema = csv_to_jsonschema(csv_file_content)
 
+    print(schema)
     # Look for each field in the schema properties
     for field in expected_fields:
         # Fields might be in the main schema or in a section
@@ -95,7 +79,7 @@ def test_required_fields_are_marked_correctly(csv_file_content):
     schema = csv_to_jsonschema(csv_file_content)
 
     # Known required fields from CSV
-    known_required_fields = ["First Name", "Last Name", "Email"]
+    known_required_fields = ["FirstName", "LastName", "AuthorizedRepresentativeEmail"]
 
     # Check if these fields are marked as required
     for field in known_required_fields:
@@ -148,7 +132,7 @@ def test_date_fields_have_correct_format(csv_file_content):
     schema = csv_to_jsonschema(csv_file_content)
 
     # Find fields that should be dates
-    date_field_names = ["Proposed Project Start Date", "Proposed Project End Date"]
+    date_field_names = ["FundingPeriodStartDate", "FundingPeriodEndDate"]
 
     for field_name in date_field_names:
         field = schema["properties"][field_name]

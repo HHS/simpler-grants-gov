@@ -28,7 +28,17 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
 
     reader = csv.DictReader(csv_content.splitlines())
 
+    skipped_field_implementations = ["button"]
+
     for row in reader:
+        if row.get("Agency FieldName", "") == "" and row.get("Agency Field Name", "") == "":
+            logger.warning(f"Skipping row with empty Agency Field Name: {row['Field ID']}")
+            continue
+
+        if row.get("Field Implementation", "").lower() in skipped_field_implementations:
+            logger.info(f"Skipping field {row['Field ID']} of type {row['Field Type']}")
+            continue
+
         field_info = FieldInfo.from_dict(row)
 
         # Skip headers and non-data rows
@@ -144,8 +154,3 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
             max_length=max_value,
             format=format_value,
         )
-
-    # Add description or help text to the property
-    if help_tip:
-        # We need to manually add description since it's not part of the builder API
-        builder.properties[field_id]["description"] = help_tip

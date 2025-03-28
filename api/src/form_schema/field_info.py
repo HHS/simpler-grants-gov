@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class FieldInfo:
 
         try:
             # Try converting to int first
-            num_value = int(cleaned_value)
+            num_value = int(Decimal(cleaned_value))
             return num_value
         except ValueError:
             # Log the error or handle it as needed
@@ -53,7 +54,7 @@ class FieldInfo:
         Args:
             value: String value containing delimited list items (e.g., "item1,item2,item3")
 
-        Returns:
+        Returns:f
             List of strings, or None if input is empty/None
         """
         if value is None or value.strip() == "":
@@ -68,11 +69,12 @@ class FieldInfo:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "FieldInfo":
         """Create a FieldInfo instance from a dictionary."""
+        id = data.get("Agency FieldName", "") or data.get("Agency Field Name", "")
         return cls(
-            id=data["Field ID"],
+            id=id,
             required=data.get("Required?", "").strip().lower() == "yes",
             data_type=data.get("Data Type", "").strip(),
-            type=data.get("Field Type", "").strip(),
+            type=data.get("Field Implementation", "").strip(),
             label=data.get("Field Label", "").strip(),
             min_value=cls.parse_numeric(data.get("Min  # of Chars or Min Value", "").strip()),
             max_value=cls.parse_numeric(data.get("Max # of Chars or Max Value", "").strip()),
