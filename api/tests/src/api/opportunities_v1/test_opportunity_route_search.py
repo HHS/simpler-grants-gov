@@ -360,19 +360,17 @@ class TestOpportunityRouteSearch(BaseTestClass):
         # Load into the search index
         schema = OpportunityV1Schema()
         json_records = []
-        for opportunity in [
-            NASA_SPACE_FELLOWSHIP,
-            NASA_INNOVATIONS,
-            NASA_K12_DIVERSITY,
-            NASA_SUPERSONIC,
-        ]:
+
+        for ind, opportunity in enumerate(OPPORTUNITIES):
+            attachment_contents = b"space" if ind < 4 else b"testing"
             json_record = schema.dump(opportunity)
             json_record["attachments"] = [
                 {
                     "filename": "filename.csv",
-                    "data": base64.b64encode(b"space").decode("utf-8"),
+                    "data": base64.b64encode(attachment_contents).decode("utf-8"),
                 }
             ]
+
             json_records.append(json_record)
 
         search_client.bulk_upsert(
