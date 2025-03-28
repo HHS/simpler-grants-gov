@@ -127,6 +127,7 @@ WITH RECURSIVE
 
 SELECT
   (SELECT deliverable_title FROM deliverable_info) AS deliverable_title,
+  (SELECT CONCAT('https://github.com/', deliverable_ghid) FROM constants) as deliverable_url,
   issue_day,
   total_opened,
   total_closed,
