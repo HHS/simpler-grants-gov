@@ -188,6 +188,7 @@ def test_foreign_schema(db_schema_prefix):
 @pytest.fixture(scope="session")
 def search_client() -> search.SearchClient:
     client = search.SearchClient()
+
     try:
         yield client
     finally:
@@ -195,6 +196,33 @@ def search_client() -> search.SearchClient:
         # in a way that didn't clean it up, delete
         # all indexes at the end of a run that start with test
         client.delete_index("test-*")
+
+
+@pytest.fixture(scope="session")
+def search_attachment_pipeline(search_client) -> str:
+    pipeline_name = "test-multi-attachment"
+    search_client.put_pipeline(
+        {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                        "ignore_missing": True,
+                    }
+                }
+            ],
+        },
+        pipeline_name=pipeline_name,
+    )
+
+    return pipeline_name
 
 
 @pytest.fixture(scope="session")
@@ -220,14 +248,6 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     # Note we don't actually create anything, this is just a random name
     alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
     monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
-    return alias
-
-
-@pytest.fixture(scope="class")
-def opportunity_search_index_class(search_client, monkeypatch):
-    # Note we don't actually create anything, this is just a random name
-    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
-    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
 

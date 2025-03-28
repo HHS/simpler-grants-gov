@@ -60,14 +60,6 @@ def clear_saved_searches(db_session):
     yield
 
 
-@pytest.fixture
-def opportunity_search_index_alias(search_client, monkeypatch):
-    # Note we don't actually create anything, this is just a random name
-    alias = f"test-opportunity-search-index-alias-{uuid.uuid4().int}"
-    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
-    return alias
-
-
 def test_user_save_search_post_unauthorized_user(client, db_session, user, user_auth_token):
     # Try to save a search for a different user ID
     different_user = UserFactory.create()
@@ -134,8 +126,8 @@ def test_user_save_search_post(
     user_auth_token,
     enable_factory_create,
     db_session,
-    opportunity_search_index_alias,
     monkeypatch,
+    opportunity_index_alias,
 ):
     # Test data
     search_name = "Test Search"
@@ -144,12 +136,16 @@ def test_user_save_search_post(
         agency_one_of=["USAID"],
     )
 
+    # Create search index
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
     # Load into the search index
     schema = OpportunityV1Schema()
     json_records = [schema.dump(opp) for opp in [SPORTS, MEDICAL_LABORATORY]]
-    search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+    search_client.bulk_upsert(index_name, json_records, "opportunity_id")
 
-    search_client.swap_alias_index(opportunity_index, opportunity_search_index_alias)
+    search_client.swap_alias_index(index_name, opportunity_index_alias)
 
     # Make the request to save a search
     response = client.post(
