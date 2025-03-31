@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This package encapsulates a data pipeline service. The service is responsible for extracting project data from GitHub and transforming the extracted data into rows in a data warehouse. We're using Metabase to provide data visualization and Business Intelligence for the data warehouse. As an example, our [dashboard that demonstrates the flow of Simpler Grants.gov Opportunity Data from the Operational DB to the Data Warehouse](http://metabase-prod-899895252.us-east-1.elb.amazonaws.com/dashboard/100-operational-data).
+This package encapsulates a data pipeline service. The service is responsible for extracting project data from GitHub and transforming the extracted data into rows in a data warehouse. We're using Metabase to provide data visualization and Business Intelligence for the data warehouse. As an example, our [dashboard that demonstrates the flow of Simpler Grants.gov Opportunity Data from the Operational DB to the Data Warehouse](http://metabase-prod-899895252.us-east-1.elb.amazonaws.com/public/dashboard/a9011e4c-2610-4089-9da5-4ef93604ff55).
 
 ## Project Directory Structure
 

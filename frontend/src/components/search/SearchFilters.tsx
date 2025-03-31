@@ -53,7 +53,7 @@ export default function SearchFilters({
                 title: t("accordion.titles.agency"),
                 content: [],
                 expanded: false,
-                id: `opportunity-filter-agency-disabled`,
+                id: "opportunity-filter-agency-disabled",
                 headingLevel: "h2",
               },
             ]}

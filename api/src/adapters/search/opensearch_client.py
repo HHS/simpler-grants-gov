@@ -181,7 +181,15 @@ class SearchClient:
         for index in old_indexes:
             self.delete_index(index)
 
-    def swap_alias_index(self, index_name: str, alias_name: str) -> None:
+    def refresh_index(self, index_name: str) -> None:
+        """
+        Refresh index
+        """
+        logger.info("Refreshing index %s", index_name, extra={"index_name": index_name})
+
+        self._client.indices.refresh(index_name)
+
+    def swap_alias_index(self, index_name: str | None, alias_name: str) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
         attached to the alias, remove them from the alias.

@@ -48,13 +48,13 @@ The various sessions and breakout rooms will be hosted on Zoom. We encourage you
 
 The frontend is developed using React with Next.js. To get started, follow the instructions in the README below:
 
-* **Frontend README**: [Read Here](../../../../frontend/)
+* **Frontend README**: [Read Here](../../../../../frontend/)
 
 **API**
 
 Our API is built with Flask (Python) and containerized with Docker. To set up your development environment, follow the steps in the documentation below:
 
-* **API Setup**: [API Development Guide](../../../api/development.md)
+* **API Setup**: [API Development Guide](../../../../api/development.md)
 * **API Endpoints Documentation (Swagger)**: [API Docs](http://api-dev-1839587515.us-east-1.elb.amazonaws.com/docs)
 
 ***

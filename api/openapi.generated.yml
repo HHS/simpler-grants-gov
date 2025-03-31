@@ -567,6 +567,38 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Get an application by ID
+      security:
+      - ApiKeyAuth: []
   /alpha/competitions/{competition_id}:
     get:
       parameters:
@@ -1220,6 +1252,8 @@ components:
       properties:
         agency_id:
           type: integer
+        active:
+          type: boolean
     SortOrderAgencyPaginationV1:
       type: object
       properties:
@@ -2501,6 +2535,66 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationFormGetResponseData:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_response:
+          type: object
+    ApplicationGetResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_forms:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ApplicationFormGetResponseData'
+    ApplicationGetResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: &id007
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicationGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     CompetitionFormAlpha:
       type: object
       properties:
@@ -2828,8 +2922,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id007
-            - object
+            type: *id007
             allOf:
             - $ref: '#/components/schemas/ValidationIssue'
         message:
@@ -2858,23 +2951,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    ApplicationFormGetResponseData:
-      type: object
-      properties:
-        application_form_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        form_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_response:
-          type: object
     ApplicationFormGetResponse:
       type: object
       properties:

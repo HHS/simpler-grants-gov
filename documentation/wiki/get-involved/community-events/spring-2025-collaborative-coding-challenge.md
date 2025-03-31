@@ -32,6 +32,8 @@ Develop simple projects using the Search & Opportunities API that showcase innov
 
 These must be added to this Google Drive folder by midnight EST on March 31st 2025. All submissions must contain the following critera to be accepted.
 
+[Google Drive Folder](https://drive.google.com/drive/u/0/folders/1A4AlwA3fVsc40m1yjBBBiTd4NmyVL4u8)
+
 **A document or slideshow  in a readable format (.docx, .rtf, .txt, .pdf, etc) which contains:**
 
 1. Team / Project Name
@@ -41,6 +43,10 @@ These must be added to this Google Drive folder by midnight EST on March 31st 20
 5. A short demonstration of the project in action.
 
 [Optional Submission Template Link](https://docs.google.com/presentation/d/1F60a_gwmgKEhOpGoZXYx2T22bi0Mn11-O8KIyXSHBrI/edit?usp=sharing)
+
+Looking for examples? Check out the [submissions](fall-2024-coding-challenge/event-submissions-and-winners.md) from our 24 hour Fall 2024 Collaborative Code & Design Challenge
+
+
 
 ***
 
