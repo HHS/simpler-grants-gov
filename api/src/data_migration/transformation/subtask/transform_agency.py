@@ -413,6 +413,14 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
 
         tgroup_field_name = tgroup.get_field_name()
 
+        if tgroup_field_name in NOT_MAPPED_FIELDS:
+            logger.info(
+                "Skipping processing of field %s for %s",
+                tgroup_field_name,
+                tgroup_agency.agency_code,
+            )
+            continue
+
         # TODO - how we want to actually handle deleted rows likely needs more investigation
         #        and discussion - do we assume that if certain fields are deleted that the
         #        entire agency should be deleted? Can they even be deleted once an opportunity refers to them?
@@ -440,14 +448,6 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
         elif tgroup_field_name in AGENCY_CONTACT_INFO_FIELD_MAP:
             field_name = AGENCY_CONTACT_INFO_FIELD_MAP[tgroup_field_name]
             updates.agency_contact_info_updates[field_name] = value
-
-        elif tgroup_field_name in NOT_MAPPED_FIELDS:
-            logger.info(
-                "Skipping processing of field %s for %s",
-                tgroup_field_name,
-                tgroup_agency.agency_code,
-            )
-            continue
 
         else:
             raise ValueError("Unknown tgroups agency field %s" % tgroup_field_name)
