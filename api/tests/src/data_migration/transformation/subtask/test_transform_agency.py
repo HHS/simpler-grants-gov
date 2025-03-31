@@ -117,7 +117,8 @@ class TestTransformAgency(BaseTransformTestClass):
         update_agency2 = setup_agency(
             "UPDATE-AGENCY-2",
             create_existing=True,
-            deleted_fields={"AgencyContactEMail2", "ldapGp", "description"},
+            deleted_fields={"AgencyContactEMail2", "ldapGp", "description", "SAMValidation"},
+            source_values={"SAMValidation": "1"},
         )
         update_agency3 = setup_agency(
             "UPDATE-AGENCY-3",
