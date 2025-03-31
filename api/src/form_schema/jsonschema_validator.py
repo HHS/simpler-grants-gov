@@ -1,7 +1,11 @@
+import logging
+
 import jsonschema
 
 from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import Form
+
+logger = logging.getLogger(__name__)
 
 
 def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
@@ -17,6 +21,15 @@ def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
         Format validation is NOT enabled by default in the JSON Schema specification:
         https://python-jsonschema.readthedocs.io/en/stable/faq/#my-schema-specifies-format-validation-why-do-invalid-instances-seem-valid
     """
+
+    # Validate that the schema passed in is actually valid
+    # as an invalid schema can produce unknown results
+    try:
+        jsonschema.Draft202012Validator.check_schema(json_schema)
+    except jsonschema.exceptions.SchemaError:
+        logger.exception("Invalid json schema found, cannot validate")
+        raise
+
     validator = jsonschema.Draft202012Validator(
         json_schema, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER
     )

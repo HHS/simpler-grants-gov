@@ -253,6 +253,43 @@ def test_application_form_update_with_validation_warnings(
     assert existing_application_form.application_response == application_response
 
 
+def test_application_form_update_with_invalid_schema_500(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+):
+    """In this test we intentionally create a bad JSON schema"""
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema={"properties": ["bad"]})
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
+    )
+
+    request_data = {"application_response": {"name": "Changed Name"}}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 500
+    assert response.get_json()["message"] == "Internal Server Error"
+    # Verify the response was not updated
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == {"name": "Original Name"}
+
+
 def test_application_form_update_application_not_found(
     client, enable_factory_create, db_session, api_auth_token
 ):

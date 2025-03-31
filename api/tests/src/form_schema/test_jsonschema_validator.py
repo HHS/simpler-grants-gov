@@ -1,7 +1,8 @@
+import jsonschema
 import pytest
 
 from src.api.response import ValidationErrorDetail
-from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.form_schema.jsonschema_validator import validate_json_schema, validate_json_schema_for_form
 from tests.src.db.models.factories import FormFactory
 
 # Form with a fairly simple JsonSchema
@@ -131,3 +132,8 @@ def test_validate_json_schema_for_form_if_then(data, expected_issues):
     validation_issues = validate_json_schema_for_form(data, IF_THEN_FORM)
 
     assert set(validation_issues) == set(expected_issues)
+
+
+def test_validate_json_schema_for_invalid_schema():
+    with pytest.raises(jsonschema.exceptions.SchemaError, match="Failed validating"):
+        validate_json_schema({}, {"properties": ["hello"]})
