@@ -116,6 +116,10 @@ class LoadOpportunitiesToIndex(Task):
                         "ignore_missing": True,
                     }
                 },
+                # After we've done the above processing to send the base64
+                # encoded file to OpenSearch, remove the raw base64 "data"
+                # field from what we actually index as it's not useful
+                # and will bloat the size of our index.
                 {
                     "foreach": {
                         "field": "attachments",
