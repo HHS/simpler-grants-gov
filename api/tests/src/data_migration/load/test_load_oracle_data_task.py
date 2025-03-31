@@ -199,3 +199,79 @@ class TestLoadOracleData(BaseTestClass):
         assert task.metrics["count.delete.total"] == 0
         assert task.metrics["count.insert.total"] == 100
         assert task.metrics["count.update.total"] == 0
+
+    def test_load_data_with_excluded_columns(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        """Test that excluded columns are not copied from foreign to staging tables."""
+        time3 = datetime.datetime(2024, 4, 10, 22, 0, 1)
+
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        # Create a record in the foreign table with specific values
+        source_record = ForeignTopportunityFactory.create(
+            opportunity_id=10,
+            oppnumber="A-10",
+            opptitle="Foreign Title",
+            cfdas=[],
+            last_upd_date=time3,
+        )
+
+        # Specify columns to exclude
+        columns_to_exclude = {"topportunity": ["opptitle"]}
+
+        # Run the task with column exclusions
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session,
+            foreign_tables,
+            staging_tables,
+            ["topportunity"],
+            columns_to_exclude=columns_to_exclude,
+        )
+        task.run()
+
+        # Force the data to be fetched from the DB and not a cache
+        db_session.expire_all()
+
+        # Retrieve the updated staging record
+        updated_record = (
+            db_session.query(destination_table)
+            .filter(destination_table.c.opportunity_id == 10)
+            .first()
+        )
+
+        # Verify regular columns were updated
+        assert updated_record.oppnumber == source_record.oppnumber
+        assert updated_record.last_upd_date == source_record.last_upd_date
+
+        # Verify excluded columns retained their original values
+        assert source_record.opptitle != updated_record.opptitle
+        assert updated_record.opptitle is None
+
+        # Test INSERT with excluded columns
+        source_record2 = ForeignTopportunityFactory.create(
+            opportunity_id=11,
+            oppnumber="A-12",
+            opptitle="Foreign Title 2",
+            cfdas=[],
+            last_upd_date=time3,
+        )
+
+        # Run the task again to process the new record
+        task.run()
+        db_session.expire_all()
+
+        # Retrieve the newly inserted record
+        inserted_record = (
+            db_session.query(destination_table)
+            .filter(destination_table.c.opportunity_id == 11)
+            .first()
+        )
+
+        # Verify regular columns were inserted
+        assert inserted_record.oppnumber == source_record2.oppnumber
+        assert inserted_record.opptitle is None

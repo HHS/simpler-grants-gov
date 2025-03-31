@@ -51,10 +51,14 @@ class LoadOracleDataTask(src.task.task.Task):
         staging_tables: dict[str, sqlalchemy.Table],
         tables_to_load: list[str] | None = None,
         insert_chunk_size: int = 800,
+        columns_to_exclude: dict[str, list[str]] | None = None,
     ) -> None:
 
         if tables_to_load is None or len(tables_to_load) == 0:
             tables_to_load = TABLES_TO_LOAD
+
+        # Initialize columns_to_exclude if None
+        self.columns_to_exclude = columns_to_exclude or {}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}
@@ -124,6 +128,13 @@ class LoadOracleDataTask(src.task.task.Task):
         """Determine new rows by primary key, and copy them into the staging table."""
         log_extra: dict = {"table": foreign_table.name}
 
+        excluded_columns = self.columns_to_exclude.get(foreign_table.name, [])
+        if excluded_columns:
+            logger.info(
+                "Excluding columns during insert",
+                extra=log_extra | {"excluded_columns": excluded_columns},
+            )
+
         logger.info("Fetching records to be inserted", extra=log_extra)
         select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
         with self.db_session.begin():
@@ -134,7 +145,7 @@ class LoadOracleDataTask(src.task.task.Task):
         logger.info("Fetched records to be inserted, beginning batches", extra=log_extra)
         for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size, strict=False):
             insert_from_select_sql = sql.build_insert_select_sql(
-                foreign_table, staging_table, batch_of_new_ids
+                foreign_table, staging_table, batch_of_new_ids, excluded_columns
             )
 
             # Execute the INSERT.
@@ -168,6 +179,13 @@ class LoadOracleDataTask(src.task.task.Task):
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
         log_extra: dict = {"table": foreign_table.name}
 
+        excluded_columns = self.columns_to_exclude.get(foreign_table.name, [])
+        if excluded_columns:
+            logger.info(
+                "Excluding columns during update",
+                extra=log_extra | {"excluded_columns": excluded_columns},
+            )
+
         logger.info("Fetching records to be updated", extra=log_extra)
         select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
         with self.db_session.begin():
@@ -180,7 +198,7 @@ class LoadOracleDataTask(src.task.task.Task):
             update_ids, self.insert_chunk_size, strict=False
         ):
             update_sql = sql.build_update_sql(
-                foreign_table, staging_table, batch_of_update_ids
+                foreign_table, staging_table, batch_of_update_ids, excluded_columns
             ).values(transformed_at=None)
 
             with self.db_session.begin():
@@ -253,8 +271,14 @@ def main() -> None:
         foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
         staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
+        columns_to_exclude = {
+            "tuser_account_mapper": ["email_address"],
+        }
+
         with db_client.get_session() as db_session:
-            LoadOracleDataTask(db_session, foreign_tables, staging_tables).run()
+            LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, columns_to_exclude=columns_to_exclude
+            ).run()
 
 
 if __name__ == "__main__":
