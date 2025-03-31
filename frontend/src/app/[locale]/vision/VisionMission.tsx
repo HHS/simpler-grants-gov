@@ -14,20 +14,28 @@ export default function VisionMssion() {
       <Grid className="grid-col">
         <Grid className="grid-row">
           <p>{t("paragraph_1")}</p>
-          <Grid className="grid-row">
-            <USWDSIcon name="trending_up" />
-            <h3 className="grid-col-1">{t("title_2")}</h3>
-            <p className="grid-col-fill padding-left-4">{t("paragraph_2")}</p>
+          <Grid className="grid-row flex-align-center flex-justify-center">
+            <USWDSIcon name="search" height="50px" className="grid-col-1" />
+            <h3 className="grid-col-2">{t("title_2")}</h3>
+            <p className="grid-col-fill">{t("paragraph_2")}</p>
           </Grid>
-          <Grid className="grid-row">
-            <USWDSIcon name="trending_up" />
-            <h3 className="grid-col-1">{t("title_3")}</h3>
-            <p className="grid-col-fill padding-left-4">{t("paragraph_3")}</p>
+          <Grid className="grid-row flex-align-center flex-justify-center">
+            <USWDSIcon
+              name="upload_file"
+              height="50px"
+              className="grid-col-1"
+            />
+            <h3 className="grid-col-2">{t("title_3")}</h3>
+            <p className="grid-col-fill">{t("paragraph_3")}</p>
           </Grid>
-          <Grid className="grid-row">
-            <USWDSIcon name="trending_up" />
-            <h3 className="grid-col-1">{t("title_4")}</h3>
-            <p className="grid-col-fill padding-left-4">{t("paragraph_4")}</p>
+          <Grid className="grid-row flex-align-center flex-justify-center">
+            <USWDSIcon
+              name="trending_up"
+              height="50px"
+              className="grid-col-1"
+            />
+            <h3 className="grid-col-2">{t("title_4")}</h3>
+            <p className="grid-col-fill">{t("paragraph_4")}</p>
           </Grid>
         </Grid>
       </Grid>
