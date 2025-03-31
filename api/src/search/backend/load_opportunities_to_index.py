@@ -115,7 +115,18 @@ class LoadOpportunitiesToIndex(Task):
                         },
                         "ignore_missing": True,
                     }
-                }
+                },
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "remove": {
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                        "ignore_missing": True,
+                    }
+                },
             ],
         }
 
