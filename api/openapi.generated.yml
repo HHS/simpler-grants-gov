@@ -1251,7 +1251,9 @@ components:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
         active:
           type: boolean
     SortOrderAgencyPaginationV1:
@@ -1323,7 +1325,9 @@ components:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
         agency_name:
           type: string
         agency_code:

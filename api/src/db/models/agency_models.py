@@ -1,4 +1,7 @@
-from sqlalchemy import BigInteger, ForeignKey
+import uuid
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,7 +20,9 @@ from src.db.models.lookup_models import (
 class AgencyContactInfo(ApiSchemaTable, TimestampMixin):
     __tablename__ = "agency_contact_info"
 
-    agency_contact_info_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    agency_contact_info_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
 
     contact_name: Mapped[str]
 
@@ -38,7 +43,7 @@ class AgencyContactInfo(ApiSchemaTable, TimestampMixin):
 class Agency(ApiSchemaTable, TimestampMixin):
     __tablename__ = "agency"
 
-    agency_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    agency_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
     agency_name: Mapped[str]
 
@@ -57,8 +62,8 @@ class Agency(ApiSchemaTable, TimestampMixin):
         )
     )
 
-    agency_contact_info_id: Mapped[BigInteger | None] = mapped_column(
-        BigInteger, ForeignKey(AgencyContactInfo.agency_contact_info_id)
+    agency_contact_info_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(AgencyContactInfo.agency_contact_info_id)
     )
     agency_contact_info: Mapped[AgencyContactInfo | None] = relationship(AgencyContactInfo)
 
@@ -93,8 +98,8 @@ class Agency(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkAgencyDownloadFileType(agency_download_file_type=obj),
     )
 
-    top_level_agency_id: Mapped[int | None] = mapped_column(
-        BigInteger,
+    top_level_agency_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID,
         ForeignKey(agency_id),
         nullable=True,
     )
@@ -107,8 +112,8 @@ class Agency(ApiSchemaTable, TimestampMixin):
 class LinkAgencyDownloadFileType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_agency_download_file_type"
 
-    agency_id: Mapped[int] = mapped_column(
-        BigInteger,
+    agency_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         ForeignKey(Agency.agency_id),
         primary_key=True,
     )
