@@ -8,8 +8,8 @@ class TuserAccountMapperMixin:
     user_account_id: Mapped[int] = mapped_column(primary_key=True)
     ext_user_id: Mapped[str]
     ext_issuer: Mapped[str]
-    last_auth_date: Mapped[datetime]
     ext_subject: Mapped[str | None]
+    last_auth_date: Mapped[datetime]
     created_date: Mapped[datetime | None]
     creator_id: Mapped[str | None]
     last_upd_date: Mapped[datetime | None]
