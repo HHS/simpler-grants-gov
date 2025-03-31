@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -328,5 +328,7 @@ load-test-prod: # Load test the production environment in aws. Please test respo
 #########################
 # Mock SOAP services
 #########################
-start-mock-soap-services:
-	docker compose up --detach mock-applicants-soap-api 	# start applicants soap api
+init-mock-soap-services: start-mock-soap-services ## Initialize the applicants soap api
+
+start-mock-soap-services: ## start applicants soap api
+	docker compose up --detach mock-applicants-soap-api
