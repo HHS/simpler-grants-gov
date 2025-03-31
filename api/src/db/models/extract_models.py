@@ -1,4 +1,5 @@
 import uuid
+
 from sqlalchemy import UUID, BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
