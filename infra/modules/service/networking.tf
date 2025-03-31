@@ -43,7 +43,7 @@ resource "aws_security_group_rule" "http_ingress" {
 }
 
 resource "aws_security_group_rule" "https_ingress" {
-  count             = var.cert_arn != null ? 1 : 0
+  count             = var.certificate_arn != null ? 1 : 0
   security_group_id = aws_security_group.alb.id
 
   description = "Allow HTTPS traffic from public internet"

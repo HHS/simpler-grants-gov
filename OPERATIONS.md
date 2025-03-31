@@ -4,14 +4,12 @@
 
 ### Deploying Every Service
 
-This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located)
+This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
 
 ```bash
 terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure
 terraform -chdir="infra/api/service" apply -var "environment_name=dev"
-```
 
-```bash
 terraform -chdir="infra/api/service" init -backend-config="staging.s3.tfbackend" -reconfigure
 terraform -chdir="infra/api/service" apply -var "environment_name=staging"
 ```
@@ -19,9 +17,7 @@ terraform -chdir="infra/api/service" apply -var "environment_name=staging"
 ```bash
 terraform -chdir="infra/frontend/service" init -backend-config="dev.s3.tfbackend" -reconfigure
 terraform -chdir="infra/frontend/service" apply -var "environment_name=dev"
-```
 
-```bash
 terraform -chdir="infra/frontend/service" init -backend-config="staging.s3.tfbackend" -reconfigure
 terraform -chdir="infra/frontend/service" apply -var "environment_name=staging"
 ```
@@ -29,9 +25,7 @@ terraform -chdir="infra/frontend/service" apply -var "environment_name=staging"
 ```bash
 terraform -chdir="infra/analytics/service" init -backend-config="dev.s3.tfbackend" -reconfigure
 terraform -chdir="infra/analytics/service" apply -var "environment_name=dev"
-```
 
-```bash
 terraform -chdir="infra/analytics/service" init -backend-config="staging.s3.tfbackend" -reconfigure
 terraform -chdir="infra/analytics/service" apply -var "environment_name=staging"
 ```

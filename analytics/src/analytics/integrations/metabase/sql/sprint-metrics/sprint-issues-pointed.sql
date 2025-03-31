@@ -55,7 +55,7 @@ WITH
         )
         OR (
           -- ...otherwise use yesterday
-          h.d_effective = data_availability.max
+          h.d_effective = data_availability.maximum_date
           AND sprint_data.end_date >= CURRENT_DATE
         )
       )

@@ -88,7 +88,7 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
 
         assert agency1.is_test_agency is True
         assert agency2.is_test_agency is True
-        assert agency3.is_test_agency is True
+        assert agency3.is_test_agency is False
         assert agency4.is_test_agency is False
         assert agency5.is_test_agency is False
 
@@ -108,6 +108,7 @@ class TestTransformAgency(BaseTransformTestClass):
             # None passed in here will make it not appear at all in the tgroups rows
             source_values={"ldapGp": None, "description": None, "label": None},
         )
+        insert_test_agency_top = setup_agency("GDIT", create_existing=False)
         insert_test_agency = setup_agency("GDIT-xyz-123", create_existing=False)
 
         # Already processed fields are ones that were handled on a prior run and won't be updated
@@ -157,7 +158,8 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, insert_agency2)
         validate_agency(db_session, insert_agency3)
         validate_agency(db_session, insert_agency4)
-        validate_agency(db_session, insert_test_agency, is_test_agency=True)
+        validate_agency(db_session, insert_test_agency_top, is_test_agency=True)
+        validate_agency(db_session, insert_test_agency, is_test_agency=False)
 
         validate_agency(db_session, update_agency1)
         validate_agency(db_session, update_agency2, deleted_fields={"ldapGp", "description"})
@@ -183,8 +185,8 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, update_error2, expect_values_to_match=False)
 
         metrics = transform_agency.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 12
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 13
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 3
 
@@ -193,8 +195,8 @@ class TestTransformAgency(BaseTransformTestClass):
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_agency.run_subtask()
 
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 15
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 16
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 6
 
