@@ -20,7 +20,7 @@ const cookiesMock = () => {
   };
 };
 
-jest.mock("src/services/auth/sessionUtils", () => ({
+jest.mock("src/utils/authUtil", () => ({
   decrypt: (...args: unknown[]) => decryptMock(args) as unknown,
   encrypt: (...args: unknown[]) => encryptMock(args) as unknown,
   CLIENT_JWT_ENCRYPTION_ALGORITHM: "algo one",

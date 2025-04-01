@@ -13,7 +13,7 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
-jest.mock("src/services/auth/sessionUtils", () => ({
+jest.mock("src/utils/authUtil", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
 }));
 

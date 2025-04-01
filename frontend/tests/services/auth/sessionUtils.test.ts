@@ -1,8 +1,4 @@
-import {
-  decrypt,
-  deleteSession,
-  encrypt,
-} from "src/services/auth/sessionUtils";
+import { decrypt, deleteSession, encrypt } from "src/utils/authUtil";
 
 type RecursiveObject = {
   [key: string]: () => RecursiveObject | string;
