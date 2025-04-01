@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
+
+
 import json
 import logging
 
 import click
 
-from src import logging as src_logging
 from src.form_schema.dat_to_jsonschema import parse_xls_to_schema
+from src.logging import init
+
+logger = logging.getLogger(__name__)
 
 
 @click.command()
@@ -29,8 +33,7 @@ from src.form_schema.dat_to_jsonschema import parse_xls_to_schema
 def main(input_file: str, sheet: int, skip_rows: int) -> int:
     """Main entry point for the script."""
 
-    with src_logging.init("dat_to_jsonschema_cli"):
-        logger = logging.getLogger(__name__)
+    with init("dat_to_jsonschema_cli"):
         try:
             result = parse_xls_to_schema(
                 file_path=input_file,
