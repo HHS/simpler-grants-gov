@@ -1,7 +1,6 @@
 from typing import Sequence
 
 from pydantic import Field
-from pydantic_settings import SettingsConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
