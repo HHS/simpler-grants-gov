@@ -3,7 +3,7 @@ import logging
 from flask import request
 
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
-from src.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
+from src.legacy_soap_api.legacy_soap_api_handler import LegacySOAPRequestHandler
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -20,12 +20,6 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
     add_extra_data_to_current_request_logs(
         {"service_name": service_name, "service_port_name": service_port_name}
     )
-    soap_client = LegacySOAPClient()
-    proxy_response = soap_client.proxy_request(
-        method="POST",
-        full_path=request.full_path,
-        headers=dict(request.headers),
-        body=request.data,
-    )
+    soap_request_handler = LegacySOAPRequestHandler(request, service_name, service_port_name)
     # This format will preserve the response data from SOAP API.
-    return proxy_response.content, proxy_response.status_code, proxy_response.headers.items()
+    return soap_request_handler.get_proxy_response().to_flask_response()
