@@ -361,8 +361,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
         schema = OpportunityV1Schema()
         json_records = []
 
-        for ind, opportunity in enumerate(OPPORTUNITIES):
-            attachment_contents = b"space" if ind < 4 else b"testing"
+        for opportunity in OPPORTUNITIES:
+            attachment_contents = b"testing"
+            if opportunity.opportunity_id == NASA_SPACE_FELLOWSHIP.opportunity_id:
+                attachment_contents = b"space"
+
             json_record = schema.dump(opportunity)
             json_record["attachments"] = [
                 {
@@ -1585,8 +1588,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
 
         # Assert only NASA opportunities are returned
         assert resp.status_code == 200
-        assert len(data) == 4
+        assert len(data) == 1
 
-        assert [opp["opportunity_id"] for opp in data] == [
-            opp.opportunity_id for opp in OPPORTUNITIES[:4]
-        ]
+        assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
