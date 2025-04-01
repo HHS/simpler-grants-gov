@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 SKIPPED_FIELD_IMPLEMENTATIONS = ["button", "radio"]
 
+
 def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
     """
     Convert a form definition CSV file to JSON Schema using JsonSchemaBuilder.

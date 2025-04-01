@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import json
-import sys
+import logging
 
 import click
 
-from src import logging
+from src import logging as src_logging
 from src.form_schema.dat_to_jsonschema import parse_xls_to_schema
 
 
@@ -29,7 +29,8 @@ from src.form_schema.dat_to_jsonschema import parse_xls_to_schema
 def main(input_file: str, sheet: int, skip_rows: int) -> int:
     """Main entry point for the script."""
 
-    with logging.init("dat_to_jsonschema_cli"):
+    with src_logging.init("dat_to_jsonschema_cli"):
+        logger = logging.getLogger(__name__)
         try:
             result = parse_xls_to_schema(
                 file_path=input_file,
@@ -40,6 +41,6 @@ def main(input_file: str, sheet: int, skip_rows: int) -> int:
             print(json.dumps(result, indent=4, separators=(",", ": ")))
             return 0
 
-        except Exception as e:
+        except Exception:
             logger.exception("Process failed")
             raise
