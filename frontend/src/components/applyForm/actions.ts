@@ -7,7 +7,7 @@ import { formDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
-import { validateData } from "./validate";
+import { validateFormData } from "./validate";
 
 type applyFormResponse = {
   errorMessage: string;
@@ -41,13 +41,12 @@ export async function applyFormAction(
     }
     throw error;
   }
-  const formObject = Object.fromEntries(formData.entries());
 
-  const errors = validateData(formObject, formSchema.form_json_schema);
+  const errors = validateFormData(formData, formSchema.form_json_schema);
   if (errors) {
     return {
       validationErrors: errors,
-      errorMessage: "You got issues",
+      errorMessage: "Error submitting form",
       formData,
     };
   } else {

@@ -7,15 +7,12 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import {
-  ErrorMessage,
-  FormGroup,
-  Label,
-  TextInput,
-} from "@trussworks/react-uswds";
+import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
+
+import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
+import { FieldLabel } from "./FieldLabel";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -31,9 +28,10 @@ function TextWidget<
   required,
   disabled,
   readonly,
+  schema,
   options = {},
   autofocus = false,
-  schema,
+  updateOnInput = false,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
@@ -50,11 +48,11 @@ function TextWidget<
     default: defaultValue,
   } = schema as S;
 
-  let inputValue;
+  let inputValue: string | number | undefined;
   if (type === "number" || type === "integer") {
-    inputValue = value || value === 0 ? value : "";
+    inputValue = value || value === 0 ? Number(value) : undefined;
   } else {
-    inputValue = value == null ? undefined : value;
+    inputValue = value ? String(value) : undefined;
   }
 
   let inputType = "text";
@@ -88,16 +86,10 @@ function TextWidget<
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <Label key={`label-for-${id}`} htmlFor={id}>
-        {title}
-        {required && (
-          <span className="usa-hint usa-hint--required text-no-underline">
-            *
-          </span>
-        )}
-      </Label>
+      <FieldLabel idFor={id} title={title} required={required} />
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <TextInput
+        data-testid={id}
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
         id={id}
@@ -105,19 +97,24 @@ function TextWidget<
         type={inputType as TextTypes}
         autoFocus={autofocus}
         name={id}
-        // update to let form validation happen on the server
         aria-required={required}
         disabled={disabled}
         readOnly={readonly}
+        list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={ariaDescribedByIds<T>(id)}
-        onChange={_onChange}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        defaultValue={inputValue ? String(value) : undefined}
+        onChange={updateOnInput ? _onChange : undefined}
+        onBlur={updateOnInput ? _onBlur : undefined}
+        onFocus={updateOnInput ? _onFocus : undefined}
+        defaultValue={updateOnInput ? undefined : inputValue}
+        value={updateOnInput ? inputValue : undefined}
         validationStatus={error ? "error" : undefined}
       />
       {Array.isArray(examples) && (
-        <datalist key={`datalist_${id}`} id={examplesId<T>(id)}>
+        <datalist
+          key={`datalist_${id}`}
+          id={examplesId<T>(id)}
+          data-testid={`datalist_${id}`}
+        >
           {(examples as string[])
             .concat(
               defaultValue && !examples.includes(defaultValue)

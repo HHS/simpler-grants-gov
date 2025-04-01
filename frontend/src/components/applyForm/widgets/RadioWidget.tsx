@@ -7,10 +7,12 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
 
-import { FocusEvent, useCallback } from "react";
-import { ErrorMessage, Fieldset, Label, Radio } from "@trussworks/react-uswds";
+import { FocusEvent, useCallback, useMemo } from "react";
+import { ErrorMessage, Fieldset, Radio } from "@trussworks/react-uswds";
+
+import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
+import { FieldLabel } from "./FieldLabel";
 
 /** The `RadioWidget` is a widget for rendering a radio group.
  *  It is typically used with a string property constrained with enum options.
@@ -30,6 +32,7 @@ function RadioWidget<
   disabled,
   readonly,
   autofocus = false,
+  updateOnInput = false,
   rawErrors = [],
   // passing on* functions made optional
   onChange = () => ({}),
@@ -37,9 +40,18 @@ function RadioWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { enumOptions, enumDisabled, emptyValue } = options;
+  const { enumDisabled, emptyValue } = options;
 
-  const { title } = schema;
+  const { title, enum: enumFromSchema } = schema;
+
+  const enumOptions = useMemo(
+    () =>
+      (enumFromSchema ?? []).map((value) => ({
+        label: String(value),
+        value,
+      })),
+    [enumFromSchema],
+  );
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) =>
@@ -70,14 +82,7 @@ function RadioWidget<
 
   return (
     <Fieldset id={id}>
-      <Label key={`label-for-${id}`} htmlFor={id}>
-        {title}
-        {required && (
-          <span className="usa-hint usa-hint--required text-no-underline">
-            *
-          </span>
-        )}
-      </Label>
+      <FieldLabel idFor={id} title={title} required={required} />
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
@@ -92,16 +97,18 @@ function RadioWidget<
             <Radio
               label={option.label}
               id={optionId(id, i)}
-              checked={checked}
+              checked={updateOnInput ? checked : undefined}
+              defaultChecked={updateOnInput ? undefined : checked}
               name={id}
               required={required}
               key={optionId(id, i)}
-              value={String(i)}
               disabled={disabled || itemDisabled || readonly}
               autoFocus={autofocus && i === 0}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onFocus={handleFocus}
+              defaultValue={updateOnInput ? undefined : String(i)}
+              value={updateOnInput ? String(i) : undefined}
+              onChange={updateOnInput ? handleChange : undefined}
+              onBlur={updateOnInput ? handleBlur : undefined}
+              onFocus={updateOnInput ? handleFocus : undefined}
               aria-describedby={ariaDescribedByIds<T>(id)}
             />
           );

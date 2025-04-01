@@ -1,6 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { UiSchema } from "src/services/applyForm/types";
 import { APIResponse } from "src/types/apiResponseTypes";
+
+import { UiSchema } from "src/components/applyForm/types";
 
 export interface formDetail {
   form_id: string;

@@ -1,12 +1,12 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { get } from "lodash";
+import { filter, get } from "lodash";
 
 import { JSX } from "react";
 
-import { wrapSection } from "./fields";
 import { UiSchema } from "./types";
+import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
@@ -72,7 +72,7 @@ const createField = (
   minLength: number | null = null,
   maxLength: number | null = null,
   schema: RJSFSchema,
-  rawErrors: string[],
+  rawErrors: string[] | undefined,
   value: string | number | undefined,
 ) => {
   if (maxLength && Number(maxLength) > 255) {
@@ -127,9 +127,7 @@ export const buildField = (
     formSchema,
     definition,
   ) as RJSFSchema;
-  const rawErrors = errors.find(
-    (error) => definition === `/properties${error.instancePath}`,
-  );
+  const rawErrors = formatFieldErrors(errors, definition, name);
   const value = get(formData, name) as string | number | undefined;
 
   return createField(
@@ -138,9 +136,30 @@ export const buildField = (
     schema.minLength,
     schema.maxLength,
     schema,
-    rawErrors ? [rawErrors.message ?? ""] : [],
+    rawErrors,
     value,
   );
+};
+
+const formatFieldErrors = (
+  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
+  definition: string,
+  name: string,
+) => {
+  const errorsforField = filter(
+    errors,
+    (error) =>
+      definition === `/properties${error.instancePath}` ||
+      name === error.params?.missingProperty,
+  );
+  return errorsforField
+    .map((error) => {
+      if (definition === `/properties${error.instancePath}`) {
+        return error.message;
+      }
+      return "This required field cannot be blank";
+    })
+    .filter((error): error is string => error !== undefined);
 };
 
 export function getWrappersForNav(
@@ -160,3 +179,19 @@ export function getWrappersForNav(
 
   return results;
 }
+
+const wrapSection = (
+  label: string,
+  fieldName: string,
+  tree: JSX.Element | undefined,
+) => {
+  return (
+    <FieldsetWidget
+      key={`${fieldName}-wrapper`}
+      fieldName={fieldName}
+      label={label}
+    >
+      {tree}
+    </FieldsetWidget>
+  );
+};

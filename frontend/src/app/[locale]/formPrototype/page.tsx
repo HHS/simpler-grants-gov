@@ -3,11 +3,6 @@ import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
-import ApplyForm from "src/services/applyForm/ApplyForm";
-import {
-  validateFormSchema,
-  validateUiSchema,
-} from "src/services/applyForm/validate";
 import { getFormDetails } from "src/services/fetch/fetchers/formFetcher";
 import { formDetail } from "src/types/formResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
@@ -15,6 +10,11 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import ApplyForm from "src/components/applyForm/ApplyForm";
+import {
+  validateFormSchema,
+  validateUiSchema,
+} from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
 
 export function generateMetadata() {

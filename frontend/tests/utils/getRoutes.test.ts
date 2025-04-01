@@ -28,6 +28,8 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/dev/feature-flags",
       "/error",
+      "/formPrototype",
+      "/formPrototype/success",
       "/health",
       "/login",
       "/maintenance",

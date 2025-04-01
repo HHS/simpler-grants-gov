@@ -1,8 +1,9 @@
 // NOTE: this route is only for testing, will be removed when API is ready
 // TODO: remove file
 import { readError } from "src/errors";
-import * as formSchema from "src/services/applyForm/data/formSchema.json";
-import * as uiSchema from "src/services/applyForm/data/uiSchema.json";
+
+import * as formSchema from "src/components/applyForm/data/formSchema.json";
+import * as uiSchema from "src/components/applyForm/data/uiSchema.json";
 
 const getFormDetails = () => {
   return JSON.parse(JSON.stringify(formSchema)) as object;

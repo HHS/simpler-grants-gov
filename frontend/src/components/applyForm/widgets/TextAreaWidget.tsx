@@ -6,10 +6,12 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-import { UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, Label, Textarea } from "@trussworks/react-uswds";
+import { ErrorMessage, Textarea } from "@trussworks/react-uswds";
+
+import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { FieldLabel } from "./FieldLabel";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.
  *
@@ -28,6 +30,7 @@ function TextareaWidget<
   readonly,
   autofocus = false,
   schema,
+  updateOnInput = false,
   rawErrors = [],
   // passing on* functions made optional
   onBlur = () => ({}),
@@ -53,17 +56,12 @@ function TextareaWidget<
     [id, onFocus],
   );
   const error = rawErrors.length ? true : undefined;
+  const inputValue = value !== undefined ? String(value) : "";
 
   return (
     <div key={`wrapper-for-${id}`}>
-      <Label key={`label-for-${id}`} htmlFor={id}>
-        {title}
-        {required && (
-          <span className="usa-hint usa-hint--required text-no-underline">
-            *
-          </span>
-        )}
-      </Label>
+      <FieldLabel idFor={id} title={title} required={required} />
+
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <Textarea
         minLength={(minLength as number) ?? undefined}
@@ -72,16 +70,16 @@ function TextareaWidget<
         key={id}
         name={id}
         autoFocus={autofocus}
-        // update to let form validation happen on the server
+        // update to let form validation happen on the updateOnInput
         aria-required={required}
         disabled={disabled}
         readOnly={readonly}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        onChange={handleChange}
+        onChange={updateOnInput ? handleChange : undefined}
+        onBlur={updateOnInput ? handleBlur : undefined}
+        onFocus={updateOnInput ? handleFocus : undefined}
         aria-describedby={ariaDescribedByIds<T>(id)}
-        // passing value made optional
-        value={value ? String(value) : undefined}
+        defaultValue={updateOnInput ? undefined : inputValue}
+        value={updateOnInput ? inputValue : undefined}
         rows={options.rows}
       />
     </div>

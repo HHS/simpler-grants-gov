@@ -4,9 +4,10 @@ import { RJSFSchema } from "@rjsf/utils";
 import { useFormStatus } from "react-dom";
 
 import { useActionState } from "react";
-import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
+import { Button, FormGroup } from "@trussworks/react-uswds";
 
 import { submitApplyForm } from "./actions";
+import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { UiSchema } from "./types";
 import { buildFormTreeClosure, getWrappersForNav } from "./utils";
@@ -38,14 +39,17 @@ const ApplyForm = ({
     <div className="usa-in-page-nav-container flex-justify">
       <ApplyFormNav fields={navFields} />
       <form action={formAction}>
-        {formState.errorMessage.length > 0 && (
-          <Alert heading="oops" headingLevel="h3" type="error">
-            {formState.errorMessage}
-          </Alert>
-        )}
+        <ApplyFormErrorMessage
+          heading={formState.errorMessage}
+          errors={formState.validationErrors}
+        />
         <FormGroup>{fields}</FormGroup>
         <Button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() =>
+            formState.validationErrors.length > 0
+              ? window.scrollTo({ top: 0, behavior: "smooth" })
+              : undefined
+          }
           type="submit"
         >
           {pending ? "Submitting..." : "Submit"}

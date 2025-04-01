@@ -6,10 +6,12 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-import { TextTypes, UswdsWidgetProps } from "src/services/applyForm/types";
 
 import { ChangeEvent, FocusEvent, SyntheticEvent, useCallback } from "react";
-import { ErrorMessage, Label, Select } from "@trussworks/react-uswds";
+import { ErrorMessage, Select } from "@trussworks/react-uswds";
+
+import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
+import { FieldLabel } from "./FieldLabel";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -40,6 +42,7 @@ function SelectWidget<
   readonly,
   multiple = false,
   autofocus = false,
+  updateOnInput = false,
   rawErrors = [],
   // passing on* functions made optional
   onChange = () => ({}),
@@ -92,14 +95,8 @@ function SelectWidget<
 
   return (
     <div key={`wrapper-for-${id}`}>
-      <Label key={`label-for-${id}`} htmlFor={id}>
-        {title}
-        {required && (
-          <span className="usa-hint usa-hint--required text-no-underline">
-            *
-          </span>
-        )}
-      </Label>
+      <FieldLabel idFor={id} title={title} required={required} />
+
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       <Select
         id={id}
@@ -111,17 +108,17 @@ function SelectWidget<
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        onChange={handleChange}
+        onChange={updateOnInput ? handleChange : undefined}
+        onBlur={updateOnInput ? handleBlur : undefined}
+        onFocus={updateOnInput ? handleFocus : undefined}
         aria-describedby={ariaDescribedByIds<T>(id)}
       >
         {Array.isArray(enumOptions) &&
-          enumOptions.map(({ value, label }, i) => {
+          enumOptions.map(({ value, label }) => {
             const disabled =
               enumDisabled && enumDisabled.indexOf(value as TextTypes) !== -1;
             return (
-              <option key={i} value={String(i)} disabled={disabled}>
+              <option key={label} value={String(label)} disabled={disabled}>
                 {label}
               </option>
             );

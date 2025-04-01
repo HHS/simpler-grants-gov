@@ -87,7 +87,9 @@ export interface UswdsWidgetProps<
   };
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[];
+  rawErrors?: string[] | undefined;
+  // whether or not to use value + onChange
+  updateOnInput?: boolean;
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;

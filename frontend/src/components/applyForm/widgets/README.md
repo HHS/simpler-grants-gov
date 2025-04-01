@@ -1,6 +1,6 @@
 # USWDS React JSON Schema Widgets
 
-These are based on the core widgets from [React JSON Schema])(https://github.com/rjsf-team/react-jsonschema-form/tree/main/packages/core/src/components/widgets).
+These are based on the core widgets from [React JSON Schema](https://github.com/rjsf-team/react-jsonschema-form/tree/main/packages/core/src/components/widgets).
 
 ## Changes
 
