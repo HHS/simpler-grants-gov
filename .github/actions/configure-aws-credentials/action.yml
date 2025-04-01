@@ -24,6 +24,7 @@ runs:
       id: get-network-name
       if: ${{ inputs.app_name && inputs.environment }}
       run: |
+        set -eux
         echo "Get network name for app_name=${{ inputs.app_name }} and environment=${{ inputs.environment }}"
 
         terraform -chdir="infra/${{ inputs.app_name }}/app-config" init > /dev/null
