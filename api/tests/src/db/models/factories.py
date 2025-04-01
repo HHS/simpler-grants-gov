@@ -1938,7 +1938,9 @@ class TuserAccountFactory(BaseFactory):
     is_duplicate = factory.Faker("yn_boolean")
     is_active = factory.Faker("yn_boolean")
     is_email_confirm_pending = factory.Faker("yn_boolean")
-    deactivated_date = sometimes_none(factory.Faker("date_time_between", start_date="-5y", end_date="now"))
+    deactivated_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
     mobile_number = factory.Faker("phone_number")
 
 
@@ -1949,9 +1951,7 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
     @classmethod
     def _setup_next_sequence(cls):
         if _db_session is not None:
-            value = _db_session.query(
-                func.max(foreign.user.TuserAccount.user_id)
-            ).scalar()
+            value = _db_session.query(func.max(foreign.user.TuserAccount.user_id)).scalar()
             if value is not None:
                 return value + 1
         return 1
@@ -1968,9 +1968,11 @@ class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
             email_address=None,
         )
 
+
 ##
 # Pseudo-factories
 ##
+
 
 class StagingTgroupsAgencyFactory(factory.DictFactory):
     """
