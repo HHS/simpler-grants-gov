@@ -6,25 +6,20 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
+from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import (
     Opportunity,
     OpportunityAssistanceListing,
     OpportunityAttachment,
     OpportunitySummary,
 )
+from tests.lib.db_testing import cascade_delete_from_db_table
 
 
 @pytest.fixture
 def truncate_opportunities(db_session):
-    # Note that we can't just do db_session.query(Opportunity).delete() as the cascade deletes won't work automatically:
-    # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-queryguide-update-delete-caveats
-    # but if we do it individually they will
-    opportunities = db_session.query(Opportunity).all()
-    for opp in opportunities:
-        db_session.delete(opp)
-
-    # Force the deletes to the DB
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, ApplicationForm)
+    cascade_delete_from_db_table(db_session, Opportunity)
 
 
 def get_search_request(

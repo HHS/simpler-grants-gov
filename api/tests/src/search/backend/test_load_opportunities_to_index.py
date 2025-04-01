@@ -1,9 +1,13 @@
 import itertools
+import math
+import uuid
+from datetime import timedelta
 
+import freezegun
 import pytest
 from sqlalchemy import select
 
-from src.db.models.opportunity_models import OpportunityChangeAudit
+from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
@@ -11,6 +15,7 @@ from src.search.backend.load_opportunities_to_index import (
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAttachmentFactory,
@@ -23,7 +28,8 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
     def load_opportunities_to_index(self, db_session, search_client, opportunity_index_alias):
         config = LoadOpportunitiesToIndexConfig(
-            alias_name=opportunity_index_alias, index_prefix="test-load-opps"
+            alias_name=opportunity_index_alias,
+            index_prefix="test-load-opps",
         )
         return LoadOpportunitiesToIndex(db_session, search_client, True, config)
 
@@ -196,12 +202,17 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
-    def load_opportunities_to_index(self, db_session, search_client, opportunity_index_alias):
+    def load_opportunities_to_index(
+        self, db_session, search_client, opportunity_index_alias, monkeypatch_class
+    ):
         config = LoadOpportunitiesToIndexConfig(
-            alias_name=opportunity_index_alias, index_prefix="test-load-opps"
+            alias_name=opportunity_index_alias,
+            index_prefix="test-load-opps",
+            incremental_load_batch_size=5,
         )
         return LoadOpportunitiesToIndex(db_session, search_client, False, config)
 
+    @freezegun.freeze_time("2024-11-30", tz_offset=0)
     def test_load_opportunities_to_index(
         self,
         truncate_opportunities,
@@ -211,9 +222,8 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         opportunity_index_alias,
         load_opportunities_to_index,
     ):
-        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
-            "%Y-%m-%d_%H-%M-%S"
-        )
+
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
         search_client.create_index(index_name)
         search_client.swap_alias_index(
             index_name,
@@ -268,6 +278,14 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             load_opportunities_to_index.Metrics.TEST_RECORDS_SKIPPED
         ] == len(test_opps)
 
+        # assert correct number of batches processed
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.BATCHES_PROCESSED
+        ] == math.ceil(
+            len(opportunities + test_opps)
+            / int(load_opportunities_to_index.config.incremental_load_batch_size)
+        )
+
         # Add a few more opportunities that will be created
         opportunities.extend(
             OpportunityFactory.create_batch(
@@ -287,6 +305,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
         db_session.commit()
         db_session.expunge_all()
+
         load_opportunities_to_index.run()
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
@@ -312,6 +331,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         self,
         db_session,
         load_opportunities_to_index,
+        enable_factory_create,
     ):
         """Test that a new opportunity in the queue gets indexed"""
         test_opportunity = OpportunityFactory.create(
@@ -337,7 +357,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         assert len(remaining_queue) == 0
 
-    def test_draft_opportunity_not_indexed(self, db_session, load_opportunities_to_index):
+    def test_draft_opportunity_not_indexed(
+        self, db_session, load_opportunities_to_index, enable_factory_create
+    ):
         """Test that draft opportunities are not indexed"""
         test_opportunity = OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
 
@@ -357,3 +379,47 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             .all()
         )
         assert len(remaining_queue) == 1
+
+    @freezegun.freeze_time(get_now_us_eastern_datetime() + timedelta(days=2), tz_offset=0)
+    def test_batch_process_exceed_time_limit(
+        self, db_session, search_client, load_opportunities_to_index, enable_factory_create
+    ):
+        OpportunityChangeAuditFactory.create()
+
+        index_name = f"partial-refresh-index-{uuid.uuid4().int}"
+
+        search_client.create_index(index_name)
+        search_client.swap_alias_index(
+            index_name,
+            load_opportunities_to_index.config.alias_name,
+        )
+
+        load_opportunities_to_index.run()
+
+        # assert process exited, no batches processed
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.BATCHES_PROCESSED
+            ]
+            == 0
+        )
+
+    def test_opportunities_to_process_query(
+        self, db_session, load_opportunities_to_index, enable_factory_create
+    ):
+        cascade_delete_from_db_table(db_session, Opportunity)
+
+        # Add new opportunities
+        oca_1 = OpportunityChangeAuditFactory.create()
+        OpportunityChangeAuditFactory.create(is_loaded_to_search=True)
+        oca_3 = OpportunityChangeAuditFactory.create(is_loaded_to_search=None)
+
+        query = load_opportunities_to_index._build_opportunities_to_process_query()
+
+        queued_opportunities = db_session.execute(query).scalars().all()
+
+        # assert only opportunities (new/updated) not loaded to search are fetched sorted by latest opportunities
+        assert len(queued_opportunities) == 2
+        assert [oca_3.opportunity_id, oca_1.opportunity_id] == [
+            opp.opportunity_id for opp in queued_opportunities
+        ]

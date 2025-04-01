@@ -5,6 +5,7 @@ from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
+from analytics.datasets.acceptance_criteria import AcceptanceCriteriaTotal
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -20,6 +21,7 @@ class EtlDeliverableModel:
         self,
         deliverable_df: Series,
         ghid_map: dict,
+        ac_total: AcceptanceCriteriaTotal,
     ) -> tuple[int | None, EtlChangeType]:
         """Write deliverable data to etl database."""
         # initialize return value
@@ -38,7 +40,12 @@ class EtlDeliverableModel:
 
             # insert facts
             if deliverable_id is not None:
-                _ = self._insert_facts(deliverable_id, deliverable_df, ghid_map)
+                _ = self._insert_facts(
+                    deliverable_id,
+                    deliverable_df,
+                    ghid_map,
+                    ac_total,
+                )
         except (
             InsufficientPrivilege,
             OperationalError,
@@ -81,6 +88,7 @@ class EtlDeliverableModel:
         deliverable_id: int,
         deliverable_df: Series,
         ghid_map: dict,
+        ac_total: AcceptanceCriteriaTotal,
     ) -> tuple[int | None, int | None]:
         """Write deliverable fact data to etl database."""
         # insert into fact table: deliverable_quad_map
@@ -109,15 +117,30 @@ class EtlDeliverableModel:
         history_id = None
         result = cursor.execute(
             text(
-                "insert into gh_deliverable_history(deliverable_id, status, d_effective) "
-                "values (:deliverable_id, :status, :effective) "
-                "on conflict(deliverable_id, d_effective) do update "
-                "set (status, t_modified) = (:status, current_timestamp) returning id",
+                "insert into gh_deliverable_history"
+                "(deliverable_id, status, d_effective, "
+                "accept_criteria_total, accept_criteria_done, "
+                "accept_metrics_total, accept_metrics_done) "
+                "values "
+                "(:deliverable_id, :status, :effective, "
+                ":criteria_total, :criteria_done, "
+                ":metrics_total, :metrics_done) "
+                "on conflict(deliverable_id, d_effective) "
+                "do update set (status, t_modified, "
+                "accept_criteria_total, accept_criteria_done, "
+                "accept_metrics_total, accept_metrics_done) = "
+                "(:status, current_timestamp, "
+                ":criteria_total, :criteria_done, "
+                ":metrics_total, :metrics_done) returning id",
             ),
             {
                 "deliverable_id": deliverable_id,
                 "status": deliverable_df["deliverable_status"],
                 "effective": self.dbh.effective_date,
+                "criteria_total": ac_total.criteria_total,
+                "criteria_done": ac_total.criteria_done,
+                "metrics_total": ac_total.metrics_total,
+                "metrics_done": ac_total.metrics_done,
             },
         )
         row = result.fetchone()

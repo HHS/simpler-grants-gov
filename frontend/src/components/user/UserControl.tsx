@@ -117,12 +117,12 @@ export const UserControl = () => {
   return (
     <>
       {!user?.token && (
-        <LoginButtonModal navLoginLinkText={t("nav_link_login")} />
+        <LoginButtonModal navLoginLinkText={t("navLinks.login")} />
       )}
       {!!user?.token && (
         <UserDropdown
           user={user}
-          navLogoutLinkText={t("nav_link_logout")}
+          navLogoutLinkText={t("navLinks.logout")}
           logout={logout}
         />
       )}

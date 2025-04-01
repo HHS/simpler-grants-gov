@@ -1,13 +1,10 @@
-output "project_name" {
-  value = local.project_name
+output "aws_services" {
+  description = "AWS services that this project uses"
+  value       = local.aws_services
 }
 
-output "owner" {
-  value = local.owner
-}
-
-output "code_repository_url" {
-  value = local.code_repository_url
+output "aws_services_security_group_name_prefix" {
+  value = local.aws_services_security_group_name_prefix
 }
 
 output "code_repository" {
@@ -15,11 +12,14 @@ output "code_repository" {
   description = "The 'org/repo' string of the repo (e.g. 'navapbc/template-infra'). This is extracted from the repo URL (e.g. 'git@github.com:navapbc/template-infra.git' or 'https://github.com/navapbc/template-infra.git')"
 }
 
+output "code_repository_url" {
+  value = local.code_repository_url
+}
+
 output "default_region" {
   value = local.default_region
 }
 
-# Common tags for all accounts and environments
 output "default_tags" {
   value = {
     project             = local.project_name
@@ -35,15 +35,18 @@ output "github_actions_role_name" {
   value = local.github_actions_role_name
 }
 
-output "aws_services" {
-  description = "AWS services that this project uses"
-  value       = local.aws_services
-}
-
-output "aws_services_security_group_name_prefix" {
-  value = local.aws_services_security_group_name_prefix
-}
-
 output "network_configs" {
   value = local.network_configs
+}
+
+output "owner" {
+  value = local.owner
+}
+
+output "project_name" {
+  value = local.project_name
+}
+
+output "system_notifications_config" {
+  value = local.system_notifications_config
 }

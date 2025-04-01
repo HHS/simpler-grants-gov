@@ -282,7 +282,7 @@ def user_save_search(
         },
     )
 
-    return response.ApiResponse(message="Success")
+    return response.ApiResponse(message="Success", data=saved_search)
 
 
 @user_blueprint.delete("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")

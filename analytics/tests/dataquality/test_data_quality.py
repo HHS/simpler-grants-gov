@@ -29,7 +29,8 @@ def roadmap_output() -> list[dict] | None:
 
     # validate effective_date
 
-    return GitHubProjectETL(config).extract_and_transform_in_memory()
+    roadmap_data, _ = GitHubProjectETL(config).extract_and_transform_in_memory()
+    return roadmap_data
 
 
 def test_sprint_snapshot(snapshot):  # noqa: ANN001
@@ -49,7 +50,8 @@ def sprint_board_output() -> list[dict] | None:
 
     # validate effective_date
 
-    return GitHubProjectETL(config).extract_and_transform_in_memory()
+    sprint_data, _ = GitHubProjectETL(config).extract_and_transform_in_memory()
+    return sprint_data
 
 
 @mock.patch.object(
@@ -64,7 +66,8 @@ def etl_output() -> list[dict]:
 
     # validate effective_date
 
-    return GitHubProjectETL(config).extract_and_transform_in_memory()
+    etl_data, _ = GitHubProjectETL(config).extract_and_transform_in_memory()
+    return etl_data
 
 
 def test_load_from_json_object(snapshot):  # noqa: ANN001

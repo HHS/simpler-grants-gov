@@ -1,8 +1,8 @@
 "server-only";
 
 import { getSession } from "src/services/auth/session";
-import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
-import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
+import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
@@ -24,7 +24,7 @@ export const handleSavedOpportunity = async (
           opportunity_id: String(opportunityId),
         }
       : {};
-  return userSavedOpportunity(type)({
+  return fetchUserWithMethod(type)({
     subPath,
     additionalHeaders: ssgToken,
     body,
@@ -34,7 +34,7 @@ export const handleSavedOpportunity = async (
 export const getSavedOpportunities = async (
   token: string,
   userId: string,
-): Promise<SavedOpportunity[]> => {
+): Promise<MinimalOpportunity[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -51,7 +51,7 @@ export const getSavedOpportunities = async (
     },
   };
   const subPath = `${userId}/saved-opportunities/list`;
-  const resp = await userSavedOpportunity("POST")({
+  const resp = await fetchUserWithMethod("POST")({
     subPath,
     additionalHeaders: ssgToken,
     body,
@@ -64,7 +64,7 @@ export const getSavedOpportunity = async (
   token: string,
   userId: string,
   opportunityId: number,
-): Promise<SavedOpportunity | null> => {
+): Promise<MinimalOpportunity | null> => {
   const savedOpportunities = await getSavedOpportunities(token, userId);
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: number }) =>
@@ -74,7 +74,7 @@ export const getSavedOpportunity = async (
 };
 
 export const fetchSavedOpportunities = async (): Promise<
-  SavedOpportunity[]
+  MinimalOpportunity[]
 > => {
   try {
     const session = await getSession();
@@ -83,7 +83,7 @@ export const fetchSavedOpportunities = async (): Promise<
     }
     const savedOpportunities = await getSavedOpportunities(
       session.token,
-      session.user_id as string,
+      session.user_id,
     );
     return savedOpportunities;
   } catch (e) {

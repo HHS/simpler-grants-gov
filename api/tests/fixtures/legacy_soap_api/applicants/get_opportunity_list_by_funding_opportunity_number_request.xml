@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <app:GetOpportunityListRequest>
+         <app1:OpportunityFilter>
+            <gran:FundingOpportunityNumber>O-BJA-2025-202930-STG</gran:FundingOpportunityNumber>
+         </app1:OpportunityFilter>
+      </app:GetOpportunityListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

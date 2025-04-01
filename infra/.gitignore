@@ -23,6 +23,3 @@ override.tf.json
 # example: *tfplan*
 *.plan
 *.tfstate
-
-# Ignore archives used for deploying lambdas
-*.zip

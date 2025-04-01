@@ -1,6 +1,6 @@
-import { Opportunity } from "src/types/search/searchResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
-export const mockOpportunity: Opportunity = {
+export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
   opportunity_status: "posted",
@@ -13,4 +13,4 @@ export const mockOpportunity: Opportunity = {
     award_floor: 10000,
   },
   opportunity_number: "OPP-12345",
-} as Opportunity;
+} as BaseOpportunity;

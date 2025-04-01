@@ -14,6 +14,8 @@ module "staging_config" {
   enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
+  enable_notifications            = local.enable_notifications
 
   service_cpu    = 256
   service_memory = 2048

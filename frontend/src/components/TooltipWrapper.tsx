@@ -13,7 +13,7 @@ type TooltipProps = {
 };
 
 export const TooltipWrapper = (props: TooltipProps) => {
-  return <Tooltip {...props} />;
+  return <Tooltip aria-label={props.title} {...props} />;
 };
 
 export default TooltipWrapper;

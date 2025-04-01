@@ -1,4 +1,4 @@
-# Database Migration Infrastructure and Deployment
+# Database migration architecture
 
 * Status: proposed
 * Deciders: @lorenyu, @daphnegold, @chouinar, @Nava-JoshLong, @addywolf-nava, @sawyerh, @acouch, @SammySteiner
@@ -6,15 +6,13 @@
 
 ## Context and Problem Statement
 
-What is the most optimal setup for database migrations infrastructure and deployment?
-This will break down the different options for how the migration is run, but not the
-tools or languages the migration will be run with, that will be dependent on the framework the application is using.
+What is the most optimal setup for database migrations infrastructure and deployment? This will break down the different options for how the migration is run, but not the tools or languages the migration will be run with, that will be dependent on the framework the application is using.
 
 Questions that need to be addressed:
 
- 1. How will the method get the latest migration code to run?
- 2. What infrastructure is required to use this method?
- 3. How is the migration deployment re-run in case of errors?
+1. How will the method get the latest migration code to run?
+2. What infrastructure is required to use this method?
+3. How is the migration deployment re-run in case of errors?
 
 ## Decision Drivers
 
@@ -88,5 +86,5 @@ Cons
 
 ## Related ADRS:
 
-* [Database module design](./0005-database-module-design.md)
-* [Provision database users with serverless function](./0006-provision-database-users-with-serverless-function.md)
+* [Database module design](0005-database-module-design.md)
+* [Provision database users with serverless function](0006-provision-database-users-with-serverless-function.md)

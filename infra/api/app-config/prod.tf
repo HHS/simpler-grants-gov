@@ -4,13 +4,14 @@ module "prod_config" {
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "prod"
-  account_name                    = "prod"
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
-  enable_https                    = false
+  enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
+  enable_notifications            = local.enable_notifications
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1
@@ -52,11 +53,17 @@ module "prod_config" {
     LOAD_OPP_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT     = 0
+    ENABLE_AUTH_ENDPOINT     = 1
     LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
     LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
+
+    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
+
+    # grants.gov services/applications URI.
+    GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
+    ENABLE_SOAP_API = 0
   }
   instance_cpu    = 1024
   instance_memory = 4096

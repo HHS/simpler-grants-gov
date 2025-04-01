@@ -1,12 +1,12 @@
 import {
-  Opportunity,
   OpportunityAssistanceListing,
+  OpportunityDetail,
 } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 
 type Props = {
-  opportunityData: Opportunity;
+  opportunityData: OpportunityDetail;
 };
 
 const AssistanceListingsDisplay = ({

@@ -74,12 +74,12 @@ resource "aws_cloudfront_distribution" "cdn" {
       custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = var.cert_arn == null ? "http-only" : "https-only"
+        origin_protocol_policy = var.certificate_arn == null ? "http-only" : "https-only"
         origin_ssl_protocols   = local.ssl_protocols
       }
 
       dynamic "origin_shield" {
-        for_each = var.cert_arn == null ? [1] : []
+        for_each = var.certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -96,7 +96,7 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_access_control_id = aws_cloudfront_origin_access_control.cdn[0].id
 
       dynamic "origin_shield" {
-        for_each = var.cert_arn == null ? [1] : []
+        for_each = var.certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -116,7 +116,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = var.cert_arn == null ? "allow-all" : "redirect-to-https"
+    viewer_protocol_policy = var.certificate_arn == null ? "allow-all" : "redirect-to-https"
 
     # Default to caching for 1 hour.
     # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
@@ -132,8 +132,8 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = var.cert_arn == null ? null : var.cert_arn
-    cloudfront_default_certificate = var.cert_arn == null ? true : false
+    acm_certificate_arn            = var.certificate_arn == null ? null : var.certificate_arn
+    cloudfront_default_certificate = var.certificate_arn == null ? true : false
     minimum_protocol_version       = local.minimum_protocol_version
     ssl_support_method             = "sni-only"
   }

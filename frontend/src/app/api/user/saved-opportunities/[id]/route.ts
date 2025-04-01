@@ -3,7 +3,7 @@ import { getSession } from "src/services/auth/session";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const opportunityId = (await params).id;
@@ -15,7 +15,7 @@ export async function GET(
     }
     const savedOpportunities = await getSavedOpportunity(
       session.token,
-      session.user_id as string,
+      session.user_id,
       Number(opportunityId),
     );
     return new Response(JSON.stringify(savedOpportunities), {

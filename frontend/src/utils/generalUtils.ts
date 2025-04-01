@@ -4,6 +4,9 @@
 // Note that:
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
+
+import { OptionalStringDict } from "src/types/generalTypes";
+
 // Refer to tests to see how this works in practice
 export const splitMarkup = (
   markupString: string,
@@ -111,3 +114,13 @@ export const saveBlobToFile = (blob: Blob, filename: string) => {
     document.body.removeChild(temporaryLink);
   }, 0);
 };
+
+export const queryParamsToQueryString = (dict: OptionalStringDict) => {
+  return Object.entries(dict).reduce((queryString, [key, value]) => {
+    return value ? `${queryString}${key}=${value}&` : queryString;
+  }, "?");
+};
+
+// note that the regexp is taking into account /en & /es localized pathnames
+export const isCurrentPath = (href: string, currentPath: string): boolean =>
+  !!currentPath.match(new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`));

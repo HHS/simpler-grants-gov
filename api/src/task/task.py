@@ -43,11 +43,12 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # Initialize the metrics
             self.initialize_metrics()
 
-            # Run the actual task
-            self.run_task()
-
+            # Start the timer
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
+
+            # Run the actual task
+            self.run_task()
 
             # Calculate and set a duration
             end = time.perf_counter()
@@ -69,6 +70,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
+        zero_metrics_dict["task_class"] = self.cls_name()
         self.set_metrics(zero_metrics_dict)
 
     def set_metrics(self, metrics: dict[str, Any]) -> None:
