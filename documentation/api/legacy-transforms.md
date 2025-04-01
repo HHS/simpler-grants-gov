@@ -60,7 +60,7 @@ class TExample(foreignbase.ForeignBase, TExampleMixin):
 
 We don't need to perfectly match everything about the Oracle system, it's fine to do the following:
 * Different column types - see [Type Mapping](#type-mapping) for details
-*
+* Different column names - the order matters for the columns, but the column name doesn't need to match if there is an issue (unless there is an issue - keep the column names the same)
 
 ## Type Mapping
 The oracle_fdw handles most type conversions for us which means we don't
@@ -280,3 +280,50 @@ While it seems inefficient to reprocess 80k+ opportunities hourly, this takes le
 
 ## StoreOpportunityVersion
 x
+
+
+# Runbooks
+
+## I want to copy and transform a new table from the Oracle DB
+
+1. Figure out what the schema of the existing Oracle table is - this requires the ability to access the Oracle DB directly.
+2. Using the existing schema, [follow the steps](#staging--foreign-table-setup) for setting up a foreign table.
+3. Create a destination table in our API schema.
+4. Build the transform class for processing the table.
+5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run)
+6. Manually test loading the table by running the job with load oracle data job with the following command `["poetry", "run", "flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
+7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
+8. Enable the jobs to run automatically by adding updating the [LoadOracleDataTask config](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/load/load_oracle_data_task.py#L21) to include the job and the [TransformOracleDataTaskConfig](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/transformation/transform_oracle_data_task.py) to enable the transformation
+
+Remember to update any relevant dashboards on New Relic.
+
+## I want to run a task in ECS
+
+**For the first few times you run a task non-locally, we recommend pairing with someone who is familiar - just in case**
+
+This first requires you to be logged into the AWS console and authenticated with AWS
+in your terminal (`aws configure sso` is one way to set this up). It also requires
+that you have terraform initialized for a given environment locally.
+
+To run an ECS task we just need to call the `run-command` script we have which will
+fetch terraform values and call ECS to run the task.
+
+If you want to override any default environment variables, first create a JSON file
+like so:
+```json
+[
+        { "name" : "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE", "value" : "true" },
+        { "name" : "INCREMENTAL_LOAD_BATCH_SIZE", "value" : "100" }
+]
+```
+Note that the values always need to be in strings even if they represent integers or other types.
+The JSON needs to be valid and parseable by `jq`, which you can test by first doing `jq -c . your_file.json`
+
+To run the query you can do the following:
+
+Example in dev:
+```sh
+bin/run-command --environment-variables "$(jq -c . ~/env_vars/load_attachment.json)" api dev '["poetry", "run", "flask", "<BLUEPRINT NAME>", "<TASK NAME>", "<PARAMS (optional)>"]'
+```
+If you have no environment variables you want to override, feel free to exclude that section
+of the command.
