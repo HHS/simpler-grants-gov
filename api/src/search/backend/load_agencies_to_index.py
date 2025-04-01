@@ -14,8 +14,6 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
-    model_config = SettingsConfigDict(env_prefix="LOAD_AGENCY_SEARCH_")  # update tf /rm ?
-
     shard_count: int = Field(default=1)
     replica_count: int = Field(default=1)
 
@@ -71,7 +69,7 @@ class LoadAgenciesToIndex(Task):
     def load_agencies(self, agencies: Sequence[Agency]) -> None:
         logger.info("Loading agencies...")
 
-        schema = AgencyResponseSchema()  # Create new one ? more data ?
+        schema = AgencyResponseSchema()
         agencies_json = [schema.dump(record) for record in agencies]
 
         self.search_client.bulk_upsert(
