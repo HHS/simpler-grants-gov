@@ -2,14 +2,14 @@ import "server-only";
 
 import { createPublicKey, KeyObject } from "crypto";
 import { environment } from "src/constants/environments";
-import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import {
   API_JWT_ENCRYPTION_ALGORITHM,
   CLIENT_JWT_ENCRYPTION_ALGORITHM,
   decrypt,
   encrypt,
   newExpirationDate,
-} from "src/utils/authUtil";
+} from "src/services/auth/sessionUtils";
+import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
 // note that cookies will be async in Next 15
