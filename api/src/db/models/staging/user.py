@@ -14,3 +14,17 @@ class TuserAccountMapper(StagingBase, user_mixin.TuserAccountMapperMixin, Stagin
 
 class TuserAccount(StagingBase, user_mixin.TuserAccountMixin, StagingParamMixin):
     __tablename__ = "tuser_account"
+
+
+class TsubscriptionMixin(StagingBase, user_mixin.TsubscriptionMixin, StagingParamMixin):
+    __tablename__ = "tsubscription"
+
+
+class TsubscriptionSearchMixin(StagingBase, user_mixin.TsubscriptionSearchMixin, StagingParamMixin):
+    __tablename__ = "tsubscription_search"
+
+
+class TsubscriptionOpportunityMixin(
+    StagingBase, user_mixin.TsubscriptionOpportunityMixin, StagingParamMixin
+):
+    __tablename__ = "tsubscription_opportunity"

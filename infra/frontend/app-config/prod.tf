@@ -6,7 +6,7 @@ module "prod_config" {
   environment                     = "prod"
   network_name                    = "prod"
   domain_name                     = "simpler.grants.gov"
-  enable_https                    = false
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

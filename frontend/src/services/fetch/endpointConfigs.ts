@@ -30,7 +30,7 @@ export const userLogoutEndpoint = {
 };
 
 // can expand to support GET when the time comes
-export const toDynamicUsersEndpoint = (type: "POST" | "DELETE") => {
+export const toDynamicUsersEndpoint = (type: "POST" | "DELETE" | "PUT") => {
   return {
     basePath: environment.API_URL,
     version: "v1",
