@@ -4,7 +4,9 @@ export const messages = {
     page_description: "From new developments to upcoming opportunities, we want you to be a part of the journey.",
     upcoming: {
       title: "Upcoming Events",
-      description: "Begins March 10, 2025 Spring 2025 Collaborative Coding Challenge. The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
+      start_date: "Begins March 10, 2025",
+      header: "Spring 2025 Collaborative Coding Challenge",
+      description: "The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
       link: "Sign up to participate"
     },
     demos: {
