@@ -73,6 +73,6 @@ async function FormPage() {
 
 export default withFeatureFlag<WithFeatureFlagProps, never>(
   FormPage,
-  "opportunityOff",
+  "applyFormPrototypeOff",
   () => redirect("/maintenance"),
 );
