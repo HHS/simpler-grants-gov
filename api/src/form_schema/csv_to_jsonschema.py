@@ -8,6 +8,7 @@ from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
 logger = logging.getLogger(__name__)
 
+SKIPPED_FIELD_IMPLEMENTATIONS = ["button", "radio"]
 
 def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
     """
@@ -28,14 +29,12 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
 
     reader = csv.DictReader(csv_content.splitlines())
 
-    skipped_field_implementations = ["button"]
-
     for row in reader:
         if row.get("Agency FieldName", "") == "" and row.get("Agency Field Name", "") == "":
             logger.warning(f"Skipping row with empty Agency Field Name: {row['Field ID']}")
             continue
 
-        if row.get("Field Implementation", "").lower() in skipped_field_implementations:
+        if row.get("Field Implementation", "").lower() in SKIPPED_FIELD_IMPLEMENTATIONS:
             logger.info(f"Skipping field {row['Field ID']} of type {row['Field Type']}")
             continue
 
