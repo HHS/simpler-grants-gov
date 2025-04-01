@@ -13,7 +13,7 @@ import src.db.models.foreign
 import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory
+from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory, ForeignTuserAccountFactory, StagingTuserAccountFactory
 
 
 def validate_copied_value(
@@ -206,31 +206,27 @@ class TestLoadOracleData(BaseTestClass):
         """Test that excluded columns are not copied from foreign to staging tables."""
         time3 = datetime.datetime(2024, 4, 10, 22, 0, 1)
 
-        source_table = foreign_tables["topportunity"]
-        destination_table = staging_tables["topportunity"]
+        source_table = foreign_tables["tuser_account"]
+        destination_table = staging_tables["tuser_account"]
 
         db_session.execute(sqlalchemy.delete(source_table))
         db_session.execute(sqlalchemy.delete(destination_table))
 
         # Create a record in the foreign table with specific values
-        source_record = ForeignTopportunityFactory.create(
-            opportunity_id=10,
-            oppnumber="A-10",
-            opptitle="Foreign Title",
-            cfdas=[],
+        source_record = ForeignTuserAccountFactory.create(
+            user_account_id=10,
+            user_id="10",
+            full_name="test user1",
+            email_address="test1@example.com",
             last_upd_date=time3,
         )
-
-        # Specify columns to exclude
-        columns_to_exclude = {"topportunity": ["opptitle"]}
 
         # Run the task with column exclusions
         task = load_oracle_data_task.LoadOracleDataTask(
             db_session,
             foreign_tables,
             staging_tables,
-            ["topportunity"],
-            columns_to_exclude=columns_to_exclude,
+            ["tuser_account"],
         )
         task.run()
 
@@ -240,24 +236,24 @@ class TestLoadOracleData(BaseTestClass):
         # Retrieve the updated staging record
         updated_record = (
             db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 10)
+            .filter(destination_table.c.user_account_id == 10)
             .first()
         )
 
         # Verify regular columns were updated
-        assert updated_record.oppnumber == source_record.oppnumber
+        assert updated_record.full_name == source_record.full_name
         assert updated_record.last_upd_date == source_record.last_upd_date
 
         # Verify excluded columns retained their original values
-        assert source_record.opptitle != updated_record.opptitle
-        assert updated_record.opptitle is None
+        assert source_record.email_address != updated_record.email_address
+        assert updated_record.email_address is None
 
         # Test INSERT with excluded columns
-        source_record2 = ForeignTopportunityFactory.create(
-            opportunity_id=11,
-            oppnumber="A-12",
-            opptitle="Foreign Title 2",
-            cfdas=[],
+        source_record2 = ForeignTuserAccountFactory.create(
+            user_account_id=11,
+            full_name="test user2",
+            user_id="11",
+            email_address="test2@example.com",
             last_upd_date=time3,
         )
 
@@ -268,10 +264,10 @@ class TestLoadOracleData(BaseTestClass):
         # Retrieve the newly inserted record
         inserted_record = (
             db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 11)
+            .filter(destination_table.c.user_account_id == 11)
             .first()
         )
 
         # Verify regular columns were inserted
-        assert inserted_record.oppnumber == source_record2.oppnumber
-        assert inserted_record.opptitle is None
+        assert inserted_record.full_name == source_record2.full_name
+        assert inserted_record.email_address is None
