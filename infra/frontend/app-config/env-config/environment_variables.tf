@@ -9,6 +9,17 @@ locals {
     NODE_OPTIONS = "-r newrelic"
     # expose the current AWS Env to the FE Next Node Server at Runtime
     ENVIRONMENT = var.environment
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#labels
+    NEW_RELIC_LABELS = "app_name:${var.app_name};environment:${var.environment};service_name:${var.app_name}-${var.environment};serviceName:${var.app_name}-${var.environment};service.name:${var.app_name}-${var.environment};entity.name:${var.app_name}-${var.environment}"
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#logging_config
+    NEW_RELIC_LOG_ENABLED = "true"
+    NEW_RELIC_LOG         = "stderr"
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#cloud_config
+    NEW_RELIC_CLOUD_AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#browser-variables
+    NEW_RELIC_BROWSER_MONITORING_ATTRIBUTES_ENABLED = "true"
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#app-logging
+    NEW_RELIC_APPLICATION_LOGGING_FORWARDING_LABELS_ENABLED = "true"
   }
 
   # Configuration for secrets

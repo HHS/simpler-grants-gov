@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from sqlalchemy import select
 
 from src.db.models.competition_models import Application, ApplicationForm
@@ -10,6 +11,16 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
 )
+
+# Simple JSON schema used for tests below
+SIMPLE_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer", "maximum": 200},
+    },
+    "required": ["name"],
+}
 
 
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
@@ -150,13 +161,17 @@ def test_application_form_update_success_update(
     # Create application
     application = ApplicationFactory.create()
 
-    existing_form = ApplicationFormFactory.create(
-        application=application,
-        application_response={"name": "Original Name"},
-    )
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
     CompetitionFormFactory.create(
         competition=application.competition,
-        form=existing_form.form,
+        form=form,
+    )
+
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
     )
 
     application_id = str(application.application_id)
@@ -171,10 +186,108 @@ def test_application_form_update_success_update(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+    assert response.json["warnings"] == []
 
     # Verify application form was updated in the database
     db_session.refresh(existing_form)
     assert existing_form.application_response == {"name": "Updated Name"}
+
+
+@pytest.mark.parametrize(
+    "application_response,expected_warnings",
+    [
+        # Missing required field
+        ({}, [{"field": "$", "message": "'name' is a required property", "type": "required"}]),
+        # Validation on age field
+        (
+            {"name": "bob", "age": 500},
+            [
+                {
+                    "field": "$.age",
+                    "message": "500 is greater than the maximum of 200",
+                    "type": "maximum",
+                }
+            ],
+        ),
+        # Extra fields are fine with our setup
+        ({"name": "bob", "age": 50, "something_else": ""}, []),
+    ],
+)
+def test_application_form_update_with_validation_warnings(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+    application_response,
+    expected_warnings,
+):
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
+    )
+
+    request_data = {"application_response": application_response}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["warnings"] == expected_warnings
+
+    # Verify application form was updated in the database
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == application_response
+
+
+def test_application_form_update_with_invalid_schema_500(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+):
+    """In this test we intentionally create a bad JSON schema"""
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema={"properties": ["bad"]})
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Original Name"},
+    )
+
+    request_data = {"application_response": {"name": "Changed Name"}}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 500
+    assert response.get_json()["message"] == "Internal Server Error"
+    # Verify the response was not updated
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == {"name": "Original Name"}
 
 
 def test_application_form_update_application_not_found(
@@ -430,6 +543,61 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-Auth": "invalid-token"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
+    application = ApplicationFactory.create(with_forms=True)
+    application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == str(application.application_id)
+    assert response.json["data"]["competition_id"] == str(application.competition_id)
+    response_application_forms = sorted(
+        response.json["data"]["application_forms"], key=lambda x: x["application_form_id"]
+    )
+    assert len(response_application_forms) == len(application_forms)
+    for application_form, application_form_response in zip(
+        application_forms, response_application_forms, strict=True
+    ):
+        assert application_form_response == {
+            "application_form_id": str(application_form.application_form_id),
+            "application_id": str(application.application_id),
+            "form_id": str(application_form.form_id),
+            "application_response": application_form.application_response,
+        }
+
+
+def test_application_get_application_not_found(
+    client, enable_factory_create, db_session, api_auth_token
+):
+    non_existent_application_id = str(uuid.uuid4())
+
+    response = client.get(
+        f"/alpha/applications/{non_existent_application_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        f"Application with ID {non_existent_application_id} not found" in response.json["message"]
+    )
+
+
+def test_application_get_unauthorized(client, enable_factory_create, db_session):
+    application = ApplicationFactory.create()
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
         headers={"X-Auth": "invalid-token"},
     )
 

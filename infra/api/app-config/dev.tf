@@ -37,7 +37,9 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT = 1
+    ENABLE_AUTH_ENDPOINT   = 1
+    ENABLE_APPLY_ENDPOINTS = 1
+    ENABLE_SOAP_API        = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

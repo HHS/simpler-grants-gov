@@ -1,4 +1,6 @@
 import {
+  deleteSavedSearch,
+  editSavedSearchName,
   obtainSavedSearches,
   saveSearch,
 } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
@@ -126,6 +128,116 @@ describe("obtainSavedSearches", () => {
     });
     const expectedError = await wrapForExpectedError(() =>
       obtainSavedSearches("faketoken"),
+    );
+
+    expect(expectedError).toBeInstanceOf(Error);
+  });
+});
+
+describe("editSavedSearchName", () => {
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = fetchMock;
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+    jest.resetAllMocks();
+  });
+  it("returns immediately if there is no token", async () => {
+    const result = await editSavedSearchName("a name", "an id");
+    expect(result).toEqual(undefined);
+  });
+  it("calls fetch as expected and returns json result", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const result = await editSavedSearchName("a name", "an id", "faketoken");
+
+    expect(result).toEqual(undefined);
+    expect(fetchMock).toHaveBeenCalledWith("/api/user/saved-searches", {
+      method: "PUT",
+      body: JSON.stringify({ name: "a name", searchId: "an id" }),
+    });
+  });
+  it("throws on non ok", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 200,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const expectedError = await wrapForExpectedError(() =>
+      editSavedSearchName("a name", "id", "faketoken"),
+    );
+
+    expect(expectedError).toBeInstanceOf(Error);
+  });
+
+  it("throws on non 200", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 500,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const expectedError = await wrapForExpectedError(() =>
+      editSavedSearchName("a name", "id", "faketoken"),
+    );
+
+    expect(expectedError).toBeInstanceOf(Error);
+  });
+});
+
+describe("deleteSavedSearch", () => {
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = fetchMock;
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+    jest.resetAllMocks();
+  });
+  it("returns immediately if there is no token", async () => {
+    const result = await deleteSavedSearch("an id");
+    expect(result).toEqual(undefined);
+  });
+  it("calls fetch as expected and returns json result", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const result = await deleteSavedSearch("an id", "faketoken");
+
+    expect(result).toEqual(undefined);
+    expect(fetchMock).toHaveBeenCalledWith("/api/user/saved-searches", {
+      method: "DELETE",
+      body: JSON.stringify({ searchId: "an id" }),
+    });
+  });
+  it("throws on non ok", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 200,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const expectedError = await wrapForExpectedError(() =>
+      deleteSavedSearch("id", "faketoken"),
+    );
+
+    expect(expectedError).toBeInstanceOf(Error);
+  });
+
+  it("throws on non 200", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 500,
+      json: () => Promise.resolve({ arbitrary: "data" }),
+    });
+    const expectedError = await wrapForExpectedError(() =>
+      deleteSavedSearch("id", "faketoken"),
     );
 
     expect(expectedError).toBeInstanceOf(Error);

@@ -1,5 +1,6 @@
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
+  areSetsEqual,
   getAgencyDisplayName,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
@@ -173,5 +174,19 @@ describe("getAgencyDisplayName", () => {
     expect(
       getAgencyDisplayName({ ...fakeOpportunity, ...{ agency_name: null } }),
     ).toEqual("NON-HMN-READABWOL");
+  });
+});
+
+describe("areSetsEqual", () => {
+  it("returns false for sets of unequal size", () => {
+    expect(areSetsEqual(new Set(["1"]), new Set(["1", "2"]))).toEqual(false);
+  });
+  it("returns false if sets contain any different strings", () => {
+    expect(areSetsEqual(new Set(["", "1"]), new Set(["", "2"]))).toEqual(false);
+  });
+  it("returns true if sets contain all of the same items", () => {
+    expect(areSetsEqual(new Set(["2", "1"]), new Set(["1", "2"]))).toEqual(
+      true,
+    );
   });
 });

@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -322,3 +322,13 @@ load-test-staging: # Load test the staging environment in aws
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
 	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml
+
+
+
+#########################
+# Mock SOAP services
+#########################
+init-mock-soap-services: start-mock-soap-services ## Initialize the applicants soap api
+
+start-mock-soap-services: ## start applicants soap api
+	docker compose up --detach mock-applicants-soap-api
