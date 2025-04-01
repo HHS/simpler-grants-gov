@@ -15,7 +15,7 @@ locals {
     NEW_RELIC_LOG_ENABLED = "true"
     NEW_RELIC_LOG         = "stderr"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#cloud_config
-    NEW_RELIC_CLOUD_AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+    NEW_RELIC_CLOUD_AWS_ACCOUNT_ID = "315341936575"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#browser-variables
     NEW_RELIC_BROWSER_MONITORING_ATTRIBUTES_ENABLED = "true"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#app-logging
