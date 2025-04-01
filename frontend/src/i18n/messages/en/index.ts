@@ -1,4 +1,22 @@
 export const messages = {
+  Events: {
+    page_title: "Events",
+    page_description: "From new developments to upcoming opportunities, we want you to be a part of the journey.",
+    upcoming: {
+      title: "Upcoming Events",
+      description: "Begins March 10, 2025 Spring 2025 Collaborative Coding Challenge. The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
+      link: "Sign up to participate"
+    },
+    demos: {
+      title: "Simpler.Grants.gov Big Demo",
+      description: "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. "
+    },
+    coding_challenge: {
+      title: "Collaborative Coding Challenge",
+      description: "The Simpler.Grants.gov Collaborative Coding Challenge is an entirely virtual interactive event attended by members of the public, government, stakeholders, and our internal development team. Small teams of external developers, designers, and researchers pitch a proposal to solve a problem with the strongest of them added to the product roadmap.",
+      link: "Read about the Spring 2025 Coding Challenge"
+    }
+  },
   Beta_alert: {
     alert_title:
       "This site is a work in progress, with new features and updates based on your feedback.",

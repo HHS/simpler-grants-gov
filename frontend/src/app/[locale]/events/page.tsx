@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import EventsHeroImg from "public/img/events-hero.jpg";
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -9,6 +10,7 @@ import {
 } from "@trussworks/react-uswds";
 
 export default function Events() {
+  const t = useTranslations("Events");
   return (
     <>
       <div
@@ -21,8 +23,8 @@ export default function Events() {
             <Grid tablet={{
               col: true
             }}>
-              <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">Events</h1>
-              <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance">From new developments to upcoming opportunities, we want you to be a part of the journey.</p>
+              <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">{t("page_title")}</h1>
+              <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance">{t("page_description")}</p>
             </Grid>
             <Grid tablet={{
               col: true
@@ -38,19 +40,46 @@ export default function Events() {
       </div>
       <div data-testid="events-upcoming">
           <GridContainer>
-          <Grid row gap="md">
-              <Grid col={3}>
-                <h1>Upcoming Events</h1>
+            <Grid row gap="md">
+              <Grid tablet={{
+                col: 3
+              }}>
+                <h1>{t("upcoming.title")}</h1>
               </Grid>
-              <Grid col={9}>Begins March 10, 2025
-              Spring 2025 Collaborative Coding Challenge
-              The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.
-              Sign up to participate</Grid>
+            <Grid tablet={{
+              col: 9
+            }}>{t("upcoming.description")}</Grid>
             </Grid>
           </GridContainer>
       </div>
       <div className="bg-base-lightest">
-
+        <GridContainer>
+          <Grid row>
+            <Grid>
+              {t("demos.title")}
+            </Grid>
+            <Grid>
+              <p>
+                {t("demos.description")}
+              </p>
+            </Grid>
+          </Grid>
+          <Grid row>
+            <Grid>
+              {t("coding_challenge.title")}
+            </Grid>
+            <Grid>
+              <p>
+                {t("coding_challenge.description")}
+              </p>
+            </Grid>
+            <Grid>
+              <p>
+                {t("coding_challenge.link")}
+              </p>
+            </Grid>
+          </Grid>
+        </GridContainer>
       </div>
     </>
   );
