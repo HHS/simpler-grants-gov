@@ -1,7 +1,9 @@
 import pytest
 
+from src.db.models.agency_models import Agency
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
 from tests.conftest import BaseTestClass
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import AgencyFactory
 
 
@@ -23,6 +25,9 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         agency_index_alias,
         enable_factory_create,
     ):
+        # Delete any agencies in db
+        cascade_delete_from_db_table(db_session, Agency)
+
         # Create Agencies to load into the search index
         agencies = [AgencyFactory.create(agency_code="DOD")]
         agencies.extend(AgencyFactory.create_batch(size=5, top_level_agency=agencies[0]))
