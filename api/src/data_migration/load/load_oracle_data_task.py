@@ -51,14 +51,15 @@ class LoadOracleDataTask(src.task.task.Task):
         staging_tables: dict[str, sqlalchemy.Table],
         tables_to_load: list[str] | None = None,
         insert_chunk_size: int = 800,
-        columns_to_exclude: dict[str, list[str]] | None = None,
     ) -> None:
 
         if tables_to_load is None or len(tables_to_load) == 0:
             tables_to_load = TABLES_TO_LOAD
 
         # Initialize columns_to_exclude if None
-        self.columns_to_exclude = columns_to_exclude or {}
+        self.columns_to_exclude = {
+            "tuser_account": ["email_address"],
+        }
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}
@@ -271,13 +272,11 @@ def main() -> None:
         foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
         staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
-        columns_to_exclude = {
-            "tuser_account_mapper": ["email_address"],
-        }
-
         with db_client.get_session() as db_session:
             LoadOracleDataTask(
-                db_session, foreign_tables, staging_tables, columns_to_exclude=columns_to_exclude
+                db_session,
+                foreign_tables,
+                staging_tables,
             ).run()
 
 
