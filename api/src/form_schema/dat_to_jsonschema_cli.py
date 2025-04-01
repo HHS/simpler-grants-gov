@@ -41,5 +41,5 @@ def main(input_file: str, sheet: int, skip_rows: int) -> int:
             return 0
 
         except Exception as e:
-            print(f"Error: {str(e)}", file=sys.stderr)
-            return 1
+            logger.exception("Process failed")
+            raise
