@@ -14,18 +14,16 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
-    model_config = SettingsConfigDict(env_prefix="LOAD_AGENCY_SEARCH_")
+    model_config = SettingsConfigDict(env_prefix="LOAD_AGENCY_SEARCH_")  # update tf /rm ?
 
-    shard_count: int = Field(
-        default=1
-    )  # LOAD_OPP_SEARCH_SHARD_COUNT # use same one here ?  update tf ?
-    replica_count: int = Field(default=1)  # LOAD_OPP_SEARCH_REPLICA_COUNT # use same one here ?
+    shard_count: int = Field(default=1)
+    replica_count: int = Field(default=1)
 
-    alias_name: str = Field(default="agency-index-alias")  # LOAD_AGENCIES_SEARCH_ALIAS_NAME
-    index_prefix: str = Field(default="agency-index")  # LOAD_OPP_INDEX_PREFIX
+    alias_name: str = Field(default="agency-index-alias")  # LOAD_AGENCY_SEARCH_ALIAS_NAME
+    index_prefix: str = Field(default="agency-index")  # LOAD_AGENCY_INDEX_PREFIX
 
 
-class LoadAgenciesToIndex(Task):  # TBC How often does this need to be updated
+class LoadAgenciesToIndex(Task):
     def __init__(
         self,
         db_session: db.Session,
