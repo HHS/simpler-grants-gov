@@ -17,7 +17,6 @@ from tests.src.db.models.factories import (
     ForeignTopportunityFactory,
     ForeignTuserAccountFactory,
     StagingTopportunityFactory,
-    StagingTuserAccountFactory,
 )
 
 
