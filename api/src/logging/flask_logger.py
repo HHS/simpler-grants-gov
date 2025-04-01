@@ -19,6 +19,7 @@ Usage:
 
 import logging
 import os
+import sys
 import time
 import uuid
 
@@ -77,6 +78,8 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     add_extra_data_to_global_logs(
         {
             "app.name": app.name,
+            "app_name": "api",
+            "run_mode": get_run_mode(),
             "environment": os.environ.get("ENVIRONMENT"),
             "deploy_github_ref": deploy_metadata.deploy_github_ref,
             "deploy_github_sha": deploy_metadata.deploy_github_sha,
@@ -212,3 +215,23 @@ def _add_new_relic_context_to_log_record(record: logging.LogRecord) -> bool:
     record.__dict__ |= newrelic_metadata
 
     return True
+
+
+def get_run_mode() -> str:
+    # We want to indicate whether the app was run as an API service
+    # or as a CLI - use the argv of the command we ran it with
+    # to determine that.
+    # CLI commands are always of the form "/path/to/flask <blueprint name> <task name> <commands>
+    #
+    # The API service can be started either as
+    #  "/path/to/flask --app src.app run ..." --> When run locally
+    #  "poetry run gunicorn src.app:create_app()"
+    #
+    # So we check for pieces that only appear in the API commands
+
+    _original_argv = tuple(sys.argv)
+    run_mode = "cli"
+    if "gunicorn" in _original_argv or "--app" in _original_argv:
+        run_mode = "service"
+
+    return run_mode

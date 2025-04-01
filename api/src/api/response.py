@@ -12,11 +12,11 @@ from src.util.dict_util import flatten_dict
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True, eq=True)
 class ValidationErrorDetail:
     type: str
     message: str = ""
-    field: Optional[str] = None
+    field: str | None = None
 
 
 class ValidationException(apiflask.exceptions.HTTPError):

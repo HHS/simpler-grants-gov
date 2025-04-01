@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class AgencyFilters(BaseModel):
-    agency_id: int | None = None
+    agency_id: uuid.UUID | None = None
     agency_name: str | None = None
     active: bool | None = None
 
