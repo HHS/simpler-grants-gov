@@ -46,7 +46,7 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local cover_all_agencies=true populate-search-opportunities start
+          make init db-seed-local-with-agencies populate-search-opportunities start
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
           cd ../frontend
