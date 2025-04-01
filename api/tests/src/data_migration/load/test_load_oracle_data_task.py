@@ -13,7 +13,12 @@ import src.db.models.foreign
 import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory, ForeignTuserAccountFactory, StagingTuserAccountFactory
+from tests.src.db.models.factories import (
+    ForeignTopportunityFactory,
+    ForeignTuserAccountFactory,
+    StagingTopportunityFactory,
+    StagingTuserAccountFactory,
+)
 
 
 def validate_copied_value(
