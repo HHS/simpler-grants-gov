@@ -46,7 +46,7 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local populate-search-opportunities start
+          make init db-seed-local cover_all_agencies=true populate-search-opportunities start
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
           cd ../frontend
@@ -60,7 +60,7 @@ jobs:
           sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env >> .env.local
           cat .env.development >> .env.local
           # Use the localhost url for tests
-          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local 
+          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local
           npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
