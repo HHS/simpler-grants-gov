@@ -1,41 +1,39 @@
 import SessionStorage from "src/utils/sessionStorage";
 
-describe("SessionStorage", () => {
-  const originalConsoleError = console.error;
 
-  let mockSessionStorage: Storage;
+
+
+
+describe("SessionStorage", () => {
+  const mockGetItem = jest.fn();
+  const mockSetItem = jest.fn();
+  const mockRemoveItem = jest.fn();
+  const mockClear = jest.fn();
+  const mockKey = jest.fn();
+  const mockConsoleError = jest.fn();
+  let originalConsoleError: typeof console.error;
 
   beforeEach(() => {
-    console.error = jest.fn();
-
-    mockSessionStorage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
-      key: jest.fn(),
-      length: 0,
-    };
-
-    (mockSessionStorage.getItem as jest.Mock).mockImplementation(
-      (key: string) => {
-        if (key === "testKey") return "testValue";
-        if (key === "testKey1") return "testValue1";
-        if (key === "testKey2") return "testValue2";
-        return null;
-      },
-    );
+    originalConsoleError = console.error;
+    console.error = mockConsoleError;
 
     Object.defineProperty(window, "sessionStorage", {
-      value: mockSessionStorage,
+      value: {
+        getItem: mockGetItem,
+        setItem: mockSetItem,
+        removeItem: mockRemoveItem,
+        clear: mockClear,
+        key: mockKey,
+        length: 0,
+      },
       writable: true,
     });
+
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
     console.error = originalConsoleError;
-
-    jest.restoreAllMocks();
   });
 
   describe("isSessionStorageAvailable", () => {
@@ -89,7 +87,14 @@ describe("SessionStorage", () => {
       expect(console.error).toHaveBeenCalled();
 
       Object.defineProperty(window, "sessionStorage", {
-        value: mockSessionStorage,
+        value: {
+          getItem: mockGetItem,
+          setItem: mockSetItem,
+          removeItem: mockRemoveItem,
+          clear: mockClear,
+          key: mockKey,
+          length: 0,
+        },
         writable: true,
       });
     });
@@ -98,10 +103,7 @@ describe("SessionStorage", () => {
   describe("setItem", () => {
     it("sets an item in sessionStorage", () => {
       SessionStorage.setItem("testKey", "testValue");
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
-        "testKey",
-        "testValue",
-      );
+      expect(mockSetItem).toHaveBeenCalledWith("testKey", "testValue");
     });
 
     it("does nothing when sessionStorage is not available", () => {
@@ -110,32 +112,33 @@ describe("SessionStorage", () => {
         .mockReturnValue(false);
 
       SessionStorage.setItem("testKey", "testValue");
-      expect(mockSessionStorage.setItem).not.toHaveBeenCalled();
+      expect(mockSetItem).not.toHaveBeenCalled();
 
       jest.restoreAllMocks();
     });
 
     it("logs error when exception is thrown", () => {
-      (mockSessionStorage.setItem as jest.Mock).mockImplementation(() => {
+      (mockSetItem as jest.Mock).mockImplementation(() => {
         throw new Error("Storage error");
       });
 
       SessionStorage.setItem("testKey", "testValue");
-      expect(console.error).toHaveBeenCalled();
+      expect(mockConsoleError).toHaveBeenCalled();
     });
   });
 
   describe("getItem", () => {
     it("gets an item from sessionStorage", () => {
+      mockGetItem.mockReturnValue("testValue");
       const result = SessionStorage.getItem("testKey");
       expect(result).toBe("testValue");
-      expect(mockSessionStorage.getItem).toHaveBeenCalledWith("testKey");
+      expect(mockGetItem).toHaveBeenCalledWith("testKey");
     });
 
     it("returns null when key does not exist", () => {
-      (mockSessionStorage.getItem as jest.Mock).mockReturnValue(null);
+      (mockGetItem as jest.Mock).mockReturnValue(null);
       expect(SessionStorage.getItem("nonExistentKey")).toBeNull();
-      expect(mockSessionStorage.getItem).toHaveBeenCalledWith("nonExistentKey");
+      expect(mockGetItem).toHaveBeenCalledWith("nonExistentKey");
     });
 
     it("returns null when sessionStorage is not available", () => {
@@ -144,25 +147,25 @@ describe("SessionStorage", () => {
         .mockReturnValue(false);
 
       expect(SessionStorage.getItem("testKey")).toBeNull();
-      expect(mockSessionStorage.getItem).not.toHaveBeenCalled();
+      expect(mockGetItem).not.toHaveBeenCalled();
 
       jest.restoreAllMocks();
     });
 
     it("returns null and logs error when exception is thrown", () => {
-      (mockSessionStorage.getItem as jest.Mock).mockImplementation(() => {
+      (mockGetItem as jest.Mock).mockImplementation(() => {
         throw new Error("Storage error");
       });
 
       expect(SessionStorage.getItem("testKey")).toBeNull();
-      expect(console.error).toHaveBeenCalled();
+      expect(mockConsoleError).toHaveBeenCalled();
     });
   });
 
   describe("removeItem", () => {
     it("removes an item from sessionStorage", () => {
       SessionStorage.removeItem("testKey");
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith("testKey");
+      expect(mockRemoveItem).toHaveBeenCalledWith("testKey");
     });
 
     it("does nothing when sessionStorage is not available", () => {
@@ -171,25 +174,25 @@ describe("SessionStorage", () => {
         .mockReturnValue(false);
 
       SessionStorage.removeItem("testKey");
-      expect(mockSessionStorage.removeItem).not.toHaveBeenCalled();
+      expect(mockRemoveItem).not.toHaveBeenCalled();
 
       jest.restoreAllMocks();
     });
 
     it("logs error when exception is thrown", () => {
-      (mockSessionStorage.removeItem as jest.Mock).mockImplementation(() => {
+      (mockRemoveItem as jest.Mock).mockImplementation(() => {
         throw new Error("Storage error");
       });
 
       SessionStorage.removeItem("testKey");
-      expect(console.error).toHaveBeenCalled();
+      expect(mockConsoleError).toHaveBeenCalled();
     });
   });
 
   describe("clear", () => {
     it("clears all items from sessionStorage", () => {
       SessionStorage.clear();
-      expect(mockSessionStorage.clear).toHaveBeenCalled();
+      expect(mockClear).toHaveBeenCalled();
     });
 
     it("does nothing when sessionStorage is not available", () => {
@@ -198,18 +201,57 @@ describe("SessionStorage", () => {
         .mockReturnValue(false);
 
       SessionStorage.clear();
-      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      expect(mockClear).not.toHaveBeenCalled();
 
       jest.restoreAllMocks();
     });
 
     it("logs error when exception is thrown", () => {
-      (mockSessionStorage.clear as jest.Mock).mockImplementation(() => {
+      (mockClear as jest.Mock).mockImplementation(() => {
         throw new Error("Storage error");
       });
 
       SessionStorage.clear();
-      expect(console.error).toHaveBeenCalled();
+      expect(mockConsoleError).toHaveBeenCalled();
     });
+  });
+
+  it("should get item from session storage", () => {
+    mockGetItem.mockReturnValue("testValue");
+
+    const result = SessionStorage.getItem("testKey");
+
+    expect(mockGetItem).toHaveBeenCalledWith("testKey");
+    expect(result).toBe("testValue");
+  });
+
+  it("should set item in session storage", () => {
+    SessionStorage.setItem("testKey", "testValue");
+
+    expect(mockSetItem).toHaveBeenCalledWith("testKey", "testValue");
+  });
+
+  it("should remove item from session storage", () => {
+    SessionStorage.removeItem("testKey");
+
+    expect(mockRemoveItem).toHaveBeenCalledWith("testKey");
+  });
+
+  it("should clear session storage", () => {
+    SessionStorage.clear();
+
+    expect(mockClear).toHaveBeenCalled();
+  });
+
+  it("should handle errors gracefully", () => {
+    mockGetItem.mockImplementation(() => {
+      throw new Error("Test error");
+    });
+
+    const result = SessionStorage.getItem("testKey");
+
+    expect(mockGetItem).toHaveBeenCalledWith("testKey");
+    expect(mockConsoleError).toHaveBeenCalled();
+    expect(result).toBeNull();
   });
 });
