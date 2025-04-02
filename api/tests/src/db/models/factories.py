@@ -1033,7 +1033,7 @@ class CompetitionFormFactory(BaseFactory):
     form = factory.SubFactory(FormFactory)
     form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
-    is_required = False
+    is_required = True
 
 
 ###################
