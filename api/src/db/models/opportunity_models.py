@@ -1,7 +1,9 @@
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,7 +26,8 @@ from src.db.models.lookup_models import (
 )
 
 if TYPE_CHECKING:
-    from src.db.models.user_models import UserSavedOpportunity
+    from src.db.models.competition_models import Competition
+    from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -79,6 +82,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    all_opportunity_notification_logs: Mapped[list["UserOpportunityNotificationLog"]] = (
+        relationship(back_populates="opportunity", uselist=True, cascade="all, delete-orphan")
+    )
+
     saved_opportunities_by_users: Mapped[list["UserSavedOpportunity"]] = relationship(
         "UserSavedOpportunity",
         back_populates="opportunity",
@@ -91,6 +98,17 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         primaryjoin="Opportunity.agency_code == foreign(Agency.agency_code)",
         uselist=False,
         viewonly=True,
+    )
+
+    competitions: Mapped[list["Competition"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
+    versions: Mapped[list["OpportunityVersion"]] = relationship(
+        "OpportunityVersion",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -145,10 +163,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
     __table_args__ = (
-        # nulls not distinct makes it so nulls work in the unique constraint
-        UniqueConstraint(
-            "is_forecast", "revision_number", "opportunity_id", postgresql_nulls_not_distinct=True
-        ),
+        UniqueConstraint("is_forecast", "opportunity_id"),
         # Need to define the table args like this to inherit whatever we set on the super table
         # otherwise we end up overwriting things and Alembic remakes the whole table
         ApiSchemaTable.__table_args__,
@@ -189,7 +204,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    revision_number: Mapped[int | None]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]
@@ -199,8 +213,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
-
-    is_deleted: Mapped[bool | None]
 
     version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
@@ -275,9 +287,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         """
         Utility method to check whether a summary object
         """
-        if self.is_deleted:
-            return False
-
         if self.post_date is None or self.post_date > current_date:
             return False
 
@@ -451,3 +460,19 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    is_loaded_to_search: Mapped[bool | None]
+
+
+class OpportunityVersion(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_version"
+
+    opportunity_version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    opportunity_data: Mapped[dict] = mapped_column(JSONB)

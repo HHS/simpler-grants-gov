@@ -86,6 +86,17 @@ class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class UserSavedOpportunitiesRequestSchema(Schema):
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserGetSavedOpportunityPaginationV1Schema",
+            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
 class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(SavedOpportunityResponseV1Schema),
@@ -99,10 +110,6 @@ class UserSaveSearchRequestSchema(Schema):
         metadata={"description": "Name of the saved search", "example": "Example search"},
     )
     search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
-
-
-class UserSaveSearchResponseSchema(AbstractResponseSchema):
-    data = fields.MixinField(metadata={"example": None})
 
 
 class SavedSearchResponseSchema(Schema):
@@ -125,6 +132,10 @@ class SavedSearchResponseSchema(Schema):
     created_at = fields.DateTime(
         metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
     )
+
+
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(SavedSearchResponseSchema)
 
 
 class UserSavedSearchesRequestSchema(Schema):

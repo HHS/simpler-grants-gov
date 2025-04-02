@@ -2,16 +2,16 @@
 
 * @mdragon # project lead
 
-/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @mdragon @widal001 # everyone
+/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @freddieyebra @mdragon @widal001 @capriiis @joshtonava # everyone
 
-/analytics/               @acouch @coilysiren @widal001
-/documentation/analytics/ @acouch @coilysiren @widal001
+/analytics/               @acouch @coilysiren @freddieyebra @widal001
+/documentation/analytics/ @acouch @coilysiren @freddieyebra @widal001
 
-/api/               @chouinar @mdragon
-/documentation/api/ @chouinar @mdragon
+/api/               @chouinar @freddieyebra @mdragon @joshtonava
+/documentation/api/ @chouinar @freddieyebra @mdragon @joshtonava
 
-/frontend/               @acouch @andycochran @btabaska @doug-s-nava
-/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava
+/frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra
+/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra
 
 /infra/               @acouch @coilysiren @mdragon
 /documentation/infra/ @acouch @coilysiren @mdragon

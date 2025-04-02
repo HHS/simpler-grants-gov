@@ -24,7 +24,10 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
-- name: User v1
+- name: User v1 - Internal Only
+- name: Application Alpha
+- name: Form Alpha
+- name: Competition Alpha
 servers: .
 paths:
   /health:
@@ -140,7 +143,7 @@ paths:
               schema: {}
           description: Found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Login
       description: '
 
@@ -174,7 +177,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Logout
       security:
       - ApiJwtAuth: []
@@ -195,7 +198,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Token Refresh
       security:
       - ApiJwtAuth: []
@@ -399,10 +402,80 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get
       security:
       - ApiJwtAuth: []
+  /alpha/applications/start:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStartResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+      tags:
+      - Application Alpha
+      summary: Create a new application for a competition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStartRequest'
+      security:
+      - ApiKeyAuth: []
+  /alpha/forms/{form_id}:
+    get:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Get
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -485,7 +558,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Search
       requestBody:
         content:
@@ -494,11 +567,11 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
-  /v1/users/{user_id}/saved-opportunities:
+  /alpha/applications/{application_id}:
     get:
       parameters:
       - in: path
-        name: user_id
+        name: application_id
         schema:
           type: string
         required: true
@@ -507,7 +580,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
+                $ref: '#/components/schemas/ApplicationGetResponse'
           description: Successful response
         '401':
           content:
@@ -522,10 +595,43 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
-      summary: User Get Saved Opportunities
+      - Application Alpha
+      summary: Get an application by ID
       security:
-      - ApiJwtAuth: []
+      - ApiKeyAuth: []
+  /alpha/competitions/{competition_id}:
+    get:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Competition Get
+      security:
+      - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
       - in: path
@@ -559,7 +665,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Save Opportunity
       requestBody:
         content:
@@ -602,7 +708,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Get Saved Searches
       requestBody:
         content:
@@ -611,21 +717,27 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
-  /v1/opportunities/{opportunity_id}/versions:
-    get:
+  /v1/users/{user_id}/saved-opportunities/list:
+    post:
       parameters:
       - in: path
-        name: opportunity_id
+        name: user_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OpportunityVersionsGetResponseV1'
+                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
           description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
         '401':
           content:
             application/json:
@@ -639,26 +751,15 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - Opportunity v1
-      summary: Opportunity Versions Get
-      description: '
-
-        __ALPHA VERSION__
-
-
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
-
-        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
-        for further details.
-
-        '
+      - User v1 - Internal Only
+      summary: User Get Saved Opportunities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -698,7 +799,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Update Saved Search
       requestBody:
         content:
@@ -739,10 +840,58 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Search
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/forms/{form_id}:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an application form response
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationFormUpdateRequest'
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -776,10 +925,47 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - User v1
+      - User v1 - Internal Only
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/application_form/{app_form_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: app_form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Get an application form by ID
+      security:
+      - ApiKeyAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -817,8 +1003,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/HealthcheckMetadata'
+          $ref: '#/components/schemas/HealthcheckMetadata'
         status_code:
           type: integer
           description: The HTTP status code
@@ -858,8 +1043,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         internal_request_id:
           type: string
           description: An internal tracking ID
@@ -896,8 +1080,7 @@ components:
         created_at:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/DateRange'
+          $ref: '#/components/schemas/DateRange'
     SortOrderExtractMetadataPaginationV1:
       type: object
       properties:
@@ -927,8 +1110,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
+            $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -960,13 +1142,11 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
+          $ref: '#/components/schemas/ExtractMetadataFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
+          $ref: '#/components/schemas/ExtractMetadataPaginationV1'
       required:
       - pagination
     SortOrder:
@@ -1008,8 +1188,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrder'
+            $ref: '#/components/schemas/SortOrder'
     ExtractMetadataResponse:
       type: object
       properties:
@@ -1043,8 +1222,7 @@ components:
           description: The pagination information for paginated endpoints
           type: &id001
           - object
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1055,8 +1233,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ExtractMetadataResponse'
+            $ref: '#/components/schemas/ExtractMetadataResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1065,7 +1242,11 @@ components:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        active:
+          type: boolean
     SortOrderAgencyPaginationV1:
       type: object
       properties:
@@ -1100,8 +1281,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
+            $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1122,20 +1302,20 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyFilterV1'
+          $ref: '#/components/schemas/AgencyFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyPaginationV1'
+          $ref: '#/components/schemas/AgencyPaginationV1'
       required:
       - pagination
     AgencyResponse:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
         agency_name:
           type: string
         agency_code:
@@ -1143,8 +1323,7 @@ components:
         top_level_agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyResponse'
+          $ref: '#/components/schemas/AgencyResponse'
         created_at:
           type: string
           format: date-time
@@ -1157,8 +1336,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1169,8 +1347,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/AgencyResponse'
+            $ref: '#/components/schemas/AgencyResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1438,68 +1615,55 @@ components:
         funding_instrument:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingInstrumentFilterV1'
+          $ref: '#/components/schemas/FundingInstrumentFilterV1'
         funding_category:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingCategoryFilterV1'
+          $ref: '#/components/schemas/FundingCategoryFilterV1'
         applicant_type:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicantTypeFilterV1'
+          $ref: '#/components/schemas/ApplicantTypeFilterV1'
         opportunity_status:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityStatusFilterV1'
+          $ref: '#/components/schemas/OpportunityStatusFilterV1'
         agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencySearchFilterV1'
+          $ref: '#/components/schemas/AgencySearchFilterV1'
         assistance_listing_number:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
+          $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
         is_cost_sharing:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/IsCostSharingFilterV1'
+          $ref: '#/components/schemas/IsCostSharingFilterV1'
         expected_number_of_awards:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
+          $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
         award_floor:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardFloorFilterV1'
+          $ref: '#/components/schemas/AwardFloorFilterV1'
         award_ceiling:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardCeilingFilterV1'
+          $ref: '#/components/schemas/AwardCeilingFilterV1'
         estimated_total_program_funding:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
+          $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
         post_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/PostDateFilterV1'
+          $ref: '#/components/schemas/PostDateFilterV1'
         close_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/CloseDateFilterV1'
+          $ref: '#/components/schemas/CloseDateFilterV1'
     ExperimentalV1:
       type: object
       properties:
@@ -1511,6 +1675,7 @@ components:
           - default
           - expanded
           - agency
+          - attachment_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
@@ -1553,8 +1718,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
+            $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1591,18 +1755,15 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+          $ref: '#/components/schemas/OpportunitySearchFilterV1'
         experimental:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExperimentalV1'
+          $ref: '#/components/schemas/ExperimentalV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityPaginationV1'
+          $ref: '#/components/schemas/OpportunityPaginationV1'
         format:
           default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
           - json
@@ -1929,13 +2090,11 @@ components:
           items:
             type: &id003
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: &id004
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2006,8 +2165,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -2024,8 +2182,7 @@ components:
           description: Counts of filter/facet values in the full response
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityFacetV1'
+          $ref: '#/components/schemas/OpportunityFacetV1'
     User:
       type: object
       properties:
@@ -2055,8 +2212,103 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/User'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationStartRequest:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - competition_id
+    ApplicationStartResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationStartResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationStartResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FormAlpha:
+      type: object
+      properties:
+        form_id:
+          type: string
+          format: uuid
+          description: The primary key ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+          example: ABC Project Form
+        form_json_schema:
+          type: object
+          description: The JSON Schema representation of the form
+          example:
+            type: object
+            title: Test form for testing
+            properties:
+              Title:
+                title: Title
+                type: string
+                minLength: 1
+                maxLength: 60
+              Description:
+                title: Description for application
+                type: string
+                minLength: 0
+                maxLength: 15
+              ApplicationNumber:
+                title: Application number
+                type: number
+                minLength: 1
+                maxLength: 120
+              Date:
+                title: 'Date of application '
+                type: string
+                format: date
+          additionalProperties: {}
+        form_ui_schema:
+          description: The UI Schema of the form for front-end rendering
+          example:
+          - type: field
+            definition: /properties/Title
+          - type: field
+            definition: /properties/Description
+          - type: field
+            definition: /properties/ApplicationNumber
+          - type: field
+            definition: /properties/Date
+    FormResponseAlpha:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/FormAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2153,12 +2405,10 @@ components:
           type: array
           items:
             type: *id003
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: *id004
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2179,8 +2429,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAttachmentV1'
+            $ref: '#/components/schemas/OpportunityAttachmentV1'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -2191,8 +2440,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
+          $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2207,10 +2455,31 @@ components:
         search_query:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
     UserSaveSearchResponse:
       type: object
       properties:
@@ -2219,58 +2488,99 @@ components:
           description: The message to return
           example: Success
         data:
-          example: null
+          type:
+          - object
+          $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
           example: 200
-    SavedOpportunitySummaryV1:
+    ApplicationFormGetResponseData:
       type: object
       properties:
-        post_date:
+        application_form_id:
           type: string
-          format: date
-          description: The date the opportunity was posted
-          example: '2024-01-01'
-        close_date:
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
           type: string
-          format: date
-          description: The date the opportunity will close
-          example: '2024-01-01'
-        is_forecast:
-          type: boolean
-          description: Whether the opportunity is forecasted
-          example: false
-    SavedOpportunityResponseV1:
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_response:
+          type: object
+          additionalProperties: {}
+    ApplicationGetResponseData:
       type: object
       properties:
-        opportunity_id:
-          type: integer
-          description: The ID of the saved opportunity
-          example: 1234
-        opportunity_title:
-          type:
-          - string
-          - 'null'
-          description: The title of the opportunity
-          example: my title
-        opportunity_status:
-          description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
-          enum:
-          - forecasted
-          - posted
-          - closed
-          - archived
-          type:
-          - string
-        summary:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_forms:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationFormGetResponseData'
+    ApplicationGetResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: &id007
+            - object
+            $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
-    UserSavedOpportunitiesResponse:
+          $ref: '#/components/schemas/ApplicationGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    CompetitionFormAlpha:
+      type: object
+      properties:
+        is_required:
+          type: boolean
+          description: Whether the form is required for all applications to the competition
+        form:
+          type:
+          - object
+          $ref: '#/components/schemas/FormAlpha'
+    CompetitionAlpha:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_id:
+          type: integer
+          description: The opportunity ID that the competition is associated with
+        competition_forms:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionFormAlpha'
+    CompetitionResponseAlpha:
       type: object
       properties:
         message:
@@ -2278,13 +2588,9 @@ components:
           description: The message to return
           example: Success
         data:
-          type: array
-          description: List of saved opportunities
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
+          type:
+          - object
+          $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2343,8 +2649,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
+            $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -2365,33 +2670,9 @@ components:
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
+          $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
       required:
       - pagination
-    SavedSearchResponse:
-      type: object
-      properties:
-        saved_search_id:
-          type: string
-          format: uuid
-          description: The ID of the saved search
-          example: 123e4567-e89b-12d3-a456-426614174000
-        name:
-          type: string
-          description: Name of the saved search
-          example: Grant opportunities in California
-        search_query:
-          description: The saved search query parameters
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
-        created_at:
-          type: string
-          format: date-time
-          description: When the search was saved
-          example: '2024-01-01T00:00:00Z'
     UserSavedSearchesResponse:
       type: object
       properties:
@@ -2405,29 +2686,116 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SavedSearchResponse'
+            $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
           example: 200
-    OpportunityVersionV1:
+    SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
-        opportunity:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          - updated_at
+          - opportunity_title
+          - close_date
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserGetSavedOpportunityPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    UserSavedOpportunitiesRequest:
+      type: object
+      properties:
+        pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityV1'
-        forecasts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpportunitySummaryV1'
-        non_forecasts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpportunitySummaryV1'
-    OpportunityVersionsGetResponseV1:
+          $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
+      required:
+      - pagination
+    SavedOpportunitySummaryV1:
+      type: object
+      properties:
+        post_date:
+          type: string
+          format: date
+          description: The date the opportunity was posted
+          example: '2024-01-01'
+        close_date:
+          type: string
+          format: date
+          description: The date the opportunity will close
+          example: '2024-01-01'
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted
+          example: false
+    SavedOpportunityResponseV1:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          description: The ID of the saved opportunity
+          example: 1234
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: my title
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
+        summary:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+    UserSavedOpportunitiesResponse:
       type: object
       properties:
         message:
@@ -2435,10 +2803,12 @@ components:
           description: The message to return
           example: Success
         data:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityVersionV1'
+          type: array
+          description: List of saved opportunities
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SavedOpportunityResponseV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2478,6 +2848,43 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationFormUpdateRequest:
+      type: object
+      properties:
+        application_response:
+          type: object
+          additionalProperties: {}
+      required:
+      - application_response
+    ApplicationFormUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationFormUpdateResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: *id007
+            $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserDeleteSavedOpportunityResponse:
       type: object
       properties:
@@ -2487,6 +2894,28 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormGetResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: *id007
+            $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code

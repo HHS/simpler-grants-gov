@@ -1,6 +1,8 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
+import { ValidSearchQueryParamData } from "src/types/search/searchRequestTypes";
+import { queryParamsToQueryString } from "src/utils/generalUtils";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -10,7 +12,10 @@ export function useSearchParamUpdater() {
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
 
-  // note that providing an empty string as `queryParamValue` will remove the param
+  // note that providing an empty string as `queryParamValue` will remove the param.
+  // also note that "query" is the name of a query param, but it being handled separately
+  // in this implementation. To set a new keyword query in the url without touching other params,
+  // you can use a call such as `updateQueryParams("", "query", queryTerm)`.
   const updateQueryParams = (
     // The parameter value that is not the query term. Query term is treated
     // separately because updates to it are captured, ie if a user updates the
@@ -49,9 +54,20 @@ export function useSearchParamUpdater() {
     router.push(newPath, { scroll });
   };
 
+  const replaceQueryParams = (params: ValidSearchQueryParamData) => {
+    router.push(`${pathname}${queryParamsToQueryString(params)}`);
+  };
+
+  const removeQueryParam = (paramKey: string) => {
+    params.delete(paramKey);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return {
     searchParams,
     updateQueryParams,
+    replaceQueryParams,
+    removeQueryParam,
   };
 }
 

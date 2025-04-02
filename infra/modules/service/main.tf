@@ -19,8 +19,18 @@ data "external" "deploy_github_sha" {
 }
 
 locals {
+  # The image is via https://docs.newrelic.com/install/aws-logs/?service=ECS&forward_ECS=sidecar_firelens
+  # 533243300146 is an AWS account belonging to New Relic.
+  # Use the following command to get a list of available versions:
+  # aws ecr list-images --repository-name newrelic/logging-firelens-fluentbit --registry-id 533243300146 --query "imageIds[].imageTag" --output text
+  new_relic_fluent_bit_repo_arn = "arn:aws:ecr:${data.aws_region.current.name}:533243300146:repository/newrelic/logging-firelens-fluentbit"
+  new_relic_fluent_bit_version  = "533243300146.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/newrelic/logging-firelens-fluentbit:2.3.0"
+  new_relic_fluent_bit_cpu      = 256
+  new_relic_fluent_bit_memory   = 1024
+
   alb_name                = var.service_name
   cluster_name            = var.service_name
+  container_name          = var.service_name
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
@@ -37,7 +47,8 @@ locals {
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
-    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value },
+    { name : "IMAGE_TAG", value : var.image_tag },
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
@@ -77,11 +88,12 @@ locals {
 #-------------------
 
 resource "aws_ecs_service" "app" {
-  name            = var.service_name
-  cluster         = aws_ecs_cluster.cluster.arn
-  launch_type     = "FARGATE"
-  task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = var.desired_instance_count
+  name                   = var.service_name
+  cluster                = aws_ecs_cluster.cluster.arn
+  launch_type            = "FARGATE"
+  task_definition        = aws_ecs_task_definition.app.arn
+  desired_count          = var.desired_instance_count
+  enable_execute_command = var.enable_command_execution ? true : null
 
   # Allow changes to the desired_count without differences in terraform plan.
   # This allows autoscaling to manage the desired count for us.
@@ -112,7 +124,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name                   = var.service_name,
+      name                   = local.container_name,
       image                  = local.image_url,
       memory                 = var.memory,
       cpu                    = var.cpu,
@@ -134,27 +146,68 @@ resource "aws_ecs_task_definition" "app" {
       portMappings = [
         {
           containerPort = var.container_port,
+          hostPort      = var.container_port,
+          protocol      = "tcp"
         }
       ],
       linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
+          add  = []
           drop = ["ALL"]
         },
         initProcessEnabled = true
       } : null,
       logConfiguration = {
+        logDriver = "awsfirelens",
+        options = {
+          Name = "newrelic",
+        },
+        secretOptions = [{
+          name      = "apiKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
+        }]
+      }
+      mountPoints    = []
+      systemControls = []
+      volumesFrom    = []
+    },
+    {
+      name                   = "${local.container_name}-fluentbit"
+      image                  = local.new_relic_fluent_bit_version,
+      memory                 = local.new_relic_fluent_bit_memory,
+      cpu                    = local.new_relic_fluent_bit_cpu,
+      networkMode            = "awsvpc",
+      essential              = true,
+      readonlyRootFilesystem = false,
+      firelensConfiguration = {
+        type = "fluentbit",
+        options = {
+          enable-ecs-log-metadata = "true"
+        }
+      },
+      logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.service_logs.name,
+          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
-    }
+      secrets = [
+        {
+          name      = "apiKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
+        }
+      ]
+    },
   ])
 
-  cpu    = var.cpu
-  memory = var.memory
+  # Take the larger of the two values for CPU and Memory and multiply by 2
+  # We need to do this because the task definition requires an aggregate value for CPU and Memory.
+  # We can't simply add them together, because the resulting value needs to be on this list
+  # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
+  cpu    = var.cpu > local.new_relic_fluent_bit_cpu ? var.cpu * 2 : local.new_relic_fluent_bit_cpu * 2
+  memory = var.memory > local.new_relic_fluent_bit_memory ? var.memory * 2 : local.new_relic_fluent_bit_memory * 2
 
   requires_compatibilities = ["FARGATE"]
 
@@ -162,6 +215,8 @@ resource "aws_ecs_task_definition" "app" {
   network_mode = "awsvpc"
 
   depends_on = [
+    aws_cloudwatch_log_group.service_logs,
+    aws_cloudwatch_log_group.fluentbit,
     aws_iam_role_policy.task_executor,
     aws_iam_role_policy_attachment.extra_policies,
   ]

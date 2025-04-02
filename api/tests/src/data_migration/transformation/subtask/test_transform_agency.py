@@ -11,6 +11,7 @@ from src.data_migration.transformation.subtask.transform_agency import (
     TgroupAgency,
     TransformAgency,
     TransformAgencyHierarchy,
+    ValidateAgencyData,
     apply_updates,
     transform_agency_download_file_types,
     transform_agency_notify,
@@ -31,13 +32,13 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
 
     def test_transform_records(self, db_session, transform_agency_hierarchy):
         # Create agencies with varying top-level agency codes
-        [
-            AgencyFactory.create(agency_code="DHS"),
-            AgencyFactory.create(agency_code="DHS-ICE"),
-            AgencyFactory.create(agency_code="DHS--ICE"),
-            AgencyFactory.create(agency_code="DHS-ICE-123"),
-            AgencyFactory.create(agency_code="ABC-ICE"),
-        ]
+        parent_agency = AgencyFactory.create(agency_code="DHS")
+        AgencyFactory.create(agency_code="DHS-ICE")
+        AgencyFactory.create(agency_code="DHS--ICE")
+        AgencyFactory.create(agency_code="DHS-ICE-123")
+        AgencyFactory.create(agency_code="ABC-ICE")
+
+        AgencyFactory.create(agency_code="SOMETHING-123-456", top_level_agency=parent_agency)
 
         # Run the transformation
         transform_agency_hierarchy.transform_records()
@@ -48,6 +49,9 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         agency3 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE-123").one_or_none()
         agency4 = db_session.query(Agency).filter(Agency.agency_code == "ABC-ICE").one_or_none()
         agency5 = db_session.query(Agency).filter(Agency.agency_code == "DHS--ICE").one_or_none()
+        agency6 = (
+            db_session.query(Agency).filter(Agency.agency_code == "SOMETHING-123-456").one_or_none()
+        )
 
         # Verify that the top-level agencies are set correctly
         assert agency1.top_level_agency_id is None
@@ -55,10 +59,38 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         assert agency3.top_level_agency_id == agency1.agency_id
         assert agency4.top_level_agency_id is None
         assert agency5.top_level_agency_id == agency1.agency_id
+        assert agency6.top_level_agency_id is None  # Verify this was unset
 
     def test_get_top_level_agency_code(self, transform_agency_hierarchy):
         assert transform_agency_hierarchy.get_top_level_agency_code("DHS-ICE") == "DHS"
         assert transform_agency_hierarchy.get_top_level_agency_code("DHS") is None
+
+    def test_transform_records_test_agencies(self, db_session, transform_agency_hierarchy):
+        # Note that our configuration has IVV as a test agency
+
+        AgencyFactory.create(agency_code="IVV", is_test_agency=False)
+        AgencyFactory.create(agency_code="IVV-123", is_test_agency=False)
+        AgencyFactory.create(
+            agency_code="IVVxyz", is_test_agency=False
+        )  # despite being a different top-level, this also gets caught
+        AgencyFactory.create(agency_code="NOTTEST", is_test_agency=False)
+        AgencyFactory.create(agency_code="NOTTEST-123", is_test_agency=True)
+
+        # Run the transformation
+        transform_agency_hierarchy.transform_records()
+
+        # Fetch the agencies again to verify the changes
+        agency1 = db_session.query(Agency).filter(Agency.agency_code == "IVV").one_or_none()
+        agency2 = db_session.query(Agency).filter(Agency.agency_code == "IVV-123").one_or_none()
+        agency3 = db_session.query(Agency).filter(Agency.agency_code == "IVVxyz").one_or_none()
+        agency4 = db_session.query(Agency).filter(Agency.agency_code == "NOTTEST").one_or_none()
+        agency5 = db_session.query(Agency).filter(Agency.agency_code == "NOTTEST-123").one_or_none()
+
+        assert agency1.is_test_agency is True
+        assert agency2.is_test_agency is True
+        assert agency3.is_test_agency is False
+        assert agency4.is_test_agency is False
+        assert agency5.is_test_agency is False
 
 
 class TestTransformAgency(BaseTransformTestClass):
@@ -76,7 +108,8 @@ class TestTransformAgency(BaseTransformTestClass):
             # None passed in here will make it not appear at all in the tgroups rows
             source_values={"ldapGp": None, "description": None, "label": None},
         )
-        insert_test_agency = setup_agency("GDIT", create_existing=False)
+        insert_test_agency_top = setup_agency("GDIT", create_existing=False)
+        insert_test_agency = setup_agency("GDIT-xyz-123", create_existing=False)
 
         # Already processed fields are ones that were handled on a prior run and won't be updated
         # during this specific run
@@ -84,7 +117,8 @@ class TestTransformAgency(BaseTransformTestClass):
         update_agency2 = setup_agency(
             "UPDATE-AGENCY-2",
             create_existing=True,
-            deleted_fields={"AgencyContactEMail2", "ldapGp", "description"},
+            deleted_fields={"AgencyContactEMail2", "ldapGp", "description", "SAMValidation"},
+            source_values={"SAMValidation": "1"},
         )
         update_agency3 = setup_agency(
             "UPDATE-AGENCY-3",
@@ -125,7 +159,8 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, insert_agency2)
         validate_agency(db_session, insert_agency3)
         validate_agency(db_session, insert_agency4)
-        validate_agency(db_session, insert_test_agency, is_test_agency=True)
+        validate_agency(db_session, insert_test_agency_top, is_test_agency=True)
+        validate_agency(db_session, insert_test_agency, is_test_agency=False)
 
         validate_agency(db_session, update_agency1)
         validate_agency(db_session, update_agency2, deleted_fields={"ldapGp", "description"})
@@ -151,8 +186,8 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, update_error2, expect_values_to_match=False)
 
         metrics = transform_agency.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 12
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 13
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 3
 
@@ -161,8 +196,8 @@ class TestTransformAgency(BaseTransformTestClass):
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_agency.run_subtask()
 
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 15
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 16
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 6
 
@@ -238,6 +273,103 @@ class TestTransformAgency(BaseTransformTestClass):
             )
 
         validate_agency(db_session, insert_that_will_fail, expect_in_db=False)
+
+
+class TestValidateAgencyData(BaseTransformTestClass):
+
+    @pytest.fixture()
+    def validate_agency_data(self, transform_oracle_data_task, truncate_agencies):
+        return ValidateAgencyData(transform_oracle_data_task)
+
+    def test_validate_agency_data_task(self, db_session, validate_agency_data, caplog):
+        # Setup a few agencies without any issues
+        top_level1 = AgencyFactory.create(agency_code="ABC")
+        AgencyFactory.create(agency_code="ABC-123", top_level_agency=top_level1)
+
+        top_level2 = AgencyFactory.create(agency_code="XYZ")
+
+        top_level3 = AgencyFactory.create(agency_code="MNOP")
+        AgencyFactory.create(agency_code="MNOP-222", top_level_agency=top_level3)
+        AgencyFactory.create(agency_code="MNOP-333", top_level_agency=top_level3)
+        AgencyFactory.create(agency_code="MNOP-444", top_level_agency=top_level3)
+
+        # Agencies with a dash, but no parent
+        orphaned_child1 = AgencyFactory.create(agency_code="HELLO-THERE")
+        orphaned_child2 = AgencyFactory.create(agency_code="some-sort-of-agency")
+        orphaned_child3 = AgencyFactory.create(
+            agency_code="ABC-999"
+        )  # ABC is a top-level created above, but it's not connected here
+
+        # Agencies with a top-level but parent agency code isn't exactly the bit before the first dash in the child
+        unexpected_top_level1 = AgencyFactory.create(
+            agency_code="something-ABC", top_level_agency=top_level1
+        )
+        unexpected_top_level2 = AgencyFactory.create(
+            agency_code="123-XYZ-456", top_level_agency=top_level2
+        )
+        unexpected_top_level3 = AgencyFactory.create(
+            agency_code="ZYX-XYZ", top_level_agency=top_level2
+        )
+        unexpected_top_level4 = AgencyFactory.create(
+            agency_code="MNOPXYZ-XYZ", top_level_agency=top_level3
+        )
+
+        # Agencies which look like a child agency shouldn't have a parent
+        # Note that these will also trigger the parent-prefix issue
+        unexpected_agency_with_parent1 = AgencyFactory.create(
+            agency_code="BOB", top_level_agency=top_level1
+        )
+        unexpected_agency_with_parent2 = AgencyFactory.create(
+            agency_code="FRED", top_level_agency=top_level2
+        )
+        unexpected_agency_with_parent3 = AgencyFactory.create(
+            agency_code="JOE", top_level_agency=top_level3
+        )
+
+        validate_agency_data.run_subtask()
+
+        # Pull agencies that hit each scenario out of the logs
+        orphaned_child_agencies = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Likely child agency is orphaned and has no parent"
+        ]
+        agencies_with_unexpected_top_level = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Agency has unexpected top level agency"
+        ]
+        parent_with_parent_agencies = [
+            record.agency_code
+            for record in caplog.records
+            if record.message == "Agency has a parent, but is not a child agency"
+        ]
+
+        assert set(orphaned_child_agencies) == {
+            orphaned_child1.agency_code,
+            orphaned_child2.agency_code,
+            orphaned_child3.agency_code,
+        }
+        assert set(agencies_with_unexpected_top_level) == {
+            unexpected_top_level1.agency_code,
+            unexpected_top_level2.agency_code,
+            unexpected_top_level3.agency_code,
+            unexpected_top_level4.agency_code,
+            unexpected_agency_with_parent1.agency_code,
+            unexpected_agency_with_parent2.agency_code,
+            unexpected_agency_with_parent3.agency_code,
+        }
+        assert set(parent_with_parent_agencies) == {
+            unexpected_agency_with_parent1.agency_code,
+            unexpected_agency_with_parent2.agency_code,
+            unexpected_agency_with_parent3.agency_code,
+        }
+
+        metrics = validate_agency_data.metrics
+        assert metrics[ValidateAgencyData.Metrics.AGENCY_VALIDATED_COUNT] == 17
+        assert metrics[ValidateAgencyData.Metrics.ORPHANED_CHILD_AGENCY_COUNT] == 3
+        assert metrics[ValidateAgencyData.Metrics.UNEXPECTED_TOP_LEVEL_AGENCY_COUNT] == 7
+        assert metrics[ValidateAgencyData.Metrics.PARENT_WITH_PARENT_AGENCY_COUNT] == 3
 
 
 @pytest.mark.parametrize(

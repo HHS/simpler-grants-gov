@@ -6,6 +6,12 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
+const getSessionMock = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 // test without feature flag functionality
 jest.mock("src/hoc/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),
@@ -67,7 +73,7 @@ const fetchMock = jest.fn().mockResolvedValue({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TypedSearchPageComponent = Search as (props: any) => React.JSX.Element;
 
-describe("Search Route", () => {
+describe("Search Page", () => {
   let originalFetch: typeof global.fetch;
   beforeAll(() => {
     originalFetch = global.fetch;

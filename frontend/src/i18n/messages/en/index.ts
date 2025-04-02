@@ -32,6 +32,25 @@ export const messages = {
     page_title: "Opportunity Listing",
     meta_description:
       "Read detailed information about this funding opportunity.",
+    save_button: {
+      save: "Save",
+      saved: "Saved",
+      loading: "Updating",
+    },
+    save_message: {
+      save: "This opportunity was saved to <linkSavedGrants>Saved grants</linkSavedGrants>.",
+      unsave: "This opportunity was unsaved.",
+      error_save: "Error saving. Please try again.",
+      error_unsave: "Error undoing save. Please try again.",
+    },
+    save_login_modal: {
+      title: "Sign in to save this opportunity",
+      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
+      description:
+        "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+      button: "Sign in with Login.gov",
+      close: "Cancel",
+    },
     intro: {
       agency: "Agency: ",
       assistance_listings: "Assistance Listings: ",
@@ -289,146 +308,6 @@ export const messages = {
       ],
     },
   },
-  Process: {
-    page_title: "Process | Simpler.Grants.gov",
-    intro: {
-      title: "Our open process",
-      content:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
-      boxes: [
-        {
-          title: "Transparent",
-          content:
-            "We’re building a simpler Grants.gov in the open. You can see our plans and our progress. And you can join us in shaping the vision and details of the features we build.",
-        },
-        {
-          title: "Iterative",
-          content:
-            "We’re releasing features early and often through a continuous cycle of planning, implementation, and assessment. Each cycle will incrementally improve the product, as we incorporate your feedback from the prior iteration.",
-        },
-        {
-          title: "Agile",
-          content:
-            "We’re building a simpler Grants.gov <italics>with you</italics>, not <italics>for you</italics>. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements.",
-        },
-      ],
-    },
-    progress: {
-      title: "Our progress so far",
-      list: [
-        {
-          title: "RESTful API",
-          content:
-            "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
-        },
-        {
-          title: "Code Challenge pilot",
-          content:
-            "We’re excited to announce the successful pilot of the Collaborative Code & Design Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.<p><linkWikiInvolved>Get involved in our open-source community</linkWikiInvolved></p>",
-        },
-        {
-          title: "Search interface launch",
-          content:
-            "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.<p><linkSearch>Try the new simpler search</linkSearch></p>",
-        },
-
-        {
-          title: "Co-Design Group recruitment",
-          content:
-            "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
-        },
-        {
-          title: "Opportunity Listing",
-          content:
-            "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
-        },
-        {
-          title: "Search UI usability testing",
-          content:
-            "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
-        },
-      ],
-    },
-    next: {
-      title: "What's happening next",
-      link: "View all of our deliverables on GitHub",
-      list: [
-        {
-          title: "Authenticate via Login.gov",
-          content:
-            "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
-        },
-        {
-          title:
-            "Full support for Opportunity Listing attachments (NOFOs/downloads)",
-          content:
-            "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
-        },
-        {
-          title: "Search & Opportunity Listing improvements",
-          content:
-            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
-        },
-        {
-          title: "Simpler application workflow prototype",
-          content:
-            "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
-        },
-      ],
-    },
-    milestones: {
-      tag: "The high-level roadmap",
-      high_level_roadmap_items: {
-        find: {
-          title: "Find",
-          content:
-            "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>",
-        },
-        advanced_reporting: {
-          title: "Advanced reporting",
-          content:
-            "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>",
-        },
-        apply: {
-          title: "Apply",
-          content:
-            "<p>Streamline the application process to make it easier for all applicants to apply for funding opportunities.</p>",
-        },
-      },
-      roadmap_1: "Find",
-      title_1: "Milestone 1",
-      name_1:
-        "Laying the foundation with a modern Application Programming Interface (API)",
-      paragraph_1:
-        "To make it easier to discover funding opportunities, we’re starting with a new modern API to make grants data more accessible. Our API‑first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications.",
-      sub_title_1: "What’s an API?",
-      sub_paragraph_1:
-        "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
-      sub_title_2: "Are you interested in the tech?",
-      sub_paragraph_2:
-        "We’re building a RESTful API. And we’re starting with an initial endpoint that allows API users to retrieve basic information about each funding opportunity.",
-      cta_1: "View the API milestone on GitHub",
-      roadmap_2: "Find",
-      title_2: "Milestone 2",
-      name_2: "A new search interface accessible to everyone",
-      paragraph_2:
-        "Once our new API is in place, we’ll begin focusing on how applicants most commonly access grants data. Our first user-facing milestone will be a simple search interface that makes data from our modern API accessible to anyone who wants to try out new ways to search for funding opportunities.",
-      sub_title_3: "Can’t wait to try out the new search?",
-      sub_paragraph_3:
-        "Search will be the first feature on Simpler.Grants.gov that you’ll be able to test. It’ll be quite basic at first, and you’ll need to continue using <LinkToGrants>www.grants.gov</LinkToGrants> as we iterate. But your feedback will inform what happens next.",
-      sub_paragraph_4:
-        "Be sure to <LinkToNewsletter>sign up for product updates</LinkToNewsletter> so you know when the new search is available.",
-      cta_2: "View the search milestone on GitHub",
-    },
-    involved: {
-      title_1: "Do you have data expertise?",
-      paragraph_1:
-        "We're spending time up-front collaborating with stakeholders on API design and data standards. If you have subject matter expertise with grants data, we want to talk. Contact us at <strong><email>simpler@grants.gov</email></strong>.",
-      title_2: "Are you code-savvy?",
-      paragraph_2:
-        "If you’re interested in contributing to the open-source project or exploring the details of exactly what we’re building, check out the project at <strong><github>https://github.com/HHS/simpler-grants-gov</github></strong> or join our community at <strong><wiki>wiki.simpler.hhs.gov</wiki></strong>.",
-    },
-  },
   Subscribe: {
     page_title: "Subscribe | Simpler.Grants.gov",
     meta_description:
@@ -465,9 +344,6 @@ export const messages = {
       "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph_1:
       "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
-    heading: "Learn more",
-    paragraph_2:
-      "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -478,9 +354,6 @@ export const messages = {
       "You will no longer receive project updates from Simpler.Grants.gov. ",
     paragraph_1: "Did you unsubscribe by accident? Sign up again.",
     button_resub: "Re-subscribe",
-    heading: "Learn more",
-    paragraph_2:
-      "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -503,18 +376,22 @@ export const messages = {
     },
   },
   Header: {
-    nav_link_home: "Home",
-    nav_link_process: "Process",
-    nav_link_research: "Research",
-    nav_link_subscribe: "Subscribe",
-    nav_menu_toggle: "Menu",
-    nav_link_search: "Search",
-    nav_link_login: "Sign in",
-    nav_link_logout: "Sign out",
-    nav_link_saved_grants: "Saved grants",
+    navLinks: {
+      home: "Home",
+      roadmap: "Roadmap",
+      research: "Research",
+      subscribe: "Subscribe",
+      menuToggle: "Menu",
+      search: "Search",
+      login: "Sign in",
+      logout: "Sign out",
+      savedGrants: "Saved opportunities",
+      savedSearches: "Saved search queries",
+      workspace: "Workspace",
+    },
     title: "Simpler.Grants.gov",
   },
-  LoginButtonModal: {
+  HeaderLoginModal: {
     title: "Sign in to Simpler.Grants.gov",
     help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
     description:
@@ -590,6 +467,7 @@ export const messages = {
     callToAction: {
       title: "Search funding opportunities",
     },
+    opportunitySaved: "Saved",
     opportunityStatus: {
       title: "Opportunity status",
       label: {
@@ -603,10 +481,13 @@ export const messages = {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListFetch: {
-      title: "Your search did not return any results.",
-      body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
-      paginationError:
-        "You're trying to access opportunity results that are beyond the last page of data.",
+      noResultsTitle: "Your search did not return any results.",
+      noResultsBody: [
+        "Check any terms you've, entered for typos",
+        "Try different keywords",
+        "Make sure you've selected the right statuses",
+        "Try resetting filters or selecting fewer options",
+      ],
     },
     resultsListItem: {
       status: {
@@ -660,6 +541,44 @@ export const messages = {
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
     },
+    saveSearch: {
+      heading: "Current search query",
+      defaultSelect: "Select saved query",
+      fetchSavedError: "Error loading saved query. Try again later.",
+      help: {
+        unauthenticated:
+          "Use this set of search terms and filters often? Sign in to save this query to your account and use it again later. You can also copy and share the link to this query without signing in.",
+        noSavedQueries:
+          "Save this frequently used search query to your account. Apply it again later to save time when searching for opportunities.",
+        authenticated:
+          "Manage your saved search queries in your <strong>Workspace</strong>.",
+        general: "About saved searches",
+      },
+      modal: {
+        title: "Save search query",
+        description:
+          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
+        inputLabel: "Query name",
+        saveText: "Save",
+        cancelText: "Cancel",
+        closeText: "Close",
+        emptyNameError: "Please name this query.",
+        successTitle: "Success!",
+        successDescription:
+          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+        apiError: "Error loading saved query. Try again later.",
+      },
+      copySearch: {
+        copy: {
+          unauthenticated: "Copy this search query",
+          authenticated: "Copy",
+        },
+        copying: "Copying",
+        copied: "Copied!",
+        snackbar:
+          "This search query was copied to your clipboard. Paste it as a link anywhere.",
+      },
+    },
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -667,10 +586,148 @@ export const messages = {
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
+  SavedSearches: {
+    heading: "Saved search queries",
+    noSavedCTA:
+      "You don’t have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+    searchButton: "Start a new search",
+    title: "Saved Search Queries | Simpler.Grants.gov",
+    error:
+      "We encountered an issue while loading your saved search queries. If this keeps happening, please email simpler@grants.gov for help.",
+    edit: "Edit name",
+    delete: "Delete",
+    // keys need to match exactly against keys defined in validSearchQueryParamKeys
+    parameterNames: {
+      status: "Status",
+      fundingInstrument: "Funding instrument",
+      eligibility: "Eligibility",
+      agency: "Agency",
+      category: "Category",
+      query: "Search terms",
+      page: "Page",
+      sortby: "Sort by",
+    },
+    editModal: {
+      title: "Edit name of search query",
+      description:
+        "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
+      inputLabel: "Query name (required)",
+      saveText: "Save",
+      cancelText: "Cancel",
+      closeText: "Close",
+      emptyNameError: "Please name this query.",
+      successTitle: "Query successfully updated",
+      apiError: "Error updating saved query. Try again later.",
+    },
+    deleteModal: {
+      title: "Delete saved query?",
+      deleteText: "Yes, delete",
+      cancelText: "Cancel",
+      apiError: "Error deleting saved query. Try again later.",
+    },
+  },
   SavedGrants: {
     heading: "Saved grants",
-    noSavedCTA: `To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page`,
+    noSavedCTA:
+      "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
     title: "Saved Grants | Simpler.Grants.gov",
+  },
+  Roadmap: {
+    pageTitle: "Roadmap | Simpler.Grants.gov",
+    pageHeaderTitle: "Product roadmap",
+    pageHeaderParagraph:
+      "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
+    sections: {
+      progress: {
+        title: "What we're working on right now",
+        contentItems: [
+          [
+            {
+              title: "Simpler application workflow prototype",
+              content:
+                "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+            },
+            {
+              title:
+                "Full support for opportunity page attachments (NOFOs/downloads)",
+              content:
+                "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+            },
+          ],
+          [
+            {
+              title: "Authentication via Login.gov",
+              content:
+                "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+            },
+            {
+              title: "Search & opportunity page improvements",
+              content:
+                "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+            },
+          ],
+        ],
+        link: "View all deliverables on GitHub",
+      },
+      milestones: {
+        title: "Recent milestones reached",
+        contentTitle: "Late 2024",
+        contentItems: [
+          {
+            title: "RESTful API launch",
+            content:
+              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+          },
+          {
+            title: "Coding Challenge pilot",
+            content:
+              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+          },
+          {
+            title: "Search UI usability test",
+            content:
+              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+          },
+          {
+            title: "Opportunity page launch",
+            content:
+              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+          },
+          {
+            title: "First Co-Design Group recruitment",
+            content:
+              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
+          },
+          {
+            title: "Search interface launch",
+            content:
+              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+          },
+        ],
+      },
+      process: {
+        title: "How we work",
+        sectionSummary:
+          "With each iteration of Simpler.Grants.gov, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+        contentItems: [
+          {
+            title: "Transparent",
+            content:
+              "We’re building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
+          },
+          {
+            title: "Agile",
+            content:
+              "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+        ],
+      },
+    },
   },
 };

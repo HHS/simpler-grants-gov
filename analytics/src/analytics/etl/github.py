@@ -9,6 +9,7 @@ from pathlib import Path
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 
+from analytics.datasets.acceptance_criteria import AcceptanceCriteriaDataset
 from analytics.datasets.issues import (
     GitHubIssues,
     IssueMetadata,
@@ -108,94 +109,138 @@ class GitHubProjectETL:
         """Run the ETL pipeline."""
         self.extract()
         self.transform()
-        self.load()
+        self.write_to_file()
 
     def extract(self) -> None:
         """Run the extract step of the ETL pipeline."""
         temp_dir = Path(self.config.temp_dir)
 
         # Export the roadmap data
-        roadmap_file = str(temp_dir / "roadmap-data.json")
+        roadmap_file_path = str(temp_dir / "roadmap-data.json")
         roadmap = self.config.roadmap_project
-        self._export_roadmap_data(
+        self._export_roadmap_data_to_file(
             roadmap=roadmap,
-            output_file=roadmap_file,
+            output_file_path=roadmap_file_path,
         )
 
         # Export sprint data for each GitHub project that the scrum teams use
         # to manage their sprints, e.g. HHS/17 and HHS/13
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
-            project = sprint_board.project_number
-            sprint_file = str(temp_dir / f"sprint-data-{project}.json")
-            # Export data
-            self._export_sprint_data(
+            n = sprint_board.project_number
+            sprint_file_path = str(temp_dir / f"sprint-data-{n}.json")
+            self._export_sprint_data_to_file(
                 sprint_board=sprint_board,
-                output_file=sprint_file,
+                output_file_path=sprint_file_path,
             )
             # Add to file list
             input_files.append(
                 InputFiles(
-                    roadmap=roadmap_file,
-                    sprint=sprint_file,
+                    roadmap=roadmap_file_path,
+                    sprint=sprint_file_path,
                 ),
             )
         # store transient files for re-use during the transform step
         self._transient_files = input_files
 
     def transform(self) -> None:
-        """Run the transformation step of the ETL pipeline."""
+        """Transform exported data and write to file."""
         # Load sprint and roadmap data
         issues = []
         for f in self._transient_files:
             issues.extend(run_transformation_pipeline(files=f))
         self.dataset = GitHubIssues(pd.DataFrame(data=issues))
 
-    def load(self) -> None:
-        """Run the load step of the ETL pipeline."""
+    def write_to_file(self) -> None:
+        """Dump dataset to file."""
         self.dataset.to_json(self.config.output_file)
 
-    def _export_roadmap_data(
+    def _export_roadmap_data_to_file(
         self,
         roadmap: RoadmapConfig,
-        output_file: str,
+        output_file_path: str,
     ) -> None:
-        """Export data from the roadmap project."""
-        # Log the export step
+
         logger.info(
             "Exporting roadmap data from %s/%d",
             roadmap.owner,
             roadmap.project_number,
         )
-        # Export the data
-        github.export_roadmap_data(
+        github.export_roadmap_data_to_file(
             client=self.client,
             owner=roadmap.owner,
             project=roadmap.project_number,
             quad_field=roadmap.quad_field,
             pillar_field=roadmap.pillar_field,
-            output_file=output_file,
+            output_file=output_file_path,
         )
 
-    def _export_sprint_data(
+    def _export_sprint_data_to_file(
         self,
         sprint_board: SprintBoardConfig,
-        output_file: str,
+        output_file_path: str,
     ) -> None:
-        """Export data from a sprint board project."""
+
         logger.info(
-            "Exporting sprint data from %s/%s",
+            "Exporting sprint data from %s/%d",
             sprint_board.owner,
             sprint_board.project_number,
         )
-        github.export_sprint_data(
+        github.export_sprint_data_to_file(
             client=self.client,
             owner=sprint_board.owner,
             project=sprint_board.project_number,
             sprint_field=sprint_board.sprint_field,
             points_field=sprint_board.points_field,
-            output_file=output_file,
+            output_file=output_file_path,
         )
+
+    def extract_and_transform_in_memory(
+        self,
+    ) -> tuple[list[dict], AcceptanceCriteriaDataset | None]:
+        """Export from GitHub and transform to JSON."""
+        # export roadmap data
+        roadmap = self.config.roadmap_project
+        roadmap_json = github.export_roadmap_data_to_object(
+            client=self.client,
+            owner=roadmap.owner,
+            project=roadmap.project_number,
+            quad_field=roadmap.quad_field,
+            pillar_field=roadmap.pillar_field,
+        )
+
+        # extract acceptance criteria from roadmap json
+        deliverable_json = [d for d in roadmap_json if d["issue_type"] == "Deliverable"]
+        acceptance_criteria = (
+            AcceptanceCriteriaDataset.load_from_json_object(json_data=deliverable_json)
+            if deliverable_json
+            else None
+        )
+
+        # export sprint data
+        issues = []
+        for sprint_board in self.config.sprint_projects:
+            sprint_json = github.export_sprint_data_to_object(
+                client=self.client,
+                owner=sprint_board.owner,
+                project=sprint_board.project_number,
+                sprint_field=sprint_board.sprint_field,
+                points_field=sprint_board.points_field,
+            )
+
+            # flatten sprint and roadmap data into issue data
+            issues.extend(
+                run_transformation_pipeline_on_json(
+                    roadmap=roadmap_json,
+                    sprint=sprint_json,
+                ),
+            )
+
+        # hydrate issue dataset
+        dataset = GitHubIssues(pd.DataFrame(data=issues))
+
+        # dump issue dataset to JSON
+        return dataset.to_dict(), acceptance_criteria
 
 
 # ===============================================================
@@ -218,6 +263,19 @@ def run_transformation_pipeline(files: InputFiles) -> list[dict]:
     return flatten_issue_data(lookup)
 
 
+def run_transformation_pipeline_on_json(
+    roadmap: list[dict],
+    sprint: list[dict],
+) -> list[dict]:
+    """Apply transformations."""
+    # Populate a lookup table with this data
+    lookup: dict = {}
+    lookup = populate_issue_lookup_table(lookup, roadmap)
+    lookup = populate_issue_lookup_table(lookup, sprint)
+    # Flatten and write issue level data to output file
+    return flatten_issue_data(lookup)
+
+
 def populate_issue_lookup_table(
     lookup: dict[str, IssueMetadata],
     issues: list[dict],
@@ -227,7 +285,11 @@ def populate_issue_lookup_table(
         try:
             entry = IssueMetadata.model_validate(issue)
         except ValidationError as err:
-            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
+            logger.info(
+                "Skipping issue %d: %s.",
+                i,
+                err,
+            )
             logger.debug("Error: %s", err)
             continue
         lookup[entry.issue_url] = entry

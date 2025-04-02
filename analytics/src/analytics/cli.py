@@ -4,6 +4,7 @@
 
 import logging
 import logging.config
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated
@@ -12,7 +13,6 @@ import typer
 from sqlalchemy import text
 
 from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb
@@ -25,6 +25,7 @@ from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
 
 logger = logging.getLogger(__name__)
+init_logging(__package__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -53,7 +54,6 @@ app.add_typer(etl_app, name="etl", help="Transform and load local file")
 def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
-    init_logging(__package__)
     init_app(logging.root)
 
 
@@ -83,12 +83,20 @@ def export_github_data(
     config = load_config(config_path, GitHubProjectConfig)
     config.temp_dir = temp_dir
     config.output_file = output_file
+
     # Run ETL pipeline
+    logger.info("running extract workflow")
+    start_time = time.perf_counter()
     GitHubProjectETL(config).run()
+    end_time = time.perf_counter()
+    logger.info(
+        "extract workflow executed in %.5f seconds",
+        float(end_time - start_time),
+    )
 
 
 # ===========================================================
-# Import commands
+# Diagnostic commands
 # ===========================================================
 
 
@@ -114,26 +122,6 @@ def test_connection() -> None:
     result.close()
 
 
-@import_app.command(name="db_import")
-def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
-    """Import JSON data to the database."""
-    logger.info("Beginning import")
-
-    # Get the database engine and establish a connection
-    client = PostgresDbClient()
-
-    # Load data from the sprint board
-    issues = GitHubIssues.from_json(delivery_file)
-
-    issues.to_sql(
-        output_table="github_project_data",
-        engine=client.engine(),
-        replace_table=True,
-    )
-    rows = len(issues.to_dict())
-    logger.info("Number of rows in table: %s", rows)
-
-
 # ===========================================================
 # Etl commands
 # ===========================================================
@@ -155,26 +143,86 @@ def transform_and_load(
 ) -> None:
     """Transform and load etl data."""
     # validate effective date arg
+    datestamp = validate_effective_date(effective_date)
+    if datestamp is None:
+        logger.error(
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
+        )
+        return
+    logger.info("running transform and load with effective date %s", datestamp)
+
+    # hydrate a dataset instance from the input data
+    start_time = time.perf_counter()
+    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
+    # sync data to db
+    etldb.sync_data(dataset, datestamp, None)
+    end_time = time.perf_counter()
+    logger.info(
+        "transform and load is done after %.5f seconds",
+        float(end_time - start_time),
+    )
+
+
+@etl_app.command(name="extract_transform_and_load")
+def extract_transform_and_load(
+    config_file: Annotated[str, CONFIG_FILE_ARG],
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+) -> None:
+    """Export data from GitHub, transform it, and load into analytics warehouse."""
+    # get configuration
+    config_path = Path(config_file)
+    if not config_path.exists():
+        typer.echo(f"Not a path to a valid config file: {config_path}")
+    config = load_config(config_path, GitHubProjectConfig)
+
+    # validate effective date arg
+    datestamp = validate_effective_date(effective_date)
+    if datestamp is None:
+        logger.error(
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
+        )
+        return
+    logger.info("running extract transform and load with effective date %s", datestamp)
+
+    # extract data from GitHub
+    logger.info("extracting data from GitHub")
+    start_time = time.perf_counter()
+    extracted_json, acceptance_criteria = GitHubProjectETL(
+        config,
+    ).extract_and_transform_in_memory()
+    end_time = time.perf_counter()
+    logger.info("extract executed in %.5f seconds", float(end_time - start_time))
+
+    # hydrate a dataset instance from the input data
+    logger.info("transforming and loading data")
+    start_time = time.perf_counter()
+    dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
+    # sync dataset to db
+    etldb.sync_data(dataset, datestamp, acceptance_criteria)
+    end_time = time.perf_counter()
+    logger.info(
+        "transform and load executed in %.5f seconds",
+        float(end_time - start_time),
+    )
+
+    logger.info("ETL workflow is done")
+
+
+def validate_effective_date(effective_date: str) -> str | None:
+    """Validate that string value conforms to effective date expected format."""
+    stamp = None
+
     try:
         dateformat = "%Y-%m-%d"
-        datestamp = (
+        stamp = (
             datetime.strptime(effective_date, dateformat)
             .astimezone()
             .strftime(dateformat)
         )
-        print(f"running transform and load with effective date {datestamp}")
     except ValueError:
-        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
-        return
+        stamp = None
 
-    # hydrate a dataset instance from the input data
-    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
-
-    # sync data to db
-    etldb.sync_data(dataset, datestamp)
-
-    # finish
-    print("transform and load is done")
+    return stamp
 
 
 @etl_app.command(name="opportunity-load")

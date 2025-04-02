@@ -1,12 +1,17 @@
 module "staging_config" {
   source                          = "./env-config"
+  project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "staging"
   network_name                    = "staging"
+  domain_name                     = null
+  enable_https                    = false
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
+  enable_notifications            = local.enable_notifications
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -32,6 +37,12 @@ module "staging_config" {
 
   service_override_extra_environment_variables = {
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT = 0
+    ENABLE_AUTH_ENDPOINT   = 1
+    ENABLE_APPLY_ENDPOINTS = 1
+    ENABLE_SOAP_API        = 1
   }
+  # Enables ECS Exec access for debugging or jump access.
+  # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
+  # Defaults to `false`. Uncomment the next line to enable.
+  # enable_command_execution = true
 }

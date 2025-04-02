@@ -3,7 +3,8 @@
 import { camelCase } from "lodash";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { QueryParamKey } from "src/types/search/searchResponseTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
+import { areSetsEqual } from "src/utils/search/searchUtils";
 
 import { useContext } from "react";
 import { Accordion } from "@trussworks/react-uswds";
@@ -30,10 +31,10 @@ export interface FilterOption {
 }
 
 export interface SearchFilterAccordionProps {
-  filterOptions: FilterOption[];
   query: Set<string>;
-  queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
+  queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
+  filterOptions: FilterOption[];
 }
 
 export interface FilterOptionWithChildren {
@@ -44,30 +45,40 @@ export interface FilterOptionWithChildren {
   children: FilterOption[];
 }
 
-const isSectionAllSelected = (
-  allSelected: Set<string>,
-  query: Set<string>,
-): boolean => {
-  return areSetsEqual(allSelected, query);
+const AccordionTitle = ({
+  title,
+  totalCheckedCount,
+}: {
+  title: string;
+  totalCheckedCount: number;
+}) => {
+  return (
+    <>
+      {title}
+      {!!totalCheckedCount && (
+        <span className="usa-tag usa-tag--big radius-pill margin-left-1">
+          {totalCheckedCount}
+        </span>
+      )}
+    </>
+  );
 };
 
-const isSectionNoneSelected = (query: Set<string>): boolean => {
-  return query.size === 0;
-};
-
-const areSetsEqual = (a: Set<string>, b: Set<string>) =>
-  a.size === b.size && [...a].every((value) => b.has(value));
-
-export function SearchFilterAccordion({
+const AccordionContent = ({
   filterOptions,
   title,
   queryParamKey,
   query,
-}: SearchFilterAccordionProps) {
+}: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
-  const totalCheckedCount = query.size;
+  const toggleOptionChecked = (value: string, isChecked: boolean) => {
+    const updated = new Set(query);
+    isChecked ? updated.add(value) : updated.delete(value);
+    updateQueryParams(updated, queryParamKey, queryTerm);
+  };
+
   // all top level selectable filter options
   const allOptionValues = filterOptions.reduce((values: string[], option) => {
     if (option.children) {
@@ -78,18 +89,6 @@ export function SearchFilterAccordion({
   }, []);
 
   const allSelected = new Set(allOptionValues);
-
-  // SPLIT ME INTO MY OWN COMPONENT
-  const getAccordionTitle = () => (
-    <>
-      {title}
-      {!!totalCheckedCount && (
-        <span className="usa-tag usa-tag--big radius-pill margin-left-1">
-          {totalCheckedCount}
-        </span>
-      )}
-    </>
-  );
 
   // need to add any existing relevant search params to the passed in set
   const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
@@ -110,22 +109,13 @@ export function SearchFilterAccordion({
     }
   };
 
-  const toggleOptionChecked = (value: string, isChecked: boolean) => {
-    const updated = new Set(query);
-    isChecked ? updated.add(value) : updated.delete(value);
-    updateQueryParams(updated, queryParamKey, queryTerm);
-  };
-
-  const isExpanded = !!query.size;
-
-  // SPLIT ME INTO MY OWN COMPONENT
-  const getAccordionContent = () => (
+  return (
     <>
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true, allSelected)}
         onClearAll={() => toggleSelectAll(false)}
-        isAllSelected={isSectionAllSelected(allSelected, query)}
-        isNoneSelected={isSectionNoneSelected(query)}
+        isAllSelected={areSetsEqual(allSelected, query)}
+        isNoneSelected={query.size === 0}
       />
 
       <ul className="usa-list usa-list--unstyled">
@@ -141,8 +131,8 @@ export function SearchFilterAccordion({
                 updateCheckedOption={toggleOptionChecked}
                 toggleSelectAll={toggleSelectAll}
                 accordionTitle={title}
-                isSectionAllSelected={isSectionAllSelected}
-                isSectionNoneSelected={isSectionNoneSelected}
+                isSectionAllSelected={areSetsEqual}
+                isSectionNoneSelected={() => query.size === 0}
               />
             ) : (
               <SearchFilterCheckbox
@@ -157,14 +147,27 @@ export function SearchFilterAccordion({
       </ul>
     </>
   );
+};
 
-  // MEMOIZE ME
+export function SearchFilterAccordion({
+  filterOptions,
+  title,
+  queryParamKey,
+  query,
+}: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
-      title: getAccordionTitle(),
-      content: getAccordionContent(),
-      expanded: isExpanded,
-      id: `opportunity-filter-${queryParamKey}`,
+      title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
+      content: (
+        <AccordionContent
+          filterOptions={filterOptions}
+          title={title}
+          queryParamKey={queryParamKey}
+          query={query}
+        />
+      ),
+      expanded: !!query.size,
+      id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
     },
   ];

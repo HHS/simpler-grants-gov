@@ -19,18 +19,15 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # https://github.com/HHS/simpler-grants-gov/issues/2582
-  - vulnerability: CVE-2024-34158
-  - vulnerability: CVE-2024-34156
-  - vulnerability: CVE-2024-34155
-  # Issue due to crypto package pulled in by GitHub CLI
-  # Will be fixed in next GitHub CLI release
-  # Last Checked: Dec 19th, 2024
-  - vulnerability: GHSA-v778-237x-gjrc
-  - vulnerability: GHSA-w32m-9786-jp63
-  # Issue with asyncio library in Python, should be fixed
-  # in 3.13.2 (early February 2025)
-  - vulnerability: CVE-2024-12254
+  # These vulnerabilities should be fixed in the next version of Debian
+  # Doing installs directly on them in our Dockerfile doesn't seem to
+  # pick up the changes, so we'll have to wait until the base images
+  # of our Docker images are updated, usually around the start of the month
+  #
+  # Last checked: March 17th, 2025
+  - vulnerability: CVE-2025-0395
+  - vulnerability: CVE-2025-1094
+  - vulnerability: CVE-2024-38428
 
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly

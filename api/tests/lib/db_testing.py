@@ -3,7 +3,8 @@
 import contextlib
 import logging
 
-from sqlalchemy import text
+from sqlalchemy import select, text
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.adapters.db.clients.postgres_config import get_db_config
@@ -58,3 +59,24 @@ def _drop_schema(conn: db.Connection, schema_name: str):
     with conn.begin():
         conn.execute(text(f"DROP SCHEMA {schema_name} CASCADE;"))
     logger.info("drop schema %s", schema_name)
+
+
+def cascade_delete_from_db_table(db_session: db.Session, table_model) -> None:
+    """Delete all records in a table in a way that cascade-deletes any records configured to do so
+
+    Normally if you were to try to do a "delete all" query against a table which has foreign keys referencing it
+    you'd get an error. SQLAlchemy's cascade deletes handle recursively cleaning up anything that would still reference it.
+
+    Note that these types of queries are much slower as it needs to first fetch and then iterate over A LOT
+    of models potentially. Before you use this, please make sure you can't write your test in a way that is fine
+    with whatever data might exist in a given table.
+    """
+
+    db_session.expunge_all()
+    with db_session.no_autoflush:
+        records = db_session.scalars(select(table_model).options(selectinload("*")))
+
+        for record in records:
+            db_session.delete(record)
+
+        db_session.commit()

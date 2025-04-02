@@ -135,7 +135,7 @@ def setup_synopsis_forecast(
 
     if create_existing:
         opportunity_summary = f.OpportunitySummaryFactory.create(
-            opportunity=opportunity, is_forecast=is_forecast, revision_number=revision_number
+            opportunity=opportunity, is_forecast=is_forecast
         )
         if is_existing_current_opportunity_summary:
             f.CurrentOpportunitySummaryFactory.create(
@@ -164,18 +164,10 @@ def setup_applicant_type(
 
     if opportunity_summary.is_forecast:
         source_values["forecast"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTapplicanttypesForecastFactory
-        else:
-            factory_cls = f.StagingTapplicanttypesForecastHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTapplicanttypesForecastFactory
     else:
         source_values["synopsis"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTapplicanttypesSynopsisFactory
-        else:
-            factory_cls = f.StagingTapplicanttypesSynopsisHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTapplicanttypesSynopsisFactory
 
     source_applicant_type = factory_cls.create(
         **source_values,
@@ -219,18 +211,10 @@ def setup_funding_instrument(
 
     if opportunity_summary.is_forecast:
         source_values["forecast"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTfundinstrForecastFactory
-        else:
-            factory_cls = f.StagingTfundinstrForecastHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTfundinstrForecastFactory
     else:
         source_values["synopsis"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTfundinstrSynopsisFactory
-        else:
-            factory_cls = f.StagingTfundinstrSynopsisHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTfundinstrSynopsisFactory
 
     source_funding_instrument = factory_cls.create(
         **source_values,
@@ -274,18 +258,10 @@ def setup_funding_category(
 
     if opportunity_summary.is_forecast:
         source_values["forecast"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTfundactcatForecastFactory
-        else:
-            factory_cls = f.StagingTfundactcatForecastHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTfundactcatForecastFactory
     else:
         source_values["synopsis"] = None
-        if opportunity_summary.revision_number is None:
-            factory_cls = f.StagingTfundactcatSynopsisFactory
-        else:
-            factory_cls = f.StagingTfundactcatSynopsisHistFactory
-            source_values["revision_number"] = opportunity_summary.revision_number
+        factory_cls = f.StagingTfundactcatSynopsisFactory
 
     source_funding_category = factory_cls.create(
         **source_values,
@@ -483,16 +459,12 @@ def validate_assistance_listing(
 
 
 def get_summary_from_source(db_session, source_summary):
-    revision_number = None
     is_forecast = source_summary.is_forecast
-    if isinstance(source_summary, (staging.synopsis.TsynopsisHist, staging.forecast.TforecastHist)):
-        revision_number = source_summary.revision_number
 
     opportunity_summary = (
         db_session.query(OpportunitySummary)
         .filter(
             OpportunitySummary.opportunity_id == source_summary.opportunity_id,
-            OpportunitySummary.revision_number == revision_number,
             OpportunitySummary.is_forecast == is_forecast,
             # Populate existing to force it to fetch updates from the DB
         )
@@ -557,20 +529,6 @@ def validate_opportunity_summary(
             ]
         )
 
-    # History only fields
-    is_deleted = False
-    if isinstance(source_summary, (staging.synopsis.TsynopsisHist, staging.forecast.TforecastHist)):
-        matching_fields.extend([("revision_number", "revision_number")])
-
-        is_deleted = source_summary.action_type == "D"
-
-    assert opportunity_summary is not None
-    validate_matching_fields(
-        source_summary, opportunity_summary, matching_fields, expect_values_to_match
-    )
-
-    assert opportunity_summary.is_deleted == is_deleted
-
 
 def validate_summary_and_nested(
     db_session,
@@ -608,7 +566,6 @@ def validate_applicant_type(
     opportunity_summary_id = (
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
-            OpportunitySummary.revision_number == source_applicant_type.revision_number,
             OpportunitySummary.is_forecast == source_applicant_type.is_forecast,
             OpportunitySummary.opportunity_id == source_applicant_type.opportunity_id,
         )
@@ -655,7 +612,6 @@ def validate_funding_instrument(
     opportunity_summary_id = (
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
-            OpportunitySummary.revision_number == source_funding_instrument.revision_number,
             OpportunitySummary.is_forecast == source_funding_instrument.is_forecast,
             OpportunitySummary.opportunity_id == source_funding_instrument.opportunity_id,
         )
@@ -703,7 +659,6 @@ def validate_funding_category(
     opportunity_summary_id = (
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
-            OpportunitySummary.revision_number == source_funding_category.revision_number,
             OpportunitySummary.is_forecast == source_funding_category.is_forecast,
             OpportunitySummary.opportunity_id == source_funding_category.opportunity_id,
         )

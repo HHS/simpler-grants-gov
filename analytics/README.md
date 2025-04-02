@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This package encapsulates a data pipeline service. The service is responsible for extracting project data from GitHub and transforming the extracted data into rows in a data warehouse. We're using Metabase to provide data visualization and Business Intelligence for the data warehouse. As an example, our [dashboard that demonstrates the flow of Simpler Grants.gov Opportunity Data from the Operational DB to the Data Warehouse](http://metabase-prod-899895252.us-east-1.elb.amazonaws.com/dashboard/100-operational-data).
+This package encapsulates a data pipeline service. The service is responsible for extracting project data from GitHub and transforming the extracted data into rows in a data warehouse. We're using Metabase to provide data visualization and Business Intelligence for the data warehouse. As an example, our [dashboard that demonstrates the flow of Simpler Grants.gov Opportunity Data from the Operational DB to the Data Warehouse](http://metabase-prod-899895252.us-east-1.elb.amazonaws.com/public/dashboard/a9011e4c-2610-4089-9da5-4ef93604ff55).
 
 ## Project Directory Structure
 
@@ -35,6 +35,17 @@ The service in this package provides capabilities to satisfy the middle step (de
 The service does not listen on a port or run as a daemon. Instead, it must be triggered manually, via `Make` commands on the command-line, or via a text-based interactive tool written in Python and referred to as CLI.
 
 In current practice, the service is triggered daily via an AWS Step Function (akin to a cron job) orchestrated with Terraform. This results in a daily update to the analytics data warehouse in Postgres, and a visible data refresh for viewers of SGG program-level metrics dashboards in Metabase. 
+
+
+## Snapshot Data Quality Tests
+
+The service contains plugings to the pytest library to perform data comparisons.  The plugin that performs these operations is [syrupy](https://github.com/syrupy-project/syrupy).  These snapshot comparions run as part of the standard `pytest` command.  The files for comparison are inside of `root/analytics/tests/dataquality/__snapshots__`. The tests exist inside of `root/analytics/tests/dataquality`
+
+### Updating snapshots
+
+In the scenario where snapshots need to be updated you can follow the below instructions
+
+After verifying that any changes To update the snapshots you can run ``pytest --snapshot-update` and the snapshots contained in the repo will be updated. Commit these updates.
 
 ##  Developer Information
 

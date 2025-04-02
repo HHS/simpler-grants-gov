@@ -242,6 +242,20 @@ i.e.
   padding: units(1) units(2);
 }
 
+.button-icon-large {
+  transform: scale(2);
+  margin: 0 units(0.5) 0 0;
+}
+
+.button-icon-md {
+  transform: scale(1.75);
+  margin: 0 units(0.5) 0 0;
+}
+
+.icon-active {
+  color: color("orange-40v");
+}
+
 // There is no config for setting the current nav item border color
 .usa-header--basic .usa-nav__primary-item > .usa-current::after {
   background-color: color("mint-40");
@@ -444,6 +458,17 @@ button.usa-pagination__button.usa-button {
         display: block;
       }
     }
+  }
+  .usa-accordion__button[aria-expanded="true"]::after {
+    background-color: color("mint-60");
+    border-radius: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    height: 0.25rem;
+    bottom: -0.25rem;
+    left: 0;
+    right: 0;
   }
 }
 

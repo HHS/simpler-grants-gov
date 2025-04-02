@@ -1,4 +1,9 @@
-import { findFirstWhitespace, splitMarkup } from "src/utils/generalUtils";
+import {
+  findFirstWhitespace,
+  isCurrentPath,
+  queryParamsToQueryString,
+  splitMarkup,
+} from "src/utils/generalUtils";
 
 describe("splitMarkup", () => {
   it("handles case where markdown string is shorter than split point", () => {
@@ -93,5 +98,33 @@ describe("findFirstWhitespace", () => {
         3,
       ),
     ).toEqual(8);
+  });
+});
+
+describe("queryParamsToQueryString", () => {
+  it("will give you a question mark for nothing", () => {
+    expect(queryParamsToQueryString({})).toEqual("?");
+  });
+  it("puts each provided key that has a value into a query string format", () => {
+    expect(
+      queryParamsToQueryString({
+        status: "archived,closed",
+        agency: "",
+        eligibility: "individual",
+      }),
+    ).toEqual("?status=archived,closed&eligibility=individual&");
+  });
+});
+
+describe("isCurrentPath", () => {
+  it("returns true if the path matches the regex with passed link", () => {
+    expect(isCurrentPath("/hello", "/en/hello")).toEqual(true);
+    expect(
+      isCurrentPath("/hello/whatever", "/es/hello/whatever?this=willgoaway"),
+    ).toEqual(true);
+  });
+  it("returns false if the path does not match the regex with passed link", () => {
+    expect(isCurrentPath("/hello/other-path", "/es/hello")).toEqual(false);
+    expect(isCurrentPath("/hello", "/gr/hello")).toEqual(false);
   });
 });

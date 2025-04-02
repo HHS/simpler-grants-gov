@@ -28,9 +28,11 @@ data "aws_subnets" "public" {
 }
 
 locals {
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
+  # The prefix is used to create uniquely named resources per terraform workspace, which
+  # are needed in CI/CD for preview environments and tests.
+  #
+  # To isolate changes during infrastructure development by using manually created
+  # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -39,14 +41,20 @@ locals {
     description = "Application resources created in ${var.environment_name} environment"
   })
 
-  service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
+  # All non-default terraform workspaces are considered temporary.
+  # Temporary environments do not have deletion protection enabled.
+  # Examples: pull request preview environments are temporary.
+  is_temporary = terraform.workspace != "default"
 
-  is_temporary = startswith(terraform.workspace, "t-")
+  build_repository_config                        = module.app_config.build_repository_config
+  environment_config                             = module.app_config.environment_configs[var.environment_name]
+  service_config                                 = local.environment_config.service_config
+  storage_config                                 = local.environment_config.storage_config
+  incident_management_service_integration_config = local.environment_config.incident_management_service_integration
+  identity_provider_config                       = local.environment_config.identity_provider_config
+  notifications_config                           = local.environment_config.notifications_config
 
-  environment_config = module.app_config.environment_configs[var.environment_name]
-  service_config     = local.environment_config.service_config
-  database_config    = local.environment_config.database_config
-  domain             = local.environment_config.domain
+  network_config = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -55,7 +63,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
+      version = ">= 5.81.0, < 6.0.0"
     }
   }
 
@@ -84,11 +92,6 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
-data "aws_acm_certificate" "cert" {
-  count  = local.domain != null ? 1 : 0
-  domain = local.domain
-}
-
 data "aws_iam_policy" "app_db_access_policy" {
   count = 1
   name  = local.database_config.app_access_policy_name
@@ -111,49 +114,90 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
+data "aws_acm_certificate" "certificate" {
+  count  = local.service_config.enable_https ? 1 : 0
+  domain = local.service_config.domain_name
+}
+
+data "aws_ssm_parameter" "incident_management_service_integration_url" {
+  count = module.app_config.has_incident_management_service ? 1 : 0
+  name  = local.incident_management_service_integration_config.integration_url_param_name
+}
+
 module "service" {
-  source                         = "../../modules/service"
-  service_name                   = local.service_name
-  is_temporary                   = false
-  enable_load_balancer           = false
-  image_repository_name          = module.app_config.image_repository_name
-  image_tag                      = local.image_tag
-  vpc_id                         = data.aws_vpc.network.id
-  public_subnet_ids              = data.aws_subnets.public.ids
-  private_subnet_ids             = data.aws_subnets.private.ids
+  source       = "../../modules/service"
+  service_name = local.service_config.service_name
+
+  image_repository_arn = local.build_repository_config.repository_arn
+  image_repository_url = local.build_repository_config.repository_url
+
+  image_tag = local.image_tag
+
+  vpc_id             = data.aws_vpc.network.id
+  public_subnet_ids  = data.aws_subnets.public.ids
+  private_subnet_ids = data.aws_subnets.private.ids
+
+  domain_name    = local.service_config.domain_name
+  hosted_zone_id = null
+  # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+
+  cpu                      = local.service_config.cpu
+  memory                   = local.service_config.memory
+  desired_instance_count   = local.service_config.desired_instance_count
+  enable_command_execution = local.service_config.enable_command_execution
+
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-  cpu                            = 1024
-  memory                         = 4096
-  readonly_root_filesystem       = false
-  desired_instance_count         = 0 # This is a task based service, not a web server, so we don't need to run any instances of the service at rest.
-  cert_arn                       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
-  app_access_policy_arn          = data.aws_iam_policy.app_db_access_policy[0].arn
-  migrator_access_policy_arn     = data.aws_iam_policy.migrator_db_access_policy[0].arn
-  scheduled_jobs                 = local.environment_config.scheduled_jobs
-  db_vars = {
-    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
+
+  file_upload_jobs = local.service_config.file_upload_jobs
+  scheduled_jobs   = local.environment_config.scheduled_jobs
+
+  db_vars = module.app_config.has_database ? {
+    security_group_ids         = module.database[0].security_group_ids
+    app_access_policy_arn      = module.database[0].app_access_policy_arn
+    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
     connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
+      host        = module.database[0].host
+      port        = module.database[0].port
+      user        = module.database[0].app_username
+      db_name     = module.database[0].db_name
+      schema_name = module.database[0].schema_name
     }
-  }
+  } : null
+
+  enable_load_balancer     = false
+  readonly_root_filesystem = false
+
   extra_environment_variables = merge(
-    local.service_config.extra_environment_variables,
-    local.api_analytics_bucket_environment_variables,
-    { "ENVIRONMENT" : var.environment_name },
+    {
+      BUCKET_NAME = local.storage_config.bucket_name
+      "ENVIRONMENT" : var.environment_name
+    },
+    # local.identity_provider_environment_variables,
+    local.notifications_environment_variables,
+    local.service_config.extra_environment_variables
   )
+
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
+    module.app_config.enable_identity_provider ? [{
+      # name      = "COGNITO_CLIENT_SECRET"
+      # valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : []
   )
+
   extra_policies = merge(
     {
-      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
+      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
+      # storage_access              = module.storage.access_policy_arn
     },
+    module.app_config.enable_identity_provider ? {
+      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {}
   )
+
+  is_temporary = local.is_temporary
 }

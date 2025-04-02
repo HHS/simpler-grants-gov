@@ -1,20 +1,6 @@
-variable "service_name" {
-  description = "name of the service, to be used for infra structure resource naming"
-  validation {
-    condition     = can(regex("^[-_\\da-z]+$", var.service_name))
-    error_message = "use only lower case letters, numbers, dashes, and underscores"
-  }
-}
-
-variable "image_tag" {
+variable "aws_services_security_group_id" {
   type        = string
-  description = "The tag of the image to deploy"
-}
-
-variable "image_repository_url" {
-  type        = string
-  description = "The full URL of the container image repository, used instead of image_repository_name if set."
-  default     = null
+  description = "Security group ID for VPC endpoints that access AWS Services"
 }
 
 variable "image_repository_name" {
@@ -23,24 +9,11 @@ variable "image_repository_name" {
   default     = null
 }
 
-variable "desired_instance_count" {
-  type        = number
-  description = "Number of instances of the task definition to place and keep running."
-  default     = 1
-}
-
 variable "cpu" {
   type        = number
   default     = 256
   description = "Number of cpu units used by the task, expessed as an integer value, e.g 512 "
 }
-
-variable "memory" {
-  type        = number
-  default     = 512
-  description = "Amount (in MiB) of memory used by the task. e.g. 2048"
-}
-
 
 variable "container_port" {
   type        = number
@@ -58,37 +31,6 @@ variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"
   default     = null
-}
-
-variable "vpc_id" {
-  type        = string
-  description = "Uniquely identifies the VPC."
-}
-
-variable "public_subnet_ids" {
-  type        = list(any)
-  description = "Public subnet ids in VPC"
-}
-
-variable "private_subnet_ids" {
-  type        = list(any)
-  description = "Private subnet ids in VPC"
-}
-
-variable "extra_environment_variables" {
-  type        = map(string)
-  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
-  default     = {}
-}
-
-variable "scheduled_jobs" {
-  description = "Variable for configuration of the step functions scheduled job"
-  type = map(object({
-    task_command        = list(string)
-    schedule_expression = string
-    state               = string
-  }))
-  default = {}
 }
 
 variable "s3_buckets" {
@@ -109,23 +51,12 @@ variable "enable_drafts_bucket" {
   default     = false
 }
 
-variable "secrets" {
-  type = set(object({
-    name      = string
-    valueFrom = string
-  }))
-  description = "List of configurations for defining environment variables that pull from SSM parameter store"
-}
-
-variable "aws_services_security_group_id" {
-  type        = string
-  description = "Security group ID for VPC endpoints that access AWS Services"
-}
-
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
-    security_group_ids = list(string)
+    security_group_ids         = list(string)
+    app_access_policy_arn      = string
+    migrator_access_policy_arn = string
     connection_info = object({
       host        = string
       port        = string
@@ -137,16 +68,28 @@ variable "db_vars" {
   default = null
 }
 
-variable "app_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the app service role for database access"
+variable "desired_instance_count" {
+  type        = number
+  description = "Number of instances of the task definition to place and keep running."
+  default     = 1
+}
+
+variable "domain_name" {
   type        = string
+  description = "The fully qualified domain name for the application"
   default     = null
 }
 
-variable "migrator_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the migrator task role for database access"
-  type        = string
-  default     = null
+variable "enable_command_execution" {
+  type        = bool
+  default     = false
+  description = "Whether the service should enable ECS Exec, such as for debugging"
+}
+
+variable "extra_environment_variables" {
+  type        = map(string)
+  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
+  default     = {}
 }
 
 variable "extra_policies" {
@@ -155,7 +98,7 @@ variable "extra_policies" {
   default     = {}
 }
 
-variable "cert_arn" {
+variable "certificate_arn" {
   description = "The ARN for the TLS certificate passed in from the app service layer"
   type        = string
   default     = null
@@ -177,11 +120,6 @@ variable "min_capacity" {
   description = "Minimum number of tasks for autoscaling"
   type        = number
   default     = 2
-}
-
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
-  type        = bool
 }
 
 variable "readonly_root_filesystem" {
@@ -245,4 +183,106 @@ variable "healthcheck_path" {
   description = "The path to check the health of the container, used on the load balancer health check"
   type        = string
   default     = "/health"
+}
+variable "file_upload_jobs" {
+  type = map(object({
+    source_bucket = string
+    path_prefix   = string
+    task_command  = list(string)
+  }))
+  description = <<EOT
+    Configurations for jobs that trigger on a file upload event.
+    Each configuration is a map from the job name to an object defining the
+    event's source bucket ( the bucket the file was uploaded to), a
+    path prefix filter ( only files that match the path prefix will trigger
+    the job), and the task command to run ( this overrides the CMD entrypoint
+    in the container).
+
+    To reference the file path and bucket that triggered the event, the task
+    command can optionally include the placeholder values`<object_key>`
+    and`<bucket_name>`. For example if task_command is:
+
+      ["python", "etl.py", "<object_key>"]
+
+    Then if an object was uploaded tos3://somebucket/path/to/file.txt, the
+    task will execute the command:
+
+      python etl.py path/to/file.txt
+  EOT
+  default     = {}
+}
+
+variable "hosted_zone_id" {
+  type        = string
+  description = "The Route53 hosted zone id for the domain"
+  default     = null
+}
+
+variable "image_repository_arn" {
+  type        = string
+  description = "The name of the container image repository"
+}
+
+variable "image_repository_url" {
+  type        = string
+  description = "The name of the container image repository"
+}
+
+variable "image_tag" {
+  type        = string
+  description = "The tag of the image to deploy"
+}
+
+variable "is_temporary" {
+  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
+  type        = bool
+  default     = false
+}
+
+variable "memory" {
+  type        = number
+  default     = 512
+  description = "Amount (in MiB) of memory used by the task. e.g. 2048"
+}
+
+variable "private_subnet_ids" {
+  type        = list(any)
+  description = "Private subnet ids in VPC"
+}
+
+variable "public_subnet_ids" {
+  type        = list(any)
+  description = "Public subnet ids in VPC"
+}
+
+variable "scheduled_jobs" {
+  description = "Variable for configuration of the step functions scheduled job"
+  type = map(object({
+    task_command        = list(string)
+    schedule_expression = string
+    state               = string
+  }))
+  default = {}
+}
+
+variable "secrets" {
+  type = set(object({
+    name      = string
+    valueFrom = string
+  }))
+  description = "List of configurations for defining environment variables that pull from SSM parameter store"
+  default     = []
+}
+
+variable "service_name" {
+  description = "name of the service, to be used for infra structure resource naming"
+  validation {
+    condition     = can(regex("^[-_\\da-z]+$", var.service_name))
+    error_message = "use only lower case letters, numbers, dashes, and underscores"
+  }
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "Uniquely identifies the VPC."
 }

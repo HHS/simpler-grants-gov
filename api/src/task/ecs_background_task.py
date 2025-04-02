@@ -48,11 +48,13 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            with _ecs_background_task_impl(task_name):
-                # Finally execute the function with New Relic instrumentation
-                return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(
-                    *args, **kwargs
-                )
+            # Wrap with New Relic instrumentation
+            application = newrelic.agent.register_application(timeout=10.0)
+            with newrelic.agent.BackgroundTask(application, name=task_name, group="Python/ECSTask"):
+                # Wrap with our own logging (timing/general logs)
+                with _ecs_background_task_impl(task_name):
+                    # Finally actually run the task
+                    return f(*args, **kwargs)
 
         return wrapper
 
@@ -119,8 +121,10 @@ def _get_ecs_metadata() -> dict:
             metadata_json["Labels"]["com.amazonaws.ecs.task-definition-version"],
         ]
     )
-    cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
-    cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
+    # We don't currently send logs to Cloudwatch, and just send directly
+    # to NewRelic, so these error if we try to use them right now.
+    # cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
+    # cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
 
     # Step function only
     sfn_execution_id = os.environ.get("SFN_EXECUTION_ID")
@@ -130,9 +134,5 @@ def _get_ecs_metadata() -> dict:
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        # these will be added automatically by New Relic log ingester, but
-        # just to be sure and for non-log usages, explicitly declare them
-        "aws.cloudwatch.log_group": cloudwatch_log_group,
-        "aws.cloudwatch.log_stream": cloudwatch_log_stream,
         "aws.step_function.id": sfn_id,
     }

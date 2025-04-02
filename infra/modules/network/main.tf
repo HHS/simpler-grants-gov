@@ -15,13 +15,21 @@ module "aws_vpc" {
   azs  = local.availability_zones
   cidr = local.vpc_cidr
 
-  public_subnets             = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
-  private_subnets            = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
-  database_subnets           = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
-  public_subnet_tags         = { subnet_type = "public" }
-  private_subnet_tags        = { subnet_type = "private" }
-  database_subnet_tags       = { subnet_type = "database" }
-  database_subnet_group_name = var.database_subnet_group_name
+  # Public subnets
+  public_subnets     = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
+  public_subnet_tags = { subnet_type = "public" }
+
+  # Private subnets
+  private_subnets     = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
+  private_subnet_tags = { subnet_type = "private" }
+
+  # Database subnets
+  # `database_subnet_tags` is only used if `database_subnets` is not empty
+  # `database_subnet_group_name` is only used if `create_database_subnet_group` is true
+  database_subnets             = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
+  database_subnet_tags         = { subnet_type = "database" }
+  create_database_subnet_group = var.has_database
+  database_subnet_group_name   = var.database_subnet_group_name
 
   # If application needs external services, then create one NAT gateway per availability zone
   enable_nat_gateway     = var.has_external_non_aws_service

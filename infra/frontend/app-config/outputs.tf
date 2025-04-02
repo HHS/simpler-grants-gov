@@ -6,6 +6,14 @@ output "account_names_by_environment" {
   value = local.account_names_by_environment
 }
 
+output "build_repository_config" {
+  value = local.build_repository_config
+}
+
+output "environment_configs" {
+  value = local.environment_configs
+}
+
 output "environments" {
   value = local.environments
 }
@@ -26,19 +34,22 @@ output "image_repository_name" {
   value = local.image_repository_name
 }
 
-output "build_repository_config" {
-  value = local.build_repository_config
-}
-
-output "environment_configs" {
-  value     = local.environment_configs
-  sensitive = true
-}
-
 output "enable_autoscaling" {
   value = local.enable_autoscaling
 }
 
 output "hostname" {
   value = local.hostname
+}
+
+output "enable_identity_provider" {
+  value = local.enable_identity_provider
+}
+
+output "enable_notifications" {
+  value = local.enable_notifications
+}
+
+output "shared_network_name" {
+  value = local.shared_network_name
 }

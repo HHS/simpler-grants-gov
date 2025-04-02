@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 
@@ -15,7 +15,7 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
-const mockOpportunityData: Opportunity = {
+const mockOpportunityData: OpportunityDetail = {
   opportunity_title: "Test Opportunity",
   agency_name: "Test Agency",
   opportunity_assistance_listings: [
@@ -29,16 +29,14 @@ const mockOpportunityData: Opportunity = {
     },
   ],
   updated_at: "2024-08-10T10:00:00Z",
-} as Opportunity;
+} as OpportunityDetail;
 
 describe("OpportunityIntro", () => {
   it("renders the opportunity title and agency name", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("Agency: Test Agency")).toBeInTheDocument();
   });
-
   it("renders assistance listings correctly", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
@@ -57,7 +55,7 @@ describe("OpportunityIntro", () => {
   });
 
   it("handles null agency name and null assistance listings", () => {
-    const opportunityDataWithNulls: Opportunity = {
+    const opportunityDataWithNulls: OpportunityDetail = {
       ...mockOpportunityData,
       agency_name: "",
       opportunity_assistance_listings: [],
@@ -70,7 +68,7 @@ describe("OpportunityIntro", () => {
   });
 
   it("handles null updated date", () => {
-    const opportunityDataWithoutDate: Opportunity = {
+    const opportunityDataWithoutDate: OpportunityDetail = {
       ...mockOpportunityData,
       updated_at: "",
     };

@@ -7,8 +7,8 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
     AbstractTransformSubTask,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
-from src.db.models.staging.forecast import Tforecast, TforecastHist
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
+from src.db.models.staging.forecast import Tforecast
+from src.db.models.staging.synopsis import Tsynopsis
 
 logger = logging.getLogger(__name__)
 
@@ -23,22 +23,9 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             [
                 Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id,
                 OpportunitySummary.is_forecast.is_(False),
-                OpportunitySummary.revision_number.is_(None),
             ],
         )
         self.process_opportunity_summary_group(synopsis_records)
-
-        logger.info("Processing synopsis hist records")
-        synopsis_hist_records = self.fetch_with_opportunity(
-            TsynopsisHist,
-            OpportunitySummary,
-            [
-                TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id,
-                TsynopsisHist.revision_number == OpportunitySummary.revision_number,
-                OpportunitySummary.is_forecast.is_(False),
-            ],
-        )
-        self.process_opportunity_summary_group(synopsis_hist_records)
 
         logger.info("Processing forecast records")
         forecast_records = self.fetch_with_opportunity(
@@ -47,22 +34,9 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             [
                 Tforecast.opportunity_id == OpportunitySummary.opportunity_id,
                 OpportunitySummary.is_forecast.is_(True),
-                OpportunitySummary.revision_number.is_(None),
             ],
         )
         self.process_opportunity_summary_group(forecast_records)
-
-        logger.info("Processing forecast hist records")
-        forecast_hist_records = self.fetch_with_opportunity(
-            TforecastHist,
-            OpportunitySummary,
-            [
-                TforecastHist.opportunity_id == OpportunitySummary.opportunity_id,
-                TforecastHist.revision_number == OpportunitySummary.revision_number,
-                OpportunitySummary.is_forecast.is_(True),
-            ],
-        )
-        self.process_opportunity_summary_group(forecast_hist_records)
 
     def process_opportunity_summary_group(
         self,
@@ -100,17 +74,6 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             self._handle_delete(
                 source_summary, target_summary, transform_constants.OPPORTUNITY_SUMMARY, extra
             )
-
-        # Historical records are linked to other historical records, however
-        # we don't import historical opportunity records, so if the opportunity
-        # was deleted, we don't have anything to link these to. Whenever we do
-        # support historical opportunities, we'll have these all marked with a
-        # flag that we can use to reprocess these.
-        elif self._is_orphaned_historical(opportunity, source_summary):
-            self._handle_orphaned_historical(
-                source_summary, transform_constants.OPPORTUNITY_SUMMARY, extra
-            )
-
         elif opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists

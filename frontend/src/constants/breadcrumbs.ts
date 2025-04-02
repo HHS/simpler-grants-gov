@@ -5,7 +5,6 @@ import {
 
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
-const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
 const SUBSCRIBE: Breadcrumb = { title: "Subscribe", path: "/subscribe/" };
 const SEARCH: Breadcrumb = {
   title: "Search",
@@ -28,8 +27,12 @@ const SAVED_GRANTS: Breadcrumb = {
   path: "/saved-grants/",
 };
 
+const SAVED_SEARCHES: Breadcrumb = {
+  title: "Saved search queries",
+  path: "/saved-search-queries/",
+};
+
 export const RESEARCH_CRUMBS: BreadcrumbList = [HOME, RESEARCH];
-export const PROCESS_CRUMBS: BreadcrumbList = [HOME, PROCESS];
 export const SUBSCRIBE_CRUMBS: BreadcrumbList = [HOME, SUBSCRIBE];
 export const SUBSCRIBE_CONFIRMATION_CRUMBS: BreadcrumbList = [
   HOME,
@@ -45,3 +48,4 @@ export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const EVENTS_CRUMBS: BreadcrumbList = [HOME, EVENTS]
 export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const SAVED_GRANTS_CRUMBS: BreadcrumbList = [HOME, SAVED_GRANTS];
+export const SAVED_SEARCHES_CRUMBS: BreadcrumbList = [HOME, SAVED_SEARCHES];

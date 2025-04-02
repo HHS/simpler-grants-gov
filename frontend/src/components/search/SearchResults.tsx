@@ -1,15 +1,109 @@
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { Suspense } from "react";
 
+import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import Loading from "src/components/Loading";
-import SearchPagination from "src/components/search/SearchPagination";
-import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
-import SearchResultsHeader from "src/components/search/SearchResultsHeader";
-import SearchResultsHeaderFetch from "src/components/search/SearchResultsHeaderFetch";
-import SearchResultsListFetch from "src/components/search/SearchResultsListFetch";
 import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
+import { SearchError } from "./SearchError";
+import SearchPagination from "./SearchPagination";
+import SearchResultsHeader from "./SearchResultsHeader";
+import SearchResultsList from "./SearchResultsList";
+
+const SearchResultsSkeleton = ({
+  sortby,
+  page,
+  query,
+  loadingMessage,
+}: {
+  sortby: string | null;
+  page: number;
+  query?: string | null;
+  loadingMessage: string;
+}) => {
+  return (
+    <>
+      <SearchResultsHeader sortby={sortby} />
+      <div className="usa-prose">
+        <div className="tablet-lg:display-flex">
+          <SearchPagination loading={true} page={page} query={query} />
+        </div>
+        <Loading message={loadingMessage} />
+        <SearchPagination loading={true} page={page} query={query} />
+      </div>
+    </>
+  );
+};
+
+const ResolvedSearchResults = async ({
+  sortby,
+  page,
+  query,
+  searchResultsPromise,
+}: {
+  sortby: string | null;
+  page: number;
+  query?: string | null;
+  searchResultsPromise: Promise<SearchAPIResponse>;
+}) => {
+  let searchResults: SearchAPIResponse;
+
+  try {
+    searchResults = await searchResultsPromise;
+  } catch (e) {
+    const error = e as Error;
+    return <SearchError error={error} />;
+  }
+
+  // if there are no results because we've requested a page beyond the number of total pages
+  // update page to the last page to trigger a new search
+  if (
+    !searchResults.data.length &&
+    searchResults.pagination_info.total_pages > 0 &&
+    searchResults.pagination_info.page_offset >
+      searchResults.pagination_info.total_pages
+  ) {
+    return (
+      <ClientSideUrlUpdater
+        param={"page"}
+        value={searchResults.pagination_info.total_pages.toString()}
+      />
+    );
+  }
+  const totalResults = searchResults.pagination_info?.total_records.toString();
+  const totalPages = searchResults.pagination_info?.total_pages;
+
+  return (
+    <>
+      <SearchResultsHeader
+        queryTerm={query}
+        sortby={sortby}
+        totalFetchedResults={totalResults}
+      />
+      <div className="usa-prose">
+        <div className="tablet-lg:display-flex">
+          <ExportSearchResultsButton />
+          <SearchPagination
+            totalPages={totalPages}
+            page={page}
+            query={query}
+            totalResults={totalResults}
+          />
+        </div>
+        <SearchResultsList searchResults={searchResults} />
+        <SearchPagination
+          totalPages={totalPages}
+          page={page}
+          query={query}
+          totalResults={totalResults}
+          scroll={true}
+        />
+      </div>
+    </>
+  );
+};
 
 export default function SearchResults({
   searchParams,
@@ -21,54 +115,27 @@ export default function SearchResults({
   loadingMessage: string;
 }) {
   const { page, sortby } = searchParams;
-
   const searchResultsPromise = searchForOpportunities(searchParams);
+  const suspenseKey = Object.entries(searchParams).join(",");
 
-  const key = Object.entries(searchParams).join(",");
-  const pager1key = Object.entries(searchParams).join("-") + "pager1";
-  const pager2key = Object.entries(searchParams).join("-") + "pager2";
   return (
-    <>
-      <Suspense key={key} fallback={<SearchResultsHeader sortby={sortby} />}>
-        <SearchResultsHeaderFetch
+    <Suspense
+      key={suspenseKey}
+      fallback={
+        <SearchResultsSkeleton
           sortby={sortby}
-          queryTerm={query}
-          searchResultsPromise={searchResultsPromise}
+          page={page}
+          query={query}
+          loadingMessage={loadingMessage}
         />
-      </Suspense>
-      <div className="usa-prose">
-        <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton />
-          <Suspense
-            key={pager1key}
-            fallback={
-              <SearchPagination loading={true} page={page} query={query} />
-            }
-          >
-            <SearchPaginationFetch
-              page={page}
-              query={query}
-              searchResultsPromise={searchResultsPromise}
-            />
-          </Suspense>
-        </div>
-        <Suspense key={key} fallback={<Loading message={loadingMessage} />}>
-          <SearchResultsListFetch searchResultsPromise={searchResultsPromise} />
-        </Suspense>
-        <Suspense
-          key={pager2key}
-          fallback={
-            <SearchPagination loading={true} page={page} query={query} />
-          }
-        >
-          <SearchPaginationFetch
-            page={page}
-            query={query}
-            searchResultsPromise={searchResultsPromise}
-            scroll={true}
-          />
-        </Suspense>
-      </div>
-    </>
+      }
+    >
+      <ResolvedSearchResults
+        sortby={sortby}
+        page={page}
+        query={query}
+        searchResultsPromise={searchResultsPromise}
+      />
+    </Suspense>
   );
 }

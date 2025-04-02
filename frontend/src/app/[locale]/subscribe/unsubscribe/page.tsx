@@ -40,27 +40,11 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
           {t("intro")}
         </p>
         <Grid row gap className="flex-align-start">
-          <Grid tabletLg={{ col: 6 }}>
+          <Grid>
             <p className="usa-intro">{t("paragraph_1")}</p>
             <Link className="usa-button margin-bottom-4" href="/subscribe">
               {t("button_resub")}
             </Link>
-          </Grid>
-          <Grid tabletLg={{ col: 6 }}>
-            <h2 className="font-sans-md tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
-              {t("heading")}
-            </h2>
-            <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-              {t.rich("paragraph_2", {
-                strong: (chunks) => <strong>{chunks}</strong>,
-                "process-link": (chunks) => (
-                  <Link href="/process">{chunks}</Link>
-                ),
-                "research-link": (chunks) => (
-                  <Link href="/research">{chunks}</Link>
-                ),
-              })}
-            </p>
           </Grid>
         </Grid>
       </GridContainer>

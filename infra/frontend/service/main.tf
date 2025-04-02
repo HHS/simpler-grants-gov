@@ -28,9 +28,11 @@ data "aws_subnets" "public" {
 }
 
 locals {
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
+  # The prefix is used to create uniquely named resources per terraform workspace, which
+  # are needed in CI/CD for preview environments and tests.
+  #
+  # To isolate changes during infrastructure development by using manually created
+  # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -41,15 +43,19 @@ locals {
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
-  is_temporary = startswith(terraform.workspace, "t-")
   # Include project name in bucket name since buckets need to be globally unique across AWS
-  bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
+  bucket_name  = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
+  is_temporary = terraform.workspace != "default"
 
+  build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
+  storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  domain                                         = local.environment_config.domain
+  identity_provider_config                       = local.environment_config.identity_provider_config
+  notifications_config                           = local.environment_config.notifications_config
+
+  network_config = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -58,7 +64,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
+      version = ">= 5.81.0, < 6.0.0"
     }
   }
 
@@ -82,31 +88,11 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_rds_cluster" "db_cluster" {
-  count              = module.app_config.has_database ? 1 : 0
-  cluster_identifier = local.database_config.cluster_name
-}
-
-data "aws_iam_policy" "app_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.app_access_policy_name
-}
-
-data "aws_iam_policy" "migrator_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.migrator_access_policy_name
-}
-
 # Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
   count = module.app_config.has_incident_management_service ? 1 : 0
   name  = local.incident_management_service_integration_config.integration_url_param_name
-}
-
-data "aws_acm_certificate" "cert" {
-  count  = local.domain != null ? 1 : 0
-  domain = local.domain
 }
 
 data "aws_security_groups" "aws_services" {
@@ -121,54 +107,78 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
+data "aws_acm_certificate" "certificate" {
+  count  = local.service_config.enable_https ? 1 : 0
+  domain = local.service_config.domain_name
+}
+
+# data "aws_route53_zone" "zone" {
+#   count = local.service_config.domain_name != null ? 1 : 0
+#   name  = local.network_config.domain_config.hosted_zone
+# }
+
 module "service" {
-  source                         = "../../modules/service"
-  service_name                   = local.service_name
-  is_temporary                   = local.is_temporary
-  image_repository_name          = module.app_config.image_repository_name
-  image_tag                      = local.image_tag
-  vpc_id                         = data.aws_vpc.network.id
-  public_subnet_ids              = data.aws_subnets.public.ids
-  private_subnet_ids             = data.aws_subnets.private.ids
+  source       = "../../modules/service"
+  service_name = local.service_config.service_name
+
+  image_repository_arn = local.build_repository_config.repository_arn
+  image_repository_url = local.build_repository_config.repository_url
+
+  image_tag = local.image_tag
+
+  vpc_id             = data.aws_vpc.network.id
+  public_subnet_ids  = data.aws_subnets.public.ids
+  private_subnet_ids = data.aws_subnets.private.ids
+
+  domain_name    = local.service_config.domain_name
+  hosted_zone_id = null
+  # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+  hostname        = module.app_config.hostname
+
+  cpu                      = local.service_config.instance_cpu
+  memory                   = local.service_config.instance_memory
+  enable_command_execution = local.service_config.enable_command_execution
+  max_capacity             = local.service_config.instance_scaling_max_capacity
+  min_capacity             = local.service_config.instance_scaling_min_capacity
+  enable_autoscaling       = true
+
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-  cert_arn                       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
-  domain                         = local.domain
-  hostname                       = module.app_config.hostname
-  desired_instance_count         = local.service_config.instance_desired_instance_count
-  max_capacity                   = local.service_config.instance_scaling_max_capacity
-  min_capacity                   = local.service_config.instance_scaling_min_capacity
-  cpu                            = local.service_config.instance_cpu
-  memory                         = local.service_config.instance_memory
-  enable_autoscaling             = true
-  enable_alb_cdn                 = true
-  app_access_policy_arn          = null
-  migrator_access_policy_arn     = null
-  db_vars = module.app_config.has_database ? {
-    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
-    }
-  } : null
+
+  file_upload_jobs = local.service_config.file_upload_jobs
+  scheduled_jobs   = local.environment_config.scheduled_jobs
+
+  enable_alb_cdn = true
+
+
+  extra_environment_variables = merge(
+    {
+      BUCKET_NAME = local.storage_config.bucket_name
+    },
+    # local.identity_provider_environment_variables,
+    local.notifications_environment_variables,
+    local.service_config.extra_environment_variables
+  )
+
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
+    module.app_config.enable_identity_provider ? [{
+      # name      = "COGNITO_CLIENT_SECRET"
+      # valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : []
   )
-  extra_environment_variables = local.service_config.extra_environment_variables
-}
 
-module "monitoring" {
-  source = "../../modules/monitoring"
-  #Email subscription list:
-  email_alerts_subscription_list = ["grantsalerts@navapbc.com"]
+  extra_policies = merge(
+    {
+      # storage_access = module.storage.access_policy_arn
+    },
+    module.app_config.enable_identity_provider ? {
+      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {}
+  )
 
-  # Module takes service and ALB names to link all alerts with corresponding targets
-  service_name                                = local.service_name
-  load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
-  incident_management_service_integration_url = module.app_config.has_incident_management_service ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
+  is_temporary = local.is_temporary
 }

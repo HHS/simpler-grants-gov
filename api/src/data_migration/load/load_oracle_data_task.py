@@ -22,22 +22,15 @@ TABLES_TO_LOAD = [
     "topportunity",
     "topportunity_cfda",
     "tsynopsis",
-    "tsynopsis_hist",
     "tforecast",
-    "tforecast_hist",
     "tapplicanttypes_forecast",
-    "tapplicanttypes_forecast_hist",
     "tapplicanttypes_synopsis",
-    "tapplicanttypes_synopsis_hist",
     "tfundactcat_forecast",
-    "tfundactcat_forecast_hist",
     "tfundactcat_synopsis",
-    "tfundactcat_synopsis_hist",
     "tfundinstr_forecast",
-    "tfundinstr_forecast_hist",
     "tfundinstr_synopsis",
-    "tfundinstr_synopsis_hist",
     "tgroups",
+    "tsynopsisattachment",
 ]
 
 
@@ -122,7 +115,7 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Determine new rows by primary key, and copy them into the staging table."""
-        log_extra = {"table": foreign_table.name}
+        log_extra: dict = {"table": foreign_table.name}
 
         logger.info("Fetching records to be inserted", extra=log_extra)
         select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
@@ -132,7 +125,7 @@ class LoadOracleDataTask(src.task.task.Task):
         t0 = time.monotonic()
         insert_chunk_count = []
         logger.info("Fetched records to be inserted, beginning batches", extra=log_extra)
-        for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size):
+        for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size, strict=False):
             insert_from_select_sql = sql.build_insert_select_sql(
                 foreign_table, staging_table, batch_of_new_ids
             )
@@ -154,19 +147,19 @@ class LoadOracleDataTask(src.task.task.Task):
         t1 = time.monotonic()
         total_insert_count = sum(insert_chunk_count)
         self.increment("count.insert.total", total_insert_count)
-        self.increment(f"count.insert.{staging_table.name}", total_insert_count)
-        self.set_metrics(
-            {
-                f"count.insert.chunk.{staging_table.name}": ",".join(map(str, insert_chunk_count)),
-                f"time.insert.{staging_table.name}": round(t1 - t0, 3),
-            }
-        )
+
+        log_extra |= {
+            f"count.insert.{staging_table.name}": total_insert_count,
+            f"count.insert.chunk.{staging_table.name}": ",".join(map(str, insert_chunk_count)),
+            f"time.insert.{staging_table.name}": round(t1 - t0, 3),
+        }
+        logger.info("Processed records to be inserted", extra=log_extra)
 
         return total_insert_count
 
     def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
-        log_extra = {"table": foreign_table.name}
+        log_extra: dict = {"table": foreign_table.name}
 
         logger.info("Fetching records to be updated", extra=log_extra)
         select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
@@ -176,7 +169,9 @@ class LoadOracleDataTask(src.task.task.Task):
         t0 = time.monotonic()
         update_chunk_count = []
         logger.info("Fetched records to be updated, beginning batches", extra=log_extra)
-        for batch_of_update_ids in itertools.batched(update_ids, self.insert_chunk_size):
+        for batch_of_update_ids in itertools.batched(
+            update_ids, self.insert_chunk_size, strict=False
+        ):
             update_sql = sql.build_update_sql(
                 foreign_table, staging_table, batch_of_update_ids
             ).values(transformed_at=None)
@@ -193,13 +188,13 @@ class LoadOracleDataTask(src.task.task.Task):
         t1 = time.monotonic()
         total_update_count = sum(update_chunk_count)
         self.increment("count.update.total", total_update_count)
-        self.increment(f"count.update.{staging_table.name}", total_update_count)
-        self.set_metrics(
-            {
-                f"count.update.chunk.{staging_table.name}": ",".join(map(str, update_chunk_count)),
-                f"time.update.{staging_table.name}": round(t1 - t0, 3),
-            }
-        )
+
+        log_extra |= {
+            f"count.update.{staging_table.name}": total_update_count,
+            f"count.update.chunk.{staging_table.name}": ",".join(map(str, update_chunk_count)),
+            f"time.update.{staging_table.name}": round(t1 - t0, 3),
+        }
+        logger.info("Processed records to be updated", extra=log_extra)
 
         return total_update_count
 
@@ -207,7 +202,7 @@ class LoadOracleDataTask(src.task.task.Task):
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
     ) -> int:
         """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
-        log_extra = {"table": foreign_table.name}
+        log_extra: dict = {"table": foreign_table.name}
 
         logger.info("Fetching records to be deleted", extra=log_extra)
         update_sql = sql.build_mark_deleted_sql(foreign_table, staging_table).values(
@@ -223,9 +218,13 @@ class LoadOracleDataTask(src.task.task.Task):
         delete_count = result.rowcount
 
         self.increment("count.delete.total", delete_count)
-        self.set_metrics({f"count.delete.{staging_table.name}": delete_count})
-        self.set_metrics({f"time.delete.{staging_table.name}": round(t1 - t0, 3)})
-        logger.info("Delete done", extra=log_extra | {"count": delete_count})
+
+        log_extra |= {
+            f"count.delete.{staging_table.name}": delete_count,
+            f"time.delete.{staging_table.name}": round(t1 - t0, 3),
+        }
+
+        logger.info("Processed records to be deleted", extra=log_extra)
 
         return delete_count
 
@@ -237,7 +236,6 @@ class LoadOracleDataTask(src.task.task.Task):
                 count = self.db_session.query(table).count()
                 extra["table"] = table.name
                 extra[f"count.{table.schema}.{table.name}"] = count
-                self.set_metrics({f"count.{message}.{table.schema}.{table.name}": count})
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
 
 

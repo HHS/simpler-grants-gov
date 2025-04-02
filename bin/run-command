@@ -1,0 +1,147 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Run an application command using the application image
+#
+# Optional parameters:
+#   --environment_variables - a JSON list of environment variables to add to the
+#     the container. Each environment variable is an object with the "name" key
+#     specifying the name of the environment variable and the "value" key
+#     specifying the value of the environment variable.
+#     e.g. '[{ "name" : "DB_USER", "value" : "migrator" }]'
+#   --task_role_arn - the IAM role ARN that the task should assume. Overrides the
+#     task role specified in the task definition.
+#
+# Positional parameters:
+#   app_name (required) - the name of subdirectory of /infra that holds the
+#     application's infrastructure code.
+#   environment (required) - the name of the application environment (e.g. dev,
+#     staging, prod)
+#   command (required) - a JSON list representing the command to run
+#     e.g. To run the command `db-migrate-up` with no arguments, set
+#     command='["db-migrate-up"]'
+#     e.g. To run the command `echo "Hello, world"` set
+#     command='["echo", "Hello, world"]')
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+# Parse optional parameters
+environment_variables=""
+task_role_arn=""
+while :; do
+  case "$1" in
+  --environment-variables)
+    environment_variables="$2"
+    shift 2
+    ;;
+  --task-role-arn)
+    task_role_arn="$2"
+    shift 2
+    ;;
+  *)
+    break
+    ;;
+  esac
+done
+
+app_name="$1"
+environment="$2"
+command="$3"
+
+echo "==============="
+echo "Running command"
+echo "==============="
+echo "Input parameters"
+echo "  app_name=${app_name}"
+echo "  environment=${environment}"
+echo "  command=${command}"
+echo "  environment_variables=${environment_variables:-}"
+echo "  task_role_arn=${task_role_arn:-}"
+echo
+
+# Use the same cluster, task definition, and network configuration that the application service uses
+cluster_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_cluster_name)
+service_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_name)
+
+service_task_definition_arn=$(aws ecs describe-services --no-cli-pager --cluster "${cluster_name}" --services "${service_name}" --query "services[0].taskDefinition" --output text)
+# For subsequent commands, use the task definition family rather than the service's task definition ARN
+# because in the case of migrations, we'll deploy a new task definition revision before updating the
+# service, so the service will be using an old revision, but we want to use the latest revision.
+task_definition_family=$(aws ecs describe-task-definition --no-cli-pager --task-definition "${service_task_definition_arn}" --query "taskDefinition.family" --output text)
+
+network_config=$(aws ecs describe-services --no-cli-pager --cluster "${cluster_name}" --services "${service_name}" --query "services[0].networkConfiguration")
+current_region=$(./bin/current-region)
+aws_user_id=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
+
+container_name=$(aws ecs describe-task-definition --task-definition "${task_definition_family}" --query "taskDefinition.containerDefinitions[?name == '${service_name}'].name" --output text)
+
+overrides=$(
+  cat <<EOF
+{
+  "containerOverrides": [
+    {
+      "name": "${container_name}",
+      "command": ${command}
+    }
+  ]
+}
+EOF
+)
+
+if [ -n "${environment_variables}" ]; then
+  overrides=$(echo "${overrides}" | jq ".containerOverrides[0].environment |= ${environment_variables}")
+fi
+
+if [ -n "${task_role_arn}" ]; then
+  overrides=$(echo "${overrides}" | jq ".taskRoleArn |= \"${task_role_arn}\"")
+fi
+
+aws_args=(
+  ecs run-task
+  --region="${current_region}"
+  --cluster="${cluster_name}"
+  --task-definition="${task_definition_family}"
+  --started-by="${aws_user_id}"
+  --launch-type=FARGATE
+  --platform-version=1.4.0
+  --network-configuration "${network_config}"
+  --overrides "${overrides}"
+)
+echo "::group::Running AWS CLI command"
+printf " ... %s\n" "${aws_args[@]}"
+task_arn=$(aws --no-cli-pager "${aws_args[@]}" --query "tasks[0].taskArn" --output text)
+echo "::endgroup::"
+echo
+
+ecs_task_id=$(basename "${task_arn}")
+
+echo "Task information"
+echo "  task_arn=${task_arn}"
+echo "  task_id=${ecs_task_id}"
+
+echo
+echo "Waiting for task to complete"
+
+aws ecs wait tasks-stopped --cluster "${cluster_name}" --tasks "${task_arn}"
+
+container_exit_code=$(
+  aws ecs describe-tasks \
+    --cluster "${cluster_name}" \
+    --tasks "${task_arn}" \
+    --query "tasks[0].containers[?name=='${container_name}'].exitCode" \
+    --output text
+)
+
+if [[ "${container_exit_code}" == "null" || "${container_exit_code}" != "0" ]]; then
+  echo "Task failed" >&2
+  # Although we could avoid extra calls to AWS CLI if we just got the full JSON response from
+  # `aws ecs describe-tasks` and parsed it with jq, we are trying to avoid unnecessary dependencies.
+  container_status=$(aws ecs describe-tasks --cluster "${cluster_name}" --tasks "${task_arn}" --query "tasks[0].containers[?name=='${container_name}'].[lastStatus,exitCode,reason]" --output text)
+  task_status=$(aws ecs describe-tasks --cluster "${cluster_name}" --tasks "${task_arn}" --query "tasks[0].[lastStatus,stopCode,stoppedAt,stoppedReason]" --output text)
+
+  echo "Container status (lastStatus, exitCode, reason): ${container_status}" >&2
+  echo "Task status (lastStatus, stopCode, stoppedAt, stoppedReason): ${task_status}" >&2
+  exit 1
+fi
+
+echo
+echo "Task complete, container exit code: ${container_exit_code}"

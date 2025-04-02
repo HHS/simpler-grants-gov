@@ -101,6 +101,18 @@ const nextConfig = {
       "types",
     ],
   },
+  experimental: {
+    testProxy: true,
+  },
+  async redirects() {
+    return [
+      {
+        source: "/process",
+        destination: "/roadmap",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

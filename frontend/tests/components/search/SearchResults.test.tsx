@@ -12,6 +12,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
+const getSessionMock = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
   setRequestLocale: identity,

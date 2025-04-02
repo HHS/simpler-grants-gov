@@ -20,12 +20,15 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
+import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -34,12 +37,16 @@ from src.constants.lookup_constants import (
     ExtractType,
     FundingCategory,
     FundingInstrument,
+    JobStatus,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
 )
 from src.db.models import agency_models
 from src.util import file_util
+
+# Needed for generating Opportunity Json Blob for OpportunityVersion
+SCHEMA = OpportunityV1Schema()
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -316,6 +323,11 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
+###################
+# Opportunity Factories
+###################
+
+
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
@@ -413,6 +425,18 @@ class OpportunityFactory(BaseFactory):
                 size=lambda: random.randint(1, 2),
             )
         )
+
+
+class OpportunityVersionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityVersion
+
+    opportunity_version_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
 class OpportunitySummaryFactory(BaseFactory):
@@ -520,11 +544,6 @@ class OpportunitySummaryFactory(BaseFactory):
         lambda s: s.forecasted_project_start_date.year if s.forecasted_project_start_date else None
     )
 
-    is_deleted = False
-
-    # Generally, current summaries won't have the revision number set
-    revision_number = None
-
     version_number = factory.Faker("random_int", min=8, max=13)
 
     funding_instruments = factory.Faker(
@@ -620,7 +639,6 @@ class OpportunitySummaryFactory(BaseFactory):
             agency_contact_description=None,
             agency_email_address=None,
             agency_email_address_description=None,
-            is_deleted=None,
             funding_instruments=[],
             funding_categories=[],
             applicant_types=[],
@@ -805,6 +823,268 @@ class OpportunityAttachmentFactory(BaseFactory):
         return attachment
 
 
+class OpportunityChangeAuditFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityChangeAudit
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+    is_loaded_to_search = False
+
+
+###################
+# User & Auth Factories
+###################
+
+
+class UserFactory(BaseFactory):
+    class Meta:
+        model = user_models.User
+
+    user_id = Generators.UuidObj
+
+
+class LinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
+
+    email = factory.Faker("email")
+
+
+class UserNotificationLogFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationLog
+
+    user_notification_log_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    notification_reason = "test"
+    notification_sent = True
+
+
+class LoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = user_models.LoginGovState
+
+    login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
+class UserTokenSessionFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserTokenSession
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    token_id = Generators.UuidObj
+
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
+
+    is_valid = True
+
+
+class UserSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunity
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class UserSavedSearchFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedSearch
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    saved_search_id = Generators.UuidObj
+
+    name = factory.Faker("sentence")
+
+    search_query = factory.LazyAttribute(lambda s: s.search_query)
+
+    last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+
+    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+
+
+###################
+# Competition & Form Factories
+###################
+
+
+class CompetitionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Competition
+
+    competition_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    public_competition_id = sometimes_none("ABC-134-56789")
+    legacy_package_id = sometimes_none("PKG-00260155")
+
+    competition_title = sometimes_none(factory.Faker("sentence"))
+
+    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
+    closing_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.opening_date)
+    )
+
+    grace_period = factory.Faker("random_int", min=1, max=10)
+    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+    )
+
+    competition_forms = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.CompetitionFormFactory",
+        factory_related_name="competition",
+        size=lambda: random.randint(1, 2),
+    )
+
+
+class CompetitionInstructionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionInstruction
+
+    competition_instruction_id = Generators.UuidObj
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+    file_location = "file_location"
+
+
+class CompetitionAssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionAssistanceListing
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
+    opportunity_assistance_listing_id = factory.LazyAttribute(
+        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
+    )
+
+
+class FormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Form
+
+    form_id = Generators.UuidObj
+    form_name = factory.Faker("bs")
+    # Form version will be like 1.0, 4.5, etc.
+    form_version = factory.Faker("pystr_format", string_format="#.#")
+    agency_code = factory.Faker("agency_code")
+
+    form_json_schema = {
+        "type": "object",
+        "title": "Test form for testing",
+        "properties": {
+            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
+            "Description": {
+                "title": "Description for application",
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 15,
+            },
+            "ApplicationNumber": {
+                "title": "Application number",
+                "type": "number",
+                "minLength": 1,
+                "maxLength": 120,
+            },
+            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
+        },
+    }
+    form_ui_schema = [
+        {"type": "field", "definition": "/properties/Title"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Date"},
+    ]
+
+
+class CompetitionFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.CompetitionForm
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+
+    is_required = False
+
+
+###################
+# Application Factories
+###################
+
+
+class ApplicationFactory(BaseFactory):
+    class Meta:
+        model = competition_models.Application
+
+    application_id = Generators.UuidObj
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+    class Params:
+        with_forms = factory.Trait(
+            application_forms=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationFormFactory",
+                factory_related_name="application",
+                size=lambda: random.randint(1, 3),
+            )
+        )
+
+
+class ApplicationFormFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationForm
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    form = factory.SubFactory(FormFactory)
+    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+
+    application_response = factory.LazyFunction(
+        lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
+    )
+
+
+###################
+# Agency Factories
+###################
+
+
 class AgencyContactInfoFactory(BaseFactory):
     class Meta:
         model = agency_models.AgencyContactInfo
@@ -866,6 +1146,30 @@ class AgencyFactory(BaseFactory):
     agency_contact_info_id = factory.LazyAttribute(
         lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
     )
+
+
+###################
+# Misc Factories
+###################
+
+
+class ExtractMetadataFactory(BaseFactory):
+    class Meta:
+        model = extract_models.ExtractMetadata
+
+    extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
+    file_name = factory.Faker("file_name")
+    file_path = "s3://bucket/key"
+    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
+
+
+class JobLogFactory(BaseFactory):
+    class Meta:
+        model = task_models.JobLog
+
+    job_id = Generators.UuidObj
+    job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
+    metrics = None
 
 
 ####################################
@@ -1029,10 +1333,10 @@ class TsynopsisAttachmentFactory(BaseFactory):
     class Meta:
         abstract = True
 
-    syn_att_id: factory.Sequence(lambda n: n)
-    opportunity_id: factory.Sequence(lambda n: n)
+    syn_att_id = factory.Sequence(lambda n: n)
+    opportunity_id = factory.Sequence(lambda n: n)
     att_revision_number = factory.Faker("random_int", min=1000, max=10000000)
-    att_type: factory.Faker("att_type")
+    att_type = factory.Faker("word")
     mime_type = factory.Faker("mime_type")
     link_url = factory.Faker("relevant_url")
     file_name = factory.Faker("file_name", category="text")
@@ -1238,7 +1542,6 @@ class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
         model = staging.synopsis.TsynopsisHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
@@ -1254,7 +1557,6 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
         model = staging.forecast.TforecastHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
@@ -1421,6 +1723,14 @@ class StagingTsynopsisAttachmentFactory(TsynopsisAttachmentFactory, AbstractStag
     class Meta:
         model = staging.attachment.TsynopsisAttachment
 
+    @classmethod
+    def _setup_next_sequence(cls):
+        # Force this to start at a large number
+        # so it doesn't cause weird ID conflicts with
+        # tests that create records in the actual attachment
+        # table directly (which starts counting at 1)
+        return 100000
+
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
@@ -1484,7 +1794,6 @@ class ForeignTsynopsisHistFactory(ForeignTsynopsisFactory):
         model = foreign.synopsis.TsynopsisHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class ForeignTforecastFactory(TforecastFactory):
@@ -1500,7 +1809,6 @@ class ForeignTforecastHistFactory(ForeignTforecastFactory):
         model = foreign.forecast.TforecastHist
 
     revision_number = factory.Faker("random_int", min=1, max=25)
-    action_type = "U"  # Update, put D for deleted
 
 
 class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
@@ -1630,234 +1938,6 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
 ##
 
 
-class OpportunitySummaryHistoryBuilder:
-    """dasdasd
-    Utility class for adding historical opportunity summary records
-    to an opportunity.
-
-    Can either take in an existing opportunity or you can pass parameters
-    into the init method to create an opportunity using the OpportunityFactory
-
-    For example:
-
-        opportunity = (
-            OpportunitySummaryHistoryBuilder(opportunity_title="My opportunity title")
-                .add_forecast()
-                .add_forecast_history()
-                .add_non_forecast(is_current=True)
-                .add_non_forecast_history(summary_description="an older description")
-                .add_non_forecast_history()
-                .build()
-        )
-
-    This would produce an opportunity with:
-        * A non-forecast summary record set to be the CurrentOpportunitySummary
-        * Two prior non-forecast summary records
-        * A forecast summary record
-        * A forecast summary history record
-
-    """
-
-    def __init__(self, opportunity: opportunity_models.Opportunity | None = None, **kwargs):
-        self.opportunity_already_exists: bool = False
-        self.forecast_already_exists: bool = False
-        self.non_forecast_already_exists: bool = False
-
-        self.most_recent_non_forecast: dict | None = None
-        self.most_recent_forecast: dict | None = None
-
-        self.non_forecast_history: list[dict] = []
-        self.forecast_history: list[dict] = []
-
-        self.is_current_non_forecast = False
-        self.is_current_forecast = False
-
-        if opportunity is None:
-            self.opportunity = OpportunityFactory.create(no_current_summary=True, **kwargs)
-        else:
-            self.opportunity_already_exists = True
-            self.opportunity = opportunity
-            if opportunity.current_opportunity_summary is not None:
-                current_summary = opportunity.current_opportunity_summary.opportunity_summary
-
-                if current_summary.is_forecast:
-                    self.most_recent_forecast = current_summary.for_json()
-                    self.forecast_already_exists = True
-                    self.is_current_forecast = True
-                else:
-                    self.most_recent_non_forecast = current_summary.for_json()
-                    self.non_forecast_already_exists = True
-                    self.is_current_non_forecast = True
-
-    def add_non_forecast(
-        self, is_current: bool = False, **kwargs
-    ) -> "OpportunitySummaryHistoryBuilder":
-        if self.most_recent_non_forecast:
-            raise Exception("Cannot call add_non_forecast if a non-forecast already exists")
-
-        kwargs["is_forecast"] = False
-        self.is_current_non_forecast = is_current
-        self.most_recent_non_forecast = kwargs
-
-        return self
-
-    def add_forecast(
-        self, is_current: bool = False, **kwargs
-    ) -> "OpportunitySummaryHistoryBuilder":
-        if self.most_recent_forecast:
-            raise Exception("Cannot call add_forecast if a forecast already exists")
-
-        kwargs["is_forecast"] = True
-        self.is_current_forecast = is_current
-        self.most_recent_forecast = kwargs
-
-        return self
-
-    def add_non_forecast_history(
-        self, is_deleted: bool = False, **kwargs
-    ) -> "OpportunitySummaryHistoryBuilder":
-        # If there is no most_recent_non_forecast set, we want to error
-        # unless the record is deleted or the last (first added) history record was deleted.
-        #
-        # Effectively, you can only have a history without a non-history record
-        # if the last history record is deleted. If the last is deleted, you're
-        # free to add more history.
-        #
-        # eg. You can setup a history that is several updates and then someone ultimately deleting the non-forecast
-        if self.most_recent_non_forecast is None:
-            if not is_deleted and (
-                len(self.non_forecast_history) > 0
-                and self.non_forecast_history[0].get("is_deleted") is not True
-            ):
-                raise Exception(
-                    "Cannot add a historical non-forecast without already having a regular non-forecast UNLESS the last historical record is deleted"
-                )
-
-        kwargs["is_forecast"] = False
-        kwargs["is_deleted"] = is_deleted
-        self.non_forecast_history.append(kwargs)
-
-        return self
-
-    def add_forecast_history(
-        self, is_deleted: bool = False, **kwargs
-    ) -> "OpportunitySummaryHistoryBuilder":
-        # If there is no most_recent_forecast set, we want to error
-        # unless the record is deleted or the last (first added) history record was deleted.
-        #
-        # Effectively, you can only have a history without a non-history record
-        # if the last history record is deleted. If the last is deleted, you're
-        # free to add more history.
-        #
-        # eg. You can setup a history that is several updates and then someone ultimately deleting the forecast
-        if self.most_recent_forecast is None:
-            if not is_deleted and (
-                len(self.forecast_history) > 0
-                and self.forecast_history[0].get("is_deleted") is not True
-            ):
-                raise Exception(
-                    "Cannot add a historical forecast without already having a regular forecast UNLESS the last historical record is deleted"
-                )
-
-        kwargs["is_forecast"] = True
-        kwargs["is_deleted"] = is_deleted
-        self.forecast_history.append(kwargs)
-
-        return self
-
-    def build(self) -> opportunity_models.Opportunity:
-        if self.is_current_non_forecast and self.is_current_forecast:
-            raise Exception(
-                "Cannot set both the forecast and non-forecast record to be the CurrentOpportunitySummary"
-            )
-
-        non_forecast_hist_count = len(self.non_forecast_history)
-        forecast_hist_count = len(self.forecast_history)
-
-        # revision number behaves sorta like
-        # a "global" count shared by all historical records
-        revision_number = non_forecast_hist_count + forecast_hist_count - 1
-
-        non_forecast_params: dict = {}
-        forecast_params: dict = {}
-
-        if self.non_forecast_already_exists is False and self.most_recent_non_forecast is not None:
-            non_forecast = OpportunitySummaryFactory.create(
-                opportunity=self.opportunity,
-                version_number=non_forecast_hist_count + 1,
-                revision_number=None,
-                **self.most_recent_non_forecast,
-            )
-
-            non_forecast_params = non_forecast.for_json()
-
-            if self.is_current_non_forecast:
-                CurrentOpportunitySummaryFactory.create(
-                    opportunity=self.opportunity, opportunity_summary=non_forecast
-                )
-
-        if self.non_forecast_already_exists:
-            # Adjust the version number to make sense
-            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
-                non_forecast_hist_count + 1
-            )
-
-        if self.forecast_already_exists is False and self.most_recent_forecast is not None:
-            forecast = OpportunitySummaryFactory.create(
-                opportunity=self.opportunity,
-                version_number=forecast_hist_count + 1,
-                revision_number=None,
-                **self.most_recent_forecast,
-            )
-
-            forecast_params = forecast.for_json()
-
-            if self.is_current_forecast:
-                CurrentOpportunitySummaryFactory.create(
-                    opportunity=self.opportunity, opportunity_summary=forecast
-                )
-
-        if self.forecast_already_exists:
-            # Adjust the version number to make sense
-            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
-                forecast_hist_count + 1
-            )
-
-        for non_forecast_hist in self.non_forecast_history:
-            params = non_forecast_params | non_forecast_hist
-
-            params.pop("opportunity_summary_id", None)
-            params["revision_number"] = revision_number
-            params["version_number"] = non_forecast_hist_count
-            params["is_deleted"] = non_forecast_hist.get("is_deleted")
-
-            non_forecast_hist = OpportunitySummaryFactory.create(
-                opportunity=self.opportunity, **params
-            )
-
-            non_forecast_params = non_forecast_hist.for_json()
-
-            non_forecast_hist_count -= 1
-            revision_number -= 1
-
-        for forecast_hist in self.forecast_history:
-            params = forecast_params | forecast_hist
-
-            params.pop("opportunity_summary_id", None)
-            params["revision_number"] = revision_number
-            params["version_number"] = forecast_hist_count
-            params["is_deleted"] = forecast_hist.get("is_deleted")
-
-            forecast_hist = OpportunitySummaryFactory.create(opportunity=self.opportunity, **params)
-
-            forecast_params = forecast_hist.for_json()
-
-            forecast_hist_count -= 1
-            revision_number -= 1
-
-        return self.opportunity
-
-
 class StagingTgroupsAgencyFactory(factory.DictFactory):
     """
         This does not need to be called directly, and instead you should use
@@ -1945,107 +2025,3 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
-
-
-class OpportunityChangeAuditFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityChangeAudit
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-
-class UserFactory(BaseFactory):
-    class Meta:
-        model = user_models.User
-
-    user_id = Generators.UuidObj
-
-
-class LinkExternalUserFactory(BaseFactory):
-    class Meta:
-        model = user_models.LinkExternalUser
-
-    link_external_user_id = Generators.UuidObj
-    external_user_id = Generators.UuidObj
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
-
-    email = factory.Faker("email")
-
-
-class UserNotificationLogFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserNotificationLog
-
-    user_notification_log_id = Generators.UuidObj
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    notification_reason = "test"
-    notification_sent = True
-
-
-class LoginGovStateFactory(BaseFactory):
-    class Meta:
-        model = user_models.LoginGovState
-
-    login_gov_state_id = Generators.UuidObj
-    nonce = Generators.UuidObj
-
-
-class ExtractMetadataFactory(BaseFactory):
-    class Meta:
-        model = extract_models.ExtractMetadata
-
-    extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
-    file_name = factory.Faker("file_name")
-    file_path = "s3://bucket/key"
-    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
-
-
-class UserTokenSessionFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserTokenSession
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    token_id = Generators.UuidObj
-
-    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
-
-    is_valid = True
-
-
-class UserSavedOpportunityFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserSavedOpportunity
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-
-class UserSavedSearchFactory(BaseFactory):
-    class Meta:
-        model = user_models.UserSavedSearch
-
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    saved_search_id = Generators.UuidObj
-
-    name = factory.Faker("sentence")
-
-    search_query = factory.LazyAttribute(lambda s: s.search_query)
-
-    last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-
-    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))

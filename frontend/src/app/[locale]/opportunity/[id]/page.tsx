@@ -4,15 +4,15 @@ import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import ContentLayout from "src/components/ContentLayout";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
@@ -21,6 +21,7 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
@@ -39,7 +40,7 @@ export async function generateMetadata({
   let title = `${t("OpportunityListing.page_title")}`;
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
-    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
+    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
@@ -102,7 +103,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     return <NotFound />;
   }
 
-  let opportunityData = {} as Opportunity;
+  let opportunityData = {} as OpportunityDetail;
   try {
     const response = await getOpportunityDetails(id);
     opportunityData = response.data;
@@ -117,7 +118,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   breadcrumbs.push({
-    title: `${opportunityData.opportunity_title}: ${opportunityData.opportunity_number}`,
+    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
@@ -130,15 +131,26 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     <div>
       <BetaAlert />
       <Breadcrumbs breadcrumbList={breadcrumbs} />
-      <OpportunityIntro opportunityData={opportunityData} />
-      <GridContainer>
-        <div className="grid-row grid-gap">
+      <ContentLayout
+        title={opportunityData.opportunity_title}
+        data-testid="opportunity-intro-content"
+        paddingTop={false}
+      >
+        <div className="usa-prose padding-y-3">
+          <OpportunitySaveUserControl />
+        </div>
+        <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+            <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
               nofoPath={nofoPath}
+              opportunityId={opportunityData.opportunity_id}
             />
-            <OpportunityDocuments documents={opportunityData.attachments} />
+            <OpportunityDocuments
+              documents={opportunityData.attachments}
+              opportunityId={opportunityData.opportunity_id}
+            />
             <OpportunityLink opportunityData={opportunityData} />
           </div>
 
@@ -149,7 +161,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityHistory summary={opportunityData.summary} />
           </div>
         </div>
-      </GridContainer>
+      </ContentLayout>
     </div>
   );
 }

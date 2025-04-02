@@ -2,11 +2,39 @@
 
 ## Deployment
 
+### Deploying Every Service
+
+This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
+
+```bash
+terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/api/service" apply -var "environment_name=dev"
+
+terraform -chdir="infra/api/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/api/service" apply -var "environment_name=staging"
+```
+
+```bash
+terraform -chdir="infra/frontend/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/frontend/service" apply -var "environment_name=dev"
+
+terraform -chdir="infra/frontend/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/frontend/service" apply -var "environment_name=staging"
+```
+
+```bash
+terraform -chdir="infra/analytics/service" init -backend-config="dev.s3.tfbackend" -reconfigure
+terraform -chdir="infra/analytics/service" apply -var "environment_name=dev"
+
+terraform -chdir="infra/analytics/service" init -backend-config="staging.s3.tfbackend" -reconfigure
+terraform -chdir="infra/analytics/service" apply -var "environment_name=staging"
+```
+
 ### Updating to our Terraform Version
 
 1. Install `tfenv`
 2. Get the terraform version to install from `terraform_version` this file: https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/deploy.yml
-3. Follow `tfenv` instructions to instsall and utilize the given terraform version
+3. Follow `tfenv` instructions to install and utilize the given terraform version
 
 ### Terraform State Locks
 
@@ -94,6 +122,123 @@ notable constraint of OpenSearch, relative to ECS and the Database.
 
 We manage several secret values that need to be rotated yearly.
 
+### Application Certificates
+
+#### Application Certificates: Part 1: Generate A Cert
+
+The process starts by generating a cert like so. You will need to generate the certs one at a time.
+
+```bash
+# api.simpler.grants.gov example
+
+openssl genrsa -out api_simpler_grants_gov.key 2048
+openssl req -new \
+    -key api_simpler_grants_gov.key \
+    -out api_simpler_grants_gov.csr \
+    -subj "/C=US/O=Simpler Grants Gov/CN=api.simpler.grants.gov" \
+    -addext "subjectAltName=DNS:api.simpler.grants.gov"
+
+# simpler.grants.gov example
+
+openssl genrsa -out simpler_grants_gov.key 2048
+openssl req -new \
+    -key simpler_grants_gov.key \
+    -out simpler_grants_gov.csr \
+    -subj "/C=US/O=Simpler Grants Gov/CN=simpler.grants.gov" \
+    -addext "subjectAltName=DNS:simpler.grants.gov"
+```
+
+You give the `{url}.csr` file to HHS so that they can perform the next step. When they get back to you, proceed to part 2a
+
+#### Application Certificates: Part 2a: Upload A Single Cert
+
+You will get a zip file back from HHS containing the certificate. Inside the zip there will be a file. If it isn't called `{url}.key` then rename it so that that's its name.
+
+```bash
+# api.simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+If you get the following error...
+
+> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
+
+...then go on to part 2b. If not, then go to part 3
+
+#### Application Certificates: Part 2b: Upload Multiple Certs
+
+If there are multiple certificates (eg. a chain certificate is included) then there will be given another file called something like `{url}_chain.key` and the command looks more like this
+
+```bash
+# api.simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
+    --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
+    --certificate-chain fileb://simpler_grants_gov_chain.pem \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+But if you got this error
+
+> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
+
+And don't have 3 certs, then you need to create the chain certs, via part 2c
+
+#### Application Certificates: Part 2c: Split Out and Upload Multiple Certs (Allegedly)
+
+This is the case where you'll need to extra the chain certs from the primary cert so you can upload them separately. You can split the certs via first running the following command,
+
+```bash
+# api.simpler.grants.gov example
+
+openssl x509 -inform DER \
+    -in api_simpler_grants_gov.cer \
+    -out api_simpler_grants_gov.pem
+
+# simpler.grants.gov example
+
+openssl x509 -inform DER \
+    -in simpler_grants_gov.cer \
+    -out simpler_grants_gov.pem
+```
+
+After that you can inspect the cert to split it out. Allegedly there should be multiple certs in there... but... in my tests there was not. So there's 2 things to do here:
+
+1. Just upload the new single cert plain text file
+2. Split out the certs so you can upload the chain cert
+
+When this document was originally written, it was case 1 above, so there was only 1 cert to actually upload. The command to do that was:
+
+```bash
+# api.simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
+    --private-key fileb://api_simpler_grants_gov.key
+
+# simpler.grants.gov example
+
+aws acm import-certificate --certificate fileb://simpler_grants_gov.pem \
+    --private-key fileb://simpler_grants_gov.key
+```
+
+**_(when someone gets an actual chain cert, they should update this documentation)_**
+
+#### Application Certificates: Part 3
+
+At this point your cert should be uploaded. The next step is to deploy the load balancers so they pick up the new cert. This should be a normal deploy, the same way you do your deploys in every other circumstance.
+
 ### Login.gov Certificates
 
 *These certificates were last updated in December 2024*
@@ -119,3 +264,25 @@ After the next deployment in an environment, we should be using the new keys, an
 Prod login.gov does not update immediately, and you must [request a deployment](https://developers.login.gov/production/#changes-to-production-applications) to get a certificate rotated.
 
 For Prod, assume it will take at least two weeks from creating the certificate, before it is available for the API, and until it is, do not change the API's configured key.
+
+## New Relic
+
+There are three ways to interact with New Relic: UI, CLI, or API. Most interactions will be done via the UI.
+
+### New Relic API via Terraform
+
+We use the New Relic via means of Terraform. [You can via the New Relic Terraform API documentation here](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/guides/getting_started). To setup Terraform for New Relic, perform the following steps:
+
+1. [Login to New Relic](https://one.newrelic.com)
+2. [Navigate to the API keys page](https://one.newrelic.com/admin-portal/api-keys/home)
+3. Create a key of key type "user"
+4. Copy the key value
+5. Set the key value, region,  in your `.zshrc` `.bashrc` or similar:
+
+```bash
+export NEW_RELIC_ACCOUNT_ID=1234 # Found in the URL among other places. eg. https://one.newrelic.com/nr1-core?account=< ACCOUNT ID HERE>
+export NEW_RELIC_API_KEY="EXAMPLE"
+export NEW_RELIC_REGION="US" # Always "US".
+```
+
+You will then be able to interact with New Relic via Terraform. There's some New Relic Terraform configuration inside of the `infra/accounts/` folder for example. From this point you can use normal Terraform CLI commands to interact with New Relic, `terraform init` `terraform apply` etc.

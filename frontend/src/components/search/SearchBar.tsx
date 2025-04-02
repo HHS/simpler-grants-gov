@@ -9,10 +9,10 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { ErrorMessage, Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
-  query: string | null | undefined;
+  queryTermFromParent: string | null | undefined;
 }
 
-export default function SearchBar({ query }: SearchBarProps) {
+export default function SearchBar({ queryTermFromParent }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
@@ -27,7 +27,7 @@ export default function SearchBar({ query }: SearchBarProps) {
     if (validationError) {
       setValidationError(undefined);
     }
-    updateQueryParams("", "query", queryTerm, false);
+    updateQueryParams("", "query", queryTerm);
   };
 
   // if we have "refresh=true" query param, clear the input
@@ -45,6 +45,10 @@ export default function SearchBar({ query }: SearchBarProps) {
       updateQueryParams("", "refresh");
     }
   }, [searchParams, updateQueryParams]);
+
+  useEffect(() => {
+    updateQueryTerm(queryTermFromParent || "");
+  }, [queryTermFromParent, updateQueryTerm]);
 
   return (
     <div
@@ -73,7 +77,7 @@ export default function SearchBar({ query }: SearchBarProps) {
           id="query"
           type="search"
           name="query"
-          defaultValue={query || ""}
+          value={queryTerm || ""}
           onChange={(e) => updateQueryTerm(e.target?.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSubmit();

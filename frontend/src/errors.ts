@@ -3,17 +3,21 @@
  * Note that the errors defined here rely on stringifying JSON data into the Error's message parameter
  * That data will need to be parsed back out into JSON when reading the error
  */
-
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
+  const cause = error.cause as FrontendErrorDetails;
+
   try {
+    if (cause?.status) {
+      return cause.status;
+    }
     const parsedMessage = JSON.parse(message) as { status: number };
     return parsedMessage.status;
   } catch (e) {
-    console.error("Malformed error object");
+    console.error("Malformed error object", e);
     return 500;
   }
 };
@@ -30,14 +34,14 @@ export class NetworkError extends Error {
     const serializedSearchInputs = searchInputs
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
-
-    const serializedData = JSON.stringify({
+    const message = error instanceof Error ? error.message : "Unknown Error";
+    const cause = {
       type: "NetworkError",
       searchInputs: serializedSearchInputs,
-      message: error instanceof Error ? error.message : "Unknown Error",
+      message,
       status: 500,
-    });
-    super(serializedData);
+    };
+    super(message, { cause });
   }
 }
 
@@ -54,15 +58,15 @@ export class BaseFrontendError extends Error {
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
 
-    const serializedData = JSON.stringify({
+    const cause = {
       type,
       searchInputs: serializedSearchInputs,
       message: message || "Unknown Error",
       status,
       details: additionalDetails,
-    });
+    };
 
-    super(serializedData);
+    super(message || "Unknown Error", { cause });
 
     if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, this.constructor);
@@ -189,3 +193,18 @@ function convertSearchInputSetsToArrays(
     page: searchInputs.page,
   };
 }
+
+// Helper function to read error details
+export const readError = (e: Error, defaultStatus: number) => {
+  const { message, cause } = e;
+  const status =
+    cause && typeof cause === "object" && "status" in cause
+      ? cause.status
+      : defaultStatus;
+
+  return {
+    status: Number(status),
+    message,
+    cause: cause as FrontendErrorDetails,
+  };
+};

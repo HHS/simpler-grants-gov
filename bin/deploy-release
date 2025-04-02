@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+app_name="$1"
+image_tag="$2"
+environment="$3"
+
+echo "--------------"
+echo "Deploy release"
+echo "--------------"
+echo "Input parameters:"
+echo "  app_name=${app_name}"
+echo "  image_tag=${image_tag}"
+echo "  environment=${environment}"
+echo
+
+# Update task definition and update service to use new task definition
+
+echo "::group::Starting ${app_name} deploy of ${image_tag} to ${environment}"
+TF_CLI_ARGS_apply="-input=false -auto-approve -var=image_tag=${image_tag}" make infra-update-app-service APP_NAME="${app_name}" ENVIRONMENT="${environment}"
+echo "::endgroup::"
+
+# Wait for the service to become stable
+
+cluster_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_cluster_name)
+service_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_name)
+echo "Wait for service ${service_name} to become stable"
+wait_for_service_stability() {
+  aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
+}
+
+if ! wait_for_service_stability; then
+  echo "Retrying"
+  wait_for_service_stability
+fi
+
+echo "Completed ${app_name} deploy of ${image_tag} to ${environment}"

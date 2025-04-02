@@ -40,11 +40,13 @@ export interface UserProfile {
   email?: string;
   token: string;
   expiresAt: Date;
+  user_id: string;
 }
 
 // represents client JWT payload
 export interface SimplerJwtPayload extends JWTPayload {
   token: string;
+  session_duration_minutes: number;
 }
 // represents API JWT payload
 export type UserSession = UserProfile & SimplerJwtPayload;
