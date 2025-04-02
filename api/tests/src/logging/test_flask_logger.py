@@ -110,6 +110,7 @@ def test_request_context_extra_attributes(app: Flask, caplog: pytest.LogCaptureF
     }
 
     app.test_client().get("/hello/jane?up=high&down=low")
+    print("hello")
 
     assert len(caplog.records) > 0
     for record in caplog.records:
