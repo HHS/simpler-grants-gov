@@ -11,7 +11,7 @@ locals {
         # Placeholder value for the hosted zone
         # A hosted zone represents a domain and all of its subdomains. For example, a
         # hosted zone of foo.domain.com includes foo.domain.com, bar.foo.domain.com, etc.
-        hosted_zone = ""
+        hosted_zone = "dev.simpler.grants.gov"
 
         certificate_configs = {
           # Example certificate configuration for a certificate that is managed by the project
@@ -37,7 +37,7 @@ locals {
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
       domain_config = {
         manage_dns  = false
-        hosted_zone = ""
+        hosted_zone = "staging.simpler.grants.gov"
 
         certificate_configs = {}
       }
@@ -50,7 +50,7 @@ locals {
       grants_gov_oracle_cidr_block = "10.250.0.0/16" # MicroHealth managed CIDR block where the prod origin Oracle database for Grants.gov is located
       domain_config = {
         manage_dns  = false
-        hosted_zone = ""
+        hosted_zone = "simpler.grants.gov"
 
         certificate_configs = {}
       }

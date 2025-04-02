@@ -221,15 +221,15 @@ def get_run_mode() -> str:
     # We want to indicate whether the app was run as an API service
     # or as a CLI - use the argv of the command we ran it with
     # to determine that.
-    # CLI commands are always of the form "/path/to/flask <blueprint name> <task name> <commands>
+    # CLI commands are always of the form "/path/to/flask <blueprint name> <task name> <commands>"
     #
     # The API service can be started either as
-    #  "/path/to/flask --app src.app run ..." --> When run locally
-    #  "poetry run gunicorn src.app:create_app()"
+    #  "/path/to/flask --app src.app run ..."         --> When run locally
+    #  "/api/.venv/bin/gunicorn src.app:create_app()" --> When run non-locally
     #
     # So we check for pieces that only appear in the API commands
 
-    _original_argv = tuple(sys.argv)
+    _original_argv = " ".join(sys.argv)
     run_mode = "cli"
     if "gunicorn" in _original_argv or "--app" in _original_argv:
         run_mode = "service"

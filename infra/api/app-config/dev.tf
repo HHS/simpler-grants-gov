@@ -5,7 +5,7 @@ module "dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "dev"
   network_name                    = "dev"
-  domain_name                     = null
+  domain_name                     = "api.dev.simpler.grants.gov"
   enable_https                    = false
   has_database                    = local.has_database
   database_enable_http_endpoint   = true

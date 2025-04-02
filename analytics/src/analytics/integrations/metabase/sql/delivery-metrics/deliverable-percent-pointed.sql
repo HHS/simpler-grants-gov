@@ -1,114 +1,145 @@
 WITH RECURSIVE 
 
-  -- Get epics within a given deliverable
-  epics_in_deliverable AS (
-    SELECT DISTINCT
-      gh_deliverable.id AS deliverable_id,
-      e.id AS epic_id,
-      e.ghid AS epic_ghid,
-      e.title AS epic_title
-    FROM 
-      gh_deliverable
-    INNER JOIN gh_epic_deliverable_map m ON m.deliverable_id = gh_deliverable.id
-    INNER JOIN gh_epic e ON m.epic_id = e.id 
-    WHERE 
-      {{deliverable_title}}
-  ),
+-- Step 1: Resolve the selected deliverable
+selected_deliverable AS (
+  SELECT id, ghid
+  FROM gh_deliverable
+  WHERE {{deliverable_title}}
+),
 
-  -- Get issues within each epic or directly linked to the deliverable
-  issue_hierarchy AS (
-    -- Issues that are direct children of an epic
-    SELECT
-      e.deliverable_id,
-      e.epic_id,
-      e.epic_ghid AS root_epic_ghid,
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,  -- Identify epics
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable  -- Identify deliverables
-    FROM 
-      epics_in_deliverable e
-    INNER JOIN gh_issue i ON i.parent_issue_ghid = e.epic_ghid
+-- Step 2: Latest epic-to-deliverable mappings only
+latest_epic_mappings AS (
+  SELECT DISTINCT ON (edm.epic_id)
+    edm.epic_id,
+    e.ghid AS epic_ghid,
+    edm.deliverable_id,
+    edm.d_effective
+  FROM gh_epic_deliverable_map edm
+  JOIN gh_epic e ON edm.epic_id = e.id
+  ORDER BY edm.epic_id, edm.d_effective DESC
+),
 
-    UNION ALL
+-- Step 3: Epics currently mapped to the selected deliverable
+epics_in_deliverable AS (
+  SELECT
+    lem.epic_id,
+    lem.epic_ghid,
+    lem.deliverable_id
+  FROM latest_epic_mappings lem
+  JOIN selected_deliverable sd ON lem.deliverable_id = sd.id
+),
 
-    -- Issues that are direct children of the deliverable itself
-    SELECT
-      gh_deliverable.id AS deliverable_id,
-      NULL AS epic_id,
-      NULL AS root_epic_ghid,
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable
-    FROM 
-      gh_deliverable
-    INNER JOIN gh_issue i ON i.parent_issue_ghid = gh_deliverable.ghid
-    WHERE 
-      {{deliverable_title}}
+-- Step 4: Recursively walk the issue tree from epics
+epic_issue_tree AS (
+  SELECT
+    e.deliverable_id,
+    e.epic_id,
+    e.epic_ghid,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM epics_in_deliverable e
+  JOIN gh_issue i ON i.parent_issue_ghid = e.epic_ghid
 
-    UNION ALL
-    
-    -- Recursively find the children of each issue
-    SELECT
-      ih.deliverable_id,
-      ih.epic_id,
-      ih.root_epic_ghid,
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable
-    FROM 
-      gh_issue i
-    INNER JOIN issue_hierarchy ih ON i.parent_issue_ghid = ih.issue_ghid
-  ),
+  UNION ALL
 
-  -- Get most recent d_effective per issue
-  latest_issue_date AS (
-    SELECT
-      h.issue_id,
-      MAX(h.d_effective) AS max_d_effective
-    FROM 
-      gh_issue_history h
-    INNER JOIN issue_hierarchy i ON h.issue_id = i.issue_id
-    WHERE 
-      NOT i.is_epic  -- Exclude epics
-      AND NOT i.is_deliverable  -- Exclude deliverables
-    GROUP BY h.issue_id
-  ),
+  SELECT
+    eit.deliverable_id,
+    eit.epic_id,
+    eit.epic_ghid,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM gh_issue i
+  JOIN epic_issue_tree eit ON i.parent_issue_ghid = eit.issue_ghid
+),
 
-  -- Determine if an issue has points on its most recent history record 
-  issue_state AS (
-    SELECT
-      i.issue_id,
-      CASE 
-        WHEN SUM(h.points) > 0 THEN 'pointed' 
-        ELSE 'unpointed' 
-      END AS issue_state
-    FROM 
-      gh_issue_history h
-    INNER JOIN issue_hierarchy i ON h.issue_id = i.issue_id
-    INNER JOIN latest_issue_date ld 
-      ON h.issue_id = ld.issue_id 
-      AND h.d_effective = ld.max_d_effective
-    WHERE 
-      NOT i.is_epic  -- Exclude epics
-      AND NOT i.is_deliverable  -- Exclude deliverables
-      AND h.status != 'Done'  -- Filter out "Done" tasks
-    GROUP BY i.issue_id
+-- Step 5: Pre-filter issues that are direct children of the deliverable
+raw_direct_issues AS (
+  SELECT
+    sd.id AS deliverable_id,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM selected_deliverable sd
+  JOIN gh_issue i ON i.parent_issue_ghid = sd.ghid
+),
+
+-- Step 6: Filter out issues that are actually epics mapped elsewhere
+direct_issues AS (
+  SELECT
+    rdi.deliverable_id,
+    NULL::integer AS epic_id,
+    NULL::text AS epic_ghid,
+    rdi.issue_id,
+    rdi.issue_ghid,
+    rdi.issue_title,
+    rdi.parent_issue_ghid
+  FROM raw_direct_issues rdi
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM latest_epic_mappings lem
+    JOIN gh_epic ep ON lem.epic_id = ep.id
+    WHERE ep.ghid = rdi.issue_ghid
   )
+),
 
--- Count issues per category (pointed vs. unpointed)
+-- Step 7: Combine both sources
+combined_issues AS (
+  SELECT * FROM epic_issue_tree
+  UNION ALL
+  SELECT * FROM direct_issues
+),
+
+-- Step 8: Ranked statuses
+ranked_statuses AS (
+  SELECT 'Icebox' AS status, 1 AS status_priority UNION ALL
+  SELECT 'Backlog', 2 UNION ALL
+  SELECT 'Prioritized', 3 UNION ALL
+  SELECT 'Planning', 4 UNION ALL
+  SELECT 'Todo', 5 UNION ALL
+  SELECT 'Blocked', 6 UNION ALL
+  SELECT 'In Progress', 7 UNION ALL
+  SELECT 'In Review', 8 UNION ALL
+  SELECT 'Done', 9
+),
+
+-- Step 9: Latest state per issue
+latest_history AS (
+  SELECT 
+    h.issue_id,
+    MAX(h.d_effective) AS latest_d_effective
+  FROM gh_issue_history h
+  JOIN combined_issues ci ON h.issue_id = ci.issue_id
+  GROUP BY h.issue_id
+),
+
+-- Step 10: Issues with latest status not Done, de-duped by issue_id
+open_issues AS (
+  SELECT 
+    h.issue_id,
+    SUM(h.points) AS total_points
+  FROM gh_issue_history h
+  JOIN latest_history lh ON h.issue_id = lh.issue_id AND h.d_effective = lh.latest_d_effective
+  WHERE h.status != 'Done'
+  GROUP BY h.issue_id
+),
+
+-- Step 11: Categorize issues by pointing state
+issue_pointing_state AS (
+  SELECT
+    issue_id,
+    CASE WHEN total_points > 0 THEN 'pointed' ELSE 'unpointed' END AS issue_state
+  FROM open_issues
+)
+
+-- Step 12: Count and return
 SELECT
   issue_state,
   COUNT(*) AS issue_count
-FROM 
-  issue_state
+FROM issue_pointing_state
 GROUP BY issue_state
 ORDER BY issue_state;
