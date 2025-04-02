@@ -9,14 +9,14 @@ export default function VisionMssion() {
   return (
     <GridContainer className="padding-4 grid-row">
       <Grid className="grid-col">
-        <h1>{t("title_1")}</h1>
+        <h1 className="font-sans-2xl">{t("title_1")}</h1>
       </Grid>
       <Grid className="grid-col">
         <Grid className="grid-row">
           <p>{t("paragraph_1")}</p>
           <Grid className="grid-row flex-align-center flex-justify-center">
             <USWDSIcon name="search" height="50px" className="grid-col-1" />
-            <h3 className="grid-col-2">{t("title_2")}</h3>
+            <h2 className="grid-col-2">{t("title_2")}</h2>
             <p className="grid-col-fill">{t("paragraph_2")}</p>
           </Grid>
           <Grid className="grid-row flex-align-center flex-justify-center">
@@ -25,7 +25,7 @@ export default function VisionMssion() {
               height="50px"
               className="grid-col-1"
             />
-            <h3 className="grid-col-2">{t("title_3")}</h3>
+            <h2 className="grid-col-2">{t("title_3")}</h2>
             <p className="grid-col-fill">{t("paragraph_3")}</p>
           </Grid>
           <Grid className="grid-row flex-align-center flex-justify-center">
@@ -34,7 +34,7 @@ export default function VisionMssion() {
               height="50px"
               className="grid-col-1"
             />
-            <h3 className="grid-col-2">{t("title_4")}</h3>
+            <h2 className="grid-col-2">{t("title_4")}</h2>
             <p className="grid-col-fill">{t("paragraph_4")}</p>
           </Grid>
         </Grid>
