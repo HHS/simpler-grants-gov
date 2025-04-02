@@ -3,7 +3,9 @@ import { APIResponse } from "src/types/apiResponseTypes";
 import { fetchApplications } from "./fetchers";
 
 interface applicationStartResponse extends APIResponse {
-  competition_id: string;
+  data: {
+    application_id: string;
+  };
 }
 
 // make call from server to API to start an application

@@ -10,10 +10,9 @@ export const POST = async () => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session start application");
     }
-    console.log("heeey");
 
     const response = await handleStartApplication(COMPETITION_ID);
-    console.log(response);
+
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
         `Error starting application: ${response.message}`,
@@ -23,10 +22,9 @@ export const POST = async () => {
     }
     return Response.json({
       message: "Application start success",
-      id: response?.competition_id,
+      applicationId: response?.data?.application_id,
     });
   } catch (e) {
-    console.log("heee", e);
     const { status, message } = readError(e as Error, 500);
     return Response.json(
       {

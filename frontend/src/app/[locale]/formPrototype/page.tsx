@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import CreateApplicatinButton from "./CreateApplication";
+import CreateApplicatinButton from "src/components/workspace/CreateApplicationButton";
 
 export function generateMetadata() {
   const meta: Metadata = {

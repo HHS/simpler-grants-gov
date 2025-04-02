@@ -1,16 +1,22 @@
 "use client";
-export const startApplication = async (token?: string) => {
-  if (!token) return;
 
+interface applicationStartResponse {
+  message: string;
+  applicationId: string;
+}
+
+export const startApplication = async (
+  token?: string,
+): Promise<applicationStartResponse> => {
+  if (!token) {
+    throw new Error(`Error starting application`);
+  }
   const res = await fetch("/api/applications/start", {
     method: "POST",
   });
-  console.log(res);
   if (res.ok && res.status === 200) {
-    const data = (await res.json()) as { id: string };
-    return data;
+    return (await res.json()) as applicationStartResponse;
   } else {
-    console.log(res);
-    throw new Error(`Error posting saved search: ${res.status}`);
+    throw new Error(`Error starting application: ${res.status}`);
   }
 };

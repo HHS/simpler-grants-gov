@@ -1,22 +1,21 @@
 "use client";
 
-import { useUser } from "src/services/auth/useUser";
 import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 const CreateApplicatinButton = () => {
-  const { user } = useUser();
-
+  const router = useRouter();
   const [loading, setLoading] = useState<boolean>();
 
   const handleSubmit = useCallback(() => {
     setLoading(true);
-    console.log("wtf");
-    startApplication("test")
+    startApplication("insecuretoken")
       .then((data) => {
-        console.log(data);
+        const { applicationId } = data;
+        router.push(`/formPrototype/${applicationId}`);
       })
       .catch((error) => {
         console.error(error);
@@ -24,7 +23,7 @@ const CreateApplicatinButton = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [user]);
+  }, [router]);
   return (
     <Button onClick={handleSubmit} type="submit">
       {loading ? "loading..." : "Create new application"}
