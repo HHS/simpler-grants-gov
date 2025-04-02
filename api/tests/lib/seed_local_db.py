@@ -1,12 +1,15 @@
 import logging
+import uuid
 
 import click
+from sqlalchemy import select
 
 import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.db.models.competition_models import Competition
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 
@@ -54,6 +57,25 @@ def _build_opportunities(
     logger.info("Finished creating opportunities")
 
 
+def _build_competitions(db_session: db.Session) -> None:
+    logger.info("Creating competitions")
+
+    # Statically create a competition with exactly one of our default forms
+    # Static to make development for frontend folks easier so they don't need
+    # to keep looking up the UUID
+    static_competition_id = uuid.UUID("fd7f5921-9585-48a5-ab0f-e726f4d1ef94")
+    static_competition = db_session.execute(
+        select(Competition).where(Competition.competition_id == static_competition_id)
+    ).scalar_one_or_none()
+    if static_competition is None:
+        competition = factories.CompetitionFactory.create(
+            competition_id=static_competition_id, competition_forms=[]
+        )
+        factories.CompetitionFormFactory.create(competition=competition)
+
+    logger.info(f"Static competition for development exists with ID {str(static_competition_id)}")
+
+
 @click.command()
 @click.option(
     "--iterations",
@@ -81,3 +103,4 @@ def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
             db_session.commit()
 
             _build_agencies(db_session)
+            _build_competitions(db_session)
