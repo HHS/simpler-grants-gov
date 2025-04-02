@@ -20,12 +20,12 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
     add_extra_data_to_current_request_logs(
         {"service_name": service_name, "service_port_name": service_port_name}
     )
-    soap_client = LegacySOAPClient()
-    proxy_response = soap_client.proxy_request(
+    soap_api_client = LegacySOAPClient()
+    proxy_response = soap_api_client.proxy_request(
         method="POST",
         full_path=request.full_path,
         headers=dict(request.headers),
         body=request.data,
     )
     # This format will preserve the response data from SOAP API.
-    return proxy_response.content, proxy_response.status_code, proxy_response.headers.items()
+    return proxy_response.to_flask_response()
