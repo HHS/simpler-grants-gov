@@ -29,6 +29,7 @@ describe("getNextRoutes", () => {
       "/subscribe/unsubscribe",
       "/unauthenticated",
       "/unauthorized",
+      "/vision",
     ]);
   });
 });
