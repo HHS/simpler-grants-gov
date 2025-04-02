@@ -7,6 +7,7 @@ from sqlalchemy import Select, select
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 import src.adapters.db as db
+from src.adapters import search
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
@@ -76,3 +77,13 @@ def get_agencies(
     pagination_info = PaginationInfo.from_pagination_params(list_params.pagination, paginator)
 
     return paginated_agencies, pagination_info
+
+class SearchAgencyParams(BaseModel):
+    pagination: PaginationParams
+    query: str | None = None
+    filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
+
+
+def search_agencies(search_client: search.SearchClient, raw_search_params: dict) -> Tuple[Sequence[Agency], PaginationInfo]:
+
+
