@@ -403,6 +403,7 @@ export const messages = {
       home: "Home",
       roadmap: "Roadmap",
       research: "Research",
+      vision: "Vision",
       subscribe: "Subscribe",
       menuToggle: "Menu",
       search: "Search",
