@@ -13,7 +13,9 @@ from tests.lib.seed_agencies import _build_agencies
 logger = logging.getLogger(__name__)
 
 
-def _build_opportunities(db_session: db.Session, iterations: int) -> None:
+def _build_opportunities(
+    db_session: db.Session, iterations: int, cover_all_agencies: bool = True
+) -> None:
     # Just create a variety of opportunities for local testing
     # we can eventually look into creating more specific scenarios
     for i in range(iterations):
@@ -46,7 +48,9 @@ def _build_opportunities(db_session: db.Session, iterations: int) -> None:
             factories.CurrentOpportunitySummaryFactory.create(
                 opportunity=all_null_opportunity, opportunity_summary=summary
             )
-
+    if cover_all_agencies:
+        for agency in factories.CustomProvider.AGENCIES:
+            factories.OpportunityFactory.create(agency_code=agency)
     logger.info("Finished creating opportunities")
 
 
@@ -56,7 +60,12 @@ def _build_opportunities(db_session: db.Session, iterations: int) -> None:
     default=1,
     help="Number of sets of opportunities to create, note that several are created per iteration",
 )
-def seed_local_db(iterations: int) -> None:
+@click.option(
+    "--cover_all_agencies",
+    default="false",
+    help="Should the seed include an opportunity assigned to each agency?",
+)
+def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
@@ -66,7 +75,7 @@ def seed_local_db(iterations: int) -> None:
         with db_client.get_session() as db_session:
             factories._db_session = db_session
 
-            _build_opportunities(db_session, iterations)
+            _build_opportunities(db_session, iterations, cover_all_agencies)
             # Need to commit to force any updates made
             # after factories created objects
             db_session.commit()
