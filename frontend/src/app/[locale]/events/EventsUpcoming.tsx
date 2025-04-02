@@ -5,7 +5,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-const Upcoming = () => {
+const EventsUpcoming = () => {
   const t = useTranslations("Events");
 
   return (
@@ -25,7 +25,7 @@ const Upcoming = () => {
           <h2>
             {t("upcoming.header")}
           </h2>
-          <p className="font-sans-md">
+          <p className="font-sans-md line-height-sans-4">
             {t("upcoming.description")}
           </p>
           <a
@@ -42,4 +42,4 @@ const Upcoming = () => {
   );
 };
 
-export default Upcoming;
+export default EventsUpcoming;

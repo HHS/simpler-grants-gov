@@ -11,11 +11,14 @@ export const messages = {
     },
     demos: {
       title: "Simpler.Grants.gov Big Demo",
-      description: "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. "
+      description: "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+      watch: "Watch recordings of past Big Demos",
+      watch_link: "January 15, 2025"
     },
     coding_challenge: {
       title: "Collaborative Coding Challenge",
-      description: "The Simpler.Grants.gov Collaborative Coding Challenge is an entirely virtual interactive event attended by members of the public, government, stakeholders, and our internal development team. Small teams of external developers, designers, and researchers pitch a proposal to solve a problem with the strongest of them added to the product roadmap.",
+      description_p1: "The Simpler.Grants.gov Collaborative Coding Challenge is an entirely virtual interactive event attended by members of the public, government, stakeholders, and our internal development team.",
+      description_p2: "Small teams of external developers, designers, and researchers pitch a proposal to solve a problem with the strongest of them added to the product roadmap.",
       link: "Read about the Spring 2025 Coding Challenge"
     }
   },
