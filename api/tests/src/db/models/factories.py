@@ -1333,10 +1333,10 @@ class TsynopsisAttachmentFactory(BaseFactory):
     class Meta:
         abstract = True
 
-    syn_att_id: factory.Sequence(lambda n: n)
-    opportunity_id: factory.Sequence(lambda n: n)
+    syn_att_id = factory.Sequence(lambda n: n)
+    opportunity_id = factory.Sequence(lambda n: n)
     att_revision_number = factory.Faker("random_int", min=1000, max=10000000)
-    att_type: factory.Faker("att_type")
+    att_type = factory.Faker("word")
     mime_type = factory.Faker("mime_type")
     link_url = factory.Faker("relevant_url")
     file_name = factory.Faker("file_name", category="text")
@@ -1722,6 +1722,14 @@ class StagingTgroupsFactory(AbstractStagingFactory):
 class StagingTsynopsisAttachmentFactory(TsynopsisAttachmentFactory, AbstractStagingFactory):
     class Meta:
         model = staging.attachment.TsynopsisAttachment
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        # Force this to start at a large number
+        # so it doesn't cause weird ID conflicts with
+        # tests that create records in the actual attachment
+        # table directly (which starts counting at 1)
+        return 100000
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
