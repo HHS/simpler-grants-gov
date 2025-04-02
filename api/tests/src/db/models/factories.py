@@ -1933,6 +1933,50 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
+class TuserAccountFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    full_name = factory.Faker("name")
+    email_address = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_duplicate = factory.Faker("yn_boolean")
+    is_active = factory.Faker("yn_boolean")
+    is_email_confirm_pending = factory.Faker("yn_boolean")
+    deactivated_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+    mobile_number = factory.Faker("phone_number")
+
+
+class ForeignTuserAccountFactory(TuserAccountFactory):
+    class Meta:
+        model = foreign.user.TuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.TuserAccount.user_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserAccount
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            full_name=None,
+            email_address=None,
+        )
+
+
 ##
 # Pseudo-factories
 ##
