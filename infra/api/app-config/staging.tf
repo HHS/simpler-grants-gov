@@ -5,7 +5,7 @@ module "staging_config" {
   default_region                  = module.project_config.default_region
   environment                     = "staging"
   network_name                    = "staging"
-  domain_name                     = null
+  domain_name                     = "api.staging.simpler.grants.gov"
   enable_https                    = false
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
@@ -37,8 +37,9 @@ module "staging_config" {
 
   service_override_extra_environment_variables = {
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT = 1
-    ENABLE_SOAP_API      = 1
+    ENABLE_AUTH_ENDPOINT   = 1
+    ENABLE_APPLY_ENDPOINTS = 1
+    ENABLE_SOAP_API        = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
