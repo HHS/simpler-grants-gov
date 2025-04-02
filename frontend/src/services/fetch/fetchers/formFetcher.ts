@@ -12,11 +12,15 @@ export const getFormDetails = async (
   return responseBody;
 };
 
-export interface FormResponse {
+export interface ApplyFormDetail {
   form_id: string;
   form_name: string;
   form_json_schema: object;
   form_ui_schema: UiSchema;
+}
+
+interface FormResponse {
+  data: ApplyFormDetail;
 }
 
 // TODO: remove once we are getting the form from the API directly

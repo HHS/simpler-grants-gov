@@ -3,7 +3,10 @@ import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
-import { FormResponse, getForm } from "src/services/fetch/fetchers/formFetcher";
+import {
+  ApplyFormDetail,
+  getForm,
+} from "src/services/fetch/fetchers/formFetcher";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { redirect } from "next/navigation";
@@ -25,11 +28,11 @@ export function generateMetadata() {
 }
 
 async function FormPage() {
-  let formData = {} as FormResponse;
+  let formData = {} as ApplyFormDetail;
   const id = "anyform";
   try {
     const response = await getForm(id);
-    formData = response;
+    formData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
@@ -38,6 +41,7 @@ async function FormPage() {
   }
 
   const { form_json_schema, form_ui_schema } = formData;
+
   try {
     validateUiSchema(form_ui_schema);
     validateFormSchema(form_json_schema);
