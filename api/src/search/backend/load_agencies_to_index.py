@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Sequence
 
 from pydantic import Field
@@ -11,6 +12,8 @@ from src.task.task import Task, logger
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
+SCHEMA = AgencyResponseSchema()
+
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
     shard_count: int = Field(default=1)
@@ -21,6 +24,9 @@ class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
 
 
 class LoadAgenciesToIndex(Task):
+    class Metrics(StrEnum):
+        RECORDS_LOADED = "records_loaded"
+
     def __init__(
         self,
         db_session: db.Session,
@@ -68,8 +74,14 @@ class LoadAgenciesToIndex(Task):
     def load_agencies(self, agencies: Sequence[Agency]) -> None:
         logger.info("Loading agencies...")
 
-        schema = AgencyResponseSchema()
-        agencies_json = [schema.dump(record) for record in agencies]
+        agencies_json = []
+        for agency in agencies:
+            logger.info(
+                "Preparing agency for upload to search index",
+                extra={"agency_id": agency.agency_id, "agency_code": "agency.agency_code"},
+            )
+            agencies_json.append(SCHEMA.dump(agency))
+            self.increment(self.Metrics.RECORDS_LOADED)
 
         self.search_client.bulk_upsert(
             self.index_name,
