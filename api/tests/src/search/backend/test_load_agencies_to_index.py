@@ -37,6 +37,9 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         resp = search_client.search(agency_index_alias, {"size": 50})
 
         assert resp.total_records == len(agencies)
+        assert load_agencies_to_index.metrics[load_agencies_to_index.Metrics.RECORDS_LOADED] == len(
+            agencies
+        )
 
         # Add more agencies to load and rerun
         agencies.extend(AgencyFactory.create_batch(size=5))
@@ -50,3 +53,6 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         resp = search_client.search(agency_index_alias, {"size": 50})
 
         assert resp.total_records == len(agencies)
+        assert load_agencies_to_index.metrics[load_agencies_to_index.Metrics.RECORDS_LOADED] == len(
+            agencies
+        )
