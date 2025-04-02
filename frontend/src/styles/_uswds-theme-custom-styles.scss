@@ -24,9 +24,6 @@ i.e.
 
 @import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
 
-#main-content:has(div:last-child.bg-base-lightest)+footer.usa-footer {
-  background-color: $theme-color-base-lightest;
-}
 
 .pdf-card {
   transition: transform 0.2s;
@@ -484,4 +481,8 @@ button.usa-pagination__button.usa-button {
 .usa-breadcrumb {
   background-color: inherit;
   color: inherit;
+}
+
+#main-content:has(div:last-child.bg-base-lightest)+footer.usa-footer {
+  background-color: color($theme-color-base-lightest);
 }
