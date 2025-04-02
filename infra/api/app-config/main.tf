@@ -41,7 +41,7 @@ locals {
   # If enabled:
   # 1. Creates an AWS Pinpoint application
   # 2. Configures email notifications using AWS SES
-  enable_notifications = false
+  enable_notifications = true
 
   environment_configs = {
     dev     = module.dev_config
