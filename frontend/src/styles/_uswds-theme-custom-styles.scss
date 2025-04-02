@@ -483,6 +483,13 @@ button.usa-pagination__button.usa-button {
   color: inherit;
 }
 
+.usa-breadcrumb__link {
+  &:visited {
+    color: inherit;
+  }
+}
+
 #main-content:has(div:last-child.bg-base-lightest)+footer.usa-footer {
   background-color: color($theme-color-base-lightest);
 }
+
