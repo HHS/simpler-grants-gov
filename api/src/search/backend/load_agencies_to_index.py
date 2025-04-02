@@ -49,8 +49,8 @@ class LoadAgenciesToIndex(Task):
         # create the index
         self.search_client.create_index(
             self.index_name,
-            shard_count=self.config.shard_count,
-            replica_count=self.config.replica_count,
+            shard_count=self.config.LOAD_AGENCY_SEARCH_SHARD_COUNT,
+            replica_count=self.config.LOAD_AGENCY_SEARCH_REPLICA_COUNT,
         )
         # load the records
         agencies = self.fetch_agencies()
