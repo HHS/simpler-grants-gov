@@ -16,11 +16,11 @@ SCHEMA = AgencyResponseSchema()
 
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
-    shard_count: int = Field(default=1)
-    replica_count: int = Field(default=1)
+    LOAD_AGENCY_SEARCH_SHARD_COUNT: int = Field(default=1)
+    LOAD_AGENCY_SEARCH_REPLICA_COUNT: int = Field(default=1)
 
-    alias_name: str = Field(default="agency-index-alias")  # LOAD_AGENCY_SEARCH_ALIAS_NAME
-    index_prefix: str = Field(default="agency-index")  # LOAD_AGENCY_INDEX_PREFIX
+    alias_name: str = Field(default="agency-index-alias")
+    index_prefix: str = Field(default="agency-index")
 
 
 class LoadAgenciesToIndex(Task):
@@ -78,7 +78,7 @@ class LoadAgenciesToIndex(Task):
         for agency in agencies:
             logger.info(
                 "Preparing agency for upload to search index",
-                extra={"agency_id": agency.agency_id, "agency_code": "agency.agency_code"},
+                extra={"agency_id": agency.agency_id, "agency_code": agency.agency_code},
             )
             agencies_json.append(SCHEMA.dump(agency))
             self.increment(self.Metrics.RECORDS_LOADED)
