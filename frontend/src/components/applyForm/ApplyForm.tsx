@@ -10,7 +10,7 @@ import { submitApplyForm } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { UiSchema } from "./types";
-import { buildFormTreeClosure, getWrappersForNav } from "./utils";
+import { buildForTreeRecursive, getWrappersForNav } from "./utils";
 
 const ApplyForm = ({
   formSchema,
@@ -27,7 +27,7 @@ const ApplyForm = ({
     formData: new FormData(),
   });
   const formObject = Object.fromEntries(formState.formData.entries());
-  const fields = buildFormTreeClosure(
+  const fields = buildForTreeRecursive(
     formSchema,
     uiSchema,
     formState.validationErrors,

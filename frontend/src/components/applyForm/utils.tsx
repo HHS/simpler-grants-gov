@@ -11,7 +11,7 @@ import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
-export function buildFormTreeClosure(
+export function buildForTreeRecursive(
   schema: RJSFSchema,
   uiSchema: UiSchema,
   errors: ErrorObject<string, Record<string, unknown>, unknown>[],
@@ -66,15 +66,23 @@ export function buildFormTreeClosure(
   return acc;
 }
 
-const createField = (
-  id: string,
-  required: boolean | undefined = false,
-  minLength: number | null = null,
-  maxLength: number | null = null,
-  schema: RJSFSchema,
-  rawErrors: string[] | undefined,
-  value: string | number | undefined,
-) => {
+const createField = ({
+  id,
+  required = false,
+  minLength = null,
+  maxLength = null,
+  schema,
+  rawErrors,
+  value,
+}: {
+  id: string;
+  required: boolean | undefined;
+  minLength: number | null;
+  maxLength: number | null;
+  schema: RJSFSchema;
+  rawErrors: string[] | undefined;
+  value: string | number | undefined;
+}) => {
   if (maxLength && Number(maxLength) > 255) {
     return TextareaWidget({
       id,
@@ -122,7 +130,7 @@ export const buildField = (
   errors: ErrorObject<string, Record<string, unknown>, unknown>[],
   formData: object,
 ) => {
-  const name = definition.split("/")[2];
+  const name = definition.split("/")[definition.split("/").length - 1];
   const schema = getSchemaObjectFromPointer(
     formSchema,
     definition,
@@ -130,15 +138,15 @@ export const buildField = (
   const rawErrors = formatFieldErrors(errors, definition, name);
   const value = get(formData, name) as string | number | undefined;
 
-  return createField(
-    name,
-    (formSchema.required ?? []).includes(name),
-    schema.minLength,
-    schema.maxLength,
+  return createField({
+    id: name,
+    required: (formSchema.required ?? []).includes(name),
+    minLength: schema.minLength ? schema.minLength : null,
+    maxLength: schema.maxLength ? schema.maxLength : null,
     schema,
     rawErrors,
     value,
-  );
+  });
 };
 
 const formatFieldErrors = (

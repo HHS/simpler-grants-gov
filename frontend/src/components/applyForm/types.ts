@@ -58,6 +58,7 @@ export type TextTypes =
   | "tel"
   | "url";
 
+// extends the WidgetProps type from rjsf for USWDS and this project implementation
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
