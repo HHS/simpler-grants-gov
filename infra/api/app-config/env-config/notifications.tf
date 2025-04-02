@@ -1,6 +1,6 @@
 # Notifications configuration
 locals {
-  notifications_config = var.enable_notifications && var.domain_name != null ? {
+  notifications_config = var.enable_notifications && var.domain_name != null && local.network_config.domain_config.hosted_zone != null ? {
     # Pinpoint app name.
     name = "${var.app_name}-${var.environment}"
 
