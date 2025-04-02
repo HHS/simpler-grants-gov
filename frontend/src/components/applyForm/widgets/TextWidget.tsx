@@ -1,7 +1,6 @@
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
 import {
-  ariaDescribedByIds,
   examplesId,
   FormContextType,
   RJSFSchema,
@@ -68,7 +67,6 @@ function TextWidget<
 
   const _onChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       onChange(value === "" ? options.emptyValue : value),
     [onChange, options],
   );
@@ -83,11 +81,18 @@ function TextWidget<
     [onFocus, id],
   );
   const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel idFor={id} title={title} required={required} />
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+      )}
       <TextInput
         data-testid={id}
         minLength={(minLength as number) ?? undefined}
@@ -101,7 +106,7 @@ function TextWidget<
         disabled={disabled}
         readOnly={readonly}
         list={examples ? examplesId<T>(id) : undefined}
-        aria-describedby={ariaDescribedByIds<T>(id)}
+        aria-describedby={describedby}
         onChange={updateOnInput ? _onChange : undefined}
         onBlur={updateOnInput ? _onBlur : undefined}
         onFocus={updateOnInput ? _onFocus : undefined}

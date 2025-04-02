@@ -1,5 +1,4 @@
 import {
-  ariaDescribedByIds,
   enumOptionsIsSelected,
   enumOptionsValueForIndex,
   FormContextType,
@@ -79,6 +78,11 @@ function RadioWidget<
     [onFocus, id, enumOptions, emptyValue],
   );
   const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   return (
     <Fieldset id={id}>
@@ -109,7 +113,7 @@ function RadioWidget<
               onChange={updateOnInput ? handleChange : undefined}
               onBlur={updateOnInput ? handleBlur : undefined}
               onFocus={updateOnInput ? handleFocus : undefined}
-              aria-describedby={ariaDescribedByIds<T>(id)}
+              aria-describedby={describedby}
             />
           );
         })}

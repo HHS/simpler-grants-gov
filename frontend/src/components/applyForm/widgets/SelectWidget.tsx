@@ -1,5 +1,4 @@
 import {
-  ariaDescribedByIds,
   enumOptionsIndexForValue,
   enumOptionsValueForIndex,
   FormContextType,
@@ -92,6 +91,11 @@ function SelectWidget<
     multiple,
   );
   const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   return (
     <div key={`wrapper-for-${id}`}>
@@ -111,7 +115,7 @@ function SelectWidget<
         onChange={updateOnInput ? handleChange : undefined}
         onBlur={updateOnInput ? handleBlur : undefined}
         onFocus={updateOnInput ? handleFocus : undefined}
-        aria-describedby={ariaDescribedByIds<T>(id)}
+        aria-describedby={describedby}
       >
         {Array.isArray(enumOptions) &&
           enumOptions.map(({ value, label }) => {

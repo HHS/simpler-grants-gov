@@ -1,11 +1,6 @@
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/widgets/TextareaWidget.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
-import {
-  ariaDescribedByIds,
-  FormContextType,
-  RJSFSchema,
-  StrictRJSFSchema,
-} from "@rjsf/utils";
+import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, Textarea } from "@trussworks/react-uswds";
@@ -56,6 +51,11 @@ function TextareaWidget<
     [id, onFocus],
   );
   const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
   const inputValue = value !== undefined ? String(value) : "";
 
   return (
@@ -77,7 +77,7 @@ function TextareaWidget<
         onChange={updateOnInput ? handleChange : undefined}
         onBlur={updateOnInput ? handleBlur : undefined}
         onFocus={updateOnInput ? handleFocus : undefined}
-        aria-describedby={ariaDescribedByIds<T>(id)}
+        aria-describedby={describedby}
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         rows={options.rows}

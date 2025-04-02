@@ -30,6 +30,6 @@ function FormSuccess() {
 
 export default withFeatureFlag<WithFeatureFlagProps, never>(
   FormSuccess,
-  "applyFormPrototypeOn",
+  "applyFormPrototypeOff",
   () => redirect("/maintenance"),
 );
