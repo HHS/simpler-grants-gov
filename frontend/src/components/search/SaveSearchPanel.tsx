@@ -107,7 +107,7 @@ export function SaveSearchPanel() {
           url={url}
           snackbarMessage={t("copySearch.snackbar")}
         >
-          {!showSavedSearchUI && (
+          {checkFeatureFlag("savedSearchesOn") && !user?.token && (
             <SaveSearchTooltip
               text={t("help.unauthenticated")}
               title={t("help.general")}

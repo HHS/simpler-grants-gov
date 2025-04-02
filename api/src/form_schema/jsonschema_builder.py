@@ -5,10 +5,11 @@ from typing import Any, Self
 class JsonSchemaBuilder:
     """Builder class for constructing a JsonSchema object"""
 
-    def __init__(self, schema: str | None = None, id: str | None = None):
+    def __init__(self, schema: str | None = None, id: str | None = None, title: str | None = None):
         # These represent the $schema and $id values optionally added to a schema
         self.schema = schema
         self.id = id
+        self.title = title
 
         self.properties: dict[str, Any] = {}
         self.required_fields: list[str] = []
@@ -21,6 +22,8 @@ class JsonSchemaBuilder:
         is_nullable: bool,
         is_required: bool,
         *,
+        title: str | None = None,
+        description: str | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
         pattern: str | None = None,
@@ -36,6 +39,12 @@ class JsonSchemaBuilder:
             str_property["type"] = ["string", "null"]
         else:
             str_property["type"] = "string"
+
+        if title is not None:
+            str_property["title"] = title
+
+        if description is not None:
+            str_property["description"] = description
 
         if min_length is not None:
             str_property["minLength"] = min_length
@@ -62,7 +71,15 @@ class JsonSchemaBuilder:
 
         return self
 
-    def add_bool_property(self, field_name: str, is_nullable: bool, is_required: bool) -> Self:
+    def add_bool_property(
+        self,
+        field_name: str,
+        is_nullable: bool,
+        is_required: bool,
+        *,
+        title: str | None = None,
+        description: str | None = None
+    ) -> Self:
         """
         Add a bool property to your JsonSchema
         """
@@ -72,6 +89,12 @@ class JsonSchemaBuilder:
             bool_property["type"] = ["boolean", "null"]
         else:
             bool_property["type"] = "boolean"
+
+        if title is not None:
+            bool_property["title"] = title
+
+        if description is not None:
+            bool_property["description"] = description
 
         self.properties[field_name] = bool_property
 
@@ -86,6 +109,8 @@ class JsonSchemaBuilder:
         is_nullable: bool,
         is_required: bool,
         *,
+        title: str | None = None,
+        description: str | None = None,
         minimum: int | None = None,
         maximum: int | None = None,
         exclusive_minimum: int | None = None,
@@ -100,6 +125,12 @@ class JsonSchemaBuilder:
             int_property["type"] = ["integer", "null"]
         else:
             int_property["type"] = "integer"
+
+        if title is not None:
+            int_property["title"] = title
+
+        if description is not None:
+            int_property["description"] = description
 
         if minimum is not None:
             int_property["minimum"] = minimum
@@ -126,6 +157,8 @@ class JsonSchemaBuilder:
         is_nullable: bool,
         is_required: bool,
         *,
+        title: str | None = None,
+        description: str | None = None,
         minimum: int | float | None = None,
         maximum: int | float | None = None,
         exclusive_minimum: int | float | None = None,
@@ -140,6 +173,12 @@ class JsonSchemaBuilder:
             float_property["type"] = ["number", "null"]
         else:
             float_property["type"] = "number"
+
+        if title is not None:
+            float_property["title"] = title
+
+        if description is not None:
+            float_property["description"] = description
 
         if minimum is not None:
             float_property["minimum"] = minimum
@@ -161,7 +200,12 @@ class JsonSchemaBuilder:
         return self
 
     def add_sub_object(
-        self, field_name: str, is_required: bool, builder: "JsonSchemaBuilder"
+        self,
+        field_name: str,
+        is_required: bool,
+        builder: "JsonSchemaBuilder",
+        *,
+        title: str | None = None
     ) -> Self:
         """
         Add an object to your JsonSchema
@@ -171,11 +215,18 @@ class JsonSchemaBuilder:
         if is_required:
             self.required_fields.append(field_name)
 
-        self.properties[field_name] = builder.build()
+        sub_object = builder.build()
+
+        if title is not None and "title" not in sub_object:
+            sub_object["title"] = title
+
+        self.properties[field_name] = sub_object
 
         return self
 
-    def add_ref_property(self, field_name: str, ref_path: str, is_required: bool) -> Self:
+    def add_ref_property(
+        self, field_name: str, ref_path: str, is_required: bool, *, title: str | None = None
+    ) -> Self:
         """
         Add a ref property to your JsonSchema
 
@@ -184,14 +235,24 @@ class JsonSchemaBuilder:
         if is_required:
             self.required_fields.append(field_name)
 
-        self.properties[field_name] = {"$ref": ref_path}
+        ref_property = {"$ref": ref_path}
+
+        if title is not None:
+            ref_property["title"] = title
+
+        self.properties[field_name] = ref_property
 
         return self
 
-    def add_def_object(self, field_name: str, def_object: dict) -> Self:
+    def add_def_object(
+        self, field_name: str, def_object: dict, *, title: str | None = None
+    ) -> Self:
         """
         Add an object to the $defs section of JsonSchema
         """
+        if title is not None and "title" not in def_object:
+            def_object["title"] = title
+
         self.defs[field_name] = def_object
 
         return self
@@ -210,6 +271,8 @@ class JsonSchemaBuilder:
             json_schema["$schema"] = self.schema
         if self.id is not None:
             json_schema["$id"] = self.id
+        if self.title is not None:
+            json_schema["title"] = self.title
 
         if self.defs:
             json_schema["$defs"] = self.defs

@@ -42,8 +42,13 @@ AGENCY = [
     "summary.agency_phone_number.keyword",
 ]
 
+ATTACHMENT_ONLY = [
+    "attachments.attachment.content",
+]
+
 
 class ScoringRule(StrEnum):
     DEFAULT = "default"
     EXPANDED = "expanded"
     AGENCY = "agency"
+    ATTACHMENT_ONLY = "attachment_only"

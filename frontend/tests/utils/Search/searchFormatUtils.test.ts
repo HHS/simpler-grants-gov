@@ -1,4 +1,7 @@
-import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import {
+  SavedSearchQuery,
+  SearchFetcherActionType,
+} from "src/types/search/searchRequestTypes";
 import {
   buildFilters,
   buildPagination,
@@ -191,6 +194,16 @@ describe("searchToQueryParams", () => {
       filters: { opportunity_status: { one_of: ["Archived", "Closed"] } },
     });
     expect(queryParams.status).toEqual("Archived,Closed");
+  });
+  it("does not break if no filters are present", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: {},
+    });
+    expect(queryParams.query).toEqual("something to search for");
+
+    const emptyQueryParams = searchToQueryParams({} as SavedSearchQuery);
+    expect(emptyQueryParams).toEqual({ query: "" });
   });
 });
 

@@ -32,6 +32,7 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
           },
         ],
       },
+      filters: { active: true },
     },
     nextOptions: {
       revalidate: 604800,

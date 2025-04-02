@@ -10,6 +10,7 @@ module "dev_config" {
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  enable_notifications            = local.enable_notifications
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
@@ -36,7 +37,9 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT = 1
+    ENABLE_AUTH_ENDPOINT   = 1
+    ENABLE_APPLY_ENDPOINTS = 1
+    ENABLE_SOAP_API        = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

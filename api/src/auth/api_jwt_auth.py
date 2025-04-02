@@ -94,6 +94,7 @@ def create_jwt_for_user(
         "iss": config.issuer,
         "email": email,
         "user_id": str(user.user_id),
+        "session_duration_minutes": config.token_expiration_minutes,
     }
 
     logger.info(

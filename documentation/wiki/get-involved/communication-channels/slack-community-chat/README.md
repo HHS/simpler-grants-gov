@@ -1,5 +1,6 @@
 ---
 description: User guide for participating in our Slack workspace.
+hidden: true
 ---
 
 # Slack - Community chat

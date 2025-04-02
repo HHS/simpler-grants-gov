@@ -7,4 +7,10 @@ locals {
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   bucket_name = "${local.prefix}${var.project_name}-${var.app_name}-${var.environment}"
+
+  network_config = module.project_config.network_configs[var.network_name]
+}
+
+module "project_config" {
+  source = "../../../project-config"
 }

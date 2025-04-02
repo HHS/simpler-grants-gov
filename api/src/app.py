@@ -29,6 +29,8 @@ from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.legacy_soap_api import init_app as init_legacy_soap_api
+from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
@@ -72,6 +74,9 @@ def create_app() -> APIFlask:
     if endpoint_config.auth_endpoint:
         initialize_login_gov_config()
         initialize_jwt_auth()
+
+    if LegacySoapAPIConfig().soap_api_enabled:
+        init_legacy_soap_api(app)
 
     return app
 

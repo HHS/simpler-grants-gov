@@ -20,7 +20,7 @@ const ProcessAndResearchContent = () => {
         <p className="font-sans-md line-height-sans-4 padding-bottom-2 desktop-lg:line-height-sans-6">
           {t("process_and_research.paragraph_1")}
         </p>
-        <Link href="/process" passHref>
+        <Link href="/roadmap" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             <span className="margin-right-5">
               {t("process_and_research.cta_1")}

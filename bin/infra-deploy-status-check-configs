@@ -47,6 +47,8 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
+source bin/util.sh
+
 # Return the names of Terraform backend configuration files in (without the ".s3.tfbackend" suffix)
 # for the root module given by "infra/${root_module_subdir}".
 #
@@ -83,13 +85,6 @@ function get_root_module_configs() {
   for backend_config_name in ${backend_config_names}; do
     echo "{\"backend_config_name\": \"${backend_config_name}\", \"infra_layer\": \"${infra_layer}\", \"root_module_subdir\": \"${root_module_subdir}\"}"
   done
-}
-
-# Retrieve the names of the applications in the repo by listing the directories in the "infra" directory
-# and filtering out the directories that are not applications.
-# Returns: A list of application names.
-function get_app_names() {
-  find "infra" -maxdepth 1 -type d -not -name "infra" -not -name "accounts" -not -name "modules" -not -name "networks" -not -name "project-config" -not -name "test" -exec basename {} \;
 }
 
 function get_account_layer_configs() {

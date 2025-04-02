@@ -106,6 +106,10 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
+    application_forms: Mapped[list["ApplicationForm"]] = relationship(
+        "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
+    )
+
 
 class ApplicationForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_form"

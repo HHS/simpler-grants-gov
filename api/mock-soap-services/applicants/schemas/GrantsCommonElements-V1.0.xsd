@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://apply.grants.gov/system/GrantsCommonElements-V1.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:GrantsCommonTypes="http://apply.grants.gov/system/GrantsCommonTypes-V1.0" xmlns:GrantsCommonElements="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+  <!--<xs:import namespace="http://apply.grants.gov/system/GrantsCommonTypes-V1.0" schemaLocation="file:///DevGit/REPO/Applications/grants_schemas/Source/schema/commons/GrantsCommonTypes-V1.0.xsd"  />-->
+  <xs:import namespace="http://apply.grants.gov/system/GrantsCommonTypes-V1.0" schemaLocation="GrantsCommonTypes-V1.0.xsd"/>
+  <!--================-->
+  <!--TYPE DEFINITIONS-->
+  <!--================-->
+  <!--Re-usable Element Definitions-->
+  <!--Begin Release 18.2 New Definitions-->
+  <xs:element name="UEI" type="GrantsCommonTypes:UEIType"/>
+  <xs:element name="AORStatus" type="GrantsCommonTypes:AORStatusType"/>
+  <xs:element name="AORUserFullName" type="GrantsCommonTypes:FullNameType"/>
+  <!--End Release 18.2 New Definitions-->
+  <!--Begin Release 15.4 New Definitions-->
+  <xs:element name="DUNS" type="GrantsCommonTypes:DUNSType"/>
+  <!--End Release 15.4 New Definitions-->
+  <!--Begin Release 15.3 New Definitions-->
+  <xs:element name="ActiveExclusions" type="GrantsCommonTypes:ActiveExclusionsType"/>
+  <xs:element name="DelinquentFederalDebt" type="GrantsCommonTypes:DelinquentFederalDebtType"/>
+  <xs:element name="ExpandedApplicationFilter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FilterType" type="GrantsCommonTypes:ExpandedApplicationFilterType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="FilterValue" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!--End Release 15.3 New Definitions-->
+  <!--Begin Release 15.2 New Definitions-->
+  <xs:element name="Version" type="xs:string"/>
+  <xs:element name="FolderID" type="GrantsCommonTypes:Number18DigitsType"/>
+  <xs:element name="FileID" type="GrantsCommonTypes:Number18DigitsType"/>
+  <xs:element name="LinkID" type="GrantsCommonTypes:Number18DigitsType"/>
+  <xs:element name="OpportunityID" type="GrantsCommonTypes:Number18DigitsType"/>
+  <xs:element name="PackageID" type="GrantsCommonTypes:PackageIDType"/>
+  <xs:element name="LinkURL" type="GrantsCommonTypes:StringWithoutNewLine250Type"/>
+  <xs:element name="LinkDescription" type="GrantsCommonTypes:StringWithoutNewLine250Type"/>
+  <xs:element name="LastUpdatedTimestamp" type="xs:dateTime"/>
+  <xs:element name="InstructionFileLastUpdatedTimestamp" type="xs:dateTime"/>
+  <xs:element name="CompletionStatus" type="GrantsCommonTypes:OperationStatusType"/>
+  <xs:element name="FileSizeInKB" type="GrantsCommonTypes:Number8DigitsType"/>
+  <xs:element name="FileName" type="GrantsCommonTypes:StringMin1Max255Type"/>
+  <xs:element name="FileMIMEType" type="GrantsCommonTypes:StringWithoutNewLine512Type"/>
+  <xs:element name="AgencyCode" type="GrantsCommonTypes:StringMin1Max255Type"/>
+  <xs:element name="AgencyName" type="GrantsCommonTypes:StringMin1Max255Type"/>
+  <xs:element name="SubmissionMethod" type="GrantsCommonTypes:SubmissionMethodType"/>
+  <xs:element name="OpportunityCategoryExplanation" type="GrantsCommonTypes:StringMin1Max255Type"/>
+  <xs:element name="NullifyMissingOptionalElements" type="GrantsCommonTypes:YesNoType" default="N"/>
+  <xs:element name="SendUpdateNotificationEmail" type="GrantsCommonTypes:YesNoType" default="Y"/>
+  <xs:element name="UpdateComments" type="GrantsCommonTypes:StringMin1Max2000Type"/>
+  <xs:element name="SendDeleteNotificationEmail" type="GrantsCommonTypes:YesNoType" default="Y"/>
+  <xs:element name="DeleteComments" type="GrantsCommonTypes:StringMin1Max2000Type"/>
+  <xs:element name="NumberOfNotificationsSent" type="GrantsCommonTypes:Number8DigitsType"/>
+  <xs:element name="LastUpdatedTimestampRangeFilter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BeginValue" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="EndValue" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!--End Release 15.2 New Definitions-->
+  <!--Begin Release 15.1 Definitions-->
+  <xs:element name="OpportunityCategory" type="GrantsCommonTypes:OpportunityCategoryType"/>
+  <xs:element name="OtherOpportunityCategoryExplanation">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:maxLength value="255"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <!--End Release 15.1 Definitions-->
+  <xs:element name="CompetitionID" type="GrantsCommonTypes:CompetitionIDType"/>
+  <xs:element name="CompetitionTitle" type="GrantsCommonTypes:CompetitionTitleType"/>
+  <xs:element name="GrantsGovTrackingNumber" type="GrantsCommonTypes:GrantsGovTrackingNumberType"/>
+  <!--Begin Release 17.0 New Schema Definitions-->
+  <xs:element name="PreviousGrantsGovTrackingNumber" type="GrantsCommonTypes:GrantsGovTrackingNumberType"/>
+  <!--End Release 17.0 New Schema Definitions-->
+  <xs:element name="PostingDate" type="GrantsCommonTypes:MMDDYYYYFwdSlashType"/>
+  <xs:element name="FundingOpportunityNumber" type="GrantsCommonTypes:FundingOpportunityNumberType"/>
+  <xs:element name="UserID" type="GrantsCommonTypes:UserIDType"/>
+  <xs:element name="FundingOpportunityTitle" type="GrantsCommonTypes:StringWithoutNewLine255Type"/>
+  <xs:element name="ClosingDate" type="GrantsCommonTypes:MMDDYYYYFwdSlashType"/>
+  <xs:element name="ArchiveDate" type="GrantsCommonTypes:MMDDYYYYFwdSlashType"/>
+  <xs:element name="CFDANumber" type="GrantsCommonTypes:CFDANumberType"/>
+  <xs:element name="SendChangeNotificationEmail" default="Y">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="Y"/>
+        <xs:enumeration value="N"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="ModificationComments">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:minLength value="1"/>
+        <xs:maxLength value="2000"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <!--Used for CreatePackageInfo where competition ID and title are required if used-->
+  <xs:element name="CompetitionInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CompetitionID" type="GrantsCommonTypes:CompetitionIDType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CompetitionTitle" type="GrantsCommonTypes:CompetitionTitleType" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ResponseMessage">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="Success"/>
+        <xs:enumeration value="Failure"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="InstructionFileInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FileName" type="GrantsCommonTypes:FileNameType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="FileExtension" type="GrantsCommonTypes:FileExtensionType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="FileContentId" type="GrantsCommonTypes:FileContentIdType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="FileDataHandler" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Attachment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FileContentId" type="GrantsCommonTypes:FileContentIdType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="FileDataHandler" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ApplicationFilter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Filter" minOccurs="0" maxOccurs="1">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <!--see GrantsGovApplicationStatusType for a list of valid status values-->
+              <xs:enumeration value="Status"/>
+              <xs:enumeration value="OpportunityID"/>
+              <xs:enumeration value="CFDANumber"/>
+              <xs:enumeration value="SubmissionTitle"/>
+              <xs:enumeration value="GrantsGovTrackingNumber"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="FilterValue" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="FilterType">
+    <xs:restriction base="xs:string">
+      <!--see GrantsGovApplicationStatusType for a list of valid status values-->
+      <xs:enumeration value="Status"/>
+      <xs:enumeration value="OpportunityID"/>
+      <xs:enumeration value="CFDANumber"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Token">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="UserID" type="GrantsCommonTypes:UserIDType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TokenId" type="GrantsCommonTypes:TokenIdType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="DUNS" type="GrantsCommonTypes:DUNSType"/>
+        <xs:element name="FullName" type="GrantsCommonTypes:FullNameType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="AORStatus" type="GrantsCommonTypes:AORStatusType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TokenExpiration" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!--Begin Release 18.2.0 New Definitions-->
+  <xs:element name="TokenInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TokenID" type="GrantsCommonTypes:TokenIdType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TokenExpirationDate" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!--End Release 18.2.0 New Definitions-->
+  <xs:element name="SecurityMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MessageCode" type="GrantsCommonTypes:MessageCodeType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="MessageText" type="GrantsCommonTypes:MessageTextType" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ErrorDetails">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Code" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="Message" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AgencyTrackingNumber" type="GrantsCommonTypes:StringMin1Max240Type"/>
+  <xs:element name="SubmissionTitle" type="GrantsCommonTypes:StringMin1Max240Type"/>
+  <xs:element name="OfferingAgency" type="GrantsCommonTypes:StringMin1Max255Type"/>
+  <xs:element name="GrantsGovApplicationStatus" type="GrantsCommonTypes:GrantsGovApplicationStatusType"/>
+  <xs:element name="AgencyContactInfo" type="GrantsCommonTypes:AgencyContactInfoType"/>
+  <xs:element name="CFDADescription" type="GrantsCommonTypes:StringWithoutNewLine255Type"/>
+  <xs:element name="SchemaURL" type="GrantsCommonTypes:StringWithoutNewLine255Type"/>
+  <xs:element name="InstructionsURL" type="GrantsCommonTypes:StringWithoutNewLine255Type"/>
+  <xs:element name="StatusDetail" type="GrantsCommonTypes:StatusDetailType"/>
+  <xs:element name="AgencyNotes" type="GrantsCommonTypes:AgencyNotesType"/>
+</xs:schema>

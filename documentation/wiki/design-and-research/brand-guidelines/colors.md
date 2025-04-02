@@ -14,8 +14,6 @@ layout:
 
 # Colors
 
-## Overview
-
 Color plays a significant role in our brand. The following values represent our core palette. These are used most often in the system and should be relied on when the color palette must be limited. Each of our colors is named for ideas that represent trust and accessibility.&#x20;
 
 Patina Green, Forest Green, and Sky Blue should be used most frequently as the primary brand colors, with the remaining values being used as support.

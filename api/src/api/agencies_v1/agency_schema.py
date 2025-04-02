@@ -4,7 +4,8 @@ from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class AgencyFilterV1Schema(Schema):
-    agency_id = fields.Integer()
+    agency_id = fields.UUID()
+    active = fields.Boolean()
 
 
 class AgencyListRequestSchema(Schema):
@@ -22,7 +23,7 @@ class AgencyListRequestSchema(Schema):
 class AgencyResponseSchema(Schema):
     """Schema for agency response"""
 
-    agency_id = fields.Integer()
+    agency_id = fields.UUID()
     agency_name = fields.String()
     agency_code = fields.String()
 

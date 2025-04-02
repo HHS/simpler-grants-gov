@@ -3,6 +3,7 @@
 #
 
 import datetime
+import logging
 
 import freezegun
 import pytest
@@ -131,9 +132,6 @@ class TestLoadOracleData(BaseTestClass):
         validate_copied_value(source_table, None, destination_records[4], is_delete=True)
         validate_copied_value(source_table, source_record5, destination_records[5])
 
-        assert task.metrics["count.delete.topportunity"] == 1
-        assert task.metrics["count.insert.topportunity"] == 2
-        assert task.metrics["count.update.topportunity"] == 2
         assert task.metrics["count.delete.total"] == 1
         assert task.metrics["count.insert.total"] == 2
         assert task.metrics["count.update.total"] == 2
@@ -148,8 +146,10 @@ class TestLoadOracleData(BaseTestClass):
 
     @freezegun.freeze_time()
     def test_load_data_chunked(
-        self, db_session, foreign_tables, staging_tables, enable_factory_create
+        self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
     ):
+        caplog.set_level(logging.INFO)
+
         time1 = datetime.datetime(2024, 1, 20, 7, 15, 0)
 
         source_table = foreign_tables["topportunity"]
@@ -174,10 +174,28 @@ class TestLoadOracleData(BaseTestClass):
             db_session.scalars(sqlalchemy.select(destination_table.c.opportunity_id))
         ) == set([record.opportunity_id for record in source_records])
 
-        assert task.metrics["count.delete.topportunity"] == 0
-        assert task.metrics["count.insert.topportunity"] == 100
-        assert task.metrics["count.insert.chunk.topportunity"] == "30,30,30,10"
-        assert task.metrics["count.update.topportunity"] == 0
+        # Find the log record where we log counts of records processed
+        insert_log_record = next(
+            record
+            for record in caplog.records
+            if record.message == "Processed records to be inserted"
+        )
+        delete_log_record = next(
+            record
+            for record in caplog.records
+            if record.message == "Processed records to be deleted"
+        )
+        update_log_record = next(
+            record
+            for record in caplog.records
+            if record.message == "Processed records to be updated"
+        )
+
+        assert getattr(delete_log_record, "count.delete.topportunity") == 0
+        assert getattr(insert_log_record, "count.insert.topportunity") == 100
+        assert getattr(insert_log_record, "count.insert.chunk.topportunity") == "30,30,30,10"
+        assert getattr(update_log_record, "count.update.topportunity") == 0
+
         assert task.metrics["count.delete.total"] == 0
         assert task.metrics["count.insert.total"] == 100
         assert task.metrics["count.update.total"] == 0

@@ -36,6 +36,7 @@ describe("getNextRoutes", () => {
       "/research",
       "/roadmap",
       "/saved-grants",
+      "/saved-search-queries",
       "/search",
       "/subscribe/confirmation",
       "/subscribe",

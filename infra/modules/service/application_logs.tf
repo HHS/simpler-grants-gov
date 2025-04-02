@@ -13,3 +13,14 @@ resource "aws_cloudwatch_log_group" "service_logs" {
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
   # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
+
+resource "aws_cloudwatch_log_group" "fluentbit" {
+  name = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit"
+
+  # Conservatively retain logs for 5 years.
+  # Looser requirements may allow shorter retention periods
+  retention_in_days = 1827
+
+  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
+}

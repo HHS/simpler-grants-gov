@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Release 16.2.1 New Schema--><xs:schema targetNamespace="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:GrantsCommonTypes="http://apply.grants.gov/system/GrantsCommonTypes-V1.0" xmlns:GrantsCommonElements="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ApplicantCommonElements="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+  <xs:import namespace="http://apply.grants.gov/system/GrantsCommonTypes-V1.0" schemaLocation="GrantsCommonTypes-V1.0.xsd"/>
+  <xs:import namespace="http://apply.grants.gov/system/GrantsCommonElements-V1.0" schemaLocation="GrantsCommonElements-V1.0.xsd"/>
+  <xs:element name="OpportunityFilter">
+    <xs:complexType>
+      <xs:sequence>
+        <!--One of the elements are required-->
+        <xs:element ref="GrantsCommonElements:FundingOpportunityNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:CFDANumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:CompetitionID" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SubmissionFilter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Type" type="ApplicantCommonElements:SubmissionFilterType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="Value" type="GrantsCommonTypes:StringMin1Max255Type" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="SubmissionFilterType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FundingOpportunityNumber"/>
+      <xs:enumeration value="GrantsGovTrackingNumber"/>
+      <xs:enumeration value="PackageID"/>
+      <xs:enumeration value="SubmissionTitle"/>
+      <xs:enumeration value="Status"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="OpportunityDetails">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="GrantsCommonElements:FundingOpportunityNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:FundingOpportunityTitle" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:CompetitionID" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:CompetitionTitle" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:PackageID" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="ApplicantCommonElements:CFDADetails" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="OpeningDate" type="xs:date" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="ClosingDate" type="xs:date" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:OfferingAgency" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:AgencyContactInfo" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:SchemaURL" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:InstructionsURL" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="IsMultiProject" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SubmissionDetails">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="GrantsCommonElements:GrantsGovTrackingNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:AgencyTrackingNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:GrantsGovApplicationStatus" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="ReceivedDateTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="StatusDateTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:FundingOpportunityNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:SubmissionTitle" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="GrantsCommonElements:PackageID" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CFDADetails">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Number" type="GrantsCommonTypes:CFDANumberType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Title" type="GrantsCommonTypes:StringWithoutNewLine255Type" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

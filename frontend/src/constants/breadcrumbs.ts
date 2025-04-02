@@ -21,6 +21,11 @@ const SAVED_GRANTS: Breadcrumb = {
   path: "/saved-grants/",
 };
 
+const SAVED_SEARCHES: Breadcrumb = {
+  title: "Saved search queries",
+  path: "/saved-search-queries/",
+};
+
 export const RESEARCH_CRUMBS: BreadcrumbList = [HOME, RESEARCH];
 export const VISION_CRUMBS: BreadcrumbList = [HOME, VISION];
 export const SUBSCRIBE_CRUMBS: BreadcrumbList = [HOME, SUBSCRIBE];
@@ -37,3 +42,4 @@ export const UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
 export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const SAVED_GRANTS_CRUMBS: BreadcrumbList = [HOME, SAVED_GRANTS];
+export const SAVED_SEARCHES_CRUMBS: BreadcrumbList = [HOME, SAVED_SEARCHES];

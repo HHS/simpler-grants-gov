@@ -1,5 +1,6 @@
 ---
 description: User guide for participating in our public meetings.
+hidden: true
 ---
 
 # Zoom - Public Meetings

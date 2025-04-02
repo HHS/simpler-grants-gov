@@ -19,10 +19,11 @@ export const searchFilterNames = [
   "category",
 ] as const;
 
+// this is used for UI display so order matters
 export const validSearchQueryParamKeys = [
+  "query",
   ...searchFilterNames,
   "page",
-  "query",
   "sortby",
 ] as const;
 

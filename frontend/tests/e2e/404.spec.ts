@@ -9,7 +9,8 @@ test.afterEach(async ({ context }) => {
   await context.close();
 });
 
-test("has title", async ({ page }) => {
+// see https://github.com/vercel/next.js/issues/77512 - unskip once this issue is resolved
+test.skip("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Oops! Page Not Found");
 });
 

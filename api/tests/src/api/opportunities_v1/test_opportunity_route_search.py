@@ -1,3 +1,4 @@
+import base64
 import csv
 from datetime import date
 
@@ -353,11 +354,35 @@ def search_scenario_id_fnc(val):
 
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
-    def setup_search_data(self, opportunity_index, opportunity_index_alias, search_client):
+    def setup_search_data(
+        self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline
+    ):
         # Load into the search index
         schema = OpportunityV1Schema()
-        json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
-        search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+        json_records = []
+
+        for opportunity in OPPORTUNITIES:
+            attachment_contents = b"testing"
+            if opportunity.opportunity_id == NASA_SPACE_FELLOWSHIP.opportunity_id:
+                attachment_contents = b"space"
+
+            json_record = schema.dump(opportunity)
+            json_record["attachments"] = [
+                {
+                    "filename": "filename.csv",
+                    "data": base64.b64encode(attachment_contents).decode("utf-8"),
+                }
+            ]
+
+            json_records.append(json_record)
+
+        search_client.bulk_upsert(
+            opportunity_index,
+            json_records,
+            "opportunity_id",
+            pipeline=search_attachment_pipeline,
+            refresh=True,
+        )
 
         # Swap the search index alias
         search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
@@ -1546,3 +1571,23 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
+
+    def test_search_experimental_attachment_200(
+        self, client, api_auth_token, search_client, opportunity_index_alias
+    ):
+        # Prepare the search request
+        search_request = get_search_request(
+            query="Space",
+            experimental={"scoring_rule": "attachment_only"},
+        )
+
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        data = resp.json["data"]
+
+        # Assert only NASA opportunities are returned
+        assert resp.status_code == 200
+        assert len(data) == 1
+
+        assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
