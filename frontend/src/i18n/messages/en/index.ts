@@ -9,7 +9,7 @@ export const messages = {
       description: "The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
       link: "Sign up to participate"
     },
-    demos: {
+    demo: {
       title: "Simpler.Grants.gov Big Demo",
       description: "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",

@@ -6,27 +6,27 @@ import {
 } from "@trussworks/react-uswds";
 
 const EventsUpcoming = () => {
-  const t = useTranslations("Events");
+  const t = useTranslations("Events.upcoming");
 
   return (
-    <GridContainer data-testid="events-upcoming" className="padding-4">
+    <GridContainer data-testid="events-upcoming-content" className="padding-4">
       <Grid row gap="md">
         <Grid tablet={{
           col: 3
         }}>
-          <h1>{t("upcoming.title")}</h1>
+          <h1>{t("title")}</h1>
         </Grid>
         <Grid tablet={{
           col: 9
         }}>
           <span className="font-sans-md">
-            {t("upcoming.start_date")}
+            {t("start_date")}
           </span>
           <h2>
-            {t("upcoming.header")}
+            {t("header")}
           </h2>
           <p className="font-sans-md line-height-sans-4">
-            {t("upcoming.description")}
+            {t("description")}
           </p>
           <a
             href="https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform"
@@ -34,7 +34,7 @@ const EventsUpcoming = () => {
             rel="noopener noreferrer"
             className="font-sans-md"
           >
-            {t("upcoming.link")}
+            {t("link")}
           </a>
         </Grid>
       </Grid>
