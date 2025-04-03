@@ -19,6 +19,7 @@ describe("SearchFilterCheckbox", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchFilterCheckbox
+        facetCounts={{}}
         option={option}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}
@@ -32,6 +33,7 @@ describe("SearchFilterCheckbox", () => {
   it("calls the appropriate handlers when the checkbox is clicked", async () => {
     render(
       <SearchFilterCheckbox
+        facetCounts={{ test: 1 }}
         option={option}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}
@@ -40,7 +42,9 @@ describe("SearchFilterCheckbox", () => {
     );
 
     // Simulate user clicking the checkbox
-    const checkbox = screen.getByLabelText(option.label);
+    const checkbox = await screen.findByRole("checkbox", {
+      name: `${option.label} [1]`,
+    });
     fireEvent.click(checkbox);
 
     // Wait for the updateCheckedOption function to be called with the checkbox being checked
