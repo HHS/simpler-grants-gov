@@ -1,19 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import { Checkbox } from "@trussworks/react-uswds";
 
 interface FilterCheckboxProps {
   id: string;
   name?: string;
-  label: string;
+  label: ReactNode;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   checked?: boolean;
   value?: string;
 }
 
-const FilterCheckbox: React.FC<FilterCheckboxProps> = ({
+const FilterCheckbox = ({
   id,
   name,
   label,
@@ -21,7 +21,7 @@ const FilterCheckbox: React.FC<FilterCheckboxProps> = ({
   disabled = false, // Default enabled. Pass in a mounted from parent if necessary.
   checked = false,
   value,
-}) => (
+}: FilterCheckboxProps) => (
   <Checkbox
     id={id}
     name={name || ""}

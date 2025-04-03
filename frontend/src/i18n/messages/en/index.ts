@@ -457,6 +457,15 @@ export const messages = {
         eligibility: "Eligibility",
         agency: "Agency",
         category: "Category",
+        status: "Opportunity status",
+      },
+      options: {
+        status: {
+          forecasted: "Forecasted",
+          posted: "Posted",
+          closed: "Closed",
+          archived: "Archived",
+        },
       },
     },
     bar: {
@@ -468,15 +477,6 @@ export const messages = {
       title: "Search funding opportunities",
     },
     opportunitySaved: "Saved",
-    opportunityStatus: {
-      title: "Opportunity status",
-      label: {
-        forecasted: "Forecasted",
-        posted: "Posted",
-        closed: "Closed",
-        archived: "Archived",
-      },
-    },
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
