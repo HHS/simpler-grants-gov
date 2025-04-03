@@ -19,8 +19,8 @@ class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
     shard_count: int = Field(default=1, alias="LOAD_AGENCY_SEARCH_SHARD_COUNT")
     replica_count: int = Field(default=1, alias="LOAD_AGENCY_SEARCH_REPLICA_COUNT")
 
-    alias_name: str = Field(default="agency-index-alias")  # LOAD_AGENCY_SEARCH_ALIAS_NAME
-    index_prefix: str = Field(default="agency-index")  # LOAD_AGENCY_INDEX_PREFIX
+    alias_name: str = Field(default="agency-index-alias", alias="LOAD_AGENCY_SEARCH_ALIAS_NAME")
+    index_prefix: str = Field(default="agency-index", alias="LOAD_AGENCY_INDEX_PREFIX")
 
 
 class LoadAgenciesToIndex(Task):
