@@ -1,119 +1,124 @@
 WITH RECURSIVE 
 
-  -- Get epics within a given deliverable
-  epics_in_deliverable AS (
-    SELECT DISTINCT
-      gh_deliverable.id AS deliverable_id,
-      e.id AS epic_id,
-      e.ghid AS epic_ghid,
-      e.title AS epic_title
-    FROM 
-      gh_deliverable
-    INNER JOIN gh_epic_deliverable_map m ON m.deliverable_id = gh_deliverable.id
-    INNER JOIN gh_epic e ON m.epic_id = e.id 
-    WHERE 
-      {{deliverable_title}}
-  ),
+-- Step 1: Resolve the selected deliverable
+selected_deliverable AS (
+  SELECT id, ghid
+  FROM gh_deliverable
+  WHERE {{deliverable_title}}
+),
 
-  -- Get issues within each epic or directly linked to the deliverable
-  issue_hierarchy AS (
-    -- Issues that are direct children of an epic
-    SELECT
-      e.deliverable_id,
-      e.epic_id,
-      e.epic_ghid AS root_epic_ghid, 
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,  -- Identify epics
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable  -- Identify deliverables
-    FROM 
-      epics_in_deliverable e
-    INNER JOIN gh_issue i ON i.parent_issue_ghid = e.epic_ghid
+-- Step 2: Latest epic-to-deliverable mappings only
+latest_epic_mappings AS (
+  SELECT DISTINCT ON (edm.epic_id)
+    edm.epic_id,
+    e.ghid AS epic_ghid,
+    edm.deliverable_id,
+    edm.d_effective
+  FROM gh_epic_deliverable_map edm
+  JOIN gh_epic e ON edm.epic_id = e.id
+  ORDER BY edm.epic_id, edm.d_effective DESC
+),
 
-    UNION ALL
+-- Step 3: Epics currently mapped to the selected deliverable
+epics_in_deliverable AS (
+  SELECT
+    lem.epic_id,
+    lem.epic_ghid,
+    lem.deliverable_id
+  FROM latest_epic_mappings lem
+  JOIN selected_deliverable sd ON lem.deliverable_id = sd.id
+),
 
-    -- Issues that are direct children of the deliverable itself
-    SELECT
-      gh_deliverable.id AS deliverable_id,
-      NULL AS epic_id,
-      NULL AS root_epic_ghid, 
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable
-    FROM 
-      gh_deliverable
-    INNER JOIN gh_issue i ON i.parent_issue_ghid = gh_deliverable.ghid
-    WHERE 
-      {{deliverable_title}}
+-- Step 4: Recursively walk the issue tree from epics
+epic_issue_tree AS (
+  SELECT
+    e.deliverable_id,
+    e.epic_id,
+    e.epic_ghid,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM epics_in_deliverable e
+  JOIN gh_issue i ON i.parent_issue_ghid = e.epic_ghid
 
-    UNION ALL
-    
-    -- Recursively find the children of each issue
-    SELECT
-      ih.deliverable_id,
-      ih.epic_id,
-      ih.root_epic_ghid,
-      i.id AS issue_id,
-      i.ghid AS issue_ghid,
-      i.title AS issue_title,
-      i.parent_issue_ghid,
-      EXISTS (SELECT 1 FROM gh_epic WHERE gh_epic.ghid = i.ghid) AS is_epic,
-      EXISTS (SELECT 1 FROM gh_deliverable WHERE gh_deliverable.ghid = i.ghid) AS is_deliverable
-    FROM 
-      gh_issue i
-    INNER JOIN issue_hierarchy ih ON i.parent_issue_ghid = ih.issue_ghid
-  ),
+  UNION ALL
 
-  -- De-duplicate history records and get most recent state for each issue (excluding epics & deliverables)
-  issue_state AS (
-    SELECT
-      history.issue_id,
-      history.is_closed::BOOLEAN AS is_closed
-    FROM (
-      SELECT
-        gh_issue_history.issue_id,
-        gh_issue_history.is_closed,
-        ROW_NUMBER() OVER (
-          PARTITION BY gh_issue_history.issue_id 
-          ORDER BY gh_issue_history.d_effective DESC
-        ) AS ranked_order
-      FROM 
-        gh_issue_history
-      INNER JOIN issue_hierarchy ON gh_issue_history.issue_id = issue_hierarchy.issue_id
-      WHERE 
-        NOT issue_hierarchy.is_epic  -- Exclude epics
-        AND NOT issue_hierarchy.is_deliverable  -- Exclude deliverables
-    ) history
-    WHERE 
-      history.ranked_order = 1
-  ),
-  
-  -- Count open and closed issues
-  subtotals AS (
-    SELECT
-      SUM(CASE WHEN is_closed THEN 0 ELSE 1 END) AS issues_open,
-      SUM(CASE WHEN is_closed THEN 1 ELSE 0 END) AS issues_closed,
-      COUNT(*) AS total_issues
-    FROM
-      issue_state
-  ),
-  
-  -- Calculate percent complete
-  total AS (
-    SELECT
-      CONCAT(CEIL(100 * (SUM(issues_closed) / NULLIF(SUM(total_issues)::DECIMAL, 0))), '%') 
-      AS percent_complete
-    FROM
-      subtotals
+  SELECT
+    eit.deliverable_id,
+    eit.epic_id,
+    eit.epic_ghid,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM gh_issue i
+  JOIN epic_issue_tree eit ON i.parent_issue_ghid = eit.issue_ghid
+),
+
+-- Step 5: Pre-filter issues that are direct children of the deliverable
+raw_direct_issues AS (
+  SELECT
+    sd.id AS deliverable_id,
+    i.id AS issue_id,
+    i.ghid AS issue_ghid,
+    i.title AS issue_title,
+    i.parent_issue_ghid
+  FROM selected_deliverable sd
+  JOIN gh_issue i ON i.parent_issue_ghid = sd.ghid
+),
+
+-- Step 6: Filter out issues that are actually epics mapped elsewhere
+direct_issues AS (
+  SELECT
+    rdi.deliverable_id,
+    NULL::integer AS epic_id,
+    NULL::text AS epic_ghid,
+    rdi.issue_id,
+    rdi.issue_ghid,
+    rdi.issue_title,
+    rdi.parent_issue_ghid
+  FROM raw_direct_issues rdi
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM latest_epic_mappings lem
+    JOIN gh_epic ep ON lem.epic_id = ep.id
+    WHERE ep.ghid = rdi.issue_ghid
   )
-  
+),
+
+-- Step 7: Combine both sources
+combined_issues AS (
+  SELECT * FROM epic_issue_tree
+  UNION ALL
+  SELECT * FROM direct_issues
+),
+
+-- Step 8: Latest snapshot per issue (deduped by issue_id + max d_effective)
+latest_history AS (
+  SELECT 
+    h.issue_id,
+    MAX(h.d_effective) AS latest_d_effective
+  FROM gh_issue_history h
+  JOIN combined_issues ci ON h.issue_id = ci.issue_id
+  GROUP BY h.issue_id
+),
+
+-- Step 9: Pull latest is_closed values
+issue_statuses AS (
+  SELECT 
+    h.issue_id,
+    h.is_closed::BOOLEAN AS is_closed
+  FROM gh_issue_history h
+  JOIN latest_history lh 
+    ON h.issue_id = lh.issue_id 
+    AND h.d_effective = lh.latest_d_effective
+)
+
+-- Step 10: Compute final result
 SELECT
-  *
-FROM
-  subtotals,
-  total;
+  SUM(CASE WHEN is_closed THEN 1 ELSE 0 END) AS issues_closed,
+  SUM(CASE WHEN is_closed THEN 0 ELSE 1 END) AS issues_open,
+  COUNT(*) AS total_issues,
+  CONCAT(CEIL(100 * (SUM(CASE WHEN is_closed THEN 1 ELSE 0 END)::DECIMAL / NULLIF(COUNT(*), 0))), '%') AS percent_complete
+FROM issue_statuses;
