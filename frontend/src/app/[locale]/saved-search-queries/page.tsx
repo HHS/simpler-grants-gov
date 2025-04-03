@@ -13,7 +13,6 @@ import Link from "next/link";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 
