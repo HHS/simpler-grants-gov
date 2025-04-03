@@ -19,6 +19,8 @@ import {
 } from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
 
+export const dynamic = "force-dynamic";
+
 export function generateMetadata() {
   const meta: Metadata = {
     title: `Form test for form React JSON Schema`,
