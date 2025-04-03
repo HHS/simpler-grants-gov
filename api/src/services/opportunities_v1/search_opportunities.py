@@ -20,6 +20,7 @@ from src.search.search_models import (
     IntSearchFilter,
     StrSearchFilter,
 )
+from src.services.agencies_v1.get_agencies import AgencyListParams
 from src.services.opportunities_v1.experimental_constant import (
     AGENCY,
     ATTACHMENT_ONLY,
@@ -175,7 +176,7 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms("agency", _adjust_field_name("agency_code"), size=1000)
 
 
-def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
+def _get_search_request(params: SearchOpportunityParams | AgencyListParams, aggregation: bool = True) -> dict:
     builder = search.SearchQueryBuilder()
 
     # Make sure total hit count gets counted for more than 10k records

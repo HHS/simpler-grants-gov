@@ -1,5 +1,7 @@
 import logging
+import math
 import uuid
+from idlelib.searchengine import search_reverse
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -11,8 +13,10 @@ from src.adapters import search
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.pagination.paginator import Paginator
+from src.search.search_config import get_search_config
+from src.services.opportunities_v1.search_opportunities import _get_search_request
 from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
@@ -26,9 +30,8 @@ class AgencyFilters(BaseModel):
 
 class AgencyListParams(BaseModel):
     pagination: PaginationParams
-
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
-
+    query: str | None = None
 
 def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
     return (
@@ -78,12 +81,29 @@ def get_agencies(
 
     return paginated_agencies, pagination_info
 
-class SearchAgencyParams(BaseModel):
-    pagination: PaginationParams
-    query: str | None = None
-    filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
+def _search_agencies(search_client: search.SearchClient, search_params: AgencyListParams) -> Sequence[Agency]:
+    search_request = _get_search_request(search_params, aggregation=False)
+
+    index_alias = get_search_config().
+
 
 
 def search_agencies(search_client: search.SearchClient, raw_search_params: dict) -> Tuple[Sequence[Agency], PaginationInfo]:
+    search_params = AgencyListParams.model_validate(raw_search_params)
+    response = _search_agencies(search_client, search_params)
+
+    pagination_info = PaginationInfo(
+        page_offset=search_params.pagination.page_offset,
+        page_size=search_params.pagination.page_size,
+        total_records=response.total_records,
+        total_pages=int(math.ceil(response.total_records / search_params.pagination.page_size)),
+        sort_order=[
+            SortOrder(order_by=p.order_by, sort_direction=p.sort_direction)
+            for p in search_params.pagination.sort_order
+        ],
+    )
+
+    return response, pagination_info
+
 
 
