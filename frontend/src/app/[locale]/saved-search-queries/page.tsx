@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { Metadata } from "next";
-import { getSession } from "src/services/auth/session";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import {
@@ -11,10 +10,10 @@ import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 
