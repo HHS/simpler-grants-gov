@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Metadata } from "next";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import {
@@ -15,19 +14,6 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-export async function generateMetadata({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale });
-  const meta: Metadata = {
-    title: t("SavedSearches.title"),
-    description: t("Index.meta_description"),
-  };
-  return meta;
-}
 
 const NoSavedSearches = ({
   noSavedCTA,
