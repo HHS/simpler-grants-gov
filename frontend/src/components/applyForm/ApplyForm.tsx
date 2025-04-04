@@ -15,16 +15,21 @@ import { buildForTreeRecursive, getWrappersForNav } from "./utils";
 const ApplyForm = ({
   formSchema,
   uiSchema,
+  formId,
 }: {
   formSchema: RJSFSchema;
   uiSchema: UiSchema;
+  formId: string;
 }) => {
   const { pending } = useFormStatus();
+
+  //   submitApplyForm.bind("", formId)
 
   const [formState, formAction] = useActionState(submitApplyForm, {
     errorMessage: "",
     validationErrors: [],
     formData: new FormData(),
+    formId,
   });
   const formObject = Object.fromEntries(formState.formData.entries());
   const fields = buildForTreeRecursive(

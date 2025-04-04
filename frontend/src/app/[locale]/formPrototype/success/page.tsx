@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
@@ -21,9 +20,7 @@ function FormSuccess() {
     <GridContainer>
       <BetaAlert />
       <h1>Form Demo Success</h1>
-      <Link className="usa-button" type="link" href="/formPrototype">
-        Back
-      </Link>
+      You successfully submitted the form.
     </GridContainer>
   );
 }

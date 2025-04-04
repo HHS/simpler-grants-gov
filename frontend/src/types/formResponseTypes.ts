@@ -3,7 +3,7 @@ import { APIResponse } from "src/types/apiResponseTypes";
 
 import { UiSchema } from "src/components/applyForm/types";
 
-export interface formDetail {
+export interface FormDetail {
   form_id: string;
   form_name: string;
   form_json_schema: RJSFSchema;
@@ -11,5 +11,5 @@ export interface formDetail {
 }
 
 export interface formDetailApiResponse extends APIResponse {
-  data: formDetail;
+  data: FormDetail;
 }

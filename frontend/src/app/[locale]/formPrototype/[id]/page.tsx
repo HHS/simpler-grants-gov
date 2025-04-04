@@ -3,11 +3,8 @@ import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
-import {
-  ApplyFormDetail,
-  getForm,
-} from "src/services/fetch/fetchers/formFetcher";
-import { WithFeatureFlagProps } from "src/types/uiTypes";
+import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
+import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
@@ -29,12 +26,23 @@ export function generateMetadata() {
   return meta;
 }
 
-async function FormPage() {
-  let formData = {} as ApplyFormDetail;
-  const id = "anyform";
+interface formPageProps {
+  params: Promise<{ id: string; locale: string }>;
+}
+
+async function FormPage({ params }: formPageProps) {
+  const { id } = await params;
+  let formData = {} as FormDetail;
+
   try {
-    const response = await getForm(id);
-    formData = response.data;
+    const response = await getCompetitionDetails(id);
+    if (response.status_code !== 200) {
+      throw new Error(
+        `Error retrieving competition details: ${JSON.stringify(response.errors)}`,
+      );
+    }
+    // TODO: this update so this is a list of forms on a competition endpoint
+    formData = response.data.competition_forms[0].form;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
@@ -42,7 +50,7 @@ async function FormPage() {
     throw error;
   }
 
-  const { form_json_schema, form_ui_schema } = formData;
+  const { form_id, form_json_schema, form_ui_schema } = formData;
 
   try {
     validateUiSchema(form_ui_schema);
@@ -71,12 +79,16 @@ async function FormPage() {
         </abbr>
         ).
       </p>
-      <ApplyForm formSchema={form_json_schema} uiSchema={form_ui_schema} />
+      <ApplyForm
+        formSchema={form_json_schema}
+        uiSchema={form_ui_schema}
+        formId={form_id}
+      />
     </GridContainer>
   );
 }
 
-export default withFeatureFlag<WithFeatureFlagProps, never>(
+export default withFeatureFlag<formPageProps, never>(
   FormPage,
   "applyFormPrototypeOff",
   () => redirect("/maintenance"),
