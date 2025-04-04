@@ -28,7 +28,7 @@ class JsonSchemaBuilder:
         max_length: int | None = None,
         pattern: str | None = None,
         format: str | None = None,
-        enum: list[str] | type[StrEnum] | None = None
+        enum: list[str] | type[StrEnum] | None = None,
     ) -> Self:
         """
         Add a string property to your JsonSchema
@@ -78,7 +78,7 @@ class JsonSchemaBuilder:
         is_required: bool,
         *,
         title: str | None = None,
-        description: str | None = None
+        description: str | None = None,
     ) -> Self:
         """
         Add a bool property to your JsonSchema
@@ -114,7 +114,7 @@ class JsonSchemaBuilder:
         minimum: int | None = None,
         maximum: int | None = None,
         exclusive_minimum: int | None = None,
-        exclusive_maximum: int | None = None
+        exclusive_maximum: int | None = None,
     ) -> Self:
         """
         Add an int property to your JsonSchema
@@ -162,7 +162,7 @@ class JsonSchemaBuilder:
         minimum: int | float | None = None,
         maximum: int | float | None = None,
         exclusive_minimum: int | float | None = None,
-        exclusive_maximum: int | float | None = None
+        exclusive_maximum: int | float | None = None,
     ) -> Self:
         """
         Add a float/number property to your JsonSchema
@@ -205,7 +205,7 @@ class JsonSchemaBuilder:
         is_required: bool,
         builder: "JsonSchemaBuilder",
         *,
-        title: str | None = None
+        title: str | None = None,
     ) -> Self:
         """
         Add an object to your JsonSchema
@@ -278,3 +278,20 @@ class JsonSchemaBuilder:
             json_schema["$defs"] = self.defs
 
         return json_schema
+
+    def build_ui_schema(self) -> list:
+        """
+        Construct a UI schema based on the properties that have been added
+
+        Returns a list of field definitions in the format:
+        [
+            { "type": "field", "definition": "/properties/<FIELDNAME>"},
+            ...
+        ]
+        """
+        ui_schema = []
+
+        for field_name in self.properties:
+            ui_schema.append({"type": "field", "definition": f"/properties/{field_name}"})
+
+        return ui_schema
