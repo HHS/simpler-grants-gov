@@ -1,4 +1,5 @@
 import { APIResponse } from "src/types/apiResponseTypes";
+
 import { FormDetail } from "./formResponseTypes";
 
 export interface CompetitionsDetailApiResponse extends APIResponse {

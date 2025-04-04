@@ -1,10 +1,9 @@
-
 import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
 
 const fakeResponseBody = { some: "response body" };
 const mockJson = jest.fn(() => fakeResponseBody);
 
-const mockfetchCompetition= jest.fn().mockResolvedValue({
+const mockfetchCompetition = jest.fn().mockResolvedValue({
   json: mockJson,
 });
 

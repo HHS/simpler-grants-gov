@@ -1,4 +1,3 @@
-
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 
 const fakeResponseBody = { some: "response body" };
