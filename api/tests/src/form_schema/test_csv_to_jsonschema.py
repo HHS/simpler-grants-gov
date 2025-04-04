@@ -160,3 +160,5 @@ def test_ui_schema_has_correct_structure(csv_file_content):
         assert item["definition"].startswith(
             "/properties/"
         ), "Definition should start with '/properties/'"
+
+    assert ui_schema[0]["definition"] == "/properties/FederalAgency"
