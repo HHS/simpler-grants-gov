@@ -84,7 +84,7 @@ const NavLinks = ({
       { text: t("home"), href: "/" },
       getSearchLink(path.includes("/search")),
       { text: t("roadmap"), href: "/roadmap" },
-      { text: t("research"), href: "/research" },
+      { text: t("vision"), href: "/vision" },
       { text: t("subscribe"), href: "/subscribe" },
     ];
     if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
