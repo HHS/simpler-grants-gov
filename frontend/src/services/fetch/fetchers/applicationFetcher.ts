@@ -2,7 +2,7 @@ import { APIResponse } from "src/types/apiResponseTypes";
 
 import { fetchApplication } from "./fetchers";
 
-interface applicationStartResponse extends APIResponse {
+interface ApplicationStartResponse extends APIResponse {
   data: {
     application_id: string;
   };
