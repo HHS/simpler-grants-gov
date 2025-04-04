@@ -30,16 +30,17 @@ export async function GET(
         { status: 404 },
       );
     }
-    const blobWriter = new zip.BlobWriter("application/zip");
-    const zipWriter = new zip.ZipWriter(blobWriter);
+    const zipWriter = new zip.ZipWriterStream();
 
-    await Promise.all(
+    const closeWriter = async () => {
+      await zipWriter.close();
+    };
+
+    Promise.allSettled(
       response.data.attachments?.map((attachment) => {
-        return zipWriter
-          .add(
-            attachment.file_name,
-            new zip.HttpReader(attachment.download_path),
-          )
+        return new zip.HttpReader(attachment.download_path).readable
+          .pipeTo(zipWriter.writable(attachment.file_name))
+
           .catch((e: Error) => {
             const uuid = randomUUID();
             console.error(
@@ -50,11 +51,22 @@ export async function GET(
             throw new Error(`${e.message}, ${uuid}`);
           });
       }),
-    );
+    )
+      .catch((e) => {
+        console.error("Error while streaming", e);
+      })
+      .finally(() => {
+        closeWriter().catch((e) => {
+          throw e;
+        });
+      });
 
-    await zipWriter.close();
-
-    return new NextResponse(await blobWriter.getData());
+    return new NextResponse(zipWriter.readable, {
+      status: 200,
+      headers: new Headers({
+        "Content-Disposition": `attachment; filename="opportunity-${response.data?.opportunity_number || opportunityId}-attachments.zip"`,
+      }),
+    });
   } catch (e) {
     console.error(e);
     const { status, message } = readError(e as Error, 500);
