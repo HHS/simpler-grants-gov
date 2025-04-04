@@ -1,13 +1,13 @@
 "use client";
 
-interface applicationStartResponse {
+interface ClientApplicationStartResponse {
   message: string;
   applicationId: string;
 }
 
 export const startApplication = async (
   token?: string,
-): Promise<applicationStartResponse> => {
+): Promise<ClientApplicationStartResponse> => {
   if (!token) {
     throw new Error(`Error starting application`);
   }
@@ -15,7 +15,7 @@ export const startApplication = async (
     method: "POST",
   });
   if (res.ok && res.status === 200) {
-    return (await res.json()) as applicationStartResponse;
+    return (await res.json()) as ClientApplicationStartResponse;
   } else {
     throw new Error(`Error starting application: ${res.status}`);
   }

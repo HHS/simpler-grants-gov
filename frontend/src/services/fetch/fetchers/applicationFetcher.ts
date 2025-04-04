@@ -11,11 +11,11 @@ interface ApplicationStartResponse extends APIResponse {
 // make call from server to API to start an application
 export const handleStartApplication = async (
   competitionID: string,
-): Promise<applicationStartResponse> => {
+): Promise<ApplicationStartResponse> => {
   const response = await fetchApplication({
     subPath: `start`,
     body: { competition_id: competitionID },
   });
 
-  return (await response.json()) as applicationStartResponse;
+  return (await response.json()) as ApplicationStartResponse;
 };
