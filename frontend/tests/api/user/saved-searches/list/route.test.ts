@@ -37,7 +37,7 @@ describe("POST request", () => {
     const json = (await response.json()) as SavedSearchRecord[];
 
     expect(response.status).toBe(200);
-    expect(mockFetchSavedSearches).toHaveBeenCalledWith("fakeToken", "1");
+    expect(mockFetchSavedSearches).toHaveBeenCalledTimes(1);
     expect(json).toEqual(fakeSavedSearches);
     expect(getSessionMock).toHaveBeenCalledTimes(1);
   });

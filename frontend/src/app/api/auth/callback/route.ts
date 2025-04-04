@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
-    return redirect("/unauthorized");
+    return redirect("/unauthenticated");
   }
   try {
     await createSession(token);
