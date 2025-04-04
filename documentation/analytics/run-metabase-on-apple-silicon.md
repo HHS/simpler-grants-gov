@@ -1,4 +1,4 @@
-# Running Metabase Locally with Docker on Apple Silicon
+# How To Run Metabase with Docker on Apple Silicon
 
 This guide provides instructions for building and running Metabase locally 
 using Docker on a Mac with Apple Silicon (M1/M2/M3). 
