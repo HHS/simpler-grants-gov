@@ -18,7 +18,7 @@ jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
   handleStartApplication: () => mockPostStartApp(),
 }));
 
-describe("POST and DELETE request", () => {
+describe("POST request", () => {
   afterEach(() => jest.clearAllMocks());
   it("saves saved opportunity", async () => {
     getSessionMock.mockImplementation(() => ({
