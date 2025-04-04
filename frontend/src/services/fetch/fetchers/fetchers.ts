@@ -120,7 +120,3 @@ export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
-
-export const fetchApplications = requesterForEndpoint(
-  fetchApplicationsEndpoint,
-);

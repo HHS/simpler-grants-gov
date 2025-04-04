@@ -1,6 +1,6 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
-import { fetchApplications } from "./fetchers";
+import { fetchApplication } from "./fetchers";
 
 interface applicationStartResponse extends APIResponse {
   data: {
@@ -12,7 +12,7 @@ interface applicationStartResponse extends APIResponse {
 export const handleStartApplication = async (
   competitionID: string,
 ): Promise<applicationStartResponse> => {
-  const response = await fetchApplications({
+  const response = await fetchApplication({
     subPath: `start`,
     body: { competition_id: competitionID },
   });
