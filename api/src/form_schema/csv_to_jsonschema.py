@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 SKIPPED_FIELD_IMPLEMENTATIONS = ["button", "radio"]
 
 
-def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
+def csv_to_jsonschema(csv_content: str) -> tuple[dict[str, Any], list]:
     """
     Convert a form definition CSV file to JSON Schema using JsonSchemaBuilder.
 
@@ -19,7 +19,9 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
         csv_file_path: Path to the CSV file containing form field definitions
 
     Returns:
-        A dictionary representing the JSON Schema
+        A tuple containing:
+        - A dictionary representing the JSON Schema
+        - A list representing the UI Schema
     """
     # Initialize the main schema builder
     schema_builder = JsonSchemaBuilder()
@@ -77,7 +79,11 @@ def csv_to_jsonschema(csv_content: str) -> dict[str, Any]:
         # Add the section as a sub-object to the main schema
         schema_builder.add_sub_object(section_key, False, section_builder)
 
-    return schema_builder.build()
+    # Generate both schemas and return them as a tuple
+    json_schema = schema_builder.build()
+    ui_schema = schema_builder.build_ui_schema()
+
+    return json_schema, ui_schema
 
 
 def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> None:

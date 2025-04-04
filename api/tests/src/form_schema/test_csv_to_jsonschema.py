@@ -38,7 +38,7 @@ def expected_fields():
 def test_csv_to_jsonschema_creates_valid_schema(csv_file_content, expected_schema_keys):
     """Test that the function generates a schema with expected structure."""
     # Run the conversion
-    schema = csv_to_jsonschema(csv_file_content)
+    schema, _ = csv_to_jsonschema(csv_file_content)
 
     # Check schema has expected top-level keys
     for key in expected_schema_keys:
@@ -52,7 +52,7 @@ def test_csv_to_jsonschema_creates_valid_schema(csv_file_content, expected_schem
 
 def test_csv_to_jsonschema_contains_expected_fields(csv_file_content, expected_fields):
     """Test that the generated schema contains expected fields."""
-    schema = csv_to_jsonschema(csv_file_content)
+    schema, _ = csv_to_jsonschema(csv_file_content)
 
     print(schema)
     # Look for each field in the schema properties
@@ -76,7 +76,7 @@ def test_csv_to_jsonschema_contains_expected_fields(csv_file_content, expected_f
 
 def test_required_fields_are_marked_correctly(csv_file_content):
     """Test that required fields are properly marked in the schema."""
-    schema = csv_to_jsonschema(csv_file_content)
+    schema, _ = csv_to_jsonschema(csv_file_content)
 
     # Known required fields from CSV
     known_required_fields = ["FirstName", "LastName", "AuthorizedRepresentativeEmail"]
@@ -101,7 +101,7 @@ def test_required_fields_are_marked_correctly(csv_file_content):
 
 def test_enum_fields_have_correct_values(csv_file_content):
     """Test that enum fields have the correct values."""
-    schema = csv_to_jsonschema(csv_file_content)
+    schema, _ = csv_to_jsonschema(csv_file_content)
 
     # Test Country field which should have enum values
     # Find the field in the schema
@@ -129,7 +129,7 @@ def test_enum_fields_have_correct_values(csv_file_content):
 
 def test_date_fields_have_correct_format(csv_file_content):
     """Test that date fields have the correct format."""
-    schema = csv_to_jsonschema(csv_file_content)
+    schema, _ = csv_to_jsonschema(csv_file_content)
 
     # Find fields that should be dates
     date_field_names = ["FundingPeriodStartDate", "FundingPeriodEndDate"]
@@ -140,3 +140,25 @@ def test_date_fields_have_correct_format(csv_file_content):
         assert field is not None, f"Date field {field_name} not found"
         assert "format" in field, f"Field {field_name} should have format specified"
         assert field["format"] == "date", f"Field {field_name} should have format 'date'"
+
+
+def test_ui_schema_has_correct_structure(csv_file_content):
+    """Test that the UI schema has the expected structure."""
+    _, ui_schema = csv_to_jsonschema(csv_file_content)
+
+    # Verify UI schema is a list
+    assert isinstance(ui_schema, list), "UI schema should be a list"
+
+    # Verify it's not empty
+    assert len(ui_schema) > 0, "UI schema should not be empty"
+
+    # Verify each entry has correct structure
+    for item in ui_schema:
+        assert "type" in item, "Each UI schema item should have a 'type' field"
+        assert "definition" in item, "Each UI schema item should have a 'definition' field"
+        assert item["type"] == "field", "Each UI schema item should have type 'field'"
+        assert item["definition"].startswith(
+            "/properties/"
+        ), "Definition should start with '/properties/'"
+
+    assert ui_schema[0]["definition"] == "/properties/FederalAgency"

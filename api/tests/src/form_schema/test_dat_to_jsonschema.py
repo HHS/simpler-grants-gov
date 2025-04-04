@@ -12,7 +12,7 @@ def test_real_file():
     xls_path = os.path.join(test_dir, "SF424_Individual_2_0-V2.0_F668.xls")
 
     # Parse the file
-    schema = parse_xls_to_schema(xls_path)
+    schema, _ = parse_xls_to_schema(xls_path)
 
     # Basic validation of the schema
     assert schema is not None
@@ -37,7 +37,7 @@ def test_real_file_f723():
     xls_path = os.path.join(test_dir, "PerformanceSite_4_0-V4.0_F723.xls")
 
     # Parse the file
-    schema = parse_xls_to_schema(xls_path)
+    schema, _ = parse_xls_to_schema(xls_path)
 
     # Basic validation of the schema
     assert schema is not None
