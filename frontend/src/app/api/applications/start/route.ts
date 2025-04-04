@@ -2,7 +2,6 @@ import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { handleStartApplication } from "src/services/fetch/fetchers/applicationFetcher";
 import { COMPETITION_ID } from "src/types/competitions";
 
-
 export const POST = async () => {
   try {
     // TODO: add session support;
