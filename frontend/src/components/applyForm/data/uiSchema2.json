@@ -1,0 +1,156 @@
+[
+  {
+    "definition": "/properties/FederalAgency"
+  },
+  {
+    "definition": "/properties/CFDANumber"
+  },
+  {
+    "definition": "/properties/CFDATitle"
+  },
+  {
+    "definition": "/properties/Date_Received"
+  },
+  {
+    "definition": "/properties/OpportunityID"
+  },
+  {
+    "definition": "/properties/OpportunityTitle"
+  },
+  {
+    "label": "Applicant Information",
+    "name": "ApplicantInformationHeader",
+    "number": "5",
+    "children": [
+      {
+        "label": "Name and Contact Information",
+        "name": "NameandContactInformationHeader",
+        "number": "5a",
+        "children": [
+          {
+            "definition": "/properties/PrefixName"
+          },
+          {
+            "definition": "/properties/FirstName"
+          },
+          {
+            "definition": "/properties/MiddleName"
+          },
+          {
+            "definition": "/properties/LastName"
+          },
+          {
+            "definition": "/properties/Suffix"
+          },
+          {
+            "definition": "/properties/AuthorizedRepresentativePhoneNumber"
+          },
+          {
+            "definition": "/properties/EveningPhone"
+          },
+          {
+            "definition": "/properties/AuthorizedRepresentativeFax"
+          },
+          {
+            "definition": "/properties/AuthorizedRepresentativeEmail"
+          }
+        ]
+      },
+      {
+        "label": "Address",
+        "name": "AddressHeader",
+        "number": "5b",
+        "children": [
+          {
+            "definition": "/properties/Street1"
+          },
+          {
+            "definition": "/properties/Street2"
+          },
+          {
+            "definition": "/properties/City"
+          },
+          {
+            "definition": "/properties/County"
+          },
+          {
+            "definition": "/properties/State"
+          },
+          {
+            "definition": "/properties/Province"
+          },
+          {
+            "definition": "/properties/Country"
+          },
+          {
+            "definition": "/properties/ZipPostalCode"
+          }
+        ]
+      },
+      {
+        "label": "Citizenship Status",
+        "name": "CitizenshipStatusHeader",
+        "number": "5c",
+        "children": [
+          {
+            "definition": "/properties/citizenship"
+          },
+          {
+            "definition": "/properties/AlienRegistrationNumber"
+          },
+          {
+            "definition": "/properties/CountryofOrigin"
+          },
+          {
+            "definition": "/properties/VisitDate"
+          }
+        ]
+      },
+      {
+        "definition": "/properties/CongressionalDistrictApplicant"
+      }
+    ]
+  },
+  {
+    "label": "Project Information",
+    "name": "ProjectInformationHeader",
+    "number": "6",
+    "children": [
+      {
+        "definition": "/properties/ProjectTitle"
+      },
+      {
+        "definition": "/properties/ProjectDecription"
+      },
+      {
+        "label": "Proposed Project ",
+        "name": "ProposedProjectHeader",
+        "number": "6c",
+        "children": [
+          {
+            "definition": "/properties/FundingPeriodStartDate"
+          },
+          {
+            "definition": "/properties/FundingPeriodEndDate"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Certification Text",
+    "name": "CertificationText",
+    "number": "7",
+    "children": [
+      {
+        "definition": "/properties/ApplicationCertification"
+      },
+      {
+        "definition": "/properties/AORSignature"
+      },
+      {
+        "definition": "/properties/AORDate"
+      }
+    ]
+  }
+]
