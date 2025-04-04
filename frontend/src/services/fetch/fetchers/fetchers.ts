@@ -4,6 +4,9 @@ import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
   fetchAgenciesEndpoint,
+  fetchApplicationEndpoint,
+  fetchCompetitionEndpoint,
+  fetchFormEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
   toDynamicUsersEndpoint,
@@ -95,6 +98,16 @@ export function requesterForEndpoint({
 
 export const fetchOpportunity = cache(
   requesterForEndpoint(fetchOpportunityEndpoint),
+);
+
+export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
+
+export const fetchCompetition = cache(
+  requesterForEndpoint(fetchCompetitionEndpoint),
+);
+
+export const fetchApplication = cache(
+  requesterForEndpoint(fetchApplicationEndpoint),
 );
 
 export const fetchOpportunitySearch = requesterForEndpoint(
