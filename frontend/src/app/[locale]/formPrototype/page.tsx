@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import CreateApplicatinButton from "src/components/workspace/CreateApplicationButton";
+import CreateApplicationButton from "src/components/workspace/CreateApplicationButton";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -21,7 +21,7 @@ export default function FormPrototypePage() {
         The following is a demo of the apply process.
       </legend>
       <p>
-        <CreateApplicatinButton />
+        <CreateApplicationButton />
       </p>
     </GridContainer>
   );

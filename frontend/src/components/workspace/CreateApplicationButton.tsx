@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-const CreateApplicatinButton = () => {
+const CreateApplicationButton = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>();
 
@@ -31,4 +31,4 @@ const CreateApplicatinButton = () => {
   );
 };
 
-export default CreateApplicatinButton;
+export default CreateApplicationButton;
