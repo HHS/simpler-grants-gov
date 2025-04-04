@@ -12,8 +12,8 @@ import {
   handleUpdateSavedSearch,
 } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
+import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 export const POST = async (request: Request) => {
   try {

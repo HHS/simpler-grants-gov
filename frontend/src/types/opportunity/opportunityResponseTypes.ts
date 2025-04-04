@@ -51,12 +51,12 @@ export interface Summary extends MinimalSummary {
   version_number: number | null;
 }
 
-export interface MinimalOpportunity {
+export type MinimalOpportunity = {
   opportunity_id: number;
   opportunity_status: OpportunityStatus;
   opportunity_title: string | null;
   summary: MinimalSummary;
-}
+};
 
 export interface BaseOpportunity extends MinimalOpportunity {
   agency_code: string | null;

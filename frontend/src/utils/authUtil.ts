@@ -1,4 +1,4 @@
-import { UserProfile } from "src/services/auth/types";
+import { UserProfile } from "src/types/authTypes";
 
 export const isSessionExpired = (userSession: UserProfile): boolean => {
   // if we haven't implemented expiration yet

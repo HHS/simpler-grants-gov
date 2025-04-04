@@ -1,3 +1,5 @@
+"server only";
+
 import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 

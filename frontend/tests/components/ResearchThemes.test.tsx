@@ -1,5 +1,6 @@
-import ResearchThemes from "src/app/[locale]/research/ResearchThemes";
 import { render, screen } from "tests/react-utils";
+
+import ResearchThemes from "src/components/research/ResearchThemes";
 
 describe("Research Content", () => {
   it("Renders without errors", () => {

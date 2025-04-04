@@ -1,6 +1,6 @@
 "use client";
 
-import { UserProviderState } from "src/services/auth/types";
+import { UserProviderState } from "src/types/authTypes";
 
 import { createContext, useContext } from "react";
 

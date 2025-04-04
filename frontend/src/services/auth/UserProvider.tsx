@@ -3,9 +3,9 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
-import { UserProfile } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
 import { userFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
+import { UserProfile } from "src/types/authTypes";
 import { isSessionExpired } from "src/utils/authUtil";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";

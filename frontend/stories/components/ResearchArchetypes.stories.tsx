@@ -1,5 +1,6 @@
 import { Meta } from "@storybook/react";
-import ResearchArchetypes from "src/app/[locale]/research/ResearchArchetypes";
+
+import ResearchArchetypes from "src/components/research/ResearchArchetypes";
 
 const meta: Meta<typeof ResearchArchetypes> = {
   title: "Components/Content/Research Archetypes Content",

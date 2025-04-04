@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { QueryContext } from "src/services/search/QueryProvider";
 
 import { useTranslations } from "next-intl";
 import { useContext } from "react";

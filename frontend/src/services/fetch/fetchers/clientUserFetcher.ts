@@ -1,7 +1,7 @@
 "use client";
 
 import { ApiRequestError } from "src/errors";
-import { UserFetcher, UserSession } from "src/services/auth/types";
+import { UserFetcher, UserSession } from "src/types/authTypes";
 
 // this fetcher is a one off for now, since the request is made from the client to the
 // NextJS Node server. We will need to build out a fetcher pattern to accomodate this usage in the future

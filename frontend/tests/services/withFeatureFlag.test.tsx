@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { identity } from "lodash";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { render } from "tests/react-utils";
 
 let enableFeature = false;

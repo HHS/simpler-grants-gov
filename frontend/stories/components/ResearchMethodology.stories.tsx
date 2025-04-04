@@ -1,5 +1,6 @@
 import { Meta } from "@storybook/react";
-import ResearchMethodology from "src/app/[locale]/research/ResearchMethodology";
+
+import ResearchMethodology from "src/components/research/ResearchMethodology";
 
 const meta: Meta<typeof ResearchMethodology> = {
   title: "Components/Content/Research Methodology Content",

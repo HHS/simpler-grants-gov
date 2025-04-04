@@ -1,5 +1,5 @@
 import { downloadOpportunities } from "src/services/fetch/fetchers/searchFetcher";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
+import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
