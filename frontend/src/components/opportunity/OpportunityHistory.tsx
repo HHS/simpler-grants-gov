@@ -2,7 +2,6 @@ import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-import { ForecastOpportunityItem } from "./ForecastOpportunityItem";
 
 type Props = {
   summary: Summary;
