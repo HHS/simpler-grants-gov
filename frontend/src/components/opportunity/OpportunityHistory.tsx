@@ -52,7 +52,6 @@ const OpportunityHistory = ({ summary }: Props) => {
         title={t("archive_date")}
         content={formatHistoryDate(summary.archive_date)}
       />
-      <ForecastOpportunityItem summary={summary} />
     </div>
   );
 };
