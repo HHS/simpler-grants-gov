@@ -1,7 +1,6 @@
 import logging
 import math
 import uuid
-from idlelib.searchengine import search_reverse
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -10,17 +9,21 @@ from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 import src.adapters.db as db
 from src.adapters import search
+from src.adapters.search.opensearch_response import SearchResponse
+from src.api.agencies_v1.agency_schema import AgencyResponseSchema, AgencyV1Schema
+from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.pagination.paginator import Paginator
 from src.search.search_config import get_search_config
-from src.services.opportunities_v1.search_opportunities import _get_search_request
+from src.services.opportunities_v1.experimental_constant import AGENCY_ONLY, ScoringRule
 from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
 
+SCHEMA = AgencyV1Schema()
 
 class AgencyFilters(BaseModel):
     agency_id: uuid.UUID | None = None
@@ -81,29 +84,57 @@ def get_agencies(
 
     return paginated_agencies, pagination_info
 
-def _search_agencies(search_client: search.SearchClient, search_params: AgencyListParams) -> Sequence[Agency]:
-    search_request = _get_search_request(search_params, aggregation=False)
-
-    index_alias = get_search_config().
 
 
+def get_search_request(params: AgencyListParams, aggregation: bool = True) -> dict:
+    builder = search.SearchQueryBuilder()
 
-def search_agencies(search_client: search.SearchClient, raw_search_params: dict) -> Tuple[Sequence[Agency], PaginationInfo]:
-    search_params = AgencyListParams.model_validate(raw_search_params)
-    response = _search_agencies(search_client, search_params)
+    # Pagination
+    builder.pagination(
+        page_size=params.pagination.page_size, page_number=params.pagination.page_offset
+    )
+
+    # Query
+    if params.query:
+        filter_rule = AGENCY_ONLY
+        builder.simple_query(params.query, filter_rule, SearchQueryOperator.OR)
+
+    return builder.build()
+
+
+def _search_agencies(search_client: search.SearchClient, search_params: AgencyListParams) -> SearchResponse:
+    search_request = get_search_request(search_params, aggregation=False)
+
+    index_alias = get_search_config().agency_search_index_alias
+    logger.info(
+        "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
+    )
+
+    response = search_client.search(index_alias, search_request)
+
+    return response
+
+
+def search_agencies(search_client: search.SearchClient, raw_search_params: dict) -> Tuple[Sequence[dict], PaginationInfo]:
+
+    params = AgencyListParams.model_validate(raw_search_params)
+    response = _search_agencies(search_client, params)
+    import pdb;pdb.set_trace()
 
     pagination_info = PaginationInfo(
-        page_offset=search_params.pagination.page_offset,
-        page_size=search_params.pagination.page_size,
+        page_offset=params.pagination.page_offset,
+        page_size=params.pagination.page_size,
         total_records=response.total_records,
-        total_pages=int(math.ceil(response.total_records / search_params.pagination.page_size)),
+        total_pages=int(math.ceil(response.total_records / params.pagination.page_size)),
         sort_order=[
             SortOrder(order_by=p.order_by, sort_direction=p.sort_direction)
-            for p in search_params.pagination.sort_order
+            for p in params.pagination.sort_order
         ],
     )
 
-    return response, pagination_info
+    records = SCHEMA.load(response.records, many=True)
+
+    return records, pagination_info
 
 
 

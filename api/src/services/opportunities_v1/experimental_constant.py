@@ -46,9 +46,19 @@ ATTACHMENT_ONLY = [
     "attachments.attachment.content",
 ]
 
+AGENCY_ONLY = [
+    "agency_name",
+    "agency_code",
+    "agency_code.keyword",
+    "top_level_agency_name",
+    "top_level_agency_code"
+    "top_level_agency_code.keyword"
+]
+
 
 class ScoringRule(StrEnum):
     DEFAULT = "default"
     EXPANDED = "expanded"
     AGENCY = "agency"
     ATTACHMENT_ONLY = "attachment_only"
+    AGENCY_ONLY = "agency_only"
