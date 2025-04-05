@@ -3,7 +3,7 @@ import EventsDemo from "./EventsDemo";
 import EventsHero from "./EventsHero";
 import EventsUpcoming from "./EventsUpcoming";
 
-export default function Events() {
+export default function Events(_p0: { params: Promise<{ locale: string; }>; }) {
   return (
     <>
       <EventsHero />
