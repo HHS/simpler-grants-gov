@@ -27,12 +27,11 @@ import {
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
-  // flaky
-  test.skip("should refresh and retain filters in a new tab", async ({ page }, {
+  // Set all inputs, then refresh the page. Those same inputs should be
+  // set from query params.
+  test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
-    // Set all inputs, then refresh the page. Those same inputs should be
-    // set from query params.
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-closed": "closed",
@@ -60,6 +59,7 @@ test.describe("Search page tests", () => {
       waitForSearchResultsInitialLoad(page),
       waitForFilterOptions(page, "agency"),
     ]);
+
     await selectSortBy(page, "agencyDesc");
     await expectSortBy(page, "agencyDesc");
 
@@ -71,6 +71,7 @@ test.describe("Search page tests", () => {
       "status",
       "forecasted,posted",
     );
+
     await clickAccordionWithTitle(page, "Funding instrument");
     await toggleCheckboxes(
       page,
@@ -157,6 +158,7 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
+    await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
@@ -221,6 +223,7 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
+    await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     const updatedSearchResultsCount =
@@ -243,7 +246,7 @@ test.describe("Search page tests", () => {
       "Funding instrument",
       "Eligibility",
       "Category",
-      // "Agency", - agency test is flaky
+      "Agency",
     ];
 
     filterTypes.forEach((filterType) => {
@@ -339,7 +342,7 @@ test.describe("Search page tests", () => {
       - click clear all nested agency
     */
     // flaky
-    test.skip("selects and clears nested agency filters", async ({ page }, {
+    test("selects and clears nested agency filters", async ({ page }, {
       project,
     }) => {
       const nestedFilterCheckboxesSelector =

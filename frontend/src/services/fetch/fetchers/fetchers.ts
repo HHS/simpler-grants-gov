@@ -4,8 +4,11 @@ import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
   fetchAgenciesEndpoint,
+  fetchCompetitionEndpoint,
+  fetchFormEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
+  toDynamicApplicationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -96,6 +99,15 @@ export function requesterForEndpoint({
 export const fetchOpportunity = cache(
   requesterForEndpoint(fetchOpportunityEndpoint),
 );
+
+export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
+
+export const fetchCompetition = cache(
+  requesterForEndpoint(fetchCompetitionEndpoint),
+);
+
+export const fetchApplicationWithMethod = (type: "POST" | "GET" | "PUT") =>
+  requesterForEndpoint(toDynamicApplicationsEndpoint(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,

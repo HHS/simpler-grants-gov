@@ -1,0 +1,76 @@
+FORM TITLE:,,Application for Federal Domestic Assistance- Individual,,,,,,,,,,,,,,,,
+[1],[2] ,[3] ,[4] ,[5] ,[6] ,[7] ,[8] ,[9],[10] ,[11] ,[12],[13],[14],[15] ,[16] ,[17] ,[18] ,[19] 
+Field #,Field Label,Field ID,Required?,Minimum Occurrences,Maximum Occurrences,Agency Field Name,Field Type,"Global Library
+Field Name",Field Type Source,Business Rules,Data Type,List of Values,Min  # of Chars or Min Value,Max # of Chars or Max Value,Field Implementation,Help Tip,Mandatory Message,Validation Message
+0-0,View Burden Statement,Burden Statement Button,,,,,Agency-specific,,,"Clicking displays burden statement:
+SF-424 Individual Form (4040-0005)
+
+According to the Paperwork Reduction Act of 1995, an agency may not conduct or sponsor, and a person is not required to respond to a collection of information unless it displays a valid OMB control number.  The valid OMB control number for this information collection is 4040-0005.  The time required to complete this information collection is estimated to average 27 minutes per response, including the time to review instructions, search existing data resources, gather the data needed and complete and review the information collection.  If you have comments concerning the accuracy of the time estimate(s) or suggestions for improving this form, please write to:  U.S. Department of Health & Human Services, OS/OCIO/PRA, 200 Independence Ave., S.W., Suite 537-H, Washington D.C. 20201,  Attention: PRA Reports Clearance Officer.
+
+Agency      Total                  Average Burden              Total Burden
+                     Responses      per response in                Hours
+                                                 Hours
+
+NEA             1150                  10/60                                      192
+NEH             2593                  30/60                                      1297
+USDA          4069                  30/60                                      2035
+HHS             600                     30/60                                      300
+Total           412                     3824
+
+3824 total hrs. x 60 minutes = 229,440 total minutes.  
+229,440 / 8412 total responses = 27 minutes per response.  ",,,,,Button,View Burden Statement,,
+0-1,"OMB Number: 4040-0005
+Expiration Date: 02/28/2026",OMB Number and Expiration Date Text,,,,,,,,,,,,,Label,,,
+0-2,APPLICATION FOR FEDERAL ASSISTANCE SF 424 - INDIVIDUAL,Form Title Text,,,,,,,,,,,,,Label,,,
+1,1. NAME OF FEDERAL AGENCY:,Name of Federal Agency,Yes,1,1,FederalAgency,Pre-populated,globLib:AgencyNameDataType,SubmissionDef.AgencyName,,AN,,1,60,Field,Pre-populated from the Application cover sheet.,,
+2-1,2. ASSISTANCE LISTING NUMBER:,Assistance Listing Number,No,0,1,CFDANumber,Pre-populated,globLib:CFDANumberDataType,SubmissionDef.CFDANumber,,AN,,0,15,Field,Pre-populated from the Application cover sheet.,,
+2-2,ASSISTANCE LISTING TITLE:,Assistance Listing Title,No,0,1,CFDATitle,Pre-populated,globLib:CFDATitleDataType,SubmissionDef.CFDATitle,,AN,,0,120,Field,Pre-populated from the Application cover sheet.,,
+3-1,3. DATE RECEIVED:,Date Received ,Yes,1,1,Date_Received,Post-populated,globLib:DateReceivedDataType,,,Date,,,,Label,Completed by Grants.gov upon submission.,,
+4-1,4. FUNDING OPPORTUNITY NUMBER:,Funding Opportunity Number,Yes,1,1,OpportunityID,Pre-populated,globLib:OpportunityIDDataType,SubmissionDef.OpportunityID,,AN,,1,40,Field,Pre-populated from the Application cover sheet.,,
+4-2,TITLE:,Funding Opportunity Title,Yes,1,1,OpportunityTitle,Pre-populated,globLib:OpportunityTitleDataType,SubmissionDef.OpportunityTitle,,AN,,1,255,Field,Pre-populated from the Application cover sheet.,,
+5-1,5. APPLICANT INFORMATION,Applicant Information Header,,,,,,,,,,,,,Label,,,
+5a-01,a. Name and Contact Information,Name and Contact Information Header,,,,,,,,,,,,,Label,,,
+5a-02,Prefix:,Prefix,No,0,1,PrefixName,Global,globLib:PrefixName,,,LIST,Mr.; Mrs.; Miss; Ms.; Dr.; Rev.,0,10,Popup,Select the Prefix from the provided list or enter a new Prefix not provided on the list.,,
+5a-03,First Name:,First Name,Yes,1,1,FirstName,Global,globLib:FirstName,,,AN,,1,35,Field,Enter the First Name. This field is required.,First Name is required. Enter the First Name.,
+5a-04,Middle Name:,Middle Name,No,0,1,MiddleName,Global,globLib:MiddleName,,,AN,,0,25,Field,Enter the Middle Name.,,
+5a-05,Last Name:,Last Name,Yes,1,1,LastName,Global,globLib:LastName,,,AN,,1,60,Field,Enter the Last Name. This field is required.,Last Name is required. Enter the Last Name.,
+5a-06,Suffix:,Suffix,No,0,1,Suffix,Global,globLib:SuffixName,,,LIST,Jr.; Sr.; M.D.; Ph.D,0,10,Popup,Select the Suffix from the provided list or enter a new Suffix not provided on the list.,,
+5a-07,Telephone Number (Daytime):,Daytime Phone Number,Yes,1,1,AuthorizedRepresentativePhoneNumber,Global,globLib:TelephoneNumberDataType,,Global,AN,,1,25,Field,Enter the daytime Telephone Number.  This field is required.,Phone Number is required: Enter the daytime Telephone Number.,
+5a-08,Telephone Number (Evening):,Evening Phone Number,No,0,1,EveningPhone,Global,globLib:TelephoneNumberDataType,,Global,AN,,0,25,Field,Enter the evening Telephone Number.,,
+5a-09,Fax Number:,Fax Number,No,0,1,AuthorizedRepresentativeFax,Global,globLib:TelephoneNumberDataType,,,AN,,1,25,Field,Enter the Fax Number.,,
+5a-10,Email:,Email,Yes,1,1,AuthorizedRepresentativeEmail,Global,globLib:EmailDataType,,E-mail validation,AN,,1,60,Field,Enter a valid Email Address.  This field is required.,Email address is required: Enter a valid Email address.,Email address is invalid: Enter a valid Email address.
+5b-1,b. Address,Address Header,,,,,,,,,,,,,Label,,,
+5b-2,Street1:,Street1,Yes,1,1,Street1,Global,globLib:Street1,,,AN,,1,55,Field,Enter the first line of the Street Address. This field is required.,Street1 is required: Enter the first line of the Street Address.,
+5b-3,Street2:,Street2,No,0,1,Street2,Global,globLib:Street2,,,AN,,0,55,Field,Enter the second line of the Street Address.,,
+5b-4,City:,City,Yes,1,1,City,Global,globLib:City,,,AN,,1,35,Field,Enter the City. This field is required.,City is required: Enter the City.,
+5b-5,County/Parish:,County/Parish,No,0,1,County,Global,globLib:County,,,AN,,0,30,Field,Enter the County/Parish.,,
+5b-6,State:,State,No,0,1,State,Global,globLib:State,,"Conditionally required if Country is US then active.  If Country is not US, then inactive",LIST,"50 US States, US possessions, territories, military codes",0,55,Popup,"Select the state, US possession or military code from the provided list.  This field is required if Country is the United States.","State is required if Country is the United States: Select the state, US possession or military code from the provided list. ",
+5b-7,Province:,Province,No,0,1,Province,Global,globLib:Province,,"If Country is US then inactive.  If Country is not US, then active",AN,,0,30,Field,Enter the Province.  ,,
+5b-8,Country:,Country,Yes,1,1,Country,Global,globLib:Country,,,LIST,GENC Standard Ed3.0 Update 11,1,49,Popup,Select the Country from the provided list.  This field is required.,Country is required: Select the Country from the provided list. ,
+5b-9,Zip/Postal Code:,Zip/Postal Code,No,0,1,ZipPostalCode,Global,globLib:ZipPostalCode,,"Conditionally required if Country is US then required.  If Country is US, min value 9 characters. If Country is not US, then optional.",AN,,0,30,Field,"Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United States.","ZIP/ Postal Code is required if the country is the United States: Enter the nine-digit Postal Code (e.g., ZIP code).","Invalid ZIP/ Postal Code: Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United States."
+5c-1,c. Citizenship Status:,Citizenship Status Header,,,,,,,,,,,,,Label,,,
+5c-2,U.S. Citizenship,U.S. Citizenship,Yes,1,1,citizenship,Radio Group,globLib:YesNoDataType,citizenship,,LIST,,,,Radio Group,,U.S. Citizenship is required: Select Yes if Applicant is a Citizen of the United States. Select No if Applicant is a permanent resident and enter the Alien Registration Number. Select No if Applicant is a foreign national and enter the country of Citizenship and start date of most recent residency in the United States.,
+5c-3,Yes,U.S. Citizenship Yes,No,0,1,,Radio Group,,citizenship,,,Yes,,,Radio,Select Yes if applicant is a citizen of the United States. ,,
+5c-4,No,U.S. Citizenship No,No,0,1,,Radio Group,,citizenship,,,No,,,Radio,Select No if applicant is a permanent resident and enter the Alien Registration Number. Select No if applicant is a foreign national and enter the country of citizenship and start date of most recent residency in the United States.,,
+5c-5,If No,If No Text,,,,,,,,,,,,,Label,,,
+5c-6,"If permanent resident of U.S., enter the Alien Registration #",Alien Registration Number,No,0,1,AlienRegistrationNumber,Agency-specific,,,"Enabled if the Citzenship Status = ""N"", else Disabled.",AN,,0,14,Field,Enter the Alien Registration Number.,,
+5c-7,"If foreign national, enter country of citizenship:",Citizenship Country,No,0,1,CountryofOrigin,Global,globLib:Country,,"Global  Enabled and Required if the Citzenship Status = ""N"", else Disabled.",LIST,GENC Standard Ed3.0 Update 11,0,49,Popup,Select the Country from the provided list.  This field is required if the applicant is not a U.S. Citizen.,Citizenship Country is required if the applicant is not a U S Citizen:  Select the Country from the provided list.  ,
+5c-8,"If foreign national, enter start date of most recent residency in U.S.:",Residency Start Date,No,0,1,VisitDate,Agency Specific,,,"Enabled and Required if the Citzenship Status = ""N"", else Disabled.",DATE,,,,Field,Enter the start date of the most recent residency in the U.S. Enter in the format MM/DD/YYYY.  This field is required if the applicant is not a U.S. Citizen.,Residency Start is required if the applicant is not a U.S. Citizen: Enter the start date of the most recent residency in the U.S.  Enter in the format MM/DD/YYYY. ,Invalid Residency Start: Enter the start date of the most recent residency in the U.S.  Enter in the format MM/DD/YYYY.  This field is required if the applicant is not a U.S. Citizen.
+5d,d. Congressional District of Applicant:,Congressional District of Applicant,Yes,1,1,CongressionalDistrictApplicant,Global,globLib:CongressionalDistrictDataType,,,AN,,1,6,Field,"Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district, NC-103 for North Carolina's 103rd district. This field is required.
+
+If outside the US, enter 00-000.","Congressional District of Applicant is required: Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district, NC-103 for North Carolina's 103rd district. If outside the US, enter 00-000.",
+6,6. PROJECT INFORMATION,Project Information Header,,,,,,,,,,,,,Label,,,
+6a,a. Project Title:,Project Title,Yes,1,1,ProjectTitle,Global,globLib:ProjectTitleDataType,,,AN,,1,200,Field,"Enter a brief, descriptive title of the project. This field is required.","Project Title is required:  Enter a brief, descriptive title of the project.",
+6b,b. Project Description:,Project Description,Yes,1,1,ProjectDecription,Agency-specific,,,,AN,,1,1000,Field,Enter a brief description of the project. This field is required.,Project Description is required:  Enter a brief description of the project.,
+6c-1,c. Proposed Project:,Proposed Project Header ,,,,,,,,,,,,,Label,,,
+6c-2,Start Date:,Proposed Project Start Date,Yes,1,1,FundingPeriodStartDate,Agency-specific,,,,DATE,,,,Field,Enter the start date for the proposed project. Enter in the format MM/DD/YYYY. This field is required. ,Proposed Project Start Date is required.  Enter the start date for the proposed project.  Enter in the format MM/DD/YYYY.,"Invalid Proposed Project Start Date:  Enter the start date for the proposed project.  Enter in the format MM/DD/YYYY.  This field is required.
+or
+CHECK DATES! The end date you entered is earlier than the start date. Please re-enter the Funding Period End Date."
+6c-3,End Date:,Proposed Project End Date,Yes,1,1,FundingPeriodEndDate,Agency-specific,,,,DATE,,,,Field,Enter the end date for the proposed project. Enter in the format MM/DD/YYYY. This field is required.,End Date is required:  Enter the end date for the proposed project. Enter in the format MM/DD/YYYY. ,"Invalid End Date:  Enter the end date for the proposed project. Enter in the format MM/DD/YYYY.  This field is required.
+or 
+CHECK DATES! The end date you entered is earlier than the start date. Please re-enter the Funding Period End Date."
+7-1,"7. * By signing this application, I certify (1) to the statements contained in the list of certifications** and (2) that the statements herein are true, complete and accurate to the best of my knowledge.  I also provide the required assurances** and agree to comply with any resulting terms if I accept an award.  I am aware that any false, fictitious, or fradulent statements or claims may subject me to criminal, civil, or administrative penalties (U.S. Code, Title 18, Section 1001)",Certification Text,,,,,,,,,,,,,Label,,,
+7-2,** I AGREE,I Agree,Yes,1,1,ApplicationCertification,Agency Specific,,,,,,,,Check,Check to select. This field is required.,I Agree checkbox is required: Check I Agree checkbox to provide the required Certifications and Assurances.,
+7-3,"** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions.",List of Certifications and Assurances Text,,,,,,,,,,,,,Label,,,
+7-4,Signature:,Signature,Yes,1,1,AORSignature,Post-Populated,globLib:SignatureDataType,,,AN,,1,144,Label,Completed by Grants.gov upon submission.,,
+7-5,Date Signed:,Date Signed,Yes,1,1,AORDate,Post-Populated,globLib:DateSignedDataType,,,DATE,,,,Label,Completed by Grants.gov upon submission.,,

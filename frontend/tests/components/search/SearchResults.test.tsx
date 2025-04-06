@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
+import { fakeSearchAPIResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SearchResults from "src/components/search/SearchResults";
@@ -60,6 +61,7 @@ describe("SearchResults", () => {
         }}
         query={""}
         loadingMessage={""}
+        searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}
       />,
     );
 
