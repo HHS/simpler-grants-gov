@@ -173,6 +173,9 @@ db-migrate-heads: ## Show migrations marked as a head
 db-seed-local: ## Generate records into your local database
 	$(PY_RUN_CMD) db-seed-local $(args)
 
+db-seed-local-with-agencies: ## add an opportunity for each agency
+	$(PY_RUN_CMD) db-seed-local --cover_all_agencies=true
+
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
@@ -297,6 +300,8 @@ seed-local-legacy-tables:
 populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
+populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
+	$(FLASK_CMD) load-search-data load-agency-data $(args)
 ##################################################
 # Miscellaneous Utilities
 ##################################################

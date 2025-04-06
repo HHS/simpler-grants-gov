@@ -8,4 +8,5 @@ export const defaultFeatureFlags: FeatureFlags = {
   authOn: false,
   savedOpportunitiesOn: false,
   savedSearchesOn: false,
+  applyFormPrototypeOff: true,
 };

@@ -1208,9 +1208,10 @@ components:
           format: date-time
           readOnly: true
         extract_metadata_id:
-          type: integer
+          type: string
+          format: uuid
           description: The ID of the extract metadata
-          example: 1
+          example: 123e4567-e89b-12d3-a456-426614174000
         extract_type:
           type: string
           description: The type of extract

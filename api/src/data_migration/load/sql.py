@@ -30,14 +30,19 @@ def build_insert_select_sql(
     source_table: sqlalchemy.Table,
     destination_table: sqlalchemy.Table,
     ids: Iterable[tuple | sqlalchemy.Row],
+    excluded_columns: list[str] | None = None,
 ) -> sqlalchemy.Insert:
     """Build an `INSERT INTO ... SELECT ... FROM ...` query for new rows."""
 
-    all_columns = tuple(c.name for c in source_table.columns)
+    if excluded_columns is None:
+        excluded_columns = []
+
+    columns_to_include = [c for c in source_table.columns if c.name not in excluded_columns]
+    column_names = tuple(c.name for c in columns_to_include)
 
     # `SELECT col1, col2, ..., FALSE AS is_deleted FROM <source_table>`
     select_sql = sqlalchemy.select(
-        source_table, sqlalchemy.literal_column("FALSE").label("is_deleted")
+        *columns_to_include, sqlalchemy.literal_column("FALSE").label("is_deleted")
     ).where(
         # `WHERE (id1, id2, ...)
         #  IN ((a1, a2), (b1, b2), ...)`
@@ -45,7 +50,7 @@ def build_insert_select_sql(
     )
     # `INSERT INTO <destination_table> (col1, col2, ..., is_deleted) SELECT ...`
     insert_from_select_sql = sqlalchemy.insert(destination_table).from_select(
-        all_columns + (destination_table.c.is_deleted,), select_sql
+        column_names + (destination_table.c.is_deleted.name,), select_sql
     )
 
     return insert_from_select_sql
@@ -54,7 +59,7 @@ def build_insert_select_sql(
 def build_select_updated_rows_sql(
     source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
 ) -> sqlalchemy.Select:
-    """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds updated rows in source_table."""
+    """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds updated rows in source_table. Excluded columns are not included in the query."""
 
     # `SELECT id1, id2, id3, ... FROM <destination_table>`
     return (
@@ -84,14 +89,25 @@ def build_update_sql(
     source_table: sqlalchemy.Table,
     destination_table: sqlalchemy.Table,
     ids: Iterable[tuple | sqlalchemy.Row],
+    excluded_columns: list[str] | None = None,
 ) -> sqlalchemy.Update:
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
+
+    if excluded_columns is None:
+        excluded_columns = []
+
+    # Create a dictionary of columns to update, excluding the excluded columns
+    update_columns = {
+        col.name: source_table.c[col.name]
+        for col in source_table.columns
+        if col.name not in excluded_columns
+    }
 
     return (
         # `UPDATE <destination_table>`
         sqlalchemy.update(destination_table)
         # `SET col1=source_table.col1, col2=source_table.col2, ...`
-        .values(dict(source_table.columns))
+        .values(update_columns)
         # `WHERE ...`
         .where(
             sqlalchemy.tuple_(*destination_table.primary_key.columns)

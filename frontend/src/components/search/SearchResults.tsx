@@ -1,4 +1,3 @@
-import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
@@ -109,13 +108,14 @@ export default function SearchResults({
   searchParams,
   query,
   loadingMessage,
+  searchResultsPromise,
 }: {
   searchParams: QueryParamData;
   query?: string | null;
   loadingMessage: string;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const { page, sortby } = searchParams;
-  const searchResultsPromise = searchForOpportunities(searchParams);
   const suspenseKey = Object.entries(searchParams).join(",");
 
   return (

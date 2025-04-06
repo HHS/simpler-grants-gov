@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
+import { fakeSearchAPIResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { Accordion } from "@trussworks/react-uswds";
@@ -76,20 +77,24 @@ jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
     ]),
 }));
 
-describe("SearchFilters", () => {
-  it("Renders without errors", () => {
-    render(
-      <SearchFilters
-        fundingInstrument={new Set()}
-        eligibility={new Set()}
-        agency={new Set()}
-        category={new Set()}
-        opportunityStatus={new Set()}
-      />,
-    );
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
 
-    // making weird use of the mocked translation behavior to make sure that things render correctly, but w/e
-    const component = screen.getByText("accordion.titles.funding");
-    expect(component).toBeInTheDocument();
+describe("SearchFilters", () => {
+  it("Renders without errors", async () => {
+    const component = await SearchFilters({
+      fundingInstrument: new Set(),
+      eligibility: new Set(),
+      agency: new Set(),
+      category: new Set(),
+      opportunityStatus: new Set(),
+      searchResultsPromise: Promise.resolve(fakeSearchAPIResponse),
+    });
+    render(component);
+
+    const title = await screen.findByText("accordion.titles.funding");
+    expect(title).toBeInTheDocument();
   });
 });
