@@ -35,20 +35,6 @@ export const ForecastOpportunityItem = ({summary}: Props) => {
             title={t("forecasted_award_date")}
             content={formatHistoryDate(summary.forecasted_award_date)}
           />
-          <OpportunityHistoryItem
-            title={t("version")}
-            content={
-              summary.version_number ? summary.version_number.toString() : "--"
-            }
-          />
-          <OpportunityHistoryItem
-            title={t("posted_date")}
-            content={formatHistoryDate(summary.post_date)}
-          />
-          <OpportunityHistoryItem
-            title={t("archive_date")}
-            content={formatHistoryDate(summary.archive_date)}
-          />
         </div>
     </div>
   );
