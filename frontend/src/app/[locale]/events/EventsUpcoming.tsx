@@ -5,7 +5,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-export default function EventsUpcoming(): JSX.Element {
+export default function EventsUpcoming() {
   const t = useTranslations("Events.upcoming");
   const signUpLink = "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform";
 

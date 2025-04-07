@@ -7,7 +7,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-export default function EventsDemo(): JSX.Element {
+export default function EventsDemo() {
   const t = useTranslations("Events.demo");
   const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
 

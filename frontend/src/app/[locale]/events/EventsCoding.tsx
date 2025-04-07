@@ -7,7 +7,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-export default function EventsCoding(): JSX.Element {
+export default function EventsCoding() {
   const t = useTranslations("Events.coding_challenge");
   const codingChallengeLink = "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 

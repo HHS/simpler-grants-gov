@@ -9,7 +9,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-export default function EventsHero(): JSX.Element {
+export default function EventsHero() {
   const t = useTranslations("Events");
 
   return (
