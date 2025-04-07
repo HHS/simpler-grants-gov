@@ -6,10 +6,10 @@ import { Button } from "@trussworks/react-uswds";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type ZipDownloadProps = {
-  opportunityId: string;
+  opportunityId: number;
 };
 
-const downloadAttachmentsZip = (opportunityId: string) => {
+const downloadAttachmentsZip = (opportunityId: number) => {
   const path = `/api/attachment-download/${opportunityId}`;
   window.open(path, "_blank");
 };
