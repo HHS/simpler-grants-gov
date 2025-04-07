@@ -36,6 +36,19 @@ The main things to focus on are:
 - don't abuse (or maybe even use) abbreviations
 - think about searchability
 
+### Promises
+
+Constants that represent unresolved promises should be named `varNamePromise(s)`.
+
+Constants that represent resolved promises should be named `resolvedVarName(s)`
+
+For example:
+
+```javascript
+const bunnyPromises = getBunnyPromises();
+const resolvedBunnies = Promise.all(bunnyPromies);
+```
+
 ## Errors
 
 When naming an "error" variable, it is our best practice to use the variable name `e` rather than `error` or `err`. This single character abbreviation breaks the rule of variable names above, but it is well established JS practice and avoids the shadowing of a reserved word (as with `error`) and the use of a slightly longer abbreviation (as with `err`).
