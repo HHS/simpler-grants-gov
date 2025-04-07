@@ -73,7 +73,7 @@ export const messages = {
     },
     documents: {
       title: "Documents",
-      table_col_category: "Category",
+      table_col_description: "Description",
       table_col_file_name: "File name",
       table_col_last_updated: "Last updated",
       type: {
