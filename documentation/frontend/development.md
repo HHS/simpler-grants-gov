@@ -142,25 +142,6 @@ It's recommended that developers configure their code editor to auto run these t
 - `npm run format-check`: Check files for prettier formatting violations without fixing them
 - `npm run all-checks`: Runs linting, typescript check, unit testing, and creates a build - simulating locally tests that are run on PRs in Github Actions, other than e2e tests
 
-#### Frontend coding conventions
-
-Some common uses and conventions are not covered in formatting and linting tools or widely agreed upon across the industry.
-
-##### Naming resolved and unresolved promises
-
-Constants that represent unresolved promises should be named `varNamePromise(s)`.
-
-Constants that represent resolved promises should be named `resolvedVarName(s)`
-
-For example:
-
-```javascript
-
-const bunnyPromises = getBunnyPromises();
-const resolvedBunnies = Promise.all(bunnyPromies);
-```
-
-
 ### 🖼️ Storybook
 
 Storybook is a [frontend workshop](https://bradfrost.com/blog/post/a-frontend-workshop-environment/) for developing and documenting pages and components in isolation. It allows you to render the same React components and files in the `src/` directory in a browser, without the need for a server or database. This allows you to develop and manually test components without having to run the entire Next.js application.
@@ -223,6 +204,7 @@ Running authentication locally requires running the API, directing the API redir
 4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
 
 #### Login flow
+
 The [documentation/api/authentication.md](../api/authentication.md) details the login flow from the frontend → API → login.gov → API → frontend.
 
 The `/api/auth/callback` route handler receives a JSON web token as query parameter, uses the `API_JWT_PUBLIC_KEY` env variable to verify that it was created by the API, sets a cookie with the token, then later uses that token to verify the user identity in `/api/auth/session` and other routes.

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";

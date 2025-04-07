@@ -1,5 +1,6 @@
-import ResearchMethodology from "src/app/[locale]/research/ResearchMethodology";
 import { render, screen } from "tests/react-utils";
+
+import ResearchMethodology from "src/components/research/ResearchMethodology";
 
 describe("Research Content", () => {
   it("Renders without errors", () => {
