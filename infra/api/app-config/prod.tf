@@ -22,7 +22,7 @@ module "prod_config" {
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 4x the instance_scaling_min_capacity
   # the "4x" number is functionally arbibrary.
-  instance_scaling_max_capacity = 12
+  instance_scaling_max_capacity = 8
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
