@@ -33,7 +33,9 @@ if TYPE_CHECKING:
 class Opportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity"
 
-    opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True)
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
@@ -169,10 +171,14 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         ApiSchemaTable.__table_args__,
     )
 
-    opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    legacy_opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, index=True)
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
@@ -296,10 +302,13 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
 
-    opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    legacy_opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, index=True)
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
@@ -320,12 +329,8 @@ class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
         # otherwise we end up overwriting things and Alembic remakes the whole table
         ApiSchemaTable.__table_args__,
     )
-
-    opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger,
-        ForeignKey(OpportunitySummary.opportunity_summary_id),
-        primary_key=True,
-        index=True,
+    opportunity_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(OpportunitySummary.opportunity_summary_id), index=True, primary_key=True
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -354,8 +359,8 @@ class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
         ApiSchemaTable.__table_args__,
     )
 
-    opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger,
+    opportunity_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
         primary_key=True,
         index=True,
@@ -387,8 +392,8 @@ class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
         ApiSchemaTable.__table_args__,
     )
 
-    opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger,
+    opportunity_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
         primary_key=True,
         index=True,
@@ -412,13 +417,13 @@ class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
 class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(single_parent=True)
 
-    opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger,
+    opportunity_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
         primary_key=True,
         index=True,
@@ -436,10 +441,12 @@ class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
 class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_attachment"
 
-    attachment_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    attachment_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    legacy_attachment_id: Mapped[int] = mapped_column(BigInteger, index=True)
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
@@ -456,8 +463,8 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
 class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_change_audit"
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
@@ -470,8 +477,8 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
