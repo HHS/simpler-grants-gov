@@ -1,8 +1,4 @@
-import SessionStorage from "src/utils/sessionStorage";
-
-
-
-
+import SessionStorage from "src/services/auth/sessionStorage";
 
 describe("SessionStorage", () => {
   const mockGetItem = jest.fn();
