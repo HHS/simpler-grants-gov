@@ -81,19 +81,19 @@ MB_DB_HOST=grants-analytics-db
 
 Run the following commands to set up the services:
 
-### A. Stop any running services:
+### 4.1. Stop any running services:
 
 ```bash
 docker compose down
 ```
 
-### B. Build Metabase image for ARM64:
+### 4.2. Build Metabase image for ARM64:
 
 ```bash
 docker compose build --no-cache grants-metabase
 ```
 
-### C. Start all services:
+### 4.3. Start all services:
 
 ```bash
 docker compose up -d
@@ -113,9 +113,27 @@ Look for the following string (or similar):
 Launching Embedded Jetty Webserver with config
 ```
 
-If you see that message or similar, the Metabase app should be available
+If you see that message or similar, the Metabase Admin app should be available
 in a web browser at [http://localhost:3100](http://localhost:3100).
 
-## Next Steps
+## 6. Connect Metabase to Postgres 
 
-Set up Metabase by following steps in the Metabase [documentation](https://www.metabase.com/docs/latest/databases/connecting).
+In the 
+[Metabase Admin](http://localhost:3100) app, navigate to Databases > Add Database. 
+Fill in the form using the `MB_DB_` values in [`local.env`](../../analytics/local.env).
+
+`local.env`
+```
+MB_DB_TYPE=postgres
+MB_DB_DBNAME=app
+MB_DB_PORT=5432
+MB_DB_USER=app
+MB_DB_HOST=grants-analytics-db
+```
+
+The effect will be to connect the Postgres database as a data source in the Metabase 
+query-builder/dashboard-builder toolkit.
+
+## See Also
+
+Metabase [documentation](https://www.metabase.com/docs/latest/databases/connecting)
