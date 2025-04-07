@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services init-tika-service
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -347,3 +347,12 @@ init-mock-soap-services: start-mock-soap-services ## Initialize the applicants s
 
 start-mock-soap-services: ## start applicants soap api
 	docker compose up --detach mock-applicants-soap-api
+
+
+#################################
+# Tika attachment file processor
+#################################
+init-tika-service: start-tika-service
+
+start-tika-service:
+	docker compose up --detach tika

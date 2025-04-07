@@ -107,6 +107,7 @@ services:
       - localstack
       - mock-oauth2-server
       - mock-applicants-soap-api
+      - tika
     networks:
       - grants_backend
       - default
@@ -133,6 +134,14 @@ services:
       - "8082:8080"
     volumes:
       - ./mock-soap-services/applicants:/opt/imposter/config:ro
+    networks:
+      - default
+
+  tika:
+    image: apache/tika:3.0.0.0
+    container_name: tika
+    ports:
+      - 9998:9998
     networks:
       - default
 
