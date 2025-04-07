@@ -143,7 +143,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             />
             <OpportunityDocuments
               documents={opportunityData.attachments}
-              opportunityId={opportunityData.opportunity_id}
+              opportunityId={opportunityData.opportunity_id.toString()}
             />
             <OpportunityLink opportunityData={opportunityData} />
           </div>
