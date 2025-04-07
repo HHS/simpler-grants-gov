@@ -1,4 +1,7 @@
-import { getNextRoutes, listPaths } from "src/utils/getRoutes";
+import {
+  getNextRoutes,
+  listPaths,
+} from "src/utils/getRoutes";
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -28,6 +31,7 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/dev/feature-flags",
       "/error",
+      "/events",
       "/formPrototype/1",
       "/formPrototype",
       "/formPrototype/success",
