@@ -19,7 +19,7 @@ export interface SetFormDataFunction {
 
 export interface UiSchemaField {
   type: "field";
-  definition: string;
+  definition: `/properties/${string}`;
 }
 
 export interface UiSchemaSection {

@@ -1,5 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
-import Ajv from "ajv";
+import Ajv, { ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
 
 import { UiSchema } from "./types";
@@ -23,7 +23,15 @@ function getKeysWithValues(formData: FormData) {
   return keysWithValue;
 }
 
-export const validateFormData = (formData: FormData, schema: RJSFSchema) => {
+export const validateFormData = (
+  formData: FormData,
+  schema: RJSFSchema,
+):
+  | ErrorObject<string, Record<string, unknown>, unknown>[]
+  | null
+  | false
+  | undefined
+  | [] => {
   const data = getKeysWithValues(formData);
   const ajv = new Ajv({ allErrors: true, coerceTypes: true });
   addFormats(ajv);

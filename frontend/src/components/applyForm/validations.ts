@@ -4,7 +4,9 @@ import { type UiSchemaSection } from "./types";
 
 export const uiSchemaFieldSchema = z.object({
   type: z.literal("field"),
-  definition: z.string(),
+  definition: z.custom<`/properties/${string}`>(
+    (val) => typeof val === "string" && val.startsWith("/properties/"),
+  ),
 });
 
 const uiSchemaSectionSchema: z.ZodSchema<UiSchemaSection> = z.lazy(() =>
@@ -18,11 +20,20 @@ const uiSchemaSectionSchema: z.ZodSchema<UiSchemaSection> = z.lazy(() =>
 );
 
 const schemaFieldSchema = z.object({
-  type: z.string(),
+  type: z.enum([
+    "string",
+    "number",
+    "array",
+    "object",
+    "boolean",
+    "null",
+    "integer",
+  ]),
   title: z.string(),
   minLength: z.number().optional(),
   maxLength: z.number().optional(),
   format: z.string().optional(),
+  pattern: z.string().optional(),
 });
 
 export const formSchemaValidate = z.object({
