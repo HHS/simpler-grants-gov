@@ -39,4 +39,4 @@ export default function EventsHero(): JSX.Element {
       </GridContainer>
     </div>
   );
-};
+}

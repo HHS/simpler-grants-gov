@@ -7,7 +7,7 @@ import {
 
 export default function EventsUpcoming(): JSX.Element {
   const t = useTranslations("Events.upcoming");
-  const signUpLink: string = "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform";
+  const signUpLink = "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform";
 
   return (
     <GridContainer data-testid="events-upcoming-content" className="padding-4">
@@ -44,4 +44,4 @@ export default function EventsUpcoming(): JSX.Element {
       </Grid>
     </GridContainer>
   );
-};
+}

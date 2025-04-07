@@ -9,7 +9,7 @@ import {
 
 export default function EventsCoding(): JSX.Element {
   const t = useTranslations("Events.coding_challenge");
-  const codingChallengeLink: string = "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
+  const codingChallengeLink = "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
   return (
     <GridContainer
@@ -47,5 +47,5 @@ export default function EventsCoding(): JSX.Element {
         </Grid>
       </Grid>
     </GridContainer>
-  );
-};
+  )
+}

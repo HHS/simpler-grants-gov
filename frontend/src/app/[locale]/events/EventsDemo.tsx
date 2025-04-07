@@ -9,7 +9,7 @@ import {
 
 export default function EventsDemo(): JSX.Element {
   const t = useTranslations("Events.demo");
-  const demoLink: string = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
+  const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
 
   return (
     <GridContainer data-testid="events-demo-content" className="padding-x-4">
@@ -49,4 +49,4 @@ export default function EventsDemo(): JSX.Element {
       </Grid>
     </GridContainer>
   );
-};
+}
