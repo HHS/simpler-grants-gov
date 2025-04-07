@@ -29,11 +29,13 @@ const ApplyForm = ({
     formData: new FormData(),
     formId,
   });
-  const formObject = Object.fromEntries(formState.formData.entries());
+
+  const { errorMessage, validationErrors, formData } = formState;
+  const formObject = Object.fromEntries(formData.entries());
   const fields = buildForTreeRecursive(
     formSchema,
     uiSchema,
-    formState.validationErrors,
+    validationErrors,
     formObject,
   );
   const navFields = getWrappersForNav(uiSchema);
@@ -42,14 +44,15 @@ const ApplyForm = ({
       {navFields.length > 0 && <ApplyFormNav fields={navFields} />}
       <form action={formAction}>
         <ApplyFormErrorMessage
-          heading={formState.errorMessage}
-          errors={formState.validationErrors}
+          heading={errorMessage}
+          errors={validationErrors}
         />
         <FormGroup>{fields}</FormGroup>
         <p>
           <Button
+            data-testid="apply-form-submit"
             onClick={() =>
-              formState.validationErrors.length > 0
+              validationErrors.length > 0
                 ? window.scrollTo({ top: 0, behavior: "smooth" })
                 : undefined
             }

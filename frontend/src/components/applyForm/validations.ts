@@ -14,7 +14,7 @@ const uiSchemaSectionSchema: z.ZodSchema<UiSchemaSection> = z.lazy(() =>
     type: z.literal("section"),
     label: z.string(),
     name: z.string(),
-    number: z.string(),
+    number: z.string().optional(),
     children: z.array(z.union([uiSchemaFieldSchema, uiSchemaSectionSchema])),
   }),
 );

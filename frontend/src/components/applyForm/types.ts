@@ -26,7 +26,7 @@ export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  number: string;
+  number?: string;
   children: (UiSchemaField | UiSchemaSection)[];
 }
 
