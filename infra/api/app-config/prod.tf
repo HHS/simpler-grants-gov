@@ -20,16 +20,23 @@ module "prod_config" {
   # The math is: 5 * max(average CPU or average Memory) * 1.3. The 1.3 is for a buffer.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
-  # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
-  instance_scaling_max_capacity = 10
+  # instance_scaling_max_capacity is 4x the instance_scaling_min_capacity
+  # the "4x" number is functionally arbibrary.
+  instance_scaling_max_capacity = 12
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
-  # database_min_capacity is 5x the average api-prod ServerlessDatabaseCapacity seen over 12 months, as of November 2024
-  # The math is: 5 * (ServerlessDatabaseCapacity) * 1.3. The 1.3 is for a buffer.
-  database_min_capacity = 20
-  # max capacity is as high as it goes
-  database_max_capacity   = 128
+  # database_min_capacity is set iteratively based on the CPU usage observed at a given point in time.
+  # On April 2025 the average CPU usage over the last 3 months was 1% (very litte).
+  # At that time, the min capacity was set to 20 (a lot).
+  # So we likely could set the minimum to 0.5 (the absolute minimum for Aurora Serverless v2).
+  # But setting it at 2 is a more reasonable default for production environments.
+  # It is 2 specifically so that we can get performance insights (see the 1st link above).
+  database_min_capacity = 2
+  # max capacity is 4x the database_min_capacity
+  # the "4x" number is functionally arbibrary.
+  database_max_capacity = 8
+  # always at least 2, for redundancy and availability, scale out if we start maxing `database_max_capacity`
   database_instance_count = 2
 
   has_search = true
