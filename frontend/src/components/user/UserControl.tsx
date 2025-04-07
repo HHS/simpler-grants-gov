@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import { UserProfile } from "src/services/auth/types";
 import { useUser } from "src/services/auth/useUser";
+import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";

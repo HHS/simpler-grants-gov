@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import { noop } from "lodash";
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
+import { QueryContext } from "src/services/search/QueryProvider";
 import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
