@@ -29,6 +29,7 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/formPrototype/1",
+      "/formPrototype",
       "/formPrototype/success",
       "/health",
       "/login",
