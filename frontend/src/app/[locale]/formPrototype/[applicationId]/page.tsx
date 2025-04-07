@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
+import { COMPETITION_ID } from "src/constants/competitions";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
-import { COMPETITION_ID } from "src/types/competitions";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import Link from "next/link";
