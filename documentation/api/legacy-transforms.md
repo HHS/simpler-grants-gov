@@ -61,16 +61,18 @@ class TExample(foreignbase.ForeignBase, TExampleMixin):
 We don't need to perfectly match everything about the Oracle system, it's fine to do the following:
 * Different column types - see [Type Mapping](#type-mapping) for details
 * Different column names - the order matters for the columns, but the column name doesn't need to match if there is an issue (unless there is an issue - keep the column names the same)
+* Adding indexes and relationships - we sometimes add relationships to make certain queries simpler like in our test factories.
+* Leaving out foreign keys - we intentionally do this to avoid complexity in copying the data over
 
 ## Type Mapping
 The oracle_fdw handles most type conversions for us which means we don't
 need to match the types as exactly as you might think. Here are a few general type
 mappings you can follow:
-* VARCHAR(x)/VARCHAR2(x) -> TEXT
-* CHAR(x) -> TEXT
-* NUMBER(x) -> Generally Integer/BigInteger, if it is defined as "Number(x,y)" that means it's a floating point number and should not be an int
-* DATE -> TIMESTAMP, the date type in Oracle stores time info as well, so can convert to timestamp
-* BLOB -> Depends on what the blob represents, if it's a file, BYTEA works
+* `VARCHAR(x)`/`VARCHAR2(x)` -> `TEXT`
+* `CHAR(x)` -> `TEXT`
+* `NUMBER(x)` -> Generally `Integer`/`BigInteger`, if it is defined as "Number(x,y)" that means it's a floating point number and should not be an int.
+* `DATE` -> `TIMESTAMP`, the date type in Oracle stores time info as well, so can convert to timestamp
+* `BLOB` -> Depends on what the blob represents, if it's a file, `BYTEA` works
 
 For anything else, consult the [oracle_fdw](https://github.com/laurenz/oracle_fdw?tab=readme-ov-file#data-types) docs.
 
@@ -131,10 +133,10 @@ Note that these example commands disable all parts of the job, running
 the above commands will just spin up the script and do nothing.
 
 The job itself is made up of 4 parts which will be described in further detail below
-* LoadOracleData - For each configured table, copy data from the Oracle tables to our staging tables, figuring out inserts/updates/deletes
-* TransformOracleData - For each configured table, transform the data according to custom logic and create records in our API tables
-* SetCurrentOpportunities - Iterate over all opportunities and determine the opportunity status / current opportunity summary for the opportunity
-* StoreOpportunityVersion - Iterate over all recently changed opportunities and create versioned opportunity data
+* [LoadOracleData](#loadoracledata) - For each configured table, copy data from the Oracle tables to our staging tables, figuring out inserts/updates/deletes
+* [TransformOracleData](#transformoracledata) - For each configured table, transform the data according to custom logic and create records in our API tables
+* [SetCurrentOpportunities](#setcurrentopportunities) - Iterate over all opportunities and determine the opportunity status / current opportunity summary for the opportunity
+* [StoreOpportunityVersion](#storeopportunityversion) - Iterate over all recently changed opportunities and create versioned opportunity data
 
 ## Load-transform options
 Each of these jobs runs as part of the same script sequentially and each part can be enabled
@@ -279,8 +281,9 @@ The job is setup to be very efficient and won't even do updates if the values wo
 While it seems inefficient to reprocess 80k+ opportunities hourly, this takes less than 2 minutes right now.
 
 ## StoreOpportunityVersion
-x
-
+[StoreOpportunityVersionTask](/api/src/task/opportunities/store_opportunity_version_task.py) iterates
+over all opportunities and populates the `opportunity_version` table. It adds records
+if the opportunity info stored in the version table differs from whatever already exists.
 
 # Runbooks
 
@@ -289,7 +292,7 @@ x
 1. Figure out what the schema of the existing Oracle table is - this requires the ability to access the Oracle DB directly.
 2. Using the existing schema, [follow the steps](#staging--foreign-table-setup) for setting up a foreign table.
 3. Create a destination table in our API schema.
-4. Build the transform class for processing the table.
+4. Build the transform class for processing the table from the staging table to our destination API table.
 5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run)
 6. Manually test loading the table by running the job with load oracle data job with the following command `["poetry", "run", "flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
 7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
@@ -303,7 +306,9 @@ Remember to update any relevant dashboards on New Relic.
 
 This first requires you to be logged into the AWS console and authenticated with AWS
 in your terminal (`aws configure sso` is one way to set this up). It also requires
-that you have terraform initialized for a given environment locally.
+that you have terraform initialized for a given environment locally which can be done
+by running `bin/terraform-init infra/api/service {environment}` - note that only the most
+recently initialized environment will be usable.
 
 To run an ECS task we just need to call the `run-command` script we have which will
 fetch terraform values and call ECS to run the task.
@@ -327,3 +332,6 @@ bin/run-command --environment-variables "$(jq -c . ~/env_vars/load_attachment.js
 ```
 If you have no environment variables you want to override, feel free to exclude that section
 of the command.
+
+## I want to reload a table we already transformed
+TODO - https://github.com/HHS/simpler-grants-gov/issues/1698
