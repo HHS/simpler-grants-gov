@@ -9,7 +9,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-const EventsHero = () => {
+export default function EventsHero(): JSX.Element {
   const t = useTranslations("Events");
 
   return (
@@ -24,7 +24,7 @@ const EventsHero = () => {
             col: true
           }}>
             <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">{t("page_title")}</h1>
-            <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance">{t("page_description")}</p>
+            <p className="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance">{t("page_description")}</p>
           </Grid>
           <Grid tablet={{
             col: true
@@ -40,5 +40,3 @@ const EventsHero = () => {
     </div>
   );
 };
-
-export default EventsHero;

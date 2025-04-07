@@ -3,13 +3,15 @@ import EventsDemo from "./EventsDemo";
 import EventsHero from "./EventsHero";
 import EventsUpcoming from "./EventsUpcoming";
 
-export default function Events(_p0: { params: Promise<{ locale: string; }>; }) {
+export default function Events(_p0: { params: Promise<{ locale: string; }>; }): JSX.Element {
   return (
     <>
       <EventsHero />
       <EventsUpcoming />
-      <EventsDemo />
-      <EventsCoding />
+      <div className="bg-base-lightest">
+        <EventsDemo />
+        <EventsCoding />
+      </div>
     </>
   );
 }

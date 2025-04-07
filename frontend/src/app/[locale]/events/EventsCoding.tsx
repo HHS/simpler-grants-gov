@@ -7,13 +7,14 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-const EventsDemo = () => {
+export default function EventsCoding(): JSX.Element {
   const t = useTranslations("Events.coding_challenge");
+  const codingChallengeLink: string = "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
   return (
     <GridContainer
       data-testid="events-coding-content" className="padding-x-4 bg-base-lightest">
-      <Grid row gap={6} className="padding-x-6 padding-y-6">
+      <Grid row gap={6} className="padding-6">
         <Grid tablet={{
           col: true
         }}>
@@ -27,7 +28,7 @@ const EventsDemo = () => {
             {t("description_p2")}
           </p>
           <a
-            href="https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge"
+            href={codingChallengeLink}
             target="_blank"
             rel="noopener noreferrer"
             className="font-sans-md line-height-sans-4"
@@ -40,7 +41,7 @@ const EventsDemo = () => {
         }}>
           <Image
             alt="events-img"
-            className="height-auto position-relative padding-left-6"
+            className="height-auto position-relative padding-y-3 padding-left-6"
             src={EventsCollabImg}
           />
         </Grid>
@@ -48,5 +49,3 @@ const EventsDemo = () => {
     </GridContainer>
   );
 };
-
-export default EventsDemo;

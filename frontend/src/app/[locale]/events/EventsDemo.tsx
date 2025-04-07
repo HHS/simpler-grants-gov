@@ -7,18 +7,19 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-const EventsDemo = () => {
+export default function EventsDemo(): JSX.Element {
   const t = useTranslations("Events.demo");
+  const demoLink: string = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
 
   return (
-    <GridContainer data-testid="events-demo-content" className="padding-x-4 bg-base-lightest">
-      <Grid row gap="md" className="padding-y-6">
+    <GridContainer data-testid="events-demo-content" className="padding-x-4">
+      <Grid row gap="md" className="padding-6">
         <Grid tablet={{
           col: true
         }}>
           <Image
             alt="events-img"
-            className="height-auto position-relative padding-x-6"
+            className="height-auto position-relative padding-right-6 padding-top-3"
             src={EventsDemoImg}
           />
         </Grid>
@@ -36,7 +37,7 @@ const EventsDemo = () => {
             </p>
             <h3 className="padding-top-2">{t("watch")}</h3>
             <a
-              href="https://vimeo.com/1050177794/278fa78e0b?share=copy"
+              href={demoLink}
               target="_blank"
               rel="noopener noreferrer"
               className="font-sans-md line-height-sans-4"
@@ -49,5 +50,3 @@ const EventsDemo = () => {
     </GridContainer>
   );
 };
-
-export default EventsDemo;
