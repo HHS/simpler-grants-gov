@@ -3,17 +3,56 @@ This document goes through in detail all the parts of the
 transformation process we have for pulling data from the
 existing grants.gov database into our system.
 
-The process is an ELT (extract-load-transform) process and
+There are two tasks documented here
+
+[Setup Foreign Tables](#create-foreign-data-wrappers-script) which is a manually run task
+that sets up tables that are backed by the existing Grants.gov Oracle database that we
+query within our own Postgres DB.
+
+[Load Transform](#load-transform-job) The process is an hourly ELT (extract-load-transform) process and
 broadly works like so:
-* We query the Oracle DB using a foreign data wrapper to figure out inserts/updates/deletes
-* We have a foreign data wrapper and staging table setup for each table we want to copy
-* We copy over all records, and any that are missing we mark as deleted
-* For each table, we have a separate transformation process for handling the conversion from the existing system to ours (very custom)
+* Extract data from Grants.gov's Oracle DB via a foreign data wrapper to figure out updates/inserts/deletes since we last ran (generally hourly)
+* Load all new/updated records into our staging tables, and mark deleted records
+* Transform each table one by one - we have a separate custom transformation process for handling the conversion from the existing system to ours
+
+## Terminology
+The "transformation job" is a single script made up of multiple different tasks.
+In our backend processing, a task represents some "chunk" of work, and doesn't say
+anything about how it is run (ie. don't mix task up with ECS task, the container in which it runs).
+In the case of the transformation job itself, there is a single script that is run
+made up of multiple tasks that run sequentially. See [LoadTransformJob](#load-transform-job)
+for further details.
+
+We frequently use "script" and "ECS task" interchangeably as terms.
+When we want to run one of our scripts, we tell ECS to spin
+up a task with a particular command to run. Our common ECS tasks are
+scheduled to run in [scheduled_jobs.tf](/infra/api/app-config/env-config/scheduled_jobs.tf)
+
+[Foreign Data Wrappers (fdw)](https://www.postgresql.org/docs/current/postgres-fdw.html) / [Oracle fdw](https://github.com/laurenz/oracle_fdw)
+are a way of setting up tables within your database that are actually backed by tables
+in an external database. For example, calling `select` on a foreign table would actually
+emit a `select` statement in the other database, and generally behave as if the table
+was an ordinary table. There are many caveats (performance, types of queries possible), but the primary
+benefit is that we're able to keep DB queries in our database, and we can minimize
+the amount of our system that needs to interact with an Oracle database.
+
+In our Postgres DB we have multiple schemas that we use for organizing tables
+based on their purpose. We have the following schemas:
+* `api` - The primary schema that anything we're building out for the system goes into
+* `staging` - Where we put tables that we'll copy data from Grants.gov's database to directly
+* `legacy` - Where we put tables that we'll configure with the Oracle Foreign Data Wrapper connected to Grants.gov's database
+
+The `staging` tables match the Oracle tables for each column, but
+we add a few additional columns for our transformation process.
+* `transformed_at` - If null, the transform process will pick up the row, when it completes processing, it will set to the current timestamp. If a new update comes in, the copy-oracle-data process will null the column out again.
+* `is_deleted` - Whether the row was deleted in the Oracle database. If true, the transform process will delete the record from our system.
+* `transformation_notes` - Freeform text field for putting notes about the transformation if an odd circumstance was hit. Occasionally set for certain scenarios in transformations.
+* `created_at`/`updated_at`/`deleted_at` - just metadata auditing columns, not directly used in the process
 
 # Staging & Foreign Table Setup
-For each table we want to copy, we create a table definition in SQLAlchemy
-that is then used for both a "staging" table where we'll copy the data (unchanged)
-and another table is used for a foreign data wrapper to Oracle - [oracle_fdw](https://github.com/laurenz/oracle_fdw).
+For each table we want to copy, we define two SQLAlchemy tables,
+a "staging" table where we'll copy the unchanged data directly,
+and a corresponding "legacy" table that uses a foreign data wrapper to the Oracle database - [oracle_fdw](https://github.com/laurenz/oracle_fdw).
 
 **The order that columns are defined must match exactly to what is defined in Oracle**
 
@@ -76,29 +115,9 @@ mappings you can follow:
 
 For anything else, consult the [oracle_fdw](https://github.com/laurenz/oracle_fdw?tab=readme-ov-file#data-types) docs.
 
-## How are these tables used?
-
-### Foreign / Legacy Tables
-These tables don't get created in migrations, instead they need to be created
-by running the `setup-foreign-tables` command. When run non-locally will create
-a foreign table connection to the Oracle database for every table derived from the
-`ForeignBase` class.
-
-See [Create Foreign Data Wrapper Script](#create-foreign-data-wrappers-script) for more detail on how this works.
-
-### Staging
-These tables will get created in our usual Alembic DB migrations.
-
-These tables are effectively Postgres equivalents of the Oracle DB tables
-and contain a few extra columns our transformation process will use (all added via `StagingParamMixin`):
-* `transformed_at` - If null, the transform process will pick up the row, when it completes processing, it will set to the current timestamp. If a new update comes in, the copy-oracle-data process will null the column out again.
-* `is_deleted` - Whether the row was deleted in the Oracle database. If true, the transform process will delete the record from our system.
-* `transformation_notes` - Freeform text field for putting notes about the transformation if an odd circumstance was hit. Occasionally set for certain scenarios in transformations.
-* `created_at`/`updated_at`/`deleted_at` - just metadata auditing columns, not directly used in the process
-
 # Create Foreign Data Wrappers Script
-Running locally: `make cmd args="data-migration setup-foreign-tables"`
-Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "setup-foreign-tables"]`
+* Running locally: `make cmd args="data-migration setup-foreign-tables"`
+* Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "setup-foreign-tables"]`
 
 [setup_foreign_tables.py](/api/src/data_migration/setup_foreign_tables.py) is a script that
 will go through each table that is derived from the `ForeignBase` class and automatically generate
@@ -118,16 +137,16 @@ With any of the columns you defined included in the create command.
 Whenever we manually run this job, it runs the command for every table, including
 ones that already exist.
 
-If we ever need to fix a table we created, we first need to drop the foreign table
-and then run the command to generate it again. No data is stored in these "tables"
-as they're just a sort of view (may not be a literal DB view) wrapper around the
-Oracle DB tables.
+If we ever need to fix a table we created (eg. correct a column type),
+we first need to drop the foreign table and then run the command to
+generate it again. No data is stored in these "tables" as they're just
+wrappers/connectors to the actual tables that exist in Oracle.
 
 **Locally we have no Oracle database, so instead of creating foreign tables, it just creates Postgres tables**
 
 # Load-transform job
-Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
-Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--no-transform", "--no-set-current", "--no-store-version"]`
+* Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
+* Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--no-transform", "--no-set-current", "--no-store-version"]`
 
 Note that these example commands disable all parts of the job, running
 the above commands will just spin up the script and do nothing.
