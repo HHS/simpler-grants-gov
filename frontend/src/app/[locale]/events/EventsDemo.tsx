@@ -1,35 +1,34 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import EventsDemoImg from "public/img/events-demo.png";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 export default function EventsDemo() {
   const t = useTranslations("Events.demo");
-  const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
+  const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy";
 
   return (
     <GridContainer data-testid="events-demo-content" className="padding-x-4">
       <Grid row gap="md" className="padding-6">
-        <Grid tablet={{
-          col: true
-        }}>
+        <Grid
+          tablet={{
+            col: true,
+          }}
+        >
           <Image
             alt="events-img"
             className="height-auto position-relative padding-right-6 padding-top-3"
             src={EventsDemoImg}
           />
         </Grid>
-        <Grid tablet={{
-          col: true
-        }}>
+        <Grid
+          tablet={{
+            col: true,
+          }}
+        >
           <Grid>
-            <h2>
-              {t("title")}
-            </h2>
+            <h2>{t("title")}</h2>
           </Grid>
           <Grid>
             <p className="font-sans-md line-height-sans-4">

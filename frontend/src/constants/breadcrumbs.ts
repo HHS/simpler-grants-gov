@@ -1,7 +1,4 @@
-import {
-  Breadcrumb,
-  BreadcrumbList,
-} from "src/components/Breadcrumbs";
+import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
 
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
@@ -45,7 +42,7 @@ export const UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
   UNSUBSCRIBE,
 ];
 export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
-export const EVENTS_CRUMBS: BreadcrumbList = [HOME, EVENTS]
+export const EVENTS_CRUMBS: BreadcrumbList = [HOME, EVENTS];
 export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const SAVED_GRANTS_CRUMBS: BreadcrumbList = [HOME, SAVED_GRANTS];
 export const SAVED_SEARCHES_CRUMBS: BreadcrumbList = [HOME, SAVED_SEARCHES];

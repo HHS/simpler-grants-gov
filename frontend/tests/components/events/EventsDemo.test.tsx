@@ -1,8 +1,5 @@
 import EventsDemo from "src/app/[locale]/events/EventsDemo";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
+import { render, screen } from "tests/react-utils";
 
 describe("Events demo Content", () => {
   it("Renders without errors", () => {

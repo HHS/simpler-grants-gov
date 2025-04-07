@@ -1,8 +1,5 @@
 import EventsUpcoming from "src/app/[locale]/events/EventsUpcoming";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
+import { render, screen } from "tests/react-utils";
 
 describe("Events Upcoming Content", () => {
   it("Renders without errors", () => {

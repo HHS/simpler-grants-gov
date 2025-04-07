@@ -1,26 +1,26 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import EventsCollabImg from "public/img/events-collab.jpg";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 export default function EventsCoding() {
   const t = useTranslations("Events.coding_challenge");
-  const codingChallengeLink = "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
+  const codingChallengeLink =
+    "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
   return (
     <GridContainer
-      data-testid="events-coding-content" className="padding-x-4 bg-base-lightest">
+      data-testid="events-coding-content"
+      className="padding-x-4 bg-base-lightest"
+    >
       <Grid row gap={6} className="padding-6">
-        <Grid tablet={{
-          col: true
-        }}>
-          <h2>
-            {t("title")}
-          </h2>
+        <Grid
+          tablet={{
+            col: true,
+          }}
+        >
+          <h2>{t("title")}</h2>
           <p className="font-sans-md line-height-sans-4">
             {t("description_p1")}
           </p>
@@ -36,9 +36,11 @@ export default function EventsCoding() {
             {t("link")}
           </a>
         </Grid>
-        <Grid tablet={{
-          col: true
-        }}>
+        <Grid
+          tablet={{
+            col: true,
+          }}
+        >
           <Image
             alt="events-img"
             className="height-auto position-relative padding-y-3 padding-left-6"
@@ -47,5 +49,5 @@ export default function EventsCoding() {
         </Grid>
       </Grid>
     </GridContainer>
-  )
+  );
 }
