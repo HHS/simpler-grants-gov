@@ -14,7 +14,7 @@ def test_competition_get_200(client, api_auth_token, enable_factory_create):
     response_competition = resp.get_json()["data"]
 
     assert response_competition["competition_id"] == str(competition.competition_id)
-    assert response_competition["opportunity_id"] == competition.opportunity_id
+    assert response_competition["opportunity_id"] == str(competition.opportunity_id)
 
 
 def test_competition_get_404_not_found(client, api_auth_token):
