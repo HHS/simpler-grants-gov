@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { FormDetail } from "src/types/formResponseTypes";
 

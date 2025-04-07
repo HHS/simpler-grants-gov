@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
 import { COMPETITION_ID } from "src/constants/competitions";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
 import { FormDetail } from "src/types/formResponseTypes";
 
