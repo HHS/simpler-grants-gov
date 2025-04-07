@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple, Sequence
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -10,7 +9,6 @@ from src.adapters.search import flask_opensearch
 from src.api.agencies_v1.agency_blueprint import agency_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.pagination.pagination_models import PaginationInfo
 from src.services.agencies_v1.get_agencies import AgencyListParams, get_agencies, search_agencies
 from src.util.dict_util import flatten_dict
 
@@ -63,7 +61,6 @@ def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiR
     return response.ApiResponse(message="Success", data=results, pagination_info=pagination_info)
 
 
-
 @agency_blueprint.post("/agencies/search")
 @agency_blueprint.input(
     agency_schema.AgencySearchRequestSchema,
@@ -76,13 +73,12 @@ def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiR
 )
 @agency_blueprint.auth_required(api_key_auth)
 @flask_opensearch.with_search_client()
-def agency_search(search_client: search.SearchClient, raw_search_params: dict) -> response.ApiResponse :
+def agency_search(
+    search_client: search.SearchClient, raw_search_params: dict
+) -> response.ApiResponse:
     add_extra_data_to_current_request_logs(flatten_dict(raw_search_params, prefix="request.body"))
     logger.info("POST /v1/agencies/search")
-    import pdb;pdb.set_trace()
-    agencies, pagination_info = search_agencies(
-        search_client, raw_search_params
-    )
+    agencies, pagination_info = search_agencies(search_client, raw_search_params)
 
     add_extra_data_to_current_request_logs(
         {
@@ -95,5 +91,3 @@ def agency_search(search_client: search.SearchClient, raw_search_params: dict) -
         data=agencies,
         pagination_info=pagination_info,
     )
-
-

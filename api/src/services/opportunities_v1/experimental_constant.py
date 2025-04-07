@@ -51,8 +51,7 @@ AGENCY_ONLY = [
     "agency_code",
     "agency_code.keyword",
     "top_level_agency_name",
-    "top_level_agency_code"
-    "top_level_agency_code.keyword"
+    "top_level_agency_code" "top_level_agency_code.keyword",
 ]
 
 

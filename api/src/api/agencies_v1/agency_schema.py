@@ -19,6 +19,7 @@ class AgencyListRequestSchema(Schema):
         required=True,
     )
 
+
 class AgencySearchRequestSchema(AgencyListRequestSchema):
     query = fields.String()
 
@@ -43,6 +44,7 @@ class AgencyListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
         metadata={"description": "A list of agency records"},
     )
 
+
 class AgencyV1Schema(Schema):
     agency_id = fields.UUID(
         metadata={"description": "The internal ID of the agency", "example": "123res45"},
@@ -59,11 +61,12 @@ class AgencyV1Schema(Schema):
         metadata={"description": "The agency who created the opportunity", "example": "ABC"},
     )
     top_level_agency = fields.Nested(
-        lambda: AgencyV1Schema(exclude=("top_level_agency",)),
-        allow_none=True)
+        lambda: AgencyV1Schema(exclude=("top_level_agency",)), allow_none=True
+    )
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
 
 class AgencySearchResponseV1Schema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.Nested(AgencyV1Schema(many=True))
