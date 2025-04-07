@@ -115,3 +115,7 @@ Launching Embedded Jetty Webserver with config
 
 If you see that message or similar, the Metabase app should be available
 in a web browser at [http://localhost:3100](http://localhost:3100).
+
+## Next Steps
+
+Set up Metabase by following steps in the Metabase [documentation](https://www.metabase.com/docs/latest/databases/connecting).
