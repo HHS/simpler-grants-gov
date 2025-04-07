@@ -15,7 +15,7 @@ class CompetitionFormAlphaSchema(Schema):
 class CompetitionAlphaSchema(Schema):
     competition_id = fields.UUID(metadata={"description": "The competition ID"})
 
-    opportunity_id = fields.Integer(
+    opportunity_id = fields.UUID(
         metadata={"description": "The opportunity ID that the competition is associated with"}
     )
 

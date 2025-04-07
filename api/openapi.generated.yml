@@ -2573,8 +2573,10 @@ components:
           description: The competition ID
           example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The opportunity ID that the competition is associated with
+          example: 123e4567-e89b-12d3-a456-426614174000
         competition_forms:
           type: array
           items:
