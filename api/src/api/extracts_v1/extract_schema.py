@@ -43,9 +43,7 @@ class ExtractMetadataRequestSchema(AbstractResponseSchema):
 
 
 class ExtractMetadataResponseSchema(FileResponseSchema):
-    extract_metadata_id = fields.Integer(
-        metadata={"description": "The ID of the extract metadata", "example": 1}
-    )
+    extract_metadata_id = fields.UUID(metadata={"description": "The ID of the extract metadata"})
     extract_type = fields.String(
         metadata={"description": "The type of extract", "example": "opportunity_data_extract"}
     )

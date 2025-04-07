@@ -50,7 +50,7 @@ export const messages = {
     },
     documents: {
       title: "Documents",
-      table_col_category: "Category",
+      table_col_description: "Description",
       table_col_file_name: "File name",
       table_col_last_updated: "Last updated",
       type: {
@@ -434,6 +434,15 @@ export const messages = {
         eligibility: "Eligibility",
         agency: "Agency",
         category: "Category",
+        status: "Opportunity status",
+      },
+      options: {
+        status: {
+          forecasted: "Forecasted",
+          posted: "Posted",
+          closed: "Closed",
+          archived: "Archived",
+        },
       },
     },
     bar: {
@@ -445,15 +454,6 @@ export const messages = {
       title: "Search funding opportunities",
     },
     opportunitySaved: "Saved",
-    opportunityStatus: {
-      title: "Opportunity status",
-      label: {
-        forecasted: "Forecasted",
-        posted: "Posted",
-        closed: "Closed",
-        archived: "Archived",
-      },
-    },
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
