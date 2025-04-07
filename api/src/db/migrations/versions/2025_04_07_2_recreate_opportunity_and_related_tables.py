@@ -1,4 +1,4 @@
-"""Recreate Opportunity and related Competition and User Tables to use UUIDs
+"""Recreate Opportunity and related tables to use UUIDs
 
 Revision ID: d363c1d86b14
 Revises: ced7b793bb3e
