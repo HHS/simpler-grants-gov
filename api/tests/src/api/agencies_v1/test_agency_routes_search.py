@@ -13,7 +13,7 @@ DOA = AgencyFactory.build(agency_code="DOA")
 # sub-agencies
 HHS_NIH = AgencyFactory.build(agency_code="HHS-NIH", top_level_agency=HHS)
 HHS_DOC = AgencyFactory.build(agency_code="HHS-DOC", top_level_agency=HHS)
-DOD_MCO = AgencyFactory.build(agency_code="DOD-MCO", top_level_agency=DOD)  # not showing
+DOD_MCO = AgencyFactory.build(agency_code="DOD-MCO", top_level_agency=DOD)
 DOD_HRE = AgencyFactory.build(agency_code="DOD-HRE", top_level_agency=DOD)
 
 AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH]

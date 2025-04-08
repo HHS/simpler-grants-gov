@@ -76,7 +76,6 @@ def _add_search_filters(
     for field in filters.model_fields_set:
         field_filters = getattr(filters, field)
         field_name = _adjust_field_name(field)
-        # import pdb; pdb.set_trace()
 
         # We use the type of the search filter to determine what methods
         # we call on the builder. This way we can make sure we have the proper

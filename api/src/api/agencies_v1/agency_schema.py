@@ -99,7 +99,7 @@ class AgencyV1Schema(Schema):
         default=False,
         allow_none=False,
         metadata={
-            "description": "Indicates whether the entity is a test agency.",
+            "description": "Indicates if the agency is linked to an opportunity that is currently active.",
             "example": "False",
         },
     )

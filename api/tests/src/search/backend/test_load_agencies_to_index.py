@@ -31,11 +31,6 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         agency_index_alias,
         enable_factory_create,
     ):
-        import pdb
-
-        pdb.set_trace()
-        # resp = search_client.search(agency_index_alias, {"size": 50})
-        agencies = db_session.query(Agency).all()
         # Create Agencies to load into the search index
         agencies = [AgencyFactory.create(agency_code="DOD")]
         agencies.extend(AgencyFactory.create_batch(size=5, top_level_agency=agencies[0]))

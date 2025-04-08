@@ -54,10 +54,6 @@ class LoadAgenciesToIndex(Task):
             replica_count=self.config.replica_count,
         )
         # load the records
-        import pdb
-
-        pdb.set_trace()
-
         agencies = self.fetch_agencies()
         self.load_agencies(agencies)
 
