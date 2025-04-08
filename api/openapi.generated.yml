@@ -1344,11 +1344,11 @@ components:
       type: object
       properties:
         filters:
-          type: &id002
+          type:
           - object
           $ref: '#/components/schemas/AgencyFilterV1'
         pagination:
-          type: &id003
+          type:
           - object
           $ref: '#/components/schemas/AgencyPaginationV1'
       required:
@@ -1396,17 +1396,99 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    IsActiveFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    AgencySearchFilterV1:
+      type: object
+      properties:
+        active:
+          type:
+          - object
+          $ref: '#/components/schemas/IsActiveFilterV1'
+    SortOrderAgencyPaginationV11:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - agency_code
+          - agency_name
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    AgencyPaginationV11:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: agency_code
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderAgencyPaginationV11'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
     AgencySearchRequest:
       type: object
       properties:
-        filters:
-          type: *id002
-          $ref: '#/components/schemas/AgencyFilterV1'
-        pagination:
-          type: *id003
-          $ref: '#/components/schemas/AgencyPaginationV1'
         query:
           type: string
+          minLength: 1
+          maxLength: 100
+          description: Query string which searches against several text fields
+          example: research
+        query_operator:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
+          - OR
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
+        filters:
+          type:
+          - object
+          $ref: '#/components/schemas/AgencySearchFilterV1'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/AgencyPaginationV11'
       required:
       - pagination
     AgencyV1:
@@ -1416,7 +1498,7 @@ components:
           type: string
           format: uuid
           description: The internal ID of the agency
-          example: 123res45
+          example: 123e4567-e89b-12d3-a456-426614174000
         agency_name:
           type: string
           description: The name of the agency who created the opportunity
@@ -1432,6 +1514,10 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyV1'
           - type: 'null'
+        is_active_agency:
+          type: boolean
+          description: Indicates whether the entity is a test agency.
+          example: 'False'
         created_at:
           type: string
           format: date-time
@@ -1576,7 +1662,7 @@ components:
             - archived
             type:
             - string
-    AgencySearchFilterV1:
+    AgencySearchFilterV11:
       type: object
       properties:
         one_of:
@@ -1738,7 +1824,7 @@ components:
         agency:
           type:
           - object
-          $ref: '#/components/schemas/AgencySearchFilterV1'
+          $ref: '#/components/schemas/AgencySearchFilterV11'
         assistance_listing_number:
           type:
           - object
@@ -1783,7 +1869,6 @@ components:
           - expanded
           - agency
           - attachment_only
-          - agency_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
@@ -2177,7 +2262,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id004
+          enum: &id002
           - discretionary
           - mandatory
           - continuation
@@ -2196,23 +2281,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id005
+            type: &id003
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id006
+          type: &id004
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id007
+          enum: &id005
           - forecasted
           - posted
           - closed
           - archived
-          type: &id008
+          type: &id006
           - string
         created_at:
           type: string
@@ -2498,7 +2583,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id004
+          enum: *id002
           type:
           - string
           - 'null'
@@ -2512,17 +2597,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id005
+            type: *id003
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id006
+          type: *id004
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id007
-          type: *id008
+          enum: *id005
+          type: *id006
         created_at:
           type: string
           format: date-time
@@ -2646,7 +2731,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id009
+            type: &id007
             - object
             $ref: '#/components/schemas/ValidationIssue'
         message:
@@ -2979,7 +3064,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id009
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -3014,7 +3099,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id009
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
