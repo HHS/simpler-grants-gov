@@ -696,10 +696,6 @@ def test_application_form_get_with_invalid_schema(
         headers={"X-Auth": api_auth_token},
     )
 
-    # Should return the data but with empty warnings (handled exception)
-    assert response.status_code == 200
-    assert response.json["message"] == "Success"
-    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
-    assert (
-        response.json["warnings"] == []
-    )  # No warnings since validation was skipped due to invalid schema
+    # Should error
+    assert response.status_code == 500
+

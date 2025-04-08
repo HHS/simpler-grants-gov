@@ -90,29 +90,14 @@ def application_form_get(
         }
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
-
     validation_warnings = []
 
     with db_session.begin():
         application_form = get_application_form(db_session, application_id, app_form_id)
 
-        # Validate the form data against the JSON schema
-        if application_form and hasattr(application_form, "form") and application_form.form:
-            try:
-                # Run validation on the application response
-                if application_form.application_response is not None:
-                    validation_warnings = validate_json_schema_for_form(
-                        application_form.application_response, application_form.form
-                    )
-            except Exception:
-                # Log the exception but continue
-                logger.exception(
-                    "Error validating application form data against schema",
-                    extra={
-                        "application_form_id": app_form_id,
-                        "application_id": application_id,
-                    },
-                )
+        validation_warnings = validate_json_schema_for_form(
+            application_form.application_response, application_form.form
+        )
 
     return response.ApiResponse(
         message="Success",
