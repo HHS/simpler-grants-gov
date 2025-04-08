@@ -1,5 +1,6 @@
 import io
 import logging
+from uuid import UUID
 
 from flask import Response
 
@@ -13,7 +14,10 @@ import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities_v1.get_opportunity import get_opportunity
+from src.services.opportunities_v1.get_opportunity import (
+    get_opportunity,
+    get_opportunity_by_legacy_id,
+)
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
@@ -223,12 +227,30 @@ def opportunity_search(
     )
 
 
-@opportunity_blueprint.get("/opportunities/<int:opportunity_id>")
+@opportunity_blueprint.get("/opportunities/<int:legacy_opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
-def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
+def opportunity_get_legacy(
+    db_session: db.Session, legacy_opportunity_id: int
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {"opportunity.legacy_opportunity_id": legacy_opportunity_id}
+    )
+    logger.info("GET /v1/opportunities/:legacy_opportunity_id")
+    with db_session.begin():
+        opportunity = get_opportunity_by_legacy_id(db_session, legacy_opportunity_id)
+
+    return response.ApiResponse(message="Success", data=opportunity)
+
+
+@opportunity_blueprint.get("/opportunities/<uuid:opportunity_id>")
+@opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
+@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
+@flask_db.with_db_session()
+def opportunity_get(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"opportunity.opportunity_id": opportunity_id})
     logger.info("GET /v1/opportunities/:opportunity_id")
     with db_session.begin():

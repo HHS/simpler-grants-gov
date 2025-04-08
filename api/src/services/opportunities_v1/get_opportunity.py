@@ -1,4 +1,6 @@
-from sqlalchemy import select
+import uuid
+
+from sqlalchemy import ColumnExpressionArgument, select
 from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
@@ -16,11 +18,13 @@ class AttachmentConfig(PydanticBaseEnvConfig):
 
 
 def _fetch_opportunity(
-    db_session: db.Session, opportunity_id: int, load_all_opportunity_summaries: bool
+    db_session: db.Session,
+    where_clause: ColumnExpressionArgument[bool],
+    load_all_opportunity_summaries: bool,
 ) -> Opportunity:
     stmt = (
         select(Opportunity)
-        .where(Opportunity.opportunity_id == opportunity_id)
+        .where(where_clause)
         .where(Opportunity.is_draft.is_(False))
         .options(selectinload("*"))
         # To get the top_level_agency field set properly upfront,
@@ -34,9 +38,6 @@ def _fetch_opportunity(
 
     opportunity = db_session.execute(stmt).unique().scalar_one_or_none()
 
-    if opportunity is None:
-        raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
-
     return opportunity
 
 
@@ -49,11 +50,7 @@ def pre_sign_opportunity_file_location(
     return opp_atts
 
 
-def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
-    opportunity = _fetch_opportunity(
-        db_session, opportunity_id, load_all_opportunity_summaries=False
-    )
-
+def _setup_attachements(opportunity: Opportunity) -> None:
     attachment_config = AttachmentConfig()
     if attachment_config.cdn_url is not None:
         s3_config = S3Config()
@@ -63,5 +60,33 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
             )
     else:
         pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
+
+
+def get_opportunity(db_session: db.Session, opportunity_id: uuid.UUID) -> Opportunity:
+    opportunity = _fetch_opportunity(
+        db_session,
+        where_clause=Opportunity.opportunity_id == opportunity_id,
+        load_all_opportunity_summaries=False,
+    )
+    if opportunity is None:
+        raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
+
+    _setup_attachements(opportunity)
+
+    return opportunity
+
+
+def get_opportunity_by_legacy_id(db_session: db.Session, legacy_opportunity_id: int) -> Opportunity:
+    opportunity = _fetch_opportunity(
+        db_session,
+        where_clause=Opportunity.legacy_opportunity_id == legacy_opportunity_id,
+        load_all_opportunity_summaries=False,
+    )
+    if opportunity is None:
+        raise_flask_error(
+            404, message=f"Could not find Opportunity with Legacy ID {legacy_opportunity_id}"
+        )
+
+    _setup_attachements(opportunity)
 
     return opportunity
