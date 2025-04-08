@@ -1,5 +1,7 @@
-from src.api.schemas.extension import Schema, fields
+from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
+from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -20,8 +22,37 @@ class AgencyListRequestSchema(Schema):
     )
 
 
-class AgencySearchRequestSchema(AgencyListRequestSchema):
-    query = fields.String()
+class AgencySearchFilterV1Schema(Schema):
+    active = fields.Nested(
+        BoolSearchSchemaBuilder("IsActiveFilterV1Schema").with_one_of(example=True).build()
+    )
+
+
+class AgencySearchRequestSchema(Schema):
+    query = fields.String(
+        metadata={
+            "description": "Query string which searches against several text fields",
+            "example": "research",
+        },
+        validate=[validators.Length(min=1, max=100)],
+    )
+    query_operator = fields.Enum(
+        SearchQueryOperator,
+        load_default=SearchQueryOperator.OR,
+        metadata={
+            "description": "Query operator for combining search conditions",
+            "example": "OR",
+        },
+    )
+    filters = fields.Nested(AgencySearchFilterV1Schema())
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AgencyPaginationV1Schema",
+            ["agency_code", "agency_name", "created_at"],
+            default_sort_order=[{"order_by": "agency_code", "sort_direction": "ascending"}],
+        ),
+        required=True,
+    )
 
 
 class AgencyResponseSchema(Schema):
@@ -47,7 +78,7 @@ class AgencyListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
 
 class AgencyV1Schema(Schema):
     agency_id = fields.UUID(
-        metadata={"description": "The internal ID of the agency", "example": "123res45"},
+        metadata={"description": "The internal ID of the agency"},
     )
     agency_name = fields.String(
         allow_none=False,
@@ -62,6 +93,15 @@ class AgencyV1Schema(Schema):
     )
     top_level_agency = fields.Nested(
         lambda: AgencyV1Schema(exclude=("top_level_agency",)), allow_none=True
+    )
+
+    is_active_agency = fields.Boolean(
+        default=False,
+        allow_none=False,
+        metadata={
+            "description": "Indicates whether the entity is a test agency.",
+            "example": "False",
+        },
     )
 
     created_at = fields.DateTime(dump_only=True)

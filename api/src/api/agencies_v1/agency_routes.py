@@ -78,6 +78,7 @@ def agency_search(
 ) -> response.ApiResponse:
     add_extra_data_to_current_request_logs(flatten_dict(raw_search_params, prefix="request.body"))
     logger.info("POST /v1/agencies/search")
+
     agencies, pagination_info = search_agencies(search_client, raw_search_params)
 
     add_extra_data_to_current_request_logs(

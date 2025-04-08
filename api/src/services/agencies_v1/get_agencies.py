@@ -15,11 +15,18 @@ from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.pagination.pagination_models import (
+    PaginationInfo,
+    PaginationParams,
+    SortDirection,
+    SortOrder,
+)
 from src.pagination.paginator import Paginator
 from src.search.search_config import get_search_config
-from src.services.opportunities_v1.experimental_constant import AGENCY_ONLY
-from src.services.service_utils import apply_sorting
+from src.search.search_models import BoolSearchFilter
+from src.services.agencies_v1.experimental_constant import DEFAULT
+from src.services.opportunities_v1.search_opportunities import _adjust_field_name
+from src.services.service_utils import _add_search_filters, apply_sorting
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +43,17 @@ class AgencyListParams(BaseModel):
     pagination: PaginationParams
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
     query: str | None = None
+
+
+class AgencySearchFilters(BaseModel):
+    active: BoolSearchFilter | None = None
+
+
+class AgencySearchParams(BaseModel):
+    pagination: PaginationParams
+    filters: AgencySearchFilters | None = Field(default=None)
+    query: str | None = None
+    query_operator: str = Field(default=SearchQueryOperator.OR)
 
 
 def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
@@ -87,7 +105,16 @@ def get_agencies(
     return paginated_agencies, pagination_info
 
 
-def get_search_request(params: AgencyListParams, aggregation: bool = True) -> dict:
+def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]]:
+    sort_by: list[tuple[str, SortDirection]] = []
+
+    for sort_order in pagination.sort_order:
+        sort_by.append((_adjust_field_name(sort_order.order_by), sort_order.sort_direction))
+
+    return sort_by
+
+
+def get_search_request(params: AgencySearchParams) -> dict:
     builder = search.SearchQueryBuilder()
 
     # Pagination
@@ -95,18 +122,25 @@ def get_search_request(params: AgencyListParams, aggregation: bool = True) -> di
         page_size=params.pagination.page_size, page_number=params.pagination.page_offset
     )
 
+    # Sorting
+    builder.sort_by(_get_sort_by(params.pagination))
+
     # Query
     if params.query:
-        filter_rule = AGENCY_ONLY
+        filter_rule = DEFAULT
         builder.simple_query(params.query, filter_rule, SearchQueryOperator.OR)
+
+    # Filters
+    if params.filters:
+        _add_search_filters(builder, params.filters)
 
     return builder.build()
 
 
 def _search_agencies(
-    search_client: search.SearchClient, search_params: AgencyListParams
+    search_client: search.SearchClient, search_params: AgencySearchParams
 ) -> SearchResponse:
-    search_request = get_search_request(search_params, aggregation=False)
+    search_request = get_search_request(search_params)
 
     index_alias = get_search_config().agency_search_index_alias
     logger.info(
@@ -122,9 +156,8 @@ def search_agencies(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> Tuple[Sequence[dict], PaginationInfo]:
 
-    params = AgencyListParams.model_validate(raw_search_params)
+    params = AgencySearchParams.model_validate(raw_search_params)
     response = _search_agencies(search_client, params)
-
     pagination_info = PaginationInfo(
         page_offset=params.pagination.page_offset,
         page_size=params.pagination.page_size,
