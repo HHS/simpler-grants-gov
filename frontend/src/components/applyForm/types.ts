@@ -19,14 +19,14 @@ export interface SetFormDataFunction {
 
 export interface UiSchemaField {
   type: "field";
-  definition: string;
+  definition: `/properties/${string}`;
 }
 
 export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  number: string;
+  number?: string;
   children: (UiSchemaField | UiSchemaSection)[];
 }
 
