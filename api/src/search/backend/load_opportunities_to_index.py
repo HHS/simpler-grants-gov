@@ -2,6 +2,7 @@ import base64
 import itertools
 import logging
 import os
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
 from typing import Iterator, Sequence
@@ -239,7 +240,7 @@ class LoadOpportunitiesToIndex(Task):
         # Fetch the opportunity IDs of opportunities we would expect to be in the index
         opportunity_ids_we_want_in_search: set[int] = set(
             self.db_session.execute(
-                select(Opportunity.opportunity_id)
+                select(Opportunity.legacy_opportunity_id)
                 .join(CurrentOpportunitySummary)
                 .join(Agency, Opportunity.agency_code == Agency.agency_code, isouter=True)
                 .where(
@@ -368,7 +369,7 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def load_records(self, records: Sequence[Opportunity], refresh: bool = False) -> set[int]:
+    def load_records(self, records: Sequence[Opportunity], refresh: bool = False) -> set[uuid.UUID]:
         logger.info("Loading batch of opportunities...")
 
         schema = OpportunityV1Schema()
