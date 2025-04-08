@@ -14,6 +14,7 @@ from src.api.application_alpha.application_schemas import (
     ApplicationStartResponseSchema,
 )
 from src.auth.api_key_auth import api_key_auth
+from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.get_application import get_application
@@ -90,13 +91,33 @@ def application_form_get(
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
+    validation_warnings = []
+
     with db_session.begin():
         application_form = get_application_form(db_session, application_id, app_form_id)
 
-    # Return the application form data
+        # Validate the form data against the JSON schema
+        if application_form and hasattr(application_form, "form") and application_form.form:
+            try:
+                # Run validation on the application response
+                if application_form.application_response is not None:
+                    validation_warnings = validate_json_schema_for_form(
+                        application_form.application_response, application_form.form
+                    )
+            except Exception as e:
+                # Log the exception but continue
+                logger.exception(
+                    "Error validating application form data against schema",
+                    extra={
+                        "application_form_id": app_form_id,
+                        "application_id": application_id,
+                    },
+                )
+
     return response.ApiResponse(
         message="Success",
         data=application_form,
+        warnings=validation_warnings,
     )
 
 
