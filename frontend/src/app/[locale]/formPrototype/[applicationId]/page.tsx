@@ -21,7 +21,7 @@ export function generateMetadata() {
   return meta;
 }
 
-interface ApplicactionLandingPageProps {
+interface ApplicationLandingPageProps {
   params: Promise<{ applicationId: string; locale: string }>;
 }
 
