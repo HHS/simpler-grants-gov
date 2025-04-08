@@ -1,3 +1,4 @@
+import uuid
 import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
@@ -51,7 +52,7 @@ def test_user_delete_saved_opportunity(
 
     # Delete the saved opportunity
     response = client.delete(
-        f"/v1/users/{user.user_id}/saved-opportunities/1234567890",
+        f"/v1/users/{user.user_id}/saved-opportunities/{uuid.uuid4()}",
         headers={"X-SGG-Token": user_auth_token},
     )
 
