@@ -10,7 +10,7 @@ export const FieldLabel = ({
   required: boolean | undefined;
 }) => {
   return (
-    <Label key={`label-for-${idFor}`} id={`label-for-${idFor}`} htmlFor={idFor}>
+    <Label id={`label-for-${idFor}`} key={`label-for-${idFor}`} htmlFor={idFor}>
       {title}
       {required && (
         <span className="usa-hint usa-hint--required text-no-underline">*</span>

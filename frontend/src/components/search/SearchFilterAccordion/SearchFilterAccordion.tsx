@@ -1,8 +1,8 @@
 "use client";
 
 import { camelCase } from "lodash";
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { QueryContext } from "src/services/search/QueryProvider";
 import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 

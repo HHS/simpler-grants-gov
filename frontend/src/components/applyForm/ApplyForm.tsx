@@ -23,42 +23,44 @@ const ApplyForm = ({
 }) => {
   const { pending } = useFormStatus();
 
-  //   submitApplyForm.bind("", formId)
-
   const [formState, formAction] = useActionState(submitApplyForm, {
     errorMessage: "",
     validationErrors: [],
     formData: new FormData(),
     formId,
   });
-  const formObject = Object.fromEntries(formState.formData.entries());
+
+  const { errorMessage, validationErrors, formData } = formState;
+  const formObject = Object.fromEntries(formData.entries());
   const fields = buildForTreeRecursive(
     formSchema,
     uiSchema,
-    formState.validationErrors,
+    validationErrors,
     formObject,
   );
   const navFields = getWrappersForNav(uiSchema);
-
   return (
     <div className="usa-in-page-nav-container flex-justify">
-      <ApplyFormNav fields={navFields} />
+      {navFields.length > 0 && <ApplyFormNav fields={navFields} />}
       <form action={formAction}>
         <ApplyFormErrorMessage
-          heading={formState.errorMessage}
-          errors={formState.validationErrors}
+          heading={errorMessage}
+          errors={validationErrors}
         />
         <FormGroup>{fields}</FormGroup>
-        <Button
-          onClick={() =>
-            formState.validationErrors.length > 0
-              ? window.scrollTo({ top: 0, behavior: "smooth" })
-              : undefined
-          }
-          type="submit"
-        >
-          {pending ? "Submitting..." : "Submit"}
-        </Button>
+        <p>
+          <Button
+            data-testid="apply-form-submit"
+            onClick={() =>
+              validationErrors.length > 0
+                ? window.scrollTo({ top: 0, behavior: "smooth" })
+                : undefined
+            }
+            type="submit"
+          >
+            {pending ? "Submitting..." : "Submit"}
+          </Button>
+        </p>
       </form>
     </div>
   );

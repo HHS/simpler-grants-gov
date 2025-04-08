@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
-import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
@@ -27,22 +27,21 @@ export function generateMetadata() {
 }
 
 interface formPageProps {
-  params: Promise<{ id: string; locale: string }>;
+  params: Promise<{ formId: string; applicationId: string; locale: string }>;
 }
 
 async function FormPage({ params }: formPageProps) {
-  const { id } = await params;
+  const { formId } = await params;
   let formData = {} as FormDetail;
 
   try {
-    const response = await getCompetitionDetails(id);
+    const response = await getFormDetails(formId);
     if (response.status_code !== 200) {
       throw new Error(
         `Error retrieving competition details: ${JSON.stringify(response.errors)}`,
       );
     }
-    // TODO: this update so this is a list of forms on a competition endpoint
-    formData = response.data.competition_forms[0].form;
+    formData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
@@ -50,7 +49,7 @@ async function FormPage({ params }: formPageProps) {
     throw error;
   }
 
-  const { form_id, form_json_schema, form_ui_schema } = formData;
+  const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
 
   try {
     validateUiSchema(form_ui_schema);
@@ -63,11 +62,9 @@ async function FormPage({ params }: formPageProps) {
   return (
     <GridContainer>
       <BetaAlert />
-      <h1>
-        Form Demo: Applicaction for Federal Assistance SF 424 - Individual
-      </h1>
+      <h1>Form demo for &quot;{form_name}&quot; form</h1>
       <legend className="usa-legend">
-        The following is a demo of the SF 424 Individual form.
+        The following is a demo of the apply forms.
       </legend>
       <p>
         Required fields are marked with an asterisk (
