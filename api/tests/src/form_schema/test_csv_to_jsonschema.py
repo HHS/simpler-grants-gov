@@ -3,6 +3,8 @@ import os
 import pytest
 
 from src.form_schema.csv_to_jsonschema import csv_to_jsonschema
+from src.form_schema.enums import StateCode, CountryCode
+from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
 
 @pytest.fixture
@@ -162,3 +164,56 @@ def test_ui_schema_has_correct_structure(csv_file_content):
         ), "Definition should start with '/properties/'"
 
     assert ui_schema[0]["definition"] == "/properties/FederalAgency"
+
+
+def test_state_and_country_fields_auto_detection():
+    """
+    Test that state and country fields automatically get the correct enum values
+    based on their field names.
+    """
+    # Create a builder
+    builder = JsonSchemaBuilder(title="Test Schema")
+
+    # Add various state and country fields with different naming patterns
+    builder.add_string_property("state", False, True, title="State")
+    builder.add_string_property("country", False, True, title="Country")
+    builder.add_string_property("homeState", False, False, title="Home State")
+    builder.add_string_property("mailingState", False, False, title="Mailing State")
+    builder.add_string_property("birthCountry", False, False, title="Birth Country")
+    builder.add_string_property("citizenshipCountry", False, False, title="Citizenship Country")
+
+    # Add a regular string field without auto-detection
+    builder.add_string_property("city", False, True, title="City")
+
+    # Add a field with explicitly provided enum that should override auto-detection
+    custom_countries = ["USA: UNITED STATES", "CAN: CANADA", "MEX: MEXICO"]
+    builder.add_string_property(
+        "preferredCountry", False, False, title="Preferred Country", enum=custom_countries
+    )
+
+    # Build the schema
+    schema = builder.build()
+
+    # Verify state fields got state codes
+    assert "enum" in schema["properties"]["state"]
+    assert schema["properties"]["state"]["enum"] == StateCode.list_values()
+    assert "enum" in schema["properties"]["homeState"]
+    assert schema["properties"]["homeState"]["enum"] == StateCode.list_values() 
+    assert "enum" in schema["properties"]["mailingState"]
+    assert schema["properties"]["mailingState"]["enum"] == StateCode.list_values()
+
+    # Verify country fields got country codes
+    assert "enum" in schema["properties"]["country"]
+    assert schema["properties"]["country"]["enum"] == CountryCode.list_values()
+    assert "enum" in schema["properties"]["birthCountry"]
+    assert schema["properties"]["birthCountry"]["enum"] == CountryCode.list_values()
+    assert "enum" in schema["properties"]["citizenshipCountry"]
+    assert schema["properties"]["citizenshipCountry"]["enum"] == CountryCode.list_values()
+
+    # Verify regular fields don't have enum values
+    assert "enum" not in schema["properties"]["city"]
+
+    # Verify explicit enum values override auto-detection
+    assert "enum" in schema["properties"]["preferredCountry"]
+    assert schema["properties"]["preferredCountry"]["enum"] == custom_countries
+    assert schema["properties"]["preferredCountry"]["enum"] != CountryCode.list_values()

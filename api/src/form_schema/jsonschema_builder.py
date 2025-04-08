@@ -1,6 +1,8 @@
 from enum import StrEnum
 from typing import Any, Self
 
+from src.form_schema.enums import CountryCode, StateCode
+
 
 class JsonSchemaBuilder:
     """Builder class for constructing a JsonSchema object"""
@@ -57,7 +59,19 @@ class JsonSchemaBuilder:
         if format is not None:
             str_property["format"] = format
 
-        if enum is not None:
+        # Check if this is a state or country field and use predefined enums if so
+        field_name_lower = field_name.lower()
+
+        # If enum not explicitly provided, check field name to determine if we should use predefined enums
+        if enum is None:
+            # Check for state fields
+            if field_name_lower == "state" or field_name_lower.endswith("state"):
+                str_property["enum"] = StateCode.list_values()
+            # Check for country fields
+            elif field_name_lower == "country" or field_name_lower.endswith("country"):
+                str_property["enum"] = CountryCode.list_values()
+            # If neither state nor country and enum was explicitly provided, use it
+        elif enum is not None:
             if isinstance(enum, list):
                 str_property["enum"] = enum
             else:
