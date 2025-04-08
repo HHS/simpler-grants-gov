@@ -16,6 +16,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 
 import src.adapters.db as db
 import src.adapters.search as search
+import tika
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
@@ -28,6 +29,7 @@ from src.task.task import Task
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
+from tika import parser
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +58,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     # Configurable max worker. Set default to ThreaPoolExecutor default.
     # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
     incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
+    tika_url: str | None = Field(default=None, alias="LOAD_OPP_SEARCH_TIKA_URL")
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -346,11 +349,21 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            if self.filter_attachment(att):
-                with file_util.open_stream(
-                    att.file_location,
-                    "rb",
-                ) as file:
+            if not self.filter_attachment(att):
+                continue
+            with file_util.open_stream(att.file_location, "rb") as file:
+                if self.config.tika_url:
+                    file_data = tika.parser.from_file(file, self.config.tika_url)
+                    attachments.append(
+                        {
+                            "filename": att.file_name,
+                            # tika adds extra \n chars before and after content so use .strip()
+                            "data": base64.b64encode(file_data["content"].encode().strip()).decode(
+                                "utf-8"
+                            ),
+                        }
+                    )
+                else:
                     file_content = file.read()
                     attachments.append(
                         {
@@ -358,7 +371,6 @@ class LoadOpportunitiesToIndex(Task):
                             "data": base64.b64encode(file_content).decode("utf-8"),
                         }
                     )
-
         return attachments
 
     @retry(
