@@ -30,12 +30,11 @@ def get_application_form(
         )
     ).scalar_one_or_none()
 
-    if application_form:
-        warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-            application_form.application_response, application_form.form
-        )
-
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
+        
+    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
+             application_form.application_response, application_form.form
+         )
 
     return application_form, warnings
