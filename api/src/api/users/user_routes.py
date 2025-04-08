@@ -203,13 +203,13 @@ def user_save_opportunity(
     return response.ApiResponse(message="Success")
 
 
-@user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<int:opportunity_id>")
+@user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<uuid:opportunity_id>")
 @user_blueprint.output(UserDeleteSavedOpportunityResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_delete_saved_opportunity(
-    db_session: db.Session, user_id: UUID, opportunity_id: int
+    db_session: db.Session, user_id: UUID, opportunity_id: UUID
 ) -> response.ApiResponse:
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
 
