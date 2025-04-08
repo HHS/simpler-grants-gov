@@ -174,6 +174,7 @@ def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
     existing_assistance_listing: OpportunityAssistanceListing | None,
+    opportunity: Opportunity,
 ) -> OpportunityAssistanceListing:
     log_extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
 
@@ -183,9 +184,14 @@ def transform_assistance_listing(
     # We always create a new assistance listing record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
     target_assistance_listing = OpportunityAssistanceListing(
-        opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
-        opportunity_id=source_assistance_listing.opportunity_id,
+        legacy_opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
+        opportunity_id=opportunity.opportunity_id,
     )
+
+    if existing_assistance_listing:
+        target_assistance_listing.opportunity_assistance_listing_id = (
+            existing_assistance_listing.opportunity_assistance_listing_id
+        )
 
     target_assistance_listing.assistance_listing_number = source_assistance_listing.cfdanumber
     target_assistance_listing.program_title = source_assistance_listing.programtitle
