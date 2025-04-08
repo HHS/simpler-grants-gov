@@ -445,23 +445,12 @@ class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
 
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(
-                func.max(opportunity_models.OpportunitySummary.legacy_opportunity_summary_id)
-            ).scalar()
-            if value is not None:
-                return value + 1
-
-        return 1
-
     opportunity_summary_id = Generators.UuidObj
-
-    legacy_opportunity_summary_id = factory.Sequence(lambda n: n)
 
     opportunity = factory.SubFactory(OpportunityFactory, current_opportunity_summary=None)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    legacy_opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.legacy_opportunity_id)
 
     summary_description = factory.Faker("summary_description")
     is_cost_sharing = factory.Faker("boolean")
