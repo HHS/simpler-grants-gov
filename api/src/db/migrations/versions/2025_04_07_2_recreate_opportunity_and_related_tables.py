@@ -860,6 +860,13 @@ def upgrade():
         sa.PrimaryKeyConstraint("application_form_id", name=op.f("application_form_pkey")),
         schema="api",
     )
+    # TODO: Do we need to save data currently in field
+    op.drop_column("user_saved_search", "searched_opportunity_ids", schema="api")
+    op.add_column(
+        "user_saved_search",
+        sa.Column("searched_opportunity_ids", postgresql.ARRAY(sa.UUID()), nullable=False),
+        schema="api",
+    )
 
     # ### end Alembic commands ###
 
@@ -1066,4 +1073,12 @@ def downgrade():
     op.drop_index(op.f("opportunity_agency_code_idx"), table_name="opportunity", schema="api")
     op.drop_table("opportunity", schema="api")
     op.drop_table("form", schema="api")
+
+    # Restore saved search opportunity ids to BigInt array
+    op.drop_column("user_saved_search", "searched_opportunity_ids", schema="api")
+    op.add_column(
+        "user_saved_search",
+        sa.Column("searched_opportunity_ids", postgresql.ARRAY(sa.BigInteger()), nullable=False),
+        schema="api",
+    )
     # ### end Alembic commands ###

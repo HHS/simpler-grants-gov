@@ -157,7 +157,7 @@ class NotificationTask(Task):
 
         # For each unique query, check if results have changed
         for searches in query_map.values():
-            current_results: list[int] = search_opportunities_id(
+            current_results: list[uuid.UUID] = search_opportunities_id(
                 self.search_client, searches[0].search_query
             )
 
