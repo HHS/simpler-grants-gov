@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import SessionStorage from "src/utils/sessionStorage";
+import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
 
 import { LoginModal } from "src/components/LoginModal";
 
-jest.mock("src/utils/sessionStorage", () => ({
+jest.mock("src/services/auth/sessionStorage", () => ({
   __esModule: true,
   default: {
     setItem: jest.fn(),
@@ -57,7 +57,7 @@ describe("LoginModal", () => {
     const modalRef = createModalRef();
     const setItemSpy = jest
       .spyOn(SessionStorage, "setItem")
-      .mockImplementation((): void => undefined);
+      .mockImplementation((_key: string, _value: string): void => undefined);
 
     render(
       <LoginModal
@@ -84,7 +84,7 @@ describe("LoginModal", () => {
     const modalRef = createModalRef();
     const setItemSpy = jest
       .spyOn(SessionStorage, "setItem")
-      .mockImplementation((): void => undefined);
+      .mockImplementation((_key: string, _value: string): void => undefined);
 
     Object.defineProperty(global, "location", {
       configurable: true,

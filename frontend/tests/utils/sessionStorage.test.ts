@@ -114,7 +114,7 @@ describe("SessionStorage", () => {
     });
 
     it("logs error when exception is thrown", () => {
-      (mockSetItem as jest.Mock).mockImplementation(() => {
+      mockSetItem.mockImplementation(() => {
         throw new Error("Storage error");
       });
 
@@ -132,7 +132,7 @@ describe("SessionStorage", () => {
     });
 
     it("returns null when key does not exist", () => {
-      (mockGetItem as jest.Mock).mockReturnValue(null);
+      mockGetItem.mockReturnValue(null);
       expect(SessionStorage.getItem("nonExistentKey")).toBeNull();
       expect(mockGetItem).toHaveBeenCalledWith("nonExistentKey");
     });
@@ -149,7 +149,7 @@ describe("SessionStorage", () => {
     });
 
     it("returns null and logs error when exception is thrown", () => {
-      (mockGetItem as jest.Mock).mockImplementation(() => {
+      mockGetItem.mockImplementation(() => {
         throw new Error("Storage error");
       });
 
@@ -176,7 +176,7 @@ describe("SessionStorage", () => {
     });
 
     it("logs error when exception is thrown", () => {
-      (mockRemoveItem as jest.Mock).mockImplementation(() => {
+      mockRemoveItem.mockImplementation(() => {
         throw new Error("Storage error");
       });
 
@@ -203,7 +203,7 @@ describe("SessionStorage", () => {
     });
 
     it("logs error when exception is thrown", () => {
-      (mockClear as jest.Mock).mockImplementation(() => {
+      mockClear.mockImplementation(() => {
         throw new Error("Storage error");
       });
 
