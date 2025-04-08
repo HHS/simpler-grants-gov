@@ -31,20 +31,6 @@ import { useUser } from "src/services/auth/useUser";
 export const useClientFetch = () => {
   const { refreshUser } = useUser();
 
-  // const fetchWithAuthCheck = (fetchFn) => {\
-  //   const requestSessionCookie = Cookies.get("session");
-  //   const response = await fetchFn(args);
-  //   if (!requestSessionCookie) {
-  //     return response;
-  //   }
-  //   // hopefully cookies have been updated at this point?
-  //   const responseSessionCookie = Cookies.get("session");
-  //   // user has been logged out
-  //   if (!responseSessionCookie) {
-  //     await refreshUser();
-  //     return response;
-  //   }
-  // }
   const clientFetch = async (url: URL, options: RequestInit) => {
     const requestSessionCookie = Cookies.get("session");
     const response = await fetch(url, options);

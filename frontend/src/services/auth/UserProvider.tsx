@@ -46,8 +46,6 @@ export default function UserProvider({
     * wrap the fetch function? maybe less difficult - on each resopnse, check the session cookie. If it was there on the request but not on the response it was erased by the middleware, and we can set something on the response body indicating the need for a user refresh? Or we can just trigger the user refresh from there? How can we make sure this only happens on the client though? Just by manual replacement?
     */
 
-  console.log("~~~ running useUser");
-
   const getUserSession = useCallback(async (): Promise<void> => {
     try {
       setHasBeenLoggedOut(false);
@@ -70,6 +68,11 @@ export default function UserProvider({
     }
   }, [localUser?.token]);
 
+  // just remove the token
+  const logoutLocalUser = () => {
+    setLocalUser({ ...(localUser as UserProfile), token: "" });
+  };
+
   // fetch user on hook startup
   useEffect(() => {
     if (localUser) return;
@@ -83,6 +86,7 @@ export default function UserProvider({
       isLoading,
       refreshUser: getUserSession,
       hasBeenLoggedOut,
+      logoutLocalUser,
     }),
     [localUser, userFetchError, isLoading, getUserSession, hasBeenLoggedOut],
   );

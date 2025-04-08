@@ -9,8 +9,9 @@ export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
 // returns a new date 1 week from time of function call
-export const newExpirationDate = () =>
-  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+export const newExpirationDate = () => new Date(Date.now() + 60 * 1000);
+// export const newExpirationDate = () =>
+//   new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
 // extracts payload object from jwt string using passed encrytion key and algo
 export const decrypt = async (

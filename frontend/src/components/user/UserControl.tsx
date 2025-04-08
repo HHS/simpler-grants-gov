@@ -106,16 +106,17 @@ const UserDropdown = ({
 export const UserControl = () => {
   const t = useTranslations("Header");
 
-  const { user, refreshUser } = useUser();
+  const { user, logoutLocalUser } = useUser();
   const router = useRouter();
 
   const logout = useCallback(async (): Promise<void> => {
     await fetch("/api/auth/logout", {
       method: "POST",
     });
-    await refreshUser();
+
+    logoutLocalUser();
     router.refresh();
-  }, [refreshUser, router]);
+  }, [logoutLocalUser, router]);
 
   return (
     <>
