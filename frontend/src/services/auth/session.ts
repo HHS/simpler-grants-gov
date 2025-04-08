@@ -9,7 +9,7 @@ import {
   encrypt,
   newExpirationDate,
 } from "src/services/auth/sessionUtils";
-import { SimplerJwtPayload, UserSession } from "src/services/auth/types";
+import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
 // note that cookies will be async in Next 15
