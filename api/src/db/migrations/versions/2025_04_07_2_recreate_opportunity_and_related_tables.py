@@ -9,6 +9,7 @@ Create Date: 2025-04-07 20:20:59.394800
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+
 from src.db.migrations.utils import (
     remove_opportunity_search_index_queue_trigger_function,
     setup_opportunity_search_index_queue_trigger_function,
