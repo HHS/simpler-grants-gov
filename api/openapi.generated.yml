@@ -2027,9 +2027,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2348,9 +2349,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
