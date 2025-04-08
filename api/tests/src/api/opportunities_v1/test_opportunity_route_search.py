@@ -32,7 +32,7 @@ def validate_search_response(
 ):
     assert search_response.status_code == expected_status_code
 
-    expected_ids = [exp.opportunity_id for exp in expected_results]
+    expected_ids = [str(exp.opportunity_id) for exp in expected_results]
 
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
@@ -41,7 +41,7 @@ def validate_search_response(
         response_json = search_response.get_json()
         opportunities = response_json["data"]
 
-    response_ids = [int(opp["opportunity_id"]) for opp in opportunities]
+    response_ids = [str(opp["opportunity_id"]) for opp in opportunities]
 
     for opp in opportunities:
         if "summary" in opp:
@@ -83,6 +83,7 @@ def build_opp(
     award_ceiling: int | None,
     estimated_total_program_funding: int | None,
     agency_phone_number: str | None = "123-456-7890",
+    opportunity_id: str | None = None,
 ) -> Opportunity:
     opportunity = OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -91,6 +92,8 @@ def build_opp(
         opportunity_assistance_listings=[],
         current_opportunity_summary=None,
     )
+    if opportunity_id:
+        opportunity.opportunity_id = opportunity_id
 
     for assistance_listing in assistance_listings:
         opportunity.opportunity_assistance_listings.append(
@@ -141,6 +144,7 @@ ECONOMIC_AL = ("11.307", "Economic Adjustment Assistance")
 MANUFACTURING_AL = ("11.611", "Manufacturing Extension Partnership")
 
 NASA_SPACE_FELLOWSHIP = build_opp(
+    opportunity_id="02df19e1-45bf-4882-8d77-fe21bd49b27e",
     opportunity_title="National Space Grant College and Fellowship Program FY 2020 - 2024",
     opportunity_number="NNH123ZYX",
     agency="NASA",
@@ -161,6 +165,7 @@ NASA_SPACE_FELLOWSHIP = build_opp(
 )
 
 NASA_INNOVATIONS = build_opp(
+    opportunity_id="05d86d8b-05ba-46ea-ba27-9e3cee87762b",
     opportunity_title="Early Stage Innovations",
     opportunity_number="NNH24-TR0N",
     agency="NASA",
@@ -180,6 +185,7 @@ NASA_INNOVATIONS = build_opp(
 )
 
 NASA_SUPERSONIC = build_opp(
+    opportunity_id="192be7c8-5f0f-44ce-ac26-4be55ff6a055",
     opportunity_title="Commercial Supersonic Technology (CST) Project",
     opportunity_number="NNH24-CST",
     agency="NASA",
@@ -199,6 +205,7 @@ NASA_SUPERSONIC = build_opp(
 )
 
 NASA_K12_DIVERSITY = build_opp(
+    opportunity_id="28386de7-8a70-4466-8344-c6464cb5828e",
     opportunity_title="Space Grant K-12 Inclusiveness and Diversity in STEM",
     opportunity_number="NNH22ZHA",
     agency="NASA",
@@ -218,6 +225,7 @@ NASA_K12_DIVERSITY = build_opp(
 )
 
 LOC_TEACHING = build_opp(
+    opportunity_id="2a80ca2e-4f17-43dd-b1ad-ba7f684cb915",
     opportunity_title="Teaching with Primary Sources - New Awards for FY25-FY27",
     opportunity_number="012ADV345",
     agency="LOC",
@@ -243,6 +251,7 @@ LOC_TEACHING = build_opp(
 )
 
 LOC_HIGHER_EDUCATION = build_opp(
+    opportunity_id="387b3e49-3f99-4d3d-bc0a-dccca77a8111",
     opportunity_title="Of the People: Widening the Path: CCDI – Higher Education",
     opportunity_number="012ADV346",
     agency="LOC",
@@ -265,6 +274,7 @@ LOC_HIGHER_EDUCATION = build_opp(
 )
 
 DOS_DIGITAL_LITERACY = build_opp(
+    opportunity_id="56065a9c-6b3b-4d8d-98af-b8f4e7d1a9d1",
     opportunity_title="American Spaces Digital Literacy and Training Program",
     opportunity_number="SFOP0001234",
     agency="DOS-ECA",
@@ -289,6 +299,7 @@ DOS_DIGITAL_LITERACY = build_opp(
 )
 
 DOC_SPACE_COAST = build_opp(
+    opportunity_id="70dc9e96-bc50-41a6-9b83-e66d778199b8",
     opportunity_title="Space Coast RIC",
     opportunity_number="SFOP0009876",
     agency="DOC-EDA",
@@ -312,6 +323,7 @@ DOC_SPACE_COAST = build_opp(
 )
 
 DOC_MANUFACTURING = build_opp(
+    opportunity_id="888c02b5-f2f0-4642-ad75-ecc4629e3e37",
     opportunity_title="Advanced Manufacturing Jobs and Innovation Accelerator Challenge",
     opportunity_number="JIAC1234AM",
     agency="DOC-EDA",
