@@ -120,9 +120,8 @@ in a web browser at [http://localhost:3100](http://localhost:3100).
 
 In the 
 [Metabase Admin](http://localhost:3100) app, navigate to Databases > Add Database. 
-Fill in the form using the `MB_DB_` values in [`local.env`](../../analytics/local.env).
+Fill in the form using the `MB_DB_` values in [`local.env`](../../analytics/local.env):
 
-`local.env`
 ```
 MB_DB_TYPE=postgres
 MB_DB_DBNAME=app
