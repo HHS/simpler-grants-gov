@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
-
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import LoginPage from "src/app/[locale]/login/page";
 
 const mockPush = jest.fn();
 const mockGetItem = jest.fn();
@@ -14,7 +14,7 @@ jest.doMock("next/navigation", () => ({
   }),
 }));
 
-jest.doMock("src/utils/sessionStorage", () => ({
+jest.doMock("src/services/auth/sessionStorage", () => ({
   __esModule: true,
   default: {
     getItem: mockGetItem,
@@ -24,8 +24,6 @@ jest.doMock("src/utils/sessionStorage", () => ({
     isSessionStorageAvailable: jest.fn().mockReturnValue(true),
   },
 }));
-
-const Login = require("src/app/[locale]/login/page").default;
 
 const createMockRouter = (props = {}) => ({
   back: jest.fn(),
@@ -69,7 +67,7 @@ describe("Login Page", () => {
   it("should redirect to stored URL from session storage", () => {
     mockGetItem.mockReturnValue("/test-redirect-path");
 
-    renderWithRouter(<Login />);
+    renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
@@ -79,7 +77,7 @@ describe("Login Page", () => {
   it("should redirect to home if no redirect URL is stored", () => {
     mockGetItem.mockReturnValue(null);
 
-    renderWithRouter(<Login />);
+    renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
@@ -88,7 +86,7 @@ describe("Login Page", () => {
   it("should redirect to home if redirect URL is empty", () => {
     mockGetItem.mockReturnValue("");
 
-    renderWithRouter(<Login />);
+    renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
@@ -97,7 +95,7 @@ describe("Login Page", () => {
   it("should redirect to home if redirect URL doesn't start with /", () => {
     mockGetItem.mockReturnValue("https://malicious-site.com");
 
-    renderWithRouter(<Login />);
+    renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
@@ -106,7 +104,7 @@ describe("Login Page", () => {
   it("should display 'Redirecting...' text", () => {
     mockGetItem.mockReturnValue("/some-path");
 
-    const { container } = renderWithRouter(<Login />);
+    const { container } = renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(container).toHaveTextContent("Redirecting...");
