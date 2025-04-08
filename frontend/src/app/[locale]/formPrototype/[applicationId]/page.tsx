@@ -53,7 +53,7 @@ const FormLinks = ({
   }
 };
 
-async function ApplicactionLandingPage({
+async function ApplicationLandingPage({
   params,
 }: ApplicactionLandingPageProps) {
   const { applicationId } = await params;
