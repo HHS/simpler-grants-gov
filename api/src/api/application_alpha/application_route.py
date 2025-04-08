@@ -104,7 +104,7 @@ def application_form_get(
                     validation_warnings = validate_json_schema_for_form(
                         application_form.application_response, application_form.form
                     )
-            except Exception as e:
+            except Exception:
                 # Log the exception but continue
                 logger.exception(
                     "Error validating application form data against schema",
