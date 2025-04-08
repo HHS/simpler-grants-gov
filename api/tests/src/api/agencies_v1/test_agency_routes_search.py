@@ -23,9 +23,9 @@ class TestAgencyRoutesSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(self, agency_index, agency_index_alias, search_client):
         # load agencies into search index
-
         schema = AgencyV1Schema()
         json_records = [schema.dump(agency) for agency in AGENCIES]
+        json_records[0]["is_active_agency"] = True  # DOA
 
         search_client.bulk_upsert(
             agency_index,
@@ -41,21 +41,20 @@ class TestAgencyRoutesSearch(BaseTestClass):
         "search_request,expected_result",
         [
             (
-                # Return ALL with "" query string
+                # Get all agencies
                 {
                     "pagination": {
                         "page_offset": 1,
                         "page_size": 25,
                         "sort_order": [
-                            {"order_by": "agency_name", "sort_direction": SortDirection.ASCENDING}
+                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
                         ],
                     },
-                    "query": "",
                 },
                 AGENCIES,
             ),
             (
-                # filter by status
+                # Query
                 {
                     "pagination": {
                         "page_offset": 1,
@@ -68,6 +67,37 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 },
                 [DOD, DOD_HRE, DOD_MCO],
             ),
+            # Filter
+            (
+                {
+                    "pagination": {
+                        "page_offset": 1,
+                        "page_size": 25,
+                        "sort_order": [
+                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+                        ],
+                    },
+                    "filters": {
+                        "active": {"one_of": [True]},
+                    },
+                },
+                [DOA],
+            ),
+            (
+                {
+                    "pagination": {
+                        "page_offset": 1,
+                        "page_size": 25,
+                        "sort_order": [
+                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+                        ],
+                    },
+                    "filters": {
+                        "active": {"one_of": [0]},
+                    },
+                },
+                [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH],
+            ),
         ],
     )
     def test_search_agencies(self, client, api_auth_token, search_request, expected_result):
@@ -76,9 +106,6 @@ class TestAgencyRoutesSearch(BaseTestClass):
         )
         data = resp.json["data"]
 
-        import pdb
-
-        pdb.set_trace()
         assert resp.status_code == 200
         assert len(data) == len(expected_result)
         assert [d["agency_id"] for d in data] == [str(exp.agency_id) for exp in expected_result]
