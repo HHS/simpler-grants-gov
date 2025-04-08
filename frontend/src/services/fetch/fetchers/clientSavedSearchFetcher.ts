@@ -5,6 +5,7 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 
 // make call from client to Next server to initiate saving a search
 export const saveSearch = async (
+  clientFetch,
   name: string,
   searchParams: ReadonlyURLSearchParams,
   token?: string,
@@ -15,7 +16,7 @@ export const saveSearch = async (
   const savedSearchParams = filterSearchParams(
     Object.fromEntries(searchParams.entries()),
   );
-  const res = await fetch("/api/user/saved-searches", {
+  const res = await clientFetch("/api/user/saved-searches", {
     method: "POST",
     body: JSON.stringify({ ...savedSearchParams, name }),
   });

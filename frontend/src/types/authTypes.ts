@@ -65,4 +65,5 @@ export type UserProviderState = {
   error?: Error;
   isLoading: boolean;
   refreshUser: () => Promise<void>;
+  hasBeenLoggedOut: boolean;
 };

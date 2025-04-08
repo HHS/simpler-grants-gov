@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useUser } from "src/services/auth/useUser";
+import { useClientFetch } from "src/services/fetch/clientFetch";
 import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
@@ -99,7 +100,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
   const [saved, setSaved] = useState<boolean>();
-
+  const { clientFetch } = useClientFetch();
   const handleSubmit = useCallback(() => {
     if (validationError) {
       setValidationError(undefined);
@@ -109,7 +110,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       return;
     }
     setLoading(true);
-    saveSearch(savedSearchName, searchParams, user?.token)
+    saveSearch(clientFetch, savedSearchName, searchParams, user?.token)
       .then((data) => {
         if (!data?.id) {
           throw new Error("saved search ID not returned from API");

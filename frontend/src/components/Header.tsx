@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useRouteChange } from "src/hooks/useRouteChange";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
@@ -218,6 +219,21 @@ const Header = ({ locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
+
+  const { refreshUser, user, hasBeenLoggedOut } = useUser();
+
+  // check if the current user is still logged in on every route change
+  useRouteChange(() => {
+    if (user?.token) {
+      refreshUser();
+    }
+  });
+
+  useEffect(() => {
+    if (hasBeenLoggedOut) {
+      console.log("&&& show toast");
+    }
+  }, [hasBeenLoggedOut]);
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
