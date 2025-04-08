@@ -27,7 +27,7 @@ def get_s3_attachment_path(
     return file_util.join(
         base_path,
         "opportunities",
-        str(opportunity.opportunity_id),
+        str(opportunity.legacy_opportunity_id),
         "attachments",
         str(opportunity_attachment_id),
         file_name,
