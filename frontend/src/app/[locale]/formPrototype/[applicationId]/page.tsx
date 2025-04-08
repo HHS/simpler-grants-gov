@@ -48,16 +48,12 @@ const FormLinks = ({
         })}
       </ul>
     );
-  } else {
-    return <></>;
   }
 };
 
-async function ApplicationLandingPage({
-  params,
-}: ApplicactionLandingPageProps) {
+async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const { applicationId } = await params;
-  let forms = [] as unknown as [{ form: FormDetail }];
+  let forms = [];
 
   try {
     const response = await getCompetitionDetails(COMPETITION_ID);
@@ -86,8 +82,8 @@ async function ApplicationLandingPage({
   );
 }
 
-export default withFeatureFlag<ApplicactionLandingPageProps, never>(
-  ApplicactionLandingPage,
+export default withFeatureFlag<ApplicationLandingPageProps, never>(
+  ApplicationLandingPage,
   "applyFormPrototypeOff",
   () => redirect("/maintenance"),
 );
