@@ -1,8 +1,15 @@
-from alembic.operations import Operations
+from typing import Protocol
+
 from src.db.migrations.constants import opportunity_search_index_queue_trigger_function
 
 
-def setup_opportunity_search_index_queue_trigger_function(op: Operations, tables: list[str]):
+class OpExecutable(Protocol):
+    def execute(self, statement: str) -> None: ...
+
+
+def setup_opportunity_search_index_queue_trigger_function(
+    op: OpExecutable, tables: list[str]
+) -> None:
     # Setup the opportunity search index queue trigger function
     op.execute(opportunity_search_index_queue_trigger_function)
 
@@ -17,7 +24,9 @@ def setup_opportunity_search_index_queue_trigger_function(op: Operations, tables
         )
 
 
-def remove_opportunity_search_index_queue_trigger_function(op: Operations, tables: list[str]):
+def remove_opportunity_search_index_queue_trigger_function(
+    op: OpExecutable, tables: list[str]
+) -> None:
     # Drop triggers
     for table in tables:
         op.execute(f"DROP TRIGGER IF EXISTS {table}_queue_trigger ON api.{table};")
