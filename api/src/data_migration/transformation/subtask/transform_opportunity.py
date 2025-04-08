@@ -105,7 +105,7 @@ class TransformOpportunity(AbstractTransformSubTask):
                         file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
                         s3_path = attachment_util.get_s3_attachment_path(
                             file_name,
-                            attachment.attachment_id,
+                            attachment.legacy_attachment_id,
                             transformed_opportunity,
                             self.s3_config,
                         )
