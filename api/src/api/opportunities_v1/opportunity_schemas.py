@@ -234,8 +234,8 @@ class OpportunityAssistanceListingV1Schema(Schema):
 
 
 class OpportunityV1Schema(Schema):
-    opportunity_id = fields.Integer(
-        metadata={"description": "The internal ID of the opportunity", "example": 12345},
+    opportunity_id = fields.UUID(
+        metadata={"description": "The internal ID of the opportunity"},
     )
 
     opportunity_number = fields.String(
@@ -539,9 +539,7 @@ class SavedOpportunitySummaryV1Schema(Schema):
 
 
 class SavedOpportunityResponseV1Schema(Schema):
-    opportunity_id = fields.Integer(
-        metadata={"description": "The ID of the saved opportunity", "example": 1234}
-    )
+    opportunity_id = fields.UUID(metadata={"description": "The ID of the saved opportunity"})
     opportunity_title = fields.String(
         allow_none=True,
         metadata={"description": "The title of the opportunity", "example": "my title"},

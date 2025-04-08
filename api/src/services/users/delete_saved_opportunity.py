@@ -7,7 +7,7 @@ from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserSavedOpportunity
 
 
-def delete_saved_opportunity(db_session: db.Session, user_id: UUID, opportunity_id: int) -> None:
+def delete_saved_opportunity(db_session: db.Session, user_id: UUID, opportunity_id: UUID) -> None:
     result = db_session.execute(
         delete(UserSavedOpportunity).where(
             UserSavedOpportunity.user_id == user_id,
