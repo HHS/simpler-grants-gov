@@ -1516,7 +1516,8 @@ components:
           - type: 'null'
         is_active_agency:
           type: boolean
-          description: Indicates whether the entity is a test agency.
+          description: Indicates if the agency is linked to an opportunity that is
+            currently active.
           example: 'False'
         created_at:
           type: string
