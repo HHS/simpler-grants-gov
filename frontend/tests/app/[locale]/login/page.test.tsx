@@ -1,11 +1,9 @@
 import { render } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/login/page";
 
+
+
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
-
-
-
 
 const mockPush = jest.fn();
 const mockGetItem = jest.fn();
