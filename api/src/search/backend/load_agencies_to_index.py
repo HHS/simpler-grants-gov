@@ -6,13 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db, search
-from src.api.agencies_v1.agency_schema import AgencyResponseSchema
+from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.db.models.agency_models import Agency
+from src.services.agencies_v1.get_agencies import _construct_active_inner_query
 from src.task.task import Task, logger
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
-SCHEMA = AgencyResponseSchema()
+SCHEMA = AgencyV1Schema()
 
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
@@ -53,6 +54,10 @@ class LoadAgenciesToIndex(Task):
             replica_count=self.config.replica_count,
         )
         # load the records
+        import pdb
+
+        pdb.set_trace()
+
         agencies = self.fetch_agencies()
         self.load_agencies(agencies)
 
@@ -73,6 +78,14 @@ class LoadAgenciesToIndex(Task):
 
     def load_agencies(self, agencies: Sequence[Agency]) -> None:
         logger.info("Loading agencies...")
+        active_agency_subquery = (
+            _construct_active_inner_query(Agency.agency_id)
+            .union(_construct_active_inner_query(Agency.top_level_agency_id))
+            .subquery()
+        )
+
+        agency_id_stmt = select(active_agency_subquery).distinct()
+        active_agencies = set(self.db_session.execute(agency_id_stmt).unique().scalars().all())
 
         agencies_json = []
         for agency in agencies:
@@ -80,7 +93,12 @@ class LoadAgenciesToIndex(Task):
                 "Preparing agency for upload to search index",
                 extra={"agency_id": agency.agency_id, "agency_code": agency.agency_code},
             )
-            agencies_json.append(SCHEMA.dump(agency))
+            agency_json = SCHEMA.dump(agency)
+            if agency.agency_id in active_agencies:
+                agency_json["is_active_agency"] = True
+
+            agencies_json.append(agency_json)
+
             self.increment(self.Metrics.RECORDS_LOADED)
 
         self.search_client.bulk_upsert(
