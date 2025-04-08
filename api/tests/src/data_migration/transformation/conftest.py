@@ -74,7 +74,7 @@ def setup_cfda(
 
     # If you don't provide an opportunity, you need to provide an ID
     if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_cfda = f.StagingTopportunityCfdaFactory.create(
         **source_values,
@@ -87,7 +87,7 @@ def setup_cfda(
     if create_existing:
         f.OpportunityAssistanceListingFactory.create(
             opportunity=opportunity,
-            opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
             timestamps_in_past=True,
@@ -435,7 +435,7 @@ def validate_assistance_listing(
     assistance_listing = (
         db_session.query(OpportunityAssistanceListing)
         .filter(
-            OpportunityAssistanceListing.opportunity_assistance_listing_id
+            OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
             == source_cfda.opp_cfda_id
         )
         .one_or_none()

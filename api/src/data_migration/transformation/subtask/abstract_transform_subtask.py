@@ -134,7 +134,7 @@ class AbstractTransformSubTask(SubTask):
             .join(destination_model, and_(*join_clause), isouter=True)
             .join(
                 Opportunity,
-                source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
+                source_model.opportunity_id == Opportunity.legacy_opportunity_id,  # type: ignore[attr-defined]
                 isouter=True,
             )
             .where(source_model.transformed_at.is_(None))
