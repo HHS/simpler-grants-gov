@@ -162,7 +162,7 @@ class AbstractTransformSubTask(SubTask):
     ]:
         # setup the join clause for getting the opportunity summary
         opportunity_summary_join_clause = [
-            source_model.opportunity_id == OpportunitySummary.opportunity_id,  # type: ignore[attr-defined]
+            source_model.opportunity_id == OpportunitySummary.legacy_opportunity_id,  # type: ignore[attr-defined]
             OpportunitySummary.is_forecast.is_(is_forecast),
         ]
 

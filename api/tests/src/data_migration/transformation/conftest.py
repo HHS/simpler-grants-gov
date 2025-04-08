@@ -178,7 +178,7 @@ def setup_applicant_type(
 
     source_applicant_type = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         at_id=legacy_lookup_value,
@@ -574,7 +574,7 @@ def validate_applicant_type(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_applicant_type.is_forecast,
-            OpportunitySummary.opportunity_id == source_applicant_type.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_applicant_type.opportunity_id,
         )
         .scalar()
     )
