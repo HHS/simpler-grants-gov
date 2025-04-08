@@ -287,7 +287,7 @@ def upgrade():
     op.create_table(
         "opportunity_summary",
         sa.Column("opportunity_summary_id", sa.UUID(), nullable=False),
-        sa.Column("legacy_opportunity_summary_id", sa.BigInteger(), nullable=False),
+        sa.Column("legacy_opportunity_id", sa.BigInteger(), nullable=False),
         sa.Column("opportunity_id", sa.UUID(), nullable=False),
         sa.Column("summary_description", sa.Text(), nullable=True),
         sa.Column("is_cost_sharing", sa.Boolean(), nullable=True),
@@ -348,9 +348,9 @@ def upgrade():
         schema="api",
     )
     op.create_index(
-        op.f("opportunity_summary_legacy_opportunity_summary_id_idx"),
+        op.f("opportunity_summary_legacy_opportunity_id_idx"),
         "opportunity_summary",
-        ["legacy_opportunity_summary_id"],
+        ["legacy_opportunity_id"],
         unique=False,
         schema="api",
     )
@@ -1024,7 +1024,7 @@ def downgrade():
         schema="api",
     )
     op.drop_index(
-        op.f("opportunity_summary_legacy_opportunity_summary_id_idx"),
+        op.f("opportunity_summary_legacy_opportunity_id_idx"),
         table_name="opportunity_summary",
         schema="api",
     )

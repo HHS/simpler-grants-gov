@@ -175,12 +175,12 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    legacy_opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, index=True)
-
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True)
 
     summary_description: Mapped[str | None]
 
