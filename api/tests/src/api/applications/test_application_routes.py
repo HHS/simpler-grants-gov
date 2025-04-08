@@ -698,4 +698,3 @@ def test_application_form_get_with_invalid_schema(
 
     # Should error
     assert response.status_code == 500
-
