@@ -265,7 +265,7 @@ def setup_funding_category(
 
     source_funding_category = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fac_id=legacy_lookup_value,
@@ -660,7 +660,7 @@ def validate_funding_category(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_category.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_category.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_category.opportunity_id,
         )
         .scalar()
     )
