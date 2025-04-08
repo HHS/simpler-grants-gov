@@ -21,7 +21,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tsynopsis,
             OpportunitySummary,
             [
-                Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id,
+                Tsynopsis.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(False),
             ],
         )
@@ -32,7 +32,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tforecast,
             OpportunitySummary,
             [
-                Tforecast.opportunity_id == OpportunitySummary.opportunity_id,
+                Tforecast.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(True),
             ],
         )
