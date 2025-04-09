@@ -104,7 +104,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
               </p>
             </div>
             <div className="border border-base-lighter radius-sm">
-              <ForecastOpportunityItem summary={opportunityData.summary}/>
+              <ForecastOpportunityItem detail={opportunityData}/>
             </div>
           </div>
         );
