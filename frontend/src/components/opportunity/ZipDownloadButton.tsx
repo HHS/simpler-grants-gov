@@ -20,6 +20,7 @@ const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
   return (
     <Button
       onClick={() => downloadAttachmentsZip(opportunityId)}
+      outline
       type="button"
       id={`opportunity-document-button-${opportunityId}`}
     >
