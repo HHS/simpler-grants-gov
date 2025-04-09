@@ -12,14 +12,6 @@ const formatHistoryDate = (date: string | null) => {
     return date === null ? "--" : formatDate(date);
 };
 
-const formatISOTimestamp = (date: string) => {
-  const stamp = new Date(date)
-  const time = stamp.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
-
-  return time
-
-}
-
 export const ForecastOpportunityItem = ({detail}: Props) => {
 
   const t = useTranslations("OpportunityListing.history");
@@ -50,10 +42,6 @@ export const ForecastOpportunityItem = ({detail}: Props) => {
         <OpportunityHistoryItem
             title={t("fiscal_year")}
             content={`${detail.summary.fiscal_year ? detail.summary.fiscal_year : ""}`}
-        />
-        <OpportunityHistoryItem
-            title={t("forecasted_last_updated")}
-            content={formatISOTimestamp(detail.updated_at)}
         />
         </div>
     </div>
