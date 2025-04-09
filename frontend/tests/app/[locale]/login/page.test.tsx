@@ -5,7 +5,8 @@ import SessionStorage from "src/services/auth/sessionStorage";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 jest.mock("react", () => {
-  const actual = jest.requireActual("react");
+  // Fix unsafe assignment and return
+  const actual = jest.requireActual<typeof import("react")>("react");
   return {
     ...actual,
     useEffect: (callback: () => void) => {
@@ -24,8 +25,6 @@ jest.mock("next/navigation", () => ({
 
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
-const mockSetItem = jest.spyOn(SessionStorage, "setItem");
-const mockClear = jest.spyOn(SessionStorage, "clear");
 const mockConsoleError = jest.spyOn(console, "error");
 
 const createMockRouter = (props = {}) => ({
@@ -122,7 +121,7 @@ describe("Login Page", () => {
     expect(container).toHaveTextContent("Redirecting...");
   });
 
-  it("should log error when window is undefined", () => {
+  it("should log error when window is undefined", async () => {
     // Mock window as undefined
     Object.defineProperty(global, "window", {
       value: undefined,
@@ -130,11 +129,11 @@ describe("Login Page", () => {
       configurable: true,
     });
 
-    // Directly call the code that checks window
-    const LoginPageModule = require("src/app/[locale]/login/page");
-    LoginPageModule.default({});
-
-    expect(mockConsoleError).toHaveBeenCalledWith("window is undefined");
-    expect(mockPush).not.toHaveBeenCalled();
+    // Fix promise handling issues by using async/await
+    await import("src/app/[locale]/login/page").then((LoginPageModule) => {
+      LoginPageModule.default();
+      expect(mockConsoleError).toHaveBeenCalledWith("window is undefined");
+      expect(mockPush).not.toHaveBeenCalled();
+    });
   });
 });
