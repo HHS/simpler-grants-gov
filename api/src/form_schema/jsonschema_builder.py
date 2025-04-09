@@ -17,6 +17,27 @@ class JsonSchemaBuilder:
         self.required_fields: list[str] = []
 
         self.defs: dict[str, Any] = {}
+        
+        # Add standard definitions for state and country
+        self._add_standard_definitions()
+
+    def _add_standard_definitions(self):
+        """Add standard definitions for states and countries"""
+        # Add state codes definition
+        self.defs["StateCode"] = {
+            "type": "string",
+            "title": "State",
+            "description": "US State or Territory Code",
+            "enum": StateCode.list_values()
+        }
+        
+        # Add country codes definition
+        self.defs["CountryCode"] = {
+            "type": "string",
+            "title": "Country",
+            "description": "Country Code",
+            "enum": CountryCode.list_values()
+        }
 
     def add_string_property(
         self,
@@ -35,6 +56,48 @@ class JsonSchemaBuilder:
         """
         Add a string property to your JsonSchema
         """
+        # Check if this should be a reference to a standard definition
+        field_name_lower = field_name.lower()
+        
+        # If enum is explicitly provided, use that instead of references
+        if enum is None:
+            # Check for state fields
+            if field_name_lower == "state" or field_name_lower.endswith("state"):
+                # Use a reference to the state codes definition
+                ref_property = {"$ref": "#/$defs/StateCode"}
+                
+                # Add any additional metadata
+                if title is not None:
+                    ref_property["title"] = title
+                if description is not None:
+                    ref_property["description"] = description
+                
+                self.properties[field_name] = ref_property
+                
+                if is_required:
+                    self.required_fields.append(field_name)
+                
+                return self
+                
+            # Check for country fields
+            elif field_name_lower == "country" or field_name_lower.endswith("country"):
+                # Use a reference to the country codes definition
+                ref_property = {"$ref": "#/$defs/CountryCode"}
+                
+                # Add any additional metadata
+                if title is not None:
+                    ref_property["title"] = title
+                if description is not None:
+                    ref_property["description"] = description
+                
+                self.properties[field_name] = ref_property
+                
+                if is_required:
+                    self.required_fields.append(field_name)
+                
+                return self
+        
+        # If we're here, we're not using a reference, so proceed with normal logic
         str_property: dict = {}
 
         if is_nullable:
@@ -59,19 +122,7 @@ class JsonSchemaBuilder:
         if format is not None:
             str_property["format"] = format
 
-        # Check if this is a state or country field and use predefined enums if so
-        field_name_lower = field_name.lower()
-
-        # If enum not explicitly provided, check field name to determine if we should use predefined enums
-        if enum is None:
-            # Check for state fields
-            if field_name_lower == "state" or field_name_lower.endswith("state"):
-                str_property["enum"] = StateCode.list_values()
-            # Check for country fields
-            elif field_name_lower == "country" or field_name_lower.endswith("country"):
-                str_property["enum"] = CountryCode.list_values()
-            # If neither state nor country and enum was explicitly provided, use it
-        elif enum is not None:
+        if enum is not None:
             if isinstance(enum, list):
                 str_property["enum"] = enum
             else:

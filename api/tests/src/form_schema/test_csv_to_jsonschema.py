@@ -168,8 +168,8 @@ def test_ui_schema_has_correct_structure(csv_file_content):
 
 def test_state_and_country_fields_auto_detection():
     """
-    Test that state and country fields automatically get the correct enum values
-    based on their field names.
+    Test that state and country fields automatically get references to the
+    appropriate definitions in the JSON schema.
     """
     # Create a builder
     builder = JsonSchemaBuilder(title="Test Schema")
@@ -194,26 +194,39 @@ def test_state_and_country_fields_auto_detection():
     # Build the schema
     schema = builder.build()
 
-    # Verify state fields got state codes
-    assert "enum" in schema["properties"]["state"]
-    assert schema["properties"]["state"]["enum"] == StateCode.list_values()
-    assert "enum" in schema["properties"]["homeState"]
-    assert schema["properties"]["homeState"]["enum"] == StateCode.list_values() 
-    assert "enum" in schema["properties"]["mailingState"]
-    assert schema["properties"]["mailingState"]["enum"] == StateCode.list_values()
+    # Verify $defs section contains our standard definitions
+    assert "$defs" in schema
+    assert "StateCode" in schema["$defs"]
+    assert "CountryCode" in schema["$defs"]
+    
+    # Verify the definitions have the correct enum values
+    assert "enum" in schema["$defs"]["StateCode"]
+    assert schema["$defs"]["StateCode"]["enum"] == StateCode.list_values()
+    assert "enum" in schema["$defs"]["CountryCode"]
+    assert schema["$defs"]["CountryCode"]["enum"] == CountryCode.list_values()
 
-    # Verify country fields got country codes
-    assert "enum" in schema["properties"]["country"]
-    assert schema["properties"]["country"]["enum"] == CountryCode.list_values()
-    assert "enum" in schema["properties"]["birthCountry"]
-    assert schema["properties"]["birthCountry"]["enum"] == CountryCode.list_values()
-    assert "enum" in schema["properties"]["citizenshipCountry"]
-    assert schema["properties"]["citizenshipCountry"]["enum"] == CountryCode.list_values()
+    # Verify state fields have references to StateCode
+    assert "$ref" in schema["properties"]["state"]
+    assert schema["properties"]["state"]["$ref"] == "#/$defs/StateCode"
+    assert "$ref" in schema["properties"]["homeState"]
+    assert schema["properties"]["homeState"]["$ref"] == "#/$defs/StateCode"
+    assert "$ref" in schema["properties"]["mailingState"]
+    assert schema["properties"]["mailingState"]["$ref"] == "#/$defs/StateCode"
 
-    # Verify regular fields don't have enum values
-    assert "enum" not in schema["properties"]["city"]
+    # Verify country fields have references to CountryCode
+    assert "$ref" in schema["properties"]["country"]
+    assert schema["properties"]["country"]["$ref"] == "#/$defs/CountryCode"
+    assert "$ref" in schema["properties"]["birthCountry"]
+    assert schema["properties"]["birthCountry"]["$ref"] == "#/$defs/CountryCode"
+    assert "$ref" in schema["properties"]["citizenshipCountry"]
+    assert schema["properties"]["citizenshipCountry"]["$ref"] == "#/$defs/CountryCode"
+
+    # Verify regular fields don't have references
+    assert "$ref" not in schema["properties"]["city"]
+    assert "type" in schema["properties"]["city"]
+    assert schema["properties"]["city"]["type"] == "string"
 
     # Verify explicit enum values override auto-detection
+    assert "$ref" not in schema["properties"]["preferredCountry"]
     assert "enum" in schema["properties"]["preferredCountry"]
     assert schema["properties"]["preferredCountry"]["enum"] == custom_countries
-    assert schema["properties"]["preferredCountry"]["enum"] != CountryCode.list_values()
