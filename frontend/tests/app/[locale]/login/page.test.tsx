@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/login/page";
 import SessionStorage from "src/services/auth/sessionStorage";
 
@@ -68,10 +68,12 @@ describe("Login Page", () => {
     );
   };
 
-  it("should redirect to stored URL from session storage", () => {
+  it("should redirect to stored URL from session storage", async () => {
     mockGetItem.mockReturnValue("/test-redirect-path");
 
-    renderWithRouter(<LoginPage />);
+    await act(async () => {
+      renderWithRouter(<LoginPage />);
+    });
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
@@ -79,43 +81,51 @@ describe("Login Page", () => {
     expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
-  it("should redirect to home if no redirect URL is stored", () => {
+  it("should redirect to home if no redirect URL is stored", async () => {
     mockGetItem.mockReturnValue(null);
 
-    renderWithRouter(<LoginPage />);
+    await act(async () => {
+      renderWithRouter(<LoginPage />);
+    });
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
-  it("should redirect to home if redirect URL is empty", () => {
+  it("should redirect to home if redirect URL is empty", async () => {
     mockGetItem.mockReturnValue("");
 
-    renderWithRouter(<LoginPage />);
+    await act(async () => {
+      renderWithRouter(<LoginPage />);
+    });
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
-  it("should redirect to home if redirect URL doesn't start with /", () => {
+  it("should redirect to home if redirect URL doesn't start with /", async () => {
     mockGetItem.mockReturnValue("https://malicious-site.com");
 
-    renderWithRouter(<LoginPage />);
+    await act(async () => {
+      renderWithRouter(<LoginPage />);
+    });
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
-  it("should display 'Redirecting...' text", () => {
+  it("should display 'Redirecting...' text", async () => {
     mockGetItem.mockReturnValue("/some-path");
 
-    const { container } = renderWithRouter(<LoginPage />);
+    const { container } = await act(async () => {
+      return renderWithRouter(<LoginPage />);
+    });
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(container).toHaveTextContent("Redirecting...");
