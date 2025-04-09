@@ -132,6 +132,11 @@ const nextConfig = {
         destination: "/roadmap",
         permanent: false,
       },
+      {
+        source: "/research",
+        destination: "/vision",
+        permanent: false,
+      },
     ];
   },
 };
