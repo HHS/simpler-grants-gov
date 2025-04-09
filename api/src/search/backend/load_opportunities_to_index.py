@@ -358,9 +358,7 @@ class LoadOpportunitiesToIndex(Task):
                         {
                             "filename": att.file_name,
                             # tika adds extra \n chars before and after content so use .strip()
-                            "data": base64.b64encode(file_data["content"].encode().strip()).decode(
-                                "utf-8"
-                            ),
+                            "data": file_data["content"].strip(),
                         }
                     )
                 else:
@@ -422,7 +420,7 @@ class LoadOpportunitiesToIndex(Task):
                 self.index_name,
                 batch_json_records,
                 "opportunity_id",
-                pipeline="multi-attachment",
+                pipeline=None if self.config.tika_url else "multi-attachment",
                 refresh=refresh,
             )
 
