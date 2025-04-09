@@ -38,21 +38,16 @@ export const useClientFetch = <T>(
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
-    const requestSessionCookie = Cookies.get("session");
-    console.log("*** request session", requestSessionCookie);
+    const sessionExpiration = Cookies.get("session_expiration");
+    console.log("*** request session", sessionExpiration);
+    if (sessionExpiration && parseInt(sessionExpiration) < Date.now()) {
+      console.log("### refresning", !!refreshUser);
+      await refreshUser();
+    }
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();
       return response;
-    }
-    if (!requestSessionCookie) {
-      return response;
-    }
-    // hopefully cookies have been updated at this point?
-    const responseSessionCookie = Cookies.get("session");
-    // user has been logged out
-    if (!responseSessionCookie) {
-      await refreshUser();
     }
     return response;
   };

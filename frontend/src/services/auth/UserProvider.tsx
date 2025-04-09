@@ -3,15 +3,23 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
-import { UserContext } from "src/services/auth/useUser";
+import { UserContext, useUser } from "src/services/auth/useUser";
 import { useClientFetch } from "src/services/fetch/clientFetch";
 import { UserProfile, UserSession } from "src/types/authTypes";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // if we don't debounce this call we get multiple requests going out on page load
+// not using clientFetch since we don't need to check the expiration here
 const debouncedUserFetcher = debounce(
-  (clientFetch) => clientFetch("/api/auth/session", { cache: "no-store" }),
+  async () => {
+    const response = await fetch("/api/auth/session", { cache: "no-store" });
+    if (response.ok && response.status === 200) {
+      const data = (await response.json()) as UserSession;
+      return data;
+    }
+    throw new Error(`Unable to fetch user: ${response.status}`);
+  },
   500,
   {
     leading: true,
@@ -55,7 +63,7 @@ export default function UserProvider({
     try {
       // there was custom logic around 204 responses in the original function
       // TBD if removing that will cause any problems
-      const fetchedUser: UserSession = await debouncedUserFetcher(clientFetch);
+      const fetchedUser: UserSession = await debouncedUserFetcher();
       if (fetchedUser) {
         if (localUser?.token && !fetchedUser.token) {
           setHasBeenLoggedOut(true);

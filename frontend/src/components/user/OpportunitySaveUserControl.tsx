@@ -68,11 +68,11 @@ export const OpportunitySaveUserControl = () => {
       .then((data) => {
         data && setSaved(true);
       })
-      .finally(() => {
-        setLoading(false);
-      })
       .catch((error) => {
         console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [opportunityId, user?.token]);
 
