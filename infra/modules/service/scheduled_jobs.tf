@@ -70,6 +70,10 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
   tracing_configuration {
     enabled = true
   }
+
+  tags = {
+    job = each.key
+  }
 }
 
 resource "aws_cloudwatch_log_group" "scheduled_jobs" {
