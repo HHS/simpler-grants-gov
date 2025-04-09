@@ -1,17 +1,19 @@
+import { use } from "react";
+
 import { Metadata } from "next";
+import {
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import ResearchArchetypes from "src/app/[locale]/research/ResearchArchetypes";
 import ResearchImpact from "src/app/[locale]/research/ResearchImpact";
 import ResearchIntro from "src/app/[locale]/research/ResearchIntro";
 import ResearchMethodology from "src/app/[locale]/research/ResearchMethodology";
 import ResearchThemes from "src/app/[locale]/research/ResearchThemes";
-import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import { LocalizedPageProps } from "src/types/intl";
-
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { use } from "react";
-
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
+import { LocalizedPageProps } from "src/types/intl";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
