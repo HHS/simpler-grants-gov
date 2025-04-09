@@ -5,11 +5,15 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, ApplicationForm
+from src.form_schema.jsonschema_validator import (
+    ValidationErrorDetail,
+    validate_json_schema_for_form,
+)
 
 
 def get_application_form(
     db_session: db.Session, application_id: UUID, app_form_id: UUID
-) -> ApplicationForm:
+) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
     # Check if application exists
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
@@ -29,4 +33,8 @@ def get_application_form(
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
-    return application_form
+    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
+        application_form.application_response, application_form.form
+    )
+
+    return application_form, warnings
