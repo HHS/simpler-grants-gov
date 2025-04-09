@@ -81,7 +81,7 @@ export const messages = {
       forecasted_award_date: "Estimated Award Date",
       forecasted_post_date: "Estimated Post Date",
       forecasted_close_date: "Estimated Application Due Date",
-      forecasted_close_date_description: "Close Date Description",
+      forecasted_close_date_description: "Estimated Due Date Description",
       forecasted_close_date_description_not_available: "Not available",
       forecasted_project_start_date: "Estimated Project Start Date",
       forecasted_last_updated: "Last Updated Date",
