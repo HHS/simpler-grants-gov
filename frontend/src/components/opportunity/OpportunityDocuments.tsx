@@ -2,7 +2,7 @@ import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTy
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-import { Grid, GridContainer, Link, Table } from "@trussworks/react-uswds";
+import { Grid, Link, Table } from "@trussworks/react-uswds";
 
 import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 

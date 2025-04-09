@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";

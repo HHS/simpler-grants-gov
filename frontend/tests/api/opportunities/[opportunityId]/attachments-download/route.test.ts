@@ -12,7 +12,7 @@ const fakeRequestForOpportunity = () => {
 
 const fakeConvertedParams = "43";
 
-const mockGetOpportunityDetails = jest.fn((params: unknown): unknown => ({
+const mockGetOpportunityDetails = jest.fn((): unknown => ({
   data: {
     attachments: [
       {
@@ -42,14 +42,8 @@ const mockGetOpportunityDetails = jest.fn((params: unknown): unknown => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
-  getOpportunityDetails: (params: unknown) => mockGetOpportunityDetails(params),
+  getOpportunityDetails: () => mockGetOpportunityDetails(),
 }));
-
-// jest.mock("next/server", () => ({
-//   NextResponse: jest.fn((params: unknown): unknown => ({
-//     calledWith: params,
-//   })),
-// }));
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
 // is to throw an error
