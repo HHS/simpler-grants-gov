@@ -16,7 +16,7 @@ export default function EventsHero() {
       className="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
     >
       <GridContainer>
-        <Grid row>
+        <Grid row gap={3} className="margin-top-6">
           <Grid
             tablet={{
               col: true,
@@ -36,7 +36,7 @@ export default function EventsHero() {
           >
             <Image
               alt="events-img"
-              className="height-auto position-relative padding-top-2 padding-bottom-4 padding-x-6"
+              className="height-auto position-relative padding-top-2 padding-bottom-4"
               src={EventsHeroImg}
             />
           </Grid>
