@@ -602,3 +602,99 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
     )
 
     assert response.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "application_response,expected_warnings",
+    [
+        # Valid data - no warnings
+        ({"name": "John Doe", "age": 30}, []),
+        # Missing required field
+        ({}, [{"field": "$", "message": "'name' is a required property", "type": "required"}]),
+        # Validation on age field
+        (
+            {"name": "bob", "age": 500},
+            [
+                {
+                    "field": "$.age",
+                    "message": "500 is greater than the maximum of 200",
+                    "type": "maximum",
+                }
+            ],
+        ),
+    ],
+)
+def test_application_form_get_with_validation_warnings(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+    application_response,
+    expected_warnings,
+):
+    """Test that GET application form endpoint includes schema validation warnings"""
+    # Create a form with our test schema
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    # Create application with the form
+    application = ApplicationFactory.create()
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with the test response data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response=application_response,
+    )
+
+    # Make the GET request
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Verify response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["data"]["application_response"] == application_response
+    assert response.json["warnings"] == expected_warnings
+
+
+def test_application_form_get_with_invalid_schema(
+    client,
+    enable_factory_create,
+    db_session,
+    api_auth_token,
+):
+    """Test behavior when form has an invalid JSON schema"""
+    # Create a form with intentionally invalid schema
+    form = FormFactory.create(form_json_schema={"properties": ["bad"]})
+
+    # Create application with the form
+    application = ApplicationFactory.create()
+
+    CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with some data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        form=form,
+        application_response={"name": "Test Name"},
+    )
+
+    # Make the GET request
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Should error
+    assert response.status_code == 500
