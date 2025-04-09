@@ -40,8 +40,8 @@ locals {
     ],
   }
   scheduled_jobs = {
-    fails-on-purpose = { # This is here to help test alerts, remove it when that's not needed.
-      task_command        = ["exit", "explode"]
+    failing-job = { # This is here to help test alerts, remove it when that's not needed.
+      task_command        = ["this-command-will-fail"]
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
     }
