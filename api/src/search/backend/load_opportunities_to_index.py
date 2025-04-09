@@ -356,8 +356,12 @@ class LoadOpportunitiesToIndex(Task):
                     attachments.append(
                         {
                             "filename": att.file_name,
-                            # tika adds extra \n chars before and after content so use .strip()
-                            "data": file_data["content"].strip(),
+                            "attachment": {
+                                # tika adds extra \n chars before and after content so use .strip()
+                                "content": file_data["content"].strip(),
+                                "content_length": file_data["metadata"]["Content-Length"],
+                                "content_type": file_data["metadata"]["Content-Type"],
+                            },
                         }
                     )
                 else:
