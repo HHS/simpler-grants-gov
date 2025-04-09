@@ -177,15 +177,41 @@ def test_state_and_country_fields_auto_detection():
     # Add various state and country fields with different naming patterns
     builder.add_string_property("state", False, True, title="State")
     builder.add_string_property("country", False, True, title="Country")
-    builder.add_string_property("homeState", False, False, title="Home State")
-    builder.add_string_property("mailingState", False, False, title="Mailing State")
-    builder.add_string_property("birthCountry", False, False, title="Birth Country")
-    builder.add_string_property("citizenshipCountry", False, False, title="Citizenship Country")
+    builder.add_string_property(
+        "homeState",
+        False,
+        False,
+        title="Home State",
+        enum=["50 US States, US possessions, territories, military codes"],
+    )
+    builder.add_string_property(
+        "mailingState",
+        False,
+        False,
+        title="Mailing State",
+        enum=["50 US States, US possessions, territories, military codes"],
+    )
+    builder.add_string_property(
+        "birthCountry", False, False, title="Birth Country", enum=["GENC Standard Ed3.0 Update 11"]
+    )
+    builder.add_string_property(
+        "citizenshipCountry",
+        False,
+        False,
+        title="Citizenship Country",
+        enum=["GENC Standard Ed3.0 Update 11"],
+    )
 
-    # Add a regular string field without auto-detection
+    # Add a regular strin   g field without auto-detection
     builder.add_string_property("city", False, True, title="City")
 
-    builder.add_string_property("preferredCountry", False, False, title="Preferred Country")
+    builder.add_string_property(
+        "preferredCountry",
+        False,
+        False,
+        title="Preferred Country",
+        enum=["GENC Standard Ed3.0 Update 11"],
+    )
 
     # Build the schema
     schema = builder.build()
@@ -222,11 +248,11 @@ def test_add_field_to_builder_state_country_references():
         required=True,
         type="Text",
         data_type="AN",
-        list_of_values=None,
         min_value=None,
         max_value=None,
         help_tip="Enter your home state",
         is_nullable=False,
+        list_of_values="50 US States, US possessions, territories, military codes",
     )
 
     country_field = FieldInfo(
@@ -235,11 +261,11 @@ def test_add_field_to_builder_state_country_references():
         required=False,
         type="Text",
         data_type="AN",
-        list_of_values=None,
         min_value=None,
         max_value=None,
         help_tip="Enter your country of birth",
         is_nullable=False,
+        list_of_values="GENC Standard Ed3.0 Update 11",
     )
 
     regular_field = FieldInfo(
