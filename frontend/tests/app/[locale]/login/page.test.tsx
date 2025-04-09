@@ -1,3 +1,9 @@
+import { render } from "@testing-library/react";
+import LoginPage from "src/app/[locale]/login/page";
+import SessionStorage from "src/services/auth/sessionStorage";
+
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 jest.mock("react", () => {
   const actual = jest.requireActual("react");
   return {
@@ -8,11 +14,6 @@ jest.mock("react", () => {
   };
 });
 
-import { render } from "@testing-library/react";
-import LoginPage from "src/app/[locale]/login/page";
-import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import SessionStorage from "src/services/auth/sessionStorage";
-
 const mockPush = jest.fn();
 
 jest.mock("next/navigation", () => ({
@@ -21,11 +22,11 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-const mockGetItem = jest.spyOn(SessionStorage, 'getItem');
-const mockRemoveItem = jest.spyOn(SessionStorage, 'removeItem');
-const mockSetItem = jest.spyOn(SessionStorage, 'setItem');
-const mockClear = jest.spyOn(SessionStorage, 'clear');
-const mockConsoleError = jest.spyOn(console, 'error');
+const mockGetItem = jest.spyOn(SessionStorage, "getItem");
+const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
+const mockSetItem = jest.spyOn(SessionStorage, "setItem");
+const mockClear = jest.spyOn(SessionStorage, "clear");
+const mockConsoleError = jest.spyOn(console, "error");
 
 const createMockRouter = (props = {}) => ({
   back: jest.fn(),
