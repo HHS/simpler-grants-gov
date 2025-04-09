@@ -30,38 +30,19 @@ export async function GET(
         { status: 404 },
       );
     }
-    const zipWriter = new zip.ZipWriterStream();
+    const blobWriter = new zip.BlobWriter();
+    const zipWriter = new zip.ZipWriter(blobWriter);
+    const addPromises = response.data.attachments?.map((attachment) => {
+      return zipWriter.add(
+        attachment.file_name,
+        new zip.HttpReader(attachment.download_path),
+      );
+    });
 
-    const closeWriter = async () => {
-      await zipWriter.close();
-    };
+    await Promise.all([...addPromises, zipWriter.close()]);
 
-    Promise.allSettled(
-      response.data.attachments.map((attachment) => {
-        return new zip.HttpReader(attachment.download_path).readable
-          .pipeTo(zipWriter.writable(attachment.file_name))
-
-          .catch((e: Error) => {
-            const uuid = randomUUID();
-            console.error(
-              "Error fetching file",
-              attachment.download_path,
-              uuid,
-            );
-            throw new Error(`${e.message}, ${uuid}`);
-          });
-      }),
-    )
-      .catch((e) => {
-        console.error("Error while streaming", e);
-      })
-      .finally(() => {
-        closeWriter().catch((e) => {
-          throw e;
-        });
-      });
-
-    return new NextResponse(zipWriter.readable, {
+    const blobData = await blobWriter.getData();
+    return new NextResponse(blobData, {
       status: 200,
       headers: new Headers({
         "Content-Disposition": `attachment; filename="opportunity-${response.data?.opportunity_number || opportunityId}-attachments.zip"`,
