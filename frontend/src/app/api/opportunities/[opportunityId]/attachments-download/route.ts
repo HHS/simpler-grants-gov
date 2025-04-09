@@ -11,17 +11,20 @@ export async function GET(
 ): Promise<Response> {
   const { opportunityId } = await params;
   try {
-    const response = await getOpportunityDetails(opportunityId);
+    const getOpportunity = await getOpportunityDetails(opportunityId);
 
-    if (!response || response.status_code !== 200) {
+    if (!getOpportunity || getOpportunity.status_code !== 200) {
       throw new ApiRequestError(
-        `Error fetching Opportunity: ${response.message}`,
+        `Error fetching Opportunity: ${getOpportunity.message}`,
         "APIRequestError",
-        response.status_code,
+        getOpportunity.status_code,
       );
     }
 
-    if (!response.data.attachments || !response.data.attachments.length) {
+    if (
+      !getOpportunity.data.attachments ||
+      !getOpportunity.data.attachments.length
+    ) {
       return Response.json(
         {
           message: `No files for Opportunity`,
@@ -32,7 +35,7 @@ export async function GET(
     }
     const blobWriter = new zip.BlobWriter();
     const zipWriter = new zip.ZipWriter(blobWriter);
-    const addPromises = response.data.attachments?.map((attachment) => {
+    const addPromises = getOpportunity.data.attachments?.map((attachment) => {
       return zipWriter.add(
         attachment.file_name,
         new zip.HttpReader(attachment.download_path),
@@ -45,7 +48,7 @@ export async function GET(
     return new NextResponse(blobData, {
       status: 200,
       headers: new Headers({
-        "Content-Disposition": `attachment; filename="opportunity-${response.data?.opportunity_number || opportunityId}-attachments.zip"`,
+        "Content-Disposition": `attachment; filename="opportunity-${getOpportunity.data?.opportunity_number || opportunityId}-attachments.zip"`,
       }),
     });
   } catch (e) {
