@@ -1,11 +1,13 @@
-import EventsHeroImg from "public/img/events-hero.jpg";
-import { EVENTS_CRUMBS } from "src/constants/breadcrumbs";
-
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
-
+import EventsHeroImg from "public/img/events-hero.jpg";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { EVENTS_CRUMBS } from "src/constants/breadcrumbs";
+
+import {
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
 export default function EventsHero() {
   const t = useTranslations("Events");
@@ -24,10 +26,10 @@ export default function EventsHero() {
             }}
           >
             <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">
-              {t("page_title")}
+              {t("pageTitle")}
             </h1>
             <p className="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance">
-              {t("page_description")}
+              {t("pageDescription")}
             </p>
           </Grid>
           <Grid

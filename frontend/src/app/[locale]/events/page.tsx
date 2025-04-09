@@ -1,8 +1,11 @@
-import { Metadata } from "next";
-import { LocalizedPageProps } from "src/types/intl";
-
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
+
+import { Metadata } from "next";
+import {
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
+import { LocalizedPageProps } from "src/types/intl";
 
 import EventsCoding from "./EventsCoding";
 import EventsDemo from "./EventsDemo";
@@ -13,7 +16,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Events.page_title"),
+    title: t("Events.pageTitle"),
     description: t("Index.meta_description"),
   };
   return meta;

@@ -11,7 +11,7 @@ const codingChallengeLink =
   "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
 export default function EventsCoding() {
-  const t = useTranslations("Events.coding_challenge");
+  const t = useTranslations("Events.codingChallenge");
 
   return (
     <GridContainer
@@ -26,10 +26,10 @@ export default function EventsCoding() {
         >
           <h2>{t("title")}</h2>
           <p className="font-sans-md line-height-sans-4">
-            {t("description_p1")}
+            {t("descriptionP1")}
           </p>
           <p className="font-sans-md line-height-sans-4">
-            {t("description_p2")}
+            {t("descriptionP2")}
           </p>
           <a
             href={codingChallengeLink}

@@ -45,7 +45,7 @@ export default function EventsDemo() {
               rel="noopener noreferrer"
               className="font-sans-md line-height-sans-4"
             >
-              {t("watch_link")}
+              {t("watchLink")}
             </a>
           </Grid>
         </Grid>

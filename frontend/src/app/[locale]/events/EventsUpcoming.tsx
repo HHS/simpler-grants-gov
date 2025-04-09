@@ -27,7 +27,7 @@ export default function EventsUpcoming() {
           }}
           className="padding-x-6"
         >
-          <span className="font-sans-md">{t("start_date")}</span>
+          <span className="font-sans-md">{t("startDate")}</span>
           <h2>{t("header")}</h2>
           <p className="font-sans-md line-height-sans-4">{t("description")}</p>
           <a
