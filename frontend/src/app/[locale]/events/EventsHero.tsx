@@ -26,7 +26,7 @@ export default function EventsHero() {
             }}
           >
             <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">
-              {t("pageTitle")}
+              {t("header")}
             </h1>
             <p className="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance">
               {t("pageDescription")}

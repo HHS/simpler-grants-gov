@@ -3,6 +3,7 @@ export const messages = {
     pageTitle: "Events | Simpler.Grants.gov",
     pageDescription:
       "From new developments to upcoming opportunities, we want you to be a part of the journey.",
+    header: "Events",
     upcoming: {
       title: "Upcoming Events",
       startDate: "Begins March 10, 2025",
