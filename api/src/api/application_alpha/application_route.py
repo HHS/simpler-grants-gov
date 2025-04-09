@@ -91,12 +91,12 @@ def application_form_get(
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
     with db_session.begin():
-        application_form = get_application_form(db_session, application_id, app_form_id)
+        application_form, warnings = get_application_form(db_session, application_id, app_form_id)
 
-    # Return the application form data
     return response.ApiResponse(
         message="Success",
         data=application_form,
+        warnings=warnings,
     )
 
 
