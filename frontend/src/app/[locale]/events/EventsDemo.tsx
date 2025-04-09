@@ -10,7 +10,7 @@ import {
 const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
 
 export default function EventsDemo() {
-  const t = useTranslations("Events.demo");;
+  const t = useTranslations("Events.demo");
 
   return (
     <GridContainer data-testid="events-demo-content" className="padding-x-4">

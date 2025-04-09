@@ -1,8 +1,6 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import EventsHeroImg from "public/img/events-hero.jpg";
-import Breadcrumbs from "src/components/Breadcrumbs";
-import { EVENTS_CRUMBS } from "src/constants/breadcrumbs";
 
 import {
   Grid,
@@ -17,7 +15,6 @@ export default function EventsHero() {
       data-testid="events-hero"
       className="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
     >
-      <Breadcrumbs breadcrumbList={EVENTS_CRUMBS} />
       <GridContainer>
         <Grid row>
           <Grid
