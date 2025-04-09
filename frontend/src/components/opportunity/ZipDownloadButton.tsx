@@ -14,7 +14,7 @@ const downloadAttachmentsZip = (opportunityId: number) => {
   window.open(path, "_blank");
 };
 
-const ZipDownload = ({ opportunityId }: ZipDownloadProps) => {
+const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
   const t = useTranslations("OpportunityListing.description");
 
   return (
@@ -29,4 +29,4 @@ const ZipDownload = ({ opportunityId }: ZipDownloadProps) => {
   );
 };
 
-export default ZipDownload;
+export default ZipDownloadButton;

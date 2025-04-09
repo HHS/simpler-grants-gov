@@ -21,7 +21,7 @@ export async function GET(
       );
     }
 
-    if (response.data.attachments?.length === 0) {
+    if (!response.data.attachments || !response.data.attachments.length) {
       return Response.json(
         {
           message: `No files for Opportunity`,
@@ -37,7 +37,7 @@ export async function GET(
     };
 
     Promise.allSettled(
-      response.data.attachments?.map((attachment) => {
+      response.data.attachments.map((attachment) => {
         return new zip.HttpReader(attachment.download_path).readable
           .pipeTo(zipWriter.writable(attachment.file_name))
 

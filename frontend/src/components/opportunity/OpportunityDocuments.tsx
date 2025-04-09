@@ -4,7 +4,7 @@ import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { useTranslations } from "next-intl";
 import { Link, Table } from "@trussworks/react-uswds";
 
-import ZipDownload from "src/components/opportunity/ZipDownload";
+import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
@@ -65,7 +65,7 @@ const OpportunityDocuments = ({
       <h2 id="opportunity_documents">{t("title")}</h2>
       {documents.length > 0 ? (
         <>
-          <ZipDownload opportunityId={opportunityId}></ZipDownload>
+          <ZipDownloadButton opportunityId={opportunityId}></ZipDownloadButton>
           <Table className="width-full">
             <DocumentTable
               documents={documents}
