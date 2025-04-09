@@ -58,7 +58,7 @@ const uiSchema: UiSchema = [
 describe("ApplyForm", () => {
   it("renders form correctly", () => {
     render(
-      <ApplyForm formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
+      <ApplyForm applicationId="" rawFormData={{name: "myself"}} formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
     );
 
     const nameLabel = screen.getByText("test name");
@@ -71,6 +71,8 @@ describe("ApplyForm", () => {
     expect(nameField).toHaveAttribute("type", "text");
     expect(nameField).toHaveAttribute("maxLength", "60");
     expect(nameField).toHaveAttribute("name", "name");
+    expect(nameField).toHaveValue("myself");
+
 
     const dobLabel = screen.getByText("Date of birth");
     expect(dobLabel).toBeInTheDocument();
@@ -92,7 +94,7 @@ describe("ApplyForm", () => {
     mockSubmitApplyForm.mockImplementation(() => Promise.resolve());
 
     render(
-      <ApplyForm formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
+      <ApplyForm applicationId="test" rawFormData={{}} formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
     );
 
     const button = screen.getByTestId("apply-form-submit");
@@ -100,9 +102,11 @@ describe("ApplyForm", () => {
 
     expect(mockSubmitApplyForm).toHaveBeenCalledWith(
       {
+        applicationId: "test",
         errorMessage: "",
         formData: new FormData(),
         formId: "test",
+        successMessage: "",
         validationErrors: [],
       },
 
