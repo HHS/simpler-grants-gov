@@ -14,7 +14,7 @@ import { validateFormData } from "./validate";
 type applyFormErrors = {
   errorMessage: string;
   validationErrors: ErrorObject<string, Record<string, unknown>, unknown>[];
-}
+};
 type applyFormResponse = {
   applicationId: string;
   formData: object;
@@ -42,7 +42,7 @@ export async function submitApplyForm(
     };
   } else {
     const applicationFormData =
-    filterFormData<ApplicationResponseDetail>(formData);
+      filterFormData<ApplicationResponseDetail>(formData);
 
     const saveSuccess = await handleSave(
       applicationFormData,
@@ -108,7 +108,7 @@ async function formValidate({
   let formSchema = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
-    if (response.status_code!==200) {
+    if (response.status_code !== 200) {
       console.error(
         `Error retrieving form details for formID (${formId})`,
         response,
@@ -120,10 +120,7 @@ async function formValidate({
     }
     formSchema = response.data;
   } catch (e) {
-    console.error(
-      `Error retrieving form details for formID (${formId})`,
-      e,
-    );
+    console.error(`Error retrieving form details for formID (${formId})`, e);
     return {
       errorMessage: "Error submitting form",
       validationErrors: [],

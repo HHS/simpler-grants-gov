@@ -54,7 +54,7 @@ describe("TextWidget", () => {
   it("renders number input type", async () => {
     const props = {
       ...WidgetProps,
-      schema: { ...WidgetProps.schema, type: "number" as const},
+      schema: { ...WidgetProps.schema, type: "number" as const },
     };
     render(<TextWidget {...props} />);
     const input = await screen.findByTestId("test");
@@ -64,7 +64,7 @@ describe("TextWidget", () => {
   it("renders password input type", async () => {
     const props = {
       ...WidgetProps,
-      schema: { ...WidgetProps.schema, format: "password"},
+      schema: { ...WidgetProps.schema, format: "password" },
     };
     render(<TextWidget {...props} />);
     const input = await screen.findByTestId("test");
@@ -74,7 +74,7 @@ describe("TextWidget", () => {
   it("renders date input type", async () => {
     const props = {
       ...WidgetProps,
-      schema: { ...WidgetProps.schema, format: "date"},
+      schema: { ...WidgetProps.schema, format: "date" },
     };
     render(<TextWidget {...props} />);
     const input = await screen.findByTestId("test");
@@ -120,7 +120,6 @@ describe("TextWidget", () => {
     input.blur();
     expect(mockOnBlur).toHaveBeenCalled();
     expect(mockOnFocus).toHaveBeenCalled();
-
   });
 
   it("handles onChange event", () => {
@@ -132,7 +131,7 @@ describe("TextWidget", () => {
     render(<TextWidget {...props} />);
     const input = screen.getByRole("textbox");
 
-    fireEvent.change(input, { target: { value: '123' } });
+    fireEvent.change(input, { target: { value: "123" } });
     expect(mockOnChange).toHaveBeenCalled();
   });
 });

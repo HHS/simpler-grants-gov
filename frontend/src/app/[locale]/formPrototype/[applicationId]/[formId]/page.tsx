@@ -84,8 +84,9 @@ async function FormPage({ params }: formPageProps) {
 
   const emptyApplicationForm = {
     application_response: {},
-    application_form_id: "",
   };
+  // TODO: this currently calls all forms for an application since we don't
+  // have the app_form_id in the path.
   const applicationForm =
     applicationData.application_forms.length > 0
       ? (applicationData.application_forms.find(
