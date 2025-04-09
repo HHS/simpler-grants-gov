@@ -418,14 +418,16 @@ button.usa-pagination__button.usa-button {
         color: white;
       }
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_less.svg"),
           linear-gradient(transparent, transparent);
         background-color: white;
       }
     }
     button[aria-expanded="false"] {
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_more.svg"),
           linear-gradient(transparent, transparent);
       }
     }

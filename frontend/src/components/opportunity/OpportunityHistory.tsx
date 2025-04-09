@@ -29,8 +29,6 @@ export const OpportunityHistoryItem = ({
   );
 };
 
-
-
 const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
 

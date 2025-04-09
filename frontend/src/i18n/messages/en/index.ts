@@ -86,7 +86,6 @@ export const messages = {
       forecasted_project_start_date: "Estimated Project Start Date",
       forecasted_last_updated: "Last Updated Date",
       fiscal_year: "Fiscal Year",
-      
 
       version: "Version",
     },
