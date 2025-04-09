@@ -25,7 +25,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
         # load agencies into search index
         schema = AgencyV1Schema()
         json_records = [schema.dump(agency) for agency in AGENCIES]
-        json_records[0]["is_active_agency"] = True  # DOA
+        json_records[0]["has_active_opportunity"] = True  # DOA
 
         search_client.bulk_upsert(
             agency_index,
@@ -78,7 +78,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         ],
                     },
                     "filters": {
-                        "active": {"one_of": [True]},
+                        "has_active_opportunity": {"one_of": [True]},
                     },
                 },
                 [DOA],
@@ -93,7 +93,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         ],
                     },
                     "filters": {
-                        "active": {"one_of": [0]},
+                        "has_active_opportunity": {"one_of": [0]},
                     },
                 },
                 [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH],

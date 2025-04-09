@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 # or for text based fields adding ".keyword" to the end to tell
 # the query we want to use the raw value rather than the tokenized one
 # See: https://opensearch.org/docs/latest/field-types/supported-field-types/keyword/
-REQUEST_FIELD_NAME_MAPPING = {
+OPP_REQUEST_FIELD_NAME_MAPPING = {
     "opportunity_number": "opportunity_number.keyword",
     "opportunity_title": "opportunity_title.keyword",
     "post_date": "summary.post_date",
@@ -117,7 +117,12 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     sort_by: list[tuple[str, SortDirection]] = []
 
     for sort_order in pagination.sort_order:
-        sort_by.append((_adjust_field_name(sort_order.order_by), sort_order.sort_direction))
+        sort_by.append(
+            (
+                _adjust_field_name(sort_order.order_by, OPP_REQUEST_FIELD_NAME_MAPPING),
+                sort_order.sort_direction,
+            )
+        )
 
     return sort_by
 
@@ -125,11 +130,23 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     # TODO - we'll likely want to adjust the total number of values returned, especially
     # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
-    builder.aggregation_terms("opportunity_status", _adjust_field_name("opportunity_status"))
-    builder.aggregation_terms("applicant_type", _adjust_field_name("applicant_type"))
-    builder.aggregation_terms("funding_instrument", _adjust_field_name("funding_instrument"))
-    builder.aggregation_terms("funding_category", _adjust_field_name("funding_category"))
-    builder.aggregation_terms("agency", _adjust_field_name("agency_code"), size=1000)
+    builder.aggregation_terms(
+        "opportunity_status",
+        _adjust_field_name("opportunity_status", OPP_REQUEST_FIELD_NAME_MAPPING),
+    )
+    builder.aggregation_terms(
+        "applicant_type", _adjust_field_name("applicant_type", OPP_REQUEST_FIELD_NAME_MAPPING)
+    )
+    builder.aggregation_terms(
+        "funding_instrument",
+        _adjust_field_name("funding_instrument", OPP_REQUEST_FIELD_NAME_MAPPING),
+    )
+    builder.aggregation_terms(
+        "funding_category", _adjust_field_name("funding_category", OPP_REQUEST_FIELD_NAME_MAPPING)
+    )
+    builder.aggregation_terms(
+        "agency", _adjust_field_name("agency_code", OPP_REQUEST_FIELD_NAME_MAPPING), size=1000
+    )
 
 
 def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
@@ -152,7 +169,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
         builder.simple_query(params.query, filter_rule, params.query_operator)
 
     # Filters
-    _add_search_filters(builder, params.filters)
+    _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
     if aggregation:
         # Aggregations / Facet / Filter Counts

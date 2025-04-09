@@ -88,5 +88,5 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         hhs_agency = next(agency for agency in resp.records if agency["agency_name"] == "HHS")
         usda_agency = next(agency for agency in resp.records if agency["agency_name"] == "USDA")
 
-        assert hhs_agency["is_active_agency"]
-        assert not usda_agency["is_active_agency"]
+        assert hhs_agency["has_active_opportunity"]
+        assert not usda_agency["has_active_opportunity"]

@@ -81,7 +81,7 @@ class LoadAgenciesToIndex(Task):
         )
 
         agency_id_stmt = select(active_agency_subquery).distinct()
-        active_agencies = set(self.db_session.execute(agency_id_stmt).unique().scalars().all())
+        active_agencies = set(self.db_session.execute(agency_id_stmt).scalars())
 
         agencies_json = []
         for agency in agencies:
@@ -90,8 +90,7 @@ class LoadAgenciesToIndex(Task):
                 extra={"agency_id": agency.agency_id, "agency_code": agency.agency_code},
             )
             agency_json = SCHEMA.dump(agency)
-            if agency.agency_id in active_agencies:
-                agency_json["is_active_agency"] = True
+            agency_json["has_active_opportunity"] = agency.agency_id in active_agencies
 
             agencies_json.append(agency_json)
 

@@ -23,8 +23,10 @@ class AgencyListRequestSchema(Schema):
 
 
 class AgencySearchFilterV1Schema(Schema):
-    active = fields.Nested(
-        BoolSearchSchemaBuilder("IsActiveFilterV1Schema").with_one_of(example=True).build()
+    has_active_opportunity = fields.Nested(
+        BoolSearchSchemaBuilder("HasActiveOpportunityFilterV1Schema")
+        .with_one_of(example=True)
+        .build()
     )
 
 
@@ -48,7 +50,7 @@ class AgencySearchRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "AgencyPaginationV1Schema",
-            ["agency_code", "agency_name", "created_at"],
+            ["agency_code", "agency_name"],
             default_sort_order=[{"order_by": "agency_code", "sort_direction": "ascending"}],
         ),
         required=True,
@@ -81,23 +83,20 @@ class AgencyV1Schema(Schema):
         metadata={"description": "The internal ID of the agency"},
     )
     agency_name = fields.String(
-        allow_none=False,
         metadata={
             "description": "The name of the agency who created the opportunity",
             "example": "Department of Examples",
         },
     )
     agency_code = fields.String(
-        allow_none=False,
         metadata={"description": "The agency who created the opportunity", "example": "ABC"},
     )
     top_level_agency = fields.Nested(
         lambda: AgencyV1Schema(exclude=("top_level_agency",)), allow_none=True
     )
 
-    is_active_agency = fields.Boolean(
+    has_active_opportunity = fields.Boolean(
         default=False,
-        allow_none=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
             "example": "False",

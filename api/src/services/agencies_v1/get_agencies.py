@@ -32,6 +32,12 @@ logger = logging.getLogger(__name__)
 
 SCHEMA = AgencyV1Schema()
 
+AGENCY_REQUEST_FIELD_NAME_MAPPING = {
+    "agency_name": "agency_name.keyword",
+    "agency_code": "agency_code.keyword",
+    "has_active_opportunity": "has_active_opportunity",
+}
+
 
 class AgencyFilters(BaseModel):
     agency_id: uuid.UUID | None = None
@@ -46,7 +52,7 @@ class AgencyListParams(BaseModel):
 
 
 class AgencySearchFilters(BaseModel):
-    active: BoolSearchFilter | None = None
+    has_active_opportunity: BoolSearchFilter | None = None
 
 
 class AgencySearchParams(BaseModel):
@@ -109,7 +115,12 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     sort_by: list[tuple[str, SortDirection]] = []
 
     for sort_order in pagination.sort_order:
-        sort_by.append((_adjust_field_name(sort_order.order_by), sort_order.sort_direction))
+        sort_by.append(
+            (
+                _adjust_field_name(sort_order.order_by, AGENCY_REQUEST_FIELD_NAME_MAPPING),
+                sort_order.sort_direction,
+            )
+        )
 
     return sort_by
 
@@ -132,7 +143,7 @@ def get_search_request(params: AgencySearchParams) -> dict:
 
     # Filters
     if params.filters:
-        _add_search_filters(builder, params.filters)
+        _add_search_filters(builder, AGENCY_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
     return builder.build()
 
