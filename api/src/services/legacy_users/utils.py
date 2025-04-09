@@ -7,10 +7,6 @@ from src.db.models.staging.user import TuserAccount, TuserAccountMapper
 def get_legacy_user_for_login_gov_id(
     login_gov_id: str, db_session: db.Session
 ) -> TuserAccount | None:
-
-    import pdb
-
-    pdb.set_trace()
     stmt = (
         select(TuserAccount)
         .join(
