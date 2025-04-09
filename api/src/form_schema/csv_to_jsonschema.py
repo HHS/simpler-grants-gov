@@ -115,6 +115,24 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
         logger.info(f"Skipping field {field_id} of type {field_type}")
         return
 
+    # Check if this is a state or country field
+    field_id_lower = field_id.lower()
+
+    # Handle state fields
+    if field_id_lower == "state" or field_id_lower.endswith("state"):
+        builder.add_ref_property(field_id, "#/$defs/StateCode", is_required=required, title=title)
+        return
+
+    # Handle country fields by name
+    if field_id_lower == "country" or field_id_lower.endswith("country"):
+        builder.add_ref_property(field_id, "#/$defs/CountryCode", is_required=required, title=title)
+        return
+
+    # Handle country fields by list_of_values containing GENC Standard
+    if list_of_values and "GENC Standard Ed3.0 Update 11" in list_of_values:
+        builder.add_ref_property(field_id, "#/$defs/CountryCode", is_required=required, title=title)
+        return
+
     # Add appropriate property based on type
     if field_type == "Radio Group" or data_type == "LIST" or list_of_values:
         builder.add_string_property(
