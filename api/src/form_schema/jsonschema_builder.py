@@ -17,26 +17,26 @@ class JsonSchemaBuilder:
         self.required_fields: list[str] = []
 
         self.defs: dict[str, Any] = {}
-        
+
         # Add standard definitions for state and country
         self._add_standard_definitions()
 
-    def _add_standard_definitions(self):
+    def _add_standard_definitions(self) -> None:
         """Add standard definitions for states and countries"""
         # Add state codes definition
         self.defs["StateCode"] = {
             "type": "string",
             "title": "State",
             "description": "US State or Territory Code",
-            "enum": StateCode.list_values()
+            "enum": StateCode.list_values(),
         }
-        
+
         # Add country codes definition
         self.defs["CountryCode"] = {
             "type": "string",
             "title": "Country",
             "description": "Country Code",
-            "enum": CountryCode.list_values()
+            "enum": CountryCode.list_values(),
         }
 
     def add_string_property(
@@ -58,45 +58,45 @@ class JsonSchemaBuilder:
         """
         # Check if this should be a reference to a standard definition
         field_name_lower = field_name.lower()
-        
+
         # If enum is explicitly provided, use that instead of references
         if enum is None:
             # Check for state fields
             if field_name_lower == "state" or field_name_lower.endswith("state"):
                 # Use a reference to the state codes definition
                 ref_property = {"$ref": "#/$defs/StateCode"}
-                
+
                 # Add any additional metadata
                 if title is not None:
                     ref_property["title"] = title
                 if description is not None:
                     ref_property["description"] = description
-                
+
                 self.properties[field_name] = ref_property
-                
+
                 if is_required:
                     self.required_fields.append(field_name)
-                
+
                 return self
-                
+
             # Check for country fields
             elif field_name_lower == "country" or field_name_lower.endswith("country"):
                 # Use a reference to the country codes definition
                 ref_property = {"$ref": "#/$defs/CountryCode"}
-                
+
                 # Add any additional metadata
                 if title is not None:
                     ref_property["title"] = title
                 if description is not None:
                     ref_property["description"] = description
-                
+
                 self.properties[field_name] = ref_property
-                
+
                 if is_required:
                     self.required_fields.append(field_name)
-                
+
                 return self
-        
+
         # If we're here, we're not using a reference, so proceed with normal logic
         str_property: dict = {}
 

@@ -3,7 +3,7 @@ import os
 import pytest
 
 from src.form_schema.csv_to_jsonschema import csv_to_jsonschema
-from src.form_schema.enums import StateCode, CountryCode
+from src.form_schema.enums import CountryCode, StateCode
 from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
 
@@ -198,7 +198,7 @@ def test_state_and_country_fields_auto_detection():
     assert "$defs" in schema
     assert "StateCode" in schema["$defs"]
     assert "CountryCode" in schema["$defs"]
-    
+
     # Verify the definitions have the correct enum values
     assert "enum" in schema["$defs"]["StateCode"]
     assert schema["$defs"]["StateCode"]["enum"] == StateCode.list_values()
