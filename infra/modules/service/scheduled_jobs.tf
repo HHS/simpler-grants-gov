@@ -72,7 +72,8 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
   }
 
   tags = {
-    job = each.key
+    job  = each.key
+    name = "${var.service_name}-${each.key}"
   }
 }
 

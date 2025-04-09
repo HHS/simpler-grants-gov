@@ -132,7 +132,8 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
   }
 
   tags = {
-    job = each.key
+    job  = each.key
+    name = "${var.service_name}-${each.key}"
   }
 }
 
