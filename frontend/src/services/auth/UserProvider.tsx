@@ -3,14 +3,14 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
-import { UserContext, useUser } from "src/services/auth/useUser";
-import { useClientFetch } from "src/services/fetch/clientFetch";
+import { UserContext } from "src/services/auth/useUser";
 import { UserProfile, UserSession } from "src/types/authTypes";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // if we don't debounce this call we get multiple requests going out on page load
 // not using clientFetch since we don't need to check the expiration here
+// and also that'd create a circular dependency chain
 const debouncedUserFetcher = debounce(
   async () => {
     const response = await fetch("/api/auth/session", { cache: "no-store" });
@@ -36,9 +36,6 @@ export default function UserProvider({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userFetchError, setUserFetchError] = useState<Error | undefined>();
   const [hasBeenLoggedOut, setHasBeenLoggedOut] = useState<boolean>(false);
-  const { clientFetch } = useClientFetch<UserSession>(
-    "Unknown error fetching user",
-  );
 
   /*
     not running often enough at this point
@@ -81,9 +78,9 @@ export default function UserProvider({
   }, [localUser?.token]);
 
   // just remove the token
-  const logoutLocalUser = () => {
+  const logoutLocalUser = useCallback(() => {
     setLocalUser({ ...(localUser as UserProfile), token: "" });
-  };
+  }, [localUser]);
 
   // fetch user on hook startup
   useEffect(() => {
@@ -100,7 +97,14 @@ export default function UserProvider({
       hasBeenLoggedOut,
       logoutLocalUser,
     }),
-    [localUser, userFetchError, isLoading, getUserSession, hasBeenLoggedOut],
+    [
+      localUser,
+      userFetchError,
+      isLoading,
+      getUserSession,
+      hasBeenLoggedOut,
+      logoutLocalUser,
+    ],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

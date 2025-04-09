@@ -76,11 +76,13 @@ export function DeleteSavedSearchModal({
 
   const handleSubmit = useCallback(() => {
     setLoading(true);
+    if (!user?.token) {
+      return;
+    }
     clientFetch("/api/user/saved-searches", {
       method: "DELETE",
       body: JSON.stringify({ searchId: savedSearchId }),
     })
-      // deleteSavedSearch(savedSearchId, user?.token)
       .then(() => {
         setUpdated(true);
         // this should trigger a page refresh, which will trigger refetching saved searches,
@@ -94,7 +96,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [user, replaceQueryParams, savedSearchId]);
+  }, [user?.token, replaceQueryParams, savedSearchId]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

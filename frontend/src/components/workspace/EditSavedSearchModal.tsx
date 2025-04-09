@@ -5,7 +5,6 @@ import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { useClientFetch } from "src/services/fetch/clientFetch";
-import { editSavedSearchName } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
@@ -124,6 +123,7 @@ export function EditSavedSearchModal({
       setValidationError(t("emptyNameError"));
       return;
     }
+    if (!user?.token) return;
     setLoading(true);
     clientFetch("/api/user/saved-searches", {
       method: "PUT",
@@ -144,11 +144,12 @@ export function EditSavedSearchModal({
       });
   }, [
     savedSearchName,
-    user,
     t,
+    user?.token,
     validationError,
     replaceQueryParams,
     savedSearchId,
+    clientFetch,
   ]);
 
   const onClose = useCallback(() => {

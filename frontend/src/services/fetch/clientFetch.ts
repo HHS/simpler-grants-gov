@@ -39,9 +39,7 @@ export const useClientFetch = <T>(
     options: RequestInit = {},
   ): Promise<Response> => {
     const sessionExpiration = Cookies.get("session_expiration");
-    console.log("*** request session", sessionExpiration);
     if (sessionExpiration && parseInt(sessionExpiration) < Date.now()) {
-      console.log("### refresning", !!refreshUser);
       await refreshUser();
     }
     const response = await fetch(url, options);
@@ -52,6 +50,10 @@ export const useClientFetch = <T>(
     return response;
   };
 
+  // when this function is used in a useEffect block the linter will want you to add it to the
+  // dependency array. Unfortunately, right now, likely because this hook depends on useUser,
+  // adding this a dependency will cause an infinite re-render loop. We should look into fixing this
+  // but for the moment do not include this in dependency arrays. - DWS
   const clientFetch = async (
     url: string,
     options: RequestInit = {},

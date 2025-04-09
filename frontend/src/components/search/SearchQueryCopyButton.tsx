@@ -8,8 +8,6 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const SNACKBAR_VISIBLE_TIME = 6000;
-
 type SearchQueryCopyButtonProps = {
   copyText: string;
   copyingText: string;

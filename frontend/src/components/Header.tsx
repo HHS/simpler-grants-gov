@@ -228,7 +228,7 @@ const Header = ({ locale }: Props) => {
   // check if the current user is still logged in on every route change
   useRouteChange(() => {
     if (user?.token) {
-      refreshUser();
+      refreshUser().catch(console.error);
     }
   });
 
@@ -236,7 +236,7 @@ const Header = ({ locale }: Props) => {
     if (hasBeenLoggedOut) {
       showSnackbar();
     }
-  }, [hasBeenLoggedOut]);
+  }, [hasBeenLoggedOut, showSnackbar]);
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {

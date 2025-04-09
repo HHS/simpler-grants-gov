@@ -29,7 +29,8 @@ export function ExportSearchResultsButton() {
           csvBlob,
           `grants-search-${getConfiguredDayJs()(new Date()).format("YYYYMMDDHHmm")}.csv`,
         );
-      });
+      })
+      .catch(console.error);
   }, [searchParams]);
 
   return (

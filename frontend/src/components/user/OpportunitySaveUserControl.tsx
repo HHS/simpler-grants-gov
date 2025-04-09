@@ -25,6 +25,7 @@ export const OpportunitySaveUserControl = () => {
   const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
     "Error fetching saved opportunity",
   );
+  console.log("$$$", fetchSaved);
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
   );
@@ -60,9 +61,7 @@ export const OpportunitySaveUserControl = () => {
 
   // fetch user's saved opportunities
   useEffect(() => {
-    console.log("!!! running", opportunityId, user?.token);
     if (!user?.token) return;
-    console.log("!!! fetching");
     setLoading(true);
     fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
       .then((data) => {

@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { useUser } from "src/services/auth/useUser";
 import { useClientFetch } from "src/services/fetch/clientFetch";
-import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
@@ -140,7 +139,15 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [savedSearchName, user, searchParams, t, validationError, onSave]);
+  }, [
+    savedSearchName,
+    user?.token,
+    searchParams,
+    t,
+    validationError,
+    onSave,
+    clientFetch,
+  ]);
 
   const onClose = useCallback(() => {
     setSaved(false);
