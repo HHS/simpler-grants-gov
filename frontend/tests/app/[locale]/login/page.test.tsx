@@ -1,30 +1,31 @@
+jest.mock("react", () => {
+  const actual = jest.requireActual("react");
+  return {
+    ...actual,
+    useEffect: (callback: () => void) => {
+      callback();
+    },
+  };
+});
+
 import { render } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/login/page";
-
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import SessionStorage from "src/services/auth/sessionStorage";
 
 const mockPush = jest.fn();
-const mockGetItem = jest.fn();
-const mockRemoveItem = jest.fn();
-const mockSetItem = jest.fn();
-const mockClear = jest.fn();
 
-jest.doMock("next/navigation", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
 }));
 
-jest.doMock("src/services/auth/sessionStorage", () => ({
-  __esModule: true,
-  default: {
-    getItem: mockGetItem,
-    removeItem: mockRemoveItem,
-    setItem: mockSetItem,
-    clear: mockClear,
-    isSessionStorageAvailable: jest.fn().mockReturnValue(true),
-  },
-}));
+const mockGetItem = jest.spyOn(SessionStorage, 'getItem');
+const mockRemoveItem = jest.spyOn(SessionStorage, 'removeItem');
+const mockSetItem = jest.spyOn(SessionStorage, 'setItem');
+const mockClear = jest.spyOn(SessionStorage, 'clear');
+const mockConsoleError = jest.spyOn(console, 'error');
 
 const createMockRouter = (props = {}) => ({
   back: jest.fn(),
@@ -47,6 +48,7 @@ describe("Login Page", () => {
     Object.defineProperty(global, "window", {
       value: windowMock,
       writable: true,
+      configurable: true,
     });
   });
 
@@ -54,6 +56,7 @@ describe("Login Page", () => {
     Object.defineProperty(global, "window", {
       value: undefined,
       writable: true,
+      configurable: true,
     });
   });
 
@@ -73,6 +76,7 @@ describe("Login Page", () => {
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/test-redirect-path");
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should redirect to home if no redirect URL is stored", () => {
@@ -81,7 +85,9 @@ describe("Login Page", () => {
     renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should redirect to home if redirect URL is empty", () => {
@@ -90,7 +96,9 @@ describe("Login Page", () => {
     renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should redirect to home if redirect URL doesn't start with /", () => {
@@ -99,7 +107,9 @@ describe("Login Page", () => {
     renderWithRouter(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should display 'Redirecting...' text", () => {
@@ -109,5 +119,21 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(container).toHaveTextContent("Redirecting...");
+  });
+
+  it("should log error when window is undefined", () => {
+    // Mock window as undefined
+    Object.defineProperty(global, "window", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    // Directly call the code that checks window
+    const LoginPageModule = require("src/app/[locale]/login/page");
+    LoginPageModule.default({});
+
+    expect(mockConsoleError).toHaveBeenCalledWith("window is undefined");
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });
