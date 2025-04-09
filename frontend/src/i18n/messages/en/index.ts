@@ -1,6 +1,6 @@
 export const messages = {
   Events: {
-    page_title: "Events",
+    page_title: "Events | Simpler.Grants.gov",
     page_description:
       "From new developments to upcoming opportunities, we want you to be a part of the journey.",
     upcoming: {
