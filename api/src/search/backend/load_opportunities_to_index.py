@@ -16,7 +16,6 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 
 import src.adapters.db as db
 import src.adapters.search as search
-import tika
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
@@ -353,7 +352,7 @@ class LoadOpportunitiesToIndex(Task):
                 continue
             with file_util.open_stream(att.file_location, "rb") as file:
                 if self.config.tika_url:
-                    file_data = tika.parser.from_file(file, self.config.tika_url)
+                    file_data = parser.from_file(file, self.config.tika_url)
                     attachments.append(
                         {
                             "filename": att.file_name,
