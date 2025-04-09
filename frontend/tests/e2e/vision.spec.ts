@@ -19,11 +19,12 @@ test("can navigate to wiki in new tab", async ({ page, context }) => {
     .getByRole("link", {
       name: /Read more about the research on our public wiki/i,
     })
-    .getByTestId("button")
     .click();
 
   const newPage = await newTabPromise;
-  await expect(newPage).toHaveURL(/wiki\.simpler\.grants\.gov/g);
+  await expect(newPage).toHaveURL(
+    "https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes",
+  );
 });
 
 test("can navigate to ethnio in new tab", async ({ page, context }) => {
@@ -32,9 +33,8 @@ test("can navigate to ethnio in new tab", async ({ page, context }) => {
     .getByRole("link", {
       name: /Sign up to participate in future user studies/i,
     })
-    .getByTestId("button")
     .click();
 
   const newPage = await newTabPromise;
-  await expect(newPage).toHaveURL(/ethn\.io/g);
+  await expect(newPage).toHaveURL("https://ethn.io/91822");
 });

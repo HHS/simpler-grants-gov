@@ -18,11 +18,19 @@ export default function VisionGetThere() {
         <Grid className="grid-row grid-gap-4">
           <a
             className="padding-bottom-2"
+            target="_blank"
+            rel="noopener noreferrer"
             href="https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes"
           >
             {t("link_text_1")}
           </a>
-          <a href="https://ethn.io/91822">{t("link_text_2")}</a>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://ethn.io/91822"
+          >
+            {t("link_text_2")}
+          </a>
         </Grid>
       </Grid>
     </GridContainer>
