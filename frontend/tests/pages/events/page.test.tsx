@@ -31,7 +31,7 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("Events", () => {
-  it.only("renders intro text", () => {
+  it("renders intro text", () => {
     render(Events({ params: localeParams }));
 
     const content = screen.getByText("pageDescription");
