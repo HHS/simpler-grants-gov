@@ -110,6 +110,7 @@ export const UserControl = () => {
   const router = useRouter();
 
   const logout = useCallback(async (): Promise<void> => {
+    // this isn't using the clientFetch hook because we don't really need all that added functionality here
     await fetch("/api/auth/logout", {
       method: "POST",
     });

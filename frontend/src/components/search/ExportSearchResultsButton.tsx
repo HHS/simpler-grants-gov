@@ -1,6 +1,8 @@
 "use client";
 
-import { downloadSearchResultsCSV } from "src/services/fetch/fetchers/clientSearchResultsDownloadFetcher";
+import { useClientFetch } from "src/services/fetch/clientFetch";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
+import { saveBlobToFile } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -12,12 +14,22 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 export function ExportSearchResultsButton() {
   const t = useTranslations("Search.exportButton");
   const searchParams = useSearchParams();
+  const { clientFetch } = useClientFetch<Response>(
+    "Unsuccessful csv download",
+    false,
+  );
 
   const downloadSearchResults = useCallback(() => {
-    // catch included here to satisfy linter
-    downloadSearchResultsCSV(searchParams).catch((e) => {
-      throw e;
-    });
+    clientFetch(`/api/search/export?${searchParams.toString()}`)
+      .then((response) => {
+        return response.blob();
+      })
+      .then((csvBlob) => {
+        return saveBlobToFile(
+          csvBlob,
+          `grants-search-${getConfiguredDayJs()(new Date()).format("YYYYMMDDHHmm")}.csv`,
+        );
+      });
   }, [searchParams]);
 
   return (

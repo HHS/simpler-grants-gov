@@ -4,14 +4,14 @@
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
 import { UserContext } from "src/services/auth/useUser";
-import { userFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
-import { UserProfile } from "src/types/authTypes";
+import { useClientFetch } from "src/services/fetch/clientFetch";
+import { UserProfile, UserSession } from "src/types/authTypes";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // if we don't debounce this call we get multiple requests going out on page load
 const debouncedUserFetcher = debounce(
-  () => userFetcher("/api/auth/session"),
+  (clientFetch) => clientFetch("/api/auth/session", { cache: "no-store" }),
   500,
   {
     leading: true,
@@ -28,6 +28,9 @@ export default function UserProvider({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userFetchError, setUserFetchError] = useState<Error | undefined>();
   const [hasBeenLoggedOut, setHasBeenLoggedOut] = useState<boolean>(false);
+  const { clientFetch } = useClientFetch<UserSession>(
+    "Unknown error fetching user",
+  );
 
   /*
     not running often enough at this point
@@ -47,13 +50,14 @@ export default function UserProvider({
     */
 
   const getUserSession = useCallback(async (): Promise<void> => {
+    setHasBeenLoggedOut(false);
+    setIsLoading(true);
     try {
-      setHasBeenLoggedOut(false);
-      setIsLoading(true);
-      const fetchedUser = await debouncedUserFetcher();
+      // there was custom logic around 204 responses in the original function
+      // TBD if removing that will cause any problems
+      const fetchedUser: UserSession = await debouncedUserFetcher(clientFetch);
       if (fetchedUser) {
         if (localUser?.token && !fetchedUser.token) {
-          // this is currently showing on manual log out as well, will need to adjust logic
           setHasBeenLoggedOut(true);
         }
         setLocalUser(fetchedUser);
@@ -62,9 +66,9 @@ export default function UserProvider({
         return;
       }
       throw new Error("received empty user session");
-    } catch (error) {
+    } catch (e) {
       setIsLoading(false);
-      setUserFetchError(error as Error);
+      setUserFetchError(e as Error);
     }
   }, [localUser?.token]);
 

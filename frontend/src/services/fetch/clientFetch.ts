@@ -28,11 +28,18 @@ import { useUser } from "src/services/auth/useUser";
   - - - fetch function should be hit, middleware stuff should remove the cookie, fetch function will refresh the user, user refresh logic (tbd) should respond
 
 */
-export const useClientFetch = () => {
+export const useClientFetch = <T>(
+  errorMessage: string,
+  jsonResponse = true,
+) => {
   const { refreshUser } = useUser();
 
-  const clientFetch = async (url: URL, options: RequestInit) => {
+  const fetchWithAuthCheck = async (
+    url: string,
+    options: RequestInit = {},
+  ): Promise<Response> => {
     const requestSessionCookie = Cookies.get("session");
+    console.log("*** request session", requestSessionCookie);
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();
@@ -46,7 +53,23 @@ export const useClientFetch = () => {
     // user has been logged out
     if (!responseSessionCookie) {
       await refreshUser();
-      return response;
+    }
+    return response;
+  };
+
+  const clientFetch = async (
+    url: string,
+    options: RequestInit = {},
+  ): Promise<T> => {
+    const response = await fetchWithAuthCheck(url, options);
+    if (response.ok && response.status === 200) {
+      if (jsonResponse) {
+        const data = (await response.json()) as T;
+        return data;
+      }
+      return response as T;
+    } else {
+      throw new Error(`${errorMessage}: ${response.status}`);
     }
   };
   return {

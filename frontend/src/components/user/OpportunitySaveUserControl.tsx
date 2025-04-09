@@ -2,6 +2,8 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { useClientFetch } from "src/services/fetch/clientFetch";
+import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -20,6 +22,12 @@ export const OpportunitySaveUserControl = () => {
   const modalRef = useRef<ModalRef>(null);
   const params = useParams();
   const opportunityId = String(params.id);
+  const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
+    "Error fetching saved opportunity",
+  );
+  const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
+    "Error updating saved opportunity",
+  );
 
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
@@ -36,16 +44,11 @@ export const OpportunitySaveUserControl = () => {
 
     const method = saved ? "DELETE" : "POST";
     try {
-      const res = await fetch("/api/user/saved-opportunities", {
+      const data = await updateSaved("/api/user/saved-opportunities", {
         method,
         body: JSON.stringify({ opportunityId }),
       });
-      if (res.ok && res.status === 200) {
-        const data = (await res.json()) as { type: string };
-        data.type === "save" ? setSaved(true) : setSaved(false);
-      } else {
-        setSavedError(true);
-      }
+      data.type === "save" ? setSaved(true) : setSaved(false);
     } catch (error) {
       setSavedError(true);
       console.error(error);
@@ -55,11 +58,13 @@ export const OpportunitySaveUserControl = () => {
     }
   };
 
+  // fetch user's saved opportunities
   useEffect(() => {
+    console.log("!!! running", opportunityId, user?.token);
     if (!user?.token) return;
+    console.log("!!! fetching");
     setLoading(true);
-    fetch(`/api/user/saved-opportunities/${opportunityId}`)
-      .then((res) => (res.ok && res.status === 200 ? res.json() : null))
+    fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
       .then((data) => {
         data && setSaved(true);
       })
@@ -69,7 +74,7 @@ export const OpportunitySaveUserControl = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, [opportunityId, user]);
+  }, [opportunityId, user?.token]);
 
   const messageText = saved
     ? savedError
