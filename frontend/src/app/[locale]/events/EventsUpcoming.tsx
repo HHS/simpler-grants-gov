@@ -1,10 +1,15 @@
 import { useTranslations } from "next-intl";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+
+import {
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
+
+const signUpLink =
+  "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform";
 
 export default function EventsUpcoming() {
   const t = useTranslations("Events.upcoming");
-  const signUpLink =
-    "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform";
 
   return (
     <GridContainer data-testid="events-upcoming-content" className="padding-4">

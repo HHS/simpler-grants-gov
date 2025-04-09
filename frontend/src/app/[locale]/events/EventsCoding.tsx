@@ -1,13 +1,17 @@
-import EventsCollabImg from "public/img/events-collab.jpg";
-
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import EventsCollabImg from "public/img/events-collab.jpg";
+
+import {
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
+
+const codingChallengeLink =
+  "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
 export default function EventsCoding() {
   const t = useTranslations("Events.coding_challenge");
-  const codingChallengeLink =
-    "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge";
 
   return (
     <GridContainer

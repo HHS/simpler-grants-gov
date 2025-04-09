@@ -1,12 +1,16 @@
-import EventsDemoImg from "public/img/events-demo.png";
-
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import EventsDemoImg from "public/img/events-demo.png";
+
+import {
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
+
+const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
 
 export default function EventsDemo() {
-  const t = useTranslations("Events.demo");
-  const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy";
+  const t = useTranslations("Events.demo");;
 
   return (
     <GridContainer data-testid="events-demo-content" className="padding-x-4">
