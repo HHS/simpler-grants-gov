@@ -1,11 +1,8 @@
-import { use } from "react";
-
 import { Metadata } from "next";
-import {
-  getTranslations,
-  setRequestLocale,
-} from "next-intl/server";
 import { LocalizedPageProps } from "src/types/intl";
+
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { use } from "react";
 
 import EventsCoding from "./EventsCoding";
 import EventsDemo from "./EventsDemo";

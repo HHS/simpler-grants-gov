@@ -1,11 +1,8 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import EventsHeroImg from "public/img/events-hero.jpg";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 export default function EventsHero() {
   const t = useTranslations("Events");

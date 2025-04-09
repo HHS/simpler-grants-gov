@@ -1,7 +1,4 @@
-import {
-  Breadcrumb,
-  BreadcrumbList,
-} from "src/components/Breadcrumbs";
+import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
 
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };

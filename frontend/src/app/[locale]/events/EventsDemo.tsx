@@ -1,13 +1,10 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import EventsDemoImg from "public/img/events-demo.png";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy"
+const demoLink = "https://vimeo.com/1050177794/278fa78e0b?share=copy";
 
 export default function EventsDemo() {
   const t = useTranslations("Events.demo");
