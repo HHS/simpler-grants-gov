@@ -13,6 +13,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import noload, selectinload
 from sqlalchemy.sql import Select
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from tika import parser
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -28,7 +29,6 @@ from src.task.task import Task
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
-from tika import parser
 
 logger = logging.getLogger(__name__)
 
