@@ -4,6 +4,7 @@ import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useRouteChange } from "src/hooks/useRouteChange";
+import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
@@ -221,6 +222,8 @@ const Header = ({ locale }: Props) => {
     useState<boolean>(false);
 
   const { refreshUser, user, hasBeenLoggedOut } = useUser();
+  const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
+    useSnackbar();
 
   // check if the current user is still logged in on every route change
   useRouteChange(() => {
@@ -231,7 +234,7 @@ const Header = ({ locale }: Props) => {
 
   useEffect(() => {
     if (hasBeenLoggedOut) {
-      console.log("&&& show toast");
+      showSnackbar();
     }
   }, [hasBeenLoggedOut]);
 
@@ -312,6 +315,9 @@ const Header = ({ locale }: Props) => {
           />
         </div>
       </USWDSHeader>
+      <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
+        {t("tokenExpired")}
+      </Snackbar>
     </>
   );
 };

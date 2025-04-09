@@ -39,9 +39,9 @@ const SearchQueryCopyButton = ({
         type="button"
         unstyled
         onClick={() => {
-          copyToClipboard(url, SNACKBAR_VISIBLE_TIME)
+          copyToClipboard(url)
             .then(() => {
-              showSnackbar(SNACKBAR_VISIBLE_TIME);
+              showSnackbar();
             })
             .catch((error) => {
               console.error(error);
