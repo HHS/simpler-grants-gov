@@ -1,3 +1,4 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Events from "src/app/[locale]/events/page";
@@ -6,12 +7,6 @@ import {
   mockMessages,
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
-
-import {
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
