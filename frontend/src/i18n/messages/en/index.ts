@@ -346,10 +346,9 @@ export const messages = {
     },
     page_not_found: {
       page_title: "Page Not Found | Simpler.Grants.gov",
-      title: "Oops! Page Not Found",
-      message_content_1:
-        "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
-      visit_homepage_button: "Return Home",
+      title: "Oops, we can't find that page.",
+      message_content_1: "It may have been moved or no longer exists.",
+      visit_homepage_button: "Visit our homepage",
     },
   },
   Header: {
