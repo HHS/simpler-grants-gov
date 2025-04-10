@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { redirect } from "next/navigation";

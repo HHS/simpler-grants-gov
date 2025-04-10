@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import QueryProvider from "src/services/search/QueryProvider";
 import { render, screen } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
