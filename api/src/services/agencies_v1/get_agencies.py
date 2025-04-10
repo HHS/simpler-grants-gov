@@ -25,8 +25,8 @@ class AgencyFilters(BaseModel):
 
 class AgencyListParams(BaseModel):
     pagination: PaginationParams
-
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
+    query: str | None = None
 
 
 def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:

@@ -1104,6 +1104,8 @@ class AgencyFactory(BaseFactory):
     class Meta:
         model = agency_models.Agency
 
+    agency_id = Generators.UuidObj
+
     agency_name = factory.Faker("agency_name")
 
     agency_code = factory.Iterator(CustomProvider.AGENCIES)
