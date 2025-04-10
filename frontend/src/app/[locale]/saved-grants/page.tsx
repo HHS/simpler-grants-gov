@@ -11,6 +11,9 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const SavedOpportunitiesList = ({
   opportunities,
 }: {

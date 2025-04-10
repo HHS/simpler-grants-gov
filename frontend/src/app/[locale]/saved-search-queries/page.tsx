@@ -15,6 +15,9 @@ import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const NoSavedSearches = ({
   noSavedCTA,
   searchButtonText,
