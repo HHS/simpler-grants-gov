@@ -301,22 +301,6 @@ i.e.
 }
 
 // Events
-.events-hero {
-  .events-hero--container {
-    padding-top: 65px;
-  }
-}
-
-.usa-breadcrumb {
-  background-color: inherit;
-  color: inherit;
-}
-
-.usa-breadcrumb__link {
-  &:visited {
-    color: inherit;
-  }
-}
 
 #main-content:has(div:last-child.bg-base-lightest) + footer.usa-footer {
   background-color: color($theme-color-base-lightest);
