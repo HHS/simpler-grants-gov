@@ -66,10 +66,27 @@ examples = {
     "example1": {
         "summary": "No filters",
         "value": {
+            "query": "USAID",
             "pagination": {
                 "sort_order": [
                     {
-                        "order_by": "created_at",
+                        "order_by": "agency_name",
+                        "sort_direction": "descending",
+                    }
+                ],
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    },
+    "example2": {
+        "summary": "Filter by active agency",
+        "value": {
+            "filters": {"has_active_opportunity": {"one_of": ["False"]}},
+            "pagination": {
+                "sort_order": [
+                    {
+                        "order_by": "agency_name",
                         "sort_direction": "descending",
                     }
                 ],
@@ -88,9 +105,6 @@ examples = {
     examples=examples,
 )
 @agency_blueprint.output(agency_schema.AgencySearchResponseV1Schema)
-@agency_blueprint.doc(
-    responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
-)
 @agency_blueprint.auth_required(api_key_auth)
 @flask_opensearch.with_search_client()
 def agency_search(
