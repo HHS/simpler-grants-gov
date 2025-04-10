@@ -1,0 +1,277 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Events renders Events page unchanged 1`] = `
+<div>
+  <div
+    class="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
+    data-testid="events-hero"
+  >
+    <div
+      class="grid-container padding-top-1 tablet:padding-top-3 desktop-lg:padding-top-4"
+      data-testid="breadcrumb"
+    >
+      <nav
+        aria-label="Breadcrumbs"
+        class="usa-breadcrumb"
+      >
+        <ol
+          class="usa-breadcrumb__list"
+          itemscope=""
+          itemtype="https://schema.org/BreadcrumbList"
+        >
+          <li
+            class="usa-breadcrumb__list-item"
+            itemprop="itemListElement"
+            itemscope=""
+            itemtype="https://schema.org/ListItem"
+          >
+            <a
+              class="usa-breadcrumb__link"
+              href="/"
+              itemid="/"
+              itemprop="item"
+              itemscope=""
+              itemtype="https://schema.org/WebPage"
+            >
+              <span
+                itemprop="name"
+              >
+                Home
+              </span>
+            </a>
+            <meta
+              content="1"
+              itemprop="position"
+            />
+          </li>
+          <li
+            aria-current="page"
+            class="usa-breadcrumb__list-item usa-current"
+            itemprop="itemListElement"
+            itemscope=""
+            itemtype="https://schema.org/ListItem"
+          >
+            <span
+              itemprop="name"
+            >
+              About: Events & news
+            </span>
+            <meta
+              content="2"
+              itemprop="position"
+            />
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <div
+      class="grid-container"
+      data-testid="gridContainer"
+    >
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <h1
+            class="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance"
+          >
+            page_title
+          </h1>
+          <p
+            class="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance"
+          >
+            page_description
+          </p>
+        </div>
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <img
+            alt="events-img"
+            class="height-auto position-relative padding-top-2 padding-bottom-4 padding-x-6"
+            data-nimg="1"
+            decoding="async"
+            height="40"
+            loading="lazy"
+            src="/_next/image?url=%2Fimg.jpg&w=96&q=75"
+            srcset="/_next/image?url=%2Fimg.jpg&w=48&q=75 1x, /_next/image?url=%2Fimg.jpg&w=96&q=75 2x"
+            style="color: transparent;"
+            width="40"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="grid-container padding-4"
+    data-testid="events-upcoming-content"
+  >
+    <div
+      class="grid-row grid-gap-md"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-3"
+        data-testid="grid"
+      >
+        <h1
+          class="margin-left-6"
+        >
+          title
+        </h1>
+      </div>
+      <div
+        class="tablet:grid-col-9 padding-x-6"
+        data-testid="grid"
+      >
+        <span
+          class="font-sans-md"
+        >
+          start_date
+        </span>
+        <h2>
+          header
+        </h2>
+        <p
+          class="font-sans-md line-height-sans-4"
+        >
+          description
+        </p>
+        <a
+          class="font-sans-md"
+          href="https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          link
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-base-lightest"
+  >
+    <div
+      class="grid-container padding-x-4"
+      data-testid="events-demo-content"
+    >
+      <div
+        class="grid-row grid-gap-md padding-6"
+        data-testid="grid"
+      >
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <img
+            alt="events-img"
+            class="height-auto position-relative padding-right-6 padding-top-3"
+            data-nimg="1"
+            decoding="async"
+            height="40"
+            loading="lazy"
+            src="/_next/image?url=%2Fimg.jpg&w=96&q=75"
+            srcset="/_next/image?url=%2Fimg.jpg&w=48&q=75 1x, /_next/image?url=%2Fimg.jpg&w=96&q=75 2x"
+            style="color: transparent;"
+            width="40"
+          />
+        </div>
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <div
+            class=""
+            data-testid="grid"
+          >
+            <h2>
+              title
+            </h2>
+          </div>
+          <div
+            class=""
+            data-testid="grid"
+          >
+            <p
+              class="font-sans-md line-height-sans-4"
+            >
+              description
+            </p>
+            <h3
+              class="padding-top-2"
+            >
+              watch
+            </h3>
+            <a
+              class="font-sans-md line-height-sans-4"
+              href="https://vimeo.com/1050177794/278fa78e0b?share=copy"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              watch_link
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="grid-container padding-x-4 bg-base-lightest"
+      data-testid="events-coding-content"
+    >
+      <div
+        class="grid-row grid-gap-6 padding-6"
+        data-testid="grid"
+      >
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <h2>
+            title
+          </h2>
+          <p
+            class="font-sans-md line-height-sans-4"
+          >
+            description_p1
+          </p>
+          <p
+            class="font-sans-md line-height-sans-4"
+          >
+            description_p2
+          </p>
+          <a
+            class="font-sans-md line-height-sans-4"
+            href="https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            link
+          </a>
+        </div>
+        <div
+          class="tablet:grid-col"
+          data-testid="grid"
+        >
+          <img
+            alt="events-img"
+            class="height-auto position-relative padding-y-3 padding-left-6"
+            data-nimg="1"
+            decoding="async"
+            height="40"
+            loading="lazy"
+            src="/_next/image?url=%2Fimg.jpg&w=96&q=75"
+            srcset="/_next/image?url=%2Fimg.jpg&w=48&q=75 1x, /_next/image?url=%2Fimg.jpg&w=96&q=75 2x"
+            style="color: transparent;"
+            width="40"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
