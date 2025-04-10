@@ -1940,6 +1940,7 @@ class TuserAccountFactory(BaseFactory):
         abstract = True
 
     user_account_id = factory.Sequence(lambda n: n)
+    user_id = Generators.UuidObj
     full_name = factory.Faker("name")
     email_address = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
@@ -1961,7 +1962,7 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
     @classmethod
     def _setup_next_sequence(cls):
         if _db_session is not None:
-            value = _db_session.query(func.max(foreign.user.TuserAccount.user_id)).scalar()
+            value = _db_session.query(func.max(foreign.user.TuserAccount.user_account_id)).scalar()
             if value is not None:
                 return value + 1
         return 1
@@ -1977,6 +1978,57 @@ class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
             full_name=None,
             email_address=None,
         )
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.TuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class TuserAccountMapperFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    ext_user_id = Generators.UuidObj
+    ext_issuer = factory.Faker("word")
+    last_auth_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    source_type = "GOV"
+    is_deleted = factory.Faker("boolean")
+
+
+class StagingTuserAccountMapperFactory(TuserAccountMapperFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserAccountMapper
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(staging.user.TuserAccountMapper.user_account_id)
+            ).scalar()
+
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class ForeignTuserAccountMapperFactory(TuserAccountMapperFactory):
+    class Meta:
+        model = foreign.user.TuserAccountMapper
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(foreign.user.TuserAccountMapper.user_account_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+        return 1
 
 
 ##
