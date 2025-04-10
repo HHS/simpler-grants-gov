@@ -103,10 +103,10 @@ export const messages = {
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
     goal: {
       paragraph_1:
-        "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
+        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
       title_2: "Grant seekers & applicants",
       paragraph_2:
-        "We’re improving the way you search for and discover relevant opportunities, making it easier to access the funding you need.",
+        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
       title_3: "Federal grantmaking agencies",
       paragraph_3:
         "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
