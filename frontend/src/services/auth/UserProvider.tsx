@@ -1,31 +1,12 @@
 "use client";
 
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
-import debounce from "lodash/debounce";
 import noop from "lodash/noop";
 import { UserContext } from "src/services/auth/useUser";
+import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { UserProfile, UserSession } from "src/types/authTypes";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-
-// if we don't debounce this call we get multiple requests going out on page load
-// not using clientFetch since we don't need to check the expiration here
-// and also that'd create a circular dependency chain
-const debouncedUserFetcher = debounce(
-  async () => {
-    const response = await fetch("/api/auth/session", { cache: "no-store" });
-    if (response.ok && response.status === 200) {
-      const data = (await response.json()) as UserSession;
-      return data;
-    }
-    throw new Error(`Unable to fetch user: ${response.status}`);
-  },
-  500,
-  {
-    leading: true,
-    trailing: false,
-  },
-);
 
 export default function UserProvider({
   children,

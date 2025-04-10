@@ -7,7 +7,7 @@ import {
   CLIENT_JWT_ENCRYPTION_ALGORITHM,
   decrypt,
   encrypt,
-  tokenExpirationDate,
+  newExpirationDate,
 } from "src/services/auth/sessionUtils";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
@@ -59,7 +59,7 @@ export const createSession = async (token: string) => {
   if (!clientJwtKey) {
     initializeSessionSecrets();
   }
-  const expiresAt = tokenExpirationDate();
+  const expiresAt = newExpirationDate();
   const session = await encrypt(token, expiresAt, clientJwtKey);
   const cookie = await cookies();
   cookie.set("session", session, {

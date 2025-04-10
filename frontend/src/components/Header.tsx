@@ -3,7 +3,6 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useRouteChange } from "src/hooks/useRouteChange";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
@@ -23,6 +22,7 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
@@ -36,17 +36,6 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-// this is isolated in its own component because next was adamant that anything using
-// useSearchParams needs to be wrapped in a suspense boundary
-const RouteChangeWatcher = () => {
-  const { refreshIfExpired } = useUser();
-  // check if the current user is still logged in on every route change
-  useRouteChange(async () => {
-    return await refreshIfExpired();
-  });
-  return <></>;
-};
 
 const NavLink = ({
   href = "",
