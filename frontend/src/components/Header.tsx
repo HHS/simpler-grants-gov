@@ -227,7 +227,7 @@ const Header = ({ locale }: Props) => {
 
   useEffect(() => {
     if (hasBeenLoggedOut) {
-      showSnackbar();
+      showSnackbar(-1);
       resetHasBeenLoggedOut();
     }
   }, [hasBeenLoggedOut, showSnackbar, resetHasBeenLoggedOut]);

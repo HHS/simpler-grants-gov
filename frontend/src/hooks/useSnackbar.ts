@@ -9,9 +9,11 @@ export const useSnackbar = () => {
 
   const showSnackbar = useCallback((visibleTime = SNACKBAR_VISIBLE_TIME) => {
     setSnackbarIsVisible(true);
-    setTimeout(() => {
-      setSnackbarIsVisible(false);
-    }, visibleTime);
+    if (visibleTime > 0) {
+      setTimeout(() => {
+        setSnackbarIsVisible(false);
+      }, visibleTime);
+    }
   }, []);
 
   const hideSnackbar = () => {
