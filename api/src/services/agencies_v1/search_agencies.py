@@ -27,7 +27,6 @@ SCHEMA = AgencyV1Schema()
 AGENCY_REQUEST_FIELD_NAME_MAPPING = {
     "agency_name": "agency_name.keyword",
     "agency_code": "agency_code.keyword",
-    "has_active_opportunity": "has_active_opportunity",
 }
 
 
