@@ -44,7 +44,7 @@ These must be added to this Google Drive folder by midnight EST on March 31st 20
 
 [Optional Submission Template Link](https://docs.google.com/presentation/d/1F60a_gwmgKEhOpGoZXYx2T22bi0Mn11-O8KIyXSHBrI/edit?usp=sharing)
 
-Looking for examples? Check out the [submissions](fall-2024-coding-challenge/event-submissions-and-winners.md) from our 24 hour Fall 2024 Collaborative Code & Design Challenge
+Looking for examples? Check out the [submissions](../fall-2024-coding-challenge/event-submissions-and-winners.md) from our 24 hour Fall 2024 Collaborative Code & Design Challenge
 
 
 
@@ -147,7 +147,7 @@ Our events foster a collaborative, creative community for all participants and g
 **API**
 
 * Built with Flask (Python), containerized with Docker.
-* API Setup: [API Development Guide](../../../api/development.md)
+* API Setup: [API Development Guide](../../../../api/development.md)
 * API Endpoints (Swagger): [API Docs](http://api-dev-1839587515.us-east-1.elb.amazonaws.com/docs)
 
 **Need an API Key?** Reach out to us [directly](mailto:opensource@grants.gov).
