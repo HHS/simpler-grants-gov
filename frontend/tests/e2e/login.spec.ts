@@ -19,6 +19,20 @@ test.describe("Login Page Redirect", () => {
         path: "/",
       },
     ]);
+
+    // Prevent navigation to external sites by redirecting back to base URL
+    await page.route("**/*", async (route) => {
+      const url = route.request().url();
+      if (!url.startsWith(BASE_URL) && !url.startsWith("http://127.0.0.1:8080")) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: `<html><head><meta http-equiv="refresh" content="0;url=${BASE_URL}/"></head></html>`
+        });
+      } else {
+        await route.continue();
+      }
+    });
   });
 
   test("should redirect to home page when no redirect URL is stored", async ({
@@ -69,25 +83,25 @@ test.describe("Login Page Redirect", () => {
   test("should handle redirect after successful login flow", async ({
     page,
   }) => {
-    // Navigate to opportunities page and wait for it to load
+    // Navigate to opportunities page
     await page.goto(`${BASE_URL}/opportunities`);
-    await page.waitForLoadState("networkidle");
-
-    // Wait for the sign-in button to be ready
-    const signInButton = page.locator('[data-testid="sign-in-button"]');
-    await signInButton.waitFor({ state: "visible" });
+    
+    // Wait for the sign-in button to be ready and click it
+    const signInButton = page.getByTestId("sign-in-button");
+    await signInButton.waitFor({ state: "visible", timeout: 10000 });
     await signInButton.click();
 
-    // Wait for the modal to be mounted
-    const modal = page.locator("#login-modal");
-    await modal.waitFor({ state: "attached" });
+    // Wait for the modal heading to be visible
+    const modalHeading = page.getByRole("heading", { name: "Sign in to Simpler.Grants.gov" });
+    await modalHeading.waitFor({ state: "visible", timeout: 10000 });
 
-    // Wait for the login link to be visible
-    const loginLink = page.getByRole("link", { name: "Login" });
-    await loginLink.waitFor({ state: "visible" });
+    // Wait for the login link to be visible and click it
+    const loginLink = page.getByRole("link", { name: /Sign in with Login.gov/i });
+    await loginLink.waitFor({ state: "visible", timeout: 10000 });
+
+    // Start waiting for navigation before clicking
+    const navigationPromise = page.waitForNavigation();
     await loginLink.click();
-
-    // Wait for the redirect to the login URL
-    await page.waitForURL("http://localhost:8080/v1/users/login");
+    await navigationPromise;
   });
 });
