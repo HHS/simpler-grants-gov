@@ -3,13 +3,10 @@ import VisionGetThere from "src/app/[locale]/vision/VisionGetThere";
 import VisionGoals from "src/app/[locale]/vision/VisionGoals";
 import VisionIntro from "src/app/[locale]/vision/VisionIntro";
 import VisionMission from "src/app/[locale]/vision/VisionMission";
-import { VISION_CRUMBS } from "src/constants/breadcrumbs";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
-
-import Breadcrumbs from "src/components/Breadcrumbs";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -27,7 +24,6 @@ export default function Vision({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbList={VISION_CRUMBS} />
       <VisionIntro />
       <VisionMission />
       <VisionGoals />
