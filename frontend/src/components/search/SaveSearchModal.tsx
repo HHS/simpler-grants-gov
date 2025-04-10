@@ -1,6 +1,6 @@
 import clsx from "clsx";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
-import { useClientFetch } from "src/services/fetch/clientFetch";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";

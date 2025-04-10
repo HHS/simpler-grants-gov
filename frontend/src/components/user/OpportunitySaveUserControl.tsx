@@ -1,8 +1,8 @@
 "use client";
 
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
-import { useClientFetch } from "src/services/fetch/clientFetch";
 import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";

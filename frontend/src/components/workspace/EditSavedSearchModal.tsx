@@ -1,10 +1,10 @@
 "use client";
 
 import clsx from "clsx";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
-import { useClientFetch } from "src/services/fetch/clientFetch";
 
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";

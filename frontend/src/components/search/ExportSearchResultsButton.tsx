@@ -1,6 +1,6 @@
 "use client";
 
-import { useClientFetch } from "src/services/fetch/clientFetch";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { saveBlobToFile } from "src/utils/generalUtils";
 
