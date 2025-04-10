@@ -263,7 +263,7 @@ class OpportunityV1Schema(Schema):
     agency_name = fields.String(
         allow_none=True,
         metadata={
-            "description": "The name of the agency who created the oppportunity",
+            "description": "The name of the agency who created the opportunity",
             "example": "Department of Examples",
         },
     )
