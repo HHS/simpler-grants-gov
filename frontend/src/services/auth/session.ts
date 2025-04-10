@@ -7,7 +7,6 @@ import {
   CLIENT_JWT_ENCRYPTION_ALGORITHM,
   decrypt,
   encrypt,
-  expirationCookieExpirationDate,
   tokenExpirationDate,
 } from "src/services/auth/sessionUtils";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
@@ -61,20 +60,12 @@ export const createSession = async (token: string) => {
     initializeSessionSecrets();
   }
   const expiresAt = tokenExpirationDate();
-  const expirationExpirestAt = expirationCookieExpirationDate();
   const session = await encrypt(token, expiresAt, clientJwtKey);
   const cookie = await cookies();
   cookie.set("session", session, {
     httpOnly: true,
     secure: environment.ENVIRONMENT === "prod",
     expires: expiresAt,
-    sameSite: "lax",
-    path: "/",
-  });
-  cookie.set("session_expiration", expiresAt.getTime().toString(), {
-    httpOnly: false,
-    secure: environment.ENVIRONMENT === "prod",
-    expires: expirationExpirestAt,
     sameSite: "lax",
     path: "/",
   });
@@ -99,7 +90,9 @@ export const getSession = async (): Promise<UserSession | null> => {
     ? {
         ...session,
         token,
-        exp,
+        // expiration timestamp in the token is in seconds, in order to compare using
+        // JS date functions it should be in ms
+        expiresAt: exp ? exp * 1000 : undefined,
       }
     : null;
 };

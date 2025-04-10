@@ -13,10 +13,6 @@ export const tokenExpirationDate = () => new Date(Date.now() + 60 * 1000);
 // export const tokenExpirationDate = () =>
 //   new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-// 1 day to give us time to check the last expiration time even after token expiration
-export const expirationCookieExpirationDate = () =>
-  new Date(Date.now() + 24 * 60 * 60 * 1000);
-
 // extracts payload object from jwt string using passed encrytion key and algo
 export const decrypt = async (
   jwt = "",

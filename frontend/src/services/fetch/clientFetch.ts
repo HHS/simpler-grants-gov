@@ -1,5 +1,6 @@
-import Cookies from "js-cookie";
 import { useUser } from "src/services/auth/useUser";
+
+import { useCallback } from "react";
 
 /*
   problem with just looking at 401 codes there is that the request we're looking at may not itself require authentication, so a 200 response may be fine there but we still want to react
@@ -32,16 +33,13 @@ export const useClientFetch = <T>(
   errorMessage: string,
   jsonResponse = true,
 ) => {
-  const { refreshUser } = useUser();
+  const { refreshIfExpired, refreshUser } = useUser();
 
   const fetchWithAuthCheck = async (
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
-    const sessionExpiration = Cookies.get("session_expiration");
-    if (sessionExpiration && parseInt(sessionExpiration) < Date.now()) {
-      await refreshUser();
-    }
+    await refreshIfExpired();
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();
@@ -54,21 +52,21 @@ export const useClientFetch = <T>(
   // dependency array. Unfortunately, right now, likely because this hook depends on useUser,
   // adding this a dependency will cause an infinite re-render loop. We should look into fixing this
   // but for the moment do not include this in dependency arrays. - DWS
-  const clientFetch = async (
-    url: string,
-    options: RequestInit = {},
-  ): Promise<T> => {
-    const response = await fetchWithAuthCheck(url, options);
-    if (response.ok && response.status === 200) {
-      if (jsonResponse) {
-        const data = (await response.json()) as T;
-        return data;
+  const clientFetch = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<T> => {
+      const response = await fetchWithAuthCheck(url, options);
+      if (response.ok && response.status === 200) {
+        if (jsonResponse) {
+          const data = (await response.json()) as T;
+          return data;
+        }
+        return response as T;
+      } else {
+        throw new Error(`${errorMessage}: ${response.status}`);
       }
-      return response as T;
-    } else {
-      throw new Error(`${errorMessage}: ${response.status}`);
-    }
-  };
+    },
+    [],
+  );
   return {
     clientFetch,
   };

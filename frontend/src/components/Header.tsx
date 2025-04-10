@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
   Menu,
@@ -36,6 +36,17 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+// this is isolated in its own component because next was adamant that anything using
+// useSearchParams needs to be wrapped in a suspense boundary
+const RouteChangeWatcher = () => {
+  const { refreshIfExpired } = useUser();
+  // check if the current user is still logged in on every route change
+  useRouteChange(async () => {
+    return await refreshIfExpired();
+  });
+  return <></>;
+};
 
 const NavLink = ({
   href = "",
@@ -221,22 +232,16 @@ const Header = ({ locale }: Props) => {
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
 
-  const { refreshUser, user, hasBeenLoggedOut } = useUser();
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
   const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
     useSnackbar();
-
-  // check if the current user is still logged in on every route change
-  useRouteChange(() => {
-    if (user?.token) {
-      refreshUser().catch(console.error);
-    }
-  });
 
   useEffect(() => {
     if (hasBeenLoggedOut) {
       showSnackbar();
+      resetHasBeenLoggedOut();
     }
-  }, [hasBeenLoggedOut, showSnackbar]);
+  }, [hasBeenLoggedOut, showSnackbar, resetHasBeenLoggedOut]);
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -263,6 +268,9 @@ const Header = ({ locale }: Props) => {
 
   return (
     <>
+      <Suspense>
+        <RouteChangeWatcher />
+      </Suspense>
       <div
         className={clsx({
           "usa-overlay": true,

@@ -25,7 +25,7 @@ export const OpportunitySaveUserControl = () => {
   const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
     "Error fetching saved opportunity",
   );
-  console.log("$$$", fetchSaved);
+
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
   );
