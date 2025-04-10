@@ -2,7 +2,11 @@ import os
 
 import pytest
 
-from src.form_schema.csv_to_jsonschema import add_field_to_builder, csv_to_jsonschema
+from src.form_schema.csv_to_jsonschema import (
+    _add_standard_definitions,
+    add_field_to_builder,
+    csv_to_jsonschema,
+)
 from src.form_schema.enums import CountryCode, StateCode
 from src.form_schema.field_info import FieldInfo
 from src.form_schema.jsonschema_builder import JsonSchemaBuilder
@@ -174,6 +178,8 @@ def test_state_and_country_fields_auto_detection():
     # Create a builder
     builder = JsonSchemaBuilder(title="Test Schema")
 
+    _add_standard_definitions(builder)
+
     # Add various state and country fields with different naming patterns
     builder.add_string_property("state", False, True, title="State")
     builder.add_string_property("country", False, True, title="Country")
@@ -240,6 +246,8 @@ def test_add_field_to_builder_state_country_references():
     """
     # Create a builder
     builder = JsonSchemaBuilder(title="Test Fields")
+
+    _add_standard_definitions(builder)
 
     # Create test field info objects
     state_field = FieldInfo(

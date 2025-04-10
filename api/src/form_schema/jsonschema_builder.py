@@ -1,8 +1,6 @@
 from enum import StrEnum
 from typing import Any, Self
 
-from src.form_schema.enums import CountryCode, StateCode
-
 
 class JsonSchemaBuilder:
     """Builder class for constructing a JsonSchema object"""
@@ -17,27 +15,6 @@ class JsonSchemaBuilder:
         self.required_fields: list[str] = []
 
         self.defs: dict[str, Any] = {}
-
-        # Add standard definitions for state and country
-        self._add_standard_definitions()
-
-    def _add_standard_definitions(self) -> None:
-        """Add standard definitions for states and countries"""
-        # Add state codes definition
-        self.defs["StateCode"] = {
-            "type": "string",
-            "title": "State",
-            "description": "US State or Territory Code",
-            "enum": StateCode.list_values(),
-        }
-
-        # Add country codes definition
-        self.defs["CountryCode"] = {
-            "type": "string",
-            "title": "Country",
-            "description": "Country Code",
-            "enum": CountryCode.list_values(),
-        }
 
     def add_string_property(
         self,
