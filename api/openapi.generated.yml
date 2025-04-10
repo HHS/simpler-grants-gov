@@ -1396,7 +1396,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    IsActiveFilterV1:
+    HasActiveOpportunityFilterV1:
       type: object
       properties:
         one_of:
@@ -1409,10 +1409,10 @@ components:
     AgencySearchFilterV1:
       type: object
       properties:
-        active:
+        has_active_opportunity:
           type:
           - object
-          $ref: '#/components/schemas/IsActiveFilterV1'
+          $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
     SortOrderAgencyPaginationV11:
       type: object
       properties:
@@ -1421,7 +1421,6 @@ components:
           enum:
           - agency_code
           - agency_name
-          - created_at
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
@@ -1514,7 +1513,7 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyV1'
           - type: 'null'
-        is_active_agency:
+        has_active_opportunity:
           type: boolean
           description: Indicates if the agency is linked to an opportunity that is
             currently active.
