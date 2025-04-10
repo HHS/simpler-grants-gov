@@ -72,7 +72,6 @@ def _build_competitions(db_session: db.Session) -> None:
         competition = factories.CompetitionFactory.create(
             competition_id=static_competition_id, competition_forms=[]
         )
-        #
         factories.CompetitionFormFactory.create(competition=competition)
         big_form = factories.FormFactory.create(form_json_schema=JSON_SCHEMA_FORM, form_name=FORM_NAME, form_ui_schema=UI_SCHEMA)
         factories.CompetitionFormFactory.create(competition=competition, form=big_form)
