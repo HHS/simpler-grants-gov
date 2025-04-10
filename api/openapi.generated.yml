@@ -169,7 +169,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgencySearchResponseV1'
-            application/octet-stream: {}
           description: Successful response
         '422':
           content:
@@ -195,9 +194,23 @@ paths:
               example1:
                 summary: No filters
                 value:
+                  query: USAID
                   pagination:
                     sort_order:
-                    - order_by: created_at
+                    - order_by: agency_name
+                      sort_direction: descending
+                    page_offset: 1
+                    page_size: 25
+              example2:
+                summary: Filter by active agency
+                value:
+                  filters:
+                    has_active_opportunity:
+                      one_of:
+                      - 'False'
+                  pagination:
+                    sort_order:
+                    - order_by: agency_name
                       sort_direction: descending
                     page_offset: 1
                     page_size: 25
