@@ -9,7 +9,8 @@ from src.adapters.search import flask_opensearch
 from src.api.agencies_v1.agency_blueprint import agency_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.agencies_v1.get_agencies import AgencyListParams, get_agencies, search_agencies
+from src.services.agencies_v1.get_agencies import AgencyListParams, get_agencies
+from src.services.agencies_v1.search_agencies import search_agencies
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,25 @@ def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiR
 
     # Serialize results
     return response.ApiResponse(message="Success", data=results, pagination_info=pagination_info)
+
+
+examples = {
+    "example1": {
+        "summary": "No filters",
+        "value": {
+            "pagination": {
+                "sort_order": [
+                    {
+                        "order_by": "created_at",
+                        "sort_direction": "descending",
+                    }
+                ],
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    },
+}
 
 
 @agency_blueprint.post("/agencies/search")
