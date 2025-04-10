@@ -17,7 +17,7 @@ GrantFinder is a tool built onto the existing Simpler.Grants.gov which makes the
 
 </details>
 
-## 2nd Place
+## 2nd Place - $1000
 
 <details>
 
@@ -33,7 +33,7 @@ GrantMatch AI+ is an AI-powered platform designed to streamline the process of d
 
 </details>
 
-## 3rd Place
+## 3rd Place - $500
 
 <details>
 
