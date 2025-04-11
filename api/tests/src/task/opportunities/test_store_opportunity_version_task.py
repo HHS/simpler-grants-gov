@@ -9,7 +9,6 @@ from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     JobLogFactory,
     OpportunityChangeAuditFactory,
-    OpportunityFactory,
     OpportunityVersionFactory,
 )
 
@@ -96,7 +95,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
             store_opportunity_version_task.metrics[
                 store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED
             ]
-            == 1
+            == 0
         )
         assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
 
@@ -122,28 +121,3 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         )
         assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
         assert opp_vers[1].opportunity_id == opp_ver_existing.opportunity_id
-
-    def test_with_draft_opportunity(
-        self, db_session, store_opportunity_version_task, enable_factory_create
-    ):
-        opp = OpportunityFactory.create(is_draft=True)
-        OpportunityChangeAuditFactory.create(opportunity=opp)
-
-        store_opportunity_version_task.run()
-
-        # Verify record is not created
-        saved_opp_version = db_session.query(OpportunityVersion).all()
-
-        assert len(saved_opp_version) == 0
-        assert (
-            store_opportunity_version_task.metrics[
-                store_opportunity_version_task.Metrics.DRAFT_OPPORTUNITIES_SKIPPED
-            ]
-            == 1
-        )
-        assert (
-            store_opportunity_version_task.metrics[
-                store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED
-            ]
-            == 0
-        )

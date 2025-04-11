@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 SCHEMA = OpportunityV1Schema()
 
 
-def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> None:
+def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> bool:
     """
     Saves a new version of an Opportunity record in the OpportunityVersion table if there are changes and the opportunity is not in draft status.
 
@@ -23,8 +23,11 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
 
     :param  db_session: The active SQLAlchemy session used to interact with the database.
     :param opportunity: An instance of the Opportunity model containing the data to be saved.
-    :return: This function does not return a value. It saves a new version of the opportunity in the database.
+    :return: This function returns a boolean indicating whether the opportunity was successfully saved.
     """
+
+    if opportunity.is_draft:
+        return
 
     # Fetch latest opportunity version stored
     latest_opp_version = db_session.execute(
@@ -50,3 +53,7 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
         )
 
         db_session.add(opportunity_version)
+
+        return True
+
+    return False

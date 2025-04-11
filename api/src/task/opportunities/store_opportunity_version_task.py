@@ -17,9 +17,12 @@ logger = logging.getLogger(__name__)
 class StoreOpportunityVersionTask(Task):
     class Metrics(StrEnum):
         OPPORTUNITIES_VERSIONED = "opportunities_versioned"
-        DRAFT_OPPORTUNITIES_SKIPPED = "draft_opportunities_skipped"
 
     def run_task(self) -> None:
+        with self.db_session.begin():
+            self.process_opportunity_versions()
+
+    def process_opportunity_versions(self) -> None:
         logger.info("Fetching opportunities to version")
         # Get latest job that run
         latest_job = self.db_session.scalars(
@@ -40,19 +43,12 @@ class StoreOpportunityVersionTask(Task):
 
         for opp_change_audit in opportunity_change_audits:
             log_extra = {
-                "opportunity_id": opp_change_audit.opportunity.opportunity_id,
+                "opportunity_id": opp_change_audit.opportunity_id,
             }
             logger.info("Preparing opportunity for versioning", extra=log_extra)
-            opportunity = opp_change_audit.opportunity
-            if opportunity.is_draft:
-                logger.info(
-                    "Skipping versioning of opportunity as it is draft",
-                    extra=log_extra,
-                )
-                self.increment(self.Metrics.DRAFT_OPPORTUNITIES_SKIPPED)
-                continue
 
             # Store to OpportunityVersion table
-            save_opportunity_version(self.db_session, opportunity)
+            saved = save_opportunity_version(self.db_session, opp_change_audit.opportunity)
 
-            self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
+            if saved:
+                self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
