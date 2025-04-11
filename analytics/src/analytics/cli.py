@@ -4,6 +4,7 @@
 
 import logging
 import logging.config
+import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +24,7 @@ from analytics.integrations.extracts.load_opportunity_data import (
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
+from analytics.newrelic import init_newrelic
 
 logger = logging.getLogger(__name__)
 init_logging(__package__)
@@ -40,7 +42,11 @@ EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to ea
 # fmt: on
 
 # instantiate the main CLI entrypoint
-app = typer.Typer()
+# Disable pretty exceptions by default as non-locally
+# we don't want the formatting/locals in New Relic
+app = typer.Typer(
+    pretty_exceptions_enable=os.getenv("ENABLE_PRETTY_EXCEPTIONS", "0") == "1",
+)
 # instantiate sub-commands for exporting data and calculating metrics
 export_app = typer.Typer()
 import_app = typer.Typer()
@@ -55,6 +61,8 @@ def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
     init_app(logging.root)
+    # Initialize New Relic
+    init_newrelic()
 
 
 @app.callback()
@@ -70,6 +78,7 @@ def callback() -> None:
 
 
 @export_app.command(name="gh_delivery_data")
+@ecs_background_task("gh_delivery_data")
 def export_github_data(
     config_file: Annotated[str, CONFIG_FILE_ARG],
     output_file: Annotated[str, OUTPUT_FILE_ARG],
@@ -101,6 +110,7 @@ def export_github_data(
 
 
 @import_app.command(name="test_connection")
+@ecs_background_task("test_connection")
 def test_connection() -> None:
     """Test function that ensures the DB connection works."""
     client = PostgresDbClient()
@@ -137,6 +147,7 @@ def migrate_database() -> None:
 
 
 @etl_app.command(name="transform_and_load")
+@ecs_background_task("transform_and_load")
 def transform_and_load(
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
@@ -164,6 +175,7 @@ def transform_and_load(
 
 
 @etl_app.command(name="extract_transform_and_load")
+@ecs_background_task("extract_transform_and_load")
 def extract_transform_and_load(
     config_file: Annotated[str, CONFIG_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
@@ -226,6 +238,7 @@ def validate_effective_date(effective_date: str) -> str | None:
 
 
 @etl_app.command(name="opportunity-load")
+@ecs_background_task("opportunity-load")
 def load_opportunity_data() -> None:
     """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()
