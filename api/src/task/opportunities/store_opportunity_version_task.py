@@ -48,7 +48,5 @@ class StoreOpportunityVersionTask(Task):
             logger.info("Preparing opportunity for versioning", extra=log_extra)
 
             # Store to OpportunityVersion table
-            saved = save_opportunity_version(self.db_session, opp_change_audit.opportunity)
-
-            if saved:
+            if save_opportunity_version(self.db_session, opp_change_audit.opportunity):
                 self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
