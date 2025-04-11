@@ -170,7 +170,7 @@ module "service" {
   } : null
 
   enable_load_balancer     = false
-  readonly_root_filesystem = false
+  readonly_root_filesystem = true
 
   extra_environment_variables = merge(
     {
