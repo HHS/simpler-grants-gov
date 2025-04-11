@@ -208,7 +208,7 @@ const wrapSection = (
     </FieldsetWidget>
   );
 };
-
+// filter and retrieve data from the FormData object
 export const filterFormData = <T extends object>(formData: FormData): T => {
   return Object.fromEntries(
     Array.from(formData.keys())
