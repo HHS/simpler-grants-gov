@@ -4,11 +4,11 @@ import { render, screen } from "@testing-library/react";
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
-const mockSubmitApplyForm = jest.fn();
+const mockHandleFormAction = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
-  submitApplyForm: (...args: unknown[]): unknown =>
-    mockSubmitApplyForm(...args),
+  handleFormAction: (...args: unknown[]): unknown =>
+    mockHandleFormAction(...args),
 }));
 
 const formSchema: RJSFSchema = {
@@ -96,7 +96,7 @@ describe("ApplyForm", () => {
   });
 
   it("calls submitApplyForm action on submit", () => {
-    mockSubmitApplyForm.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
       <ApplyForm
@@ -111,7 +111,7 @@ describe("ApplyForm", () => {
     const button = screen.getByTestId("apply-form-submit");
     button.click();
 
-    expect(mockSubmitApplyForm).toHaveBeenCalledWith(
+    expect(mockHandleFormAction).toHaveBeenCalledWith(
       {
         applicationId: "test",
         errorMessage: "",

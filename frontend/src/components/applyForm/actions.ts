@@ -22,7 +22,7 @@ type applyFormResponse = {
   successMessage: string;
 };
 
-export async function submitApplyForm(
+export async function handleFormAction(
   _prevState: applyFormResponse & applyFormErrors,
   formData: FormData,
 ) {
