@@ -17,7 +17,6 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
     ],
     staging = [
       "poetry",
@@ -28,7 +27,6 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
     ],
     prod = [
       "poetry",
@@ -39,7 +37,6 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
     ],
   }
   scheduled_jobs = {
