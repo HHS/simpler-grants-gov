@@ -11,7 +11,7 @@ const formatHistoryDate = (date: string | null) => {
   return date === null ? "--" : formatDate(date);
 };
 
-const OpportunityHistoryItem = ({
+export const OpportunityHistoryItem = ({
   title,
   content,
 }: {
@@ -31,6 +31,7 @@ const OpportunityHistoryItem = ({
 
 const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
+
   return (
     <div className="usa-prose margin-top-4">
       <h3>{t("history")}</h3>
