@@ -1,5 +1,4 @@
 import logging
-import math
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -7,12 +6,7 @@ from pydantic import BaseModel, Field
 import src.adapters.search as search
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
-from src.pagination.pagination_models import (
-    PaginationInfo,
-    PaginationParams,
-    SortDirection,
-    SortOrder,
-)
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
     BoolSearchFilter,
@@ -204,16 +198,7 @@ def search_opportunities(
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
     response = _search_opportunities(search_client, search_params)
 
-    pagination_info = PaginationInfo(
-        page_offset=search_params.pagination.page_offset,
-        page_size=search_params.pagination.page_size,
-        total_records=response.total_records,
-        total_pages=int(math.ceil(response.total_records / search_params.pagination.page_size)),
-        sort_order=[
-            SortOrder(order_by=p.order_by, sort_direction=p.sort_direction)
-            for p in search_params.pagination.sort_order
-        ],
-    )
+    pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)
 
     # While the data returned is already JSON/dicts like we want to return
     # APIFlask will try to run whatever we return through the deserializers
