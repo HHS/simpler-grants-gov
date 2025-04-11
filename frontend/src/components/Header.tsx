@@ -96,7 +96,15 @@ const NavLinks = ({
           { text: t("roadmap"), href: "/roadmap" },
         ]
       },
-      { text: t("research"), href: "/research" },
+      {
+        text: "Community",
+        children: [
+          { text: t("subscribe"), href: "/subscribe" },
+          { text: t("events"), href: "/events" },
+          { text: t("wiki"), href: "https://wiki.simpler.grants.gov/" },
+          { text: t("discussion"), href: "https://simplergrants.discourse.group/" },
+        ]
+      },
       { text: t("subscribe"), href: "/subscribe" },
     ];
     if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {

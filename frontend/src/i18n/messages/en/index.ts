@@ -383,6 +383,8 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      discussion: "Discussion forum",
+      events: "Events",
       home: "Home",
       login: "Sign in",
       logout: "Sign out",
@@ -394,6 +396,7 @@ export const messages = {
       search: "Search",
       subscribe: "Subscribe",
       vision: "Our Vision",
+      wiki: "Public wiki",
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",
