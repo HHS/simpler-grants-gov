@@ -4,11 +4,11 @@ import { render, screen } from "@testing-library/react";
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
-const mockSubmitApplyForm = jest.fn();
+const mockHandleFormAction = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
-  submitApplyForm: (...args: unknown[]): unknown =>
-    mockSubmitApplyForm(...args),
+  handleFormAction: (...args: unknown[]): unknown =>
+    mockHandleFormAction(...args),
 }));
 
 const formSchema: RJSFSchema = {
@@ -58,7 +58,13 @@ const uiSchema: UiSchema = [
 describe("ApplyForm", () => {
   it("renders form correctly", () => {
     render(
-      <ApplyForm formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
+      <ApplyForm
+        applicationId=""
+        rawFormData={{ name: "myself" }}
+        formSchema={formSchema}
+        uiSchema={uiSchema}
+        formId="test"
+      />,
     );
 
     const nameLabel = screen.getByText("test name");
@@ -71,6 +77,7 @@ describe("ApplyForm", () => {
     expect(nameField).toHaveAttribute("type", "text");
     expect(nameField).toHaveAttribute("maxLength", "60");
     expect(nameField).toHaveAttribute("name", "name");
+    expect(nameField).toHaveValue("myself");
 
     const dobLabel = screen.getByText("Date of birth");
     expect(dobLabel).toBeInTheDocument();
@@ -89,20 +96,28 @@ describe("ApplyForm", () => {
   });
 
   it("calls submitApplyForm action on submit", () => {
-    mockSubmitApplyForm.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
-      <ApplyForm formSchema={formSchema} uiSchema={uiSchema} formId="test" />,
+      <ApplyForm
+        applicationId="test"
+        rawFormData={{}}
+        formSchema={formSchema}
+        uiSchema={uiSchema}
+        formId="test"
+      />,
     );
 
     const button = screen.getByTestId("apply-form-submit");
     button.click();
 
-    expect(mockSubmitApplyForm).toHaveBeenCalledWith(
+    expect(mockHandleFormAction).toHaveBeenCalledWith(
       {
+        applicationId: "test",
         errorMessage: "",
         formData: new FormData(),
         formId: "test",
+        successMessage: "",
         validationErrors: [],
       },
 
