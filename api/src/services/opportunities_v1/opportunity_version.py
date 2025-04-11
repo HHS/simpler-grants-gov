@@ -26,9 +26,6 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     :return: This function does not return a value. It saves a new version of the opportunity in the database.
     """
 
-    if opportunity.is_draft:
-        return
-
     # Fetch latest opportunity version stored
     latest_opp_version = db_session.execute(
         select(OpportunityVersion)
