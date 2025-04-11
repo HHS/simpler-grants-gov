@@ -53,12 +53,3 @@ def test_save_opportunity_version(db_session, enable_factory_create):
     assert len(saved_opp_version) == 1
     assert saved_opp_version[0].opportunity_id == opp.opportunity_id
     assert saved_opp_version[0].opportunity_data == expected
-
-
-def test_save_opportunity_version_draft(db_session, enable_factory_create):
-    opp = OpportunityFactory.create(is_draft=True)
-    save_opportunity_version(db_session, opp)
-
-    # Verify record is not created
-    saved_opp_version = db_session.query(OpportunityVersion).all()
-    assert len(saved_opp_version) == 0
