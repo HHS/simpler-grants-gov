@@ -1,8 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { noop } from "lodash";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { identity, noop } from "lodash";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SaveSearchModal } from "src/components/search/SaveSearchModal";
+
+const fakeSearchParams = new URLSearchParams();
 
 const mockUseUser = jest.fn(() => ({
   user: {
@@ -10,24 +12,35 @@ const mockUseUser = jest.fn(() => ({
   },
 }));
 
-const mockSaveSearch = jest.fn();
+const clientFetchMock = jest.fn();
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
 }));
-jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
-  saveSearch: (...args: unknown[]) => mockSaveSearch(...args) as unknown,
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
 }));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
+jest.mock("src/utils/search/searchFormatUtils", () => ({
+  filterSearchParams: identity,
+}));
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => fakeSearchParams,
+}));
+
 jest.useFakeTimers();
 
 describe("SaveSearchModal", () => {
   afterEach(() => {
-    mockSaveSearch.mockReset();
+    clientFetchMock.mockReset();
     jest.clearAllTimers();
   });
   it("displays a working modal toggle button", async () => {
@@ -75,11 +88,13 @@ describe("SaveSearchModal", () => {
     expect(validationError).toBeInTheDocument();
   });
   it("displays an API error if API returns an error", async () => {
-    mockSaveSearch.mockRejectedValue(new Error());
+    clientFetchMock.mockRejectedValue(new Error());
     const { rerender } = render(<SaveSearchModal onSave={noop} />);
 
     const toggle = await screen.findByTestId("open-save-search-modal-button");
-    toggle.click();
+    act(() => {
+      toggle.click();
+    });
 
     rerender(<SaveSearchModal onSave={noop} />);
 
@@ -90,14 +105,13 @@ describe("SaveSearchModal", () => {
 
     rerender(<SaveSearchModal onSave={noop} />);
 
-    // this isn't translated... update after entering real text
     const error = await screen.findByText("apiError");
 
     expect(error).toBeInTheDocument();
   });
 
   it("displays a success message on successful save", async () => {
-    mockSaveSearch.mockResolvedValue({ id: "123" });
+    clientFetchMock.mockResolvedValue({ id: "123" });
     const { rerender } = render(<SaveSearchModal onSave={noop} />);
 
     const toggle = await screen.findByTestId("open-save-search-modal-button");

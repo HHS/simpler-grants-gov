@@ -20,6 +20,11 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
+jest.mock("src/hooks/useRouteChange", () => ({
+  // eslint-disable-next-line
+  useRouteChange: () => {},
+}));
+
 describe("LoginButtonModal", () => {
   it("renders", () => {
     render(<LoginButtonModal navLoginLinkText="Sign in" />);

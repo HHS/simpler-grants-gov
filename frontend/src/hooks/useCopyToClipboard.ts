@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const COPY_STATE_RESET_DURATION = 6000;
+
 export const useCopyToClipboard = () => {
   const [copied, setCopied] = useState(false);
   const [copying, setCopying] = useState(false);
@@ -32,7 +34,10 @@ export const useCopyToClipboard = () => {
     }
   };
 
-  const copyToClipboard = async (content: string, contentTime: number) => {
+  const copyToClipboard = async (
+    content: string,
+    contentTime = COPY_STATE_RESET_DURATION,
+  ) => {
     try {
       setCopying(true);
       await copyWithFallback(content);

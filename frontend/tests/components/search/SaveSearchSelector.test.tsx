@@ -8,7 +8,7 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 import { SaveSearchSelector } from "src/components/search/SaveSearchSelector";
 
 const mockUseUser = jest.fn();
-const mockObtainSavedSearches = jest.fn();
+const clientFetchMock = jest.fn();
 const fakeSavedSearchRecord = {
   name: "saved search name",
   saved_search_id: "an id",
@@ -32,8 +32,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
-  obtainSavedSearches: () => mockObtainSavedSearches() as unknown,
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
 }));
 
 describe("SaveSearchSelector", () => {
@@ -45,7 +47,7 @@ describe("SaveSearchSelector", () => {
     jest.resetAllMocks();
   });
   it("does not render a select if no saved searches exist", () => {
-    mockObtainSavedSearches.mockResolvedValue([]);
+    clientFetchMock.mockResolvedValue([]);
     render(
       <SaveSearchSelector
         newSavedSearches={[]}
@@ -57,7 +59,7 @@ describe("SaveSearchSelector", () => {
     expect(screen.queryByTestId("Select")).not.toBeInTheDocument();
   });
   it("renders an alert on error fetching saved searches", async () => {
-    mockObtainSavedSearches.mockRejectedValue(new Error("o no"));
+    clientFetchMock.mockRejectedValue(new Error("o no"));
     render(
       <SaveSearchSelector
         newSavedSearches={[]}
@@ -74,7 +76,7 @@ describe("SaveSearchSelector", () => {
   // this is totally synthetic - in real life we'd allow the selector to update the parent state, and then reconsume it
   // I had a test passing that did this more elegantly, but got bored trying to get the typing to work - DWS
   it("renders a select if saved searches exist (prop drilling)", async () => {
-    mockObtainSavedSearches.mockResolvedValue([fakeSavedSearchRecord]);
+    clientFetchMock.mockResolvedValue([fakeSavedSearchRecord]);
     const { rerender } = render(
       <SaveSearchSelector
         newSavedSearches={[]}
@@ -95,7 +97,7 @@ describe("SaveSearchSelector", () => {
   });
 
   it("renders default option and option for each saved search", async () => {
-    mockObtainSavedSearches.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
+    clientFetchMock.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
     render(
       <SaveSearchSelector
         newSavedSearches={[]}
@@ -112,7 +114,7 @@ describe("SaveSearchSelector", () => {
   });
 
   it("selects new saved search option when present", async () => {
-    mockObtainSavedSearches.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
+    clientFetchMock.mockResolvedValue([]); // since we're prop drilling the searches this doesn't matter here
     render(
       <SaveSearchSelector
         newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
@@ -125,7 +127,7 @@ describe("SaveSearchSelector", () => {
     expect((options[1] as HTMLOptionElement).selected).toEqual(true);
   });
   it("selects correct saved search on select", async () => {
-    mockObtainSavedSearches.mockResolvedValue([]);
+    clientFetchMock.mockResolvedValue([]);
     render(
       <SaveSearchSelector
         newSavedSearches={[fakeSavedSearchRecord.saved_search_id]}
@@ -144,7 +146,7 @@ describe("SaveSearchSelector", () => {
   });
   it("fetches saved searches at initial render, login, and new saved search", () => {
     mockUseUser.mockReturnValue({ user: { token: "first token" } });
-    mockObtainSavedSearches.mockResolvedValue([fakeSavedSearchRecord]);
+    clientFetchMock.mockResolvedValue([fakeSavedSearchRecord]);
     const { rerender } = render(
       <SaveSearchSelector
         newSavedSearches={[]}
@@ -153,7 +155,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(mockObtainSavedSearches).toHaveBeenCalledTimes(1);
+    expect(clientFetchMock).toHaveBeenCalledTimes(1);
     mockUseUser.mockReturnValue({ user: { token: "second token" } });
 
     rerender(
@@ -164,7 +166,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(mockObtainSavedSearches).toHaveBeenCalledTimes(2);
+    expect(clientFetchMock).toHaveBeenCalledTimes(2);
 
     rerender(
       <SaveSearchSelector
@@ -174,11 +176,11 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(mockObtainSavedSearches).toHaveBeenCalledTimes(3);
+    expect(clientFetchMock).toHaveBeenCalledTimes(3);
   });
   it("sets selected search based on savedSearch query parameter", async () => {
     mockUseUser.mockReturnValue({ user: { token: "first token" } });
-    mockObtainSavedSearches.mockResolvedValue([]);
+    clientFetchMock.mockResolvedValue([]);
     fakeSearchParams = new ReadonlyURLSearchParams(
       `savedSearch=${fakeSavedSearchRecord.saved_search_id}`,
     );

@@ -18,7 +18,6 @@ export default function Layout({ children, locale }: Props) {
   const t = useTranslations();
 
   return (
-    // Stick the footer to the bottom of the page
     <UserProvider>
       <div className="display-flex flex-column minh-viewport">
         <a className="usa-skipnav" href="#main-content">

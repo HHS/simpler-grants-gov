@@ -8,8 +8,6 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const SNACKBAR_VISIBLE_TIME = 6000;
-
 type SearchQueryCopyButtonProps = {
   copyText: string;
   copyingText: string;
@@ -39,9 +37,9 @@ const SearchQueryCopyButton = ({
         type="button"
         unstyled
         onClick={() => {
-          copyToClipboard(url, SNACKBAR_VISIBLE_TIME)
+          copyToClipboard(url)
             .then(() => {
-              showSnackbar(SNACKBAR_VISIBLE_TIME);
+              showSnackbar();
             })
             .catch((error) => {
               console.error(error);
