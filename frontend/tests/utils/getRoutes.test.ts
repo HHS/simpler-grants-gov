@@ -28,7 +28,6 @@ describe("getNextRoutes", () => {
       "/subscribe",
       "/subscribe/unsubscribe",
       "/unauthenticated",
-      "/unauthorized",
     ]);
   });
 });

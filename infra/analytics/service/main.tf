@@ -179,7 +179,8 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
-    local.service_config.extra_environment_variables
+    local.service_config.extra_environment_variables,
+    local.api_analytics_bucket_environment_variables
   )
 
   secrets = concat(

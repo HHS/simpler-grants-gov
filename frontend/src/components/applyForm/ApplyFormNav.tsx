@@ -13,18 +13,20 @@ const ApplyFormNav = ({
     </li>
   ));
   return (
-    <aside
-      className="usa-in-page-nav top-3"
-      aria-label="On this form"
-      data-testid="InPageNavigation"
-    >
-      <nav className="usa-in-page-nav__nav">
-        <h4 className="usa-in-page-nav__heading" tabIndex={0}>
-          On this form
-        </h4>
-        <ul className="usa-in-page-nav__list">{Links}</ul>
-      </nav>
-    </aside>
+    fields.length > 0 && (
+      <aside
+        className="usa-in-page-nav top-3"
+        aria-label="On this form"
+        data-testid="InPageNavigation"
+      >
+        <nav className="usa-in-page-nav__nav">
+          <h4 className="usa-in-page-nav__heading" tabIndex={0}>
+            On this form
+          </h4>
+          <ul className="usa-in-page-nav__list">{Links}</ul>
+        </nav>
+      </aside>
+    )
   );
 };
 

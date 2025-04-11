@@ -11,12 +11,17 @@ import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
-export function buildForTreeRecursive(
-  schema: RJSFSchema,
-  uiSchema: UiSchema,
-  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
-  formData: object,
-) {
+export function buildForTreeRecursive({
+  errors,
+  formData,
+  schema,
+  uiSchema,
+}: {
+  errors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  formData: object;
+  schema: RJSFSchema;
+  uiSchema: UiSchema;
+}) {
   let acc: JSX.Element[] = [];
 
   const buildFormTree = (
@@ -202,4 +207,17 @@ const wrapSection = (
       {tree}
     </FieldsetWidget>
   );
+};
+// filter and retrieve data from the FormData object
+export const filterFormData = <T extends object>(formData: FormData): T => {
+  return Object.fromEntries(
+    Array.from(formData.keys())
+      .filter((key) => !key.startsWith("$ACTION_"))
+      .map((key) => [
+        key,
+        formData.getAll(key).length > 1
+          ? formData.getAll(key)
+          : formData.get(key),
+      ]),
+  ) as T;
 };
