@@ -49,7 +49,7 @@ export const OpportunitySaveUserControl = () => {
         method,
         body: JSON.stringify({ opportunityId }),
       });
-      data.type === "save" ? setSaved(true) : setSaved(false);
+      setSaved(data.type === "save");
     } catch (error) {
       setSavedError(true);
       console.error(error);
