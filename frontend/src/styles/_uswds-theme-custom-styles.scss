@@ -300,6 +300,12 @@ i.e.
   }
 }
 
+// Events
+
+#main-content:has(div:last-child.bg-base-lightest) + footer.usa-footer {
+  background-color: color($theme-color-base-lightest);
+}
+
 // Footer
 .usa-footer__primary-section {
   background-color: color("mint-5");

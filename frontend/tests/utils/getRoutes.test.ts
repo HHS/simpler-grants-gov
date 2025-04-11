@@ -10,6 +10,7 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/dev/feature-flags",
       "/error",
+      "/events",
       "/formPrototype/[applicationId]/[formId]",
       "/formPrototype/[applicationId]",
       "/formPrototype",
