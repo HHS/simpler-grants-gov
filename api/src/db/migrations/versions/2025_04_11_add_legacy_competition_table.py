@@ -1,8 +1,8 @@
 """Add legacy competition table
 
-Revision ID: 688a5d83d6b8
+Revision ID: e7bd013db717
 Revises: 20f73906ed2a
-Create Date: 2025-04-11 17:41:57.748296
+Create Date: 2025-04-11 18:29:26.837541
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "688a5d83d6b8"
+revision = "e7bd013db717"
 down_revision = "20f73906ed2a"
 branch_labels = None
 depends_on = None
@@ -25,8 +25,8 @@ def upgrade():
         sa.Column("competitionid", sa.Text(), nullable=True),
         sa.Column("familyid", sa.BigInteger(), nullable=True),
         sa.Column("competitiontitle", sa.Text(), nullable=True),
-        sa.Column("openingdate", sa.TIMESTAMP(timezone=True), nullable=True),
-        sa.Column("closingdate", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("openingdate", sa.Date(), nullable=True),
+        sa.Column("closingdate", sa.Date(), nullable=True),
         sa.Column("contactinfo", sa.Text(), nullable=True),
         sa.Column("graceperiod", sa.BigInteger(), nullable=True),
         sa.Column("opentoapplicanttype", sa.BigInteger(), nullable=True),

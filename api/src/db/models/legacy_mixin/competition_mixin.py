@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
@@ -10,8 +10,8 @@ class TcompetitionMixin:
     competitionid: Mapped[str | None]
     familyid: Mapped[int | None]
     competitiontitle: Mapped[str | None]
-    openingdate: Mapped[datetime | None]
-    closingdate: Mapped[datetime | None]
+    openingdate: Mapped[date | None]
+    closingdate: Mapped[date | None]
     contactinfo: Mapped[str | None]
     graceperiod: Mapped[int | None]
     opentoapplicanttype: Mapped[int | None]
