@@ -152,6 +152,39 @@ const NavLinks = ({
     }
   }, [mobileExpanded, onToggleMobileNav]);
 
+  // const closeSecondaryNav = useCallback(() => {
+  //   console.log("!!! calling");
+  //   if (secondaryNavOpen) {
+  //     console.log("!!! closing");
+  //     setSecondaryNavOpen(false);
+  //   }
+  // }, [secondaryNavOpen]);
+
+  // useEffect(() => {
+  //   document.addEventListener("click", closeSecondaryNav);
+  // }, [closeSecondaryNav]);
+
+  // useEffect(() => {
+  //   if (secondaryNavOpen) {
+  //     console.log("!!! adding");
+  //     document.addEventListener("click", () => {
+  //       console.log("!!! calling");
+  //       setSecondaryNavOpen(false);
+  //     });
+  //   } else {
+  //     console.log("!!! removing");
+
+  //     document.removeEventListener("click", () => {
+  //       console.log("!!! calling");
+  //       setSecondaryNavOpen(false);
+  //     });
+  //   }
+  //   return document.removeEventListener("click", () => {
+  //     console.log("!!! calling");
+  //     setSecondaryNavOpen(false);
+  //   });
+  // }, [secondaryNavOpen, setSecondaryNavOpen]);
+
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text) {
@@ -177,7 +210,28 @@ const NavLinks = ({
               label={link.text}
               menuId={link.text}
               isOpen={secondaryNavOpen}
-              onToggle={() => setSecondaryNavOpen(!secondaryNavOpen)}
+              onToggle={() => {
+                /*
+                  I cannot figure this out why is it so hard
+                  I add the thing and it keeps running on the click that should be removing it
+                  even if I manage to turn this into a click handler and prevent default on it
+                */
+                if (secondaryNavOpen) {
+                  console.log("!!! removing");
+                  document.removeEventListener("click", () => {
+                    console.log("!!! calling");
+                    setSecondaryNavOpen(false);
+                  });
+                }
+                setSecondaryNavOpen(!secondaryNavOpen);
+                if (!secondaryNavOpen) {
+                  console.log("!!! adding");
+                  document.addEventListener("click", () => {
+                    console.log("!!! calling");
+                    setSecondaryNavOpen(false);
+                  });
+                }
+              }}
               className={clsx({
                 "usa-current": currentNavItemIndex === index,
                 "simpler-subnav-open": secondaryNavOpen,
@@ -205,8 +259,15 @@ const NavLinks = ({
         />
       );
     });
-  }, [navLinkList, currentNavItemIndex, secondaryNavOpen, closeMobileNav]);
+  }, [
+    navLinkList,
+    currentNavItemIndex,
+    secondaryNavOpen,
+    setSecondaryNavOpen,
+    closeMobileNav,
+  ]);
 
+  console.log("$$$ render", secondaryNavOpen);
   return (
     <PrimaryNav
       items={navItems}
