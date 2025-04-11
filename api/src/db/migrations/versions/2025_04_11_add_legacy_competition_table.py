@@ -1,8 +1,8 @@
 """Add legacy competition table
 
-Revision ID: e7bd013db717
+Revision ID: 617374e55b71
 Revises: 20f73906ed2a
-Create Date: 2025-04-11 18:29:26.837541
+Create Date: 2025-04-11 18:46:31.938384
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "e7bd013db717"
+revision = "617374e55b71"
 down_revision = "20f73906ed2a"
 branch_labels = None
 depends_on = None

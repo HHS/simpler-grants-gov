@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 @declarative_mixin
 class TcompetitionMixin:
-    comp_id: Mapped[int | None] = mapped_column(primary_key=True)
+    comp_id: Mapped[int] = mapped_column(primary_key=True)
     opp_cfda_id: Mapped[int | None]
     competitionid: Mapped[str | None]
     familyid: Mapped[int | None]
