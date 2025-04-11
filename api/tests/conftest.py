@@ -500,6 +500,8 @@ class BaseTestClass:
 # File fixtures
 ###################
 
+FILE_FIXTURE_DIR = path.join(path.dirname(__file__), ".", "fixtures")
+
 
 @pytest.fixture
 def fixture_from_file():
@@ -513,8 +515,16 @@ def fixture_from_file():
     """
 
     def _file_reader(file_path: str):
-        full_file_path = path.join(path.dirname(__file__), ".", "fixtures", file_path.lstrip("/"))
+        full_file_path = path.join(FILE_FIXTURE_DIR, file_path.lstrip("/"))
         with open(full_file_path, "r") as f:
             return f.read()
 
     return _file_reader
+
+
+@pytest.fixture
+def fixture_file_path():
+    def _get_fixture_file_path(fixture_path_relative_to_fixture_dir: str) -> str:
+        return path.join(FILE_FIXTURE_DIR, fixture_path_relative_to_fixture_dir.lstrip("/"))
+
+    return _get_fixture_file_path
