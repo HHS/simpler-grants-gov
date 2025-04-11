@@ -65,10 +65,16 @@ class PaginationInfo:
     def from_search_response(
         cls, pagination_params: PaginationParams, search_response: SearchResponse
     ) -> Self:
+        # OpenSearch cannot return records past 10,000, so even if the count
+        # is greater, reduce it to 10,000 exactly.
         total_records = search_response.total_records
         if total_records > 10000:
             total_records = 10000
 
+        # If the total records was reduced, the page count will get reduced
+        # accordingly. It's fine if the last page partially goes over 10k as
+        # in our request building logic to OpenSearch we will make sure this page
+        # fully fits within the 10k.
         total_pages = int(math.ceil(total_records / pagination_params.page_size))
 
         return cls(
