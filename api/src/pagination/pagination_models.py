@@ -1,9 +1,11 @@
 import dataclasses
+import math
 from enum import StrEnum
 from typing import Self
 
 from pydantic import BaseModel, Field
 
+from src.adapters.search.opensearch_response import SearchResponse
 from src.pagination.paginator import Paginator
 
 
@@ -56,5 +58,26 @@ class PaginationInfo:
             total_pages=paginator.total_pages,
             sort_order=[
                 SortOrder(p.order_by, p.sort_direction) for p in pagination_params.sort_order
+            ],
+        )
+
+    @classmethod
+    def from_search_response(
+        cls, pagination_params: PaginationParams, search_response: SearchResponse
+    ) -> Self:
+        total_records = search_response.total_records
+        if total_records > 10000:
+            total_records = 10000
+
+        total_pages = int(math.ceil(total_records / pagination_params.page_size))
+
+        return cls(
+            page_offset=pagination_params.page_offset,
+            page_size=pagination_params.page_size,
+            total_records=total_records,
+            total_pages=total_pages,
+            sort_order=[
+                SortOrder(order_by=p.order_by, sort_direction=p.sort_direction)
+                for p in pagination_params.sort_order
             ],
         )
