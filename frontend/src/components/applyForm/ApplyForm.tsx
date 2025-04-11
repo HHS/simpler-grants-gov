@@ -4,51 +4,71 @@ import { RJSFSchema } from "@rjsf/utils";
 import { useFormStatus } from "react-dom";
 
 import { useActionState } from "react";
-import { Button, FormGroup } from "@trussworks/react-uswds";
+import { Button, Fieldset, FormGroup } from "@trussworks/react-uswds";
 
-import { submitApplyForm } from "./actions";
+import { handleFormAction } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
+import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
 import { UiSchema } from "./types";
 import { buildForTreeRecursive, getWrappersForNav } from "./utils";
 
 const ApplyForm = ({
-  formSchema,
-  uiSchema,
+  applicationId,
   formId,
+  formSchema,
+  rawFormData,
+  uiSchema,
 }: {
-  formSchema: RJSFSchema;
-  uiSchema: UiSchema;
+  applicationId: string;
   formId: string;
+  formSchema: RJSFSchema;
+  rawFormData?: object;
+  uiSchema: UiSchema;
 }) => {
   const { pending } = useFormStatus();
 
-  const [formState, formAction] = useActionState(submitApplyForm, {
+  const [formState, formAction] = useActionState(handleFormAction, {
+    applicationId,
     errorMessage: "",
-    validationErrors: [],
-    formData: new FormData(),
     formId,
+    formData: new FormData(),
+    successMessage: "",
+    validationErrors: [],
   });
 
-  const { errorMessage, validationErrors, formData } = formState;
-  const formObject = Object.fromEntries(formData.entries());
-  const fields = buildForTreeRecursive(
-    formSchema,
+  const { formData, errorMessage, successMessage, validationErrors } =
+    formState;
+  const formObject = rawFormData || Object.fromEntries(formData.entries());
+  const fields = buildForTreeRecursive({
+    errors: validationErrors,
+    formData: formObject,
+    schema: formSchema,
     uiSchema,
-    validationErrors,
-    formObject,
-  );
+  });
   const navFields = getWrappersForNav(uiSchema);
   return (
     <div className="usa-in-page-nav-container flex-justify">
-      {navFields.length > 0 && <ApplyFormNav fields={navFields} />}
-      <form action={formAction}>
+      <ApplyFormNav fields={navFields} />
+      <form className="usa-form usa-form-large flex-1" action={formAction}>
+        <ApplyFormSuccessMessage message={successMessage} />
         <ApplyFormErrorMessage
-          heading={errorMessage}
+          message={errorMessage}
           errors={validationErrors}
         />
-        <FormGroup>{fields}</FormGroup>
+        <FormGroup>
+          <Fieldset legendStyle="large">{fields}</Fieldset>
+        </FormGroup>
         <p>
+          <Button
+            data-testid="apply-form-save"
+            type="submit"
+            secondary
+            name="apply-form-button"
+            value="save"
+          >
+            {pending ? "Saving..." : "Save"}
+          </Button>
           <Button
             data-testid="apply-form-submit"
             onClick={() =>
@@ -56,6 +76,8 @@ const ApplyForm = ({
                 ? window.scrollTo({ top: 0, behavior: "smooth" })
                 : undefined
             }
+            name="apply-form-button"
+            value="submit"
             type="submit"
           >
             {pending ? "Submitting..." : "Submit"}
