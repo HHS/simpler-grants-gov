@@ -13,6 +13,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import noload, selectinload
 from sqlalchemy.sql import Select
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from tika import parser
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -56,6 +57,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     # Configurable max worker. Set default to ThreaPoolExecutor default.
     # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
     incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
+    tika_url: str | None = Field(default=None, alias="LOAD_OPP_SEARCH_TIKA_URL")
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -346,11 +348,23 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            if self.filter_attachment(att):
-                with file_util.open_stream(
-                    att.file_location,
-                    "rb",
-                ) as file:
+            if not self.filter_attachment(att):
+                continue
+            with file_util.open_stream(att.file_location, "rb") as file:
+                if self.config.tika_url:
+                    file_data = parser.from_file(file, self.config.tika_url)
+                    attachments.append(
+                        {
+                            "filename": att.file_name,
+                            "attachment": {
+                                # tika adds extra \n chars before and after content so use .strip()
+                                "content": file_data["content"].strip(),
+                                "content_length": file_data["metadata"]["Content-Length"],
+                                "content_type": file_data["metadata"]["Content-Type"],
+                            },
+                        }
+                    )
+                else:
                     file_content = file.read()
                     attachments.append(
                         {
@@ -358,7 +372,6 @@ class LoadOpportunitiesToIndex(Task):
                             "data": base64.b64encode(file_content).decode("utf-8"),
                         }
                     )
-
         return attachments
 
     @retry(
@@ -410,7 +423,7 @@ class LoadOpportunitiesToIndex(Task):
                 self.index_name,
                 batch_json_records,
                 "opportunity_id",
-                pipeline="multi-attachment",
+                pipeline=None if self.config.tika_url else "multi-attachment",
                 refresh=refresh,
             )
 
