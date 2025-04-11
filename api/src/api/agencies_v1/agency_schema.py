@@ -96,7 +96,7 @@ class AgencyV1Schema(Schema):
     )
 
     has_active_opportunity = fields.Boolean(
-        default=False,
+        dump_default=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
             "example": "False",
