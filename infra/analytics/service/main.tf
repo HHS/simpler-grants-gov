@@ -170,7 +170,7 @@ module "service" {
   } : null
 
   enable_load_balancer     = false
-  readonly_root_filesystem = false
+  readonly_root_filesystem = true
 
   extra_environment_variables = merge(
     {
@@ -179,7 +179,8 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
-    local.service_config.extra_environment_variables
+    local.service_config.extra_environment_variables,
+    local.api_analytics_bucket_environment_variables
   )
 
   secrets = concat(

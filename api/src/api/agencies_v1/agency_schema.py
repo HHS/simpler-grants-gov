@@ -49,7 +49,7 @@ class AgencySearchRequestSchema(Schema):
     filters = fields.Nested(AgencySearchFilterV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(
-            "AgencyPaginationV1Schema",
+            "AgencySearchPaginationV1Schema",
             ["agency_code", "agency_name"],
             default_sort_order=[{"order_by": "agency_code", "sort_direction": "ascending"}],
         ),
@@ -96,7 +96,7 @@ class AgencyV1Schema(Schema):
     )
 
     has_active_opportunity = fields.Boolean(
-        default=False,
+        dump_default=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
             "example": "False",

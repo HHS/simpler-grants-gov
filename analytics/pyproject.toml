@@ -5,6 +5,7 @@ name = "simpler-grants-gov-analytics"
 packages = [{ include = "analytics", from = "src" }]
 readme = "README.md"
 version = "0.1.0"
+include = ["newrelic.ini"]
 
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
@@ -28,6 +29,7 @@ boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 psycopg = "^3.2.3"
 smart-open = "^7.0.5"
+newrelic = "10.7.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -50,7 +52,7 @@ python_version = "3.12"
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
-module = ["plotly.*", "dynaconf.*"]
+module = ["plotly.*", "dynaconf.*", "newrelic.*"]
 
 [tool.pylint."MESSAGE CONTROL"]
 disable = [
