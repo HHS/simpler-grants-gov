@@ -68,6 +68,15 @@ A subset of tests can be run by passing a pattern to the script. For example, to
 npm run test-watch -- pages
 ```
 
+A single test can be run by appending `.only` to the test. For example:
+
+```sh
+describe('MyComponent', () => {
+  it.only('should render correctly', () => {
+    // ... test logic
+  });
+```
+
 ### 🚦 End-to-end (E2E) testing
 
 [Playwright](https://playwright.dev/) is a framework for web testing and its test runner is called [Playwright Test](https://playwright.dev/docs/api/class-test), which can be used to run E2E or integration tests across chromium, firefox, and webkit browsers.
