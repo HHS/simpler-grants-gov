@@ -19,7 +19,7 @@ i.e.
 @include u-padding-right('05');
 ----------------------------------------
 */
-//
+
 @use "uswds-core" as *;
 
 @import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
@@ -424,16 +424,14 @@ button.usa-pagination__button.usa-button {
         color: white;
       }
       span:after {
-        mask-image:
-          url("/uswds/img/usa-icons/expand_less.svg"),
+        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
           linear-gradient(transparent, transparent);
         background-color: white;
       }
     }
     button[aria-expanded="false"] {
       span:after {
-        mask-image:
-          url("/uswds/img/usa-icons/expand_more.svg"),
+        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
           linear-gradient(transparent, transparent);
       }
     }
