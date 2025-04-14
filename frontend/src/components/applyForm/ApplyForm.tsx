@@ -46,6 +46,7 @@ const ApplyForm = ({
     schema: formSchema,
     uiSchema,
   });
+
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
 
   return (

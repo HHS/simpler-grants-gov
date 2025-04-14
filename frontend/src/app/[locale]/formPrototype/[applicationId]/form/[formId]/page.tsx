@@ -15,10 +15,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
-import {
-  validateFormSchema,
-  validateUiSchema,
-} from "src/components/applyForm/validate";
+import { validateUiSchema } from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +96,6 @@ async function FormPage({ params }: formPageProps) {
 
   try {
     validateUiSchema(form_ui_schema);
-    validateFormSchema(form_json_schema);
   } catch (e) {
     console.error("Error validating form", e);
     return <TopLevelError />;

@@ -5,7 +5,7 @@ import { filter, get } from "lodash";
 
 import { JSX } from "react";
 
-import { UiSchema } from "./types";
+import { UiSchema, UiSchemaField } from "./types";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
@@ -25,7 +25,7 @@ export function buildForTreeRecursive({
   let acc: JSX.Element[] = [];
 
   const buildFormTree = (
-    uiSchema: UiSchema,
+    uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
     parent: { label: string; name: string } | null,
   ) => {
     if (
@@ -40,12 +40,17 @@ export function buildForTreeRecursive({
     } else if (Array.isArray(uiSchema)) {
       uiSchema.forEach((node) => {
         if ("children" in node) {
-          buildFormTree(node.children, {
+          buildFormTree(node.children as unknown as UiSchema, {
             label: node.label,
             name: node.name,
           });
         } else if (!parent && "definition" in node) {
-          const field = buildField(node.definition, schema, errors, formData);
+          const field = buildField({
+            fieldObject: node,
+            formSchema: schema,
+            errors,
+            formData,
+          });
           if (field) {
             acc = [...acc, field];
           }
@@ -65,8 +70,12 @@ export function buildForTreeRecursive({
             });
             return null;
           } else {
-            const { definition } = node as { definition: string };
-            return buildField(definition, schema, errors, formData);
+            return buildField({
+              fieldObject: node,
+              formSchema: schema,
+              errors,
+              formData,
+            });
           }
         });
         if (keys.length) {
@@ -105,9 +114,11 @@ const createField = ({
   rawErrors: string[] | undefined;
   value: string | number | undefined;
 }) => {
+  const disabled = schema.type === "null";
   if (maxLength && Number(maxLength) > 255) {
     return TextareaWidget({
       id,
+      disabled,
       required,
       minLength: minLength ?? undefined,
       maxLength,
@@ -118,15 +129,18 @@ const createField = ({
     });
   } else if (schema.enum?.length) {
     return SelectWidget({
+      disabled,
       id,
       required,
       minLength: minLength ?? undefined,
       maxLength: minLength ?? undefined,
       options: {
-        enumOptions: schema.enum.map((label, index) => ({
-          value: index,
-          label: String(label),
-        })),
+        enumOptions: [{ value: "", label: "" }].concat(
+          schema.enum.map((label, index) => ({
+            value: String(index + 1),
+            label: String(label),
+          })),
+        ),
       },
       schema,
       rawErrors,
@@ -135,6 +149,7 @@ const createField = ({
   } else {
     return TextWidget({
       id,
+      disabled,
       required,
       minLength: minLength ?? undefined,
       maxLength: minLength ?? undefined,
@@ -146,26 +161,33 @@ const createField = ({
   }
 };
 
-export const buildField = (
-  definition: string,
-  formSchema: RJSFSchema,
-  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
-  formData: object,
-) => {
-  const name = definition.split("/")[definition.split("/").length - 1];
-  const schema = getSchemaObjectFromPointer(
-    formSchema,
-    definition,
-  ) as RJSFSchema;
+export const buildField = ({
+  fieldObject,
+  formSchema,
+  errors,
+  formData,
+}: {
+  fieldObject: UiSchemaField;
+  formSchema: RJSFSchema;
+  errors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  formData: object;
+}) => {
+  const { definition, schema } = fieldObject;
+  const name = definition
+    ? definition.split("/")[definition.split("/").length - 1]
+    : (schema?.title ?? "untitled").replace(" ", "-");
+  const fieldSchema = definition
+    ? (getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema)
+    : schema;
   const rawErrors = formatFieldErrors(errors, definition, name);
   const value = get(formData, name) as string | number | undefined;
 
   return createField({
     id: name,
     required: (formSchema.required ?? []).includes(name),
-    minLength: schema.minLength ? schema.minLength : null,
-    maxLength: schema.maxLength ? schema.maxLength : null,
-    schema,
+    minLength: fieldSchema?.minLength ? fieldSchema.minLength : null,
+    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : null,
+    schema: fieldSchema as RJSFSchema,
     rawErrors,
     value,
   });
@@ -173,7 +195,7 @@ export const buildField = (
 
 const formatFieldErrors = (
   errors: ErrorObject<string, Record<string, unknown>, unknown>[],
-  definition: string,
+  definition: string | undefined,
   name: string,
 ) => {
   const errorsforField = filter(
@@ -199,11 +221,21 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if ("children" in item && item.children && item.children.length > 0) {
+    if (
+      "children" in item &&
+      item.children &&
+      Array.isArray(item.children) &&
+      item.children.length > 0
+    ) {
       if (item.name && item.label) {
         results.push({ href: item.name, text: item.label });
       }
-      results.push(...getFieldsForNav(item.children));
+      if (
+        Array.isArray(item.children) &&
+        item.children.every((child) => "label" in child && "name" in child)
+      ) {
+        results.push(...getFieldsForNav(item.children as unknown as UiSchema));
+      }
     }
   }
 

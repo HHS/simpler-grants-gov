@@ -9,31 +9,6 @@ import {
 
 import { HTMLAttributes } from "react";
 
-export interface FormData {
-  [key: string]: FormDataEntryValue;
-}
-
-export interface SetFormDataFunction {
-  (data: FormData): void;
-}
-
-export interface UiSchemaField {
-  type: "field";
-  definition: `/properties/${string}`;
-}
-
-export interface UiSchemaSection {
-  type: "section";
-  label: string;
-  name: string;
-  number?: string;
-  children: (UiSchemaField | UiSchemaSection)[];
-}
-
-export type UiSchema =
-  | (UiSchemaField | UiSchemaSection)
-  | (UiSchemaField | UiSchemaSection)[];
-
 export type SchemaField = {
   type: string;
   title: string;
@@ -48,6 +23,29 @@ export interface FormSchema {
   properties: Record<string, SchemaField>;
   required?: string[];
 }
+
+export interface FormData {
+  [key: string]: FormDataEntryValue;
+}
+
+export interface SetFormDataFunction {
+  (data: FormData): void;
+}
+
+export type UiSchemaField = {
+  type: "field";
+  definition?: `/properties/${string}`;
+  schema?: SchemaField;
+};
+
+export interface UiSchemaSection {
+  type: "section";
+  label: string;
+  name: string;
+  children: Array<UiSchemaField> | UiSchemaSection;
+}
+
+export type UiSchema = Array<UiSchemaSection>;
 
 export type TextTypes =
   | "text"
@@ -95,3 +93,36 @@ export interface UswdsWidgetProps<
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
 }
+
+export const uiSchema: UiSchema = [
+  {
+    type: "section",
+    label: "Applicant info",
+    name: "ApplicantInfo",
+    children: [
+      {
+        type: "field",
+        definition: "/properties/name",
+      },
+      {
+        type: "field",
+        definition: "/properties/dob",
+      },
+    ],
+  },
+  {
+    type: "section",
+    label: "Applicant location",
+    name: "ApplicantLocation",
+    children: [
+      {
+        type: "field",
+        definition: "/properties/address",
+      },
+      {
+        type: "field",
+        definition: "/properties/state",
+      },
+    ],
+  },
+];

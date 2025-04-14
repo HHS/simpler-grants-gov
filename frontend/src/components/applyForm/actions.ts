@@ -28,6 +28,7 @@ export async function handleFormAction(
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
+
   const formDetails = await fetchForm(formId);
   if (!formDetails) {
     return {
@@ -44,7 +45,12 @@ export async function handleFormAction(
     formData,
     formSchema: form_json_schema,
   });
+  const applicationFormData = shapeFormData<ApplicationResponseDetail>(
+    formData,
+    form_json_schema,
+  );
   if (validationErrors.length) {
+    await handleSave(applicationFormData, applicationId, formId);
     return {
       applicationId,
       errorMessage,
@@ -54,11 +60,6 @@ export async function handleFormAction(
       validationErrors,
     };
   } else {
-    const applicationFormData = shapeFormData<ApplicationResponseDetail>(
-      formData,
-      form_json_schema,
-    );
-
     const saveSuccess = await handleSave(
       applicationFormData,
       applicationId,
