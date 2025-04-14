@@ -1,4 +1,33 @@
 export const messages = {
+  Events: {
+    pageTitle: "Events | Simpler.Grants.gov",
+    pageDescription:
+      "From new developments to upcoming opportunities, we want you to be a part of the journey.",
+    header: "Events",
+    upcoming: {
+      title: "Upcoming Events",
+      startDate: "Begins March 10, 2025",
+      header: "Spring 2025 Collaborative Coding Challenge",
+      description:
+        "The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
+      link: "Sign up to participate",
+    },
+    demo: {
+      title: "Simpler.Grants.gov Big Demo",
+      description:
+        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+      watch: "Watch recordings of past Big Demos",
+      watchLink: "January 15, 2025",
+    },
+    codingChallenge: {
+      title: "Collaborative Coding Challenge",
+      descriptionP1:
+        "The Simpler.Grants.gov Collaborative Coding Challenge is an entirely virtual interactive event attended by members of the public, government, stakeholders, and our internal development team.",
+      descriptionP2:
+        "Small teams of external developers, designers, and researchers pitch a proposal to solve a problem with the strongest of them added to the product roadmap.",
+      link: "Read about the Spring 2025 Coding Challenge",
+    },
+  },
   Beta_alert: {
     alert_title:
       "This site is a work in progress, with new features and updates based on your feedback.",
@@ -103,10 +132,10 @@ export const messages = {
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
     goal: {
       paragraph_1:
-        "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
+        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
       title_2: "Grant seekers & applicants",
       paragraph_2:
-        "We’re improving the way you search for and discover relevant opportunities, making it easier to access the funding you need.",
+        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
       title_3: "Federal grantmaking agencies",
       paragraph_3:
         "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
