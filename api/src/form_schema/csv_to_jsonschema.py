@@ -3,6 +3,7 @@ import logging
 import re
 from typing import Any
 
+from src.form_schema.enums import CountryCode, StateCode
 from src.form_schema.field_info import FieldInfo
 from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
@@ -25,6 +26,9 @@ def csv_to_jsonschema(csv_content: str) -> tuple[dict[str, Any], list]:
     """
     # Initialize the main schema builder
     schema_builder = JsonSchemaBuilder()
+
+    # Add standard definitions for state and country codes
+    _add_standard_definitions(schema_builder)
 
     # Group fields by section for better organization
     sections: dict[str, list[FieldInfo]] = {}
@@ -115,6 +119,19 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
         logger.info(f"Skipping field {field_id} of type {field_type}")
         return
 
+    # Handle state fields by list_of_values containing constant
+    if (
+        list_of_values
+        and "50 US States, US possessions, territories, military codes" in list_of_values
+    ):
+        builder.add_ref_property(field_id, "#/$defs/StateCode", is_required=required, title=title)
+        return
+
+    # Handle country fields by list_of_values containing GENC Standard
+    if list_of_values and "GENC Standard Ed3.0 Update 11" in list_of_values:
+        builder.add_ref_property(field_id, "#/$defs/CountryCode", is_required=required, title=title)
+        return
+
     # Add appropriate property based on type
     if field_type == "Radio Group" or data_type == "LIST" or list_of_values:
         builder.add_string_property(
@@ -160,3 +177,22 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
             max_length=max_value,
             format=format_value,
         )
+
+
+def _add_standard_definitions(builder: JsonSchemaBuilder) -> None:
+    """Add standard definitions for states and countries to a schema builder"""
+    # Add state codes definition
+    builder.defs["StateCode"] = {
+        "type": "string",
+        "title": "State",
+        "description": "US State or Territory Code",
+        "enum": StateCode.list_values(),
+    }
+
+    # Add country codes definition
+    builder.defs["CountryCode"] = {
+        "type": "string",
+        "title": "Country",
+        "description": "Country Code",
+        "enum": CountryCode.list_values(),
+    }

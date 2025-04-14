@@ -17,6 +17,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
     staging = [
       "poetry",
@@ -27,6 +28,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
     prod = [
       "poetry",
@@ -37,9 +39,15 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
   }
   scheduled_jobs = {
+    failing-job = { # This is here to help test alerts, remove it when that's not needed.
+      task_command        = ["this-command-will-fail"]
+      schedule_expression = "cron(0 * * * ? *)"
+      state               = "ENABLED"
+    }
     load-transform = {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour

@@ -2,7 +2,14 @@ import os
 
 import pytest
 
-from src.form_schema.csv_to_jsonschema import csv_to_jsonschema
+from src.form_schema.csv_to_jsonschema import (
+    _add_standard_definitions,
+    add_field_to_builder,
+    csv_to_jsonschema,
+)
+from src.form_schema.enums import CountryCode, StateCode
+from src.form_schema.field_info import FieldInfo
+from src.form_schema.jsonschema_builder import JsonSchemaBuilder
 
 
 @pytest.fixture
@@ -111,8 +118,7 @@ def test_enum_fields_have_correct_values(csv_file_content):
     country_field = schema["properties"]["Country"]
 
     assert country_field is not None, "Country field not found"
-    assert "enum" in country_field, "Country field should have enum values"
-    assert isinstance(country_field["enum"], list), "Enum values should be a list"
+    assert country_field["$ref"] == "#/$defs/CountryCode", "Country field should have enum values"
 
     # Test prefix field which should have Mr., Mrs., etc.
     prefix_field = None
@@ -162,3 +168,215 @@ def test_ui_schema_has_correct_structure(csv_file_content):
         ), "Definition should start with '/properties/'"
 
     assert ui_schema[0]["definition"] == "/properties/FederalAgency"
+
+
+def test_state_and_country_fields_auto_detection():
+    """
+    Test that state and country fields automatically get references to the
+    appropriate definitions in the JSON schema.
+    """
+    # Create a builder
+    builder = JsonSchemaBuilder(title="Test Schema")
+
+    _add_standard_definitions(builder)
+
+    # Add various state and country fields with different naming patterns
+    builder.add_string_property("state", False, True, title="State")
+    builder.add_string_property("country", False, True, title="Country")
+    builder.add_string_property(
+        "homeState",
+        False,
+        False,
+        title="Home State",
+        enum=["50 US States, US possessions, territories, military codes"],
+    )
+    builder.add_string_property(
+        "mailingState",
+        False,
+        False,
+        title="Mailing State",
+        enum=["50 US States, US possessions, territories, military codes"],
+    )
+    builder.add_string_property(
+        "birthCountry", False, False, title="Birth Country", enum=["GENC Standard Ed3.0 Update 11"]
+    )
+    builder.add_string_property(
+        "citizenshipCountry",
+        False,
+        False,
+        title="Citizenship Country",
+        enum=["GENC Standard Ed3.0 Update 11"],
+    )
+
+    # Add a regular strin   g field without auto-detection
+    builder.add_string_property("city", False, True, title="City")
+
+    builder.add_string_property(
+        "preferredCountry",
+        False,
+        False,
+        title="Preferred Country",
+        enum=["GENC Standard Ed3.0 Update 11"],
+    )
+
+    # Build the schema
+    schema = builder.build()
+
+    # Verify $defs section contains our standard definitions
+    assert "$defs" in schema
+    assert "StateCode" in schema["$defs"]
+    assert "CountryCode" in schema["$defs"]
+
+    # Verify the definitions have the correct enum values
+    assert "enum" in schema["$defs"]["StateCode"]
+    assert schema["$defs"]["StateCode"]["enum"] == StateCode.list_values()
+    assert "enum" in schema["$defs"]["CountryCode"]
+    assert schema["$defs"]["CountryCode"]["enum"] == CountryCode.list_values()
+
+    # Verify regular fields don't have references
+    assert "$ref" not in schema["properties"]["city"]
+    assert "type" in schema["properties"]["city"]
+    assert schema["properties"]["city"]["type"] == "string"
+
+
+def test_add_field_to_builder_state_country_references():
+    """
+    Test that add_field_to_builder correctly adds state and country fields
+    as references to standard definitions.
+    """
+    # Create a builder
+    builder = JsonSchemaBuilder(title="Test Fields")
+
+    _add_standard_definitions(builder)
+
+    # Create test field info objects
+    state_field = FieldInfo(
+        id="homeState",
+        label="Home State",
+        required=True,
+        type="Text",
+        data_type="AN",
+        min_value=None,
+        max_value=None,
+        help_tip="Enter your home state",
+        is_nullable=False,
+        list_of_values="50 US States, US possessions, territories, military codes",
+    )
+
+    country_field = FieldInfo(
+        id="birthCountry",
+        label="Country of Birth",
+        required=False,
+        type="Text",
+        data_type="AN",
+        min_value=None,
+        max_value=None,
+        help_tip="Enter your country of birth",
+        is_nullable=False,
+        list_of_values="GENC Standard Ed3.0 Update 11",
+    )
+
+    regular_field = FieldInfo(
+        id="fullName",
+        label="Full Name",
+        required=True,
+        type="Text",
+        data_type="AN",
+        list_of_values=None,
+        min_value=None,
+        max_value=None,
+        help_tip="Enter your full name",
+        is_nullable=False,
+    )
+
+    # Add fields to the builder
+    add_field_to_builder(builder, state_field)
+    add_field_to_builder(builder, country_field)
+    add_field_to_builder(builder, regular_field)
+
+    # Build the schema
+    schema = builder.build()
+
+    # Verify $defs section exists with standard definitions
+    assert "$defs" in schema
+    assert "StateCode" in schema["$defs"]
+    assert "CountryCode" in schema["$defs"]
+
+    # Verify state field is added as a reference
+    assert "homeState" in schema["properties"]
+    assert "$ref" in schema["properties"]["homeState"]
+    assert schema["properties"]["homeState"]["$ref"] == "#/$defs/StateCode"
+    assert schema["properties"]["homeState"]["title"] == "Home State"
+    assert "homeState" in schema["required"]
+
+    # Verify country field is added as a reference
+    assert "birthCountry" in schema["properties"]
+    assert "$ref" in schema["properties"]["birthCountry"]
+    assert schema["properties"]["birthCountry"]["$ref"] == "#/$defs/CountryCode"
+    assert schema["properties"]["birthCountry"]["title"] == "Country of Birth"
+    assert "birthCountry" not in schema["required"]  # Shouldn't be required
+
+    # Verify regular field is NOT added as a reference
+    assert "fullName" in schema["properties"]
+    assert "$ref" not in schema["properties"]["fullName"]
+    assert schema["properties"]["fullName"]["type"] == "string"
+    assert schema["properties"]["fullName"]["title"] == "Full Name"
+    assert "fullName" in schema["required"]
+
+
+def test_add_field_to_builder_genc_country_detection():
+    """
+    Test that add_field_to_builder correctly identifies country fields
+    based on GENC Standard in list_of_values.
+    """
+    from src.form_schema.csv_to_jsonschema import add_field_to_builder
+    from src.form_schema.field_info import FieldInfo
+
+    # Create a builder
+    builder = JsonSchemaBuilder(title="GENC Test")
+
+    # Create a field with GENC Standard in list_of_values
+    genc_country_field = FieldInfo(
+        id="nationalOrigin",  # Not ending with 'country'
+        label="National Origin",
+        required=True,
+        type="Select",
+        data_type="LIST",
+        list_of_values=["GENC Standard Ed3.0 Update 11"],  # Contains GENC marker
+        min_value=None,
+        max_value=None,
+        help_tip="Select your national origin",
+        is_nullable=False,
+    )
+
+    # Create a regular dropdown field
+    regular_dropdown = FieldInfo(
+        id="favoriteColor",
+        label="Favorite Color",
+        required=False,
+        type="Select",
+        data_type="LIST",
+        list_of_values=["Red", "Green", "Blue"],  # No GENC marker
+        min_value=None,
+        max_value=None,
+        help_tip="Select your favorite color",
+        is_nullable=False,
+    )
+
+    # Add fields to the builder
+    add_field_to_builder(builder, genc_country_field)
+    add_field_to_builder(builder, regular_dropdown)
+
+    # Build the schema
+    schema = builder.build()
+
+    # Verify the GENC field is treated as a country reference
+    assert "nationalOrigin" in schema["properties"]
+    assert "$ref" in schema["properties"]["nationalOrigin"]
+    assert schema["properties"]["nationalOrigin"]["$ref"] == "#/$defs/CountryCode"
+
+    # Verify the regular dropdown is NOT treated as a reference
+    assert "favoriteColor" in schema["properties"]
+    assert "$ref" not in schema["properties"]["favoriteColor"]
+    assert "enum" in schema["properties"]["favoriteColor"]
+    assert schema["properties"]["favoriteColor"]["enum"] == ["Red", "Green", "Blue"]
