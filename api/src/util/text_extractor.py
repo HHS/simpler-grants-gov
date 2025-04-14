@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Callable
 
+import pptx
 from bs4 import BeautifulSoup
 from docx import Document
 from pypdf import PdfReader
@@ -50,8 +51,27 @@ def extract_text_from_pdf(file_data: bytes) -> str:
     return "\n".join(text_data)
 
 
+def pptx_reader(file_path: str) -> str:
+    presentation = pptx.Presentation(file_path)
+    text_runs = []
+    for slide in presentation.slides:
+        for shape in slide.shapes:
+            if not shape.has_text_frame:
+                continue
+            for paragraph in shape.text_frame.paragraphs:
+                for run in paragraph.runs:
+                    text_runs.append(run.text)
+    return "\n".join(text_runs)
+
+
 def extract_text_from_rft(rtf_data: str) -> str:
     return rtf_to_text(rtf_data)
+
+
+def doc_reader(file_path: str) -> str:
+    text = docx2txt.process(file_path)
+    print(text)
+    return text
 
 
 def docx_reader(file_path: str) -> str:
@@ -88,8 +108,10 @@ class TextExtractor:
     def _get_text_extractor_config(self) -> TextExtractorConfig:
         html_extractor_config = TextExtractorConfig(extractor=extract_text_from_html)
         return {
+            "doc": TextExtractorConfig(reader=doc_reader, read_mode="rb"),
             "docx": TextExtractorConfig(reader=docx_reader),
             "pdf": TextExtractorConfig(extractor=extract_text_from_pdf, read_mode="rb"),
+            "pptx": TextExtractorConfig(reader=pptx_reader),
             "txt": TextExtractorConfig(),
             "html": html_extractor_config,
             "htm": html_extractor_config,

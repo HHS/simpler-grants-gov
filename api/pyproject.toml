@@ -38,6 +38,7 @@ pypdf = "^5.4.0"
 python-docx = "^1.1.2"
 beautifulsoup4 = "^4.13.3"
 striprtf = "^0.0.29"
+python-pptx = "^1.0.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
