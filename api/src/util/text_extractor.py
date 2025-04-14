@@ -5,6 +5,7 @@ from typing import Callable
 from bs4 import BeautifulSoup
 from docx import Document
 from pypdf import PdfReader
+from striprtf.striprtf import rtf_to_text
 
 from src.util.file_util import open_stream
 
@@ -34,6 +35,10 @@ def extract_text_from_file(file_path: str, file_type: str | None = None) -> str 
         return None
 
 
+def extract_text_from_html(html_string: str) -> str:
+    return "\n".join(BeautifulSoup(html_string, "html.parser").stripped_strings)
+
+
 def extract_text_from_pdf(file_data: bytes) -> str:
     reader = PdfReader(BytesIO(file_data))
     number_of_pages = len(reader.pages)
@@ -45,8 +50,8 @@ def extract_text_from_pdf(file_data: bytes) -> str:
     return "\n".join(text_data)
 
 
-def extract_text_from_html(html_string: str) -> str:
-    return "\n".join(BeautifulSoup(html_string, "html.parser").stripped_strings)
+def extract_text_from_rft(rtf_data: str) -> str:
+    return rtf_to_text(rtf_data)
 
 
 def docx_reader(file_path: str) -> str:
@@ -88,6 +93,7 @@ class TextExtractor:
             "txt": TextExtractorConfig(),
             "html": html_extractor_config,
             "htm": html_extractor_config,
+            "rtf": TextExtractorConfig(extractor=extract_text_from_rft),
         }[self.file_type]
 
     def _validate_file_type(self) -> None:

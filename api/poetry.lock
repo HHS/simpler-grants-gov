@@ -2841,6 +2841,21 @@ files = [
 pbr = ">=2.0.0"
 
 [[package]]
+name = "striprtf"
+version = "0.0.29"
+description = "A simple library to convert rtf to text"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "striprtf-0.0.29-py3-none-any.whl", hash = "sha256:0fc6a41999d015358d19627776b616424dd501ad698105c81d76734d1e14d91b"},
+    {file = "striprtf-0.0.29.tar.gz", hash = "sha256:5a822d075e17417934ed3add6fc79b5fc8fb544fe4370b2f894cdd28f0ddd78e"},
+]
+
+[package.extras]
+dev = ["build (>=1.0.0)", "pytest (>=7.0.0)"]
+
+[[package]]
 name = "tenacity"
 version = "8.5.0"
 description = "Retry code until it succeeds"
@@ -3172,4 +3187,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.13"
-content-hash = "ae3bc337a6c5c5a1b5055cdd5a6997a2571eb34d22b49a485405e8b5eb55e3a1"
+content-hash = "df82a7ef3c7bb9ebd347dbc71a4bd5d72d5ecc528f4b18c3ca34b6d96a5b9104"

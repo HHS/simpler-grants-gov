@@ -22,10 +22,11 @@ def test_extract_text_from_file_returns_none_unsupported_file_type() -> None:
     "fixture_file_path_val,expected",
     [
         (f"{TEST_FILE_DIR}/docx_data.docx", "Docx data"),
-        (f"{TEST_FILE_DIR}/pdf_data.pdf", "pdf data"),
-        (f"{TEST_FILE_DIR}/text_data.txt", "text data"),
         (f"{TEST_FILE_DIR}/html_data.html", "header 1\nparagraph\ndiv p\nClick\nhere"),
         (f"{TEST_FILE_DIR}/htm_data.htm", "header 1\nparagraph\ndiv p\nClick\nhere"),
+        (f"{TEST_FILE_DIR}/pdf_data.pdf", "pdf data"),
+        (f"{TEST_FILE_DIR}/rtf_data.rtf", "rtf title\n\nrtf paragraph"),
+        (f"{TEST_FILE_DIR}/text_data.txt", "text data"),
     ],
 )
 def test_extract_pdf_text(fixture_file_path, fixture_file_path_val, expected) -> None:
