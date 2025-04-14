@@ -1,106 +1,242 @@
 FORM_NAME = "Application For Federal Assistance SF 424 - Individual"
 
 UI_SCHEMA = [
-    {"type": "field", "definition": "/properties/FederalAgency"},
-    {"type": "field", "definition": "/properties/CFDANumber"},
-    {"type": "field", "definition": "/properties/CFDATitle"},
-    {"type": "field", "definition": "/properties/Date_Received"},
-    {"type": "field", "definition": "/properties/OpportunityID"},
-    {"type": "field", "definition": "/properties/OpportunityTitle"},
-    {
+  {
+    "type": "section",
+    "label": "1. Name of Federal Agency",
+    "name": "NameFederalAgency",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/FederalAgency"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "2. Assistance Listing Number",
+    "name": "AssistanceListingNumber",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/CFDANumber"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/CFDATitle"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "3. Date Received",
+    "name": "DateReived",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/Date_Received"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "4. Funding Opportunity Number",
+    "name": "FundingOpportunityNumber",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/OpportunityID"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/OpportunityTitle"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "5. Applicant Information",
+    "name": "ApplicantInformationHeader",
+    "children": [
+      {
         "type": "section",
-        "label": "Applicant Information",
-        "name": "ApplicantInformationHeader",
-        "number": "5",
+        "label": "5a. Name and Contact Information",
+        "name": "NameandContactInformationHeader",
         "children": [
-            {
-                "type": "section",
-                "label": "Name and Contact Information",
-                "name": "NameandContactInformationHeader",
-                "number": "5a",
-                "children": [
-                    {"type": "field", "definition": "/properties/PrefixName"},
-                    {"type": "field", "definition": "/properties/FirstName"},
-                    {"type": "field", "definition": "/properties/MiddleName"},
-                    {"type": "field", "definition": "/properties/LastName"},
-                    {"type": "field", "definition": "/properties/Suffix"},
-                    {
-                        "type": "field",
-                        "definition": "/properties/AuthorizedRepresentativePhoneNumber",
-                    },
-                    {"type": "field", "definition": "/properties/EveningPhone"},
-                    {
-                        "type": "field",
-                        "definition": "/properties/AuthorizedRepresentativeFax",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/AuthorizedRepresentativeEmail",
-                    },
-                ],
-            },
-            {
-                "type": "section",
-                "label": "Address",
-                "name": "AddressHeader",
-                "number": "5b",
-                "children": [
-                    {"type": "field", "definition": "/properties/Street1"},
-                    {"type": "field", "definition": "/properties/Street2"},
-                    {"type": "field", "definition": "/properties/City"},
-                    {"type": "field", "definition": "/properties/County"},
-                    {"type": "field", "definition": "/properties/State"},
-                    {"type": "field", "definition": "/properties/Province"},
-                    {"type": "field", "definition": "/properties/Country"},
-                    {"type": "field", "definition": "/properties/ZipPostalCode"},
-                ],
-            },
-            {
-                "type": "section",
-                "label": "Citizenship Status",
-                "name": "CitizenshipStatusHeader",
-                "number": "5c",
-                "children": [
-                    {"type": "field", "definition": "/properties/citizenship"},
-                    {"type": "field", "definition": "/properties/AlienRegistrationNumber"},
-                    {"type": "field", "definition": "/properties/CountryofOrigin"},
-                    {"type": "field", "definition": "/properties/VisitDate"},
-                ],
-            },
-            {"type": "field", "definition": "/properties/CongressionalDistrictApplicant"},
-        ],
-    },
-    {
+          {
+            "type": "field",
+            "definition": "/properties/PrefixName"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/FirstName"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/MiddleName"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/LastName"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/Suffix"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/AuthorizedRepresentativePhoneNumber"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/EveningPhone"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/AuthorizedRepresentativeFax"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/AuthorizedRepresentativeEmail"
+          }
+        ]
+      },
+      {
         "type": "section",
-        "label": "Project Information",
-        "name": "ProjectInformationHeader",
-        "number": "6",
+        "label": "5b. Address",
+        "name": "AddressHeader",
         "children": [
-            {"type": "field", "definition": "/properties/ProjectTitle"},
-            {"type": "field", "definition": "/properties/ProjectDecription"},
-            {
-                "type": "section",
-                "label": "Proposed Project ",
-                "name": "ProposedProjectHeader",
-                "number": "6c",
-                "children": [
-                    {"type": "field", "definition": "/properties/FundingPeriodStartDate"},
-                    {"type": "field", "definition": "/properties/FundingPeriodEndDate"},
-                ],
-            },
-        ],
-    },
-    {
+          {
+            "type": "field",
+            "definition": "/properties/Street1"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/Street2"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/City"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/County"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/State"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/Province"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/Country"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/ZipPostalCode"
+          }
+        ]
+      },
+      {
         "type": "section",
-        "label": "Certification Text",
-        "name": "CertificationText",
-        "number": "7",
+        "label": "5c. Citizenship Status",
+        "name": "CitizenshipStatusHeader",
         "children": [
-            {"type": "field", "definition": "/properties/ApplicationCertification"},
-            {"type": "field", "definition": "/properties/AORSignature"},
-            {"type": "field", "definition": "/properties/AORDate"},
-        ],
-    },
+          {
+            "type": "field",
+            "definition": "/properties/citizenship"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/AlienRegistrationNumber"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/CountryofOrigin"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/VisitDate"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "label": "5d. Congressional District of Applicant",
+        "name": "CongressionalDistrictApplicant",
+        "children": [
+          {
+            "type": "field",
+            "definition": "/properties/CongressionalDistrictApplicant"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "6. Project Information",
+    "name": "ProjectInformationHeader",
+    "children": [
+      {
+        "type": "section",
+        "label": "6a. Project Title ",
+        "name": "ProjectTitle",
+        "children": [
+        {
+          "type": "field",
+          "definition": "/properties/ProjectTitle"
+        }]
+      },
+      {
+        "type": "section",
+        "label": "6a. Project Description",
+        "name": "ProjectDecription",
+        "children": [
+        {
+          "type": "field",
+          "definition": "/properties/ProjectDecription"
+        }]
+      },
+      {
+        "type": "section",
+        "label": "6c. Proposed Project ",
+        "name": "ProposedProjectHeader",
+        "children": [
+          {
+            "type": "field",
+            "definition": "/properties/FundingPeriodStartDate"
+          },
+          {
+            "type": "field",
+            "definition": "/properties/FundingPeriodEndDate"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "7. Certification Text",
+    "name": "CertificationText",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/ApplicationCertification"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/AORSignature"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/AORDate"
+      }
+    ]
+  }
 ]
 
 JSON_SCHEMA_FORM = [
