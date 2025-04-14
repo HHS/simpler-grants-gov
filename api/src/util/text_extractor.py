@@ -68,12 +68,6 @@ def extract_text_from_rft(rtf_data: str) -> str:
     return rtf_to_text(rtf_data)
 
 
-def doc_reader(file_path: str) -> str:
-    text = docx2txt.process(file_path)
-    print(text)
-    return text
-
-
 def docx_reader(file_path: str) -> str:
     return "\n".join(paragraph.text for paragraph in Document(file_path).paragraphs)
 
@@ -108,7 +102,6 @@ class TextExtractor:
     def _get_text_extractor_config(self) -> TextExtractorConfig:
         html_extractor_config = TextExtractorConfig(extractor=extract_text_from_html)
         return {
-            "doc": TextExtractorConfig(reader=doc_reader, read_mode="rb"),
             "docx": TextExtractorConfig(reader=docx_reader),
             "pdf": TextExtractorConfig(extractor=extract_text_from_pdf, read_mode="rb"),
             "pptx": TextExtractorConfig(reader=pptx_reader),
