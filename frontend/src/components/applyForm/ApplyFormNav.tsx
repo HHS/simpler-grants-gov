@@ -1,17 +1,21 @@
-import React, { memo } from "react";
+import React, { useMemo } from "react";
 
-const ApplyFormNav = memo(({
+const ApplyFormNav = ({
   fields,
 }: {
   fields: { href: string; text: string }[];
 }) => {
-  const Links = fields.map(({ text, href }) => (
-    <li className="usa-in-page-nav__item" key={text}>
-      <a className="usa-link usa-in-page-nav__link" href={`#${href}`}>
-        {text}
-      </a>
-    </li>
-  ));
+  const Links = useMemo(
+    () =>
+      fields.map(({ text, href }) => (
+        <li className="usa-in-page-nav__item" key={text}>
+          <a className="usa-link usa-in-page-nav__link" href={`#${href}`}>
+            {text}
+          </a>
+        </li>
+      )),
+    [fields],
+  );
   return (
     fields.length > 0 && (
       <aside
@@ -28,6 +32,6 @@ const ApplyFormNav = memo(({
       </aside>
     )
   );
-});
+};
 
 export default ApplyFormNav;

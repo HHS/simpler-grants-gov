@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { clone, filter, get } from "lodash";
+import { filter, get } from "lodash";
 
 import { JSX } from "react";
 
@@ -63,6 +63,7 @@ export function buildForTreeRecursive({
                 }
               }
             });
+            return null;
           } else {
             const { definition } = node as { definition: string };
             return buildField(definition, schema, errors, formData);

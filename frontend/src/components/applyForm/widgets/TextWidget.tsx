@@ -37,7 +37,6 @@ function TextWidget<
   onFocus = () => ({}),
   rawErrors = [],
 }: UswdsWidgetProps<T, S, F>) {
-  console.log('render')
   const {
     title,
     maxLength,
@@ -89,7 +88,7 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`} >
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel idFor={id} title={title} required={required} />
       {error && (
         <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>

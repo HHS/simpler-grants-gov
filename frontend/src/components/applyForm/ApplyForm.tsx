@@ -3,10 +3,10 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { useFormStatus } from "react-dom";
 
-import { useActionState, useCallback, useMemo } from "react";
-import { Button, Fieldset, FormGroup } from "@trussworks/react-uswds";
+import { useActionState, useMemo } from "react";
+import { Button, FormGroup } from "@trussworks/react-uswds";
 
-import { submitApplyForm } from "./actions";
+import { handleFormAction } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
@@ -28,7 +28,7 @@ const ApplyForm = ({
 }) => {
   const { pending } = useFormStatus();
 
-  const [formState, formAction] = useActionState(submitApplyForm, {
+  const [formState, formAction] = useActionState(handleFormAction, {
     applicationId,
     errorMessage: "",
     formId,
@@ -60,9 +60,7 @@ const ApplyForm = ({
           message={errorMessage}
           errors={validationErrors}
         />
-        <FormGroup>
-          {fields}
-        </FormGroup>
+        <FormGroup>{fields}</FormGroup>
         <p>
           <Button
             data-testid="apply-form-save"
