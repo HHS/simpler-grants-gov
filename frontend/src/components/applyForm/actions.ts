@@ -1,5 +1,6 @@
 "use server";
 
+import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
@@ -8,7 +9,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
-import { filterFormData } from "./utils";
+import { shapeFormData } from "./utils";
 import { validateFormData } from "./validate";
 
 type applyFormErrors = {
@@ -22,14 +23,26 @@ type applyFormResponse = {
   successMessage: string;
 };
 
-export async function handleFormAction(
+export async function submitApplyForm(
   _prevState: applyFormResponse & applyFormErrors,
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
-  const { validationErrors, errorMessage } = await formValidate({
+  const formDetails = await fetchForm(formId);
+  if (!formDetails) {
+    return {
+      applicationId,
+      errorMessage: "Error submitting form",
+      formData,
+      formId,
+      successMessage,
+      validationErrors: [],
+    };
+  }
+  const { form_json_schema } = formDetails;
+  const { validationErrors, errorMessage } = formValidate({
     formData,
-    formId,
+    formSchema: form_json_schema,
   });
   if (validationErrors.length) {
     return {
@@ -41,8 +54,10 @@ export async function handleFormAction(
       validationErrors,
     };
   } else {
-    const applicationFormData =
-      filterFormData<ApplicationResponseDetail>(formData);
+    const applicationFormData = shapeFormData<ApplicationResponseDetail>(
+      formData,
+      form_json_schema,
+    );
 
     const saveSuccess = await handleSave(
       applicationFormData,
@@ -98,13 +113,7 @@ const handleSave = async (
   }
 };
 
-async function formValidate({
-  formData,
-  formId,
-}: {
-  formData: FormData;
-  formId: string;
-}): Promise<applyFormErrors> {
+async function fetchForm(formId: string): Promise<FormDetail> {
   let formSchema = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
@@ -113,21 +122,22 @@ async function formValidate({
         `Error retrieving form details for formID (${formId})`,
         response,
       );
-      return {
-        errorMessage: "Error submitting form",
-        validationErrors: [],
-      };
     }
     formSchema = response.data;
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
-    return {
-      errorMessage: "Error submitting form",
-      validationErrors: [],
-    };
   }
+  return formSchema;
+}
 
-  const errors = validateFormData(formData, formSchema.form_json_schema);
+function formValidate({
+  formData,
+  formSchema,
+}: {
+  formData: FormData;
+  formSchema: RJSFSchema;
+}): applyFormErrors {
+  const errors = validateFormData(formData, formSchema);
   if (errors) {
     return {
       errorMessage: "Error submitting form",

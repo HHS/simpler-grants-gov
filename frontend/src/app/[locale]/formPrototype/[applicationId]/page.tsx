@@ -35,7 +35,7 @@ const FormLinks = ({
 }) => {
   if (forms.length > 0) {
     return (
-      <ul>
+      <ul className="usa-list">
         {forms.map((form) => {
           return (
             <li key={form.form.form_name}>

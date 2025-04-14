@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get } from "lodash";
+import { clone, filter, get } from "lodash";
 
 import { JSX } from "react";
 
@@ -52,18 +52,34 @@ export function buildForTreeRecursive({
         }
       });
       if (parent) {
-        // eslint-disable-next-line array-callback-return
+        const childAcc: JSX.Element[] = [];
+        const keys: number[] = [];
         const row = uiSchema.map((node) => {
           if ("children" in node) {
-            // TODO: remove children from acc
-            // return children from acc;
+            acc.forEach((item, key) => {
+              if (item) {
+                if (item.key === `${node.name}-wrapper`) {
+                  keys.push(key);
+                }
+              }
+            });
           } else {
             const { definition } = node as { definition: string };
             return buildField(definition, schema, errors, formData);
           }
         });
-        acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
-        // acc = parentHasChild(uiSchema) ? wrapSection(parent.label, parent.name, row) : [acc, wrapSection(parent.label, parent.name, row)];
+        if (keys.length) {
+          keys.forEach((key) => {
+            childAcc.push(acc[key]);
+            delete acc[key];
+          });
+          acc = [
+            ...acc,
+            wrapSection(parent.label, parent.name, <>{childAcc}</>),
+          ];
+        } else {
+          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+        }
       }
     }
   };
@@ -175,7 +191,7 @@ const formatFieldErrors = (
     .filter((error): error is string => error !== undefined);
 };
 
-export function getWrappersForNav(
+export function getFieldsForNav(
   schema: UiSchema,
 ): { href: string; text: string }[] {
   const results: { href: string; text: string }[] = [];
@@ -186,7 +202,7 @@ export function getWrappersForNav(
       if (item.name && item.label) {
         results.push({ href: item.name, text: item.label });
       }
-      results.push(...getWrappersForNav(item.children));
+      results.push(...getFieldsForNav(item.children));
     }
   }
 
@@ -208,9 +224,13 @@ const wrapSection = (
     </FieldsetWidget>
   );
 };
-// filter and retrieve data from the FormData object
-export const filterFormData = <T extends object>(formData: FormData): T => {
-  return Object.fromEntries(
+
+// filters, orders, and nests the form data to match the form schema
+export const shapeFormData = <T extends object>(
+  formData: FormData,
+  formSchema: RJSFSchema,
+): T => {
+  const filteredData = Object.fromEntries(
     Array.from(formData.keys())
       .filter((key) => !key.startsWith("$ACTION_"))
       .map((key) => [
@@ -219,5 +239,78 @@ export const filterFormData = <T extends object>(formData: FormData): T => {
           ? formData.getAll(key)
           : formData.get(key),
       ]),
-  ) as T;
+  );
+
+  // arrays from FormData() look like item[0]:value or item[0][key]: value
+  // this accepts flat objects or strings
+  const formDataArrayToArray = (
+    field: string,
+    data: Record<string, unknown>,
+  ) => {
+    const result: Array<Record<string, unknown>> | string[] = [];
+    Object.entries(data).forEach(([key, value]) => {
+      if (!key.includes(field)) return;
+      const match = key.match(/([a-z]+)\[(\d+)\]?\[?([a-z]+)?]/);
+      if (!match?.length) return;
+      const dataField = match[1];
+      if (dataField !== field) return;
+      const dataIndex = Number(match[2]);
+      if (Number.isNaN(dataIndex)) return;
+      const dataItem = match[3];
+      if (dataItem) {
+        if (result[dataIndex] && typeof result[dataIndex] === "object") {
+          result[dataIndex][dataItem] = value;
+        } else {
+          result[dataIndex] = { [dataItem]: value };
+        }
+      } else {
+        result[dataIndex] = value as string;
+      }
+    });
+    return result;
+  };
+
+  const shapeData = (
+    schema: RJSFSchema,
+    data: Record<string, unknown>,
+  ): Record<string, unknown> => {
+    const result: Record<string, unknown> = {};
+
+    if (schema.properties) {
+      for (const key of Object.keys(schema.properties)) {
+        if (
+          typeof schema.properties[key] !== "boolean" &&
+          schema.properties[key].type === "object"
+        ) {
+          result[key] = shapeData(
+            schema.properties[key] as RJSFSchema,
+            (data[key] as Record<string, unknown>) || data,
+          );
+        } else if (
+          typeof schema.properties[key] !== "boolean" &&
+          schema.properties[key].type === "array" &&
+          typeof data === "object"
+        ) {
+          const arrayData = formDataArrayToArray(key, data);
+          result[key] = (arrayData as unknown[]).map((item) =>
+            typeof item === "object" &&
+            schema.properties &&
+            typeof schema.properties[key] !== "boolean" &&
+            schema.properties[key].items
+              ? shapeData(
+                  schema.properties[key].items as RJSFSchema,
+                  item as Record<string, unknown>,
+                )
+              : item,
+          );
+        } else {
+          result[key] = data[key];
+        }
+      }
+    }
+
+    return result;
+  };
+
+  return shapeData(formSchema, filteredData) as T;
 };

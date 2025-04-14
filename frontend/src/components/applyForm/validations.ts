@@ -29,7 +29,7 @@ const schemaFieldSchema = z.object({
     "null",
     "integer",
   ]),
-  title: z.string(),
+  title: z.string().optional(),
   minLength: z.number().optional(),
   maxLength: z.number().optional(),
   format: z.string().optional(),
@@ -39,7 +39,7 @@ const schemaFieldSchema = z.object({
 export const formSchemaValidate = z.object({
   title: z.string(),
   description: z.string().optional(),
-  properties: z.record(schemaFieldSchema),
+  properties: z.record(schemaFieldSchema).optional(),
   required: z.array(z.string()).optional(),
 });
 

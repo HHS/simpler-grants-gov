@@ -1,39 +1,65 @@
 [
   {
-    "type": "field",
-    "definition": "/properties/FederalAgency"
-  },
-  {
-    "type": "field",
-    "definition": "/properties/CFDANumber"
-  },
-  {
-    "type": "field",
-    "definition": "/properties/CFDATitle"
-  },
-  {
-    "type": "field",
-    "definition": "/properties/Date_Received"
-  },
-  {
-    "type": "field",
-    "definition": "/properties/OpportunityID"
-  },
-  {
-    "type": "field",
-    "definition": "/properties/OpportunityTitle"
+    "type": "section",
+    "label": "1. Name of Federal Agency",
+    "name": "NameFederalAgency",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/FederalAgency"
+      }
+    ]
   },
   {
     "type": "section",
-    "label": "Applicant Information",
+    "label": "2. Assistance Listing Number",
+    "name": "AssistanceListingNumber",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/CFDANumber"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/CFDATitle"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "3. Date Received",
+    "name": "DateReived",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/Date_Received"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "4. Funding Opportunity Number",
+    "name": "FundingOpportunityNumber",
+    "children": [
+      {
+        "type": "field",
+        "definition": "/properties/OpportunityID"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/OpportunityTitle"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "label": "5. Applicant Information",
     "name": "ApplicantInformationHeader",
-    "number": "5",
     "children": [
       {
         "type": "section",
-        "label": "Name and Contact Information",
+        "label": "5a. Name and Contact Information",
         "name": "NameandContactInformationHeader",
-        "number": "5a",
         "children": [
           {
             "type": "field",
@@ -75,9 +101,8 @@
       },
       {
         "type": "section",
-        "label": "Address",
+        "label": "5b. Address",
         "name": "AddressHeader",
-        "number": "5b",
         "children": [
           {
             "type": "field",
@@ -115,9 +140,8 @@
       },
       {
         "type": "section",
-        "label": "Citizenship Status",
+        "label": "5c. Citizenship Status",
         "name": "CitizenshipStatusHeader",
-        "number": "5c",
         "children": [
           {
             "type": "field",
@@ -138,16 +162,22 @@
         ]
       },
       {
-        "type": "field",
-        "definition": "/properties/CongressionalDistrictApplicant"
+        "type": "section",
+        "label": "5d. Congressional District of Applicant",
+        "name": "CongressionalDistrictApplicant",
+        "children": [
+          {
+            "type": "field",
+            "definition": "/properties/CongressionalDistrictApplicant"
+          }
+        ]
       }
     ]
   },
   {
     "type": "section",
-    "label": "Project Information",
+    "label": "6. Project Information",
     "name": "ProjectInformationHeader",
-    "number": "6",
     "children": [
       {
         "type": "field",
@@ -159,9 +189,8 @@
       },
       {
         "type": "section",
-        "label": "Proposed Project ",
+        "label": "6c. Proposed Project ",
         "name": "ProposedProjectHeader",
-        "number": "6c",
         "children": [
           {
             "type": "field",
@@ -177,9 +206,8 @@
   },
   {
     "type": "section",
-    "label": "Certification Text",
+    "label": "7. Certification Text",
     "name": "CertificationText",
-    "number": "7",
     "children": [
       {
         "type": "field",

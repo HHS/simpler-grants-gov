@@ -4,11 +4,11 @@ import { render, screen } from "@testing-library/react";
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
-const mockHandleFormAction = jest.fn();
+const mockSubmitApplyForm = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
-  handleFormAction: (...args: unknown[]): unknown =>
-    mockHandleFormAction(...args),
+  submitApplyForm: (...args: unknown[]): unknown =>
+    mockSubmitApplyForm(...args),
 }));
 
 const formSchema: RJSFSchema = {
@@ -60,7 +60,7 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId=""
-        rawFormData={{ name: "myself" }}
+        savedFormData={{ name: "myself" }}
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
@@ -96,12 +96,12 @@ describe("ApplyForm", () => {
   });
 
   it("calls submitApplyForm action on submit", () => {
-    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+    mockSubmitApplyForm.mockImplementation(() => Promise.resolve());
 
     render(
       <ApplyForm
         applicationId="test"
-        rawFormData={{}}
+        savedFormData={{}}
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
@@ -111,7 +111,7 @@ describe("ApplyForm", () => {
     const button = screen.getByTestId("apply-form-submit");
     button.click();
 
-    expect(mockHandleFormAction).toHaveBeenCalledWith(
+    expect(mockSubmitApplyForm).toHaveBeenCalledWith(
       {
         applicationId: "test",
         errorMessage: "",

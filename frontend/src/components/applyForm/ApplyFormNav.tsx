@@ -1,6 +1,6 @@
-import React from "react";
+import React, { memo } from "react";
 
-const ApplyFormNav = ({
+const ApplyFormNav = memo(({
   fields,
 }: {
   fields: { href: string; text: string }[];
@@ -15,7 +15,7 @@ const ApplyFormNav = ({
   return (
     fields.length > 0 && (
       <aside
-        className="usa-in-page-nav top-3"
+        className="usa-in-page-nav top-3 width-mobile maxw-none"
         aria-label="On this form"
         data-testid="InPageNavigation"
       >
@@ -28,6 +28,6 @@ const ApplyFormNav = ({
       </aside>
     )
   );
-};
+});
 
 export default ApplyFormNav;

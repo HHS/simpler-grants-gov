@@ -3,32 +3,32 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { useFormStatus } from "react-dom";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useMemo } from "react";
 import { Button, Fieldset, FormGroup } from "@trussworks/react-uswds";
 
-import { handleFormAction } from "./actions";
+import { submitApplyForm } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
 import { UiSchema } from "./types";
-import { buildForTreeRecursive, getWrappersForNav } from "./utils";
+import { buildForTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,
   formId,
   formSchema,
-  rawFormData,
+  savedFormData,
   uiSchema,
 }: {
   applicationId: string;
   formId: string;
   formSchema: RJSFSchema;
-  rawFormData?: object;
+  savedFormData?: object;
   uiSchema: UiSchema;
 }) => {
   const { pending } = useFormStatus();
 
-  const [formState, formAction] = useActionState(handleFormAction, {
+  const [formState, formAction] = useActionState(submitApplyForm, {
     applicationId,
     errorMessage: "",
     formId,
@@ -39,25 +39,29 @@ const ApplyForm = ({
 
   const { formData, errorMessage, successMessage, validationErrors } =
     formState;
-  const formObject = rawFormData || Object.fromEntries(formData.entries());
+  const formObject = savedFormData || Object.fromEntries(formData.entries());
   const fields = buildForTreeRecursive({
     errors: validationErrors,
     formData: formObject,
     schema: formSchema,
     uiSchema,
   });
-  const navFields = getWrappersForNav(uiSchema);
+  const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+
   return (
     <div className="usa-in-page-nav-container flex-justify">
       <ApplyFormNav fields={navFields} />
-      <form className="usa-form usa-form-large flex-1" action={formAction}>
+      <form
+        className="usa-form usa-form--large flex-1 margin-top-neg-5"
+        action={formAction}
+      >
         <ApplyFormSuccessMessage message={successMessage} />
         <ApplyFormErrorMessage
           message={errorMessage}
           errors={validationErrors}
         />
         <FormGroup>
-          <Fieldset legendStyle="large">{fields}</Fieldset>
+          {fields}
         </FormGroup>
         <p>
           <Button
