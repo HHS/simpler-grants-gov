@@ -5,31 +5,57 @@ UI_SCHEMA = [
         "type": "section",
         "label": "1. Name of Federal Agency",
         "name": "NameFederalAgency",
-        "children": [{"type": "field", "definition": "/properties/FederalAgency"}],
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/FederalAgency"
+            }
+        ]
     },
     {
         "type": "section",
         "label": "2. Assistance Listing Number",
         "name": "AssistanceListingNumber",
         "children": [
-            {"type": "field", "definition": "/properties/CFDANumber"},
-            {"type": "field", "definition": "/properties/CFDATitle"},
-        ],
+            {
+                "type": "field",
+                "definition": "/properties/CFDANumber"
+            },
+            {
+                "type": "field",
+                "definition": "/properties/CFDATitle"
+            }
+        ]
     },
     {
         "type": "section",
         "label": "3. Date Received",
         "name": "DateReived",
-        "children": [{"type": "field", "definition": "/properties/Date_Received"}],
+        "children": [
+            {
+                "type": "field",
+                "schema": {
+                    "title": "Date received",
+                    "type": "null",
+                    "description": "Completed by Grants.gov upon submission."
+                }
+            }
+        ]
     },
     {
         "type": "section",
         "label": "4. Funding Opportunity Number",
         "name": "FundingOpportunityNumber",
         "children": [
-            {"type": "field", "definition": "/properties/OpportunityID"},
-            {"type": "field", "definition": "/properties/OpportunityTitle"},
-        ],
+            {
+                "type": "field",
+                "definition": "/properties/OpportunityID"
+            },
+            {
+                "type": "field",
+                "definition": "/properties/OpportunityTitle"
+            }
+        ]
     },
     {
         "type": "section",
@@ -41,55 +67,118 @@ UI_SCHEMA = [
                 "label": "5a. Name and Contact Information",
                 "name": "NameandContactInformationHeader",
                 "children": [
-                    {"type": "field", "definition": "/properties/PrefixName"},
-                    {"type": "field", "definition": "/properties/FirstName"},
-                    {"type": "field", "definition": "/properties/MiddleName"},
-                    {"type": "field", "definition": "/properties/LastName"},
-                    {"type": "field", "definition": "/properties/Suffix"},
                     {
                         "type": "field",
-                        "definition": "/properties/AuthorizedRepresentativePhoneNumber",
+                        "definition": "/properties/PrefixName"
                     },
-                    {"type": "field", "definition": "/properties/EveningPhone"},
-                    {"type": "field", "definition": "/properties/AuthorizedRepresentativeFax"},
-                    {"type": "field", "definition": "/properties/AuthorizedRepresentativeEmail"},
-                ],
+                    {
+                        "type": "field",
+                        "definition": "/properties/FirstName"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/MiddleName"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/LastName"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/Suffix"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/AuthorizedRepresentativePhoneNumber"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/EveningPhone"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/AuthorizedRepresentativeFax"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/AuthorizedRepresentativeEmail"
+                    }
+                ]
             },
             {
                 "type": "section",
                 "label": "5b. Address",
                 "name": "AddressHeader",
                 "children": [
-                    {"type": "field", "definition": "/properties/Street1"},
-                    {"type": "field", "definition": "/properties/Street2"},
-                    {"type": "field", "definition": "/properties/City"},
-                    {"type": "field", "definition": "/properties/County"},
-                    {"type": "field", "definition": "/properties/State"},
-                    {"type": "field", "definition": "/properties/Province"},
-                    {"type": "field", "definition": "/properties/Country"},
-                    {"type": "field", "definition": "/properties/ZipPostalCode"},
-                ],
+                    {
+                        "type": "field",
+                        "definition": "/properties/Street1"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/Street2"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/City"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/County"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/State"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/Province"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/Country"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/ZipPostalCode"
+                    }
+                ]
             },
             {
                 "type": "section",
                 "label": "5c. Citizenship Status",
                 "name": "CitizenshipStatusHeader",
                 "children": [
-                    {"type": "field", "definition": "/properties/citizenship"},
-                    {"type": "field", "definition": "/properties/AlienRegistrationNumber"},
-                    {"type": "field", "definition": "/properties/CountryofOrigin"},
-                    {"type": "field", "definition": "/properties/VisitDate"},
-                ],
+                    {
+                        "type": "field",
+                        "definition": "/properties/citizenship"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/AlienRegistrationNumber"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/CountryofOrigin"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/VisitDate"
+                    }
+                ]
             },
             {
                 "type": "section",
                 "label": "5d. Congressional District of Applicant",
                 "name": "CongressionalDistrictApplicant",
                 "children": [
-                    {"type": "field", "definition": "/properties/CongressionalDistrictApplicant"}
-                ],
-            },
-        ],
+                    {
+                        "type": "field",
+                        "definition": "/properties/CongressionalDistrictApplicant"
+                    }
+                ]
+            }
+        ]
     },
     {
         "type": "section",
@@ -100,59 +189,71 @@ UI_SCHEMA = [
                 "type": "section",
                 "label": "6a. Project Title ",
                 "name": "ProjectTitle",
-                "children": [{"type": "field", "definition": "/properties/ProjectTitle"}],
+                "children": [
+                    {
+                        "type": "field",
+                        "definition": "/properties/ProjectTitle"
+                    }
+                ]
             },
             {
                 "type": "section",
                 "label": "6a. Project Description",
                 "name": "ProjectDecription",
-                "children": [{"type": "field", "definition": "/properties/ProjectDecription"}],
+                "children": [
+                    {
+                        "type": "field",
+                        "definition": "/properties/ProjectDecription"
+                    }
+                ]
             },
             {
                 "type": "section",
                 "label": "6c. Proposed Project ",
                 "name": "ProposedProjectHeader",
                 "children": [
-                    {"type": "field", "definition": "/properties/FundingPeriodStartDate"},
-                    {"type": "field", "definition": "/properties/FundingPeriodEndDate"},
-                ],
-            },
-        ],
+                    {
+                        "type": "field",
+                        "definition": "/properties/FundingPeriodStartDate"
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/FundingPeriodEndDate"
+                    }
+                ]
+            }
+        ]
     },
     {
         "type": "section",
         "label": "7. Certification Text",
         "name": "CertificationText",
         "children": [
-            {"type": "field", "definition": "/properties/ApplicationCertification"},
-            {"type": "field", "definition": "/properties/AORSignature"},
-            {"type": "field", "definition": "/properties/AORDate"},
-        ],
-    },
+            {
+                "type": "field",
+                "definition": "/properties/ApplicationCertification"
+            },
+            {
+                "type": "field",
+                "schema": {
+                    "title": "Signature",
+                    "type": "null",
+                    "description": "Completed by Grants.gov upon submission."
+                }
+            },
+            {
+                "type": "field",
+                "schema": {
+                    "title": "Date",
+                    "type": "null",
+                    "description": "Completed by Grants.gov upon submission."
+                }
+            }
+        ]
+    }
 ]
 
 JSON_SCHEMA_FORM = [
-    {
-        "type": "object",
-        "title": "Test form for testing",
-        "properties": {
-            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
-            "Description": {
-                "title": "Description for application",
-                "type": "string",
-                "minLength": 0,
-                "maxLength": 15,
-            },
-            "ApplicationNumber": {
-                "title": "Application number",
-                "type": "number",
-                "minLength": 1,
-                "maxLength": 120,
-            },
-            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
-        },
-        "required": ["ApplicationNumber"],
-    },
     {
         "type": "object",
         "title": "Application For Federal Assistance SF 424 - Individual",
