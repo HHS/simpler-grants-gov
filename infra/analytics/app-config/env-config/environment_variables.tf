@@ -73,5 +73,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
     }
+
+    NEW_RELIC_LICENSE_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/new-relic-license-key"
+    }
   }
 }
