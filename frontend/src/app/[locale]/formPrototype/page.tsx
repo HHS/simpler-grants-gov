@@ -1,5 +1,7 @@
 import { Metadata } from "next";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
@@ -12,7 +14,7 @@ export function generateMetadata() {
   return meta;
 }
 
-export default function FormPrototypePage() {
+function FormPrototypePage() {
   return (
     <GridContainer>
       <BetaAlert />
@@ -26,3 +28,7 @@ export default function FormPrototypePage() {
     </GridContainer>
   );
 }
+
+export default withFeatureFlag(FormPrototypePage, "applyFormPrototypeOff", () =>
+  redirect("/maintenance"),
+);
