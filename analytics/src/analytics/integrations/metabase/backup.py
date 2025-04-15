@@ -82,10 +82,9 @@ class MetabaseBackup:
         for c in name:
             if c.isalnum():
                 cleaned += c
-            else:
+            elif not cleaned or cleaned[-1] != "_":
                 # Only add underscore if the last character isn't already an underscore
-                if not cleaned or cleaned[-1] != "_":
-                    cleaned += "_"
+                cleaned += "_"
         return cleaned.strip("_")  # Remove trailing underscores
 
     def backup(self) -> None:

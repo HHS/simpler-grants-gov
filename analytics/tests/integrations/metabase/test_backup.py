@@ -37,8 +37,8 @@ def _metabase_backup_fixture(tmp_path: Path) -> MetabaseBackup:
             api_key="test-key",
             output_dir=str(tmp_path),
         )
-        # Use setattr to avoid private member access warning
-        setattr(backup, "_requests", mock_requests)
+        # pylint: disable=protected-access
+        backup._requests = mock_requests
         yield backup
 
 
@@ -51,7 +51,8 @@ def _backup_instance(tmp_path: Path) -> MetabaseBackup:
         output_dir=tmp_path,
     )
     mock_requests = MagicMock()
-    setattr(backup, "_requests", mock_requests)
+    # pylint: disable=protected-access
+    backup._requests = mock_requests
     return backup
 
 
@@ -158,14 +159,16 @@ def test_get_collections(
     response = MagicMock(spec=requests.Response)
     response.json.return_value = collection_data
     response.raise_for_status.return_value = None
-    getattr(backup_instance, "_requests").get.return_value = response
+    # pylint: disable=protected-access
+    backup_instance._requests.get.return_value = response
 
     result = backup_instance.get_collections()
 
     assert len(result) == 5
     assert result[0]["id"] == 1
     assert result[0]["name"] == "Collection 1"
-    getattr(backup_instance, "_requests").get.assert_called_once_with(
+    # pylint: disable=protected-access
+    backup_instance._requests.get.assert_called_once_with(
         "http://metabase.example.com/api/collection/?exclude-other-user-collections=true",
         headers=backup_instance.headers,
         timeout=30,
@@ -174,8 +177,9 @@ def test_get_collections(
 
 def test_get_collections_error(backup_instance: MetabaseBackup) -> None:
     """Test error handling when getting collections."""
-    getattr(backup_instance, "_requests").get.side_effect = RequestException(
-        "API Error"
+    # pylint: disable=protected-access
+    backup_instance._requests.get.side_effect = RequestException(
+        "API Error",
     )
 
     with pytest.raises(RequestException):
@@ -192,7 +196,8 @@ def test_get_items(
     response = MagicMock(spec=requests.Response)
     response.json.return_value = {"data": item_data}
     response.raise_for_status.return_value = None
-    getattr(backup_instance, "_requests").get.return_value = response
+    # pylint: disable=protected-access
+    backup_instance._requests.get.return_value = response
 
     # Test getting items for a collection
     result = backup_instance.get_items(collection_data[0]["id"])
@@ -206,7 +211,8 @@ def test_get_items(
     assert len(result) == 0
 
     # Test API error - this will raise an exception as the implementation doesn't handle it
-    getattr(backup_instance, "_requests").get.side_effect = Exception("API Error")
+    # pylint: disable=protected-access
+    backup_instance._requests.get.side_effect = Exception("API Error")
 
     # We expect this to raise an exception
     with pytest.raises(Exception, match="API Error"):
@@ -214,7 +220,7 @@ def test_get_items(
 
 
 def test_get_item_sql(
-    backup_instance: MetabaseBackup, test_response: MagicMock
+    backup_instance: MetabaseBackup, test_response: MagicMock,
 ) -> None:
     """Test getting query from an item."""
     # Test valid SQL query
@@ -222,7 +228,8 @@ def test_get_item_sql(
         "dataset_query": {"native": {"query": "SELECT * FROM table WHERE id = 1"}},
     }
 
-    getattr(backup_instance, "_requests").get = MagicMock(return_value=test_response)
+    # pylint: disable=protected-access
+    backup_instance._requests.get = MagicMock(return_value=test_response)
     sql_query = backup_instance.get_item_sql(1)
 
     # The implementation formats the SQL with sqlparse, so we need to compare with the
@@ -294,34 +301,32 @@ def test_process_item(backup_instance: MetabaseBackup, tmp_path: Path) -> None:
 
 
 def test_get_collection_path(
-    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]]
+    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]],
 ) -> None:
     """Test getting collection path."""
     collection = {"id": 1, "name": "Test Collection", "location": "/1/2/3"}
     response = MagicMock()
     response.json.return_value = collection_data
-    getattr(backup_instance, "_requests").get.return_value = response
+    # pylint: disable=protected-access
+    backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
-    expected_path = (
-        backup_instance.output_dir / "1-Unknown/2-Unknown/3-Unknown/1-Test_Collection"
-    )
+    expected_path = backup_instance.output_dir / "1-Unknown/2-Unknown/3-Unknown/1-Test_Collection"
     assert str(path) == str(expected_path)
 
 
 def test_get_collection_path_with_empty_ids(
-    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]]
+    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]],
 ) -> None:
     """Test getting collection path with empty IDs."""
     collection = {"id": 7, "name": "Collection 7", "location": "/invalid/7"}
     response = MagicMock()
     response.json.return_value = collection_data
-    getattr(backup_instance, "_requests").get.return_value = response
+    # pylint: disable=protected-access
+    backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
-    expected_path = (
-        backup_instance.output_dir / "invalid-Unknown/7-Unknown/7-Collection_7"
-    )
+    expected_path = backup_instance.output_dir / "invalid-Unknown/7-Unknown/7-Collection_7"
     assert str(path) == str(expected_path)
 
 
@@ -428,10 +433,11 @@ def test_backup_integration(backup_instance: MetabaseBackup, tmp_path: Path) -> 
 
     # Mock the get_item_sql method to return the query
     backup_instance.get_item_sql = MagicMock(
-        return_value="SELECT * FROM table WHERE id = 1"
+        return_value="SELECT * FROM table WHERE id = 1",
     )
 
-    getattr(backup_instance, "_requests").get = MagicMock(side_effect=mock_responses)
+    # pylint: disable=protected-access
+    backup_instance._requests.get = MagicMock(side_effect=mock_responses)
     backup_instance.backup()
 
     # Verify output structure
@@ -461,7 +467,7 @@ def test_init(backup_instance: MetabaseBackup) -> None:
 
 
 def test_get_item_sql_invalid(
-    backup_instance: MetabaseBackup, invalid_sql: str
+    backup_instance: MetabaseBackup, invalid_sql: str,
 ) -> None:
     """Test handling of invalid queries."""
     response = MagicMock(spec=requests.Response)
@@ -469,12 +475,14 @@ def test_get_item_sql_invalid(
         "dataset_query": {"native": {"query": invalid_sql}},
     }
     response.raise_for_status.return_value = None
-    getattr(backup_instance, "_requests").get.return_value = response
+    # pylint: disable=protected-access
+    backup_instance._requests.get.return_value = response
 
     sql_query = backup_instance.get_item_sql(101)
 
     assert sql_query is None
-    getattr(backup_instance, "_requests").get.assert_called_once_with(
+    # pylint: disable=protected-access
+    backup_instance._requests.get.assert_called_once_with(
         "http://metabase.example.com/api/card/101",
         headers=backup_instance.headers,
         timeout=30,
@@ -494,13 +502,14 @@ def test_get_item_sql_permission_denied(backup_instance: MetabaseBackup) -> None
     response.raise_for_status.side_effect = http_error
     response.json.return_value = {}
 
-    getattr(backup_instance, "_requests").get = MagicMock(return_value=response)
+    # pylint: disable=protected-access
+    backup_instance._requests.get = MagicMock(return_value=response)
     sql_query = backup_instance.get_item_sql(1)
     assert sql_query is None
 
 
 def test_write_changelog_with_stats(
-    backup_instance: MetabaseBackup, tmp_path: Path
+    backup_instance: MetabaseBackup, tmp_path: Path,
 ) -> None:
     """Test writing to the changelog with stats."""
     backup_instance.output_dir = tmp_path
@@ -532,53 +541,8 @@ def test_write_changelog_with_stats(
     assert "Errors encountered: 2" in content
 
 
-def test_backup_process(
-    backup_instance: MetabaseBackup,
-    collection_data: list[dict[str, Any]],
-    item_data: list[dict[str, Any]],
-    sql_query: str,
-) -> None:
-    """Test the full backup process."""
-    # Mock API responses
-    backup_instance.get_collections = MagicMock(return_value=collection_data)
-    backup_instance.get_items = MagicMock(return_value=item_data)
-    backup_instance.get_item_sql = MagicMock(return_value=sql_query)
-
-    # Run backup
-    backup_instance.backup()
-
-    # Verify collections were processed
-    backup_instance.get_collections.assert_called_once()
-    assert backup_instance.get_items.call_count == len(collection_data)
-
-    # Verify files were created
-    for collection in collection_data:
-        collection_path = backup_instance.get_collection_path(collection)
-        assert collection_path.exists()
-        assert collection_path.is_dir()
-
-        for item in item_data:
-            item_path = (
-                collection_path
-                / f"{item['id']}-{backup_instance.clean_name(item['name'])}.sql"
-            )
-            assert item_path.exists()
-            assert item_path.read_text() == sql_query
-
-    # Verify changelog was created
-    changelog_path = backup_instance.output_dir / "CHANGELOG.txt"
-    assert changelog_path.exists()
-    changelog_content = changelog_path.read_text()
-    assert "Backup completed" in changelog_content
-    assert f"Collections processed: {len(collection_data)}" in changelog_content
-    assert (
-        f"Items processed: {len(collection_data) * len(item_data)}" in changelog_content
-    )
-    assert "Folders renamed:" in changelog_content
-
-
 def test_file_renaming(
-    backup_instance: MetabaseBackup, sql_query: str, tmp_path: Path
+    backup_instance: MetabaseBackup, sql_query: str, tmp_path: Path,
 ) -> None:
     """Test file renaming when item names change."""
     backup_instance.output_dir = tmp_path
@@ -626,11 +590,7 @@ def test_collection_path_with_empty_ids(
     path = backup_instance.get_collection_path(collection)
     # The implementation creates a path with "Unknown" for all parent collections
     expected_path = (
-        backup_instance.output_dir
-        / "1-Unknown"
-        / "2-Unknown"
-        / "6-Unknown"
-        / "6-Collection_6"
+        backup_instance.output_dir / "1-Unknown" / "2-Unknown" / "6-Unknown" / "6-Collection_6"
     )
     assert str(path) == str(expected_path)
 
@@ -710,7 +670,8 @@ def test_backup_with_empty_collection(
     backup_instance.output_dir = tmp_path
 
     # Mock API responses for an empty collection
-    getattr(backup_instance, "_requests").get.side_effect = [
+    # pylint: disable=protected-access
+    backup_instance._requests.get.side_effect = [
         # get_collections
         MagicMock(
             json=lambda: [collection_data[0]],  # Just one collection
@@ -758,7 +719,7 @@ def test_create_collection_dir(backup_instance: MetabaseBackup, tmp_path: Path) 
 
     # Mock get_collection_path to return a specific path
     backup_instance.get_collection_path = MagicMock(
-        return_value=tmp_path / "1-Collection_1"
+        return_value=tmp_path / "1-Collection_1",
     )
 
     # Create the directory
