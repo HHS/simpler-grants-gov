@@ -1,8 +1,7 @@
 """Unit tests for Metabase backup functionality."""
 
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -49,7 +48,8 @@ def test_clean_name() -> None:
 
 
 def test_get_collections(
-    backup: MetabaseBackup, mock_collections: List[Dict[str, Any]]
+    backup: MetabaseBackup,
+    mock_collections: list[dict[str, Any]],
 ) -> None:
     """Test getting collections from Metabase."""
     mock_response = MagicMock(spec=requests.Response)
@@ -71,8 +71,8 @@ def test_get_collections(
 
 def test_get_items(
     backup: MetabaseBackup,
-    mock_collections: List[Dict[str, Any]],
-    mock_items: List[Dict[str, Any]],
+    mock_collections: list[dict[str, Any]],
+    mock_items: list[dict[str, Any]],
 ) -> None:
     """Test getting collection items."""
     # Mock the API response
@@ -110,7 +110,8 @@ def test_get_item_sql(backup: MetabaseBackup, mock_response: MagicMock) -> None:
     backup._requests.get = MagicMock(return_value=mock_response)
     query = backup.get_item_sql(1)
 
-    # The implementation formats the SQL with sqlparse, so we need to compare with the formatted version
+    # The implementation formats the SQL with sqlparse, so we need to compare with the
+    # formatted version
     expected_formatted_query = format_sql(
         "SELECT * FROM table WHERE id = 1",
         reindent=True,
@@ -178,7 +179,8 @@ def test_process_item(backup: MetabaseBackup, tmp_path: Path) -> None:
 
 
 def test_get_collection_path(
-    backup: MetabaseBackup, mock_collections: List[Dict[str, Any]]
+    backup: MetabaseBackup,
+    mock_collections: list[dict[str, Any]],
 ) -> None:
     """Test creating collection paths."""
     # Mock get_collections to return our mock collections
@@ -318,7 +320,7 @@ def test_backup_integration(backup: MetabaseBackup, tmp_path: Path) -> None:
 
 
 @pytest.fixture
-def mock_collections() -> List[Dict[str, Any]]:
+def mock_collections() -> list[dict[str, Any]]:
     """Mock collection data."""
     return [
         {
@@ -365,7 +367,7 @@ def mock_collections() -> List[Dict[str, Any]]:
 
 
 @pytest.fixture
-def mock_items() -> List[Dict[str, Any]]:
+def mock_items() -> list[dict[str, Any]]:
     """Mock item data with different model types."""
     return [
         {"id": 101, "name": "Query 1", "model": "card"},
@@ -389,7 +391,7 @@ def mock_invalid_query() -> str:
 
 def test_init() -> None:
     """Test initialization of MetabaseBackup."""
-    with patch("analytics.integrations.metabase.backup.requests") as mock_requests:
+    with patch("analytics.integrations.metabase.backup.requests"):
         backup = MetabaseBackup(
             api_url="http://metabase.example.com/api",
             api_key="test-key",
@@ -485,8 +487,8 @@ def test_write_changelog_with_stats(backup: MetabaseBackup, tmp_path: Path) -> N
 
 def test_backup_process(
     backup: MetabaseBackup,
-    mock_collections: List[Dict[str, Any]],
-    mock_items: List[Dict[str, Any]],
+    mock_collections: list[dict[str, Any]],
+    mock_items: list[dict[str, Any]],
     mock_query: str,
 ) -> None:
     """Test the full backup process."""
@@ -555,7 +557,8 @@ def test_file_renaming(backup: MetabaseBackup, mock_query: str, tmp_path: Path) 
 
 
 def test_collection_path_with_empty_ids(
-    backup: MetabaseBackup, mock_collections: List[Dict[str, Any]]
+    backup: MetabaseBackup,
+    mock_collections: list[dict[str, Any]],
 ) -> None:
     """Test handling of empty collection IDs in paths."""
     # Mock get_collections to return our mock collections
@@ -597,8 +600,8 @@ def test_collection_path_with_empty_ids(
 
 def test_backup_with_error_handling(
     backup: MetabaseBackup,
-    mock_collections: List[Dict[str, Any]],
-    mock_items: List[Dict[str, Any]],
+    mock_collections: list[dict[str, Any]],
+    mock_items: list[dict[str, Any]],
     mock_query: str,
     tmp_path: Path,
 ) -> None:
@@ -616,7 +619,7 @@ def test_backup_with_error_handling(
     backup.get_collections = MagicMock(return_value=mock_collections)
 
     # Mock get_items to return items for collection 1 and raise a RequestException for collection 2
-    def get_items_side_effect(collection_id: int) -> List[Dict[str, Any]]:
+    def get_items_side_effect(collection_id: int) -> list[dict[str, Any]]:
         if collection_id == 1:
             return [mock_items[0], mock_items[1]]
         if collection_id == 2:
@@ -646,7 +649,9 @@ def test_backup_with_error_handling(
 
 
 def test_backup_with_empty_collection(
-    backup: MetabaseBackup, mock_collections: List[Dict[str, Any]], tmp_path: Path
+    backup: MetabaseBackup,
+    mock_collections: list[dict[str, Any]],
+    tmp_path: Path,
 ) -> None:
     """Test handling of empty collections."""
     backup.output_dir = tmp_path

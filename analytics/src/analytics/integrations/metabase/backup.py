@@ -34,6 +34,7 @@ class MetabaseBackup:
             api_url: Base URL for the Metabase API.
             api_key: API key for authentication.
             output_dir: Directory to write backup files to.
+
         """
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
@@ -52,6 +53,7 @@ class MetabaseBackup:
 
         Returns:
             Dictionary with initialized stats.
+
         """
         return {
             "total_items": 0,
@@ -73,6 +75,7 @@ class MetabaseBackup:
 
         Returns:
             Cleaned name with special characters replaced by underscores.
+
         """
         # Replace whitespace and special characters with underscores
         cleaned = ""
@@ -84,9 +87,7 @@ class MetabaseBackup:
         return cleaned.strip("_")  # Remove trailing underscores
 
     def backup(self) -> None:
-        """
-        Backup all Metabase queries to local filesystem.
-        """
+        """Backup all Metabase queries to local filesystem."""
         # Reset stats
         self.stats = self._init_stats()
 
@@ -125,10 +126,9 @@ class MetabaseBackup:
 
             except (OSError, RequestException) as e:
                 logger.exception(
-                    "Error processing collection %d (%s): %s",
+                    "Error processing collection %d (%s)",
                     collection_id,
                     collection_name,
-                    str(e),
                 )
                 self.stats["items_skipped"] += len(items)
 
@@ -142,6 +142,7 @@ class MetabaseBackup:
 
         Returns:
             List of collection objects with id, name, and location.
+
         """
         url = f"{self.api_url}/collection/?exclude-other-user-collections=true"
         response = self._requests.get(url, headers=self.headers, timeout=30)
@@ -172,6 +173,7 @@ class MetabaseBackup:
 
         Returns:
             Path to the collection directory.
+
         """
         # Get the collection path
         collection_path = self.get_collection_path(collection)
@@ -222,6 +224,7 @@ class MetabaseBackup:
 
         Returns:
             Path to the collection directory.
+
         """
         # Get the collection's location path
         location = collection.get("location", "")
@@ -264,6 +267,7 @@ class MetabaseBackup:
 
         Returns:
             List of item objects with id and name.
+
         """
         url = f"{self.api_url}/collection/{collection_id}/items"
         response = self._requests.get(url, headers=self.headers, timeout=30)
@@ -293,6 +297,7 @@ class MetabaseBackup:
         Args:
             item: The item to process.
             collection_dir: The directory to write the item to.
+
         """
         # Get details about card including embedded sql
         query = self.get_item_sql(item["id"])
@@ -358,6 +363,7 @@ class MetabaseBackup:
 
         Returns:
             SQL query string if found and valid, None otherwise.
+
         """
         url = f"{self.api_url}/card/{item_id}"
         try:
@@ -393,17 +399,15 @@ class MetabaseBackup:
                     item_id,
                 )
                 return None
-            logger.exception("Error getting query for item %d: %s", item_id, str(e))
+            logger.exception("Error getting query for item %d", item_id)
             return None
 
         except RequestException as e:
-            logger.exception("Error getting query for item %d: %s", item_id, str(e))
+            logger.exception("Error getting query for item %d", item_id)
             return None
 
     def write_changelog(self) -> None:
-        """
-        Write a changelog entry with backup statistics.
-        """
+        """Write a changelog entry with backup statistics."""
         logger.info("Total items processed: %d", self.stats["total_items"])
         logger.info("Items with queries: %d", self.stats["items_with_queries"])
         logger.info("Items skipped: %d", self.stats["items_skipped"])
