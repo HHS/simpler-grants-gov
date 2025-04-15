@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Callable
 
+import pandas
 import pptx
 from bs4 import BeautifulSoup
 from docx import Document
@@ -72,6 +73,16 @@ def docx_reader(file_path: str) -> str:
     return "\n".join(paragraph.text for paragraph in Document(file_path).paragraphs)
 
 
+def xls_reader(file_path: str) -> str:
+    # Get all rows from every sheet in the xlsx file.
+    all_data = {}
+    excel_file = pandas.ExcelFile(file_path)
+    for sheet_name in excel_file.sheet_names:
+        xls_data = pandas.read_excel(excel_file, sheet_name=sheet_name, dtype=str)
+        all_data[sheet_name] = xls_data.astype(str).values.tolist()
+    return _xls_dict_to_string(all_data)
+
+
 @dataclass
 class TextExtractorConfig:
     extractor: Callable[[bytes | str], str] = lambda data: data
@@ -101,6 +112,7 @@ class TextExtractor:
 
     def _get_text_extractor_config(self) -> TextExtractorConfig:
         html_extractor_config = TextExtractorConfig(extractor=extract_text_from_html)
+        xls_extractor_config = TextExtractorConfig(reader=xls_reader)
         return {
             "docx": TextExtractorConfig(reader=docx_reader),
             "pdf": TextExtractorConfig(extractor=extract_text_from_pdf, read_mode="rb"),
@@ -109,8 +121,20 @@ class TextExtractor:
             "html": html_extractor_config,
             "htm": html_extractor_config,
             "rtf": TextExtractorConfig(extractor=extract_text_from_rft),
+            "xlsm": xls_extractor_config,
+            "xlsx": xls_extractor_config,
         }[self.file_type]
 
     def _validate_file_type(self) -> None:
         if self.file_type.lower() not in TEXT_EXTRACTOR_SUPPORTED_FILE_TYPES:
             raise UnsupportedTextExtractorFileType(f"Unsupported file type: {self.file_type}")
+
+
+def _xls_dict_to_string(xls_dict: dict[str, list[list]]) -> str:
+    xls_data = []
+    for sheet_name, rows in xls_dict.items():
+        xls_data.append(sheet_name)
+        for row in rows:
+            xls_data.append(",".join(str(i) for i in row))
+        xls_data.append("")
+    return "\n".join(xls_data)

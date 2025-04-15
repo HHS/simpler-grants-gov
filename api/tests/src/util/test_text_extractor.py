@@ -28,6 +28,14 @@ def test_extract_text_from_file_returns_none_unsupported_file_type() -> None:
         (f"{TEST_FILE_DIR}/pptx_data.pptx", "Presentation Title Text\nSubtitle Text"),
         (f"{TEST_FILE_DIR}/rtf_data.rtf", "rtf title\n\nrtf paragraph"),
         (f"{TEST_FILE_DIR}/text_data.txt", "text data"),
+        (
+            f"{TEST_FILE_DIR}/xlsx_data.xlsx",
+            "sheet1\nh1,h2\nxlsx,data\n\nsheet2\nh3,h4\nandxlsm,data",
+        ),
+        (
+            f"{TEST_FILE_DIR}/xlsm_data.xlsm",
+            "sheet1\nh1,h2\nxlsx,data\n\nsheet2\nh3,h4\nandxlsm,data",
+        ),
     ],
 )
 def test_extract_pdf_text(fixture_file_path, fixture_file_path_val, expected) -> None:
