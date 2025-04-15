@@ -290,55 +290,44 @@ class MetabaseBackup:
         # Check if a file with this ID already exists (regardless of name)
         existing_files = list(collection_dir.glob(f"{item['id']}-*.sql"))
 
-        if existing_files:
-            # Found an existing file with the same ID
-            existing_file = existing_files[0]
-
-            # Check if the filename has changed
-            if existing_file.name != new_filename:
-                # Read the current query from the existing file
-                current_query = existing_file.read_text()
-
-                # Update the file with the new query
-                existing_file.write_text(query)
-
-                # Rename the file to match the new name
-                existing_file.rename(new_filepath)
-                stats["items_renamed"] += 1
-                logger.info(
-                    "Renamed file for item %d from '%s' to '%s'",
-                    item["id"],
-                    existing_file.name,
-                    new_filename,
-                )
-
-                # Check if the query content has changed
-                if current_query != query:
-                    stats["items_with_diffs"] += 1
-                    logger.info(
-                        "Found diffs in query for item %d (%s)",
-                        item["id"],
-                        item["name"],
-                    )
-            else:
-                # Same filename, just check if content has changed
-                current_query = existing_file.read_text()
-                if current_query != query:
-                    existing_file.write_text(query)
-                    stats["items_with_diffs"] += 1
-                    logger.info(
-                        "Found diffs in query for item %d (%s)",
-                        item["id"],
-                        item["name"],
-                    )
-        else:
-            # No existing file with this ID, create a new one
+        # If no existing file with this ID, create a new one and return
+        if not existing_files:
             new_filepath.write_text(query)
             stats["items_with_diffs"] += 1
             logger.info(
                 "Found diffs in query for item %d (%s)",
                 item["id"],
                 item["name"],
+            )
+            return
+
+        # Found an existing file with the same ID
+        existing_file = existing_files[0]
+
+        # Read the current query from the existing file
+        current_query = existing_file.read_text()
+
+        # Check if the query content has changed
+        if current_query != query:
+            # Update the file with the new query
+            existing_file.write_text(query)
+            stats["items_with_diffs"] += 1
+            logger.info(
+                "Found diffs in query for item %d (%s)",
+                item["id"],
+                item["name"],
+            )
+
+        # Check if the filename has changed
+        if existing_file.name != new_filename:
+            # Rename the file to match the new name
+            existing_file.rename(new_filepath)
+            stats["items_renamed"] += 1
+            logger.info(
+                "Renamed file for item %d from '%s' to '%s'",
+                item["id"],
+                existing_file.name,
+                new_filename,
             )
 
     def _process_item(self, item: Dict, collection_dir: Path, stats: Dict) -> None:
