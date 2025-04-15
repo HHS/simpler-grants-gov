@@ -27,12 +27,12 @@ def test_invalid_text_extractor_args(file_path, file_type, exception) -> None:
 
 def test_extract_text_from_file_raises_when_specified_in_param() -> None:
     with pytest.raises(UnsupportedTextExtractorFileType):
-        extract_text_from_file("unsopported_file_type.not_today", raise_on_error=True)
-    assert extract_text_from_file("unsopported_file_type.not_today", raise_on_error=False) is None
+        extract_text_from_file("unsupported_file_type.not_today", raise_on_error=True)
+    assert extract_text_from_file("unsupported_file_type.not_today", raise_on_error=False) is None
 
 
 def test_extract_text_from_file_returns_none_unsupported_file_type() -> None:
-    assert extract_text_from_file("unsopported_file_type.not_today") is None
+    assert extract_text_from_file("unsupported_file_type.not_today") is None
 
 
 @pytest.mark.parametrize(
