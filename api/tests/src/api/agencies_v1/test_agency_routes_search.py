@@ -9,15 +9,15 @@ from tests.src.db.models.factories import AgencyFactory
 HHS = AgencyFactory.build(agency_code="HHS")
 DOD = AgencyFactory.build(agency_code="DOD")
 DOA = AgencyFactory.build(agency_code="DOA")
-DHA = AgencyFactory.build(agency_code="DHA", is_test_agency=True)
 
 # sub-agencies
 HHS_NIH = AgencyFactory.build(agency_code="HHS-NIH", top_level_agency=HHS)
 HHS_DOC = AgencyFactory.build(agency_code="HHS-DOC", top_level_agency=HHS)
+HHS_OMHA = AgencyFactory.build(agency_code="HHS-OMHA", top_level_agency=HHS, is_test_agency=True)
 DOD_MCO = AgencyFactory.build(agency_code="DOD-MCO", top_level_agency=DOD)
 DOD_HRE = AgencyFactory.build(agency_code="DOD-HRE", top_level_agency=DOD)
 
-AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, DHA]
+AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA]
 
 
 class TestAgencyRoutesSearch(BaseTestClass):
@@ -68,7 +68,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 },
                 [DOD, DOD_HRE, DOD_MCO],
             ),
-            # Filter
+                # Filter
             (
                 {
                     "pagination": {
@@ -97,7 +97,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         "has_active_opportunity": {"one_of": [0]},
                     },
                 },
-                [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH],
+                [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA],
             ),
             (
                     {
@@ -109,10 +109,10 @@ class TestAgencyRoutesSearch(BaseTestClass):
                             ],
                         },
                         "filters": {
-                            "is_test_agency": {"one_of": [0]},
+                            "is_test_agency": {"one_of": [1]},
                         },
                     },
-                    [DHA],
+                    [HHS_OMHA],
             ),
         ],
     )
