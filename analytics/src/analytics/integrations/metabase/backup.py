@@ -323,8 +323,7 @@ class MetabaseBackup:
             return None
 
     def write_changelog(self) -> None:
-        """Write a changelog entry with backup statistics.
-        """
+        """Write a changelog entry with backup statistics."""
         logger.info("Total items processed: %d", self.stats["total_items"])
         logger.info("Items with queries: %d", self.stats["items_with_queries"])
         logger.info("Items skipped: %d", self.stats["items_skipped"])
