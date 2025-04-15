@@ -93,36 +93,3 @@ export interface UswdsWidgetProps<
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
 }
-
-export const uiSchema: UiSchema = [
-  {
-    type: "section",
-    label: "Applicant info",
-    name: "ApplicantInfo",
-    children: [
-      {
-        type: "field",
-        definition: "/properties/name",
-      },
-      {
-        type: "field",
-        schema: { 'title': 'wtf', type: "string"},
-      },
-    ],
-  },
-  {
-    type: "section",
-    label: "Applicant location",
-    name: "ApplicantLocation",
-    children: [
-      {
-        type: "field",
-        definition: "/properties/address",
-      },
-      {
-        type: "field",
-        definition: "/properties/state",
-      },
-    ],
-  },
-];
