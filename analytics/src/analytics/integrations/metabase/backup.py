@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import requests
+from requests.exceptions import HTTPError, RequestException
 from sqlparse import format as format_sql
 
 logger = logging.getLogger(__name__)
@@ -149,17 +150,15 @@ class MetabaseBackup:
                 return None
 
             return query
-        except Exception as e:
-            if (
-                hasattr(e, "response")
-                and hasattr(e.response, "status_code")
-                and e.response.status_code == 403
-            ):
+        except HTTPError as e:
+            if e.response.status_code == 403:
                 logger.warning(f"Permission denied (403) for item {item_id}. Skipping.")
                 return None
-            else:
-                logger.error(f"Error getting query for item {item_id}: {str(e)}")
-                return None
+            logger.error(f"Error getting query for item {item_id}: {str(e)}")
+            return None
+        except RequestException as e:
+            logger.error(f"Error getting query for item {item_id}: {str(e)}")
+            return None
 
     def write_query_to_file(
         self, collection_path: Path, item_id: int, item_name: str, query: str
@@ -196,41 +195,48 @@ class MetabaseBackup:
         filepath.write_text(formatted_query)
         return True
 
-    def create_collection_path(self, collections: List[Dict], collection: Dict) -> Path:
-        """Create the full path for a collection based on its location.
+    def create_collection_path(self, collection: Dict) -> Path:
+        """Create a path for a collection.
 
         Args:
-            collections: List of all collections
-            collection: Collection to create path for
+            collection: Collection object with id, name, and location
 
         Returns:
-            Path object for the collection directory
+            Path to the collection directory
         """
-        # Create a map of collection IDs to names for path resolution
+        # Get the collection's location path
+        location = collection.get("location", "")
+
+        # For root collections, just use the collection name
+        if not location:
+            return (
+                self.output_dir
+                / f"{collection['id']}-{self._clean_name(collection['name'])}"
+            )
+
+        # For collections with a location, we need to handle the hierarchy
+        # The location is a path like "/123/456" where each number is a collection ID
+
+        # First, get all collections to build a map of IDs to names
+        collections = self.get_collections()
         collection_map = {str(c["id"]): c["name"] for c in collections}
 
-        # Get the location path (e.g. "/123/456")
-        location = collection["location"]
-        if not location:
-            # Root level collection
-            path_parts = []
-        else:
-            # Remove leading slash and split into IDs
-            path_parts = [part for part in location.strip("/").split("/") if part]
+        # Split the location path into parts and remove the leading slash
+        parts = [p for p in location.strip("/").split("/") if p]
 
         # Build the path
         path = self.output_dir
-        for part in path_parts:
+        for part in parts:
             if part in collection_map:
+                # Use the actual collection name from our map
                 name = collection_map[part]
                 path = path / f"{part}-{self._clean_name(name)}"
+            else:
+                # If we can't find the collection name, use a generic name
+                path = path / f"{part}-Collection_{part}"
 
         # Add the current collection to the path
-        current_id = str(collection["id"])
-        current_name = collection["name"]
-        path = path / f"{current_id}-{self._clean_name(current_name)}"
-
-        return path
+        return path / f"{collection['id']}-{self._clean_name(collection['name'])}"
 
     def write_changelog(self, stats: Dict) -> None:
         """Write a changelog entry with backup statistics.
@@ -291,9 +297,7 @@ class MetabaseBackup:
                     )
 
                     # Create collection directory
-                    collection_dir = self.create_collection_path(
-                        collections, collection
-                    )
+                    collection_dir = self.create_collection_path(collection)
                     collection_dir.mkdir(parents=True, exist_ok=True)
 
                     # Process each item
@@ -362,13 +366,13 @@ class MetabaseBackup:
                                     f"No valid query found for item {item['id']} ({item['name']})"
                                 )
 
-                        except Exception as e:
+                        except (IOError, RequestException) as e:
                             logger.error(
                                 f"Error processing item {item['id']} ({item['name']}): {str(e)}"
                             )
                             items_skipped += 1
 
-                except Exception as e:
+                except (IOError, RequestException) as e:
                     logger.error(
                         f"Error processing collection {collection_id} ({collection_name}): {str(e)}"
                     )
