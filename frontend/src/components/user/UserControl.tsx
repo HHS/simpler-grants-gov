@@ -85,7 +85,18 @@ const UserDropdown = ({
         // @ts-ignore: Type 'Element' is not assignable to type 'string'
         label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
-        onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
+        onToggle={() => {
+          if (!userProfileMenuOpen) {
+            setUserProfileMenuOpen(true);
+            document.addEventListener(
+              "click",
+              () => {
+                setUserProfileMenuOpen(false);
+              },
+              { once: true },
+            );
+          }
+        }}
         isCurrent={false}
         menuId="user-control"
       />
