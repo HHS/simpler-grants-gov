@@ -25,15 +25,13 @@ from src.db.models.opportunity_models import (
     OpportunityChangeAudit,
 )
 from src.task.task import Task
-from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.text_extractor import TextExtractor, extract_text_from_file
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_ATTACHMENT_SUFFIXES = set(
-    ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
-)
+ALLOWED_ATTACHMENT_SUFFIXES = set(TextExtractor.get_configs())
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -347,17 +345,15 @@ class LoadOpportunitiesToIndex(Task):
         attachments = []
         for att in opp_attachments:
             if self.filter_attachment(att):
-                with file_util.open_stream(
-                    att.file_location,
-                    "rb",
-                ) as file:
-                    file_content = file.read()
-                    attachments.append(
-                        {
-                            "filename": att.file_name,
-                            "data": base64.b64encode(file_content).decode("utf-8"),
-                        }
-                    )
+                file_text = extract_text_from_file(att.file_location)
+                attachments.append(
+                    {
+                        "filename": att.file_name,
+                        "attachment": {
+                            "content": file_text,
+                        },
+                    }
+                )
 
         return attachments
 
@@ -410,7 +406,7 @@ class LoadOpportunitiesToIndex(Task):
                 self.index_name,
                 batch_json_records,
                 "opportunity_id",
-                pipeline="multi-attachment",
+                pipeline=None,
                 refresh=refresh,
             )
 
