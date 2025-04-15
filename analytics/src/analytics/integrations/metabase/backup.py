@@ -20,6 +20,7 @@ from sqlparse import format as format_sql
 
 logger = logging.getLogger(__name__)
 
+
 class MetabaseBackup:
     """Handles backing up Metabase queries to disk."""
 
@@ -31,12 +32,12 @@ class MetabaseBackup:
             api_key: API key for authentication
             output_dir: Directory to write backup files to
         """
-        self.api_url = api_url.rstrip('/')
+        self.api_url = api_url.rstrip("/")
         self.api_key = api_key
         self.output_dir = Path(output_dir)
-        self.headers = {'x-api-key': api_key}
+        self.headers = {"x-api-key": api_key}
         self._requests = requests
-        
+
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -50,15 +51,15 @@ class MetabaseBackup:
             Cleaned name with special characters replaced by underscores
         """
         # Replace whitespace and special characters with underscores
-        cleaned = ''
+        cleaned = ""
         for c in name:
             if c.isalnum():
                 cleaned += c
-            elif c in '<>':  # Handle angle brackets specially
-                cleaned += '_'
+            elif c in "<>":  # Handle angle brackets specially
+                cleaned += "_"
             else:
-                cleaned += '_'
-        return cleaned.strip('_')  # Remove trailing underscores
+                cleaned += "_"
+        return cleaned.strip("_")  # Remove trailing underscores
 
     def get_collections(self) -> List[Dict]:
         """Get all available collections from Metabase.
@@ -69,19 +70,21 @@ class MetabaseBackup:
         url = f"{self.api_url}/collection/?exclude-other-user-collections=true"
         response = self._requests.get(url, headers=self.headers)
         response.raise_for_status()
-        
+
         collections = []
         for collection in response.json():
             # Skip personal, sample, or archived collections
-            if (collection.get('is_personal') or 
-                collection.get('is_sample') or 
-                collection.get('archived')):
+            if (
+                collection.get("is_personal")
+                or collection.get("is_sample")
+                or collection.get("archived")
+            ):
                 continue
-                
+
             # Ensure required fields exist
-            if all(field in collection for field in ['id', 'name', 'location']):
+            if all(field in collection for field in ["id", "name", "location"]):
                 collections.append(collection)
-                
+
         return collections
 
     def get_collection_items(self, collection_id: int) -> List[Dict]:
@@ -96,16 +99,20 @@ class MetabaseBackup:
         url = f"{self.api_url}/collection/{collection_id}/items"
         response = self._requests.get(url, headers=self.headers)
         response.raise_for_status()
-        
+
         # The API returns items in a nested 'data' field
         items = []
-        for item in response.json().get('data', []):
+        for item in response.json().get("data", []):
             # Only process items with model="card"
-            if item.get('model') == 'card' and all(field in item for field in ['id', 'name']):
+            if item.get("model") == "card" and all(
+                field in item for field in ["id", "name"]
+            ):
                 items.append(item)
             else:
-                logger.debug(f"Skipping non-card item: {item.get('name')} (model: {item.get('model')})")
-                
+                logger.debug(
+                    f"Skipping non-card item: {item.get('name')} (model: {item.get('model')})"
+                )
+
         return items
 
     def get_item_query(self, item_id: int) -> Optional[str]:
@@ -121,33 +128,42 @@ class MetabaseBackup:
         try:
             response = self._requests.get(url, headers=self.headers)
             response.raise_for_status()
-            
+
             # The query is nested in the dataset_query field
             data = response.json()
-            dataset_query = data.get('dataset_query', {})
-            query = dataset_query.get('native', {}).get('query')
-            
+            dataset_query = data.get("dataset_query", {})
+            query = dataset_query.get("native", {}).get("query")
+
             if not query or not isinstance(query, str):
                 logger.warning(f"No valid query found for item {item_id}")
                 return None
-            
+
             # Basic sanity check for SQL
-            if not any(keyword.lower() in query.lower() 
-                      for keyword in ['select', 'from', 'where']):
-                logger.warning(f"Query for item {item_id} does not contain required SQL keywords")
+            if not any(
+                keyword.lower() in query.lower()
+                for keyword in ["select", "from", "where"]
+            ):
+                logger.warning(
+                    f"Query for item {item_id} does not contain required SQL keywords"
+                )
                 return None
-            
+
             return query
         except Exception as e:
-            if hasattr(e, 'response') and hasattr(e.response, 'status_code') and e.response.status_code == 403:
+            if (
+                hasattr(e, "response")
+                and hasattr(e.response, "status_code")
+                and e.response.status_code == 403
+            ):
                 logger.warning(f"Permission denied (403) for item {item_id}. Skipping.")
                 return None
             else:
                 logger.error(f"Error getting query for item {item_id}: {str(e)}")
                 return None
 
-    def write_query_to_file(self, collection_path: Path, item_id: int, 
-                          item_name: str, query: str) -> bool:
+    def write_query_to_file(
+        self, collection_path: Path, item_id: int, item_name: str, query: str
+    ) -> bool:
         """Write a query to a file, only if the content has changed.
 
         Args:
@@ -161,27 +177,26 @@ class MetabaseBackup:
         """
         # Create collection directory if it doesn't exist
         collection_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Format the query for readability
-        formatted_query = format_sql(query, reindent=True, keyword_case='upper')
-        
+        formatted_query = format_sql(query, reindent=True, keyword_case="upper")
+
         # Create filename
         clean_name = self._clean_name(item_name)
         filename = f"{item_id}-{clean_name}.sql"
         filepath = collection_path / filename
-        
+
         # Check if file exists and content is different
         if filepath.exists():
             current_content = filepath.read_text()
             if current_content == formatted_query:
                 return False
-                
+
         # Write the file
         filepath.write_text(formatted_query)
         return True
 
-    def create_collection_path(self, collections: List[Dict], 
-                             collection: Dict) -> Path:
+    def create_collection_path(self, collections: List[Dict], collection: Dict) -> Path:
         """Create the full path for a collection based on its location.
 
         Args:
@@ -192,29 +207,29 @@ class MetabaseBackup:
             Path object for the collection directory
         """
         # Create a map of collection IDs to names for path resolution
-        collection_map = {str(c['id']): c['name'] for c in collections}
-        
+        collection_map = {str(c["id"]): c["name"] for c in collections}
+
         # Get the location path (e.g. "/123/456")
-        location = collection['location']
+        location = collection["location"]
         if not location:
             # Root level collection
             path_parts = []
         else:
             # Remove leading slash and split into IDs
-            path_parts = [part for part in location.strip('/').split('/') if part]
-            
+            path_parts = [part for part in location.strip("/").split("/") if part]
+
         # Build the path
         path = self.output_dir
         for part in path_parts:
             if part in collection_map:
                 name = collection_map[part]
                 path = path / f"{part}-{self._clean_name(name)}"
-        
+
         # Add the current collection to the path
-        current_id = str(collection['id'])
-        current_name = collection['name']
+        current_id = str(collection["id"])
+        current_name = collection["name"]
         path = path / f"{current_id}-{self._clean_name(current_name)}"
-        
+
         return path
 
     def write_changelog(self, stats: Dict) -> None:
@@ -233,14 +248,14 @@ class MetabaseBackup:
             f"Errors encountered: {stats['errors']}\n"
             "================================\n"
         )
-        
+
         changelog_path = self.output_dir / "CHANGELOG.txt"
-        
+
         # Create the file if it doesn't exist
         if not changelog_path.exists():
             changelog_path.write_text("")
             logger.info("Created new changelog file")
-        
+
         # Append the new entry to the existing content
         current_content = changelog_path.read_text()
         changelog_path.write_text(log_entry + current_content)
@@ -251,90 +266,114 @@ class MetabaseBackup:
             # Get all collections
             collections = self.get_collections()
             logger.info(f"Found {len(collections)} collections")
-            
+
             # Track stats
             total_items = 0
             items_with_queries = 0
             items_with_diffs = 0
             items_skipped = 0
             items_renamed = 0
-            
+
             # Process each collection
             for collection in collections:
-                collection_id = collection['id']
-                collection_name = collection['name']
-                logger.info(f"Processing collection {collection_id} ({collection_name})")
-                
+                collection_id = collection["id"]
+                collection_name = collection["name"]
+                logger.info(
+                    f"Processing collection {collection_id} ({collection_name})"
+                )
+
                 try:
                     # Get items in collection
                     items = self.get_collection_items(collection_id)
                     total_items += len(items)
-                    logger.info(f"Found {len(items)} items in collection {collection_id} ({collection_name})")
-                    
+                    logger.info(
+                        f"Found {len(items)} items in collection {collection_id} ({collection_name})"
+                    )
+
                     # Create collection directory
-                    collection_dir = self.create_collection_path(collections, collection)
+                    collection_dir = self.create_collection_path(
+                        collections, collection
+                    )
                     collection_dir.mkdir(parents=True, exist_ok=True)
-                    
+
                     # Process each item
                     for item in items:
                         try:
                             # Get query for item
-                            query = self.get_item_query(item['id'])
+                            query = self.get_item_query(item["id"])
                             if query:
                                 items_with_queries += 1
-                                
+
                                 # Create the new filename
-                                new_filename = f"{item['id']}-{self._clean_name(item['name'])}.sql"
+                                new_filename = (
+                                    f"{item['id']}-{self._clean_name(item['name'])}.sql"
+                                )
                                 new_filepath = collection_dir / new_filename
-                                
+
                                 # Check if a file with this ID already exists (regardless of name)
-                                existing_files = list(collection_dir.glob(f"{item['id']}-*.sql"))
-                                
+                                existing_files = list(
+                                    collection_dir.glob(f"{item['id']}-*.sql")
+                                )
+
                                 if existing_files:
                                     # Found an existing file with the same ID
                                     existing_file = existing_files[0]
-                                    
+
                                     # Check if the filename has changed
                                     if existing_file.name != new_filename:
                                         # Read the current query from the existing file
                                         current_query = existing_file.read_text()
-                                        
+
                                         # Update the file with the new query
                                         existing_file.write_text(query)
-                                        
+
                                         # Rename the file to match the new name
                                         existing_file.rename(new_filepath)
                                         items_renamed += 1
-                                        logger.info(f"Renamed file for item {item['id']} from '{existing_file.name}' to '{new_filename}'")
-                                        
+                                        logger.info(
+                                            f"Renamed file for item {item['id']} from '{existing_file.name}' to '{new_filename}'"
+                                        )
+
                                         # Check if the query content has changed
                                         if current_query != query:
                                             items_with_diffs += 1
-                                            logger.info(f"Found diffs in query for item {item['id']} ({item['name']})")
+                                            logger.info(
+                                                f"Found diffs in query for item {item['id']} ({item['name']})"
+                                            )
                                     else:
                                         # Same filename, just check if content has changed
                                         current_query = existing_file.read_text()
                                         if current_query != query:
                                             existing_file.write_text(query)
                                             items_with_diffs += 1
-                                            logger.info(f"Found diffs in query for item {item['id']} ({item['name']})")
+                                            logger.info(
+                                                f"Found diffs in query for item {item['id']} ({item['name']})"
+                                            )
                                 else:
                                     # No existing file with this ID, create a new one
                                     new_filepath.write_text(query)
                                     items_with_diffs += 1
-                                    logger.info(f"Found diffs in query for item {item['id']} ({item['name']})")
+                                    logger.info(
+                                        f"Found diffs in query for item {item['id']} ({item['name']})"
+                                    )
                             else:
                                 items_skipped += 1
-                                logger.warning(f"No valid query found for item {item['id']} ({item['name']})")
-                                
+                                logger.warning(
+                                    f"No valid query found for item {item['id']} ({item['name']})"
+                                )
+
                         except Exception as e:
-                            logger.error(f"Error processing item {item['id']} ({item['name']}): {str(e)}")
+                            logger.error(
+                                f"Error processing item {item['id']} ({item['name']}): {str(e)}"
+                            )
                             items_skipped += 1
-                            
+
                 except Exception as e:
-                    logger.error(f"Error processing collection {collection_id} ({collection_name}): {str(e)}")
+                    logger.error(
+                        f"Error processing collection {collection_id} ({collection_name}): {str(e)}"
+                    )
                     items_skipped += len(items)
-                    
+
             # Log final stats
             logger.info(f"Done processing {len(collections)} collections")
             logger.info(f"Total items processed: {total_items}")
@@ -342,19 +381,19 @@ class MetabaseBackup:
             logger.info(f"Items with diffs: {items_with_diffs}")
             logger.info(f"Items renamed: {items_renamed}")
             logger.info(f"Items skipped: {items_skipped}")
-            
+
             # Write changelog
             stats = {
-                'collections': len(collections),
-                'items': total_items,
-                'changed_files': items_with_diffs,
-                'renamed_files': items_renamed,
-                'errors': items_skipped
+                "collections": len(collections),
+                "items": total_items,
+                "changed_files": items_with_diffs,
+                "renamed_files": items_renamed,
+                "errors": items_skipped,
             }
             self.write_changelog(stats)
-            
+
             logger.info("Done")
-            
+
         except Exception as e:
             logger.error(f"Backup failed: {str(e)}")
-            raise 
+            raise

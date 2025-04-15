@@ -244,15 +244,14 @@ def load_opportunity_data() -> None:
 def backup_metabase() -> None:
     """Backup Metabase queries to disk."""
     # Get environment variables
-    api_url = os.getenv('MB_API_URL')
-    api_key = os.getenv('MB_API_KEY')
-    output_dir = os.getenv('MB_BACKUP_DIR', 
-                          'src/analytics/integrations/metabase/sql')
-    
+    api_url = os.getenv("MB_API_URL")
+    api_key = os.getenv("MB_API_KEY")
+    output_dir = os.getenv("MB_BACKUP_DIR", "src/analytics/integrations/metabase/sql")
+
     if not api_url or not api_key:
         logger.error("MB_API_URL and MB_API_KEY must be set")
         return
-        
+
     # Create backup handler and run backup
     backup = MetabaseBackup(api_url, api_key, output_dir)
     backup.backup()

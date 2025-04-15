@@ -25,22 +25,20 @@ def mock_response():
 def backup(tmp_path):
     """Create a MetabaseBackup instance with a temporary output directory."""
     return MetabaseBackup(
-        api_url="http://test-api",
-        api_key="test-key",
-        output_dir=str(tmp_path)
+        api_url="http://test-api", api_key="test-key", output_dir=str(tmp_path)
     )
 
 
 def test_clean_name():
     """Test cleaning names for filenames."""
     backup = MetabaseBackup("http://test", "key", "output")
-    
+
     # Test basic cleaning
     assert backup._clean_name("Test Name") == "Test_Name"
-    
+
     # Test special characters
     assert backup._clean_name("Test@Name#123") == "Test_Name_123"
-    
+
     # Test multiple spaces
     assert backup._clean_name("Test   Name") == "Test___Name"
 
@@ -57,7 +55,7 @@ def test_get_collections(backup, mock_collections):
     assert collections[0]["name"] == "Collection 1"
     backup._requests.get.assert_called_once_with(
         "http://metabase.example.com/api/collection/?exclude-other-user-collections=true",
-        headers=backup.headers
+        headers=backup.headers,
     )
 
 
@@ -65,22 +63,24 @@ def test_get_collection_items(backup, mock_collections, mock_items):
     """Test getting collection items."""
     # Mock the API response
     backup._requests.get.return_value.json.return_value = {"data": mock_items}
-    
+
     # Test getting items for a collection
     items = backup.get_collection_items(mock_collections[0])
     assert len(items) == 2
     assert items[0]["id"] == 101
     assert items[1]["id"] == 102
-    
+
     # Test getting items for a collection with no items
     backup._requests.get.return_value.json.return_value = {"data": []}
     items = backup.get_collection_items(mock_collections[1])
     assert len(items) == 0
-    
+
     # Test API error - this will raise an exception as the implementation doesn't handle it
     backup._requests.get.return_value.json.side_effect = Exception("API Error")
-    backup._requests.get.return_value.raise_for_status.side_effect = Exception("API Error")
-    
+    backup._requests.get.return_value.raise_for_status.side_effect = Exception(
+        "API Error"
+    )
+
     # We expect this to raise an exception
     with pytest.raises(Exception):
         backup.get_collection_items(mock_collections[2])
@@ -90,32 +90,24 @@ def test_get_item_query(backup, mock_response):
     """Test getting query from an item."""
     # Test valid SQL query
     mock_response.json.return_value = {
-        "dataset_query": {
-            "native": {
-                "query": "SELECT * FROM table WHERE id = 1"
-            }
-        }
+        "dataset_query": {"native": {"query": "SELECT * FROM table WHERE id = 1"}}
     }
-    
+
     backup._requests.get = MagicMock(return_value=mock_response)
     query = backup.get_item_query(1)
     assert query == "SELECT * FROM table WHERE id = 1"
-    
+
     # Test invalid query (not SQL)
     mock_response.json.return_value = {
-        "dataset_query": {
-            "native": {
-                "query": "not a sql query"
-            }
-        }
+        "dataset_query": {"native": {"query": "not a sql query"}}
     }
-    
+
     query = backup.get_item_query(1)
     assert query is None
-    
+
     # Test missing query
     mock_response.json.return_value = {}
-    
+
     query = backup.get_item_query(1)
     assert query is None
 
@@ -126,39 +118,49 @@ def test_write_query_to_file(backup, tmp_path):
     item_id = 1
     item_name = "Test Item"
     query = "SELECT * FROM table WHERE id = 1"
-    
+
     # Test writing new file
     changed = backup.write_query_to_file(collection_path, item_id, item_name, query)
     assert changed is True
-    
+
     # Verify file was created with formatted SQL
     file_path = collection_path / f"{item_id}-Test_Item.sql"
     assert file_path.exists()
-    assert file_path.read_text() == format_sql(query, reindent=True, keyword_case='upper')
-    
+    assert file_path.read_text() == format_sql(
+        query, reindent=True, keyword_case="upper"
+    )
+
     # Test writing same content (should not change file)
     changed = backup.write_query_to_file(collection_path, item_id, item_name, query)
     assert changed is False
-    
+
     # Test writing different content
     new_query = "SELECT * FROM table WHERE id = 2"
     changed = backup.write_query_to_file(collection_path, item_id, item_name, new_query)
     assert changed is True
-    assert file_path.read_text() == format_sql(new_query, reindent=True, keyword_case='upper')
+    assert file_path.read_text() == format_sql(
+        new_query, reindent=True, keyword_case="upper"
+    )
 
 
 def test_create_collection_path(backup, mock_collections):
     """Test creating collection paths."""
     # Test nested collection path
     path = backup.create_collection_path(mock_collections, mock_collections[3])
-    expected_path = backup.output_dir / "1-Collection_1" / "2-Collection_2" / "4-Collection_4" / "4-Collection_4"
+    expected_path = (
+        backup.output_dir
+        / "1-Collection_1"
+        / "2-Collection_2"
+        / "4-Collection_4"
+        / "4-Collection_4"
+    )
     assert str(path) == str(expected_path)
-    
+
     # Test root collection
     path = backup.create_collection_path(mock_collections, mock_collections[0])
     expected_path = backup.output_dir / "1-Collection_1" / "1-Collection_1"
     assert str(path) == str(expected_path)
-    
+
     # Test invalid location
     path = backup.create_collection_path(mock_collections, mock_collections[4])
     expected_path = backup.output_dir / "5-Collection_5" / "5-Collection_5"
@@ -167,23 +169,19 @@ def test_create_collection_path(backup, mock_collections):
 
 def test_write_changelog(backup, tmp_path):
     """Test writing changelog."""
-    stats = {
-        "collections": 2,
-        "items": 5,
-        "changed_files": 3
-    }
-    
+    stats = {"collections": 2, "items": 5, "changed_files": 3}
+
     # Write initial changelog
     backup.write_changelog(stats)
     changelog_path = backup.output_dir / "CHANGELOG.txt"
     assert changelog_path.exists()
-    
+
     # Verify content
     content = changelog_path.read_text()
     assert "Collections processed: 2" in content
     assert "Items processed: 5" in content
     assert "Files changed: 3" in content
-    
+
     # Write another entry
     backup.write_changelog(stats)
     content = changelog_path.read_text()
@@ -195,7 +193,7 @@ def test_write_changelog(backup, tmp_path):
 def test_backup_integration(backup, mock_response, tmp_path):
     """Test the full backup process."""
     backup.output_dir = tmp_path
-    
+
     # Mock collection response
     collections_data = [
         {
@@ -204,7 +202,7 @@ def test_backup_integration(backup, mock_response, tmp_path):
             "location": "/",
             "is_personal": False,
             "is_sample": False,
-            "archived": False
+            "archived": False,
         }
     ]
 
@@ -212,43 +210,27 @@ def test_backup_integration(backup, mock_response, tmp_path):
     items_data = {
         "data": [
             {"id": 1, "name": "Item 1", "model": "card"},
-            {"id": 2, "name": "Item 2", "model": "card"}
+            {"id": 2, "name": "Item 2", "model": "card"},
         ]
     }
 
     # Mock query responses
     query_data = {
-        "dataset_query": {
-            "native": {
-                "query": "SELECT * FROM table WHERE id = 1"
-            }
-        }
+        "dataset_query": {"native": {"query": "SELECT * FROM table WHERE id = 1"}}
     }
 
     # Set up mock responses
     mock_responses = [
         # get_collections
-        MagicMock(
-            json=lambda: collections_data,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: collections_data, raise_for_status=lambda: None),
         # get_collection_items
-        MagicMock(
-            json=lambda: items_data,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: items_data, raise_for_status=lambda: None),
         # get_item_query for item 1
-        MagicMock(
-            json=lambda: query_data,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: query_data, raise_for_status=lambda: None),
         # get_item_query for item 2
-        MagicMock(
-            json=lambda: query_data,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: query_data, raise_for_status=lambda: None),
     ]
-    
+
     backup._requests.get = MagicMock(side_effect=mock_responses)
     backup.backup()
 
@@ -262,11 +244,11 @@ def test_backup_integration(backup, mock_response, tmp_path):
 @pytest.fixture
 def backup():
     """Create a MetabaseBackup instance for testing."""
-    with patch('analytics.integrations.metabase.backup.requests') as mock_requests:
+    with patch("analytics.integrations.metabase.backup.requests") as mock_requests:
         backup = MetabaseBackup(
             api_url="http://metabase.example.com/api",
             api_key="test-key",
-            output_dir="test_output"
+            output_dir="test_output",
         )
         yield backup
 
@@ -311,46 +293,36 @@ def test_init(backup):
     assert backup.api_url == "http://metabase.example.com/api"
     assert backup.api_key == "test-key"
     assert backup.output_dir == Path("test_output")
-    assert backup.headers == {'x-api-key': 'test-key'}
+    assert backup.headers == {"x-api-key": "test-key"}
 
 
 def test_get_item_query(backup, mock_query):
     """Test getting a query for an item."""
     backup._requests.get.return_value.json.return_value = {
-        "dataset_query": {
-            "native": {
-                "query": mock_query
-            }
-        }
+        "dataset_query": {"native": {"query": mock_query}}
     }
     backup._requests.get.return_value.raise_for_status.return_value = None
-    
+
     query = backup.get_item_query(101)
-    
+
     assert query == mock_query
     backup._requests.get.assert_called_once_with(
-        "http://metabase.example.com/api/card/101",
-        headers=backup.headers
+        "http://metabase.example.com/api/card/101", headers=backup.headers
     )
 
 
 def test_get_item_query_invalid(backup, mock_invalid_query):
     """Test handling of invalid queries."""
     backup._requests.get.return_value.json.return_value = {
-        "dataset_query": {
-            "native": {
-                "query": mock_invalid_query
-            }
-        }
+        "dataset_query": {"native": {"query": mock_invalid_query}}
     }
     backup._requests.get.return_value.raise_for_status.return_value = None
-    
+
     query = backup.get_item_query(101)
-    
+
     assert query is None
     backup._requests.get.assert_called_once_with(
-        "http://metabase.example.com/api/card/101",
-        headers=backup.headers
+        "http://metabase.example.com/api/card/101", headers=backup.headers
     )
 
 
@@ -361,12 +333,12 @@ def test_get_item_query_permission_denied(backup):
     mock_response.status_code = 403
     http_error = requests.exceptions.HTTPError()
     http_error.response = mock_response
-    
+
     # Set up the mock to raise the exception
     mock_response = MagicMock()
     mock_response.raise_for_status.side_effect = http_error
     mock_response.json.return_value = {}
-    
+
     backup._requests.get = MagicMock(return_value=mock_response)
     query = backup.get_item_query(1)
     assert query is None
@@ -389,21 +361,21 @@ def test_clean_name(backup):
 def test_write_changelog(backup, tmp_path):
     """Test writing to the changelog."""
     backup.output_dir = tmp_path
-    
+
     # Test creating a new changelog
     stats = {
         "collections": 5,
         "items": 10,
         "changed_files": 3,
         "renamed_files": 1,
-        "errors": 0
+        "errors": 0,
     }
-    
+
     backup.write_changelog(stats)
-    
+
     changelog_path = tmp_path / "CHANGELOG.txt"
     assert changelog_path.exists()
-    
+
     content = changelog_path.read_text()
     assert "Backup completed at" in content
     assert "Collections processed: 5" in content
@@ -411,18 +383,18 @@ def test_write_changelog(backup, tmp_path):
     assert "Files changed: 3" in content
     assert "Renamed files: 1" in content
     assert "Errors encountered: 0" in content
-    
+
     # Test appending to an existing changelog
     stats = {
         "collections": 6,
         "items": 12,
         "changed_files": 4,
         "renamed_files": 2,
-        "errors": 1
+        "errors": 1,
     }
-    
+
     backup.write_changelog(stats)
-    
+
     content = changelog_path.read_text()
     assert content.count("Backup completed at") == 2
     assert "Collections processed: 6" in content
@@ -439,47 +411,32 @@ def test_backup_process(backup, mock_collections, mock_items, mock_query, tmp_pa
     # Mock API responses
     mock_responses = [
         # get_collections
-        MagicMock(
-            json=lambda: mock_collections,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: mock_collections, raise_for_status=lambda: None),
         # get_collection_items for collection 1
         MagicMock(
             json=lambda: {"data": [mock_items[0], mock_items[1]]},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_item_query for item 101
         MagicMock(
             json=lambda: {"dataset_query": {"native": {"query": mock_query}}},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_item_query for item 102
         MagicMock(
             json=lambda: {"dataset_query": {"native": {"query": mock_query}}},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_collection_items for collection 2
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
         # get_collection_items for collection 3
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
         # get_collection_items for collection 4
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
         # get_collection_items for collection 5
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
     ]
-    
+
     backup._requests.get = MagicMock(side_effect=mock_responses)
     backup.backup()
 
@@ -505,39 +462,26 @@ def test_file_renaming(backup, mock_collections, mock_items, mock_query, tmp_pat
     # Mock API responses
     mock_responses = [
         # get_collections
-        MagicMock(
-            json=lambda: mock_collections,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: mock_collections, raise_for_status=lambda: None),
         # get_collection_items for collection 1
         MagicMock(
-            json=lambda: {"data": [{"id": 101, "name": "New Query Name", "model": "card"}]},
-            raise_for_status=lambda: None
+            json=lambda: {
+                "data": [{"id": 101, "name": "New Query Name", "model": "card"}]
+            },
+            raise_for_status=lambda: None,
         ),
         # get_item_query for item 101
         MagicMock(
             json=lambda: {"dataset_query": {"native": {"query": mock_query}}},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_collection_items for other collections
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
     ]
-    
+
     backup._requests.get = MagicMock(side_effect=mock_responses)
     backup.backup()
 
@@ -550,99 +494,89 @@ def test_collection_path_with_empty_ids(backup, mock_collections):
     """Test handling of empty collection IDs in paths."""
     # Create a collection with a path containing empty segments
     collection = {"id": 6, "name": "Collection 6", "location": "/1//2/6"}
-    
+
     path = backup.create_collection_path(mock_collections, collection)
     assert str(path) == "test_output/1-Collection_1/2-Collection_2/6-Collection_6"
-    
+
     # Create a collection with a path containing invalid IDs
     collection = {"id": 7, "name": "Collection 7", "location": "/invalid/7"}
-    
+
     path = backup.create_collection_path(mock_collections, collection)
     assert str(path) == "test_output/7-Collection_7"
 
 
-def test_backup_with_error_handling(backup, mock_collections, mock_items, mock_query, tmp_path):
+def test_backup_with_error_handling(
+    backup, mock_collections, mock_items, mock_query, tmp_path
+):
     """Test error handling during the backup process."""
     backup.output_dir = tmp_path
-    
+
     # Mock API responses with an error for one collection
     backup._requests.get.side_effect = [
         # get_collections
-        MagicMock(
-            json=lambda: mock_collections,
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: mock_collections, raise_for_status=lambda: None),
         # get_collection_items for collection 1
         MagicMock(
             json=lambda: {"data": [mock_items[0], mock_items[1]]},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_item_query for item 101
         MagicMock(
             json=lambda: {"dataset_query": {"native": {"query": mock_query}}},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_item_query for item 102 - simulate an error
         Exception("API error for item 102"),
         # get_collection_items for collection 2 - simulate an error
         Exception("API error for collection 2"),
         # get_collection_items for collection 3
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
         # get_collection_items for collection 4
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
         # get_collection_items for collection 5
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
     ]
-    
+
     # Run the backup
     backup.backup()
-    
+
     # Check that the backup completed despite errors
     assert (tmp_path / "CHANGELOG.txt").exists()
-    
+
     # Check that the changelog includes error information
     changelog_content = (tmp_path / "CHANGELOG.txt").read_text()
     assert "Errors encountered:" in changelog_content
-    assert "Errors encountered: 2" in changelog_content or "Errors encountered: 3" in changelog_content
+    assert (
+        "Errors encountered: 2" in changelog_content
+        or "Errors encountered: 3" in changelog_content
+    )
 
 
 def test_backup_with_empty_collection(backup, mock_collections, tmp_path):
     """Test handling of empty collections."""
     backup.output_dir = tmp_path
-    
+
     # Mock API responses for an empty collection
     backup._requests.get.side_effect = [
         # get_collections
         MagicMock(
             json=lambda: [mock_collections[0]],  # Just one collection
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         ),
         # get_collection_items for collection 1 - empty
-        MagicMock(
-            json=lambda: {"data": []},
-            raise_for_status=lambda: None
-        ),
+        MagicMock(json=lambda: {"data": []}, raise_for_status=lambda: None),
     ]
-    
+
     # Run the backup
     backup.backup()
-    
+
     # Check that the collection directory was created
     assert (tmp_path / "1-Collection_1").exists()
-    
+
     # Check that the changelog was created
     assert (tmp_path / "CHANGELOG.txt").exists()
-    
+
     # Check that the changelog includes information about the empty collection
     changelog_content = (tmp_path / "CHANGELOG.txt").read_text()
     assert "Collections processed: 1" in changelog_content
-    assert "Items processed: 0" in changelog_content 
+    assert "Items processed: 0" in changelog_content
