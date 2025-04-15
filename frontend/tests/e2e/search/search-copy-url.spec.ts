@@ -1,23 +1,20 @@
 import { test, expect } from "@playwright/test";
-import { fillSearchInputAndSubmit } from "./searchSpecUtil";
 
 test("should copy search query URL to clipboard", async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto("/search");
   
-  const searchTerm = "education grants";
-  await fillSearchInputAndSubmit(searchTerm, page);
-  await page.click("button:has-text('Search')");
-  await page.waitForSelector(".search-results, .result-item", { timeout: 5000 });
+  const searchInput = page.getByLabel('Search terms Enter keywords,');
+  await searchInput.fill("education grants");
+  await searchInput.press('Enter');
   
-  // Try multiple selectors for the copy button
-  const copySelectors = [
-    "a:has-text('Copy this search query')",
-  ]
+  await page.waitForURL(/.*search.*query=education\+grants.*/, { timeout: 10000 });
   
-  // Increase timeout for clipboard operations
-  await page.waitForTimeout(300);
+  // selector for copy buttons
+  const copyButton = page.locator("button:has-text('Copy'), a:has-text('Copy')").first();
+  await copyButton.waitFor({ timeout: 10000 });
+  await copyButton.click();
+  
   const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
-  const encodedTerm = encodeURIComponent(searchTerm).replace(/%20/g, "+");
-  expect(clipboardContent).toContain(`/search?keywords=${encodedTerm}`);
-});
+  expect(clipboardContent).toContain("/search?query=education+grants");
+})
