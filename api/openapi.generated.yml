@@ -1547,7 +1547,7 @@ components:
           example: 'False'
         is_test_agency:
           type: boolean
-          description: Indicates if the agency is a test agency .
+          description: Indicates if the agency is a test agency.
           example: 'False'
         created_at:
           type: string
