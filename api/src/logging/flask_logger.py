@@ -61,6 +61,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
         handler.addFilter(_add_global_context_info_to_log_record)
         handler.addFilter(_add_request_context_info_to_log_record)
         handler.addFilter(_add_new_relic_context_to_log_record)
+        handler.addFilter(_add_error_info_to_log_record)
 
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule
@@ -213,6 +214,18 @@ def _add_new_relic_context_to_log_record(record: logging.LogRecord) -> bool:
     newrelic_metadata = newrelic.api.time_trace.get_linking_metadata()
 
     record.__dict__ |= newrelic_metadata
+
+    return True
+
+
+def _add_error_info_to_log_record(record: logging.LogRecord) -> bool:
+    """Add a shorter form of the error message to our log record."""
+    exc_info = getattr(record, "exc_info", None)
+    # exc_info is a 3-part tuple with the class, error obj, and traceback
+    if exc_info and len(exc_info) == 3:
+        # If the error were `raise ValueError("example")`, the
+        # value of this would be "ValueError('example')"
+        record.__dict__["exc_info_short"] = repr(exc_info[1])
 
     return True
 
