@@ -1544,11 +1544,11 @@ components:
           type: boolean
           description: Indicates if the agency is linked to an opportunity that is
             currently active.
-          example: 'False'
+          example: false
         is_test_agency:
           type: boolean
           description: Indicates if the agency is a test agency.
-          example: 'False'
+          example: false
         created_at:
           type: string
           format: date-time
