@@ -60,7 +60,7 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId=""
-        rawFormData={{ name: "myself" }}
+        savedFormData={{ name: "myself" }}
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
@@ -95,13 +95,13 @@ describe("ApplyForm", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("calls submitApplyForm action on submit", () => {
+  it("calls handleFormAction action on submit", () => {
     mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
       <ApplyForm
         applicationId="test"
-        rawFormData={{}}
+        savedFormData={{}}
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
