@@ -48,7 +48,9 @@ def init_app(app_logger: logging.Logger) -> None:
         handler.addFilter(_add_new_relic_context_to_log_record)
 
     # Add some metadata to all log messages globally
-    add_extra_data_to_global_logs({"environment": os.environ.get("ENVIRONMENT")})
+    add_extra_data_to_global_logs(
+        {"app_name": "analytics", "environment": os.environ.get("ENVIRONMENT")},
+    )
 
     app_logger.info("initialized logger")
 
