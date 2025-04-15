@@ -2,19 +2,25 @@
 
 We collaborate on the project using various public and private channels. Find out what information or conversations you'll find in each.
 
+## Public channels
+
+{% hint style="warning" %}
+**Content privacy**
+
+Content that you share in Simpler.Grants.gov communications channels is **never** fully private. Administrators can view all of the content shared in each channel, including those with the semblance of privacy, such as direct messages within Slack. The content in these channels is also subject to [Freedom of Information Act (FOIA) requests](https://www.foia.gov/how-to.html).
+{% endhint %}
+
+### Discourse forum
+
+We use Discourse as our primary platform for discussing open-source development.
+
+<table data-view="cards" data-full-width="false"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td>Visit Discourse</td><td><a href="../../.gitbook/assets/Discourse logo.png">Discourse logo.png</a></td><td><a href="https://simplergrants.discourse.group/">https://simplergrants.discourse.group/</a></td></tr></tbody></table>
+
 {% hint style="danger" %}
-**Warning**
+**Prohibited activity**
 
 Prohibited activity (e.g., violations of our Code of Conduct or the Federal Hatch Act) is never allowed in any channel. Project maintainers have the right and responsibility to moderate and remove prohibited content from all communication channels.
 {% endhint %}
-
-## Public channels
-
-### Discourse Forum
-
-Our primary platform for discussing open-source development is Discourse.
-
-<table data-view="cards" data-full-width="false"><thead><tr><th></th><th data-hidden data-card-cover data-type="files"></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td>Visit Discourse</td><td><a href="../../.gitbook/assets/Discourse logo.png">Discourse logo.png</a></td><td><a href="https://simplergrants.discourse.group/">https://simplergrants.discourse.group/</a></td></tr></tbody></table>
 
 ### All public channels
 
@@ -68,4 +74,4 @@ Zoom is our primary tool for virtual meetings within the Simpler Grants communit
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>3/19/2025</td><td>Updated the channels</td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>3/19/2025</td><td>Updated the channels</td><td></td></tr><tr><td>4/15</td><td>Updated privacy and prohibited activity warnings</td><td>Consolidated with information previously found on stand-alone "Content privacy" page.</td></tr></tbody></table>
