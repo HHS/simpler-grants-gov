@@ -5,7 +5,7 @@ This module provides functionality to backup Metabase queries by:
 1. Fetching all collections
 2. Getting items in each collection
 3. Retrieving query details for each item
-4. Writing the queries to disk in a structured format
+4. Writing the queries to local filesystem in a structured format
 """
 
 import logging
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class MetabaseBackup:
-    """Handles backing up Metabase queries to disk."""
+    """Back up Metabase queries to local filesystem."""
 
     def __init__(self, api_url: str, api_key: str, output_dir: str):
         """Initialize the Metabase backup handler.
