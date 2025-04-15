@@ -220,7 +220,8 @@ def test_get_items(
 
 
 def test_get_item_sql(
-    backup_instance: MetabaseBackup, test_response: MagicMock,
+    backup_instance: MetabaseBackup,
+    test_response: MagicMock,
 ) -> None:
     """Test getting query from an item."""
     # Test valid SQL query
@@ -301,7 +302,8 @@ def test_process_item(backup_instance: MetabaseBackup, tmp_path: Path) -> None:
 
 
 def test_get_collection_path(
-    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]],
+    backup_instance: MetabaseBackup,
+    collection_data: list[dict[str, Any]],
 ) -> None:
     """Test getting collection path."""
     collection = {"id": 1, "name": "Test Collection", "location": "/1/2/3"}
@@ -311,12 +313,15 @@ def test_get_collection_path(
     backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
-    expected_path = backup_instance.output_dir / "1-Unknown/2-Unknown/3-Unknown/1-Test_Collection"
+    expected_path = (
+        backup_instance.output_dir / "1-Unknown/2-Unknown/3-Unknown/1-Test_Collection"
+    )
     assert str(path) == str(expected_path)
 
 
 def test_get_collection_path_with_empty_ids(
-    backup_instance: MetabaseBackup, collection_data: list[dict[str, Any]],
+    backup_instance: MetabaseBackup,
+    collection_data: list[dict[str, Any]],
 ) -> None:
     """Test getting collection path with empty IDs."""
     collection = {"id": 7, "name": "Collection 7", "location": "/invalid/7"}
@@ -326,7 +331,9 @@ def test_get_collection_path_with_empty_ids(
     backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
-    expected_path = backup_instance.output_dir / "invalid-Unknown/7-Unknown/7-Collection_7"
+    expected_path = (
+        backup_instance.output_dir / "invalid-Unknown/7-Unknown/7-Collection_7"
+    )
     assert str(path) == str(expected_path)
 
 
@@ -467,7 +474,8 @@ def test_init(backup_instance: MetabaseBackup) -> None:
 
 
 def test_get_item_sql_invalid(
-    backup_instance: MetabaseBackup, invalid_sql: str,
+    backup_instance: MetabaseBackup,
+    invalid_sql: str,
 ) -> None:
     """Test handling of invalid queries."""
     response = MagicMock(spec=requests.Response)
@@ -509,7 +517,8 @@ def test_get_item_sql_permission_denied(backup_instance: MetabaseBackup) -> None
 
 
 def test_write_changelog_with_stats(
-    backup_instance: MetabaseBackup, tmp_path: Path,
+    backup_instance: MetabaseBackup,
+    tmp_path: Path,
 ) -> None:
     """Test writing to the changelog with stats."""
     backup_instance.output_dir = tmp_path
@@ -542,7 +551,9 @@ def test_write_changelog_with_stats(
 
 
 def test_file_renaming(
-    backup_instance: MetabaseBackup, sql_query: str, tmp_path: Path,
+    backup_instance: MetabaseBackup,
+    sql_query: str,
+    tmp_path: Path,
 ) -> None:
     """Test file renaming when item names change."""
     backup_instance.output_dir = tmp_path
@@ -590,7 +601,11 @@ def test_collection_path_with_empty_ids(
     path = backup_instance.get_collection_path(collection)
     # The implementation creates a path with "Unknown" for all parent collections
     expected_path = (
-        backup_instance.output_dir / "1-Unknown" / "2-Unknown" / "6-Unknown" / "6-Collection_6"
+        backup_instance.output_dir
+        / "1-Unknown"
+        / "2-Unknown"
+        / "6-Unknown"
+        / "6-Collection_6"
     )
     assert str(path) == str(expected_path)
 
