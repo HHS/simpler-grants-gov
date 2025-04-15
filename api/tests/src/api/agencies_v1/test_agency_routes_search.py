@@ -68,7 +68,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 },
                 [DOD, DOD_HRE, DOD_MCO],
             ),
-                # Filter
+            # Filter
             (
                 {
                     "pagination": {
@@ -100,19 +100,19 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA],
             ),
             (
-                    {
-                        "pagination": {
-                            "page_offset": 1,
-                            "page_size": 25,
-                            "sort_order": [
-                                {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                            ],
-                        },
-                        "filters": {
-                            "is_test_agency": {"one_of": [1]},
-                        },
+                {
+                    "pagination": {
+                        "page_offset": 1,
+                        "page_size": 25,
+                        "sort_order": [
+                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+                        ],
                     },
-                    [HHS_OMHA],
+                    "filters": {
+                        "is_test_agency": {"one_of": [1]},
+                    },
+                },
+                [HHS_OMHA],
             ),
         ],
     )

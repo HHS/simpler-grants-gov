@@ -29,9 +29,7 @@ class AgencySearchFilterV1Schema(Schema):
         .build()
     )
     is_test_agency = fields.Nested(
-        BoolSearchSchemaBuilder("IsTestAgencyFilterV1Schema")
-        .with_one_of(example=True)
-        .build()
+        BoolSearchSchemaBuilder("IsTestAgencyFilterV1Schema").with_one_of(example=True).build()
     )
 
 
