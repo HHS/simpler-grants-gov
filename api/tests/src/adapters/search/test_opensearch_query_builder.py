@@ -276,6 +276,55 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
 
         validate_valid_request(search_client, search_index, builder, expected_results)
 
+    @pytest.mark.parametrize(
+        "page_size,page_number,expected_size,expected_from,expected_results",
+        [
+            # Page size of 4000, page 3 by default would be 8000-12000, modified down to 8000-10000
+            (4000, 3, 2000, 8000, []),
+            # Page size of 9000, page 2 by default would be 9000 - 18000, modified down to 9000-10000
+            (9000, 2, 1000, 9000, []),
+            # Page size of 1000, page 10 would be 9000-10000, stays the same
+            (1000, 10, 1000, 9000, []),
+            # Page size of 20000, page 1 would be 0-20000, modified down to 0-10000
+            (20000, 1, 10000, 0, FULL_DATA),
+            # Page size of 1, page 10001, would be fully past 10000, so hardcoded to be size 0, exactly 10000 offset
+            (1, 10001, 0, 10000, []),
+            # Page size of 100, page 1000, would be fully past 10000, so hardcoded to be size 0, exactly 10000 offset
+            (100, 1000, 0, 10000, []),
+            # Page size of 25, page 100000, would be fully past 10000, so hardcoded to be size 0, exactly 10000 offset
+            (25, 100000, 0, 10000, []),
+        ],
+    )
+    def test_query_builder_pagination_10k_checks(
+        self,
+        search_client,
+        search_index,
+        page_size,
+        page_number,
+        expected_size,
+        expected_from,
+        expected_results,
+    ):
+        """Test that the query builder will always handle not asking
+        the search index for records past the 10,000th one to avoid any
+        possible errors.
+        """
+        builder = (
+            SearchQueryBuilder()
+            .pagination(page_size=page_size, page_number=page_number)
+            .sort_by([("id", SortDirection.ASCENDING)])
+        )
+
+        assert builder.build() == {
+            "size": expected_size,
+            "from": expected_from,
+            "track_scores": True,
+            "track_total_hits": True,
+            "sort": [{"id": {"order": "asc"}}],
+        }
+
+        validate_valid_request(search_client, search_index, builder, expected_results)
+
     # Note that by having parametrize twice, it will run every one of the specific tests with the different
     # sort by parameter to show that they behave the same
     @pytest.mark.parametrize("sort_by", [[], [("relevancy", SortDirection.DESCENDING)]])

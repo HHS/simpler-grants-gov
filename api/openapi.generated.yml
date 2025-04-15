@@ -1419,6 +1419,16 @@ components:
           items:
             type: boolean
             example: true
+    IsTestAgencyFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
     AgencySearchFilterV1:
       type: object
       properties:
@@ -1426,7 +1436,11 @@ components:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
-    SortOrderAgencyPaginationV11:
+        is_test_agency:
+          type:
+          - object
+          $ref: '#/components/schemas/IsTestAgencyFilterV1'
+    SortOrderAgencySearchPaginationV1:
       type: object
       properties:
         order_by:
@@ -1445,7 +1459,7 @@ components:
       required:
       - order_by
       - sort_direction
-    AgencyPaginationV11:
+    AgencySearchPaginationV1:
       type: object
       properties:
         sort_order:
@@ -1459,7 +1473,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/SortOrderAgencyPaginationV11'
+            $ref: '#/components/schemas/SortOrderAgencySearchPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1500,7 +1514,7 @@ components:
         pagination:
           type:
           - object
-          $ref: '#/components/schemas/AgencyPaginationV11'
+          $ref: '#/components/schemas/AgencySearchPaginationV1'
       required:
       - pagination
     AgencyV1:
@@ -1530,7 +1544,11 @@ components:
           type: boolean
           description: Indicates if the agency is linked to an opportunity that is
             currently active.
-          example: 'False'
+          example: false
+        is_test_agency:
+          type: boolean
+          description: Indicates if the agency is a test agency.
+          example: false
         created_at:
           type: string
           format: date-time
@@ -1675,7 +1693,7 @@ components:
             - archived
             type:
             - string
-    AgencySearchFilterV11:
+    AgencyOppSearchFilterV1:
       type: object
       properties:
         one_of:
@@ -1837,7 +1855,7 @@ components:
         agency:
           type:
           - object
-          $ref: '#/components/schemas/AgencySearchFilterV11'
+          $ref: '#/components/schemas/AgencyOppSearchFilterV1'
         assistance_listing_number:
           type:
           - object

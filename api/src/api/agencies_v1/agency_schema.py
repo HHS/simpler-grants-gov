@@ -28,6 +28,9 @@ class AgencySearchFilterV1Schema(Schema):
         .with_one_of(example=True)
         .build()
     )
+    is_test_agency = fields.Nested(
+        BoolSearchSchemaBuilder("IsTestAgencyFilterV1Schema").with_one_of(example=True).build()
+    )
 
 
 class AgencySearchRequestSchema(Schema):
@@ -49,7 +52,7 @@ class AgencySearchRequestSchema(Schema):
     filters = fields.Nested(AgencySearchFilterV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(
-            "AgencyPaginationV1Schema",
+            "AgencySearchPaginationV1Schema",
             ["agency_code", "agency_name"],
             default_sort_order=[{"order_by": "agency_code", "sort_direction": "ascending"}],
         ),
@@ -99,7 +102,13 @@ class AgencyV1Schema(Schema):
         dump_default=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
-            "example": "False",
+            "example": False,
+        },
+    )
+    is_test_agency = fields.Boolean(
+        metadata={
+            "description": "Indicates if the agency is a test agency.",
+            "example": False,
         },
     )
 
