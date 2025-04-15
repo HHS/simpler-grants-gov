@@ -49,6 +49,7 @@ class MetabaseBackup:
             "items_with_queries": 0,
             "items_with_diffs": 0,
             "items_skipped": 0,
+            "folders_renamed": 0,
             "files_renamed": 0,
             "files_updated": 0,
         }
@@ -92,8 +93,7 @@ class MetabaseBackup:
 
             try:
                 # Create collection directory
-                collection_dir = self.get_collection_path(collection)
-                collection_dir.mkdir(parents=True, exist_ok=True)
+                collection_dir = self.create_collection_dir(collection)
 
                 # Get items in collection
                 items = self.get_items(collection_id)
@@ -146,6 +146,48 @@ class MetabaseBackup:
                 collections.append(collection)
 
         return collections
+
+    def create_collection_dir(self, collection: Dict) -> Path:
+        """Create a directory for a collection or rename existing dir as necessary."""
+        # Get the collection path
+        collection_path = self.get_collection_path(collection)
+
+        # Split the path into segments
+        path_parts = list(collection_path.parts)
+        output_dir_parts = list(self.output_dir.parts)
+
+        # Start from the output directory
+        current_path = self.output_dir
+
+        # Process each segment after the output directory
+        for i in range(len(output_dir_parts), len(path_parts)):
+            segment = path_parts[i]
+            segment_id = segment.split("-")[0]
+
+            # Check if a directory with the same ID prefix exists
+            existing_dirs = list(current_path.glob(f"{segment_id}-*"))
+
+            # If found and it's not the same as our target segment, rename it
+            if existing_dirs and existing_dirs[0].name != segment:
+                old_dir = existing_dirs[0]
+                new_dir = current_path / segment
+
+                # Rename the directory
+                old_dir.rename(new_dir)
+                self.stats["folders_renamed"] += 1
+                logger.info(
+                    "Renamed directory from '%s' to '%s'",
+                    old_dir.name,
+                    new_dir.name,
+                )
+
+            # Update the current path
+            current_path = current_path / segment
+
+            # Create the directory if it doesn't exist
+            current_path.mkdir(parents=True, exist_ok=True)
+
+        return collection_path
 
     def get_collection_path(self, collection: Dict) -> Path:
         """Create a path for a collection.
@@ -328,6 +370,7 @@ class MetabaseBackup:
         logger.info("Items with queries: %d", self.stats["items_with_queries"])
         logger.info("Items skipped: %d", self.stats["items_skipped"])
         logger.info("Items with diffs: %d", self.stats["items_with_diffs"])
+        logger.info("Folders renamed: %d", self.stats["folders_renamed"])
         logger.info("Files updated: %d", self.stats["files_updated"])
         logger.info("Files renamed: %d", self.stats["files_renamed"])
 
@@ -337,6 +380,7 @@ class MetabaseBackup:
             f"\n=== Backup completed at {timestamp} ===\n"
             f"Collections processed: {self.stats['total_collections']}\n"
             f"Items processed: {self.stats['total_items']}\n"
+            f"Folders renamed: {self.stats['folders_renamed']}\n"
             f"Files updated: {self.stats['files_updated']}\n"
             f"Files renamed: {self.stats['files_renamed']}\n"
             f"Errors encountered: {self.stats['items_skipped']}\n"
