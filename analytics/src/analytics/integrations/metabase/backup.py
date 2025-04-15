@@ -66,7 +66,7 @@ class MetabaseBackup:
             "files_updated": 0,
         }
 
-    def _clean_name(self, name: str) -> str:
+    def clean_name(self, name: str) -> str:
         """
         Clean a name for use in filenames.
 
@@ -83,7 +83,9 @@ class MetabaseBackup:
             if c.isalnum():
                 cleaned += c
             else:
-                cleaned += "_"
+                # Only add underscore if the last character isn't already an underscore
+                if not cleaned or cleaned[-1] != "_":
+                    cleaned += "_"
         return cleaned.strip("_")  # Remove trailing underscores
 
     def backup(self) -> None:
@@ -124,7 +126,7 @@ class MetabaseBackup:
                 for item in items:
                     self.process_item(item, collection_dir)
 
-            except (OSError, RequestException) as e:
+            except (OSError, RequestException):
                 logger.exception(
                     "Error processing collection %d (%s)",
                     collection_id,
@@ -233,7 +235,7 @@ class MetabaseBackup:
         if not location:
             return (
                 self.output_dir
-                / f"{collection['id']}-{self._clean_name(collection['name'])}"
+                / f"{collection['id']}-{self.clean_name(collection['name'])}"
             )
 
         # For collections with a location, we need to handle the hierarchy
@@ -250,13 +252,13 @@ class MetabaseBackup:
             if part in collection_map:
                 # Use the actual collection name from our map
                 name = collection_map[part]
-                path = path / f"{part}-{self._clean_name(name)}"
+                path = path / f"{part}-{self.clean_name(name)}"
             else:
                 # If we can't find the collection name, use a generic name
                 path = path / f"{part}-Unknown"
 
         # Add the current collection to the path
-        return path / f"{collection['id']}-{self._clean_name(collection['name'])}"
+        return path / f"{collection['id']}-{self.clean_name(collection['name'])}"
 
     def get_items(self, collection_id: int) -> list[dict[str, Any]]:
         """
@@ -308,7 +310,7 @@ class MetabaseBackup:
         self.stats["items_with_queries"] += 1
 
         # Define path of local file to which we will write sql
-        new_filename = f"{item['id']}-{self._clean_name(item['name'])}.sql"
+        new_filename = f"{item['id']}-{self.clean_name(item['name'])}.sql"
         new_filepath = collection_dir / new_filename
 
         # Check if a file with this ID already exists (regardless of name)
@@ -402,7 +404,7 @@ class MetabaseBackup:
             logger.exception("Error getting query for item %d", item_id)
             return None
 
-        except RequestException as e:
+        except RequestException:
             logger.exception("Error getting query for item %d", item_id)
             return None
 
