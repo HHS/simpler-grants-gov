@@ -57,6 +57,7 @@ def _add_search_filters(
             builder.filter_terms(field_name, field_filters.one_of)
 
         elif isinstance(field_filters, BoolSearchFilter) and field_filters.one_of:
+            print("===============", field_name, field_filters.one_of)
             builder.filter_terms(field_name, field_filters.one_of)
 
         elif isinstance(field_filters, IntSearchFilter):
