@@ -9,7 +9,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
-import { shapeFormData } from "./utils";
+import { parseSchema, shapeFormData } from "./utils";
 import { validateFormData } from "./validate";
 
 type applyFormErrors = {
@@ -29,8 +29,8 @@ export async function handleFormAction(
 ) {
   const { formId, applicationId, successMessage } = _prevState;
 
-  const formDetails = await fetchForm(formId);
-  if (!formDetails) {
+  const formSchema = await getFormSchema(formId);
+  if (!formSchema) {
     return {
       applicationId,
       errorMessage: "Error submitting form",
@@ -40,21 +40,21 @@ export async function handleFormAction(
       validationErrors: [],
     };
   }
-  const { form_json_schema } = formDetails;
+
   const { validationErrors, errorMessage } = formValidate({
     formData,
-    formSchema: form_json_schema,
+    formSchema,
   });
   const applicationFormData = shapeFormData<ApplicationResponseDetail>(
     formData,
-    form_json_schema,
+    formSchema,
   );
   if (validationErrors.length) {
     await handleSave(applicationFormData, applicationId, formId);
     return {
       applicationId,
       errorMessage,
-      formData,
+      formData: applicationFormData,
       formId,
       successMessage,
       validationErrors,
@@ -72,7 +72,7 @@ export async function handleFormAction(
         return {
           applicationId,
           errorMessage,
-          formData,
+          formData: applicationFormData,
           formId,
           successMessage: "Form saved",
           validationErrors,
@@ -114,7 +114,7 @@ const handleSave = async (
   }
 };
 
-async function fetchForm(formId: string): Promise<FormDetail> {
+async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   let formSchema = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
@@ -128,7 +128,7 @@ async function fetchForm(formId: string): Promise<FormDetail> {
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
   }
-  return formSchema;
+  return await parseSchema(formSchema.form_json_schema);
 }
 
 function formValidate({

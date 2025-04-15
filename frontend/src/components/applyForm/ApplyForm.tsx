@@ -1,6 +1,7 @@
 "use client";
 
 import { RJSFSchema } from "@rjsf/utils";
+import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
 import { useActionState, useMemo } from "react";
@@ -23,7 +24,7 @@ const ApplyForm = ({
   applicationId: string;
   formId: string;
   formSchema: RJSFSchema;
-  savedFormData?: object;
+  savedFormData: object;
   uiSchema: UiSchema;
 }) => {
   const { pending } = useFormStatus();
@@ -39,7 +40,8 @@ const ApplyForm = ({
 
   const { formData, errorMessage, successMessage, validationErrors } =
     formState;
-  const formObject = savedFormData || Object.fromEntries(formData.entries());
+
+  const formObject = !isEmpty(formData) ? formData : savedFormData;
   const fields = buildForTreeRecursive({
     errors: validationErrors,
     formData: formObject,

@@ -50,6 +50,7 @@ function SelectWidget<
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
   const { title, description } = schema;
+  const selectValue = value ? String(value) : "";
 
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
@@ -100,12 +101,15 @@ function SelectWidget<
       />
 
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+
       <Select
+        // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
+        key={selectValue}
         id={id}
         name={id}
         multiple={multiple}
-        defaultValue={updateOnInput ? undefined : String(value)}
-        value={updateOnInput ? String(value) : undefined}
+        defaultValue={updateOnInput ? undefined : selectValue}
+        value={updateOnInput ? selectValue : undefined}
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}

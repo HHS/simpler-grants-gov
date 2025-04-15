@@ -1,3 +1,4 @@
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
@@ -5,16 +6,14 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
-import {
-  ApplicationDetail,
-  ApplicationFormDetail,
-} from "src/types/applicationResponseTypes";
+import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
+import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
 
@@ -79,25 +78,23 @@ async function FormPage({ params }: formPageProps) {
     return <TopLevelError />;
   }
 
-  const emptyApplicationForm = {
-    application_response: {},
-  };
-  // TODO: this currently calls all forms for an application since we don't
-  // have the app_form_id in the path.
-  const applicationForm =
-    applicationData.application_forms.length > 0
-      ? (applicationData.application_forms.find(
-          (form) => form.form_id === formId,
-        ) as ApplicationFormDetail)
-      : emptyApplicationForm;
-
-  const { application_response } = applicationForm;
+  const application_response = getApplicationResponse(
+    applicationData.application_forms,
+    formId,
+  );
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
-
   try {
     validateUiSchema(form_ui_schema);
   } catch (e) {
     console.error("Error validating form", e);
+    return <TopLevelError />;
+  }
+
+  let formSchema = {};
+  try {
+    formSchema = await $RefParser.dereference(form_json_schema);
+  } catch (e) {
+    console.error("Error parsing JSON schema", e);
     return <TopLevelError />;
   }
 
@@ -120,7 +117,7 @@ async function FormPage({ params }: formPageProps) {
       </p>
       <ApplyForm
         savedFormData={application_response}
-        formSchema={form_json_schema}
+        formSchema={formSchema}
         uiSchema={form_ui_schema}
         formId={form_id}
         applicationId={applicationId}

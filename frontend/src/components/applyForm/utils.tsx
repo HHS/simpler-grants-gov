@@ -1,7 +1,12 @@
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get } from "lodash";
+import {
+  ApplicationFormDetail,
+  ApplicationResponseDetail,
+} from "src/types/applicationResponseTypes";
 
 import { JSX } from "react";
 
@@ -10,6 +15,17 @@ import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+
+// resolves $refs in schemas for single schema object
+export const parseSchema = async (
+  schema: RJSFSchema,
+): Promise<RJSFSchema | undefined> => {
+  try {
+    return (await $RefParser.dereference(schema)) as RJSFSchema;
+  } catch (e) {
+    console.error("Error parsing JSON schema", e);
+  }
+};
 
 export function buildForTreeRecursive({
   errors,
@@ -46,7 +62,7 @@ export function buildForTreeRecursive({
           });
         } else if (!parent && "definition" in node) {
           const field = buildField({
-            fieldObject: node,
+            uiFieldObject: node,
             formSchema: schema,
             errors,
             formData,
@@ -71,7 +87,7 @@ export function buildForTreeRecursive({
             return null;
           } else {
             return buildField({
-              fieldObject: node,
+              uiFieldObject: node,
               formSchema: schema,
               errors,
               formData,
@@ -162,20 +178,21 @@ const createField = ({
 };
 
 export const buildField = ({
-  fieldObject,
+  uiFieldObject,
   formSchema,
   errors,
   formData,
 }: {
-  fieldObject: UiSchemaField;
+  uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
   errors: ErrorObject<string, Record<string, unknown>, unknown>[];
   formData: object;
 }) => {
-  const { definition, schema } = fieldObject;
+  const { definition, schema } = uiFieldObject;
   const name = definition
     ? definition.split("/")[definition.split("/").length - 1]
     : (schema?.title ?? "untitled").replace(" ", "-");
+  // TODO: parse UI schema in single function
   const fieldSchema = definition
     ? (getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema)
     : schema;
@@ -346,4 +363,18 @@ export const shapeFormData = <T extends object>(
   };
 
   return shapeData(formSchema, filteredData) as T;
+};
+
+// the application detail contains an empty array for the form response if no
+// forms have been saved or an application_response with a form_id
+export const getApplicationResponse = (
+  forms: [] | ApplicationFormDetail[],
+  formId: string,
+): ApplicationResponseDetail | object => {
+  if (forms.length > 0) {
+    const form = forms.find((form) => form?.form_id === formId);
+    return form?.application_response || {};
+  } else {
+    return {};
+  }
 };

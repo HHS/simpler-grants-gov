@@ -40,7 +40,7 @@ const FormLinks = ({
           return (
             <li key={form.form.form_name}>
               <Link
-                href={`/formPrototype/${applicationId}/${form.form.form_id}`}
+                href={`/formPrototype/${applicationId}/form/${form.form.form_id}`}
               >
                 {form.form.form_name}
               </Link>
