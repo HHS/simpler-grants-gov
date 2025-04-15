@@ -2189,7 +2189,6 @@ version = "10.7.0"
 description = "New Relic Python Agent"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
 files = [
     {file = "newrelic-10.7.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:08e959814e0b23a8f96383955cceecb6180dc66f240279c45ee8484058f96eb4"},
     {file = "newrelic-10.7.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4e12b7e88e0d78497b4e3dfca0411a76a548ee15842b9d6ef971035bbdc91693"},
@@ -4116,5 +4115,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.13"
-content-hash = "08ff3baa835820213f9800f6633208238c8cdd6446ee5847dfa9bc001d0d4485"
-
+content-hash = "e86b44ae8799de87f9e1d1c3bf07ba4f1082f831d79f7f325ebd293cae5c88b6"
