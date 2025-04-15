@@ -17,6 +17,8 @@ Usage:
 import logging
 import os
 
+import newrelic.api.time_trace
+
 EXTRA_LOG_DATA_ATTR = "extra_log_data"
 
 _GLOBAL_LOG_CONTEXT: dict = {}
@@ -43,9 +45,12 @@ def init_app(app_logger: logging.Logger) -> None:
     # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
     for handler in app_logger.handlers:
         handler.addFilter(_add_global_context_info_to_log_record)
+        handler.addFilter(_add_new_relic_context_to_log_record)
 
     # Add some metadata to all log messages globally
-    add_extra_data_to_global_logs({"environment": os.environ.get("ENVIRONMENT")})
+    add_extra_data_to_global_logs(
+        {"app_name": "analytics", "environment": os.environ.get("ENVIRONMENT")},
+    )
 
     app_logger.info("initialized logger")
 
@@ -61,5 +66,28 @@ def add_extra_data_to_global_logs(
 def _add_global_context_info_to_log_record(record: logging.LogRecord) -> bool:
     global _GLOBAL_LOG_CONTEXT  # noqa: PLW0602
     record.__dict__ |= _GLOBAL_LOG_CONTEXT
+
+    return True
+
+
+def _add_new_relic_context_to_log_record(record: logging.LogRecord) -> bool:
+    """Add New Relic tracing info to our log record."""
+    # This is not the recommended way of implementing this, but the alternatives
+    # either change the structure of our logging to not be JSON, or would
+    # entirely replace the formatter we have for outputting logs.
+    #
+    # The NewRelicContextFormatter calls this function internally when it
+    # creates the output object.
+    #
+    # This sets the following fields:
+    # entity.type
+    # entity.name
+    # entity.guid
+    # hostname
+    # span.id
+    # trace.id
+    newrelic_metadata = newrelic.api.time_trace.get_linking_metadata()
+
+    record.__dict__ |= newrelic_metadata
 
     return True

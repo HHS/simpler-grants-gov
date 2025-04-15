@@ -8,6 +8,7 @@ import uuid
 from functools import wraps
 from typing import Callable, Generator, ParamSpec, TypeVar  # noqa:  UP035
 
+import newrelic.agent
 import requests
 
 from analytics.logs.app_logger import add_extra_data_to_global_logs
@@ -47,7 +48,18 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            with _ecs_background_task_impl(task_name):
+            # Wrap with New Relic instrumentation
+            application = newrelic.agent.register_application(timeout=10.0)
+            with (
+                newrelic.agent.BackgroundTask(
+                    application,
+                    name=task_name,
+                    group="Python/AnalyticsTask",
+                ),
+                # Wrap with our own logging (timing/general logs)
+                _ecs_background_task_impl(task_name),
+            ):
+                # Finally actually run the task
                 return f(*args, **kwargs)
 
         return wrapper

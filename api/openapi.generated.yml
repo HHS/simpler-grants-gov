@@ -1426,7 +1426,7 @@ components:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
-    SortOrderAgencyPaginationV11:
+    SortOrderAgencySearchPaginationV1:
       type: object
       properties:
         order_by:
@@ -1445,7 +1445,7 @@ components:
       required:
       - order_by
       - sort_direction
-    AgencyPaginationV11:
+    AgencySearchPaginationV1:
       type: object
       properties:
         sort_order:
@@ -1459,7 +1459,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/SortOrderAgencyPaginationV11'
+            $ref: '#/components/schemas/SortOrderAgencySearchPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1500,7 +1500,7 @@ components:
         pagination:
           type:
           - object
-          $ref: '#/components/schemas/AgencyPaginationV11'
+          $ref: '#/components/schemas/AgencySearchPaginationV1'
       required:
       - pagination
     AgencyV1:
@@ -1675,7 +1675,7 @@ components:
             - archived
             type:
             - string
-    AgencySearchFilterV11:
+    AgencyOppSearchFilterV1:
       type: object
       properties:
         one_of:
@@ -1837,7 +1837,7 @@ components:
         agency:
           type:
           - object
-          $ref: '#/components/schemas/AgencySearchFilterV11'
+          $ref: '#/components/schemas/AgencyOppSearchFilterV1'
         assistance_listing_number:
           type:
           - object
