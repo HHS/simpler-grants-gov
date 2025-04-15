@@ -68,6 +68,7 @@ const ApplyForm = ({
           <Button
             data-testid="apply-form-save"
             type="submit"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             secondary
             name="apply-form-button"
             value="save"
