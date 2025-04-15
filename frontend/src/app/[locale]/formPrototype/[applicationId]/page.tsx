@@ -35,12 +35,12 @@ const FormLinks = ({
 }) => {
   if (forms.length > 0) {
     return (
-      <ul>
+      <ul className="usa-list">
         {forms.map((form) => {
           return (
             <li key={form.form.form_name}>
               <Link
-                href={`/formPrototype/${applicationId}/${form.form.form_id}`}
+                href={`/formPrototype/${applicationId}/form/${form.form.form_id}`}
               >
                 {form.form.form_name}
               </Link>

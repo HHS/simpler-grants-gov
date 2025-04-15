@@ -1,5 +1,6 @@
 "use server";
 
+import { RJSFSchema } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
@@ -8,7 +9,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
-import { filterFormData } from "./utils";
+import { parseSchema, shapeFormData } from "./utils";
 import { validateFormData } from "./validate";
 
 type applyFormErrors = {
@@ -27,23 +28,38 @@ export async function handleFormAction(
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
-  const { validationErrors, errorMessage } = await formValidate({
+
+  const formSchema = await getFormSchema(formId);
+  if (!formSchema) {
+    return {
+      applicationId,
+      errorMessage: "Error submitting form",
+      formData,
+      formId,
+      successMessage,
+      validationErrors: [],
+    };
+  }
+
+  const { validationErrors, errorMessage } = formValidate({
     formData,
-    formId,
+    formSchema,
   });
+  const applicationFormData = shapeFormData<ApplicationResponseDetail>(
+    formData,
+    formSchema,
+  );
   if (validationErrors.length) {
+    await handleSave(applicationFormData, applicationId, formId);
     return {
       applicationId,
       errorMessage,
-      formData,
+      formData: applicationFormData,
       formId,
       successMessage,
       validationErrors,
     };
   } else {
-    const applicationFormData =
-      filterFormData<ApplicationResponseDetail>(formData);
-
     const saveSuccess = await handleSave(
       applicationFormData,
       applicationId,
@@ -56,7 +72,7 @@ export async function handleFormAction(
         return {
           applicationId,
           errorMessage,
-          formData,
+          formData: applicationFormData,
           formId,
           successMessage: "Form saved",
           validationErrors,
@@ -98,13 +114,7 @@ const handleSave = async (
   }
 };
 
-async function formValidate({
-  formData,
-  formId,
-}: {
-  formData: FormData;
-  formId: string;
-}): Promise<applyFormErrors> {
+async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   let formSchema = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
@@ -113,21 +123,22 @@ async function formValidate({
         `Error retrieving form details for formID (${formId})`,
         response,
       );
-      return {
-        errorMessage: "Error submitting form",
-        validationErrors: [],
-      };
     }
     formSchema = response.data;
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
-    return {
-      errorMessage: "Error submitting form",
-      validationErrors: [],
-    };
   }
+  return await parseSchema(formSchema.form_json_schema);
+}
 
-  const errors = validateFormData(formData, formSchema.form_json_schema);
+function formValidate({
+  formData,
+  formSchema,
+}: {
+  formData: FormData;
+  formSchema: RJSFSchema;
+}): applyFormErrors {
+  const errors = validateFormData(formData, formSchema);
   if (errors) {
     return {
       errorMessage: "Error submitting form",
