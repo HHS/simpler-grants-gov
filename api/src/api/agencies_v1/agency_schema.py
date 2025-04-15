@@ -107,7 +107,7 @@ class AgencyV1Schema(Schema):
     )
     is_test_agency = fields.Boolean(
         metadata={
-            "description": "Indicates if the agency is a test agency .",
+            "description": "Indicates if the agency is a test agency.",
             "example": "False",
         },
     )
