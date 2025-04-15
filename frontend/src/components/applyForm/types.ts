@@ -106,7 +106,7 @@ export const uiSchema: UiSchema = [
       },
       {
         type: "field",
-        definition: "/properties/dob",
+        schema: { 'title': 'wtf', type: "string"},
       },
     ],
   },

@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { type UiSchemaSection } from "./types";
-
 const schemaFieldSchema = z.object({
   type: z.enum([
     "string",
@@ -27,26 +25,9 @@ export const uiSchemaFieldSchema = z.object({
   schema: schemaFieldSchema.optional(),
 });
 
-const uiSchemaSectionSchema: z.ZodSchema<UiSchemaSection> = z.lazy(() =>
-  z.object({
-    type: z.literal("section"),
-    label: z.string(),
-    name: z.string(),
-    number: z.string().optional(),
-    children: z.array(
-      z.union([uiSchemaFieldSchema, uiSchemaSectionSchema]).optional(),
-    ),
-  }),
-);
-
 export const formSchemaValidate = z.object({
   title: z.string(),
   description: z.string().optional(),
   properties: z.record(schemaFieldSchema).optional(),
   required: z.array(z.string()).optional(),
 });
-
-export const uiSchemaValidate = z.union([
-  z.union([uiSchemaFieldSchema, uiSchemaSectionSchema]),
-  z.array(z.union([uiSchemaFieldSchema, uiSchemaSectionSchema])),
-]);

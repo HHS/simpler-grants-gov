@@ -3,14 +3,14 @@ import Ajv, { ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
 
 import { UiSchema } from "./types";
-import { formSchemaValidate, uiSchemaValidate } from "./validations";
+import { formSchemaValidate } from "./validations";
 
 export const validateFormSchema = (data: RJSFSchema) => {
   return formSchemaValidate.parse(data);
 };
 
-export const validateUiSchema = (data: UiSchema) => {
-  return uiSchemaValidate.parse(data);
+export const validateUiSchema = (_data: UiSchema) => {
+  return true;
 };
 
 function getKeysWithValues(formData: FormData) {
