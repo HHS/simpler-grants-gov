@@ -9,9 +9,9 @@ This module provides functionality to backup Metabase queries by:
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import HTTPError, RequestException
@@ -19,16 +19,21 @@ from sqlparse import format as format_sql
 
 logger = logging.getLogger(__name__)
 
+# Constants
+HTTP_FORBIDDEN = 403
+
 
 class MetabaseBackup:
     """Back up Metabase queries to local filesystem."""
 
-    def __init__(self, api_url: str, api_key: str, output_dir: str):
-        """Initialize the Metabase backup handler.
+    def __init__(self, api_url: str, api_key: str, output_dir: str) -> None:
+        """
+        Initialize the Metabase backup handler.
+
         Args:
-            api_url: Base URL for the Metabase API
-            api_key: API key for authentication
-            output_dir: Directory to write backup files to
+            api_url: Base URL for the Metabase API.
+            api_key: API key for authentication.
+            output_dir: Directory to write backup files to.
         """
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
@@ -36,14 +41,19 @@ class MetabaseBackup:
         self.headers = {"x-api-key": api_key}
         self._requests = requests
         self.stats = self._init_stats()
-        self.collections: List[Dict] = []
+        self.collections: list[dict[str, Any]] = []
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def _init_stats(self) -> dict:
-        """Init dictionary of stats to collect."""
-        stats = {
+    def _init_stats(self) -> dict[str, int]:
+        """
+        Init dictionary of stats to collect.
+
+        Returns:
+            Dictionary with initialized stats.
+        """
+        return {
             "total_items": 0,
             "total_collections": 0,
             "items_with_queries": 0,
@@ -53,14 +63,16 @@ class MetabaseBackup:
             "files_renamed": 0,
             "files_updated": 0,
         }
-        return stats
 
     def _clean_name(self, name: str) -> str:
-        """Clean a name for use in filenames.
+        """
+        Clean a name for use in filenames.
+
         Args:
-            name: Name to clean
+            name: Name to clean.
+
         Returns:
-            Cleaned name with special characters replaced by underscores
+            Cleaned name with special characters replaced by underscores.
         """
         # Replace whitespace and special characters with underscores
         cleaned = ""
@@ -72,7 +84,9 @@ class MetabaseBackup:
         return cleaned.strip("_")  # Remove trailing underscores
 
     def backup(self) -> None:
-        """Backup all Metabase queries to local filesystem."""
+        """
+        Backup all Metabase queries to local filesystem.
+        """
         # Reset stats
         self.stats = self._init_stats()
 
@@ -109,8 +123,8 @@ class MetabaseBackup:
                 for item in items:
                     self.process_item(item, collection_dir)
 
-            except (IOError, RequestException) as e:
-                logger.error(
+            except (OSError, RequestException) as e:
+                logger.exception(
                     "Error processing collection %d (%s): %s",
                     collection_id,
                     collection_name,
@@ -122,10 +136,12 @@ class MetabaseBackup:
         logger.info("Done processing %d collections", self.stats["total_collections"])
         self.write_changelog()
 
-    def get_collections(self) -> List[Dict]:
-        """Get all available collections from Metabase.
+    def get_collections(self) -> list[dict[str, Any]]:
+        """
+        Get all available collections from Metabase.
+
         Returns:
-            List of collection objects with id, name, and location
+            List of collection objects with id, name, and location.
         """
         url = f"{self.api_url}/collection/?exclude-other-user-collections=true"
         response = self._requests.get(url, headers=self.headers, timeout=30)
@@ -147,8 +163,16 @@ class MetabaseBackup:
 
         return collections
 
-    def create_collection_dir(self, collection: Dict) -> Path:
-        """Create a directory for a collection or rename existing dir as necessary."""
+    def create_collection_dir(self, collection: dict[str, Any]) -> Path:
+        """
+        Create a directory for a collection or rename existing dir as necessary.
+
+        Args:
+            collection: Collection object with id, name, and location.
+
+        Returns:
+            Path to the collection directory.
+        """
         # Get the collection path
         collection_path = self.get_collection_path(collection)
 
@@ -189,12 +213,15 @@ class MetabaseBackup:
 
         return collection_path
 
-    def get_collection_path(self, collection: Dict) -> Path:
-        """Create a path for a collection.
+    def get_collection_path(self, collection: dict[str, Any]) -> Path:
+        """
+        Create a path for a collection.
+
         Args:
-            collection: Collection object with id, name, and location
+            collection: Collection object with id, name, and location.
+
         Returns:
-            Path to the collection directory
+            Path to the collection directory.
         """
         # Get the collection's location path
         location = collection.get("location", "")
@@ -228,12 +255,15 @@ class MetabaseBackup:
         # Add the current collection to the path
         return path / f"{collection['id']}-{self._clean_name(collection['name'])}"
 
-    def get_items(self, collection_id: int) -> List[Dict]:
-        """Get all items in a collection.
+    def get_items(self, collection_id: int) -> list[dict[str, Any]]:
+        """
+        Get all items in a collection.
+
         Args:
-            collection_id: ID of the collection to get
+            collection_id: ID of the collection to get.
+
         Returns:
-            List of item objects with id and name
+            List of item objects with id and name.
         """
         url = f"{self.api_url}/collection/{collection_id}/items"
         response = self._requests.get(url, headers=self.headers, timeout=30)
@@ -256,13 +286,14 @@ class MetabaseBackup:
 
         return items
 
-    def process_item(self, item: Dict, collection_dir: Path) -> None:
-        """Process a single item from a collection.
-        Args:
-            item: The item to process
-            collection_dir: The directory to write the item to
+    def process_item(self, item: dict[str, Any], collection_dir: Path) -> None:
         """
+        Process a single item from a collection.
 
+        Args:
+            item: The item to process.
+            collection_dir: The directory to write the item to.
+        """
         # Get details about card including embedded sql
         query = self.get_item_sql(item["id"])
         if not query:
@@ -318,12 +349,15 @@ class MetabaseBackup:
                 new_filename,
             )
 
-    def get_item_sql(self, item_id: int) -> Optional[str]:
-        """Get the SQL query for an item.
+    def get_item_sql(self, item_id: int) -> str | None:
+        """
+        Get the SQL query for an item.
+
         Args:
-            item_id: ID of the item to get
+            item_id: ID of the item to get.
+
         Returns:
-            SQL query string if found and valid, None otherwise
+            SQL query string if found and valid, None otherwise.
         """
         url = f"{self.api_url}/card/{item_id}"
         try:
@@ -345,27 +379,31 @@ class MetabaseBackup:
                 for keyword in ["select", "from", "where"]
             ):
                 logger.warning(
-                    "Query for item %d does not contain required SQL keywords", item_id
+                    "Query for item %d does not contain required SQL keywords",
+                    item_id,
                 )
                 return None
 
             return format_sql(query, reindent=True, keyword_case="upper")
 
         except HTTPError as e:
-            if e.response.status_code == 403:
+            if e.response.status_code == HTTP_FORBIDDEN:
                 logger.warning(
-                    "Permission denied (403) for item %d. Skipping.", item_id
+                    "Permission denied (403) for item %d. Skipping.",
+                    item_id,
                 )
                 return None
-            logger.error("Error getting query for item %d: %s", item_id, str(e))
+            logger.exception("Error getting query for item %d: %s", item_id, str(e))
             return None
 
         except RequestException as e:
-            logger.error("Error getting query for item %d: %s", item_id, str(e))
+            logger.exception("Error getting query for item %d: %s", item_id, str(e))
             return None
 
     def write_changelog(self) -> None:
-        """Write a changelog entry with backup statistics."""
+        """
+        Write a changelog entry with backup statistics.
+        """
         logger.info("Total items processed: %d", self.stats["total_items"])
         logger.info("Items with queries: %d", self.stats["items_with_queries"])
         logger.info("Items skipped: %d", self.stats["items_skipped"])
@@ -375,7 +413,7 @@ class MetabaseBackup:
         logger.info("Files renamed: %d", self.stats["files_renamed"])
 
         # Write changelog
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         log_entry = (
             f"\n=== Backup completed at {timestamp} ===\n"
             f"Collections processed: {self.stats['total_collections']}\n"
