@@ -1,6 +1,7 @@
 import pytest
 
 from src.util.text_extractor import (
+    FileTypeMismatchTextExtractorError,
     TextExtractor,
     UnsupportedTextExtractorFileType,
     extract_text_from_file,
@@ -9,9 +10,25 @@ from src.util.text_extractor import (
 TEST_FILE_DIR = "/text_extractor_test_files"
 
 
-def test_text_extractor_errors_on_invalid_file_type() -> None:
+@pytest.mark.parametrize(
+    "file_path,file_type,exception",
+    [
+        ("d.docx", "doc", FileTypeMismatchTextExtractorError),
+        ("d.docx", ".doc", FileTypeMismatchTextExtractorError),
+        ("d", ".doc", FileTypeMismatchTextExtractorError),
+        ("d.app", ".app", UnsupportedTextExtractorFileType),
+        ("d.docx", "ocx", UnsupportedTextExtractorFileType),
+    ],
+)
+def test_invalid_text_extractor_args(file_path, file_type, exception) -> None:
+    with pytest.raises(exception):
+        TextExtractor(file_path=file_path, file_type=file_type)
+
+
+def test_extract_text_from_file_raises_when_specified_in_param() -> None:
     with pytest.raises(UnsupportedTextExtractorFileType):
-        TextExtractor("/pathtounsupported/filetype.movie")
+        extract_text_from_file("unsopported_file_type.not_today", raise_on_error=True)
+    assert extract_text_from_file("unsopported_file_type.not_today", raise_on_error=False) is None
 
 
 def test_extract_text_from_file_returns_none_unsupported_file_type() -> None:

@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Callable
@@ -11,29 +12,31 @@ from striprtf.striprtf import rtf_to_text
 
 from src.util.file_util import open_stream
 
-TEXT_EXTRACTOR_SUPPORTED_FILE_TYPES = (
-    "txt",
-    "pdf",
-    "docx",
-    "doc",
-    "xlsx",
-    "xlsm",
-    "html",
-    "htm",
-    "pptx",
-    "ppt",
-    "rtf",
-)
+logger = logging.getLogger(__name__)
 
 
 class UnsupportedTextExtractorFileType(Exception):
     pass
 
 
-def extract_text_from_file(file_path: str, file_type: str | None = None) -> str | None:
+class FileTypeMismatchTextExtractorError(Exception):
+    pass
+
+
+class TextExtractorError(Exception):
+    pass
+
+
+def extract_text_from_file(
+    file_path: str, file_type: str | None = None, raise_on_error: bool = False
+) -> str | None:
     try:
         return TextExtractor(file_path, file_type=file_type).get_text()
-    except UnsupportedTextExtractorFileType:
+    except Exception as e:
+        if raise_on_error:
+            logger.error(e)
+            raise e
+        logger.warning(e)
         return None
 
 
@@ -47,8 +50,8 @@ def extract_text_from_pdf(file_data: bytes) -> str:
     text_data = []
     for page_number in range(number_of_pages):
         page = reader.pages[page_number]
-        text = page.extract_text()
-        text_data.append(text)
+        if text := page.extract_text().strip():
+            text_data.append(text)
     return "\n".join(text_data)
 
 
@@ -61,7 +64,8 @@ def pptx_reader(file_path: str) -> str:
                 continue
             for paragraph in shape.text_frame.paragraphs:
                 for run in paragraph.runs:
-                    text_runs.append(run.text)
+                    if text := run.text.strip():
+                        text_runs.append(text)
     return "\n".join(text_runs)
 
 
@@ -97,20 +101,20 @@ class TextExtractor:
         file_type: str | None = None,
     ) -> None:
         self.file_path = file_path
-        self.file_type = file_type if file_type else self.file_path.split(".")[-1]
+        self.file_type = file_type.lower() if file_type else self.file_path.split(".")[-1].lower()
         self._validate_file_type()
-        self.config = self._get_text_extractor_config()
+        self.config = TextExtractor.get_configs()[self.file_type]
 
     def get_text(self) -> str:
-        return self.config.extractor(self._read_file_data()).strip()
+        try:
+            return self.config.extractor(self._read_file_data()).strip()
+        except Exception as e:
+            err = f"TextExtractorError: Could not extract text from file {self.file_path} - {self.file_type}: {e}"
+            logger.error(err)
+            raise TextExtractorError(err)
 
-    def _read_file_data(self) -> bytes | str:
-        if self.config.reader:
-            return self.config.reader(self.file_path)
-        with open_stream(self.file_path, self.config.read_mode) as f:
-            return f.read()
-
-    def _get_text_extractor_config(self) -> TextExtractorConfig:
+    @staticmethod
+    def get_configs() -> dict:
         html_extractor_config = TextExtractorConfig(extractor=extract_text_from_html)
         xls_extractor_config = TextExtractorConfig(reader=xls_reader)
         return {
@@ -123,11 +127,21 @@ class TextExtractor:
             "rtf": TextExtractorConfig(extractor=extract_text_from_rft),
             "xlsm": xls_extractor_config,
             "xlsx": xls_extractor_config,
-        }[self.file_type]
+        }
+
+    def _read_file_data(self) -> bytes | str:
+        if self.config.reader:
+            return self.config.reader(self.file_path)
+        with open_stream(self.file_path, self.config.read_mode) as f:
+            return f.read()
 
     def _validate_file_type(self) -> None:
-        if self.file_type.lower() not in TEXT_EXTRACTOR_SUPPORTED_FILE_TYPES:
-            raise UnsupportedTextExtractorFileType(f"Unsupported file type: {self.file_type}")
+        if not self.file_path.lower().endswith(self.file_type):
+            err = f"Mismatch file type: {self.file_path} must end with {self.file_type}"
+            raise FileTypeMismatchTextExtractorError(err)
+        if not self.file_type in set(TextExtractor.get_configs().keys()):
+            err = f"Unsupported file type: {self.file_type}"
+            raise UnsupportedTextExtractorFileType(err)
 
 
 def _xls_dict_to_string(xls_dict: dict[str, list[list]]) -> str:
