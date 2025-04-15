@@ -64,6 +64,7 @@ locals {
     local.base_environment_variables,
     local.db_environment_variables,
     local.cdn_environment_variables,
+    local.scheduled_job_environment_variables,
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }

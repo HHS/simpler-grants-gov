@@ -1,3 +1,13 @@
+locals {
+  scheduled_job_environment_variables = [
+    for name, value in var.scheduled_jobs :
+    {
+      name  = "SCHEDULED_JOB_NAME",
+      value = name
+    }
+  ]
+}
+
 resource "aws_scheduler_schedule" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 

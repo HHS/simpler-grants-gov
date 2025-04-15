@@ -43,18 +43,13 @@ locals {
     ],
   }
   scheduled_jobs = {
-    failing-job = { # This is here to help test alerts, remove it when that's not needed.
-      task_command        = ["this-command-will-fail"]
-      schedule_expression = "cron(0 * * * ? *)"
-      state               = "ENABLED"
-    }
     load-transform = {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
     }
-    populate-search-index = {
+    load-search-and-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
       schedule_expression = "cron(30 * * * ? *)"
