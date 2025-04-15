@@ -252,14 +252,18 @@ class BoolSearchSchemaBuilder(BaseSearchSchemaBuilder):
             )
     """
 
-    def with_one_of(self, example: bool | None = None) -> "BoolSearchSchemaBuilder":
+    def with_one_of(self, example: bool | None = None, default: bool | None = None) -> "BoolSearchSchemaBuilder":
         metadata = {}
         if example is not None:
             metadata["example"] = example
 
         self.schema_fields["one_of"] = fields.List(
-            fields.Boolean(metadata=metadata), allow_none=True
+            fields.Boolean(metadata=metadata, load_default=default), allow_none=True,
         )
+        return self
+
+    def with_default(self, default) -> "BoolSearchSchemaBuilder":
+        self.default = default
         return self
 
 

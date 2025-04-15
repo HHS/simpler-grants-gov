@@ -9,6 +9,7 @@ from tests.src.db.models.factories import AgencyFactory
 HHS = AgencyFactory.build(agency_code="HHS")
 DOD = AgencyFactory.build(agency_code="DOD")
 DOA = AgencyFactory.build(agency_code="DOA")
+DHA = AgencyFactory.build(agency_code="DHA", is_test_agency=True)
 
 # sub-agencies
 HHS_NIH = AgencyFactory.build(agency_code="HHS-NIH", top_level_agency=HHS)
@@ -16,7 +17,7 @@ HHS_DOC = AgencyFactory.build(agency_code="HHS-DOC", top_level_agency=HHS)
 DOD_MCO = AgencyFactory.build(agency_code="DOD-MCO", top_level_agency=DOD)
 DOD_HRE = AgencyFactory.build(agency_code="DOD-HRE", top_level_agency=DOD)
 
-AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH]
+AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, DHA]
 
 
 class TestAgencyRoutesSearch(BaseTestClass):
@@ -97,6 +98,21 @@ class TestAgencyRoutesSearch(BaseTestClass):
                     },
                 },
                 [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH],
+            ),
+            (
+                    {
+                        "pagination": {
+                            "page_offset": 1,
+                            "page_size": 25,
+                            "sort_order": [
+                                {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+                            ],
+                        },
+                        "filters": {
+                            "is_test_agency": {"one_of": [0]},
+                        },
+                    },
+                    [DHA],
             ),
         ],
     )

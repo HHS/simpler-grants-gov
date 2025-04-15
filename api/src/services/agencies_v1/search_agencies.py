@@ -32,6 +32,7 @@ AGENCY_REQUEST_FIELD_NAME_MAPPING = {
 
 class AgencySearchFilters(BaseModel):
     has_active_opportunity: BoolSearchFilter | None = None
+    is_test_agency: BoolSearchFilter | None = None
 
 
 class AgencySearchParams(BaseModel):
