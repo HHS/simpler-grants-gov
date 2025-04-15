@@ -102,13 +102,13 @@ class AgencyV1Schema(Schema):
         dump_default=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
-            "example": "False",
+            "example": False,
         },
     )
     is_test_agency = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is a test agency.",
-            "example": "False",
+            "example": False,
         },
     )
 
