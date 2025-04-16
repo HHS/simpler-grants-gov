@@ -67,5 +67,11 @@ locals {
       schedule_expression = "cron(0 10 * * ? *)"
       state               = "ENABLED"
     }
+    load-search-and-opportunity-data = {
+      task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
+      # Every hour at the half hour
+      schedule_expression = "cron(0 8 * * ? *)"
+      state               = "ENABLED"
+        }
   }
 }
