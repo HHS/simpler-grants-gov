@@ -4,12 +4,12 @@
 * **Last Modified:** 2023-12-18
 * **Related Issue:** [#854](https://github.com/HHS/simpler-grants-gov/issues/854)
 * **Deciders:**
-  * Lucas Brown
-  * Sarah Knopp
-  * Sumi Thaiveettil
-  * Aaron Couch
-  * Esther Oke
-  * Billy Daly
+  * Lucas&#x20;
+  * Sarah&#x20;
+  * Sumi&#x20;
+  * Aaron&#x20;
+  * Esther&#x20;
+  * Billy&#x20;
 * **Tags:** analytics, github
 
 ## Context and Problem Statement

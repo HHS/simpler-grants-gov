@@ -3,7 +3,7 @@
 * **Status:** Active
 * **Last Modified:** 2024-04-10
 * **Related Issue:** [#1507](https://github.com/HHS/simpler-grants-gov/issues/1507)
-* **Deciders:** Aaron Couch, Billy Daly
+* **Deciders:** Aaron, Billy
 
 ## Context and Problem Statement
 
