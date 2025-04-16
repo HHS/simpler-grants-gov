@@ -6,9 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
-from analytics.integrations.metabase.backup import MetabaseBackup
 from requests.exceptions import RequestException
 from sqlparse import format as format_sql
+
+from analytics.integrations.metabase.backup import MetabaseBackup
 
 
 @pytest.fixture(name="mock_response")
