@@ -135,7 +135,7 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
     # Add appropriate property based on type
     if field_type == "Radio Group" or data_type == "LIST" or list_of_values:
         builder.add_string_property(
-            field_id,
+            title,
             is_nullable=is_nullable,
             is_required=required,
             title=title,
@@ -147,7 +147,7 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
         )
     elif data_type == "DATE":
         builder.add_string_property(
-            field_id,
+            title,
             is_nullable=is_nullable,
             is_required=required,
             title=title,
@@ -156,7 +156,7 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
         )
     elif data_type == "AN":  # Alphanumeric
         builder.add_string_property(
-            field_id,
+            title,
             is_nullable=is_nullable,
             is_required=required,
             title=title,
@@ -168,7 +168,7 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
     else:
         # Default to string
         builder.add_string_property(
-            field_id,
+            title,
             is_nullable=is_nullable,
             is_required=required,
             title=title,

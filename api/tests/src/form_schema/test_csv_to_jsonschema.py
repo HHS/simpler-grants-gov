@@ -34,11 +34,11 @@ def expected_schema_keys():
 def expected_fields():
     # A sample of fields we expect to find in the schema
     return [
-        "FirstName",
-        "LastName",
-        "City",
+        "First Name:",
+        "Last Name:",
+        "City:",
         "Country",
-        "citizenship",
+        "U.S. Citizenship",
     ]
 
 
@@ -61,7 +61,6 @@ def test_csv_to_jsonschema_contains_expected_fields(csv_file_content, expected_f
     """Test that the generated schema contains expected fields."""
     schema, _ = csv_to_jsonschema(csv_file_content)
 
-    print(schema)
     # Look for each field in the schema properties
     for field in expected_fields:
         # Fields might be in the main schema or in a section
@@ -85,8 +84,9 @@ def test_required_fields_are_marked_correctly(csv_file_content):
     """Test that required fields are properly marked in the schema."""
     schema, _ = csv_to_jsonschema(csv_file_content)
 
+    print(schema)
     # Known required fields from CSV
-    known_required_fields = ["FirstName", "LastName", "AuthorizedRepresentativeEmail"]
+    known_required_fields = ["First Name:", "Last Name:", "Email:"]
 
     # Check if these fields are marked as required
     for field in known_required_fields:
@@ -138,7 +138,7 @@ def test_date_fields_have_correct_format(csv_file_content):
     schema, _ = csv_to_jsonschema(csv_file_content)
 
     # Find fields that should be dates
-    date_field_names = ["FundingPeriodStartDate", "FundingPeriodEndDate"]
+    date_field_names = ["Start Date:", "End Date:"]
 
     for field_name in date_field_names:
         field = schema["properties"][field_name]
@@ -167,7 +167,7 @@ def test_ui_schema_has_correct_structure(csv_file_content):
             "/properties/"
         ), "Definition should start with '/properties/'"
 
-    assert ui_schema[0]["definition"] == "/properties/FederalAgency"
+    assert ui_schema[0]["definition"] == "/properties/1. NAME OF FEDERAL AGENCY:"
 
 
 def test_state_and_country_fields_auto_detection():
@@ -317,11 +317,11 @@ def test_add_field_to_builder_state_country_references():
     assert "birthCountry" not in schema["required"]  # Shouldn't be required
 
     # Verify regular field is NOT added as a reference
-    assert "fullName" in schema["properties"]
-    assert "$ref" not in schema["properties"]["fullName"]
-    assert schema["properties"]["fullName"]["type"] == "string"
-    assert schema["properties"]["fullName"]["title"] == "Full Name"
-    assert "fullName" in schema["required"]
+    assert "Full Name" in schema["properties"]
+    assert "$ref" not in schema["properties"]["Full Name"]
+    assert schema["properties"]["Full Name"]["type"] == "string"
+    assert schema["properties"]["Full Name"]["title"] == "Full Name"
+    assert "Full Name" in schema["required"]
 
 
 def test_add_field_to_builder_genc_country_detection():
@@ -376,7 +376,7 @@ def test_add_field_to_builder_genc_country_detection():
     assert schema["properties"]["nationalOrigin"]["$ref"] == "#/$defs/CountryCode"
 
     # Verify the regular dropdown is NOT treated as a reference
-    assert "favoriteColor" in schema["properties"]
-    assert "$ref" not in schema["properties"]["favoriteColor"]
-    assert "enum" in schema["properties"]["favoriteColor"]
-    assert schema["properties"]["favoriteColor"]["enum"] == ["Red", "Green", "Blue"]
+    assert "Favorite Color" in schema["properties"]
+    assert "$ref" not in schema["properties"]["Favorite Color"]
+    assert "enum" in schema["properties"]["Favorite Color"]
+    assert schema["properties"]["Favorite Color"]["enum"] == ["Red", "Green", "Blue"]
