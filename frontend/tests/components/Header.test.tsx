@@ -1,10 +1,12 @@
-import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
-import { render, screen } from "tests/react-utils";
-
 import { ReadonlyURLSearchParams } from "next/navigation";
-
+import { Response } from "node-fetch";
 import Header from "src/components/Header";
+import {
+  render,
+  screen,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const props = {
   locale: "en",
@@ -147,14 +149,14 @@ describe("Header", () => {
   });
 
   describe("About", () => {
-    it("shows About as the active nav item when on Vision page", async () => {
+    it("shows About as the active nav item when on Vision page", () => {
       usePathnameMock.mockReturnValue("/vision");
       render(<Header />);
 
       const homeLink = screen.getByRole("button", { name: /About/i });
       expect(homeLink).toHaveClass("usa-current");
     });
-    it("shows About as the active nav item when on Roadmap page", async () => {
+    it("shows About as the active nav item when on Roadmap page", () => {
       usePathnameMock.mockReturnValue("/roadmap");
       render(<Header />);
 
