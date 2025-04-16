@@ -279,19 +279,19 @@ exports[`Header About renders About submenu 1`] = `
             class="usa-nav__primary-item"
           >
             <button
-              aria-controls="Header.navLinks.about"
+              aria-controls="About"
               aria-expanded="true"
               class="usa-accordion__button usa-nav__link usa-current simpler-subnav-open"
               data-testid="navDropDownButton"
               type="button"
             >
               <span>
-                Header.navLinks.about
+                About
               </span>
             </button>
             <ul
               class="usa-nav__submenu margin-top-05"
-              id="Header.navLinks.about"
+              id="About"
             >
               <li
                 class="usa-nav__submenu-item"
@@ -300,7 +300,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/vision"
                 >
                   <div>
-                    Header.navLinks.vision
+                    Our Vision
                   </div>
                 </a>
               </li>
@@ -311,7 +311,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/roadmap"
                 >
                   <div>
-                    Roadmap
+                    Product Roadmap
                   </div>
                 </a>
               </li>
@@ -614,26 +614,45 @@ exports[`Header renders Header navbar menu 1`] = `
           <li
             class="usa-nav__primary-item"
           >
-            <a
-              class="usa-nav__link"
-              href="/roadmap"
+            <button
+              aria-controls="About"
+              aria-expanded="false"
+              class="usa-accordion__button usa-nav__link"
+              data-testid="navDropDownButton"
+              type="button"
             >
-              <div>
-                Roadmap
-              </div>
-            </a>
-          </li>
-          <li
-            class="usa-nav__primary-item"
-          >
-            <a
-              class="usa-nav__link"
-              href="/research"
+              <span>
+                About
+              </span>
+            </button>
+            <ul
+              class="usa-nav__submenu margin-top-05"
+              hidden=""
+              id="About"
             >
-              <div>
-                Research
-              </div>
-            </a>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/vision"
+                >
+                  <div>
+                    Our Vision
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/roadmap"
+                >
+                  <div>
+                    Product Roadmap
+                  </div>
+                </a>
+              </li>
+            </ul>
           </li>
           <li
             class="usa-nav__primary-item"
