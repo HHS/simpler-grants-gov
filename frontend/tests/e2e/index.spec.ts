@@ -1,5 +1,8 @@
 /* eslint-disable testing-library/prefer-screen-queries */
-import { expect, test } from "@playwright/test";
+import {
+  expect,
+  test,
+} from "@playwright/test";
 
 import { openMobileNav } from "./playwrightUtils";
 
@@ -61,7 +64,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
     const primaryNavItems = page.locator(
       ".usa-accordion > .usa-nav__primary-item",
     );
-    await expect(primaryNavItems).toHaveCount(5);
+    await expect(primaryNavItems).toHaveCount(4);
     const allNavItems = await page
       .locator(".usa-accordion > .usa-nav__primary-item")
       .all();
