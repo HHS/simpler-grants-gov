@@ -6,10 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from analytics.integrations.metabase.backup import MetabaseBackup
 from requests.exceptions import RequestException
 from sqlparse import format as format_sql
-
-from analytics.integrations.metabase.backup import MetabaseBackup
 
 
 @pytest.fixture(name="mock_response")
@@ -38,6 +37,7 @@ def _metabase_backup_fixture(tmp_path: Path) -> MetabaseBackup:
             output_dir=str(tmp_path),
         )
         # pylint: disable=protected-access
+        # ruff: noqa: SLF001
         backup._requests = mock_requests
         yield backup
 
@@ -52,6 +52,7 @@ def _backup_instance(tmp_path: Path) -> MetabaseBackup:
     )
     mock_requests = MagicMock()
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup._requests = mock_requests
     return backup
 
@@ -160,6 +161,7 @@ def test_get_collections(
     response.json.return_value = collection_data
     response.raise_for_status.return_value = None
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.return_value = response
 
     result = backup_instance.get_collections()
@@ -168,6 +170,7 @@ def test_get_collections(
     assert result[0]["id"] == 1
     assert result[0]["name"] == "Collection 1"
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.assert_called_once_with(
         "http://metabase.example.com/api/collection/?exclude-other-user-collections=true",
         headers=backup_instance.headers,
@@ -178,6 +181,7 @@ def test_get_collections(
 def test_get_collections_error(backup_instance: MetabaseBackup) -> None:
     """Test error handling when getting collections."""
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.side_effect = RequestException(
         "API Error",
     )
@@ -197,6 +201,7 @@ def test_get_items(
     response.json.return_value = {"data": item_data}
     response.raise_for_status.return_value = None
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.return_value = response
 
     # Test getting items for a collection
@@ -212,6 +217,7 @@ def test_get_items(
 
     # Test API error - this will raise an exception as the implementation doesn't handle it
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.side_effect = Exception("API Error")
 
     # We expect this to raise an exception
@@ -230,6 +236,7 @@ def test_get_item_sql(
     }
 
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get = MagicMock(return_value=test_response)
     sql_query = backup_instance.get_item_sql(1)
 
@@ -310,6 +317,7 @@ def test_get_collection_path(
     response = MagicMock()
     response.json.return_value = collection_data
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
@@ -328,6 +336,7 @@ def test_get_collection_path_with_empty_ids(
     response = MagicMock()
     response.json.return_value = collection_data
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.return_value = response
 
     path = backup_instance.get_collection_path(collection)
@@ -444,6 +453,7 @@ def test_backup_integration(backup_instance: MetabaseBackup, tmp_path: Path) -> 
     )
 
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get = MagicMock(side_effect=mock_responses)
     backup_instance.backup()
 
@@ -484,12 +494,14 @@ def test_get_item_sql_invalid(
     }
     response.raise_for_status.return_value = None
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.return_value = response
 
     sql_query = backup_instance.get_item_sql(101)
 
     assert sql_query is None
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.assert_called_once_with(
         "http://metabase.example.com/api/card/101",
         headers=backup_instance.headers,
@@ -511,6 +523,7 @@ def test_get_item_sql_permission_denied(backup_instance: MetabaseBackup) -> None
     response.json.return_value = {}
 
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get = MagicMock(return_value=response)
     sql_query = backup_instance.get_item_sql(1)
     assert sql_query is None
@@ -686,6 +699,7 @@ def test_backup_with_empty_collection(
 
     # Mock API responses for an empty collection
     # pylint: disable=protected-access
+    # ruff: noqa: SLF001
     backup_instance._requests.get.side_effect = [
         # get_collections
         MagicMock(
