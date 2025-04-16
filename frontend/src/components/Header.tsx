@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
@@ -97,7 +98,7 @@ const NavLinks = ({
         ]
       },
       {
-        text: "Community",
+        text: t("community"),
         children: [
           { text: t("subscribe"), href: "/subscribe" },
           { text: t("events"), href: "/events" },
@@ -181,12 +182,18 @@ const NavLinks = ({
             return <></>;
           }
           return (
-            <NavLink
-              href={childLink.href}
-              key={childLink.href}
-              onClick={closeMobileNav}
-              text={childLink.text}
-            />
+            <>
+              <NavLink
+                href={childLink.href}
+                key={childLink.href}
+                onClick={closeMobileNav}
+                text={childLink.text}
+              />
+              {
+                childLink && childLink.href && childLink.href.includes("https") &&
+                  <USWDSIcon name="launch" className="usa-icon--size-3 padding-top-1" />
+              }
+            </>
           );
         });
         return (

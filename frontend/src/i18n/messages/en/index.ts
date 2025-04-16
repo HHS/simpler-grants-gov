@@ -383,6 +383,7 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      community: "Community",
       discussion: "Discussion forum",
       events: "Events",
       home: "Home",

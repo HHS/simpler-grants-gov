@@ -417,6 +417,13 @@ button.usa-pagination__button.usa-button {
 
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
+.usa-nav__submenu-item {
+  display: flex;
+  svg {
+    color: white;
+  }
+}
+
 .usa-nav__primary {
   .mobile-nav-dropdown-uncollapsed-override {
     @include at-media("desktop") {
