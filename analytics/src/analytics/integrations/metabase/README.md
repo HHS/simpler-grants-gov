@@ -7,10 +7,12 @@ restoration of dashboards and visualizations.
 
 ## Folder Structure
 
+The `sql/` directory is organized into subfolders, each of which maps to a
+specific Metabase "collection". The subfolders contain `.sql` files which 
+contain backed-up copies of the SQL queries (known as "questions" in Metabase
+parlance) within each collection.
 
-The `sql/` directory is organized into subfolders based loosely on dashboard 
-categories. Each subfolder contains `.sql` files corresponding to Metabase 
-questions.
+For example (names are not exact):
 
 - `sql/data-availability/` — SQL queries related to data quality, completeness,
   and availability monitoring.
@@ -25,15 +27,45 @@ questions.
 
 ## Purpose
 
-Metabase dashboards rely on complex SQL queries that are currently stored
-only within the Metabase interface and not under source control. Until an
-automated backup and restore solution is implemented, this folder serves as a
-manual disaster recovery mechanism.
+SGG dashboards in Metabase are powered by many complex SQL queries. The Metabase
+instance itself is the canonical source of truth for the queries, and the queries
+are not automatically backed-up in any source control system (other than DB 
+snapshots). In the unlikely event of a catastrophic outage, all queries could be
+lost. Therefore, the purpose of this directory is to provide a semi-automated
+backup script and backup copies of each production query.
 
-## Manual Disaster Recovery Process
+## Semi-Automated Backup Process
 
-Follow the steps below to manually restore dashboards using the contents of
-this folder:
+Follow the steps below to query the Metabase API for collections and questions, 
+and write those collections and questions to the local filesystem. 
+
+1. Get an API key from the Metabase Admin interface if you have access, otherwise
+   ask for a key from your team lead. 
+
+2. Open a terminal and change directory to `simpler-grants-gov/analytics`. 
+
+3. Inspect the `local.env` file and ensure that `MB_API_URL` is set to the 
+   correct target instance (i.e. dev or prod). 
+
+4. Use the command line in your open terminal window to set the `MB_API_KEY` 
+   environment variable to hold the Metabase API key. For example:
+
+```bash 
+export MB_API_KEY=mb_DjVxkjsdjsd89wkjaszqSLej4qabWr
+```
+
+5. From the command line, run the command `make mb-backup` and observe the 
+   output to ensure success.
+
+After successful execution of the backup command, the `sql/` directory should
+contain backup copies of all collections and SQL queries, as well as an updated
+`CHANGELOG.txt` file. As a final step, create a branch and open a PR with the
+updated queries and change log.
+
+## Disaster Recovery Process
+
+Follow the steps below to manually restore dashboards in Metabase using the backup 
+copies of the SQL queries in this folder.
 
 ### 1. Recreate Metabase Questions
 
