@@ -1,5 +1,4 @@
 import {
-  enumOptionsIndexForValue,
   enumOptionsValueForIndex,
   FormContextType,
   RJSFSchema,
@@ -50,8 +49,8 @@ function SelectWidget<
 }: UswdsWidgetProps<T, S, F>) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
-  const { title } = schema;
-  const emptyValue = multiple ? [] : undefined;
+  const { title, description } = schema;
+  const selectValue = value ? String(value) : "";
 
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
@@ -85,11 +84,6 @@ function SelectWidget<
     [onChange, multiple, enumOptions, optEmptyVal],
   );
 
-  const selectedIndexes = enumOptionsIndexForValue<S>(
-    value,
-    enumOptions,
-    multiple,
-  );
   const error = rawErrors.length ? true : undefined;
   const describedby = error
     ? `error-for-${id}`
@@ -99,16 +93,23 @@ function SelectWidget<
 
   return (
     <div key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
+      <FieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description}
+      />
 
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+
       <Select
+        // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
+        key={selectValue}
         id={id}
         name={id}
         multiple={multiple}
-        value={
-          typeof selectedIndexes === "undefined" ? emptyValue : selectedIndexes
-        }
+        defaultValue={updateOnInput ? undefined : selectValue}
+        value={updateOnInput ? selectValue : undefined}
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}

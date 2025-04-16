@@ -2,6 +2,7 @@ import logging
 import os
 from typing import Any, Tuple
 
+import flask
 from apiflask import APIFlask, exceptions
 from flask_cors import CORS
 from pydantic import Field
@@ -58,6 +59,7 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    setup_newrelic_5xx_test(app)
     init_newrelic()
     register_db_client(app)
 
@@ -79,6 +81,18 @@ def create_app() -> APIFlask:
         init_legacy_soap_api(app)
 
     return app
+
+
+def setup_newrelic_5xx_test(app: APIFlask) -> None:
+    # TODO - remove before next prod deploy
+    #        just using this for testing newrelic alerts
+    @app.before_request
+    def newrelic_5xx_test() -> None:
+        if (
+            flask.has_request_context()
+            and flask.request.headers.get("Newrelic-Failure-Header") == "FAIL"
+        ):
+            raise Exception("Intentional 5xx due to New Relic testing")
 
 
 def setup_logging(app: APIFlask) -> None:

@@ -1,19 +1,20 @@
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
+import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
-import {
-  validateFormSchema,
-  validateUiSchema,
-} from "src/components/applyForm/validate";
+import { getApplicationResponse } from "src/components/applyForm/utils";
+import { validateUiSchema } from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
 
 export const dynamic = "force-dynamic";
@@ -31,31 +32,69 @@ interface formPageProps {
 }
 
 async function FormPage({ params }: formPageProps) {
-  const { formId } = await params;
+  const { applicationId, formId } = await params;
   let formData = {} as FormDetail;
+  let applicationData = {} as ApplicationDetail;
 
   try {
     const response = await getFormDetails(formId);
     if (response.status_code !== 200) {
-      throw new Error(
-        `Error retrieving competition details: ${JSON.stringify(response.errors)}`,
+      console.error(
+        `Error retrieving form details for formID (${formId})`,
+        response,
       );
+      return <TopLevelError />;
     }
     formData = response.data;
-  } catch (error) {
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+  } catch (e) {
+    console.error(
+      `Error retrieving application details for formId ${formId}:`,
+      e,
+    );
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return <NotFound />;
     }
-    throw error;
+    return <TopLevelError />;
   }
 
-  const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
+  try {
+    const response = await getApplicationDetails(applicationId);
+    if (response.status_code !== 200) {
+      console.error(
+        `Error retrieving form details for applicationID (${applicationId}), formID (${formId})`,
+        response,
+      );
+      return <TopLevelError />;
+    }
+    applicationData = response.data;
+  } catch (e) {
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
+      console.error(
+        `Error retrieving application details for applicationID (${applicationId}), formId ${formId}:`,
+        e,
+      );
+      return <NotFound />;
+    }
+    return <TopLevelError />;
+  }
 
+  const application_response = getApplicationResponse(
+    applicationData.application_forms,
+    formId,
+  );
+  const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
   try {
     validateUiSchema(form_ui_schema);
-    validateFormSchema(form_json_schema);
-  } catch (error) {
-    console.error("Error validating", error);
+  } catch (e) {
+    console.error("Error validating form", e);
+    return <TopLevelError />;
+  }
+
+  let formSchema = {};
+  try {
+    formSchema = await $RefParser.dereference(form_json_schema);
+  } catch (e) {
+    console.error("Error parsing JSON schema", e);
     return <TopLevelError />;
   }
 
@@ -77,9 +116,11 @@ async function FormPage({ params }: formPageProps) {
         ).
       </p>
       <ApplyForm
-        formSchema={form_json_schema}
+        savedFormData={application_response}
+        formSchema={formSchema}
         uiSchema={form_ui_schema}
         formId={form_id}
+        applicationId={applicationId}
       />
     </GridContainer>
   );

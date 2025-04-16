@@ -1,11 +1,11 @@
-import { formDetailApiResponse } from "src/types/formResponseTypes";
+import { FormDetailApiResponse } from "src/types/formResponseTypes";
 
 import { fetchForm } from "./fetchers";
 
 export const getFormDetails = async (
   id: string,
-): Promise<formDetailApiResponse> => {
+): Promise<FormDetailApiResponse> => {
   const response = await fetchForm({ subPath: id });
-  const responseBody = (await response.json()) as formDetailApiResponse;
+  const responseBody = (await response.json()) as FormDetailApiResponse;
   return responseBody;
 };

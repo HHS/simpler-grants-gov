@@ -17,6 +17,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
     staging = [
       "poetry",
@@ -27,6 +28,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
     prod = [
       "poetry",
@@ -37,6 +39,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
+      "--store-version"
     ],
   }
   scheduled_jobs = {
@@ -46,7 +49,7 @@ locals {
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
     }
-    populate-search-index = {
+    load-search-and-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
       schedule_expression = "cron(30 * * * ? *)"

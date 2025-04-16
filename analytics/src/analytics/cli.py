@@ -4,7 +4,7 @@
 
 import logging
 import logging.config
-import time
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated
@@ -23,6 +23,7 @@ from analytics.integrations.extracts.load_opportunity_data import (
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
+from analytics.newrelic import init_newrelic
 
 logger = logging.getLogger(__name__)
 init_logging(__package__)
@@ -40,7 +41,11 @@ EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to ea
 # fmt: on
 
 # instantiate the main CLI entrypoint
-app = typer.Typer()
+# Disable pretty exceptions by default as non-locally
+# we don't want the formatting/locals in New Relic
+app = typer.Typer(
+    pretty_exceptions_enable=os.getenv("ENABLE_PRETTY_EXCEPTIONS", "0") == "1",
+)
 # instantiate sub-commands for exporting data and calculating metrics
 export_app = typer.Typer()
 import_app = typer.Typer()
@@ -55,6 +60,8 @@ def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
     init_app(logging.root)
+    # Initialize New Relic
+    init_newrelic()
 
 
 @app.callback()
@@ -70,6 +77,7 @@ def callback() -> None:
 
 
 @export_app.command(name="gh_delivery_data")
+@ecs_background_task("gh_delivery_data")
 def export_github_data(
     config_file: Annotated[str, CONFIG_FILE_ARG],
     output_file: Annotated[str, OUTPUT_FILE_ARG],
@@ -86,13 +94,8 @@ def export_github_data(
 
     # Run ETL pipeline
     logger.info("running extract workflow")
-    start_time = time.perf_counter()
     GitHubProjectETL(config).run()
-    end_time = time.perf_counter()
-    logger.info(
-        "extract workflow executed in %.5f seconds",
-        float(end_time - start_time),
-    )
+    logger.info("extract workflow done")
 
 
 # ===========================================================
@@ -101,6 +104,7 @@ def export_github_data(
 
 
 @import_app.command(name="test_connection")
+@ecs_background_task("test_connection")
 def test_connection() -> None:
     """Test function that ensures the DB connection works."""
     client = PostgresDbClient()
@@ -137,6 +141,7 @@ def migrate_database() -> None:
 
 
 @etl_app.command(name="transform_and_load")
+@ecs_background_task("transform_and_load")
 def transform_and_load(
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
@@ -152,18 +157,14 @@ def transform_and_load(
     logger.info("running transform and load with effective date %s", datestamp)
 
     # hydrate a dataset instance from the input data
-    start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
     # sync data to db
     etldb.sync_data(dataset, datestamp, None)
-    end_time = time.perf_counter()
-    logger.info(
-        "transform and load is done after %.5f seconds",
-        float(end_time - start_time),
-    )
+    logger.info("transform and load is done")
 
 
 @etl_app.command(name="extract_transform_and_load")
+@ecs_background_task("extract_transform_and_load")
 def extract_transform_and_load(
     config_file: Annotated[str, CONFIG_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
@@ -186,26 +187,17 @@ def extract_transform_and_load(
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
-    start_time = time.perf_counter()
     extracted_json, acceptance_criteria = GitHubProjectETL(
         config,
     ).extract_and_transform_in_memory()
-    end_time = time.perf_counter()
-    logger.info("extract executed in %.5f seconds", float(end_time - start_time))
+    logger.info("extract is done")
 
     # hydrate a dataset instance from the input data
     logger.info("transforming and loading data")
-    start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
     # sync dataset to db
     etldb.sync_data(dataset, datestamp, acceptance_criteria)
-    end_time = time.perf_counter()
-    logger.info(
-        "transform and load executed in %.5f seconds",
-        float(end_time - start_time),
-    )
-
-    logger.info("ETL workflow is done")
+    logger.info("transform and load is done")
 
 
 def validate_effective_date(effective_date: str) -> str | None:
@@ -226,6 +218,7 @@ def validate_effective_date(effective_date: str) -> str | None:
 
 
 @etl_app.command(name="opportunity-load")
+@ecs_background_task("opportunity-load")
 def load_opportunity_data() -> None:
     """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()

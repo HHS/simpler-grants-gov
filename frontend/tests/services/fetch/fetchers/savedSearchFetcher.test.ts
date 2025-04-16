@@ -8,10 +8,15 @@ import { arbitrarySearchPagination } from "src/utils/testing/fixtures";
 
 const fetchUserMock = jest.fn();
 const fetchUserWithMethodMock = jest.fn();
+const mockGetSession = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchUserWithMethod: (type: string) =>
     fetchUserWithMethodMock(type) as unknown,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => mockGetSession(),
 }));
 
 describe("handleSavedSearch", () => {
@@ -44,11 +49,12 @@ describe("handleSavedSearch", () => {
 describe("fetchSavedSearches", () => {
   afterEach(() => jest.resetAllMocks());
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken", user_id: "1" });
     fetchUserMock.mockReturnValue({
       json: () => ({ data: [{ fake: "saved search" }] }),
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
-    const result = await fetchSavedSearches("faketoken", "1");
+    const result = await fetchSavedSearches();
 
     expect(result).toEqual([{ fake: "saved search" }]);
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
@@ -70,6 +76,12 @@ describe("fetchSavedSearches", () => {
         },
       },
     });
+  });
+  it("returns empty array if user session is not present", async () => {
+    mockGetSession.mockResolvedValue({});
+    const result = await fetchSavedSearches();
+
+    expect(result).toEqual([]);
   });
 });
 

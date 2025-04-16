@@ -1,24 +1,5 @@
 import { z } from "zod";
 
-import { type UiSchemaSection } from "./types";
-
-export const uiSchemaFieldSchema = z.object({
-  type: z.literal("field"),
-  definition: z.custom<`/properties/${string}`>(
-    (val) => typeof val === "string" && val.startsWith("/properties/"),
-  ),
-});
-
-const uiSchemaSectionSchema: z.ZodSchema<UiSchemaSection> = z.lazy(() =>
-  z.object({
-    type: z.literal("section"),
-    label: z.string(),
-    name: z.string(),
-    number: z.string().optional(),
-    children: z.array(z.union([uiSchemaFieldSchema, uiSchemaSectionSchema])),
-  }),
-);
-
 const schemaFieldSchema = z.object({
   type: z.enum([
     "string",
@@ -29,21 +10,24 @@ const schemaFieldSchema = z.object({
     "null",
     "integer",
   ]),
-  title: z.string(),
+  title: z.string().optional(),
   minLength: z.number().optional(),
   maxLength: z.number().optional(),
   format: z.string().optional(),
   pattern: z.string().optional(),
 });
 
+export const uiSchemaFieldSchema = z.object({
+  type: z.literal("field"),
+  definition: z
+    .custom<`/properties/${string}`>((val) => typeof val === "string" && val.startsWith("/properties/"))
+    .optional(),
+  schema: schemaFieldSchema.optional(),
+});
+
 export const formSchemaValidate = z.object({
   title: z.string(),
   description: z.string().optional(),
-  properties: z.record(schemaFieldSchema),
+  properties: z.record(schemaFieldSchema).optional(),
   required: z.array(z.string()).optional(),
 });
-
-export const uiSchemaValidate = z.union([
-  z.union([uiSchemaFieldSchema, uiSchemaSectionSchema]),
-  z.array(z.union([uiSchemaFieldSchema, uiSchemaSectionSchema])),
-]);

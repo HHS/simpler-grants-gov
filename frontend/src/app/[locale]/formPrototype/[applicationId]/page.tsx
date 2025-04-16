@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { COMPETITION_ID } from "src/constants/competitions";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
@@ -34,12 +35,12 @@ const FormLinks = ({
 }) => {
   if (forms.length > 0) {
     return (
-      <ul>
+      <ul className="usa-list">
         {forms.map((form) => {
           return (
             <li key={form.form.form_name}>
               <Link
-                href={`/formPrototype/${applicationId}/${form.form.form_id}`}
+                href={`/formPrototype/${applicationId}/form/${form.form.form_id}`}
               >
                 {form.form.form_name}
               </Link>
@@ -58,16 +59,22 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   try {
     const response = await getCompetitionDetails(COMPETITION_ID);
     if (response.status_code !== 200) {
-      throw new Error(
-        `Error retrieving competition details: ${JSON.stringify(response.errors)}`,
+      console.error(
+        `Error retrieving competition details for competitionId (${COMPETITION_ID})`,
+        response,
       );
+      return <TopLevelError />;
     }
     forms = response.data.competition_forms;
-  } catch (error) {
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+  } catch (e) {
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
+      console.error(
+        `Error retrieving competition details for competitionId (${COMPETITION_ID})`,
+        e,
+      );
       return <NotFound />;
     }
-    throw error;
+    return <TopLevelError />;
   }
 
   return (
