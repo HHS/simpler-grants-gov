@@ -9,7 +9,7 @@ description: >-
 * **Status:** Accepted
 * **Last Modified:** 2025-01-02
 * **Related Issue:** [#3205](https://github.com/HHS/simpler-grants-gov/issues/3205)
-* **Deciders:** Billy Daly, Lucas Brown, Matt Dragon
+* **Deciders:** Billy, Lucas, Matt&#x20;
 * **Tags:** Repo
 
 ## Overview

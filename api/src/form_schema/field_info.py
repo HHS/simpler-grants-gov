@@ -12,6 +12,7 @@ class FieldInfo:
     required: bool
     data_type: str
     type: str
+    title: str
     label: str
     min_value: int | None = None
     max_value: int | None = None
@@ -72,6 +73,7 @@ class FieldInfo:
         id = data.get("Agency FieldName", "") or data.get("Agency Field Name", "")
         return cls(
             id=id,
+            title=data.get("Field ID", "").strip(),
             required=data.get("Required?", "").strip().lower() == "yes",
             data_type=data.get("Data Type", "").strip(),
             type=data.get("Field Implementation", "").strip(),

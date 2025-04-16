@@ -3,7 +3,7 @@
 * **Status:** Accepted
 * **Last Modified:** 2023-07-10
 * **Related Issue:** [#30](https://github.com/HHS/simpler-grants-gov/issues/30)
-* **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
+* **Deciders:** Lucas, Aaron, Billy, Sarah, Sumi
 * **Tags:** communucations, open source, wiki
 
 ## Context and Problem Statement
