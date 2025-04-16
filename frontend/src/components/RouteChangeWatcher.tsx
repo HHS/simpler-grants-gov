@@ -7,7 +7,7 @@ export const RouteChangeWatcher = () => {
   const { refreshIfExpired } = useUser();
   // check if the current user is still logged in on every route change
   useRouteChange(async () => {
-    return await refreshIfExpired();
+    await refreshIfExpired();
   });
   return <></>;
 };

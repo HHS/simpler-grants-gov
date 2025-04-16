@@ -59,11 +59,14 @@ export default function UserProvider({
 
   // checks user token expiration time and refreshes the local user if it has expired
   // in order to perform a logout
-  const refreshIfExpired = useCallback(async () => {
+  const refreshIfExpired = useCallback(async (): Promise<
+    boolean | undefined
+  > => {
     if (localUser?.expiresAt && new Date(localUser.expiresAt) < new Date()) {
       await getUserSession().then(noop).catch(noop);
+      return true;
     }
-  }, [localUser?.expiresAt]);
+  }, [localUser?.expiresAt, getUserSession]);
 
   const value = useMemo(
     () => ({
@@ -84,6 +87,7 @@ export default function UserProvider({
       hasBeenLoggedOut,
       logoutLocalUser,
       refreshIfExpired,
+      resetHasBeenLoggedOut,
     ],
   );
 

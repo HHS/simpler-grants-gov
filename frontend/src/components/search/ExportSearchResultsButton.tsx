@@ -16,7 +16,7 @@ export function ExportSearchResultsButton() {
   const searchParams = useSearchParams();
   const { clientFetch } = useClientFetch<Response>(
     "Unsuccessful csv download",
-    false,
+    { jsonResponse: false },
   );
 
   const downloadSearchResults = useCallback(() => {

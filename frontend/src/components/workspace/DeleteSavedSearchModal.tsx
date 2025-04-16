@@ -67,7 +67,7 @@ export function DeleteSavedSearchModal({
   const isSSR = useIsSSR();
   const { clientFetch } = useClientFetch<Response>(
     "Error deleting saved search",
-    false,
+    { jsonResponse: false, authGatedRequest: true },
   );
 
   const [apiError, setApiError] = useState<boolean>();

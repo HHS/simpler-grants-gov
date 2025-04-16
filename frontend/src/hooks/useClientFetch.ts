@@ -1,5 +1,6 @@
 import { useUser } from "src/services/auth/useUser";
 
+import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 /*
@@ -7,22 +8,31 @@ import { useCallback } from "react";
   will automatically handle:
     * checking for token expiration
     * returning json data (by default, though you can opt out with the second parameter)
+    * refreshing the page on unauthenticated requests (optional, controlled by the `authGatedRequest` option)
     * throwing errors on unsuccessful requests
  */
 export const useClientFetch = <T>(
   errorMessage: string,
-  jsonResponse = true,
+  { jsonResponse = true, authGatedRequest = false } = {},
 ) => {
   const { refreshIfExpired, refreshUser } = useUser();
+  const router = useRouter();
 
   const fetchWithAuthCheck = async (
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
-    await refreshIfExpired();
+    const expired = await refreshIfExpired();
+    if (expired && authGatedRequest) {
+      router.refresh();
+      throw new Error("local token expired, logging out");
+    }
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();
+      if (authGatedRequest) {
+        router.refresh();
+      }
       return response;
     }
     return response;

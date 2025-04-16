@@ -106,7 +106,7 @@ export function EditSavedSearchModal({
   const isSSR = useIsSSR();
   const { clientFetch } = useClientFetch<Response>(
     "Error updating saved search",
-    false,
+    { jsonResponse: false, authGatedRequest: true },
   );
 
   const [validationError, setValidationError] = useState<string>();

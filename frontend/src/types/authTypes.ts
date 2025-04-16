@@ -68,5 +68,5 @@ export type UserProviderState = {
   hasBeenLoggedOut: boolean;
   logoutLocalUser: () => void;
   resetHasBeenLoggedOut: () => void;
-  refreshIfExpired: () => Promise<void>;
+  refreshIfExpired: () => Promise<boolean | undefined>;
 };
