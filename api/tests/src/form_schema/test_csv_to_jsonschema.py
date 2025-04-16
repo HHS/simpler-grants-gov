@@ -84,7 +84,6 @@ def test_required_fields_are_marked_correctly(csv_file_content):
     """Test that required fields are properly marked in the schema."""
     schema, _ = csv_to_jsonschema(csv_file_content)
 
-    print(schema)
     # Known required fields from CSV
     known_required_fields = ["First Name:", "Last Name:", "Email:"]
 
