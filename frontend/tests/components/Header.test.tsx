@@ -1,12 +1,10 @@
-import { ReadonlyURLSearchParams } from "next/navigation";
-import { Response } from "node-fetch";
-import Header from "src/components/Header";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
-
 import userEvent from "@testing-library/user-event";
+import { Response } from "node-fetch";
+import { render, screen } from "tests/react-utils";
+
+import { ReadonlyURLSearchParams } from "next/navigation";
+
+import Header from "src/components/Header";
 
 const props = {
   locale: "en",
@@ -81,7 +79,9 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
-    const govBanner = screen.getByRole("button", { name: /Here’s how you know/i });
+    const govBanner = screen.getByRole("button", {
+      name: /Here’s how you know/i,
+    });
 
     expect(govBanner).toBeInTheDocument();
 
@@ -164,7 +164,9 @@ describe("Header", () => {
     it("renders About submenu", async () => {
       const { container } = render(<Header />);
 
-      expect(screen.queryByRole("link", { name: /Our Vision/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /Our Vision/i }),
+      ).not.toBeInTheDocument();
 
       const aboutBtn = screen.getByRole("button", { name: /About/i });
 
@@ -174,7 +176,7 @@ describe("Header", () => {
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
       const visionLink = screen.getByRole("link", { name: /Our Vision/i });
-      expect(visionLink).toBeInTheDocument()
+      expect(visionLink).toBeInTheDocument();
     });
   });
 });

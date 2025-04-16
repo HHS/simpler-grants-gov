@@ -1,30 +1,24 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
 import clsx from "clsx";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
-  Header as USWDSHeader,
   Menu,
   NavDropDownButton,
   NavMenuButton,
   PrimaryNav,
   Title,
+  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
 import { UserControl } from "./user/UserControl";
@@ -90,10 +84,11 @@ const NavLinks = ({
       { text: t("home"), href: "/" },
       getSearchLink(path.includes("/search")),
       {
-        text: t("about"), children: [
+        text: t("about"),
+        children: [
           { text: t("vision"), href: "/vision" },
-          { text: t("roadmap"), href: "/roadmap" }
-        ]
+          { text: t("roadmap"), href: "/roadmap" },
+        ],
       },
       { text: t("subscribe"), href: "/subscribe" },
     ];
