@@ -1,11 +1,10 @@
-import UserProvider from "src/services/auth/UserProvider";
-
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import UserProvider from "src/services/auth/UserProvider";
 
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
-import Header from "./Header";
+import Header from "./header/Header";
 
 type Props = {
   children: React.ReactNode;

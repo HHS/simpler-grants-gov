@@ -1,9 +1,12 @@
-import userEvent from "@testing-library/user-event";
-import { render, screen } from "tests/react-utils";
-
-import Header from "src/components/Header";
+import Header from "src/components/header/Header";
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 import { LOGIN_URL } from "src/components/LoginModal";
+import {
+  render,
+  screen,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 

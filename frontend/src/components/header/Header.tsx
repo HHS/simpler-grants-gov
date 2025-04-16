@@ -28,7 +28,8 @@ import {
   Title,
 } from "@trussworks/react-uswds";
 
-import { UserControl } from "./user/UserControl";
+import { UserControl } from "../user/UserControl";
+import NavLink from "./NavLink";
 
 type PrimaryLink = {
   text?: string;
@@ -41,24 +42,6 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-const NavLink = ({
-  href = "",
-  classes,
-  onClick,
-  text,
-}: {
-  href?: string;
-  classes?: string;
-  onClick: () => void;
-  text: string;
-}) => {
-  return (
-    <Link href={href} key={href} className={classes}>
-      <div onClick={onClick}>{text}</div>
-    </Link>
-  );
-};
 
 const NavLinks = ({
   mobileExpanded,
