@@ -2,7 +2,9 @@ import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTy
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-import { Link, Table } from "@trussworks/react-uswds";
+import { Grid, Link, Table } from "@trussworks/react-uswds";
+
+import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
@@ -60,14 +62,30 @@ const OpportunityDocuments = ({
 
   return (
     <>
-      <h2 id="opportunity_documents">{t("title")}</h2>
-      {documents.length > 0 ? (
-        <Table className="width-full">
-          <DocumentTable documents={documents} opportunityId={opportunityId} />
-        </Table>
-      ) : (
-        <p>--</p>
-      )}
+      <Grid row>
+        <Grid col={8}>
+          <h2 id="opportunity_documents">{t("title")}</h2>
+        </Grid>
+
+        {documents.length > 0 ? (
+          <>
+            <Grid col={4} className="text-right">
+              <ZipDownloadButton
+                opportunityId={opportunityId}
+              ></ZipDownloadButton>
+            </Grid>
+
+            <Table className="width-full">
+              <DocumentTable
+                documents={documents}
+                opportunityId={opportunityId}
+              />
+            </Table>
+          </>
+        ) : (
+          <p>--</p>
+        )}
+      </Grid>
     </>
   );
 };
