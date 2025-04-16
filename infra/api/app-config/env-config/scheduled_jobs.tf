@@ -69,8 +69,8 @@ locals {
     }
     load-search-and-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
-      # Every hour at the half hour
-      schedule_expression = "cron(0 8 * * ? *)"
+      # Every day at 8am Eastern Time during DST. 9am during non-DST.
+      schedule_expression = "cron(0 13 * * ? *)"
       state               = "ENABLED"
         }
   }
