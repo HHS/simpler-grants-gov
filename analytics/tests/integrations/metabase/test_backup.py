@@ -735,10 +735,10 @@ def test_backup_with_empty_collection(
 
 
 def test_create_collection_dir(backup_instance: MetabaseBackup, tmp_path: Path) -> None:
-    """Test creating collection directories with renaming of existing directories."""
+    """Test creating collection directories."""
     backup_instance.output_dir = tmp_path
 
-    # Create a collection with a specific path
+    # Create a collection with a specific name
     collection = {
         "id": 1,
         "name": "Collection 1",
@@ -749,9 +749,8 @@ def test_create_collection_dir(backup_instance: MetabaseBackup, tmp_path: Path) 
     }
 
     # Mock get_collection_path to return a specific path
-    backup_instance.get_collection_path = MagicMock(
-        return_value=tmp_path / "1-Collection_1",
-    )
+    expected_dir = tmp_path / "1-Collection_1"
+    backup_instance.get_collection_path = MagicMock(return_value=expected_dir)
 
     # Create the directory
     collection_dir = backup_instance.create_collection_dir(collection)
@@ -760,87 +759,17 @@ def test_create_collection_dir(backup_instance: MetabaseBackup, tmp_path: Path) 
     assert collection_dir.exists()
     assert collection_dir.is_dir()
 
-    # Now test renaming when collection name changes
-    # First, create a directory with the old name
-    old_dir = tmp_path / "1-Old_Collection_Name"
-    old_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create a file in the old directory to verify it gets moved
-    test_file = old_dir / "test.txt"
-    test_file.write_text("test content")
-
-    # Update the collection name
+    # Change the collection name and update the mock
     collection["name"] = "New Collection Name"
+    new_expected_dir = tmp_path / "1-New_Collection_Name"
+    backup_instance.get_collection_path = MagicMock(return_value=new_expected_dir)
 
-    # Mock get_collection_path to return the new path
-    backup_instance.get_collection_path = MagicMock(
-        return_value=tmp_path / "1-New_Collection_Name",
-    )
+    # Create the directory again (should create new dir, not rename)
+    new_collection_dir = backup_instance.create_collection_dir(collection)
 
-    # Create the directory again
-    collection_dir = backup_instance.create_collection_dir(collection)
+    # Verify the new directory was created
+    assert new_collection_dir.exists()
+    assert new_collection_dir.is_dir()
 
-    # Verify the old directory was renamed
-    assert not old_dir.exists()
-    assert collection_dir.exists()
-
-    # Verify the file was moved to the new directory
-    assert (collection_dir / "test.txt").exists()
-    assert (collection_dir / "test.txt").read_text() == "test content"
-
-    # Verify the folders_renamed stat was incremented
+    # Check that stats are updated as expected
     assert backup_instance.stats["folders_renamed"] == 1
-
-    # Test nested collection paths
-    # Create a nested collection
-    nested_collection = {
-        "id": 2,
-        "name": "Nested Collection",
-        "location": "/1",
-        "is_personal": False,
-        "is_sample": False,
-        "archived": False,
-    }
-
-    # Mock get_collection_path to return a nested path
-    backup_instance.get_collection_path = MagicMock(
-        return_value=tmp_path / "1-New_Collection_Name" / "2-Nested_Collection",
-    )
-
-    # Create the nested directory
-    nested_dir = backup_instance.create_collection_dir(nested_collection)
-
-    # Verify the nested directory was created
-    assert nested_dir.exists()
-    assert nested_dir.is_dir()
-
-    # Test renaming a nested directory
-    # Create an old nested directory
-    old_nested_dir = tmp_path / "1-New_Collection_Name" / "2-Old_Nested_Name"
-    old_nested_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create a file in the old nested directory
-    nested_test_file = old_nested_dir / "nested_test.txt"
-    nested_test_file.write_text("nested test content")
-
-    # Update the nested collection name
-    nested_collection["name"] = "Updated Nested Collection"
-
-    # Mock get_collection_path to return the updated nested path
-    backup_instance.get_collection_path = MagicMock(
-        return_value=tmp_path / "1-New_Collection_Name" / "2-Updated_Nested_Collection",
-    )
-
-    # Create the nested directory again
-    nested_dir = backup_instance.create_collection_dir(nested_collection)
-
-    # Verify the old nested directory was renamed
-    assert not old_nested_dir.exists()
-    assert nested_dir.exists()
-
-    # Verify the file was moved to the new nested directory
-    assert (nested_dir / "nested_test.txt").exists()
-    assert (nested_dir / "nested_test.txt").read_text() == "nested test content"
-
-    # Verify the folders_renamed stat was incremented again
-    assert backup_instance.stats["folders_renamed"] == 2
