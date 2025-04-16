@@ -107,6 +107,15 @@ export const messages = {
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",
+      forecasted_award_date: "Estimated Award Date",
+      forecasted_post_date: "Estimated Post Date",
+      forecasted_close_date: "Estimated Application Due Date",
+      forecasted_close_date_description: "Estimated Due Date Description",
+      forecasted_close_date_description_not_available: "Not available",
+      forecasted_project_start_date: "Estimated Project Start Date",
+      forecasted_last_updated: "Last Updated Date",
+      fiscal_year: "Fiscal Year",
+
       version: "Version",
     },
     link: {
@@ -173,6 +182,53 @@ export const messages = {
       "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
     wtgi_paragraph_2:
       "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
+  },
+  Vision: {
+    page_title: "Vision | Simpler.Grants.gov",
+    intro: {
+      title_1: "Our vision",
+      content_1:
+        "We believe that applying for federal financial assistance should be simple, accessible, and easy. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
+    },
+    mission: {
+      title_1: "Our mission",
+      paragraph_1:
+        "We want to increase access to federal funding opportunities and continuously improve the grants experience for everyone—whether you’re an applicant searching for funding or a federal agency posting opportunities.",
+      title_2: "Find",
+      paragraph_2:
+        "Help applicants and grantors find relevant funding opportunities by improving search and making listings easier to read",
+      title_3: "Apply",
+      paragraph_3:
+        "Simplify the application process, empowering applicants of all experience levels to confidently submit funding requests with fewer obstacles.",
+      title_4: "Report",
+      paragraph_4:
+        "Make it easier for applicants and grantors to track, manage, and fulfill reporting requirements throughout the grant lifecycle.",
+    },
+    goals: {
+      title_1: "Our goals",
+      title_2: "Reduce the burden",
+      paragraph_1:
+        "Make the entire process more efficient for both applicants and grantors by reducing friction and addressing challenges across all stages of the grant journey.",
+      title_3: "Support users at every step",
+      paragraph_2:
+        "Offer timely, contextual support to meet users where they are. Provide a guided journey that reduces their need to search elsewhere.",
+      title_4: "Demystify the process",
+      paragraph_3:
+        "Ensure that everyone has easy access to guidance and information that empowers them to navigate the system with confidence.",
+      title_5: "Cultivate trust through consistency",
+      paragraph_4:
+        "Create a recognizable, reliable experience through our visual brand identity and human-centered approach.",
+    },
+    get_there: {
+      title_1: "How we get there",
+      title_2: "Guided by research, shaped by your experience",
+      paragraph_1:
+        "To build a better Grants.gov, we listen to the people who use it. Through ongoing research, user feedback, and real conversations with applicants and grantors, we identify challenges and prioritize opportunities for improvement.",
+      paragraph_2:
+        "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
+      link_text_1: "Read more about the research on our public wiki",
+      link_text_2: "Sign up to participate in future user studies",
+    },
   },
   Research: {
     page_title: "Research | Simpler.Grants.gov",
@@ -385,6 +441,7 @@ export const messages = {
       home: "Home",
       roadmap: "Roadmap",
       research: "Research",
+      vision: "Vision",
       subscribe: "Subscribe",
       menuToggle: "Menu",
       search: "Search",
