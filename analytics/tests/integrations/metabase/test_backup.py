@@ -1,15 +1,16 @@
 """Unit tests for Metabase backup functionality."""
 
+# pylint: disable=wrong-import-order
+
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from analytics.integrations.metabase.backup import MetabaseBackup
 from requests.exceptions import RequestException
 from sqlparse import format as format_sql
-
-from analytics.integrations.metabase.backup import MetabaseBackup
 
 
 @pytest.fixture(name="mock_response")
