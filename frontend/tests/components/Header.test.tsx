@@ -1,10 +1,12 @@
-import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
-import { render, screen } from "tests/react-utils";
-
 import { ReadonlyURLSearchParams } from "next/navigation";
-
+import { Response } from "node-fetch";
 import Header from "src/components/Header";
+import {
+  render,
+  screen,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const props = {
   locale: "en",
@@ -136,6 +138,16 @@ describe("Header", () => {
     const allLinks = await screen.findAllByRole("link");
     allLinks.forEach((link) => {
       expect(link).not.toHaveClass("usa-current");
+    });
+  });
+
+  describe("About", () => {
+    it("shows the correct styling for active nav item", async () => {
+      usePathnameMock.mockReturnValue("/events");
+      render(<Header />);
+
+      const homeLink = screen.getByRole("link", { name: "Home" });
+      expect(homeLink).toHaveClass("usa-current");
     });
   });
 });
