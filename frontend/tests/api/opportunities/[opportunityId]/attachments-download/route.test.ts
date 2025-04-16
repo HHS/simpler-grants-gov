@@ -46,8 +46,6 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
   getOpportunityDetails: (params: unknown) => mockGetOpportunityDetails(params),
 }));
 
-// note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
-// is to throw an error
 describe("attachments-download export GET request", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls opportunityDetails with expected arguments", async () => {

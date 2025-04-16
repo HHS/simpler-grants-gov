@@ -10,7 +10,7 @@ type ZipDownloadProps = {
 };
 
 const downloadAttachmentsZip = (opportunityId: number) => {
-  const path = `/api/attachment-download/${opportunityId}`;
+  const path = `/api/opportunities/${opportunityId}/attachments-download`;
   window.open(path, "_blank");
 };
 
