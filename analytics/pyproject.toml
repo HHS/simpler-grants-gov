@@ -83,15 +83,6 @@ ignore = [
   "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
 ]
 
-[tool.ruff.lint.isort]
-known-first-party = ["analytics"]
-known-third-party = ["pytest", "requests", "sqlparse"]
-section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
-combine-as-imports = true
-force-single-line = false
-force-wrap-aliases = true
-lines-after-imports = 2
-
 [tool.ruff.lint.flake8-builtins]
 # Don't complain about shadowing the builtin format function
 # Many builtin classes we extend use format as a function name
