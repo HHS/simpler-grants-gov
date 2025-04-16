@@ -55,6 +55,10 @@ python_version = "3.12"
 ignore_missing_imports = true
 module = ["plotly.*", "dynaconf.*", "newrelic.*"]
 
+[[tool.mypy.overrides]]
+module = "sqlparse"
+ignore_missing_imports = true
+
 [tool.pylint."MESSAGE CONTROL"]
 disable = [
   "R0801", # duplicate-code
