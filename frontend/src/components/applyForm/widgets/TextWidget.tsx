@@ -39,6 +39,7 @@ function TextWidget<
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
+    description,
     maxLength,
     minLength,
     format,
@@ -89,7 +90,12 @@ function TextWidget<
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
+      <FieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description}
+      />
       {error && (
         <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
       )}

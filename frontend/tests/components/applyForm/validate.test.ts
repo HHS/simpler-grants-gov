@@ -1,10 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
 
-import { UiSchema } from "src/components/applyForm/types";
 import {
   validateFormData,
   validateFormSchema,
-  validateUiSchema,
 } from "src/components/applyForm/validate";
 
 describe("validateFormSchema", () => {
@@ -30,30 +28,6 @@ describe("validateFormSchema", () => {
     };
 
     expect(() => validateFormSchema(invalidSchema)).toThrow();
-  });
-});
-
-describe("validateUiSchema", () => {
-  it("should validate a correct UI schema", () => {
-    const validUiSchema: UiSchema = [
-      {
-        type: "field",
-        definition: "/properties/test",
-      },
-    ];
-
-    expect(() => validateUiSchema(validUiSchema)).not.toThrow();
-  });
-
-  it("should throw an error for an invalid UI schema", () => {
-    const invalidUiSchema: UiSchema = [
-      {
-        type: "field",
-        definition: "test" as `/properties/${string}`,
-      },
-    ];
-
-    expect(() => validateUiSchema(invalidUiSchema)).toThrow();
   });
 });
 

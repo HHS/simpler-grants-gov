@@ -11,7 +11,7 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/events",
-      "/formPrototype/[applicationId]/[formId]",
+      "/formPrototype/[applicationId]/form/[formId]",
       "/formPrototype/[applicationId]",
       "/formPrototype",
       "/formPrototype/success",
