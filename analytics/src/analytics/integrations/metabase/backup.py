@@ -66,27 +66,6 @@ class MetabaseBackup:
             "files_updated": 0,
         }
 
-    def clean_name(self, name: str) -> str:
-        """
-        Clean a name for use in filenames.
-
-        Args:
-            name: Name to clean.
-
-        Returns:
-            Cleaned name with special characters replaced by underscores.
-
-        """
-        # Replace whitespace and special characters with underscores
-        cleaned = ""
-        for c in name:
-            if c.isalnum():
-                cleaned += c
-            elif not cleaned or cleaned[-1] != "_":
-                # Only add underscore if the last character isn't already an underscore
-                cleaned += "_"
-        return cleaned.strip("_")  # Remove trailing underscores
-
     def backup(self) -> None:
         """Backup all Metabase queries to local filesystem."""
         # Reset stats
@@ -439,3 +418,24 @@ class MetabaseBackup:
         # Append the new entry to the existing content
         current_content = changelog_path.read_text()
         changelog_path.write_text(log_entry + current_content)
+
+    def clean_name(self, name: str) -> str:
+        """
+        Clean a name for use in filenames.
+
+        Args:
+            name: Name to clean.
+
+        Returns:
+            Cleaned name with special characters replaced by underscores.
+
+        """
+        # Replace whitespace and special characters with underscores
+        cleaned = ""
+        for c in name:
+            if c.isalnum():
+                cleaned += c
+            elif not cleaned or cleaned[-1] != "_":
+                # Add underscore if the last char isn't an underscore
+                cleaned += "_"
+        return cleaned.strip("_")  # Remove trailing underscores
