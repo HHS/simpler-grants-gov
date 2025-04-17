@@ -1,5 +1,6 @@
-import VisionIntro from "src/app/[locale]/vision/VisionIntro";
 import { render, screen } from "tests/react-utils";
+
+import VisionIntro from "src/components/vision/sections/VisionIntro";
 
 describe("Vision Intro Content", () => {
   it("Renders without errors", () => {
