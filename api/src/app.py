@@ -198,7 +198,7 @@ def register_robots_txt(app: APIFlask) -> None:
 def register_well_known(app: APIFlask) -> None:
     @app.route("/.well-known/pki-validation/<file_name>")
     @app.doc(hide=True)
-    def get_dv_verification_content(file_name: str) -> str:
+    def get_dv_verification_content(file_name: str) -> tuple:
         try:
             with open(
                 f"{Path(__file__).resolve().parent}/static/domain_verification_assets/{file_name}"
