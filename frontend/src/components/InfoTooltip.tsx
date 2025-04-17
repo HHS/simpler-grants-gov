@@ -15,24 +15,22 @@ const InfoTooltip = ({
   position = "top",
   className,
 }: InfoTooltipProps) => {
-  const IconWrapper = forwardRef<HTMLSpanElement>((props, ref) => (
-    <span 
-      {...props} 
-      ref={ref}
-      style={{ 
-        display: 'inline-flex',
-        cursor: 'help',
-        verticalAlign: 'middle'
-      }}
-    >
-      <USWDSIcon
-        name="info_outline"
-        height="16px"
-      />
-    </span>
-  ));
-  
-  IconWrapper.displayName = 'IconWrapper';
+  const IconWrapper = forwardRef<HTMLSpanElement, any>((props, ref) => (
+  <span 
+    {...props}
+    ref={ref}
+    style={{ 
+      cursor: 'help',
+    }}
+  >
+    <USWDSIcon
+      name="info_outline"
+      // height="16px"
+      
+    />
+  </span>
+));
+
 
   return (
     <TooltipWrapper
@@ -40,7 +38,9 @@ const InfoTooltip = ({
       position={position}
       asCustom={IconWrapper}
       className={className}
-    />
+    >
+      <span />
+    </TooltipWrapper>
   );
 };
 
