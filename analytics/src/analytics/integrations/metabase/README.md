@@ -1,4 +1,4 @@
-# Metabase Dashboards: Disaster Recovery Guide
+# Metabase Dashboards: Backup and Recovery Guide
 
 This directory contains a backup of critical SQL queries and dashboard
 references used in the Metabase instance. In the event of a non-recoverable
