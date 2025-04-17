@@ -13,6 +13,8 @@ import SearchResultListItemStatus from "./SearchResultListItemStatus";
 interface SearchResultsListItemProps {
   opportunity: BaseOpportunity;
   saved?: boolean;
+  index: number;
+  page?: number;
 }
 
 const metadataBorderClasses = `
@@ -37,6 +39,8 @@ const resultBorderClasses = `
 export default function SearchResultsListItem({
   opportunity,
   saved = false,
+  index,
+  page = 1,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
@@ -50,6 +54,7 @@ export default function SearchResultsListItem({
                 <Link
                   href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link"
+                  id={`search-result-link-${page}-${index + 1}`}
                 >
                   {opportunity?.opportunity_title}
                 </Link>

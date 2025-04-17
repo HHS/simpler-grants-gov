@@ -69,6 +69,7 @@ const makeOpportunity = (overrides = {}) => ({
 describe("SearchResultsList", () => {
   it("should not have accessibility violations", async () => {
     const component = await SearchResultsList({
+      page: 1,
       searchResults: makeSearchResults({}),
     });
     const { container } = render(component);
@@ -77,6 +78,7 @@ describe("SearchResultsList", () => {
   });
   it("renders an error if search results have no data", async () => {
     const component = await SearchResultsList({
+      page: 1,
       searchResults: makeSearchResults({ status_code: 404 }),
     });
     render(component);
@@ -84,6 +86,7 @@ describe("SearchResultsList", () => {
   });
   it('renders a "not found" page if no records are passed in', async () => {
     const component = await SearchResultsList({
+      page: 1,
       searchResults: makeSearchResults({}),
     });
     render(component);
@@ -93,6 +96,7 @@ describe("SearchResultsList", () => {
   });
   it("renders an list item for each search result", async () => {
     const component = await SearchResultsList({
+      page: 1,
       searchResults: makeSearchResults({
         data: [makeOpportunity({}), makeOpportunity({ opportunity_id: 2 })],
       }),
@@ -106,6 +110,7 @@ describe("SearchResultsList", () => {
       token: "fakeToken",
     }));
     const component = await SearchResultsList({
+      page: 1,
       searchResults: makeSearchResults({
         data: [
           makeOpportunity({ opportunity_id: 1 }),

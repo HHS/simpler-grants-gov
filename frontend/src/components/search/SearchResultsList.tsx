@@ -10,10 +10,12 @@ import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ServerPageProps {
   searchResults: SearchAPIResponse;
+  page: number;
 }
 
 export default async function SearchResultsList({
   searchResults,
+  page,
 }: ServerPageProps) {
   const t = await getTranslations("Search");
 
@@ -41,11 +43,13 @@ export default async function SearchResultsList({
 
   return (
     <ul className="usa-list--unstyled">
-      {searchResults.data.map((opportunity) => (
+      {searchResults.data.map((opportunity, index) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem
             opportunity={opportunity}
             saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
+            index={index}
+            page={page}
           />
         </li>
       ))}
