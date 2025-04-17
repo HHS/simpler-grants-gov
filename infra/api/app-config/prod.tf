@@ -59,6 +59,10 @@ module "prod_config" {
     LOAD_OPP_SEARCH_SHARD_COUNT   = 3
     LOAD_OPP_SEARCH_REPLICA_COUNT = 2
 
+    # Set the agency search index to have more shards/replicas in prod
+    LOAD_AGENCY_SEARCH_SHARD_COUNT   = 3
+    LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
+
     # Login.gov OAuth
     ENABLE_AUTH_ENDPOINT     = 1
     LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"

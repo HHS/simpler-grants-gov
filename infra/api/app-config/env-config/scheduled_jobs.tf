@@ -49,7 +49,7 @@ locals {
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
     }
-    load-search-and-opportunity-data = {
+    load-search-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
       schedule_expression = "cron(30 * * * ? *)"
@@ -65,6 +65,12 @@ locals {
       task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
       # Every day at 5am Eastern Time during DST. 6am during non-DST.
       schedule_expression = "cron(0 10 * * ? *)"
+      state               = "ENABLED"
+    }
+    load-search-agency-data = {
+      task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
+      # Every day at 8am Eastern Time during DST. 9am during non-DST.
+      schedule_expression = "cron(0 13 * * ? *)"
       state               = "ENABLED"
     }
   }

@@ -5,6 +5,7 @@ import { findFirstWhitespace } from "src/utils/generalUtils";
 import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { ForecastOpportunityItem } from "./ForecastOpportunityItem";
 
 type Props = {
   opportunityData: OpportunityDetail;
@@ -96,10 +97,15 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         );
       case "forecasted":
         return (
-          <div className="usa-tag bg-base-dark border-radius-2 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
-            <p>
-              <strong>{t("forecasted")}</strong>
-            </p>
+          <div>
+            <div className="usa-tag bg-base-dark radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+              <p>
+                <strong>{t("forecasted")}</strong>
+              </p>
+            </div>
+            <div className="border border-base-lighter radius-sm">
+              <ForecastOpportunityItem detail={opportunityData} />
+            </div>
           </div>
         );
       default:

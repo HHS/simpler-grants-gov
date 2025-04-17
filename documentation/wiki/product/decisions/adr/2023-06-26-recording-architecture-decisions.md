@@ -3,7 +3,7 @@
 * **Status:** Active
 * **Last Modified:** 2023-06-26
 * **Related Issue:** [#34](https://github.com/HHS/simpler-grants-gov/issues/34)
-* **Deciders:** Lucas Brown, Aaron Couch, Billy Daly
+* **Deciders:** Lucas, Aaron, Billy&#x20;
 * **Tags:** ADRs
 
 ## Context and Problem Statement

@@ -5,7 +5,7 @@
 * **Status:** Active
 * **Last Modified:** 2025-02-25
 * **Related Issue:** [**#3314**](https://github.com/HHS/simpler-grants-gov/issues/3314)
-* **Deciders:** Brandon Tabaska (Open Source Developer Evangelist)
+* **Deciders:** Brandon
 * **Tags:** open source, community
 
 ## Context and Problem Statement
