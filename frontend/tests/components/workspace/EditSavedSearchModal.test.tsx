@@ -9,7 +9,7 @@ const mockUseUser = jest.fn(() => ({
   },
 }));
 
-const clientFetchMock = jest.fn();
+const mockEditSearch = jest.fn();
 const mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
 
@@ -26,11 +26,9 @@ jest.mock("next/navigation", () => ({
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
 }));
-
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
-  }),
+jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
+  editSavedSearchName: (...args: unknown[]) =>
+    mockEditSearch(...args) as unknown,
 }));
 
 jest.mock("next-intl", () => ({
@@ -41,7 +39,7 @@ jest.useFakeTimers();
 
 describe("EditSavedSearchModal", () => {
   afterEach(() => {
-    clientFetchMock.mockReset();
+    mockEditSearch.mockReset();
     jest.clearAllTimers();
   });
   it("displays a working modal toggle button", async () => {
@@ -101,7 +99,7 @@ describe("EditSavedSearchModal", () => {
     expect(validationError).toBeInTheDocument();
   });
   it("displays an API error if API returns an error", async () => {
-    clientFetchMock.mockRejectedValue(new Error());
+    mockEditSearch.mockRejectedValue(new Error());
     const { rerender } = render(
       <EditSavedSearchModal savedSearchId="1" editText="edit" />,
     );
@@ -126,7 +124,7 @@ describe("EditSavedSearchModal", () => {
   });
 
   it("displays a success message on successful save", async () => {
-    clientFetchMock.mockResolvedValue({ id: "123" });
+    mockEditSearch.mockResolvedValue({ id: "123" });
     const { rerender } = render(
       <EditSavedSearchModal savedSearchId="1" editText="edit" />,
     );

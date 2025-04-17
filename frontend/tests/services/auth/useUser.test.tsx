@@ -1,12 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import identity from "lodash/identity";
 import UserProvider from "src/services/auth/UserProvider";
 import { useUser } from "src/services/auth/useUser";
 
-const debouncedUserFetcherMock = jest.fn();
+const userFetcherMock = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
-  debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,
+  userFetcher: () => userFetcherMock() as unknown,
 }));
+
+jest.mock("lodash/debounce", () => identity);
 
 const UseUserConsumer = () => {
   const { error, isLoading, user } = useUser();
@@ -22,7 +25,7 @@ const UseUserConsumer = () => {
 describe("useUser", () => {
   afterEach(() => jest.clearAllMocks());
   it("renders with the expected state on successful fetch", async () => {
-    debouncedUserFetcherMock.mockResolvedValue("this is where a user would be");
+    userFetcherMock.mockResolvedValue("this is where a user would be");
 
     render(
       <UserProvider>
@@ -38,11 +41,11 @@ describe("useUser", () => {
     });
 
     expect(errorDisplay).toBeEmptyDOMElement();
-    expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    expect(userFetcherMock).toHaveBeenCalledTimes(1);
   });
 
   it("renders with the expected state on error", async () => {
-    debouncedUserFetcherMock.mockResolvedValue(null);
+    userFetcherMock.mockResolvedValue(null);
     render(
       <UserProvider>
         <UseUserConsumer />
@@ -57,6 +60,6 @@ describe("useUser", () => {
     });
 
     expect(userDisplay).toBeEmptyDOMElement();
-    expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    expect(userFetcherMock).toHaveBeenCalledTimes(1);
   });
 });

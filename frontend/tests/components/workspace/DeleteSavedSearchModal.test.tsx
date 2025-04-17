@@ -9,9 +9,9 @@ const mockUseUser = jest.fn(() => ({
   },
 }));
 
+const mockDeleteSearch = jest.fn();
 const mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
-const clientFetchMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(() => "/test") as jest.Mock<string>,
@@ -26,11 +26,9 @@ jest.mock("next/navigation", () => ({
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
 }));
-
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
-  }),
+jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
+  deleteSavedSearch: (...args: unknown[]) =>
+    mockDeleteSearch(...args) as unknown,
 }));
 
 jest.mock("next-intl", () => ({
@@ -41,7 +39,7 @@ jest.useFakeTimers();
 
 describe("DeleteSavedSearchModal", () => {
   afterEach(() => {
-    clientFetchMock.mockReset();
+    mockDeleteSearch.mockReset();
     jest.clearAllTimers();
   });
   it("displays a working modal toggle button", async () => {
@@ -81,7 +79,7 @@ describe("DeleteSavedSearchModal", () => {
   });
 
   it("displays an API error if API returns an error", async () => {
-    clientFetchMock.mockRejectedValue(new Error());
+    mockDeleteSearch.mockRejectedValue(new Error());
     const { rerender } = render(
       <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
     );
@@ -106,7 +104,7 @@ describe("DeleteSavedSearchModal", () => {
   });
 
   it("displays a success message on successful save", async () => {
-    clientFetchMock.mockResolvedValue({ id: "123" });
+    mockDeleteSearch.mockResolvedValue({ id: "123" });
     const { rerender } = render(
       <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
     );

@@ -1,7 +1,6 @@
 import clsx from "clsx";
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
-import { filterSearchParams } from "src/utils/search/searchFormatUtils";
+import { saveSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -100,9 +99,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
   const [saved, setSaved] = useState<boolean>();
-  const { clientFetch } = useClientFetch<{ id: string }>(
-    "Error posting saved search",
-  );
+
   const handleSubmit = useCallback(() => {
     if (validationError) {
       setValidationError(undefined);
@@ -111,20 +108,8 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       setValidationError(t("emptyNameError"));
       return;
     }
-    if (!user?.token) {
-      return;
-    }
-    // send up a filtered set of params, converted to an object
-    // we will do the further filter and pagination object building on the server
-    const savedSearchParams = filterSearchParams(
-      Object.fromEntries(searchParams.entries()),
-    );
-
     setLoading(true);
-    clientFetch("/api/user/saved-searches", {
-      method: "POST",
-      body: JSON.stringify({ ...savedSearchParams, name: savedSearchName }),
-    })
+    saveSearch(savedSearchName, searchParams, user?.token)
       .then((data) => {
         if (!data?.id) {
           throw new Error("saved search ID not returned from API");
@@ -139,15 +124,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [
-    savedSearchName,
-    user?.token,
-    searchParams,
-    t,
-    validationError,
-    onSave,
-    clientFetch,
-  ]);
+  }, [savedSearchName, user, searchParams, t, validationError, onSave]);
 
   const onClose = useCallback(() => {
     setSaved(false);

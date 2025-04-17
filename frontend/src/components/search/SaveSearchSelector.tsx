@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { noop } from "lodash";
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
+import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 import { QueryContext } from "src/services/search/QueryProvider";
 import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
@@ -37,9 +37,6 @@ export const SaveSearchSelector = ({
     useSearchParamUpdater();
   const prevSearchParams = usePrevious(searchParams);
   const { updateQueryTerm } = useContext(QueryContext);
-  const { clientFetch } = useClientFetch<SavedSearchRecord[]>(
-    "Error fetching saved searches",
-  );
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,14 +49,9 @@ export const SaveSearchSelector = ({
     useState<boolean>(false);
 
   const fetchSavedSearches = useCallback(() => {
-    if (!user?.token) {
-      setApiError(new Error("Not logged in, can't fetch saved searches"));
-    }
     setLoading(true);
     setApiError(null);
-    return clientFetch("/api/user/saved-searches/list", {
-      method: "POST",
-    })
+    return obtainSavedSearches(user?.token)
       .then((savedSearches) => {
         setLoading(false);
         setSavedSearches(savedSearches);

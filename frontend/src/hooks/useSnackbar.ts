@@ -1,20 +1,16 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import Snackbar from "src/components/Snackbar";
-
-const SNACKBAR_VISIBLE_TIME = 6000;
 
 export const useSnackbar = () => {
   const [snackbarIsVisible, setSnackbarIsVisible] = useState<boolean>(false);
 
-  const showSnackbar = useCallback((visibleTime = SNACKBAR_VISIBLE_TIME) => {
+  const showSnackbar = (visibleTime: number) => {
     setSnackbarIsVisible(true);
-    if (visibleTime > 0) {
-      setTimeout(() => {
-        setSnackbarIsVisible(false);
-      }, visibleTime);
-    }
-  }, []);
+    setTimeout(() => {
+      setSnackbarIsVisible(false);
+    }, visibleTime);
+  };
 
   const hideSnackbar = () => {
     setSnackbarIsVisible(false);

@@ -1,10 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
+import { editSavedSearchName } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
@@ -104,10 +104,6 @@ export function EditSavedSearchModal({
   // The Modal component throws an error during SSR unless we specify that it should not "render to portal"
   // this hook allows us to opt out of that rendering behavior on the server
   const isSSR = useIsSSR();
-  const { clientFetch } = useClientFetch<Response>(
-    "Error updating saved search",
-    { jsonResponse: false, authGatedRequest: true },
-  );
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -123,12 +119,8 @@ export function EditSavedSearchModal({
       setValidationError(t("emptyNameError"));
       return;
     }
-    if (!user?.token) return;
     setLoading(true);
-    clientFetch("/api/user/saved-searches", {
-      method: "PUT",
-      body: JSON.stringify({ name: savedSearchName, searchId: savedSearchId }),
-    })
+    editSavedSearchName(savedSearchName, savedSearchId, user?.token)
       .then(() => {
         setUpdated(true);
         // this should trigger a page refresh, which will trigger refetching saved searches,
@@ -144,12 +136,11 @@ export function EditSavedSearchModal({
       });
   }, [
     savedSearchName,
+    user,
     t,
-    user?.token,
     validationError,
     replaceQueryParams,
     savedSearchId,
-    clientFetch,
   ]);
 
   const onClose = useCallback(() => {

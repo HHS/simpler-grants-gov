@@ -480,7 +480,6 @@ export const messages = {
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",
-    tokenExpired: "You've been logged out. Please sign in again.",
   },
   HeaderLoginModal: {
     title: "Sign in to Simpler.Grants.gov",

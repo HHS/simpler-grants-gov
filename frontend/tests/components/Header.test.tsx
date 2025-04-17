@@ -31,10 +31,6 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
-jest.mock("src/components/RouteChangeWatcher", () => ({
-  RouteChangeWatcher: () => <></>,
-}));
-
 describe("Header", () => {
   const mockResponse = {
     auth_login_url: "/login-url",

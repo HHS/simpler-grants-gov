@@ -1,9 +1,7 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
-import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -22,13 +20,6 @@ export const OpportunitySaveUserControl = () => {
   const modalRef = useRef<ModalRef>(null);
   const params = useParams();
   const opportunityId = String(params.id);
-  const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
-    "Error fetching saved opportunity",
-  );
-
-  const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
-    "Error updating saved opportunity",
-  );
 
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
@@ -45,11 +36,16 @@ export const OpportunitySaveUserControl = () => {
 
     const method = saved ? "DELETE" : "POST";
     try {
-      const data = await updateSaved("/api/user/saved-opportunities", {
+      const res = await fetch("/api/user/saved-opportunities", {
         method,
         body: JSON.stringify({ opportunityId }),
       });
-      setSaved(data.type === "save");
+      if (res.ok && res.status === 200) {
+        const data = (await res.json()) as { type: string };
+        data.type === "save" ? setSaved(true) : setSaved(false);
+      } else {
+        setSavedError(true);
+      }
     } catch (error) {
       setSavedError(true);
       console.error(error);
@@ -59,21 +55,21 @@ export const OpportunitySaveUserControl = () => {
     }
   };
 
-  // fetch user's saved opportunities
   useEffect(() => {
     if (!user?.token) return;
     setLoading(true);
-    fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
+    fetch(`/api/user/saved-opportunities/${opportunityId}`)
+      .then((res) => (res.ok && res.status === 200 ? res.json() : null))
       .then((data) => {
         data && setSaved(true);
       })
-      .catch((error) => {
-        console.error(error);
-      })
       .finally(() => {
         setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
       });
-  }, [opportunityId, user?.token]);
+  }, [opportunityId, user]);
 
   const messageText = saved
     ? savedError

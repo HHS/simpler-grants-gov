@@ -90,9 +90,7 @@ export const getSession = async (): Promise<UserSession | null> => {
     ? {
         ...session,
         token,
-        // expiration timestamp in the token is in seconds, in order to compare using
-        // JS date functions it should be in ms
-        expiresAt: exp ? exp * 1000 : undefined,
+        exp,
       }
     : null;
 };

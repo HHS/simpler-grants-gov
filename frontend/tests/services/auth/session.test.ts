@@ -55,12 +55,9 @@ describe("getSession", () => {
     expect(createPublicKeyMock).toHaveBeenCalledWith("api secret");
   });
   it("calls decrypt with the correct arguments and returns successfully", async () => {
-    decryptMock.mockReturnValueOnce({
+    decryptMock.mockReturnValue({
       token: "some decrypted token",
       exp: 123,
-    });
-    decryptMock.mockReturnValueOnce({
-      arbitrary: "stuff",
     });
     const session = await getSession();
     expect(decryptMock).toHaveBeenCalledTimes(2);
@@ -76,8 +73,7 @@ describe("getSession", () => {
     ]);
     expect(session).toEqual({
       token: "some decrypted token",
-      arbitrary: "stuff",
-      expiresAt: 123000,
+      exp: 123,
     });
   });
   it("returns null if client token decrypt does not return a payload and token", async () => {

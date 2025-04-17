@@ -102,7 +102,7 @@ export class BadRequestError extends ApiRequestError {
 }
 
 /**
- * An API response returned a 401 status code for failed authentication
+ * An API response returned a 401 status code
  */
 export class UnauthorizedError extends ApiRequestError {
   constructor(message: string, details?: FrontendErrorDetails) {
