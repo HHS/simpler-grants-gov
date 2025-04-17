@@ -1,6 +1,6 @@
+import json
 import logging
 import os
-from pathlib import Path
 from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
@@ -53,6 +53,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
+    domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
 
 
 def create_app() -> APIFlask:
@@ -70,7 +71,6 @@ def create_app() -> APIFlask:
     register_index(app)
     register_robots_txt(app)
     register_search_client(app)
-    register_well_known(app)
 
     endpoint_config = EndpointConfig()
     if endpoint_config.auth_endpoint:
@@ -79,6 +79,8 @@ def create_app() -> APIFlask:
 
     if LegacySoapAPIConfig().soap_api_enabled:
         init_legacy_soap_api(app)
+
+    register_well_known(app, endpoint_config.domain_verification_content)
 
     return app
 
@@ -195,16 +197,22 @@ def register_robots_txt(app: APIFlask) -> None:
         """
 
 
-def register_well_known(app: APIFlask) -> None:
-    @app.route("/.well-known/pki-validation/<file_name>")
+def register_well_known(app: APIFlask, domain_verification_content: str | None) -> None:
+    @app.get("/.well-known/pki-validation/<file_name>")
     @app.doc(hide=True)
-    def get_dv_verification_content(file_name: str) -> tuple:
+    def get_domain_verification_content(file_name: str) -> tuple:
+        """Domain verification
+
+        This endpoint is responsible for domain verification related
+        to grants.gov S2S SOAP API.
+        """
+        if not domain_verification_content:
+            err = "Domain not configured for verification"
+            logger.error(err)
+            return err, 404
         try:
-            with open(
-                f"{Path(__file__).resolve().parent}/static/domain_verification_assets/{file_name}"
-            ) as f:
-                return f.read(), 200
+            return json.loads(domain_verification_content)[file_name], 200
         except Exception as e:
-            message = f"Could not read {file_name} dv contents: {e}"
-            logger.warning(message)
-            return message, 404
+            err = f"Could not read {file_name} contents: {e}"
+            logger.error(err)
+            return err, 404

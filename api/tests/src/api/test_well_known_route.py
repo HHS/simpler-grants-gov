@@ -1,6 +1,10 @@
+# This variable is configured in local.env in the DOMAIN_VERIFICATION_CONTENT env var.
+DV_FILE_NAME = "dv.txt"
+
+
 def test_get_well_known_200(client):
-    existing_file = "05589A9E44482CE51E7B9531194F4087.txt"
-    response = client.get(f"/.well-known/pki-validation/{existing_file}")
+    response = client.get(f"/.well-known/pki-validation/{DV_FILE_NAME}")
+    assert response.text == "data"
     assert response.status_code == 200
 
 
