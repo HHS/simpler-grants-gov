@@ -35,7 +35,7 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
         .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
         .order_by(OpportunityVersion.created_at.desc())
         .options(selectinload("*"))
-    ).scalar_one_or_none()
+    ).first()
 
     # Extracts the opportunity data as JSON object
     opportunity_new = SCHEMA.dump(opportunity)
