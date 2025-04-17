@@ -39,28 +39,39 @@ backup script and backup copies of each production query.
 Follow the steps below to query the Metabase API for collections and questions, 
 and write those collections and questions to the local filesystem. 
 
-1. Get an API key from the Metabase Admin interface if you have access, otherwise
+### Get API Key
+
+Get an API key from the Metabase Admin interface if you have access, otherwise
    ask for a key from your team lead. 
 
-2. Open a terminal and change directory to `simpler-grants-gov/analytics`. 
+### Set Environment Variables
 
-3. Inspect the `local.env` file and ensure that `MB_API_URL` is set to the 
-   correct target instance (i.e. dev or prod). 
+Inspect the `local.env` file to find the `MB_API_URL`.  Set an environment 
+variable with that value:
 
-4. Use the command line in your open terminal window to set the `MB_API_KEY` 
-   environment variable to hold the Metabase API key. For example:
-
-```bash 
-export MB_API_KEY=mb_DjVxkjsdjsd89wkjaszqSLej4qabWr
+```bash
+$ grep MB_API_URL ./local.env
+MB_API_URL=http://metabase-dev-710651776.us-east-1.elb.amazonaws.com/api
+$ export MB_API_URL=http://metabase-dev-710651776.us-east-1.elb.amazonaws.com/api
 ```
 
-5. From the command line, run the command `make mb-backup` and observe the 
-   output to ensure success.
+Set another environment variable with the API key from the previous step.
 
-After successful execution of the backup command, the `sql/` directory should
-contain backup copies of all collections and SQL queries, as well as an updated
-`CHANGELOG.txt` file. As a final step, create a branch and open a PR with the
-updated queries and change log.
+```bash 
+export MB_API_KEY=mb_DjVxtH1sSn0tAr3A7k3YzLej4qabWr
+```
+
+### Run the Backup 
+
+In a terminal, change directory to `simpler-grants-gov/analytics`.  Run the 
+command `make mb-backup` and observe the output to ensure success.  After 
+successful execution of the backup command, the `sql/` directory should
+contain backup copies of all collections and SQL queries and an updated
+`CHANGELOG.txt` file. 
+
+### Open a PR  
+
+As a final step, create a branch and add the `.sql` and `CHANGELOG.txt` files. Open a PR with the branch.
 
 ## Disaster Recovery Process
 
