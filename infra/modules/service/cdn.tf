@@ -132,6 +132,15 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn == null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = true
+      minimum_protocol_version       = local.minimum_protocol_version
+    }
+  }
+
   depends_on = [
     aws_s3_bucket_public_access_block.cdn[0],
     aws_s3_bucket_acl.cdn[0],
