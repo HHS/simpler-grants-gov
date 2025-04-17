@@ -129,115 +129,88 @@ We manage several secret values that need to be rotated yearly.
 The process starts by generating a cert like so. You will need to generate the certs one at a time.
 
 ```bash
-# api.simpler.grants.gov example
-
 openssl genrsa -out api_simpler_grants_gov.key 2048
 openssl req -new \
     -key api_simpler_grants_gov.key \
     -out api_simpler_grants_gov.csr \
     -subj "/C=US/O=Simpler Grants Gov/CN=api.simpler.grants.gov" \
     -addext "subjectAltName=DNS:api.simpler.grants.gov"
-
-# simpler.grants.gov example
-
-openssl genrsa -out simpler_grants_gov.key 2048
-openssl req -new \
-    -key simpler_grants_gov.key \
-    -out simpler_grants_gov.csr \
-    -subj "/C=US/O=Simpler Grants Gov/CN=simpler.grants.gov" \
-    -addext "subjectAltName=DNS:simpler.grants.gov"
 ```
 
 You give the `{url}.csr` file to HHS so that they can perform the next step. When they get back to you, proceed to part 2a
 
 #### Application Certificates: Part 2a: Upload A Single Cert
 
-You will get a zip file back from HHS containing the certificate. Inside the zip there will be a file. If it isn't called `{url}.key` then rename it so that that's its name.
+You will get a zip file back from HHS containing the certificate. Inside the zip there will be one file. If it isn't called `{url}.cer` then rename it so that that's its name. That's the cert. Here you have two options. If the cert isn't plain text, you need to turn it into plain text. How to determine if something is plain text or not can be done by `cat`'ing the file and seeing if it has a bunch of �'s in it, that means it's binary. Binary certs can be turned into plain text, then uploaded, like so:
 
 ```bash
-# api.simpler.grants.gov example
+openssl x509 -inform DER \
+    -in api_simpler_grants_gov.cer \
+    -out api_simpler_grants_gov.pem # the file extensions here are functionally arbitrary
 
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
     --private-key fileb://api_simpler_grants_gov.key
-
-# simpler.grants.gov example
-
-aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
-    --private-key fileb://simpler_grants_gov.key
 ```
 
-If you get the following error...
+For plain text certs, that would look like:
 
-> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
+```bash
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \  # again, the file extensions here are functionally arbitrary
+    --private-key fileb://api_simpler_grants_gov.key
+```
 
-...then go on to part 2b. If not, then go to part 3
+Later on (eg. during part 3), you might get the following error:
+
+> NET:ERR_CERT_AUTHORITY_INVALID
+
+If that happens, then that means that something went wrong with this step, eg. step 2a. In that case, you need to redo your work in form of step 2b.
 
 #### Application Certificates: Part 2b: Upload Multiple Certs
 
-If there are multiple certificates (eg. a chain certificate is included) then there will be given another file called something like `{url}_chain.key` and the command looks more like this
+If there are multiple certificates (eg. a chain certificate is included) then there will be given another file called something like `{url}_chain.cer` and the commands look more like this
 
 ```bash
-# api.simpler.grants.gov example
-
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
-    --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
-    --private-key fileb://api_simpler_grants_gov.key
-
-# simpler.grants.gov example
-
-aws acm import-certificate --certificate fileb://simpler_grants_gov.cer \
-    --certificate-chain fileb://simpler_grants_gov_chain.pem \
-    --private-key fileb://simpler_grants_gov.key
-```
-
-But if you got this error
-
-> An error occurred (ValidationException) when calling the ImportCertificate operation: The certificate field contains more than one certificate. You can specify only one certificate in this field.
-
-And don't have 3 certs, then you need to create the chain certs, via part 2c
-
-#### Application Certificates: Part 2c: Split Out and Upload Multiple Certs (Allegedly)
-
-This is the case where you'll need to extra the chain certs from the primary cert so you can upload them separately. You can split the certs via first running the following command,
-
-```bash
-# api.simpler.grants.gov example
-
 openssl x509 -inform DER \
     -in api_simpler_grants_gov.cer \
     -out api_simpler_grants_gov.pem
 
-# simpler.grants.gov example
-
 openssl x509 -inform DER \
-    -in simpler_grants_gov.cer \
-    -out simpler_grants_gov.pem
-```
-
-After that you can inspect the cert to split it out. Allegedly there should be multiple certs in there... but... in my tests there was not. So there's 2 things to do here:
-
-1. Just upload the new single cert plain text file
-2. Split out the certs so you can upload the chain cert
-
-When this document was originally written, it was case 1 above, so there was only 1 cert to actually upload. The command to do that was:
-
-```bash
-# api.simpler.grants.gov example
+    -in api_simpler_grants_gov_chain.cer \
+    -out api_simpler_grants_gov_chain.pem
 
 aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
+    --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
     --private-key fileb://api_simpler_grants_gov.key
-
-# simpler.grants.gov example
-
-aws acm import-certificate --certificate fileb://simpler_grants_gov.pem \
-    --private-key fileb://simpler_grants_gov.key
 ```
 
-**_(when someone gets an actual chain cert, they should update this documentation)_**
+Or if one of the certs is in plain text, then the command looks like this
 
-#### Application Certificates: Part 3
+```bash
+aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
+    --certificate-chain fileb://api_simpler_grants_gov_chain.cer \
+    --private-key fileb://api_simpler_grants_gov.key
+```
 
-At this point your cert should be uploaded. The next step is to deploy the load balancers so they pick up the new cert. This should be a normal deploy, the same way you do your deploys in every other circumstance.
+In summary, Inspect which certs are binary, which are plain text, and decrypt them as needed. Then import the file with multiple certs into `--certificate-chain`.
+
+#### Application Certificates: Part 3: Attach to Load Balancer
+
+This is the last step where the cert actually starts being used. Login to the AWS console and open up this page:
+
+https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancers:v=3
+
+From there:
+
+- Click on the load balancer whose cert you are updating, like `api-prod`
+- Scroll down to "Listeners and rules"
+- Click `HTTPS:443`
+- Click `Certificates`
+- Click `Add certificate`
+- Choose the certificate that you just uploaded, you can determine this by looking at the `CertificateArn` CLI output, or by otherwise [inspecting the AWS console here](https://us-east-1.console.aws.amazon.com/acm/home?region=us-east-1#/certificates/list).
+- Add the certificate. This UI is confusing and likely subject to change on AWS's end, so the exact text of the buttons of the buttons isn't included in this documentation.
+- `Remove` the old certificate.
+
+At this point the new certificate should start being served... after 5 ~ 10 minutes. Check your website periodically during that turn to confirm the rotation of your cert.
 
 ### Login.gov Certificates
 

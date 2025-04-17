@@ -149,7 +149,7 @@ def log_program_info(program_name: str) -> None:
             # throw an unused “type: ignore” comment error. Casting to Any instead ensures this
             # passes regardless of where mypy is being run
             "cpu_usable": (
-                len(cast(Any, os).sched_getaffinity(0))
+                len(cast(Any, os).sched_getaffinity(0))  # pylint: disable=E1101
                 if "sched_getaffinity" in dir(os)
                 else "unknown"
             ),

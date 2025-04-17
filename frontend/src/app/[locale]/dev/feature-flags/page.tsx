@@ -1,8 +1,9 @@
 import { Metadata } from "next";
-import FeatureFlagsTable from "src/app/[locale]/dev/feature-flags/FeatureFlagsTable";
 
 import Head from "next/head";
 import React from "react";
+
+import FeatureFlagsTable from "src/components/dev/FeatureFlagsTable";
 
 export function generateMetadata() {
   const meta: Metadata = {

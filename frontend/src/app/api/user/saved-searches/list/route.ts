@@ -12,10 +12,7 @@ export const POST = async (_request: Request) => {
       );
     }
 
-    const savedSearches = await fetchSavedSearches(
-      session.token,
-      session.user_id,
-    );
+    const savedSearches = await fetchSavedSearches();
 
     return new Response(JSON.stringify(savedSearches), {
       status: 200,

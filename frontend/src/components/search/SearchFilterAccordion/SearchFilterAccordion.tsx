@@ -1,8 +1,8 @@
 "use client";
 
 import { camelCase } from "lodash";
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { QueryContext } from "src/services/search/QueryProvider";
 import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
@@ -35,6 +35,8 @@ export interface SearchFilterAccordionProps {
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
   filterOptions: FilterOption[];
+  facetCounts?: { [key: string]: number };
+  defaultEmptySelection?: Set<string>;
 }
 
 export interface FilterOptionWithChildren {
@@ -69,14 +71,22 @@ const AccordionContent = ({
   title,
   queryParamKey,
   query,
+  facetCounts,
+  defaultEmptySelection,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
+  // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
-    const updated = new Set(query);
-    isChecked ? updated.add(value) : updated.delete(value);
-    updateQueryParams(updated, queryParamKey, queryTerm);
+    const newParamValue = new Set(query);
+    isChecked ? newParamValue.add(value) : newParamValue.delete(value);
+    // handle status filter custom behavior to set param when all options are unselected
+    const updatedParamValue =
+      !newParamValue.size && defaultEmptySelection?.size
+        ? defaultEmptySelection
+        : newParamValue;
+    updateQueryParams(updatedParamValue, queryParamKey, queryTerm);
   };
 
   // all top level selectable filter options
@@ -91,6 +101,7 @@ const AccordionContent = ({
   const allSelected = new Set(allOptionValues);
 
   // need to add any existing relevant search params to the passed in set
+  // TODO: split this into two functions andimplement within the components where they're used to make it more testable
   const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
     if (all && newSelections) {
       // get existing current selected options for this accordion from url
@@ -104,7 +115,9 @@ const AccordionContent = ({
       ]);
       updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
     } else {
-      const clearedSelections = newSelections || new Set<string>();
+      const clearedSelections = newSelections?.size
+        ? newSelections
+        : new Set<string>();
       updateQueryParams(clearedSelections, queryParamKey, queryTerm);
     }
   };
@@ -113,7 +126,7 @@ const AccordionContent = ({
     <>
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true, allSelected)}
-        onClearAll={() => toggleSelectAll(false)}
+        onClearAll={() => toggleSelectAll(false, defaultEmptySelection)}
         isAllSelected={areSetsEqual(allSelected, query)}
         isNoneSelected={query.size === 0}
       />
@@ -133,6 +146,7 @@ const AccordionContent = ({
                 accordionTitle={title}
                 isSectionAllSelected={areSetsEqual}
                 isSectionNoneSelected={() => query.size === 0}
+                facetCounts={facetCounts}
               />
             ) : (
               <SearchFilterCheckbox
@@ -140,6 +154,7 @@ const AccordionContent = ({
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
+                facetCounts={facetCounts}
               />
             )}
           </li>
@@ -154,6 +169,8 @@ export function SearchFilterAccordion({
   title,
   queryParamKey,
   query,
+  facetCounts,
+  defaultEmptySelection,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -164,6 +181,8 @@ export function SearchFilterAccordion({
           title={title}
           queryParamKey={queryParamKey}
           query={query}
+          facetCounts={facetCounts}
+          defaultEmptySelection={defaultEmptySelection}
         />
       ),
       expanded: !!query.size,

@@ -16,18 +16,22 @@ module "dev_config" {
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
-  # With a minimum of 2, so CPU doesn't spike to infinity on deploys.
+  # instance_desired_instance_count is 2, as a general best pratice.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
-  # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
-  instance_scaling_max_capacity = 10
+  # instance_scaling_max_capacity is 2x the instance_scaling_min_capacity
+  # this is so that we can observe some scaling behavior without burning $$$ for no reason.
+  instance_scaling_max_capacity = 4
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-dev;is-cluster=true;tab=monitoring
-  # database_min_capacity is average api-dev ServerlessDatabaseCapacity seen over 12 months, as of November 2024
+  # database_min_capacity is a reasonable default given a low load environment,
+  # It is 2 specifically so that we can get performance insights (see the 1st link above)
   database_min_capacity = 2
-  # database_max_capacity is 5x the database_min_capacity
-  database_max_capacity   = 10
+  # database_max_capacity is 2x the database_min_capacity
+  # this is so that we can observe some scaling behavior without burning $$$ for no reason.
+  database_max_capacity = 4
+  # always at least 2, for redundancy and availability
   database_instance_count = 2
 
   has_search = true

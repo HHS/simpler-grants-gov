@@ -69,3 +69,4 @@ def test_ecs_background_task_when_erroring(caplog: pytest.LogCaptureFixture):
     assert last_record["another_param"] == "hello"
     assert last_record["levelname"] == "ERROR"
     assert last_record["message"] == "ECS task failed"
+    assert last_record["exc_info_short"] == "ValueError('I am an error')"

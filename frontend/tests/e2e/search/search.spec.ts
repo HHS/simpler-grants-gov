@@ -27,12 +27,11 @@ import {
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
-  // flaky
+  // Set all inputs, then refresh the page. Those same inputs should be
+  // set from query params.
   test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
-    // Set all inputs, then refresh the page. Those same inputs should be
-    // set from query params.
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-closed": "closed",
@@ -60,6 +59,7 @@ test.describe("Search page tests", () => {
       waitForSearchResultsInitialLoad(page),
       waitForFilterOptions(page, "agency"),
     ]);
+
     await selectSortBy(page, "agencyDesc");
     await expectSortBy(page, "agencyDesc");
 
@@ -71,6 +71,7 @@ test.describe("Search page tests", () => {
       "status",
       "forecasted,posted",
     );
+
     await clickAccordionWithTitle(page, "Funding instrument");
     await toggleCheckboxes(
       page,
@@ -157,6 +158,7 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
+    await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
@@ -221,6 +223,7 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
+    await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     const updatedSearchResultsCount =

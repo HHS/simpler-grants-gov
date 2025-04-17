@@ -300,6 +300,8 @@ seed-local-legacy-tables:
 populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
+populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
+	$(FLASK_CMD) load-search-data load-agency-data $(args)
 ##################################################
 # Miscellaneous Utilities
 ##################################################

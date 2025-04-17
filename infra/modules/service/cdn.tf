@@ -3,7 +3,7 @@ locals {
   # We do not currently do this, though.
   default_origin_id        = "default"
   ssl_protocols            = ["TLSv1.2"]
-  minimum_protocol_version = "TLSv1.2_2021"
+  minimum_protocol_version = "TLSv1"
   enable_cdn               = var.enable_alb_cdn || var.enable_s3_cdn
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
@@ -40,10 +40,7 @@ resource "aws_cloudfront_cache_policy" "default" {
   name = var.service_name
 
   # Default to caching for 1 hour.
-  # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
-  # There's also a `max_ttl` option, which can be used to override the above headers.
-  min_ttl     = 0
-  default_ttl = 3600
+  min_ttl = 3600
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
@@ -117,12 +114,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
     viewer_protocol_policy = var.certificate_arn == null ? "allow-all" : "redirect-to-https"
-
-    # Default to caching for 1 hour.
-    # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
-    # There's also a `max_ttl` option, which can be used to override the above headers.
-    min_ttl     = 0
-    default_ttl = 3600
   }
 
   restrictions {
@@ -135,7 +126,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     acm_certificate_arn            = var.certificate_arn == null ? null : var.certificate_arn
     cloudfront_default_certificate = var.certificate_arn == null ? true : false
     minimum_protocol_version       = local.minimum_protocol_version
-    ssl_support_method             = "sni-only"
   }
 
   depends_on = [

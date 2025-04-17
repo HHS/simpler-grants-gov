@@ -1,8 +1,9 @@
 import clsx from "clsx";
-import { UserProfile } from "src/services/auth/types";
 import { useUser } from "src/services/auth/useUser";
+import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import {
   IconListContent,
@@ -106,13 +107,15 @@ export const UserControl = () => {
   const t = useTranslations("Header");
 
   const { user, refreshUser } = useUser();
+  const router = useRouter();
 
   const logout = useCallback(async (): Promise<void> => {
     await fetch("/api/auth/logout", {
       method: "POST",
     });
     await refreshUser();
-  }, [refreshUser]);
+    router.refresh();
+  }, [refreshUser, router]);
 
   return (
     <>

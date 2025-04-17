@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
@@ -122,11 +122,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
-  const nofoPath =
-    opportunityData.attachments.length === 1
-      ? opportunityData.attachments[0]?.download_path
-      : "";
-
   return (
     <div>
       <BetaAlert />
@@ -144,8 +139,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
-              nofoPath={nofoPath}
-              opportunityId={opportunityData.opportunity_id}
+              attachments={opportunityData.attachments}
             />
             <OpportunityDocuments
               documents={opportunityData.attachments}

@@ -1,4 +1,33 @@
 export const messages = {
+  Events: {
+    pageTitle: "Events | Simpler.Grants.gov",
+    pageDescription:
+      "From new developments to upcoming opportunities, we want you to be a part of the journey.",
+    header: "Events",
+    upcoming: {
+      title: "Upcoming Events",
+      startDate: "Begins March 10, 2025",
+      header: "Spring 2025 Collaborative Coding Challenge",
+      description:
+        "The next Simpler.Grants.gov Coding Challenge gives participants an opportunity to showcase their creativity and coding capabilities while competing for awards from our $4,000 prize pool.",
+      link: "Sign up to participate",
+    },
+    demo: {
+      title: "Simpler.Grants.gov Big Demo",
+      description:
+        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+      watch: "Watch recordings of past Big Demos",
+      watchLink: "January 15, 2025",
+    },
+    codingChallenge: {
+      title: "Collaborative Coding Challenge",
+      descriptionP1:
+        "The Simpler.Grants.gov Collaborative Coding Challenge is an entirely virtual interactive event attended by members of the public, government, stakeholders, and our internal development team.",
+      descriptionP2:
+        "Small teams of external developers, designers, and researchers pitch a proposal to solve a problem with the strongest of them added to the product roadmap.",
+      link: "Read about the Spring 2025 Coding Challenge",
+    },
+  },
   Beta_alert: {
     alert_title:
       "This site is a work in progress, with new features and updates based on your feedback.",
@@ -50,7 +79,7 @@ export const messages = {
     },
     documents: {
       title: "Documents",
-      table_col_category: "Category",
+      table_col_description: "Description",
       table_col_file_name: "File name",
       table_col_last_updated: "Last updated",
       type: {
@@ -78,6 +107,15 @@ export const messages = {
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",
+      forecasted_award_date: "Estimated Award Date",
+      forecasted_post_date: "Estimated Post Date",
+      forecasted_close_date: "Estimated Application Due Date",
+      forecasted_close_date_description: "Estimated Due Date Description",
+      forecasted_close_date_description_not_available: "Not available",
+      forecasted_project_start_date: "Estimated Project Start Date",
+      forecasted_last_updated: "Last Updated Date",
+      fiscal_year: "Fiscal Year",
+
       version: "Version",
     },
     link: {
@@ -103,10 +141,10 @@ export const messages = {
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
     goal: {
       paragraph_1:
-        "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
+        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
       title_2: "Grant seekers & applicants",
       paragraph_2:
-        "We’re improving the way you search for and discover relevant opportunities, making it easier to access the funding you need.",
+        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
       title_3: "Federal grantmaking agencies",
       paragraph_3:
         "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
@@ -144,6 +182,53 @@ export const messages = {
       "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
     wtgi_paragraph_2:
       "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
+  },
+  Vision: {
+    page_title: "Vision | Simpler.Grants.gov",
+    intro: {
+      title_1: "Our vision",
+      content_1:
+        "We believe that applying for federal financial assistance should be simple, accessible, and easy. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
+    },
+    mission: {
+      title_1: "Our mission",
+      paragraph_1:
+        "We want to increase access to federal funding opportunities and continuously improve the grants experience for everyone—whether you’re an applicant searching for funding or a federal agency posting opportunities.",
+      title_2: "Find",
+      paragraph_2:
+        "Help applicants and grantors find relevant funding opportunities by improving search and making listings easier to read",
+      title_3: "Apply",
+      paragraph_3:
+        "Simplify the application process, empowering applicants of all experience levels to confidently submit funding requests with fewer obstacles.",
+      title_4: "Report",
+      paragraph_4:
+        "Make it easier for applicants and grantors to track, manage, and fulfill reporting requirements throughout the grant lifecycle.",
+    },
+    goals: {
+      title_1: "Our goals",
+      title_2: "Reduce the burden",
+      paragraph_1:
+        "Make the entire process more efficient for both applicants and grantors by reducing friction and addressing challenges across all stages of the grant journey.",
+      title_3: "Support users at every step",
+      paragraph_2:
+        "Offer timely, contextual support to meet users where they are. Provide a guided journey that reduces their need to search elsewhere.",
+      title_4: "Demystify the process",
+      paragraph_3:
+        "Ensure that everyone has easy access to guidance and information that empowers them to navigate the system with confidence.",
+      title_5: "Cultivate trust through consistency",
+      paragraph_4:
+        "Create a recognizable, reliable experience through our visual brand identity and human-centered approach.",
+    },
+    get_there: {
+      title_1: "How we get there",
+      title_2: "Guided by research, shaped by your experience",
+      paragraph_1:
+        "To build a better Grants.gov, we listen to the people who use it. Through ongoing research, user feedback, and real conversations with applicants and grantors, we identify challenges and prioritize opportunities for improvement.",
+      paragraph_2:
+        "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
+      link_text_1: "Read more about the research on our public wiki",
+      link_text_2: "Sign up to participate in future user studies",
+    },
   },
   Research: {
     page_title: "Research | Simpler.Grants.gov",
@@ -346,10 +431,9 @@ export const messages = {
     },
     page_not_found: {
       page_title: "Page Not Found | Simpler.Grants.gov",
-      title: "Oops! Page Not Found",
-      message_content_1:
-        "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
-      visit_homepage_button: "Return Home",
+      title: "Oops, we can't find that page.",
+      message_content_1: "It may have been moved or no longer exists.",
+      visit_homepage_button: "Visit our homepage",
     },
   },
   Header: {
@@ -357,6 +441,7 @@ export const messages = {
       home: "Home",
       roadmap: "Roadmap",
       research: "Research",
+      vision: "Vision",
       subscribe: "Subscribe",
       menuToggle: "Menu",
       search: "Search",
@@ -434,6 +519,15 @@ export const messages = {
         eligibility: "Eligibility",
         agency: "Agency",
         category: "Category",
+        status: "Opportunity status",
+      },
+      options: {
+        status: {
+          forecasted: "Forecasted",
+          posted: "Posted",
+          closed: "Closed",
+          archived: "Archived",
+        },
       },
     },
     bar: {
@@ -445,15 +539,6 @@ export const messages = {
       title: "Search funding opportunities",
     },
     opportunitySaved: "Saved",
-    opportunityStatus: {
-      title: "Opportunity status",
-      label: {
-        forecasted: "Forecasted",
-        posted: "Posted",
-        closed: "Closed",
-        archived: "Archived",
-      },
-    },
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
