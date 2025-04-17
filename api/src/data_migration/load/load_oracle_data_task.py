@@ -31,6 +31,11 @@ TABLES_TO_LOAD = [
     "tfundinstr_synopsis",
     "tgroups",
     "tsynopsisattachment",
+    "tuser_account",
+    "tuser_account_mapper",
+    "tsubscription",
+    "tsubscription_search",
+    "tsubscription_opportunity",
 ]
 
 
