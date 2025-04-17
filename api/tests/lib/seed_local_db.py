@@ -12,6 +12,7 @@ from src.adapters.db import PostgresDBClient
 from src.db.models.competition_models import Competition
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
+from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,10 @@ def _build_competitions(db_session: db.Session) -> None:
             competition_id=static_competition_id, competition_forms=[]
         )
         factories.CompetitionFormFactory.create(competition=competition)
+        big_form = factories.FormFactory.create(
+            form_json_schema=JSON_SCHEMA_FORM, form_name=FORM_NAME, form_ui_schema=UI_SCHEMA
+        )
+        factories.CompetitionFormFactory.create(competition=competition, form=big_form)
 
     logger.info(f"Static competition for development exists with ID {str(static_competition_id)}")
 
