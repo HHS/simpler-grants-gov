@@ -41,7 +41,7 @@ def upgrade():
     )
     op.create_table(
         "lk_form_family",
-        sa.Column("form_family_id", sa.Integer(), nullable=True),
+        sa.Column("form_family_id", sa.Integer(), nullable=False),
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column(
             "created_at",
@@ -94,7 +94,7 @@ def upgrade():
         schema="api",
     )
     op.add_column(
-        "competition", sa.Column("form_family_id", sa.Integer(), nullable=False), schema="api"
+        "competition", sa.Column("form_family_id", sa.Integer(), nullable=True), schema="api"
     )
     op.add_column(
         "competition",
