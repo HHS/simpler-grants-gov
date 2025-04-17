@@ -133,10 +133,9 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         opp_vers = db_session.query(OpportunityVersion).all()
         assert len(opp_vers) == 3
         assert (
-                store_opportunity_version_task.metrics[
-                    store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED
-                ]
-                == 1
+            store_opportunity_version_task.metrics[
+                store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED
+            ]
+            == 1
         )
         assert opp_vers[2].opportunity_id == opp_ver_existing.opportunity_id
-
