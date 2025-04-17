@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
@@ -69,6 +70,7 @@ def create_app() -> APIFlask:
     register_index(app)
     register_robots_txt(app)
     register_search_client(app)
+    register_well_known(app)
 
     endpoint_config = EndpointConfig()
     if endpoint_config.auth_endpoint:
@@ -191,3 +193,18 @@ def register_robots_txt(app: APIFlask) -> None:
         Allow: /docs
         Disallow: /
         """
+
+
+def register_well_known(app: APIFlask) -> None:
+    @app.route("/.well-known/pki-validation/<file_name>")
+    @app.doc(hide=True)
+    def get_dv_verification_content(file_name: str) -> str:
+        try:
+            with open(
+                f"{Path(__file__).resolve().parent}/static/domain_verification_assets/{file_name}"
+            ) as f:
+                return f.read()
+        except Exception as e:
+            message = f"Could not read {file_name} dv contents: {e}"
+            logger.warning(message)
+            return message, 404
