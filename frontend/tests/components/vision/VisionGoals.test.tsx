@@ -1,5 +1,6 @@
-import VisionGoals from "src/app/[locale]/vision/VisionGoals";
 import { render, screen } from "tests/react-utils";
+
+import VisionGoals from "src/components/vision/sections/VisionGoals";
 
 describe("Vision Goals Content", () => {
   it("Renders without errors", () => {
