@@ -122,10 +122,14 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  viewer_certificate {
-    acm_certificate_arn            = var.certificate_arn == null ? null : var.certificate_arn
-    cloudfront_default_certificate = var.certificate_arn == null ? true : false
-    minimum_protocol_version       = local.minimum_protocol_version
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn != null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = false
+      minimum_protocol_version       = local.minimum_protocol_version
+      ssl_support_method             = "sni-only"
+    }
   }
 
   depends_on = [
