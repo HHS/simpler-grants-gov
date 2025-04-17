@@ -439,10 +439,13 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      community: "Community",
+      events: "Events",
       home: "Home",
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      wiki: "Public wiki",
       research: "Research",
       roadmap: "Product Roadmap",
       savedGrants: "Saved opportunities",
