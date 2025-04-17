@@ -41,7 +41,7 @@ def upgrade():
     )
     op.create_table(
         "lk_form_family",
-        sa.Column("form_family_id", sa.Integer(), nullable=False),
+        sa.Column("form_family_id", sa.Integer(), nullable=True),
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column(
             "created_at",

@@ -32,7 +32,7 @@ class Competition(ApiSchemaTable, TimestampMixin):
     grace_period: Mapped[int | None] = mapped_column(BigInteger)
     contact_info: Mapped[str | None]
 
-    form_family: Mapped[FormFamily] = mapped_column(
+    form_family: Mapped[FormFamily | None] = mapped_column(
         "form_family_id",
         LookupColumn(LkFormFamily),
         ForeignKey(LkFormFamily.form_family_id),
