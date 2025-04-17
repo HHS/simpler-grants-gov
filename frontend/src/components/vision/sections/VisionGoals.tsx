@@ -1,6 +1,6 @@
 import { useMessages, useTranslations } from "next-intl";
 
-import VisionPageSection from "src/components/vision/visionPageSection";
+import VisionPageSection from "src/components/vision/VisionPageSection";
 
 export default function VisionGoals() {
   const t = useTranslations("Vision.sections.goals");
