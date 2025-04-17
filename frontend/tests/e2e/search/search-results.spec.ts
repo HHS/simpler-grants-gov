@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { screen } from "@testing-library/react";
 
 import {
   fillSearchInputAndSubmit,
