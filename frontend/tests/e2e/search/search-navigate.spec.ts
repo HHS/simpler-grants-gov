@@ -23,3 +23,9 @@ test("should navigate from index to search page", async ({
   await expectCheckboxIDIsChecked(page, "#status-forecasted");
   await expectCheckboxIDIsChecked(page, "#status-posted");
 });
+
+test("should navigate from search to opportunity page", async ({ page }) => {
+  await page.goto("/search");
+  await page.locator('[href*="/opportunity/"]').first().click();
+  await expect(page).toHaveURL(/opportunity/);
+});
