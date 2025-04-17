@@ -114,8 +114,8 @@ UI_SCHEMA = [
             {
                 "type": "section",
                 "label": "6b. Project Description",
-                "name": "ProjectDecription",
-                "children": [{"type": "field", "definition": "/properties/ProjectDecription"}],
+                "name": "ProjectDescription",
+                "children": [{"type": "field", "definition": "/properties/ProjectDescription"}],
             },
             {
                 "type": "section",
@@ -170,241 +170,159 @@ JSON_SCHEMA_FORM = {
         "citizenship",
         "CongressionalDistrictApplicant",
         "ProjectTitle",
-        "ProjectDecription",
+        "ProjectDescription",
         "FundingPeriodStartDate",
         "FundingPeriodEndDate",
-        "ApplicationCertification"
+        "ApplicationCertification",
     ],
     "properties": {
         "FederalAgency": {
             "type": "string",
-            "title": "1. NAME OF FEDERAL AGENCY:",
-            "description": "Pre-populated from the Application cover sheet.",
+            "title": "Name of Federal Agency",
             "minLength": 1,
-            "maxLength": 60
+            "maxLength": 60,
         },
         "CFDANumber": {
             "type": "string",
-            "title": "2. ASSISTANCE LISTING NUMBER:",
-            "description": "Pre-populated from the Application cover sheet.",
+            "title": "Assistance Listing Number",
             "minLength": 0,
-            "maxLength": 15
+            "maxLength": 15,
         },
         "CFDATitle": {
             "type": "string",
-            "title": "ASSISTANCE LISTING TITLE:",
-            "description": "Pre-populated from the Application cover sheet.",
+            "title": "Assistance Listing Title",
             "minLength": 0,
-            "maxLength": 120
+            "maxLength": 120,
         },
         "OpportunityID": {
             "type": "string",
-            "title": "4. FUNDING OPPORTUNITY NUMBER:",
-            "description": "Pre-populated from the Application cover sheet.",
+            "title": "Funding Opportunity Number",
             "minLength": 1,
-            "maxLength": 40
+            "maxLength": 40,
         },
         "OpportunityTitle": {
             "type": "string",
-            "title": "TITLE:",
-            "description": "Pre-populated from the Application cover sheet.",
+            "title": "Funding Opportunity Title",
             "minLength": 1,
-            "maxLength": 255
+            "maxLength": 255,
         },
         "PrefixName": {
             "type": "string",
-            "title": "Prefix:",
-            "description": "Select the Prefix from the provided list or enter a new Prefix not provided on the list.",
+            "title": "Prefix",
             "minLength": 0,
             "maxLength": 10,
-            "enum": [
-                "Mr.",
-                "Mrs.",
-                "Miss",
-                "Ms.",
-                "Dr.",
-                "Rev."
-            ]
+            "enum": ["Mr.", "Mrs.", "Miss", "Ms.", "Dr.", "Rev."],
         },
-        "FirstName": {
-            "type": "string",
-            "title": "First Name:",
-            "description": "Enter the First Name. This field is required.",
-            "minLength": 1,
-            "maxLength": 35
-        },
-        "MiddleName": {
-            "type": "string",
-            "title": "Middle Name:",
-            "description": "Enter the Middle Name.",
-            "minLength": 0,
-            "maxLength": 25
-        },
-        "LastName": {
-            "type": "string",
-            "title": "Last Name:",
-            "description": "Enter the Last Name. This field is required.",
-            "minLength": 1,
-            "maxLength": 60
-        },
+        "FirstName": {"type": "string", "title": "First Name", "minLength": 1, "maxLength": 35},
+        "MiddleName": {"type": "string", "title": "Middle Name", "minLength": 0, "maxLength": 25},
+        "LastName": {"type": "string", "title": "Last Name", "minLength": 1, "maxLength": 60},
         "Suffix": {
             "type": "string",
-            "title": "Suffix:",
-            "description": "Select the Suffix from the provided list or enter a new Suffix not provided on the list.",
+            "title": "Suffix",
             "minLength": 0,
             "maxLength": 10,
-            "enum": [
-                "Jr.",
-                "Sr.",
-                "M.D.",
-                "Ph.D"
-            ]
+            "enum": ["Jr.", "Sr.", "M.D.", "Ph.D"],
         },
         "AuthorizedRepresentativePhoneNumber": {
             "type": "string",
-            "title": "Telephone Number (Daytime):",
-            "description": "Enter the daytime Telephone Number.  This field is required.",
+            "title": "Daytime Phone Number",
             "minLength": 1,
-            "maxLength": 25
+            "maxLength": 25,
         },
         "EveningPhone": {
             "type": "string",
-            "title": "Telephone Number (Evening):",
-            "description": "Enter the evening Telephone Number.",
+            "title": "Evening Phone Number",
             "minLength": 0,
-            "maxLength": 25
+            "maxLength": 25,
         },
         "AuthorizedRepresentativeFax": {
             "type": "string",
-            "title": "Fax Number:",
-            "description": "Enter the Fax Number.",
+            "title": "Fax Number",
             "minLength": 1,
-            "maxLength": 25
+            "maxLength": 25,
         },
         "AuthorizedRepresentativeEmail": {
             "type": "string",
-            "title": "Email:",
-            "description": "Enter a valid Email Address.  This field is required.",
+            "title": "Email",
+            "description": "Enter a valid Email Address.",
             "minLength": 1,
             "maxLength": 60,
-            "format": "email"
+            "format": "email",
         },
-        "Street1": {
-            "type": "string",
-            "title": "Street1:",
-            "description": "Enter the first line of the Street Address. This field is required.",
-            "minLength": 1,
-            "maxLength": 55
-        },
-        "Street2": {
-            "type": "string",
-            "title": "Street2:",
-            "description": "Enter the second line of the Street Address.",
-            "minLength": 0,
-            "maxLength": 55
-        },
-        "City": {
-            "type": "string",
-            "title": "City:",
-            "description": "Enter the City. This field is required.",
-            "minLength": 1,
-            "maxLength": 35
-        },
-        "County": {
-            "type": "string",
-            "title": "County/Parish:",
-            "description": "Enter the County/Parish.",
-            "minLength": 0,
-            "maxLength": 30
-        },
-        "State": {
-            "$ref": "#/$defs/StateCode",
-            "title": "State:"
-        },
-        "Province": {
-            "type": "string",
-            "title": "Province:",
-            "description": "Enter the Province.",
-            "minLength": 0,
-            "maxLength": 30
-        },
-        "Country": {
-            "$ref": "#/$defs/CountryCode",
-            "title": "Country:"
-        },
+        "Street1": {"type": "string", "title": "Street1", "minLength": 1, "maxLength": 55},
+        "Street2": {"type": "string", "title": "Street2", "minLength": 0, "maxLength": 55},
+        "City": {"type": "string", "title": "City", "minLength": 1, "maxLength": 35},
+        "County": {"type": "string", "title": "County/Parish", "minLength": 0, "maxLength": 30},
+        "State": {"$ref": "#/$defs/StateCode", "title": "State"},
+        "Province": {"type": "string", "title": "Province", "minLength": 0, "maxLength": 30},
+        "Country": {"$ref": "#/$defs/CountryCode", "title": "Country"},
         "ZipPostalCode": {
             "type": "string",
-            "title": "Zip/Postal Code:",
+            "title": "Zip/Postal Code",
             "description": "Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United States.",
             "minLength": 0,
-            "maxLength": 30
+            "maxLength": 30,
         },
-        "citizenship": {
-            "type": "string",
-            "title": "U.S. Citizenship",
-            "description": ""
-        },
+        "citizenship": {"type": "string", "title": "U.S. Citizenship", "enum": ["Y: Yes", "N: No"]},
         "AlienRegistrationNumber": {
             "type": "string",
-            "title": "If permanent resident of U.S., enter the Alien Registration #",
-            "description": "Enter the Alien Registration Number.",
+            "title": "Alien Registration Number",
+            "description": "If a permanent resident of the U.S., enter your Alien Registration Number.",
             "minLength": 0,
-            "maxLength": 14
+            "maxLength": 14,
         },
         "CountryofOrigin": {
             "$ref": "#/$defs/CountryCode",
-            "title": "If foreign national, enter country of citizenship:"
+            "title": "Citizenship Country",
+            "description": "If foreign national, enter country of citizenship.",
         },
         "VisitDate": {
             "type": "string",
-            "title": "If foreign national, enter start date of most recent residency in U.S.:",
-            "description": "Enter the start date of the most recent residency in the U.S. Enter in the format MM/DD/YYYY.  This field is required if the applicant is not a U.S. Citizen.",
-            "format": "date"
+            "title": "Residency Start Date",
+            "description": "If foreign national, enter start date of the most recent residency in the U.S. This field is required if the applicant is not a U.S. Citizen.",
+            "format": "date",
         },
         "CongressionalDistrictApplicant": {
             "type": "string",
-            "title": "d. Congressional District of Applicant:",
-            "description": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district, NC-103 for North Carolina's 103rd district. This field is required.If outside the US, enter 00-000.",
+            "title": "Congressional District of Applicant",
+            "description": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district, NC-103 for North Carolina's 103rd district. If outside the US, enter 00-000.",
             "minLength": 1,
-            "maxLength": 6
+            "maxLength": 6,
         },
         "ProjectTitle": {
             "type": "string",
-            "title": "a. Project Title:",
-            "description": "Enter a brief, descriptive title of the project. This field is required.",
+            "title": "Project Title",
+            "description": "Enter a brief, descriptive title of the project.",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
         },
-        "ProjectDecription": {
+        "ProjectDescription": {
             "type": "string",
-            "title": "b. Project Description:",
-            "description": "Enter a brief description of the project. This field is required.",
+            "title": "Project Description",
+            "description": "Enter a brief description of the project.",
             "minLength": 1,
-            "maxLength": 1000
+            "maxLength": 1000,
         },
         "FundingPeriodStartDate": {
             "type": "string",
-            "title": "Start Date:",
-            "description": "Enter the start date for the proposed project. Enter in the format MM/DD/YYYY. This field is required.",
-            "format": "date"
+            "title": "Proposed Project Start Date",
+            "format": "date",
         },
         "FundingPeriodEndDate": {
             "type": "string",
-            "title": "End Date:",
-            "description": "Enter the end date for the proposed project. Enter in the format MM/DD/YYYY. This field is required.",
-            "format": "date"
+            "title": "Proposed Project End Date",
+            "format": "date",
         },
         "ApplicationCertification": {
             "type": "string",
-            "title": "** I AGREE",
-            "description": "Check to select. This field is required."
-        }
+            "title": "I Agree",
+            "enum": ["Y: Yes", "N: No"],
+        },
     },
     "$defs": {
         "StateCode": {
             "type": "string",
             "title": "State",
-            "description": "US State or Territory Code",
             "enum": [
                 "AL: Alabama",
                 "AK: Alaska",
@@ -476,13 +394,12 @@ JSON_SCHEMA_FORM = {
                 "WQ: Wake Island",
                 "AA: Armed Forces Americas (except Canada)",
                 "AE: Armed Forces Europe, the Middle East, and Canada",
-                "AP: Armed Forces Pacific"
-            ]
+                "AP: Armed Forces Pacific",
+            ],
         },
         "CountryCode": {
             "type": "string",
             "title": "Country",
-            "description": "Country Code",
             "enum": [
                 "AFG: AFGHANISTAN",
                 "XQZ: AKROTIRI",
@@ -542,10 +459,10 @@ JSON_SCHEMA_FORM = {
                 "COK: COOK ISLANDS",
                 "XCS: CORAL SEA ISLANDS",
                 "CRI: COSTA RICA",
-                "CIV: C\u00d4TE D'IVOIRE",
+                "CIV: CÔTE D'IVOIRE",
                 "HRV: CROATIA",
                 "CUB: CUBA",
-                "CUW: CURA\u00c7AO",
+                "CUW: CURAÇAO",
                 "CYP: CYPRUS",
                 "CZE: CZECHIA",
                 "DNK: DENMARK",
@@ -744,8 +661,8 @@ JSON_SCHEMA_FORM = {
                 "ESH: WESTERN SAHARA",
                 "YEM: YEMEN",
                 "ZMB: ZAMBIA",
-                "ZWE: ZIMBABWE"
-            ]
-        }
-    }
+                "ZWE: ZIMBABWE",
+            ],
+        },
+    },
 }
