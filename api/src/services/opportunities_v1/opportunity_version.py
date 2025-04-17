@@ -43,7 +43,7 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
     diffs = []
 
     if latest_opp_version:
-        diffs = diff_nested_dicts(opportunity_new, latest_opp_version.opportunity_data)
+        diffs = diff_nested_dicts(opportunity_new, latest_opp_version[0].opportunity_data)
 
     if diffs or latest_opp_version is None:
         # Add new OpportunityVersion instance to the database session
