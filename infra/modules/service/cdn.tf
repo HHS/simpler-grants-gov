@@ -147,12 +147,13 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket.cdn[0],
   ]
 
-  #checkov:skip=CKV2_AWS_46:We sometimes use a ALB origin
-  #checkov:skip=CKV_AWS_174:False positive
-  #checkov:skip=CKV_AWS_310:Configure a failover in future work
-  #checkov:skip=CKV_AWS_68:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_47:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_32:Configure response headers policy in future work
-  #checkov:skip=CKV_AWS_374:Ignore the geo restriction
-  #checkov:skip=CKV_AWS_305:We don't need a default root object... we don't need to redirect / to index.html.
+  #checkov:skip=CKV2_AWS_42: Sometimes we don't have a skip
+  #checkov:skip=CKV2_AWS_46: We sometimes use a ALB origin
+  #checkov:skip=CKV_AWS_174: False positive
+  #checkov:skip=CKV_AWS_310: Configure a failover in future work
+  #checkov:skip=CKV_AWS_68: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_47: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_32: Configure response headers policy in future work
+  #checkov:skip=CKV_AWS_374: Ignore the geo restriction
+  #checkov:skip=CKV_AWS_305: We don't need a default root object... we don't need to redirect / to index.html.
 }
