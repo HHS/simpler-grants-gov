@@ -203,7 +203,7 @@ def register_well_known(app: APIFlask) -> None:
             with open(
                 f"{Path(__file__).resolve().parent}/static/domain_verification_assets/{file_name}"
             ) as f:
-                return f.read()
+                return f.read(), 200
         except Exception as e:
             message = f"Could not read {file_name} dv contents: {e}"
             logger.warning(message)
