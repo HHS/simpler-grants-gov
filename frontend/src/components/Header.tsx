@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
@@ -41,6 +42,10 @@ type Props = {
 
 const homeRegexp = /^\/(?:e[ns])?$/;
 
+function isExternalLink(href: string): boolean {
+  return !!href.includes("https");
+}
+
 const NavLink = ({
   href = "",
   classes,
@@ -52,9 +57,16 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
+  const iconBtnClass = href && isExternalLink(href) ? "icon-btn" : "";
   return (
     <Link href={href} key={href} className={classes}>
-      <div onClick={onClick}>{text}</div>
+      <div onClick={onClick} className={iconBtnClass}>
+      {text}
+      {
+        href && isExternalLink(href) &&
+        <USWDSIcon name="launch" className="usa-icon--size-2" />
+      }
+      </div>
     </Link>
   );
 };
@@ -105,7 +117,7 @@ const NavLinks = ({
           { text: t("subscribe"), href: "/subscribe" },
           { text: t("events"), href: "/events" },
           { text: t("wiki"), href: wikiLink },
-          { text: t("events"), href: forumLink },
+          { text: t("forum"), href: forumLink },
         ]
       }
     ];
@@ -188,6 +200,7 @@ const NavLinks = ({
               key={childLink.href}
               onClick={closeMobileNav}
               text={childLink.text}
+              className=""
             />
           );
         });

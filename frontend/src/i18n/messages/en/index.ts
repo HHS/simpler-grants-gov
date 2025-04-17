@@ -441,6 +441,7 @@ export const messages = {
       about: "About",
       community: "Community",
       events: "Events",
+      forum: "Discussion Forum",
       home: "Home",
       login: "Sign in",
       logout: "Sign out",
