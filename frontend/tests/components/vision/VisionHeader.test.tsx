@@ -1,10 +1,10 @@
 import { render, screen } from "tests/react-utils";
 
-import VisionIntro from "src/components/vision/sections/VisionIntro";
+import VisionHeader from "src/components/vision/sections/VisionHeader";
 
-describe("Vision Intro Content", () => {
+describe("Vision Header Content", () => {
   it("Renders without errors", () => {
-    render(<VisionIntro />);
+    render(<VisionHeader />);
     const ProcessH1 = screen.getByRole("heading", {
       // level: 1,
       name: "Our vision",
