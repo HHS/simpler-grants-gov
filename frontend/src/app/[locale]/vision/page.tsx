@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { use } from "react";
+import { getTranslations } from "next-intl/server";
 
 import VisionPageSections from "src/components/vision/VisionSections";
 
@@ -16,13 +15,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export default function Vision({ params }: LocalizedPageProps) {
-  const { locale } = use(params);
-  setRequestLocale(locale);
-
-  return (
-    <>
-      <VisionPageSections />
-    </>
-  );
+export default function Vision() {
+  return <VisionPageSections />;
 }

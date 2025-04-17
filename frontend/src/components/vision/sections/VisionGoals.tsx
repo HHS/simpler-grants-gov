@@ -11,14 +11,11 @@ export default function VisionGoals() {
     <VisionPageSection className={"bg-base-lightest"} title={t("title")}>
       <div className="margin-top-1" />
       {contentItems.map((contentRows, contentRowsIdx) => (
-        <div
-          className="grid-row"
-          key={`vision-what-were-working-on-${contentRowsIdx}`}
-        >
+        <div className="grid-row" key={`vision-goals-${contentRowsIdx}`}>
           {contentRows.map((contentRowItem, contentRowItemIdx) => (
             <div
               className="margin-bottom-3 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
-              key={`vision-what-were-working-on-${contentRowsIdx}-${contentRowItemIdx}`}
+              key={`vision-goals-${contentRowsIdx}-${contentRowItemIdx}`}
             >
               <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
                 {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
