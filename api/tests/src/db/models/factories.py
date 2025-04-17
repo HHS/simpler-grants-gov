@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.lookup_models as lookup_models
 import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
@@ -927,7 +928,6 @@ class UserSavedSearchFactory(BaseFactory):
 # Competition & Form Factories
 ###################
 
-
 class CompetitionFactory(BaseFactory):
     class Meta:
         model = competition_models.Competition
@@ -936,6 +936,8 @@ class CompetitionFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    form_family = factory.fuzzy.FuzzyChoice(lookup_models.FormFamily) 
 
     public_competition_id = sometimes_none("ABC-134-56789")
     legacy_package_id = sometimes_none("PKG-00260155")
