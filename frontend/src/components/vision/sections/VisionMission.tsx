@@ -1,7 +1,7 @@
 import { useMessages, useTranslations } from "next-intl";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-import VisionPageSection from "src/components/vision/VisionPageSection";
+import VisionPageSection from "src/components/vision/visionPageSection";
 
 export default function VisionMission() {
   const t = useTranslations("Vision.sections.mission");

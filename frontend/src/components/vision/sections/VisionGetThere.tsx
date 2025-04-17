@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import VisionPageSection from "src/components/vision/VisionPageSection";
+import VisionPageSection from "src/components/vision/visionPageSection";
 
 export default function VisionGetThere() {
   const t = useTranslations("Vision.sections.get_there");
