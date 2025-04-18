@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useUser } from "src/services/auth/useUser";
 
 import { useRouter } from "next/navigation";
-import { useUser } from "src/services/auth/useUser";
+import { useCallback } from "react";
 
 /*
   returns a function that you should use for 99% of client side requests to the Next API
@@ -18,25 +18,25 @@ export const useClientFetch = <T>(
   const { refreshIfExpired, refreshUser } = useUser();
   const router = useRouter();
 
-  const fetchWithAuthCheck = useCallback(async (
-    url: string,
-    options: RequestInit = {},
-  ): Promise<Response> => {
-    const expired = await refreshIfExpired();
-    if (expired && authGatedRequest) {
-      router.refresh();
-      throw new Error("local token expired, logging out");
-    }
-    const response = await fetch(url, options);
-    if (response.status === 401) {
-      await refreshUser();
-      if (authGatedRequest) {
+  const fetchWithAuthCheck = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<Response> => {
+      const expired = await refreshIfExpired();
+      if (expired && authGatedRequest) {
         router.refresh();
+        throw new Error("local token expired, logging out");
+      }
+      const response = await fetch(url, options);
+      if (response.status === 401) {
+        await refreshUser();
+        if (authGatedRequest) {
+          router.refresh();
+        }
+        return response;
       }
       return response;
-    }
-    return response;
-  }, [authGatedRequest, refreshIfExpired, refreshUser, router]);
+    },
+    [authGatedRequest, refreshIfExpired, refreshUser, router],
+  );
 
   // when this function is used in a useEffect block the linter will want you to add it to the
   // dependency array. Unfortunately, right now, likely because this hook depends on useUser,

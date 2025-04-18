@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
-
 import clsx from "clsx";
 import { IndexType } from "src/types/generalTypes";
 
-import {
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: IndexType;

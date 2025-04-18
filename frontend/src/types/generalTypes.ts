@@ -257,8 +257,7 @@ export type UswdsIconNames =
   | "zoom_out_map"
   | "zoom_out";
 
-
-// exported Interfaces ---- 
+// exported Interfaces ----
 export interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{
