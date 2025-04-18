@@ -30,21 +30,14 @@ test.describe("Search page results tests", () => {
   test("should return at least 1 result when searching with valid term", async ({
     page,
   }) => {
-    // eslint-disable-next-line testing-library/prefer-screen-queries
-    const resultsHeading = page.getByRole("heading", {
-      name: /^[1-9]\d*\s+Opportunities$/i,
+    const resultsHeading = page.locator("h2", {
+      hasText: /^[1-9]\d*\s+Opportunities$/i,
     });
     await expect(resultsHeading).toBeVisible();
   });
 
-  test("should have a list of opportunities available", async ({ page }) => {
-    await expect(page.getByTestId("search-list")).toBeAttached();
-  });
-
-  test("list of opportunities should have at least one opportunity", async ({
-    page,
-  }) => {
-    const searchList = page.getByTestId("search-list");
+  test("search list should have at least 1 item", async ({ page }) => {
+    const searchList = page.locator("div.usa-prose > ul.usa-list--unstyled");
     await expect(searchList.locator("li >> nth=1")).toBeVisible();
   });
 });

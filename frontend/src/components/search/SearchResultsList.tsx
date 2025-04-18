@@ -40,7 +40,7 @@ export default async function SearchResultsList({
   }
 
   return (
-    <ul className="usa-list--unstyled" data-testid="search-list">
+    <ul className="usa-list--unstyled">
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem
