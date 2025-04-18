@@ -481,7 +481,7 @@ export const messages = {
       savedSearches: "Saved search queries",
       search: "Search",
       subscribe: "Subscribe",
-      vision: "Our Vision",
+      vision: "Our vision",
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",

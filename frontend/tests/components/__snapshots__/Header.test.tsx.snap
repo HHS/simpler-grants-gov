@@ -300,7 +300,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/vision"
                 >
                   <div>
-                    Our Vision
+                    Our vision
                   </div>
                 </a>
               </li>
@@ -738,7 +738,7 @@ exports[`Header renders Header navbar menu 1`] = `
                   href="/vision"
                 >
                   <div>
-                    Our Vision
+                    Our vision
                   </div>
                 </a>
               </li>
