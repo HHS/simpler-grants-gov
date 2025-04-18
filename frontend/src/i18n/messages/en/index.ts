@@ -543,6 +543,7 @@ export const messages = {
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
     accordion: {
+      any: "Any",
       titles: {
         funding: "Funding instrument",
         eligibility: "Eligibility",
