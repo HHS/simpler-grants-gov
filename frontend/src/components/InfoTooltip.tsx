@@ -19,14 +19,11 @@ const InfoTooltip = ({
   <span 
     {...props}
     ref={ref}
-    style={{ 
-      cursor: 'help',
-    }}
+    style={{ cursor: 'help' }}
+    className="text-secondary"
   >
     <USWDSIcon
       name="info_outline"
-      // height="16px"
-      
     />
   </span>
 ));
