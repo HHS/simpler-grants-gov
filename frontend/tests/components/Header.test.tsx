@@ -48,6 +48,11 @@ describe("Header", () => {
     global.fetch = originalFetch;
   });
 
+  it("renders Header navbar menu", () => {
+    const { container } = render(<Header />);
+    expect(container).toMatchSnapshot();
+  });
+
   it("toggles the mobile nav menu", async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -63,9 +68,9 @@ describe("Header", () => {
       "href",
       "/",
     );
-    expect(screen.getByRole("link", { name: /roadmap/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /search/i })).toHaveAttribute(
       "href",
-      "/roadmap",
+      "/search",
     );
 
     await userEvent.click(menuButton);
@@ -78,7 +83,9 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
-    const govBanner = screen.getByRole("button", { expanded: false });
+    const govBanner = screen.getByRole("button", {
+      name: /Here’s how you know/i,
+    });
 
     expect(govBanner).toBeInTheDocument();
 
@@ -140,6 +147,40 @@ describe("Header", () => {
     const allLinks = await screen.findAllByRole("link");
     allLinks.forEach((link) => {
       expect(link).not.toHaveClass("usa-current");
+    });
+  });
+
+  describe("About", () => {
+    it("shows About as the active nav item when on Vision page", () => {
+      usePathnameMock.mockReturnValue("/vision");
+      render(<Header />);
+
+      const homeLink = screen.getByRole("button", { name: /About/i });
+      expect(homeLink).toHaveClass("usa-current");
+    });
+    it("shows About as the active nav item when on Roadmap page", () => {
+      usePathnameMock.mockReturnValue("/roadmap");
+      render(<Header />);
+
+      const homeLink = screen.getByRole("button", { name: /About/i });
+      expect(homeLink).toHaveClass("usa-current");
+    });
+    it("renders About submenu", async () => {
+      const { container } = render(<Header />);
+
+      expect(
+        screen.queryByRole("link", { name: /Our Vision/i }),
+      ).not.toBeInTheDocument();
+
+      const aboutBtn = screen.getByRole("button", { name: /About/i });
+
+      await userEvent.click(aboutBtn);
+
+      expect(container).toMatchSnapshot();
+      expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
+
+      const visionLink = screen.getByRole("link", { name: /Our Vision/i });
+      expect(visionLink).toBeInTheDocument();
     });
   });
 });

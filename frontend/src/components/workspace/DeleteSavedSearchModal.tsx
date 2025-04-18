@@ -96,7 +96,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [user?.token, replaceQueryParams, savedSearchId]);
+  }, [clientFetch, user?.token, replaceQueryParams, savedSearchId]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

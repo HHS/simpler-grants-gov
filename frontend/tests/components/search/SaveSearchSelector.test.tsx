@@ -155,7 +155,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(1);
+    expect(clientFetchMock).toHaveBeenCalledTimes(2);
     mockUseUser.mockReturnValue({ user: { token: "second token" } });
 
     rerender(
@@ -166,7 +166,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(2);
+    expect(clientFetchMock).toHaveBeenCalledTimes(3);
 
     rerender(
       <SaveSearchSelector
@@ -176,7 +176,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(3);
+    expect(clientFetchMock).toHaveBeenCalledTimes(4);
   });
   it("sets selected search based on savedSearch query parameter", async () => {
     mockUseUser.mockReturnValue({ user: { token: "first token" } });

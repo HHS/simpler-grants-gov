@@ -18,25 +18,25 @@ export const useClientFetch = <T>(
   const { refreshIfExpired, refreshUser } = useUser();
   const router = useRouter();
 
-  const fetchWithAuthCheck = async (
-    url: string,
-    options: RequestInit = {},
-  ): Promise<Response> => {
-    const expired = await refreshIfExpired();
-    if (expired && authGatedRequest) {
-      router.refresh();
-      throw new Error("local token expired, logging out");
-    }
-    const response = await fetch(url, options);
-    if (response.status === 401) {
-      await refreshUser();
-      if (authGatedRequest) {
+  const fetchWithAuthCheck = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<Response> => {
+      const expired = await refreshIfExpired();
+      if (expired && authGatedRequest) {
         router.refresh();
+        throw new Error("local token expired, logging out");
+      }
+      const response = await fetch(url, options);
+      if (response.status === 401) {
+        await refreshUser();
+        if (authGatedRequest) {
+          router.refresh();
+        }
+        return response;
       }
       return response;
-    }
-    return response;
-  };
+    },
+    [authGatedRequest, refreshIfExpired, refreshUser, router],
+  );
 
   // when this function is used in a useEffect block the linter will want you to add it to the
   // dependency array. Unfortunately, right now, likely because this hook depends on useUser,
@@ -55,7 +55,7 @@ export const useClientFetch = <T>(
         throw new Error(`${errorMessage}: ${response.status}`);
       }
     },
-    [],
+    [errorMessage, fetchWithAuthCheck, jsonResponse],
   );
   return {
     clientFetch,
