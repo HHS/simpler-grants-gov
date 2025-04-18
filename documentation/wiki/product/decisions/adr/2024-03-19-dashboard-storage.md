@@ -1,9 +1,9 @@
 # Dashboard Data Storage
 
-- **Status:** Active
-- **Last Modified:** 2024-03-19
-- **Related Issue:** [#1506](https://github.com/HHS/simpler-grants-gov/issues/1506)
-- **Deciders:** Aaron Couch, Billy Daly
+* **Status:** Active
+* **Last Modified:** 2024-03-19
+* **Related Issue:** [#1506](https://github.com/HHS/simpler-grants-gov/issues/1506)
+* **Deciders:** Aaron, Billy
 
 ## Context and Problem Statement
 
@@ -11,36 +11,36 @@ We want to determine the data storage solution for our upcoming business intelli
 
 This data storage solution will be our canonical source of truth for many types of imported data. These data types will range from thousands of records a month (ex. sprint data), up to potentially millions of records of records (ex. Google Analytics) once this project reaches maturity. The chosen solution should be easy to use, cost-effective, and performant for all of our in-scope data types. The types of data we will be importing include:
 
-- Google Analytics
-- Grants program data, eg.
-  - Grants opportunities from the database
-  - Grant applications from S3
-- USA spending data CSVs
-- Communication platform stats, eg.
-  - Slack stats
-  - Google Group stats
-  - GitHub stats
-- API application metrics
-- API infrastructure metrics from Cloudwatch
+* Google Analytics
+* Grants program data, eg.
+  * Grants opportunities from the database
+  * Grant applications from S3
+* USA spending data CSVs
+* Communication platform stats, eg.
+  * Slack stats
+  * Google Group stats
+  * GitHub stats
+* API application metrics
+* API infrastructure metrics from Cloudwatch
 
-We will not be importing all of these types of data immediately. On the 0 - 6 month timeframe, we will only likely only be  importing the smaller datasets (thousands of records), with the exception of the infrastructure metrics. By 2 - 5 years we will be importing all of these types of data, and our data size will be quite large (many millions of records). The desired solutions have different cost/performance characteristics in those time ranges, and we will need to evaluate those differences.
+We will not be importing all of these types of data immediately. On the 0 - 6 month timeframe, we will only likely only be importing the smaller datasets (thousands of records), with the exception of the infrastructure metrics. By 2 - 5 years we will be importing all of these types of data, and our data size will be quite large (many millions of records). The desired solutions have different cost/performance characteristics in those time ranges, and we will need to evaluate those differences.
 
 That said, with respect to data size, there is still a large outstanding question. For those sources of data, do we want to ingest point level data (e.g. individual page views, clicks, and API calls) or do we want to do some level of aggregation before loading it into our data warehouse. Choosing to pre-aggregate the data would decrease the total size of our data across every time range.
 
 ## Decision Drivers
 
-- cost
-- ease of use
-- performance
+* cost
+* ease of use
+* performance
 
 All of these options should be evaluated for 0 - 6 months, 6 months - 2 years, 2 years - 5 years
 
 ## Options Considered
 
-- S3
-- Redshift
-- Postgres
-- Snowflake
+* S3
+* Redshift
+* Postgres
+* Snowflake
 
 ## Pros and Cons of the Options
 
@@ -76,7 +76,7 @@ At 0 - 6 months, Postgres beats Redshift due to us already having a functional a
 
 At 6 months - 2 years, Redshift and Postgres are essentially identical solutions, given that we have already paid down the initial setup cost.
 
- In the 2 - 5 year range, Postgres becomes less appealing due to its higher GB-month hosting cost. There is however evidence that Redshift's OLAP advantages don't kick in until the data grows to terabytes in size. It is unclear if our data will ever grow to that size.
+In the 2 - 5 year range, Postgres becomes less appealing due to its higher GB-month hosting cost. There is however evidence that Redshift's OLAP advantages don't kick in until the data grows to terabytes in size. It is unclear if our data will ever grow to that size.
 
 ### Snowflake
 

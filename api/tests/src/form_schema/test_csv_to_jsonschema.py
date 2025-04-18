@@ -261,6 +261,7 @@ def test_add_field_to_builder_state_country_references():
         help_tip="Enter your home state",
         is_nullable=False,
         list_of_values="50 US States, US possessions, territories, military codes",
+        title="Home State",
     )
 
     country_field = FieldInfo(
@@ -274,6 +275,7 @@ def test_add_field_to_builder_state_country_references():
         help_tip="Enter your country of birth",
         is_nullable=False,
         list_of_values="GENC Standard Ed3.0 Update 11",
+        title="Country of Birth",
     )
 
     regular_field = FieldInfo(
@@ -287,6 +289,7 @@ def test_add_field_to_builder_state_country_references():
         max_value=None,
         help_tip="Enter your full name",
         is_nullable=False,
+        title="Full Name",
     )
 
     # Add fields to the builder
@@ -347,6 +350,7 @@ def test_add_field_to_builder_genc_country_detection():
         max_value=None,
         help_tip="Select your national origin",
         is_nullable=False,
+        title="National Origin",
     )
 
     # Create a regular dropdown field
@@ -361,6 +365,7 @@ def test_add_field_to_builder_genc_country_detection():
         max_value=None,
         help_tip="Select your favorite color",
         is_nullable=False,
+        title="Favorite Color",
     )
 
     # Add fields to the builder
