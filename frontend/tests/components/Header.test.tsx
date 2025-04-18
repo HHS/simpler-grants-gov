@@ -1,10 +1,12 @@
-import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
-import { render, screen } from "tests/react-utils";
-
 import { ReadonlyURLSearchParams } from "next/navigation";
-
+import { Response } from "node-fetch";
 import Header from "src/components/Header";
+import {
+  render,
+  screen,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const props = {
   locale: "en",
@@ -68,9 +70,9 @@ describe("Header", () => {
       "href",
       "/",
     );
-    expect(screen.getByRole("link", { name: /subscribe/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /search/i })).toHaveAttribute(
       "href",
-      "/subscribe",
+      "/search",
     );
 
     await userEvent.click(menuButton);
