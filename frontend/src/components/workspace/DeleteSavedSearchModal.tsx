@@ -1,9 +1,9 @@
 "use client";
 
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
-import { deleteSavedSearch } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
@@ -65,6 +65,10 @@ export function DeleteSavedSearchModal({
   const { user } = useUser();
   const { replaceQueryParams } = useSearchParamUpdater();
   const isSSR = useIsSSR();
+  const { clientFetch } = useClientFetch<Response>(
+    "Error deleting saved search",
+    { jsonResponse: false, authGatedRequest: true },
+  );
 
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -72,7 +76,13 @@ export function DeleteSavedSearchModal({
 
   const handleSubmit = useCallback(() => {
     setLoading(true);
-    deleteSavedSearch(savedSearchId, user?.token)
+    if (!user?.token) {
+      return;
+    }
+    clientFetch("/api/user/saved-searches", {
+      method: "DELETE",
+      body: JSON.stringify({ searchId: savedSearchId }),
+    })
       .then(() => {
         setUpdated(true);
         // this should trigger a page refresh, which will trigger refetching saved searches,
@@ -86,7 +96,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [user, replaceQueryParams, savedSearchId]);
+  }, [user?.token, replaceQueryParams, savedSearchId]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from src.constants.lookup_constants import JobStatus
@@ -86,7 +88,6 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
     ):
         oca = OpportunityChangeAuditFactory.create()
         opp_ver_existing = OpportunityVersionFactory.create(opportunity=oca.opportunity)
-
         store_opportunity_version_task.run()
 
         opp_vers = db_session.query(OpportunityVersion).all()
@@ -121,3 +122,20 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         )
         assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
         assert opp_vers[1].opportunity_id == opp_ver_existing.opportunity_id
+
+        # run with a second update
+        oca.opportunity.current_opportunity_summary = None
+        oca.updated_at = datetime.now()
+        db_session.commit()
+
+        store_opportunity_version_task.run()
+
+        opp_vers = db_session.query(OpportunityVersion).all()
+        assert len(opp_vers) == 3
+        assert (
+            store_opportunity_version_task.metrics[
+                store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED
+            ]
+            == 1
+        )
+        assert opp_vers[2].opportunity_id == opp_ver_existing.opportunity_id
