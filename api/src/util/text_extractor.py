@@ -55,8 +55,9 @@ def extract_text_from_pdf(file_data: bytes) -> str:
     return "\n".join(text_data)
 
 
-def pptx_reader(file_path: str) -> str:
-    presentation = pptx.Presentation(file_path)
+def extract_text_from_pptx(file_data: bytes) -> str:
+    stream = BytesIO(file_data)
+    presentation = pptx.Presentation(stream)
     text_runs = []
     for slide in presentation.slides:
         for shape in slide.shapes:
@@ -66,15 +67,17 @@ def pptx_reader(file_path: str) -> str:
                 for run in paragraph.runs:
                     if text := run.text.strip():
                         text_runs.append(text)
-    return "\n".join(text_runs)
+    data = "\n".join(text_runs)
+    stream.close()
+    return data
 
 
 def extract_text_from_rft(rtf_data: str) -> str:
     return rtf_to_text(rtf_data)
 
 
-def docx_reader(file_path: str) -> str:
-    return "\n".join(paragraph.text for paragraph in Document(file_path).paragraphs)
+def extract_text_from_docx(file_data: bytes) -> str:
+    return "\n".join(paragraph.text for paragraph in Document(BytesIO(file_data)).paragraphs)
 
 
 def xls_reader(file_path: str) -> str:
@@ -118,9 +121,9 @@ class TextExtractor:
         html_extractor_config = TextExtractorConfig(extractor=extract_text_from_html)
         xls_extractor_config = TextExtractorConfig(reader=xls_reader)
         return {
-            "docx": TextExtractorConfig(reader=docx_reader),
+            "docx": TextExtractorConfig(extractor=extract_text_from_docx, read_mode="rb"),
             "pdf": TextExtractorConfig(extractor=extract_text_from_pdf, read_mode="rb"),
-            "pptx": TextExtractorConfig(reader=pptx_reader),
+            "pptx": TextExtractorConfig(extractor=extract_text_from_pptx, read_mode="rb"),
             "txt": TextExtractorConfig(),
             "html": html_extractor_config,
             "htm": html_extractor_config,
