@@ -1,25 +1,31 @@
 "use client";
 
-import clsx from "clsx";
-import GrantsLogo from "public/img/grants-logo.svg";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useUser } from "src/services/auth/useUser";
-import { isCurrentPath } from "src/utils/generalUtils";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
+import { isCurrentPath } from "src/utils/generalUtils";
+
 import {
   GovBanner,
+  Header as USWDSHeader,
   NavMenuButton,
   PrimaryNav,
   Title,
-  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { UserControl } from "./user/UserControl";
 
@@ -50,7 +56,7 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
-  const iconBtnClass = href && isExternalLink(href) ? "icon-btn" : "";
+  const iconBtnClass: string = href && isExternalLink(href) ? "icon-btn" : "";
   return (
     <Link href={href} key={href} className={classes}>
       <div onClick={onClick} className={iconBtnClass}>
@@ -88,9 +94,6 @@ const NavLinks = ({
   const { checkFeatureFlag } = useFeatureFlags();
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
-
-  // if we introduce more than one secondary nav this could be expanded to use an index rather than boolean
-  // const [openSecondaryNavIndex, setOpenSecondaryNavIndex] = useState<number>(0);
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
