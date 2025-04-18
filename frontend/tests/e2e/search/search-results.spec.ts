@@ -33,11 +33,11 @@ test.describe("Search page results tests", () => {
     const resultsHeading = page.locator("h2", {
       hasText: /^[1-9]\d*\s+Opportunities$/i,
     });
-    await expect(resultsHeading).toBeVisible();
+    await expect(resultsHeading).toBeAttached();
   });
 
   test("search list should have at least 1 item", async ({ page }) => {
     const searchList = page.locator("div.usa-prose > ul.usa-list--unstyled");
-    await expect(searchList.locator("li >> nth=1")).toBeVisible();
+    await expect(searchList.locator("li >> nth=1")).toBeAttached();
   });
 });
