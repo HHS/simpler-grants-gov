@@ -1,12 +1,10 @@
-import { ReadonlyURLSearchParams } from "next/navigation";
-import { Response } from "node-fetch";
-import Header from "src/components/Header";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
-
 import userEvent from "@testing-library/user-event";
+import { Response } from "node-fetch";
+import { render, screen } from "tests/react-utils";
+
+import { ReadonlyURLSearchParams } from "next/navigation";
+
+import Header from "src/components/Header";
 
 const props = {
   locale: "en",
