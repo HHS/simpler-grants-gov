@@ -20,6 +20,7 @@ from analytics.integrations.db import PostgresDbClient
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
 )
+from analytics.integrations.metabase.backup import MetabaseBackup
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
@@ -50,10 +51,12 @@ app = typer.Typer(
 export_app = typer.Typer()
 import_app = typer.Typer()
 etl_app = typer.Typer()
+metabase_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
+app.add_typer(metabase_app, name="metabase", help="Metabase integration commands")
 
 
 def init() -> None:
@@ -222,3 +225,25 @@ def validate_effective_date(effective_date: str) -> str | None:
 def load_opportunity_data() -> None:
     """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()
+
+
+# ===========================================================
+# Metabase commands
+# ===========================================================
+
+
+@metabase_app.command(name="backup")
+def backup_metabase() -> None:
+    """Backup Metabase queries to disk."""
+    # Get environment variables
+    api_url = os.getenv("MB_API_URL")
+    api_key = os.getenv("MB_API_KEY")
+    output_dir = os.getenv("MB_BACKUP_DIR", "src/analytics/integrations/metabase/sql")
+
+    if not api_url or not api_key:
+        logger.error("MB_API_URL and MB_API_KEY must be set")
+        return
+
+    # Create backup handler and run backup
+    backup = MetabaseBackup(api_url, api_key, output_dir)
+    backup.backup()

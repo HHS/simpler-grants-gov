@@ -23,6 +23,7 @@ import src.adapters.db as db
 import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
+import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
@@ -936,6 +937,8 @@ class CompetitionFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    form_family = factory.fuzzy.FuzzyChoice(lookup_models.FormFamily)
 
     public_competition_id = sometimes_none("ABC-134-56789")
     legacy_package_id = sometimes_none("PKG-00260155")

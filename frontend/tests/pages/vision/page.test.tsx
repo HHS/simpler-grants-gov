@@ -2,11 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Vision from "src/app/[locale]/vision/page";
-import {
-  localeParams,
-  mockMessages,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
+import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -26,18 +22,15 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("Vision", () => {
-  it("renders intro text", () => {
-    render(Vision({ params: localeParams }));
-
-    const content = screen.getByText("content_1");
-
+  it("renders header title text", () => {
+    render(<Vision />);
+    const content = screen.getByText("pageHeaderTitle");
     expect(content).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
-    const { container } = render(Vision({ params: localeParams }));
+    const { container } = render(<Vision />);
     const results = await waitFor(() => axe(container));
-
     expect(results).toHaveNoViolations();
   });
 });
