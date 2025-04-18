@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { noop } from "lodash";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
@@ -177,18 +178,22 @@ const NavLinks = ({
               label={link.text}
               menuId={link.text}
               isOpen={secondaryNavOpen}
-              onToggle={() => {
+              onClick={(e) => {
                 if (!secondaryNavOpen) {
                   setSecondaryNavOpen(true);
-                  document.addEventListener(
-                    "click",
-                    () => {
-                      setSecondaryNavOpen(false);
-                    },
-                    { once: true },
+                  e.stopPropagation();
+                  requestAnimationFrame(() =>
+                    document.addEventListener(
+                      "click",
+                      () => {
+                        setSecondaryNavOpen(false);
+                      },
+                      { once: true },
+                    ),
                   );
                 }
               }}
+              onToggle={noop}
               className={clsx({
                 "usa-current": currentNavItemIndex === index,
                 "simpler-subnav-open": secondaryNavOpen,
