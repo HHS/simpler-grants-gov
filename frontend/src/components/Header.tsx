@@ -1,31 +1,25 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
 import clsx from "clsx";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
-import { USWDSIcon } from "src/components/USWDSIcon";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
-  Header as USWDSHeader,
   NavMenuButton,
   PrimaryNav,
   Title,
+  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { UserControl } from "./user/UserControl";
 
@@ -60,11 +54,10 @@ const NavLink = ({
   return (
     <Link href={href} key={href} className={classes}>
       <div onClick={onClick} className={iconBtnClass}>
-      {text}
-      {
-        href && isExternalLink(href) &&
-        <USWDSIcon name="launch" className="usa-icon--size-2" />
-      }
+        {text}
+        {href && isExternalLink(href) && (
+          <USWDSIcon name="launch" className="usa-icon--size-2" />
+        )}
       </div>
     </Link>
   );
@@ -117,8 +110,8 @@ const NavLinks = ({
           { text: t("events"), href: "/events" },
           { text: t("wiki"), href: wikiLink },
           { text: t("forum"), href: forumLink },
-        ]
-      }
+        ],
+      },
     ];
     if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
       return anonymousNavLinks;
@@ -172,12 +165,14 @@ const NavLinks = ({
   const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
     getCurrentNavItemIndex(path),
   );
-  const [activeNavDropdownIndex, setActiveNavDropdownIndex] = useState<number | null>(null);
+  const [activeNavDropdownIndex, setActiveNavDropdownIndex] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
   }, [path, getCurrentNavItemIndex]);
-  
+
   const closeMobileNav = useCallback(() => {
     if (mobileExpanded) {
       onToggleMobileNav();
@@ -199,8 +194,8 @@ const NavLinks = ({
               href={childLink.href}
               key={childLink.href}
               onClick={() => {
-                setActiveNavDropdownIndex(null)
-                closeMobileNav
+                setActiveNavDropdownIndex(null);
+                closeMobileNav;
               }}
               text={childLink.text}
             />
@@ -222,8 +217,8 @@ const NavLinks = ({
           href={link.href}
           key={link.href}
           onClick={() => {
-            setActiveNavDropdownIndex(null)
-            closeMobileNav
+            setActiveNavDropdownIndex(null);
+            closeMobileNav;
           }}
           text={link.text}
           classes={clsx({
@@ -233,7 +228,13 @@ const NavLinks = ({
         />
       );
     });
-  }, [navLinkList, currentNavItemIndex, closeMobileNav, activeNavDropdownIndex, setActiveNavDropdownIndex]);
+  }, [
+    navLinkList,
+    currentNavItemIndex,
+    closeMobileNav,
+    activeNavDropdownIndex,
+    setActiveNavDropdownIndex,
+  ]);
 
   return (
     <PrimaryNav

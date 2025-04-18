@@ -1,16 +1,9 @@
-'use client'
-
-import {
-  useEffect,
-  useState,
-} from "react";
+"use client";
 
 import clsx from "clsx";
 
-import {
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { useEffect, useState } from "react";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: number | null;
@@ -35,10 +28,10 @@ export default function NavDropdown({
     const activeIndex: number | null = isOpen ? null : index;
     setActiveNavDropdownIndex(activeIndex);
   }
-  
+
   useEffect(() => {
     setIsOpen(activeNavDropdownIndex === index);
-  }, [activeNavDropdownIndex])
+  }, [activeNavDropdownIndex]);
 
   return (
     <>
@@ -59,5 +52,5 @@ export default function NavDropdown({
         className="margin-top-05"
       />
     </>
-  )
+  );
 }
