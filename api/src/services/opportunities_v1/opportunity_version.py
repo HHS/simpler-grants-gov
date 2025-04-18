@@ -30,12 +30,16 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
         return False
 
     # Fetch latest opportunity version stored
-    latest_opp_version = db_session.execute(
-        select(OpportunityVersion)
-        .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
-        .order_by(OpportunityVersion.created_at.desc())
-        .options(selectinload("*"))
-    ).scalar_one_or_none()
+    latest_opp_version = (
+        db_session.execute(
+            select(OpportunityVersion)
+            .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
+            .order_by(OpportunityVersion.created_at.desc())
+            .options(selectinload("*"))
+        )
+        .scalars()
+        .first()
+    )
 
     # Extracts the opportunity data as JSON object
     opportunity_new = SCHEMA.dump(opportunity)

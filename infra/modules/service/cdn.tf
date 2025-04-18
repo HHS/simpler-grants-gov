@@ -122,10 +122,23 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  viewer_certificate {
-    acm_certificate_arn            = var.certificate_arn == null ? null : var.certificate_arn
-    cloudfront_default_certificate = var.certificate_arn == null ? true : false
-    minimum_protocol_version       = local.minimum_protocol_version
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn != null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = false
+      minimum_protocol_version       = local.minimum_protocol_version
+      ssl_support_method             = "sni-only"
+    }
+  }
+
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn == null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = true
+      minimum_protocol_version       = local.minimum_protocol_version
+    }
   }
 
   depends_on = [
@@ -134,12 +147,13 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket.cdn[0],
   ]
 
-  #checkov:skip=CKV2_AWS_46:We sometimes use a ALB origin
-  #checkov:skip=CKV_AWS_174:False positive
-  #checkov:skip=CKV_AWS_310:Configure a failover in future work
-  #checkov:skip=CKV_AWS_68:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_47:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_32:Configure response headers policy in future work
-  #checkov:skip=CKV_AWS_374:Ignore the geo restriction
-  #checkov:skip=CKV_AWS_305:We don't need a default root object... we don't need to redirect / to index.html.
+  #checkov:skip=CKV2_AWS_42: Sometimes we don't have a skip
+  #checkov:skip=CKV2_AWS_46: We sometimes use a ALB origin
+  #checkov:skip=CKV_AWS_174: False positive
+  #checkov:skip=CKV_AWS_310: Configure a failover in future work
+  #checkov:skip=CKV_AWS_68: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_47: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_32: Configure response headers policy in future work
+  #checkov:skip=CKV_AWS_374: Ignore the geo restriction
+  #checkov:skip=CKV_AWS_305: We don't need a default root object... we don't need to redirect / to index.html.
 }
