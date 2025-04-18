@@ -46,9 +46,12 @@ def init_app(app_logger: logging.Logger) -> None:
     for handler in app_logger.handlers:
         handler.addFilter(_add_global_context_info_to_log_record)
         handler.addFilter(_add_new_relic_context_to_log_record)
+        handler.addFilter(_add_error_info_to_log_record)
 
     # Add some metadata to all log messages globally
-    add_extra_data_to_global_logs({"environment": os.environ.get("ENVIRONMENT")})
+    add_extra_data_to_global_logs(
+        {"app_name": "analytics", "environment": os.environ.get("ENVIRONMENT")},
+    )
 
     app_logger.info("initialized logger")
 
@@ -64,6 +67,18 @@ def add_extra_data_to_global_logs(
 def _add_global_context_info_to_log_record(record: logging.LogRecord) -> bool:
     global _GLOBAL_LOG_CONTEXT  # noqa: PLW0602
     record.__dict__ |= _GLOBAL_LOG_CONTEXT
+
+    return True
+
+
+def _add_error_info_to_log_record(record: logging.LogRecord) -> bool:
+    """Add a shorter form of the error message to our log record."""
+    exc_info = getattr(record, "exc_info", None)
+    # exc_info is a 3-part tuple with the class, error obj, and traceback
+    if exc_info and len(exc_info) == 3:  # noqa:PLR2004
+        # If the error were `raise ValueError("example")`, the
+        # value of this would be "ValueError('example')"
+        record.__dict__["exc_info_short"] = repr(exc_info[1])
 
     return True
 

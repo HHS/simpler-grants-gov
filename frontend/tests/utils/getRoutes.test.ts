@@ -11,7 +11,7 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/events",
-      "/formPrototype/[applicationId]/[formId]",
+      "/formPrototype/[applicationId]/form/[formId]",
       "/formPrototype/[applicationId]",
       "/formPrototype",
       "/formPrototype/success",
@@ -29,6 +29,7 @@ describe("getNextRoutes", () => {
       "/subscribe",
       "/subscribe/unsubscribe",
       "/unauthenticated",
+      "/vision",
     ]);
   });
 });

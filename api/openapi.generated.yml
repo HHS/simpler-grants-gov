@@ -1419,6 +1419,16 @@ components:
           items:
             type: boolean
             example: true
+    IsTestAgencyFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
     AgencySearchFilterV1:
       type: object
       properties:
@@ -1426,6 +1436,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
+        is_test_agency:
+          type:
+          - object
+          $ref: '#/components/schemas/IsTestAgencyFilterV1'
     SortOrderAgencySearchPaginationV1:
       type: object
       properties:
@@ -1530,7 +1544,11 @@ components:
           type: boolean
           description: Indicates if the agency is linked to an opportunity that is
             currently active.
-          example: 'False'
+          example: false
+        is_test_agency:
+          type: boolean
+          description: Indicates if the agency is a test agency.
+          example: false
         created_at:
           type: string
           format: date-time

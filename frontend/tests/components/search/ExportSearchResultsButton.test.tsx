@@ -1,19 +1,23 @@
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
+import { render, screen, waitFor } from "tests/react-utils";
 
 import { ExportSearchResultsButton } from "src/components/search/ExportSearchResultsButton";
 
-const mockDownloadSearchResultsCSV = jest.fn();
+const clientFetchMock = jest.fn();
+const mockSaveBlobToFile = jest.fn();
 
 const fakeSearchParams = new URLSearchParams();
 
-jest.mock(
-  "src/services/fetch/fetchers/clientSearchResultsDownloadFetcher",
-  () => ({
-    downloadSearchResultsCSV: (params: unknown): unknown =>
-      Promise.resolve(mockDownloadSearchResultsCSV(params)),
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
-);
+}));
+
+jest.mock("src/utils/generalUtils", () => ({
+  saveBlobToFile: (...args: unknown[]): unknown => mockSaveBlobToFile(...args),
+}));
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => fakeSearchParams,
@@ -30,10 +34,39 @@ describe("ExportSearchResultsButton", () => {
   });
 
   it("calls downloadSearchResultsCSV with correct args on button click", () => {
+    clientFetchMock.mockResolvedValue({});
     render(<ExportSearchResultsButton />);
     const button = screen.getByRole("button");
     button.click();
 
-    expect(mockDownloadSearchResultsCSV).toHaveBeenCalledWith(fakeSearchParams);
+    expect(clientFetchMock).toHaveBeenCalledWith(`/api/search/export?`);
+  });
+
+  it("calls blob on the API response", async () => {
+    const mockBlob = jest.fn().mockResolvedValue("blob value");
+    clientFetchMock.mockResolvedValue({
+      blob: mockBlob,
+    });
+    render(<ExportSearchResultsButton />);
+    const button = screen.getByRole("button");
+    button.click();
+
+    await waitFor(() => expect(mockBlob).toHaveBeenCalledTimes(1));
+  });
+
+  it("calls saveBlopToFile on the blob", async () => {
+    const mockBlob = jest.fn().mockResolvedValue("blob value");
+    clientFetchMock.mockResolvedValue({
+      blob: mockBlob,
+    });
+    render(<ExportSearchResultsButton />);
+    const button = screen.getByRole("button");
+    button.click();
+
+    await waitFor(() => expect(mockSaveBlobToFile).toHaveBeenCalledTimes(1));
+    expect(mockSaveBlobToFile).toHaveBeenCalledWith(
+      "blob value",
+      `grants-search-${getConfiguredDayJs()(new Date()).format("YYYYMMDDHHmm")}.csv`,
+    );
   });
 });

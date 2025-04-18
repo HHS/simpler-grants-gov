@@ -3,7 +3,7 @@
 * **Status:** Active
 * **Last Modified:** 2023-07-11
 * **Related Issue:** [#116](https://github.com/HHS/simpler-grants-gov/issues/116)
-* **Deciders:** Andy Cochran, Emily Ianacone, Sumi Thaiveettil, Aaron Couch, Billy Daly, Lucas Brown
+* **Deciders:** Andy, Emily, Sumi, Aaron, Billy, Lucas
 * **Tags:** design
 
 ## Context and Problem Statement

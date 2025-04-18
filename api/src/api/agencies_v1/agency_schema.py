@@ -28,6 +28,9 @@ class AgencySearchFilterV1Schema(Schema):
         .with_one_of(example=True)
         .build()
     )
+    is_test_agency = fields.Nested(
+        BoolSearchSchemaBuilder("IsTestAgencyFilterV1Schema").with_one_of(example=True).build()
+    )
 
 
 class AgencySearchRequestSchema(Schema):
@@ -99,7 +102,13 @@ class AgencyV1Schema(Schema):
         dump_default=False,
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently active.",
-            "example": "False",
+            "example": False,
+        },
+    )
+    is_test_agency = fields.Boolean(
+        metadata={
+            "description": "Indicates if the agency is a test agency.",
+            "example": False,
         },
     )
 

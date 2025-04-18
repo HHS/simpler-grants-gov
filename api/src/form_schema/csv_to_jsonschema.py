@@ -101,9 +101,7 @@ def add_field_to_builder(builder: JsonSchemaBuilder, field_info: FieldInfo) -> N
     list_of_values = field_info.list_of_values
     help_tip = field_info.help_tip
     is_nullable = field_info.is_nullable
-
-    # Use field_label as the title
-    title = field_info.label
+    title = field_info.title
 
     # Determine field format
     format_value = None

@@ -13,10 +13,11 @@ DOA = AgencyFactory.build(agency_code="DOA")
 # sub-agencies
 HHS_NIH = AgencyFactory.build(agency_code="HHS-NIH", top_level_agency=HHS)
 HHS_DOC = AgencyFactory.build(agency_code="HHS-DOC", top_level_agency=HHS)
+HHS_OMHA = AgencyFactory.build(agency_code="HHS-OMHA", top_level_agency=HHS, is_test_agency=True)
 DOD_MCO = AgencyFactory.build(agency_code="DOD-MCO", top_level_agency=DOD)
 DOD_HRE = AgencyFactory.build(agency_code="DOD-HRE", top_level_agency=DOD)
 
-AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH]
+AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA]
 
 
 class TestAgencyRoutesSearch(BaseTestClass):
@@ -96,7 +97,22 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         "has_active_opportunity": {"one_of": [0]},
                     },
                 },
-                [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH],
+                [DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA],
+            ),
+            (
+                {
+                    "pagination": {
+                        "page_offset": 1,
+                        "page_size": 25,
+                        "sort_order": [
+                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+                        ],
+                    },
+                    "filters": {
+                        "is_test_agency": {"one_of": [1]},
+                    },
+                },
+                [HHS_OMHA],
             ),
         ],
     )
