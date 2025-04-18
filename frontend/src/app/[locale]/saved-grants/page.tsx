@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Metadata } from "next";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -12,15 +11,8 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale });
-  const meta: Metadata = {
-    title: t("SavedGrants.title"),
-    description: t("Index.meta_description"),
-  };
-  return meta;
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const SavedOpportunitiesList = ({
   opportunities,

@@ -9,7 +9,7 @@ import {
   encrypt,
   newExpirationDate,
 } from "src/services/auth/sessionUtils";
-import { SimplerJwtPayload, UserSession } from "src/services/auth/types";
+import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
 // note that cookies will be async in Next 15
@@ -90,7 +90,9 @@ export const getSession = async (): Promise<UserSession | null> => {
     ? {
         ...session,
         token,
-        exp,
+        // expiration timestamp in the token is in seconds, in order to compare using
+        // JS date functions it should be in ms
+        expiresAt: exp ? exp * 1000 : undefined,
       }
     : null;
 };

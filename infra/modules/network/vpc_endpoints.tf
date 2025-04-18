@@ -13,9 +13,6 @@ locals {
     # AWS service endpoint(s) reccommended by AWS for all VPCs
     ["ec2"],
 
-    # Feature flags with AWS Evidently
-    ["evidently", "evidently-dataplane"],
-
     # AWS services used by the database's role manager
     var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
 

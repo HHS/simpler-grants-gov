@@ -15,6 +15,29 @@ export const opportunitySearchEndpoint = {
   method: "POST" as ApiMethod,
 };
 
+export const fetchCompetitionEndpoint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "competitions",
+  method: "GET" as ApiMethod,
+};
+
+export const toDynamicApplicationsEndpoint = (type: "POST" | "GET" | "PUT") => {
+  return {
+    basePath: environment.API_URL,
+    version: "alpha",
+    namespace: "applications",
+    method: type as ApiMethod,
+  };
+};
+
+export const fetchFormEndpoint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "forms",
+  method: "GET" as ApiMethod,
+};
+
 export const fetchOpportunityEndpoint = {
   basePath: environment.API_URL,
   version: "v1",

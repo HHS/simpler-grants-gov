@@ -111,3 +111,10 @@ export const fakeSearchAPIResponse: SearchAPIResponse = {
   message: "anything",
   status_code: 200,
 };
+
+export const fakeOpportunityDocument = {
+  file_name: "your_file_thanks.mp3",
+  download_path: "http://big-website.net/your_file_again.mp4",
+  updated_at: Date.now().toString(),
+  file_description: "a description for your file",
+};
