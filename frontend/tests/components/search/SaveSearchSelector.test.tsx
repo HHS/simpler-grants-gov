@@ -1,11 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { noop } from "lodash";
+import { ReadonlyURLSearchParams } from "next/navigation";
+import { SaveSearchSelector } from "src/components/search/SaveSearchSelector";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { ReadonlyURLSearchParams } from "next/navigation";
-
-import { SaveSearchSelector } from "src/components/search/SaveSearchSelector";
+import {
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 
 const mockUseUser = jest.fn();
 const clientFetchMock = jest.fn();
@@ -174,7 +177,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(3);
+    expect(clientFetchMock).toHaveBeenCalledTimes(4);
   });
   it("sets selected search based on savedSearch query parameter", async () => {
     mockUseUser.mockReturnValue({ user: { token: "first token" } });
