@@ -113,8 +113,8 @@ class TextExtractor:
             return self.config.extractor(self._read_file_data()).strip()
         except Exception as e:
             err = f"TextExtractorError: Could not extract text from file {self.file_path} - {self.file_type}: {e}"
-            logger.error(err)
-            raise TextExtractorError(err)
+            logger.exception(err)
+            raise TextExtractorError(err) from e
 
     @staticmethod
     def get_configs() -> dict:
@@ -142,7 +142,7 @@ class TextExtractor:
         if not self.file_path.lower().endswith(self.file_type):
             err = f"Mismatch file type: {self.file_path} must end with {self.file_type}"
             raise FileTypeMismatchTextExtractorError(err)
-        if not self.file_type in set(TextExtractor.get_configs().keys()):
+        if self.file_type not in set(TextExtractor.get_configs().keys()):
             err = f"Unsupported file type: {self.file_type}"
             raise UnsupportedTextExtractorFileType(err)
 
