@@ -14,7 +14,7 @@ export const AnyOptionCheckbox = ({
 }) => {
   const id = `${title}-any`;
   const t = useTranslations("Search.accordion");
-  const label = t("any");
+  const label = `${t("any")} ${title.toLowerCase()}`;
   return (
     <Checkbox
       id={id}

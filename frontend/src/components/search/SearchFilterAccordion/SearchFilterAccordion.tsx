@@ -78,12 +78,7 @@ const AccordionContent = ({
   includeAnyOption = true,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
-  const {
-    updateQueryParams,
-    searchParams,
-    removeQueryParam,
-    replaceQueryParams,
-  } = useSearchParamUpdater();
+  const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
   // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {

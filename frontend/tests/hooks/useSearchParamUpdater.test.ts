@@ -87,7 +87,9 @@ describe("useSearchParamUpdater", () => {
       mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
       const { result } = renderHook(() => useSearchParamUpdater());
       result.current.removeQueryParam("removeMe");
-      expect(routerPush).toHaveBeenCalledWith("/test?keepMe=cool");
+      expect(routerPush).toHaveBeenCalledWith("/test?keepMe=cool", {
+        scroll: false,
+      });
     });
   });
 });
