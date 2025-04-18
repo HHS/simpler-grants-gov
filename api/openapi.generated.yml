@@ -903,7 +903,7 @@ paths:
       - in: path
         name: opportunity_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
@@ -2027,9 +2027,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2348,9 +2349,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2573,8 +2575,10 @@ components:
           description: The competition ID
           example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The opportunity ID that the competition is associated with
+          example: 123e4567-e89b-12d3-a456-426614174000
         competition_forms:
           type: array
           items:
@@ -2600,7 +2604,9 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
       required:
       - opportunity_id
     UserSaveOpportunityResponse:
@@ -2772,9 +2778,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The ID of the saved opportunity
-          example: 1234
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_title:
           type:
           - string

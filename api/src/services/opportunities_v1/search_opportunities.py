@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 # the query we want to use the raw value rather than the tokenized one
 # See: https://opensearch.org/docs/latest/field-types/supported-field-types/keyword/
 REQUEST_FIELD_NAME_MAPPING = {
+    "opportunity_id": "opportunity_id.keyword",
     "opportunity_number": "opportunity_number.keyword",
     "opportunity_title": "opportunity_title.keyword",
     "post_date": "summary.post_date",

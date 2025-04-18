@@ -114,7 +114,7 @@ def test_user_get_saved_opportunities(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 1
-    assert response.json["data"][0]["opportunity_id"] == opportunity.opportunity_id
+    assert response.json["data"][0]["opportunity_id"] == str(opportunity.opportunity_id)
     assert response.json["data"][0]["opportunity_title"] == opportunity.opportunity_title
 
 
@@ -213,7 +213,7 @@ def test_get_saved_opportunities_sorting(
 
     assert len(opportunities) == len(expected_result)
     assert [opp["opportunity_id"] for opp in opportunities] == [
-        opp.opportunity_id for opp in expected_result
+        str(opp.opportunity_id) for opp in expected_result
     ]
 
 
@@ -255,9 +255,9 @@ def test_user_get_only_own_saved_opportunities(
     opportunity_ids = [opp["opportunity_id"] for opp in response.json["data"]]
 
     # Verify that the user sees their own opportunities but not the other user's
-    assert user_opportunity.opportunity_id in opportunity_ids
-    assert shared_opportunity.opportunity_id in opportunity_ids
-    assert other_opportunity.opportunity_id not in opportunity_ids
+    assert str(user_opportunity.opportunity_id) in opportunity_ids
+    assert str(shared_opportunity.opportunity_id) in opportunity_ids
+    assert str(other_opportunity.opportunity_id) not in opportunity_ids
 
     # Verify the opportunity titles
     opportunity_titles = [opp["opportunity_title"] for opp in response.json["data"]]

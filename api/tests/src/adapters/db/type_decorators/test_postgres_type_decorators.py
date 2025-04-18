@@ -34,7 +34,7 @@ def test_lookup_column_conversion(
     # Verify what we stored in the DB is the integer
     raw_db_value = db_session.execute(
         text(
-            f"select opportunity_category_id from {test_api_schema}.{Opportunity.get_table_name()} where opportunity_id={opportunity.opportunity_id}"  # nosec
+            f"select opportunity_category_id from {test_api_schema}.{Opportunity.get_table_name()} where opportunity_id='{opportunity.opportunity_id}'"  # nosec
         )
     ).scalar()
     assert raw_db_value == db_value
