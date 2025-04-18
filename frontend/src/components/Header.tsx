@@ -21,13 +21,12 @@ import { isCurrentPath } from "src/utils/generalUtils";
 import {
   GovBanner,
   Header as USWDSHeader,
-  Menu,
-  NavDropDownButton,
   NavMenuButton,
   PrimaryNav,
   Title,
 } from "@trussworks/react-uswds";
 
+import NavDropdown from "./NavDropdown";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
@@ -98,7 +97,7 @@ const NavLinks = ({
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
 
   // if we introduce more than one secondary nav this could be expanded to use an index rather than boolean
-  const [secondaryNavOpen, setSecondaryNavOpen] = useState<boolean>(false);
+  // const [openSecondaryNavIndex, setOpenSecondaryNavIndex] = useState<number>(0);
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -173,11 +172,12 @@ const NavLinks = ({
   const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
     getCurrentNavItemIndex(path),
   );
+  const [activeNavDropdownIndex, setActiveNavDropdownIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
   }, [path, getCurrentNavItemIndex]);
-
+  
   const closeMobileNav = useCallback(() => {
     if (mobileExpanded) {
       onToggleMobileNav();
@@ -198,38 +198,33 @@ const NavLinks = ({
             <NavLink
               href={childLink.href}
               key={childLink.href}
-              onClick={closeMobileNav}
+              onClick={() => {
+                setActiveNavDropdownIndex(null)
+                closeMobileNav
+              }}
               text={childLink.text}
-              className=""
             />
           );
         });
         return (
-          <>
-            <NavDropDownButton
-              label={link.text}
-              menuId={link.text}
-              isOpen={secondaryNavOpen}
-              onToggle={() => setSecondaryNavOpen(!secondaryNavOpen)}
-              className={clsx({
-                "usa-current": currentNavItemIndex === index,
-                "simpler-subnav-open": secondaryNavOpen,
-              })}
-            />
-            <Menu
-              id={link.text}
-              items={items}
-              isOpen={secondaryNavOpen}
-              className="margin-top-05"
-            />
-          </>
+          <NavDropdown
+            activeNavDropdownIndex={activeNavDropdownIndex}
+            index={index}
+            isCurrent={currentNavItemIndex === index}
+            linkText={link.text}
+            menuItems={items}
+            setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+          />
         );
       }
       return (
         <NavLink
           href={link.href}
           key={link.href}
-          onClick={closeMobileNav}
+          onClick={() => {
+            setActiveNavDropdownIndex(null)
+            closeMobileNav
+          }}
           text={link.text}
           classes={clsx({
             "usa-nav__link": true,
@@ -238,7 +233,7 @@ const NavLinks = ({
         />
       );
     });
-  }, [navLinkList, currentNavItemIndex, secondaryNavOpen, closeMobileNav]);
+  }, [navLinkList, currentNavItemIndex, closeMobileNav, activeNavDropdownIndex, setActiveNavDropdownIndex]);
 
   return (
     <PrimaryNav
