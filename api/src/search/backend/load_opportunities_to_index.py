@@ -1,4 +1,3 @@
-import base64
 import itertools
 import logging
 import os
