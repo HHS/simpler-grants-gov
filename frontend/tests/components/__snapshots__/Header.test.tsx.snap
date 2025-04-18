@@ -311,7 +311,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/roadmap"
                 >
                   <div>
-                    Product Roadmap
+                    Product roadmap
                   </div>
                 </a>
               </li>
@@ -320,19 +320,120 @@ exports[`Header About renders About submenu 1`] = `
           <li
             class="usa-nav__primary-item"
           >
-            <a
-              class="usa-nav__link"
-              href="/subscribe"
+            <button
+              aria-controls="Community"
+              aria-expanded="false"
+              class="usa-accordion__button usa-nav__link"
+              data-testid="navDropDownButton"
+              type="button"
             >
-              <div>
-                Subscribe
-              </div>
-            </a>
+              <span>
+                Community
+              </span>
+            </button>
+            <ul
+              class="usa-nav__submenu margin-top-05"
+              hidden=""
+              id="Community"
+            >
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/subscribe"
+                >
+                  <div>
+                    Subscribe
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/events"
+                >
+                  <div>
+                    Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="https://wiki.simpler.grants.gov/"
+                  target="_blank"
+                >
+                  <div
+                    class="icon-btn"
+                  >
+                    Public wiki
+                    <svg
+                      aria-hidden="true"
+                      class="usa-icon usa-icon--size-2"
+                      role="img"
+                    >
+                      <use
+                        href="/img.jpg#launch"
+                      />
+                    </svg>
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="https://simplergrants.discourse.group/"
+                  target="_blank"
+                >
+                  <div
+                    class="icon-btn"
+                  >
+                    Discussion forum
+                    <svg
+                      aria-hidden="true"
+                      class="usa-icon usa-icon--size-2"
+                      role="img"
+                    >
+                      <use
+                        href="/img.jpg#launch"
+                      />
+                    </svg>
+                  </div>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>
     </div>
   </header>
+  <div
+    aria-hidden="true"
+    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
+    data-testid="snackbar"
+    role="status"
+  >
+    You've been logged out. Please sign in again.
+    <button
+      aria-label="close"
+      class="usa-button usa-button--unstyled padding-left-2 text-white"
+      data-testid="snackbar-close"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="usa-icon"
+        role="img"
+      >
+        <use
+          href="/img.jpg#close"
+        />
+      </svg>
+    </button>
+  </div>
 </div>
 `;
 
@@ -648,7 +749,7 @@ exports[`Header renders Header navbar menu 1`] = `
                   href="/roadmap"
                 >
                   <div>
-                    Product Roadmap
+                    Product roadmap
                   </div>
                 </a>
               </li>
@@ -657,18 +758,119 @@ exports[`Header renders Header navbar menu 1`] = `
           <li
             class="usa-nav__primary-item"
           >
-            <a
-              class="usa-nav__link"
-              href="/subscribe"
+            <button
+              aria-controls="Community"
+              aria-expanded="false"
+              class="usa-accordion__button usa-nav__link"
+              data-testid="navDropDownButton"
+              type="button"
             >
-              <div>
-                Subscribe
-              </div>
-            </a>
+              <span>
+                Community
+              </span>
+            </button>
+            <ul
+              class="usa-nav__submenu margin-top-05"
+              hidden=""
+              id="Community"
+            >
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/subscribe"
+                >
+                  <div>
+                    Subscribe
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/events"
+                >
+                  <div>
+                    Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="https://wiki.simpler.grants.gov/"
+                  target="_blank"
+                >
+                  <div
+                    class="icon-btn"
+                  >
+                    Public wiki
+                    <svg
+                      aria-hidden="true"
+                      class="usa-icon usa-icon--size-2"
+                      role="img"
+                    >
+                      <use
+                        href="/img.jpg#launch"
+                      />
+                    </svg>
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="https://simplergrants.discourse.group/"
+                  target="_blank"
+                >
+                  <div
+                    class="icon-btn"
+                  >
+                    Discussion forum
+                    <svg
+                      aria-hidden="true"
+                      class="usa-icon usa-icon--size-2"
+                      role="img"
+                    >
+                      <use
+                        href="/img.jpg#launch"
+                      />
+                    </svg>
+                  </div>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>
     </div>
   </header>
+  <div
+    aria-hidden="true"
+    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
+    data-testid="snackbar"
+    role="status"
+  >
+    You've been logged out. Please sign in again.
+    <button
+      aria-label="close"
+      class="usa-button usa-button--unstyled padding-left-2 text-white"
+      data-testid="snackbar-close"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="usa-icon"
+        role="img"
+      >
+        <use
+          href="/img.jpg#close"
+        />
+      </svg>
+    </button>
+  </div>
 </div>
 `;
