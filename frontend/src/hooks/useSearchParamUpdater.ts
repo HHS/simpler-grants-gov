@@ -58,6 +58,11 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${queryParamsToQueryString(params)}`);
   };
 
+  const setQueryParam = (key: string, value: string, scroll = false) => {
+    params.set(key, value);
+    router.push(`${pathname}?${params.toString()}`, { scroll });
+  };
+
   const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
     router.push(`${pathname}?${params.toString()}`, { scroll });
@@ -68,6 +73,7 @@ export function useSearchParamUpdater() {
     updateQueryParams,
     replaceQueryParams,
     removeQueryParam,
+    setQueryParam,
   };
 }
 

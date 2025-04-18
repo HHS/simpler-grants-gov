@@ -6,7 +6,7 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
-import { useCallback, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
@@ -111,36 +111,25 @@ const AccordionContent = ({
 
   // need to add any existing relevant search params to the passed in set
   // TODO: split this into two functions and implement within the components where they're used to make it more testable
-  const toggleSelectAll = useCallback(
-    (all: boolean, newSelections?: Set<string>): void => {
-      if (all && newSelections) {
-        // get existing current selected options for this accordion from url
-        const currentSelections = new Set(
-          searchParams.get(camelCase(title))?.split(","),
-        );
-        // add existing to newly selected section
-        const sectionPlusCurrent = new Set([
-          ...currentSelections,
-          ...newSelections,
-        ]);
-        updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
-      } else {
-        const clearedSelections = newSelections?.size
-          ? newSelections
-          : new Set<string>();
-        updateQueryParams(clearedSelections, queryParamKey, queryTerm);
-      }
-    },
-    [queryParamKey, queryTerm, searchParams, title, updateQueryParams],
-  );
-
-  /*
-    When checked: remove param for the filter from the query, which will unselect all checkboxes
-    When unchecked: this will not happen on any box click. any box will become unchecked whenever another option is checked
-  */
-  const onAnySelection = useCallback(() => {
-    toggleSelectAll(false, defaultEmptySelection);
-  }, [toggleSelectAll, defaultEmptySelection]);
+  const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
+    if (all && newSelections) {
+      // get existing current selected options for this accordion from url
+      const currentSelections = new Set(
+        searchParams.get(camelCase(title))?.split(","),
+      );
+      // add existing to newly selected section
+      const sectionPlusCurrent = new Set([
+        ...currentSelections,
+        ...newSelections,
+      ]);
+      updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
+    } else {
+      const clearedSelections = newSelections?.size
+        ? newSelections
+        : new Set<string>();
+      updateQueryParams(clearedSelections, queryParamKey, queryTerm);
+    }
+  };
 
   return (
     <>
@@ -154,9 +143,10 @@ const AccordionContent = ({
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
           <AnyOptionCheckbox
-            onAnySelection={onAnySelection}
             title={title}
             checked={isNoneSelected}
+            queryParamKey={queryParamKey}
+            defaultEmptySelection={defaultEmptySelection}
           />
         )}
         {filterOptions.map((option) => (
