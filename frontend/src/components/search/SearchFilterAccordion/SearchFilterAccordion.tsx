@@ -142,12 +142,14 @@ const AccordionContent = ({
 
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
-          <AnyOptionCheckbox
-            title={title}
-            checked={isNoneSelected}
-            queryParamKey={queryParamKey}
-            defaultEmptySelection={defaultEmptySelection}
-          />
+          <li>
+            <AnyOptionCheckbox
+              title={title}
+              checked={isNoneSelected}
+              queryParamKey={queryParamKey}
+              defaultEmptySelection={defaultEmptySelection}
+            />
+          </li>
         )}
         {filterOptions.map((option) => (
           <li key={option.id}>

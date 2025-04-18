@@ -36,7 +36,7 @@ describe("AnyOptionCheckbox", () => {
 
     // Simulate user clicking the checkbox
     const checkbox = await screen.findByRole("checkbox");
-    userEvent.click(checkbox);
+    await userEvent.click(checkbox);
 
     // Wait for the updateCheckedOption function to be called with the checkbox being checked
     await waitFor(() => {
@@ -56,7 +56,7 @@ describe("AnyOptionCheckbox", () => {
 
     // Simulate user clicking the checkbox
     const checkbox = await screen.findByRole("checkbox");
-    userEvent.click(checkbox);
+    await userEvent.click(checkbox);
 
     // Wait for the updateCheckedOption function to be called with the checkbox being checked
     await waitFor(() => {
@@ -71,7 +71,7 @@ describe("AnyOptionCheckbox", () => {
 
     // Simulate user clicking the checkbox
     const checkbox = await screen.findByRole("checkbox");
-    userEvent.click(checkbox);
+    await userEvent.click(checkbox);
 
     expect(mockSetQueryParam).toHaveBeenCalledTimes(0);
   });
