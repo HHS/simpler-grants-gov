@@ -1,27 +1,34 @@
 "use client";
 
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
 import { isCurrentPath } from "src/utils/generalUtils";
 
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
+  Header as USWDSHeader,
   NavMenuButton,
   PrimaryNav,
   Title,
-  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
@@ -53,9 +60,15 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
-  const iconBtnClass: string = href && isExternalLink(href) ? "icon-btn" : "";
+  let iconBtnClass, linkTarget;
+
+  if (href && isExternalLink(href)) {
+    iconBtnClass = "icon-btn";
+    linkTarget = "_blank";
+  }
+
   return (
-    <Link href={href} key={href} className={classes}>
+    <Link href={href} key={href} className={classes} target={linkTarget}>
       <div onClick={onClick} className={iconBtnClass}>
         {text}
         {href && isExternalLink(href) && (
