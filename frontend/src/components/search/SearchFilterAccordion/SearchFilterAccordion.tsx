@@ -78,16 +78,12 @@ const AccordionContent = ({
   includeAnyOption = true,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
-  const { updateQueryParams, searchParams, removeQueryParam } =
-    useSearchParamUpdater();
-
-  /*
-    When checked: remove param for the filter from the query, which will unselect all checkboxes
-    When unchecked: this will not happen on any box click. any box will become unchecked whenever another option is checked
-  */
-  const onAnySelection = useCallback(() => {
-    removeQueryParam(queryParamKey);
-  }, [removeQueryParam, queryParamKey]);
+  const {
+    updateQueryParams,
+    searchParams,
+    removeQueryParam,
+    replaceQueryParams,
+  } = useSearchParamUpdater();
 
   // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
@@ -120,25 +116,36 @@ const AccordionContent = ({
 
   // need to add any existing relevant search params to the passed in set
   // TODO: split this into two functions and implement within the components where they're used to make it more testable
-  const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
-    if (all && newSelections) {
-      // get existing current selected options for this accordion from url
-      const currentSelections = new Set(
-        searchParams.get(camelCase(title))?.split(","),
-      );
-      // add existing to newly selected section
-      const sectionPlusCurrent = new Set([
-        ...currentSelections,
-        ...newSelections,
-      ]);
-      updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
-    } else {
-      const clearedSelections = newSelections?.size
-        ? newSelections
-        : new Set<string>();
-      updateQueryParams(clearedSelections, queryParamKey, queryTerm);
-    }
-  };
+  const toggleSelectAll = useCallback(
+    (all: boolean, newSelections?: Set<string>): void => {
+      if (all && newSelections) {
+        // get existing current selected options for this accordion from url
+        const currentSelections = new Set(
+          searchParams.get(camelCase(title))?.split(","),
+        );
+        // add existing to newly selected section
+        const sectionPlusCurrent = new Set([
+          ...currentSelections,
+          ...newSelections,
+        ]);
+        updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
+      } else {
+        const clearedSelections = newSelections?.size
+          ? newSelections
+          : new Set<string>();
+        updateQueryParams(clearedSelections, queryParamKey, queryTerm);
+      }
+    },
+    [queryParamKey, queryTerm, searchParams, title, updateQueryParams],
+  );
+
+  /*
+    When checked: remove param for the filter from the query, which will unselect all checkboxes
+    When unchecked: this will not happen on any box click. any box will become unchecked whenever another option is checked
+  */
+  const onAnySelection = useCallback(() => {
+    toggleSelectAll(false, defaultEmptySelection);
+  }, [toggleSelectAll, defaultEmptySelection]);
 
   return (
     <>

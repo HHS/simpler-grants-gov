@@ -58,9 +58,9 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${queryParamsToQueryString(params)}`);
   };
 
-  const removeQueryParam = (paramKey: string) => {
+  const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`, { scroll });
   };
 
   return {
