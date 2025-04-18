@@ -78,14 +78,16 @@ const AccordionContent = ({
   includeAnyOption = true,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
-  const { updateQueryParams, searchParams } = useSearchParamUpdater();
-  const onAnySelection = useCallback(() => {}, []);
-  const anyChecked = useMemo(() => {
-    return false;
-  }, [includeAnyOption]);
-  const anyClickable = useMemo(() => {
-    return false;
-  }, [includeAnyOption]);
+  const { updateQueryParams, searchParams, removeQueryParam } =
+    useSearchParamUpdater();
+
+  /*
+    When checked: remove param for the filter from the query, which will unselect all checkboxes
+    When unchecked: this will not happen on any box click. any box will become unchecked whenever another option is checked
+  */
+  const onAnySelection = useCallback(() => {
+    removeQueryParam(queryParamKey);
+  }, [removeQueryParam, queryParamKey]);
 
   // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
@@ -100,18 +102,24 @@ const AccordionContent = ({
   };
 
   // all top level selectable filter options
-  const allOptionValues = filterOptions.reduce((values: string[], option) => {
-    if (option.children) {
-      return values;
-    }
-    values.push(option.value);
-    return values;
-  }, []);
+  const allOptionValues = useMemo(
+    () =>
+      new Set(
+        filterOptions.reduce((values: string[], option) => {
+          if (option.children) {
+            return values;
+          }
+          values.push(option.value);
+          return values;
+        }, []),
+      ),
+    [filterOptions],
+  );
 
-  const allSelected = new Set(allOptionValues);
+  const isNoneSelected = useMemo(() => query.size === 0, [query]);
 
   // need to add any existing relevant search params to the passed in set
-  // TODO: split this into two functions andimplement within the components where they're used to make it more testable
+  // TODO: split this into two functions and implement within the components where they're used to make it more testable
   const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
     if (all && newSelections) {
       // get existing current selected options for this accordion from url
@@ -135,10 +143,10 @@ const AccordionContent = ({
   return (
     <>
       <SearchFilterToggleAll
-        onSelectAll={() => toggleSelectAll(true, allSelected)}
+        onSelectAll={() => toggleSelectAll(true, allOptionValues)}
         onClearAll={() => toggleSelectAll(false, defaultEmptySelection)}
-        isAllSelected={areSetsEqual(allSelected, query)}
-        isNoneSelected={query.size === 0}
+        isAllSelected={areSetsEqual(allOptionValues, query)}
+        isNoneSelected={isNoneSelected}
       />
 
       <ul className="usa-list usa-list--unstyled">
@@ -146,8 +154,7 @@ const AccordionContent = ({
           <AnyOptionCheckbox
             onAnySelection={onAnySelection}
             title={title}
-            checked={anyChecked}
-            clickable={anyClickable}
+            checked={isNoneSelected}
           />
         )}
         {filterOptions.map((option) => (
