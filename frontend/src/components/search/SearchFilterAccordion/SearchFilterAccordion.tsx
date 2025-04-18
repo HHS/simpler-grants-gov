@@ -6,12 +6,13 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
-import { useContext } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
+import { AnyOptionCheckbox } from "./AnyOptionCheckbox";
 
 export interface AccordionItemProps {
   title: React.ReactNode | string;
@@ -37,6 +38,7 @@ export interface SearchFilterAccordionProps {
   filterOptions: FilterOption[];
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
+  includeAnyOption?: boolean;
 }
 
 export interface FilterOptionWithChildren {
@@ -73,9 +75,17 @@ const AccordionContent = ({
   query,
   facetCounts,
   defaultEmptySelection,
+  includeAnyOption = true,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
+  const onAnySelection = useCallback(() => {}, []);
+  const anyChecked = useMemo(() => {
+    return false;
+  }, [includeAnyOption]);
+  const anyClickable = useMemo(() => {
+    return false;
+  }, [includeAnyOption]);
 
   // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
@@ -132,6 +142,14 @@ const AccordionContent = ({
       />
 
       <ul className="usa-list usa-list--unstyled">
+        {includeAnyOption && (
+          <AnyOptionCheckbox
+            onAnySelection={onAnySelection}
+            title={title}
+            checked={anyChecked}
+            clickable={anyClickable}
+          />
+        )}
         {filterOptions.map((option) => (
           <li key={option.id}>
             {/* If we have children, show a "section" dropdown, otherwise show just a checkbox */}
@@ -171,6 +189,7 @@ export function SearchFilterAccordion({
   query,
   facetCounts,
   defaultEmptySelection,
+  includeAnyOption = true,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -183,6 +202,7 @@ export function SearchFilterAccordion({
           query={query}
           facetCounts={facetCounts}
           defaultEmptySelection={defaultEmptySelection}
+          includeAnyOption={includeAnyOption}
         />
       ),
       expanded: !!query.size,
