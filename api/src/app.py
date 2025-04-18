@@ -207,7 +207,7 @@ def register_robots_txt(app: APIFlask) -> None:
         """
 
 
-def register_well_known(app: APIFlask, domain_verification_content: dict) -> None:
+def register_well_known(app: APIFlask, domain_verification_map: dict | None) -> None:
     @app.get("/.well-known/pki-validation/<file_name>")
     @app.doc(hide=True)
     def get_domain_verification_content(file_name: str) -> tuple:
@@ -216,6 +216,6 @@ def register_well_known(app: APIFlask, domain_verification_content: dict) -> Non
         This endpoint is responsible for domain verification related
         to grants.gov S2S SOAP API.
         """
-        if file_name in domain_verification_content:
-            return domain_verification_content[file_name], 200
+        if domain_verification_map and file_name in domain_verification_map:
+            return domain_verification_map[file_name], 200
         return f"Could not find {file_name}", 404
