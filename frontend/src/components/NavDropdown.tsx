@@ -1,17 +1,27 @@
 "use client";
 
-import clsx from "clsx";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
-import { useEffect, useState } from "react";
-import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
+import clsx from "clsx";
+import { IndexType } from "src/types/generalTypes";
+
+import {
+  Menu,
+  NavDropDownButton,
+} from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
-  activeNavDropdownIndex: number | null;
-  setActiveNavDropdownIndex: any;
+  activeNavDropdownIndex: IndexType;
   index: number;
   isCurrent: boolean;
   linkText: string;
   menuItems: JSX.Element[];
+  setActiveNavDropdownIndex: Dispatch<SetStateAction<IndexType>>;
 }
 
 export default function NavDropdown({
@@ -25,13 +35,13 @@ export default function NavDropdown({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   function handleToggle() {
-    const activeIndex: number | null = isOpen ? null : index;
+    const activeIndex: IndexType = isOpen ? null : index;
     setActiveNavDropdownIndex(activeIndex);
   }
 
   useEffect(() => {
     setIsOpen(activeNavDropdownIndex === index);
-  }, [activeNavDropdownIndex]);
+  }, [activeNavDropdownIndex, index]);
 
   return (
     <>

@@ -1,15 +1,15 @@
 "use client";
 
+import { useCallback } from "react";
+
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { saveBlobToFile } from "src/utils/generalUtils";
 
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 import { Button } from "@trussworks/react-uswds";
-
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 export function ExportSearchResultsButton() {
   const t = useTranslations("Search.exportButton");
@@ -31,7 +31,7 @@ export function ExportSearchResultsButton() {
         );
       })
       .catch(console.error);
-  }, [searchParams]);
+  }, [clientFetch, searchParams]);
 
   return (
     <div

@@ -1,7 +1,7 @@
-import { useUser } from "src/services/auth/useUser";
+import { useCallback } from "react";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useUser } from "src/services/auth/useUser";
 
 /*
   returns a function that you should use for 99% of client side requests to the Next API
@@ -18,7 +18,7 @@ export const useClientFetch = <T>(
   const { refreshIfExpired, refreshUser } = useUser();
   const router = useRouter();
 
-  const fetchWithAuthCheck = async (
+  const fetchWithAuthCheck = useCallback(async (
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
@@ -36,7 +36,7 @@ export const useClientFetch = <T>(
       return response;
     }
     return response;
-  };
+  }, [authGatedRequest, refreshIfExpired, refreshUser, router]);
 
   // when this function is used in a useEffect block the linter will want you to add it to the
   // dependency array. Unfortunately, right now, likely because this hook depends on useUser,
@@ -55,7 +55,7 @@ export const useClientFetch = <T>(
         throw new Error(`${errorMessage}: ${response.status}`);
       }
     },
-    [],
+    [errorMessage, fetchWithAuthCheck, jsonResponse],
   );
   return {
     clientFetch,

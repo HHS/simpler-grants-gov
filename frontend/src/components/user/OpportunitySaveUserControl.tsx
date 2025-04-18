@@ -1,19 +1,28 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useUser } from "src/services/auth/useUser";
-import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
-
 import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { useClientFetch } from "src/hooks/useClientFetch";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
+import {
+  MinimalOpportunity,
+} from "src/types/opportunity/opportunityResponseTypes";
+
+import {
+  ModalRef,
+  ModalToggleButton,
+} from "@trussworks/react-uswds";
 
 const SAVED_OPPS_PAGE_LINK = "/saved-grants";
 
@@ -73,7 +82,7 @@ export const OpportunitySaveUserControl = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [opportunityId, user?.token]);
+  }, [fetchSaved, opportunityId, user?.token]);
 
   const messageText = saved
     ? savedError

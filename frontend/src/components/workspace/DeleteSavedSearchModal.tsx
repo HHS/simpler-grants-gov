@@ -1,12 +1,22 @@
 "use client";
 
+import {
+  RefObject,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { useTranslations } from "next-intl";
+import Loading from "src/components/Loading";
+import SimplerAlert from "src/components/SimplerAlert";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 
-import { useTranslations } from "next-intl";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Button,
   Modal,
@@ -15,10 +25,6 @@ import {
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
-
-import Loading from "src/components/Loading";
-import SimplerAlert from "src/components/SimplerAlert";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SuccessContent({
   modalRef,
@@ -96,7 +102,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [user?.token, replaceQueryParams, savedSearchId]);
+  }, [clientFetch, user?.token, replaceQueryParams, savedSearchId]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

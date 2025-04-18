@@ -1,14 +1,3 @@
-import clsx from "clsx";
-import { noop } from "lodash";
-import { useClientFetch } from "src/hooks/useClientFetch";
-import { usePrevious } from "src/hooks/usePrevious";
-import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { useUser } from "src/services/auth/useUser";
-import { QueryContext } from "src/services/search/QueryProvider";
-import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
-import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
-
-import { useTranslations } from "next-intl";
 import {
   Dispatch,
   SetStateAction,
@@ -17,10 +6,21 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Select } from "@trussworks/react-uswds";
 
+import clsx from "clsx";
+import { noop } from "lodash";
+import { useTranslations } from "next-intl";
 import SimplerAlert from "src/components/SimplerAlert";
 import Spinner from "src/components/Spinner";
+import { useClientFetch } from "src/hooks/useClientFetch";
+import { usePrevious } from "src/hooks/usePrevious";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { useUser } from "src/services/auth/useUser";
+import { QueryContext } from "src/services/search/QueryProvider";
+import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
+import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
+
+import { Select } from "@trussworks/react-uswds";
 
 export const SaveSearchSelector = ({
   newSavedSearches,
@@ -69,7 +69,7 @@ export const SaveSearchSelector = ({
         console.error("Error fetching saved searches", e);
         setApiError(e as Error);
       });
-  }, [user?.token, setSavedSearches]);
+  }, [clientFetch, user?.token, setSavedSearches]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list

@@ -1,26 +1,34 @@
 "use client";
 
-import clsx from "clsx";
-import GrantsLogo from "public/img/grants-logo.svg";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useSnackbar } from "src/hooks/useSnackbar";
-import { useUser } from "src/services/auth/useUser";
-import { isCurrentPath } from "src/utils/generalUtils";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSnackbar } from "src/hooks/useSnackbar";
+import { useUser } from "src/services/auth/useUser";
+import { IndexType } from "src/types/generalTypes";
+import { isCurrentPath } from "src/utils/generalUtils";
+
 import {
   GovBanner,
+  Header as USWDSHeader,
   NavMenuButton,
   PrimaryNav,
   Title,
-  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
@@ -65,8 +73,8 @@ const NavLink = ({
   );
 };
 
-const wikiLink: string = "https://wiki.simpler.grants.gov/";
-const forumLink: string = "https://simplergrants.discourse.group/";
+const wikiLink = "https://wiki.simpler.grants.gov/";
+const forumLink = "https://simplergrants.discourse.group/";
 
 const NavLinks = ({
   mobileExpanded,
@@ -165,7 +173,7 @@ const NavLinks = ({
     getCurrentNavItemIndex(path),
   );
   const [activeNavDropdownIndex, setActiveNavDropdownIndex] = useState<
-    number | null
+    IndexType
   >(null);
 
   useEffect(() => {
@@ -177,6 +185,11 @@ const NavLinks = ({
       onToggleMobileNav();
     }
   }, [mobileExpanded, onToggleMobileNav]);
+
+  const closeDropdownAndMobileNav = useCallback(() => {
+    setActiveNavDropdownIndex(null);
+    closeMobileNav();
+  }, [closeMobileNav]);
 
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {
@@ -192,16 +205,14 @@ const NavLinks = ({
             <NavLink
               href={childLink.href}
               key={childLink.href}
-              onClick={() => {
-                setActiveNavDropdownIndex(null);
-                closeMobileNav;
-              }}
+              onClick={closeDropdownAndMobileNav}
               text={childLink.text}
             />
           );
         });
         return (
           <NavDropdown
+            key={link.href}
             activeNavDropdownIndex={activeNavDropdownIndex}
             index={index}
             isCurrent={currentNavItemIndex === index}
@@ -215,10 +226,7 @@ const NavLinks = ({
         <NavLink
           href={link.href}
           key={link.href}
-          onClick={() => {
-            setActiveNavDropdownIndex(null);
-            closeMobileNav;
-          }}
+          onClick={closeDropdownAndMobileNav}
           text={link.text}
           classes={clsx({
             "usa-nav__link": true,
@@ -228,10 +236,10 @@ const NavLinks = ({
       );
     });
   }, [
-    navLinkList,
-    currentNavItemIndex,
-    closeMobileNav,
     activeNavDropdownIndex,
+    closeDropdownAndMobileNav,
+    currentNavItemIndex,
+    navLinkList,
     setActiveNavDropdownIndex,
   ]);
 
