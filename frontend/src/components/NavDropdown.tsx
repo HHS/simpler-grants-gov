@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { IndexType } from "src/types/generalTypes";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, JSX, SetStateAction, useEffect, useState } from "react";
 import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
