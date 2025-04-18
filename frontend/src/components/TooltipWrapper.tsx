@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ForwardedRef, ForwardRefExoticComponent, ReactNode } from "react";
 import { Tooltip } from "@trussworks/react-uswds";
 
 type TooltipProps = {
@@ -10,6 +10,7 @@ type TooltipProps = {
   wrapperclasses?: string;
   className?: string;
   children: ReactNode;
+  asCustom?: ForwardRefExoticComponent<any>;
 };
 
 export const TooltipWrapper = (props: TooltipProps) => {
