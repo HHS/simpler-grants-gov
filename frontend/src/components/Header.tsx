@@ -15,9 +15,15 @@ import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
   Header as USWDSHeader,
@@ -27,6 +33,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import NavDropdown from "./NavDropdown";
+
+import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
@@ -253,6 +261,17 @@ const Header = ({ locale }: Props) => {
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
 
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
+  const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
+    useSnackbar();
+
+  useEffect(() => {
+    if (hasBeenLoggedOut) {
+      showSnackbar(-1);
+      resetHasBeenLoggedOut();
+    }
+  }, [hasBeenLoggedOut, showSnackbar, resetHasBeenLoggedOut]);
+
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
       setIsMobileNavExpanded(false);
@@ -278,6 +297,9 @@ const Header = ({ locale }: Props) => {
 
   return (
     <>
+      <Suspense>
+        <RouteChangeWatcher />
+      </Suspense>
       <div
         className={clsx({
           "usa-overlay": true,
@@ -330,6 +352,9 @@ const Header = ({ locale }: Props) => {
           />
         </div>
       </USWDSHeader>
+      <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
+        {t("tokenExpired")}
+      </Snackbar>
     </>
   );
 };

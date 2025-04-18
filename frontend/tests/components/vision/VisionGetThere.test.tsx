@@ -1,5 +1,6 @@
-import VisionGetThere from "src/app/[locale]/vision/VisionGetThere";
 import { render, screen } from "tests/react-utils";
+
+import VisionGetThere from "src/components/vision/sections/VisionGetThere";
 
 describe("Vision Get There Content", () => {
   it("Renders without errors", () => {

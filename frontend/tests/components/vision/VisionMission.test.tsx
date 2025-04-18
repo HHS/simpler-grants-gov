@@ -1,5 +1,6 @@
-import VisionMission from "src/app/[locale]/vision/VisionMission";
 import { render, screen } from "tests/react-utils";
+
+import VisionMission from "src/components/vision/sections/VisionMission";
 
 describe("Vision Mission Content", () => {
   it("Renders without errors", () => {
