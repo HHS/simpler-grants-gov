@@ -5,6 +5,10 @@ data "aws_ecr_repository" "app" {
   name  = var.image_repository_name
 }
 
+module "project_config" {
+  source = "../../project-config"
+}
+
 data "external" "whoami" {
   program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
@@ -34,6 +38,9 @@ locals {
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
+  fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
+  fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
+  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${module.project_config.latest_fluent_bit_commit}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
@@ -159,32 +166,25 @@ resource "aws_ecs_task_definition" "app" {
       } : null,
       logConfiguration = {
         logDriver = "awsfirelens",
-        options = {
-          Name = "newrelic",
-        },
-        secretOptions = [{
-          name      = "apiKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }]
       }
       mountPoints    = []
       systemControls = []
       volumesFrom    = []
     },
     {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.new_relic_fluent_bit_version,
-      memory                 = local.new_relic_fluent_bit_memory,
-      cpu                    = local.new_relic_fluent_bit_cpu,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
+      name                     = "${local.container_name}-fluentbit"
+      image                    = local.fluent_bit_image_url,
+      memory                   = 256,
+      cpu                      = 512,
+      networkMode              = "awsvpc",
+      readonly_root_filesystem = false,
+      essential                = true,
       firelensConfiguration = {
         type = "fluentbit",
         options = {
           enable-ecs-log-metadata = "true"
         }
-      },
+      }
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -195,10 +195,16 @@ resource "aws_ecs_task_definition" "app" {
       }
       secrets = [
         {
-          name      = "apiKey",
+          name      = "licenseKey",
           valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
         }
       ]
+      environment = [
+        { name : "aws_region", value : data.aws_region.current.name },
+        { name : "container_name", value : local.container_name },
+        { name : "log_group_name", value : local.log_group_name },
+        { name : "FLB_LOG_LEVEL", value : "debug" },
+      ],
     },
   ])
 
