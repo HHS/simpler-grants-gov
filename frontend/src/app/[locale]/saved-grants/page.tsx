@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Metadata } from "next";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -12,15 +11,8 @@ import { Button, GridContainer } from "@trussworks/react-uswds";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale });
-  const meta: Metadata = {
-    title: t("SavedGrants.title"),
-    description: t("Index.meta_description"),
-  };
-  return meta;
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const SavedOpportunitiesList = ({
   opportunities,
@@ -53,7 +45,7 @@ const NoSavedOpportunities = ({
     <>
       <USWDSIcon
         name="star_outline"
-        className="grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
         <p className="usa-intro ">{noSavedCTA}</p>{" "}

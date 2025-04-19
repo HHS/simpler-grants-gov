@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -173,6 +173,9 @@ db-migrate-heads: ## Show migrations marked as a head
 db-seed-local: ## Generate records into your local database
 	$(PY_RUN_CMD) db-seed-local $(args)
 
+db-seed-local-with-agencies: ## add an opportunity for each agency
+	$(PY_RUN_CMD) db-seed-local --cover_all_agencies=true
+
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
@@ -206,6 +209,16 @@ start-localstack:
 setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
 
+
+##################################################
+# Form Schema
+# Example usage:
+# make dat-to-jsonschema args="tests/src/form_schema/SF424_Individual_2_0-V2.0_F668.xls"
+##################################################
+
+dat-to-jsonschema:
+	$(PY_RUN_CMD) dat-to-jsonschema $(args)
+
 ##################################################
 # Mock Oauth Server
 ##################################################
@@ -224,9 +237,6 @@ test: ## Run all tests except for audit logging tests
 
 test-audit: ## Run audit logging tests
 	$(PY_RUN_CMD) pytest -m "audit" $(args)
-
-test-watch: ## Run tests continually and watch for changes
-	$(PY_RUN_CMD) pytest-watch --clear $(args)
 
 test-coverage: ## Run tests and generate coverage report
 	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
@@ -290,6 +300,8 @@ seed-local-legacy-tables:
 populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
+populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
+	$(FLASK_CMD) load-search-data load-agency-data $(args)
 ##################################################
 # Miscellaneous Utilities
 ##################################################
@@ -325,3 +337,13 @@ load-test-staging: # Load test the staging environment in aws
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
 	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml
+
+
+
+#########################
+# Mock SOAP services
+#########################
+init-mock-soap-services: start-mock-soap-services ## Initialize the applicants soap api
+
+start-mock-soap-services: ## start applicants soap api
+	docker compose up --detach mock-applicants-soap-api

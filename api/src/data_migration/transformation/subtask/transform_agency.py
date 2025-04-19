@@ -314,11 +314,14 @@ class TransformAgencyHierarchy(AbstractTransformSubTask):
             # Recalculate whether an agency is a test agency on each run
             # in case we update the config values
             # This same function is called whenever we create/update an agency that has other updates
-            is_test_agency = is_test_agency_code(agency.agency_code, self.agency_config)
+            is_test_agency = is_test_agency_code(
+                (agency.top_level_agency or agency).agency_code, self.agency_config
+            )
             logger.info(
                 "Determined whether agency is a test agency",
                 extra=log_extra | {"is_test_agency": is_test_agency},
             )
+
             agency.is_test_agency = is_test_agency
 
     def get_top_level_agency_code(self, agency_code: str) -> str | None:
@@ -410,6 +413,14 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
 
         tgroup_field_name = tgroup.get_field_name()
 
+        if tgroup_field_name in NOT_MAPPED_FIELDS:
+            logger.info(
+                "Skipping processing of field %s for %s",
+                tgroup_field_name,
+                tgroup_agency.agency_code,
+            )
+            continue
+
         # TODO - how we want to actually handle deleted rows likely needs more investigation
         #        and discussion - do we assume that if certain fields are deleted that the
         #        entire agency should be deleted? Can they even be deleted once an opportunity refers to them?
@@ -437,14 +448,6 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
         elif tgroup_field_name in AGENCY_CONTACT_INFO_FIELD_MAP:
             field_name = AGENCY_CONTACT_INFO_FIELD_MAP[tgroup_field_name]
             updates.agency_contact_info_updates[field_name] = value
-
-        elif tgroup_field_name in NOT_MAPPED_FIELDS:
-            logger.info(
-                "Skipping processing of field %s for %s",
-                tgroup_field_name,
-                tgroup_agency.agency_code,
-            )
-            continue
 
         else:
             raise ValueError("Unknown tgroups agency field %s" % tgroup_field_name)
@@ -533,16 +536,12 @@ def apply_updates(
         record.updated_at = updated_at
 
 
-def is_test_agency_code(agency_code: str, agency_config: AgencyConfig) -> bool:
+def is_test_agency_code(top_level_agency_code: str, agency_config: AgencyConfig) -> bool:
     """Determine whether an agency is a test agency
 
-    If the agency_code starts with one of the configured values, it is a test agency
+    If the top_level_agency_code matches one of the configured values, it is a test agency
     """
-    for test_agency in agency_config.test_agency_config:
-        if agency_code.startswith(test_agency):
-            return True
-
-    return False
+    return top_level_agency_code in agency_config.test_agency_config
 
 
 def is_child_agency(agency: Agency) -> bool:

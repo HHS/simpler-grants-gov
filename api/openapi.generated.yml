@@ -160,6 +160,62 @@ paths:
         with endpoints.
 
         '
+  /v1/agencies/search:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencySearchResponseV1'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Agency v1
+      summary: Agency Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencySearchRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  query: USAID
+                  pagination:
+                    sort_order:
+                    - order_by: agency_name
+                      sort_direction: descending
+                    page_offset: 1
+                    page_size: 25
+              example2:
+                summary: Filter by active agency
+                value:
+                  filters:
+                    has_active_opportunity:
+                      one_of:
+                      - 'False'
+                  pagination:
+                    sort_order:
+                    - order_by: agency_name
+                      sort_direction: descending
+                    page_offset: 1
+                    page_size: 25
+      security:
+      - ApiKeyAuth: []
   /v1/users/token/logout:
     post:
       parameters: []
@@ -567,6 +623,38 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Get an application by ID
+      security:
+      - ApiKeyAuth: []
   /alpha/competitions/{competition_id}:
     get:
       parameters:
@@ -971,8 +1059,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/HealthcheckMetadata'
+          $ref: '#/components/schemas/HealthcheckMetadata'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1012,8 +1099,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         internal_request_id:
           type: string
           description: An internal tracking ID
@@ -1050,8 +1136,7 @@ components:
         created_at:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/DateRange'
+          $ref: '#/components/schemas/DateRange'
     SortOrderExtractMetadataPaginationV1:
       type: object
       properties:
@@ -1081,8 +1166,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
+            $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1114,13 +1198,11 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
+          $ref: '#/components/schemas/ExtractMetadataFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
+          $ref: '#/components/schemas/ExtractMetadataPaginationV1'
       required:
       - pagination
     SortOrder:
@@ -1162,8 +1244,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrder'
+            $ref: '#/components/schemas/SortOrder'
     ExtractMetadataResponse:
       type: object
       properties:
@@ -1183,9 +1264,10 @@ components:
           format: date-time
           readOnly: true
         extract_metadata_id:
-          type: integer
+          type: string
+          format: uuid
           description: The ID of the extract metadata
-          example: 1
+          example: 123e4567-e89b-12d3-a456-426614174000
         extract_type:
           type: string
           description: The type of extract
@@ -1197,8 +1279,7 @@ components:
           description: The pagination information for paginated endpoints
           type: &id001
           - object
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1209,8 +1290,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/ExtractMetadataResponse'
+            $ref: '#/components/schemas/ExtractMetadataResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1219,7 +1299,11 @@ components:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        active:
+          type: boolean
     SortOrderAgencyPaginationV1:
       type: object
       properties:
@@ -1254,8 +1338,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
+            $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1276,20 +1359,20 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyFilterV1'
+          $ref: '#/components/schemas/AgencyFilterV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyPaginationV1'
+          $ref: '#/components/schemas/AgencyPaginationV1'
       required:
       - pagination
     AgencyResponse:
       type: object
       properties:
         agency_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
         agency_name:
           type: string
         agency_code:
@@ -1297,8 +1380,7 @@ components:
         top_level_agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencyResponse'
+          $ref: '#/components/schemas/AgencyResponse'
         created_at:
           type: string
           format: date-time
@@ -1311,8 +1393,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1323,8 +1404,174 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/AgencyResponse'
+            $ref: '#/components/schemas/AgencyResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    HasActiveOpportunityFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    IsTestAgencyFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    AgencySearchFilterV1:
+      type: object
+      properties:
+        has_active_opportunity:
+          type:
+          - object
+          $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
+        is_test_agency:
+          type:
+          - object
+          $ref: '#/components/schemas/IsTestAgencyFilterV1'
+    SortOrderAgencySearchPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - agency_code
+          - agency_name
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    AgencySearchPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: agency_code
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderAgencySearchPaginationV1'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    AgencySearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Query string which searches against several text fields
+          example: research
+        query_operator:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
+          - OR
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
+        filters:
+          type:
+          - object
+          $ref: '#/components/schemas/AgencySearchFilterV1'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/AgencySearchPaginationV1'
+      required:
+      - pagination
+    AgencyV1:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          format: uuid
+          description: The internal ID of the agency
+          example: 123e4567-e89b-12d3-a456-426614174000
+        agency_name:
+          type: string
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
+        agency_code:
+          type: string
+          description: The agency who created the opportunity
+          example: ABC
+        top_level_agency:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/AgencyV1'
+          - type: 'null'
+        has_active_opportunity:
+          type: boolean
+          description: Indicates if the agency is linked to an opportunity that is
+            currently active.
+          example: false
+        is_test_agency:
+          type: boolean
+          description: Indicates if the agency is a test agency.
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    AgencySearchResponseV1:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id001
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgencyV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1446,7 +1693,7 @@ components:
             - archived
             type:
             - string
-    AgencySearchFilterV1:
+    AgencyOppSearchFilterV1:
       type: object
       properties:
         one_of:
@@ -1592,68 +1839,55 @@ components:
         funding_instrument:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingInstrumentFilterV1'
+          $ref: '#/components/schemas/FundingInstrumentFilterV1'
         funding_category:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FundingCategoryFilterV1'
+          $ref: '#/components/schemas/FundingCategoryFilterV1'
         applicant_type:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicantTypeFilterV1'
+          $ref: '#/components/schemas/ApplicantTypeFilterV1'
         opportunity_status:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityStatusFilterV1'
+          $ref: '#/components/schemas/OpportunityStatusFilterV1'
         agency:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AgencySearchFilterV1'
+          $ref: '#/components/schemas/AgencyOppSearchFilterV1'
         assistance_listing_number:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
+          $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
         is_cost_sharing:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/IsCostSharingFilterV1'
+          $ref: '#/components/schemas/IsCostSharingFilterV1'
         expected_number_of_awards:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
+          $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
         award_floor:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardFloorFilterV1'
+          $ref: '#/components/schemas/AwardFloorFilterV1'
         award_ceiling:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/AwardCeilingFilterV1'
+          $ref: '#/components/schemas/AwardCeilingFilterV1'
         estimated_total_program_funding:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
+          $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
         post_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/PostDateFilterV1'
+          $ref: '#/components/schemas/PostDateFilterV1'
         close_date:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/CloseDateFilterV1'
+          $ref: '#/components/schemas/CloseDateFilterV1'
     ExperimentalV1:
       type: object
       properties:
@@ -1665,6 +1899,7 @@ components:
           - default
           - expanded
           - agency
+          - attachment_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
@@ -1707,8 +1942,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
+            $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1745,18 +1979,15 @@ components:
         filters:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+          $ref: '#/components/schemas/OpportunitySearchFilterV1'
         experimental:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ExperimentalV1'
+          $ref: '#/components/schemas/ExperimentalV1'
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityPaginationV1'
+          $ref: '#/components/schemas/OpportunityPaginationV1'
         format:
           default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
           - json
@@ -2050,7 +2281,7 @@ components:
           type:
           - string
           - 'null'
-          description: The name of the agency who created the oppportunity
+          description: The name of the agency who created the opportunity
           example: Department of Examples
         top_level_agency_name:
           type:
@@ -2083,13 +2314,11 @@ components:
           items:
             type: &id003
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: &id004
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2160,8 +2389,7 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: *id001
-          allOf:
-          - $ref: '#/components/schemas/PaginationInfo'
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -2178,8 +2406,7 @@ components:
           description: Counts of filter/facet values in the full response
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityFacetV1'
+          $ref: '#/components/schemas/OpportunityFacetV1'
     User:
       type: object
       properties:
@@ -2209,8 +2436,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/User'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2241,8 +2467,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationStartResponseData'
+          $ref: '#/components/schemas/ApplicationStartResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2264,11 +2489,39 @@ components:
           description: The JSON Schema representation of the form
           example:
             type: object
-            properties: {}
+            title: Test form for testing
+            properties:
+              Title:
+                title: Title
+                type: string
+                minLength: 1
+                maxLength: 60
+              Description:
+                title: Description for application
+                type: string
+                minLength: 0
+                maxLength: 15
+              ApplicationNumber:
+                title: Application number
+                type: number
+                minLength: 1
+                maxLength: 120
+              Date:
+                title: 'Date of application '
+                type: string
+                format: date
+          additionalProperties: {}
         form_ui_schema:
-          type: object
           description: The UI Schema of the form for front-end rendering
-          example: {}
+          example:
+          - type: field
+            definition: /properties/Title
+          - type: field
+            definition: /properties/Description
+          - type: field
+            definition: /properties/ApplicationNumber
+          - type: field
+            definition: /properties/Date
     FormResponseAlpha:
       type: object
       properties:
@@ -2279,8 +2532,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FormAlpha'
+          $ref: '#/components/schemas/FormAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2350,7 +2602,7 @@ components:
           type:
           - string
           - 'null'
-          description: The name of the agency who created the oppportunity
+          description: The name of the agency who created the opportunity
           example: Department of Examples
         top_level_agency_name:
           type:
@@ -2377,12 +2629,10 @@ components:
           type: array
           items:
             type: *id003
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: *id004
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1'
+          $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -2403,8 +2653,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAttachmentV1'
+            $ref: '#/components/schemas/OpportunityAttachmentV1'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -2415,8 +2664,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
+          $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2431,8 +2679,7 @@ components:
         search_query:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
     SavedSearchResponse:
@@ -2451,8 +2698,7 @@ components:
           description: The saved search query parameters
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+          $ref: '#/components/schemas/OpportunitySearchRequestV1'
         created_at:
           type: string
           format: date-time
@@ -2468,8 +2714,65 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/SavedSearchResponse'
+          $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormGetResponseData:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_response:
+          type: object
+          additionalProperties: {}
+    ApplicationGetResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_forms:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationFormGetResponseData'
+    ApplicationGetResponse:
+      type: object
+      properties:
+        warnings:
+          type: array
+          description: A list of warnings - indicating something you may want to be
+            aware of, but did not prevent handling of the request
+          items:
+            type: &id007
+            - object
+            $ref: '#/components/schemas/ValidationIssue'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2483,8 +2786,7 @@ components:
         form:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/FormAlpha'
+          $ref: '#/components/schemas/FormAlpha'
     CompetitionAlpha:
       type: object
       properties:
@@ -2501,8 +2803,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/CompetitionFormAlpha'
+            $ref: '#/components/schemas/CompetitionFormAlpha'
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -2513,8 +2814,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/CompetitionAlpha'
+          $ref: '#/components/schemas/CompetitionAlpha'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2573,8 +2873,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
+            $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -2595,8 +2894,7 @@ components:
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
+          $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
       required:
       - pagination
     UserSavedSearchesResponse:
@@ -2612,8 +2910,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SavedSearchResponse'
+            $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2653,8 +2950,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
+            $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -2675,8 +2971,7 @@ components:
         pagination:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
+          $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
       required:
       - pagination
     SavedOpportunitySummaryV1:
@@ -2723,8 +3018,7 @@ components:
         summary:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+          $ref: '#/components/schemas/SavedOpportunitySummaryV1'
     UserSavedOpportunitiesResponse:
       type: object
       properties:
@@ -2738,8 +3032,7 @@ components:
           items:
             type:
             - object
-            allOf:
-            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
+            $ref: '#/components/schemas/SavedOpportunityResponseV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2784,6 +3077,7 @@ components:
       properties:
         application_response:
           type: object
+          additionalProperties: {}
       required:
       - application_response
     ApplicationFormUpdateResponseData:
@@ -2801,10 +3095,8 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id007
-            - object
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            type: *id007
+            $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
           description: The message to return
@@ -2812,8 +3104,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2831,23 +3122,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    ApplicationFormGetResponseData:
-      type: object
-      properties:
-        application_form_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        form_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_response:
-          type: object
     ApplicationFormGetResponse:
       type: object
       properties:
@@ -2857,8 +3131,7 @@ components:
             aware of, but did not prevent handling of the request
           items:
             type: *id007
-            allOf:
-            - $ref: '#/components/schemas/ValidationIssue'
+            $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
           description: The message to return
@@ -2866,8 +3139,7 @@ components:
         data:
           type:
           - object
-          allOf:
-          - $ref: '#/components/schemas/ApplicationFormGetResponseData'
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code

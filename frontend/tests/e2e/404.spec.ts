@@ -9,12 +9,13 @@ test.afterEach(async ({ context }) => {
   await context.close();
 });
 
-test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle("Oops! Page Not Found");
+// see https://github.com/vercel/next.js/issues/77512 - unskip once this issue is resolved
+test.skip("has title", async ({ page }) => {
+  await expect(page).toHaveTitle("Oops, we can't find that page.");
 });
 
 test("can view the home button", async ({ page }) => {
-  await expect(page.getByRole("link", { name: "Return Home" })).toHaveText(
-    "Return Home",
-  );
+  await expect(
+    page.getByRole("link", { name: "Visit our homepage" }),
+  ).toHaveText("Visit our homepage");
 });

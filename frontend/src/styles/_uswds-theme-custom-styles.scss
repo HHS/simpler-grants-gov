@@ -257,6 +257,10 @@ i.e.
   background-color: color("mint-40");
 }
 
+.bg-mint-70 {
+  background-color: color("mint-70");
+}
+
 // Hero
 .hero {
   .hero--container {
@@ -298,6 +302,12 @@ i.e.
       max-width: 42rem;
     }
   }
+}
+
+// Events
+
+#main-content:has(div:last-child.bg-base-lightest) + footer.usa-footer {
+  background-color: color($theme-color-base-lightest);
 }
 
 // Footer
@@ -447,6 +457,17 @@ button.usa-pagination__button.usa-button {
         display: block;
       }
     }
+  }
+  .usa-accordion__button[aria-expanded="true"]::after {
+    background-color: color("mint-60");
+    border-radius: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    height: 0.25rem;
+    bottom: -0.25rem;
+    left: 0;
+    right: 0;
   }
 }
 

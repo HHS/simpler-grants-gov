@@ -3,7 +3,7 @@
 * **Status:** Accepted
 * **Last Modified:** 2023-07-11
 * **Related Issue:** [#98](https://github.com/HHS/simpler-grants-gov/issues/98)
-* **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly
+* **Deciders:** Lucas, Esther, Sumi, Sarah, Aaron, Billy
 * **Tags:** communications, sprint planning, agile
 
 ## Context and Problem Statement

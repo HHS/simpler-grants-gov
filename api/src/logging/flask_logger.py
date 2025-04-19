@@ -19,10 +19,13 @@ Usage:
 
 import logging
 import os
+import sys
 import time
 import uuid
 
 import flask
+import newrelic.agent
+import newrelic.api.time_trace
 
 from src.util.deploy_metadata import get_deploy_metadata_config
 
@@ -57,6 +60,8 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     for handler in app_logger.handlers:
         handler.addFilter(_add_global_context_info_to_log_record)
         handler.addFilter(_add_request_context_info_to_log_record)
+        handler.addFilter(_add_new_relic_context_to_log_record)
+        handler.addFilter(_add_error_info_to_log_record)
 
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule
@@ -74,6 +79,8 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     add_extra_data_to_global_logs(
         {
             "app.name": app.name,
+            "app_name": "api",
+            "run_mode": get_run_mode(),
             "environment": os.environ.get("ENVIRONMENT"),
             "deploy_github_ref": deploy_metadata.deploy_github_ref,
             "deploy_github_sha": deploy_metadata.deploy_github_sha,
@@ -185,3 +192,59 @@ def _get_request_context_info(request: flask.Request) -> dict:
     for key, value in request.args.items():
         data[f"request.query.{key}"] = value
     return data
+
+
+def _add_new_relic_context_to_log_record(record: logging.LogRecord) -> bool:
+    """Add New Relic tracing info to our log record."""
+
+    # This is not the recommended way of implementing this, but the alternatives
+    # either change the structure of our logging to not be JSON, or would
+    # entirely replace the formatter we have for outputting logs.
+    #
+    # The NewRelicContextFormatter calls this function internally when it
+    # creates the output object.
+    #
+    # This sets the following fields:
+    # entity.type
+    # entity.name
+    # entity.guid
+    # hostname
+    # span.id
+    # trace.id
+    newrelic_metadata = newrelic.api.time_trace.get_linking_metadata()
+
+    record.__dict__ |= newrelic_metadata
+
+    return True
+
+
+def _add_error_info_to_log_record(record: logging.LogRecord) -> bool:
+    """Add a shorter form of the error message to our log record."""
+    exc_info = getattr(record, "exc_info", None)
+    # exc_info is a 3-part tuple with the class, error obj, and traceback
+    if exc_info and len(exc_info) == 3:
+        # If the error were `raise ValueError("example")`, the
+        # value of this would be "ValueError('example')"
+        record.__dict__["exc_info_short"] = repr(exc_info[1])
+
+    return True
+
+
+def get_run_mode() -> str:
+    # We want to indicate whether the app was run as an API service
+    # or as a CLI - use the argv of the command we ran it with
+    # to determine that.
+    # CLI commands are always of the form "/path/to/flask <blueprint name> <task name> <commands>"
+    #
+    # The API service can be started either as
+    #  "/path/to/flask --app src.app run ..."         --> When run locally
+    #  "/api/.venv/bin/gunicorn src.app:create_app()" --> When run non-locally
+    #
+    # So we check for pieces that only appear in the API commands
+
+    _original_argv = " ".join(sys.argv)
+    run_mode = "cli"
+    if "gunicorn" in _original_argv or "--app" in _original_argv:
+        run_mode = "service"
+
+    return run_mode

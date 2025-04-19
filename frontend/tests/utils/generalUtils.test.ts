@@ -1,5 +1,6 @@
 import {
   findFirstWhitespace,
+  isCurrentPath,
   queryParamsToQueryString,
   splitMarkup,
 } from "src/utils/generalUtils";
@@ -112,5 +113,18 @@ describe("queryParamsToQueryString", () => {
         eligibility: "individual",
       }),
     ).toEqual("?status=archived,closed&eligibility=individual&");
+  });
+});
+
+describe("isCurrentPath", () => {
+  it("returns true if the path matches the regex with passed link", () => {
+    expect(isCurrentPath("/hello", "/en/hello")).toEqual(true);
+    expect(
+      isCurrentPath("/hello/whatever", "/es/hello/whatever?this=willgoaway"),
+    ).toEqual(true);
+  });
+  it("returns false if the path does not match the regex with passed link", () => {
+    expect(isCurrentPath("/hello/other-path", "/es/hello")).toEqual(false);
+    expect(isCurrentPath("/hello", "/gr/hello")).toEqual(false);
   });
 });

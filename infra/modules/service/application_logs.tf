@@ -15,7 +15,7 @@ resource "aws_cloudwatch_log_group" "service_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "fluentbit" {
-  name = "service/${var.service_name}-fluentbit"
+  name = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit"
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

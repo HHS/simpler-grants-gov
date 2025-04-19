@@ -8,6 +8,7 @@ import uuid
 from functools import wraps
 from typing import Callable, Generator, ParamSpec, TypeVar  # noqa:  UP035
 
+import newrelic.agent
 import requests
 
 from analytics.logs.app_logger import add_extra_data_to_global_logs
@@ -47,7 +48,18 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            with _ecs_background_task_impl(task_name):
+            # Wrap with New Relic instrumentation
+            application = newrelic.agent.register_application(timeout=10.0)
+            with (
+                newrelic.agent.BackgroundTask(
+                    application,
+                    name=task_name,
+                    group="Python/AnalyticsTask",
+                ),
+                # Wrap with our own logging (timing/general logs)
+                _ecs_background_task_impl(task_name),
+            ):
+                # Finally actually run the task
                 return f(*args, **kwargs)
 
         return wrapper
@@ -120,20 +132,13 @@ def _get_ecs_metadata() -> dict:
             metadata_json["Labels"]["com.amazonaws.ecs.task-definition-version"],
         ],
     )
-    cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
-    cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
 
     # Step function only
-    sfn_execution_id = os.environ.get("SFN_EXECUTION_ID")
-    sfn_id = sfn_execution_id.split(":")[-2] if sfn_execution_id is not None else None
+    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
 
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        # these will be added automatically by New Relic log ingester, but
-        # just to be sure and for non-log usages, explicitly declare them
-        "aws.cloudwatch.log_group": cloudwatch_log_group,
-        "aws.cloudwatch.log_stream": cloudwatch_log_stream,
-        "aws.step_function.id": sfn_id,
+        "scheduled_job_name": step_function_name,
     }

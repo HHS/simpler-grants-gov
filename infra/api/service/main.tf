@@ -37,8 +37,10 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
-    environment = var.environment_name
-    description = "Application resources created in ${var.environment_name} environment"
+    app          = module.app_config.app_name
+    environment  = var.environment_name
+    service_name = local.service_name
+    description  = "Application resources created in ${var.environment_name} environment"
   })
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
@@ -95,8 +97,9 @@ data "aws_rds_cluster" "db_cluster" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count  = local.service_config.domain_name != null ? 1 : 0
-  domain = local.service_config.domain_name
+  count       = local.service_config.enable_https ? 1 : 0
+  domain      = local.service_config.domain_name
+  most_recent = true
 }
 
 data "aws_iam_policy" "app_db_access_policy" {
@@ -128,16 +131,6 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
-data "aws_acm_certificate" "certificate" {
-  count  = local.service_config.enable_https ? 1 : 0
-  domain = local.service_config.domain_name
-}
-
-# data "aws_route53_zone" "zone" {
-#   count = local.service_config.domain_name != null ? 1 : 0
-#   name  = local.network_config.domain_config.hosted_zone
-# }
-
 module "service" {
   source           = "../../modules/service"
   service_name     = local.service_config.service_name
@@ -152,11 +145,9 @@ module "service" {
   public_subnet_ids  = data.aws_subnets.public.ids
   private_subnet_ids = data.aws_subnets.private.ids
 
-  cert_arn       = local.service_config.domain_name != null ? data.aws_acm_certificate.cert[0].arn : null
-  domain_name    = local.service_config.domain_name
-  hosted_zone_id = null
-  # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
-  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+  certificate_arn = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
+  domain_name     = local.service_config.domain_name
+  hosted_zone_id  = null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

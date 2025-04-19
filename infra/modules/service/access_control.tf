@@ -77,6 +77,16 @@ data "aws_iam_policy_document" "task_executor" {
     resources = [local.fluent_bit_repo_arn]
   }
 
+  statement {
+    sid = "PullSharedNewRelicKey"
+    actions = [
+      "ssm:GetParameters"
+    ]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
+    ]
+  }
+
   dynamic "statement" {
     for_each = length(var.secrets) > 0 ? [1] : []
     content {

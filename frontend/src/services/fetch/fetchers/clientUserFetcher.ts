@@ -1,24 +1,23 @@
 "use client";
 
-import { ApiRequestError } from "src/errors";
-import { UserFetcher, UserSession } from "src/services/auth/types";
+import { debounce } from "lodash";
+import { UserSession } from "src/types/authTypes";
 
-// this fetcher is a one off for now, since the request is made from the client to the
-// NextJS Node server. We will need to build out a fetcher pattern to accomodate this usage in the future
-export const userFetcher: UserFetcher = async (url) => {
-  let response;
-  try {
-    response = await fetch(url, { cache: "no-store" });
-  } catch (e) {
-    const error = e as Error;
-    console.error("User session fetch network error", e);
-    throw new ApiRequestError(error.message, "NetworkError", 0); // Network error
-  }
-  if (response.status === 204) return undefined;
-  if (response.ok) return (await response.json()) as UserSession;
-  throw new ApiRequestError(
-    "Unknown error fetching user",
-    undefined,
-    response.status,
-  );
-};
+// if we don't debounce this call we get multiple requests going out on page load
+// not using clientFetch since we don't need to check the expiration here
+// and also that'd create a circular dependency chain in the cilentFetch hook
+export const debouncedUserFetcher = debounce(
+  async () => {
+    const response = await fetch("/api/auth/session", { cache: "no-store" });
+    if (response.ok && response.status === 200) {
+      const data = (await response.json()) as UserSession;
+      return data;
+    }
+    throw new Error(`Unable to fetch user: ${response.status}`);
+  },
+  500,
+  {
+    leading: true,
+    trailing: false,
+  },
+);

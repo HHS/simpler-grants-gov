@@ -121,20 +121,17 @@ def _get_ecs_metadata() -> dict:
             metadata_json["Labels"]["com.amazonaws.ecs.task-definition-version"],
         ]
     )
-    cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
-    cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
+    # We don't currently send logs to Cloudwatch, and just send directly
+    # to NewRelic, so these error if we try to use them right now.
+    # cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
+    # cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
 
     # Step function only
-    sfn_execution_id = os.environ.get("SFN_EXECUTION_ID")
-    sfn_id = sfn_execution_id.split(":")[-2] if sfn_execution_id is not None else None
+    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
 
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        # these will be added automatically by New Relic log ingester, but
-        # just to be sure and for non-log usages, explicitly declare them
-        "aws.cloudwatch.log_group": cloudwatch_log_group,
-        "aws.cloudwatch.log_stream": cloudwatch_log_stream,
-        "aws.step_function.id": sfn_id,
+        "scheduled_job_name": step_function_name,
     }

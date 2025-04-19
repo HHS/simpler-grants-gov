@@ -3,7 +3,7 @@ locals {
   # We do not currently do this, though.
   default_origin_id        = "default"
   ssl_protocols            = ["TLSv1.2"]
-  minimum_protocol_version = "TLSv1.2_2021"
+  minimum_protocol_version = "TLSv1"
   enable_cdn               = var.enable_alb_cdn || var.enable_s3_cdn
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
@@ -40,10 +40,7 @@ resource "aws_cloudfront_cache_policy" "default" {
   name = var.service_name
 
   # Default to caching for 1 hour.
-  # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
-  # There's also a `max_ttl` option, which can be used to override the above headers.
-  min_ttl     = 0
-  default_ttl = 3600
+  min_ttl = 3600
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
@@ -74,12 +71,12 @@ resource "aws_cloudfront_distribution" "cdn" {
       custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = var.cert_arn == null ? "http-only" : "https-only"
+        origin_protocol_policy = var.certificate_arn == null ? "http-only" : "https-only"
         origin_ssl_protocols   = local.ssl_protocols
       }
 
       dynamic "origin_shield" {
-        for_each = var.cert_arn == null ? [1] : []
+        for_each = var.certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -96,7 +93,7 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_access_control_id = aws_cloudfront_origin_access_control.cdn[0].id
 
       dynamic "origin_shield" {
-        for_each = var.cert_arn == null ? [1] : []
+        for_each = var.certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -116,13 +113,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = var.cert_arn == null ? "allow-all" : "redirect-to-https"
-
-    # Default to caching for 1 hour.
-    # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
-    # There's also a `max_ttl` option, which can be used to override the above headers.
-    min_ttl     = 0
-    default_ttl = 3600
+    viewer_protocol_policy = var.certificate_arn == null ? "allow-all" : "redirect-to-https"
   }
 
   restrictions {
@@ -131,11 +122,23 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  viewer_certificate {
-    acm_certificate_arn            = var.cert_arn == null ? null : var.cert_arn
-    cloudfront_default_certificate = var.cert_arn == null ? true : false
-    minimum_protocol_version       = local.minimum_protocol_version
-    ssl_support_method             = "sni-only"
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn != null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = false
+      minimum_protocol_version       = local.minimum_protocol_version
+      ssl_support_method             = "sni-only"
+    }
+  }
+
+  dynamic "viewer_certificate" {
+    for_each = var.certificate_arn == null ? [1] : []
+    content {
+      acm_certificate_arn            = var.certificate_arn
+      cloudfront_default_certificate = true
+      minimum_protocol_version       = local.minimum_protocol_version
+    }
   }
 
   depends_on = [
@@ -144,12 +147,13 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket.cdn[0],
   ]
 
-  #checkov:skip=CKV2_AWS_46:We sometimes use a ALB origin
-  #checkov:skip=CKV_AWS_174:False positive
-  #checkov:skip=CKV_AWS_310:Configure a failover in future work
-  #checkov:skip=CKV_AWS_68:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_47:Configure WAF in future work
-  #checkov:skip=CKV2_AWS_32:Configure response headers policy in future work
-  #checkov:skip=CKV_AWS_374:Ignore the geo restriction
-  #checkov:skip=CKV_AWS_305:We don't need a default root object... we don't need to redirect / to index.html.
+  #checkov:skip=CKV2_AWS_42: Sometimes we don't have a skip
+  #checkov:skip=CKV2_AWS_46: We sometimes use a ALB origin
+  #checkov:skip=CKV_AWS_174: False positive
+  #checkov:skip=CKV_AWS_310: Configure a failover in future work
+  #checkov:skip=CKV_AWS_68: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_47: Configure WAF in future work
+  #checkov:skip=CKV2_AWS_32: Configure response headers policy in future work
+  #checkov:skip=CKV_AWS_374: Ignore the geo restriction
+  #checkov:skip=CKV_AWS_305: We don't need a default root object... we don't need to redirect / to index.html.
 }

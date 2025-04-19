@@ -4,8 +4,10 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FormFamily,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -123,6 +125,23 @@ EXTRACT_TYPE_CONFIG = LookupConfig(
     [
         LookupStr(ExtractType.OPPORTUNITIES_JSON, 1),
         LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
+    ]
+)
+
+FORM_FAMILY_CONFIG = LookupConfig(
+    [
+        LookupStr(FormFamily.SF_424, 1),
+        LookupStr(FormFamily.SF_424_INDIVIDUAL, 2),
+        LookupStr(FormFamily.RR, 3),
+        LookupStr(FormFamily.SF_424_MANDATORY, 4),
+        LookupStr(FormFamily.SF_424_SHORT_ORGANIZATION, 5),
+    ]
+)
+
+COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
+    [
+        LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
+        LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
     ]
 )
 
@@ -264,3 +283,29 @@ class LkJobStatus(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> "LkJobStatus":
         return LkJobStatus(job_status_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(FORM_FAMILY_CONFIG)
+class LkFormFamily(LookupTable, TimestampMixin):
+    __tablename__ = "lk_form_family"
+
+    form_family_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkFormFamily":
+        return LkFormFamily(form_family_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(COMPETITION_OPEN_TO_APPLICANT_CONFIG)
+class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
+    __tablename__ = "lk_competition_open_to_applicant"
+
+    competition_open_to_applicant_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
+        return LkCompetitionOpenToApplicant(
+            competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
+        )

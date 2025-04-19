@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import { noop } from "lodash";
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { usePrevious } from "src/hooks/usePrevious";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
-import { obtainSavedSearches } from "src/services/fetch/fetchers/clientSavedSearchFetcher";
+import { QueryContext } from "src/services/search/QueryProvider";
 import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
@@ -33,12 +33,18 @@ export const SaveSearchSelector = ({
 }) => {
   const t = useTranslations("Search.saveSearch");
   const { user } = useUser();
-  const { searchParams, replaceQueryParams } = useSearchParamUpdater();
+  const { searchParams, replaceQueryParams, removeQueryParam } =
+    useSearchParamUpdater();
   const prevSearchParams = usePrevious(searchParams);
   const { updateQueryTerm } = useContext(QueryContext);
+  const { clientFetch } = useClientFetch<SavedSearchRecord[]>(
+    "Error fetching saved searches",
+  );
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [runPostFetchActions, setRunPostFetchActions] =
+    useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
 
   // allows us to avoid resetting the select option when params change after selection
@@ -46,9 +52,14 @@ export const SaveSearchSelector = ({
     useState<boolean>(false);
 
   const fetchSavedSearches = useCallback(() => {
+    if (!user?.token) {
+      setApiError(new Error("Not logged in, can't fetch saved searches"));
+    }
     setLoading(true);
     setApiError(null);
-    return obtainSavedSearches(user?.token)
+    return clientFetch("/api/user/saved-searches/list", {
+      method: "POST",
+    })
       .then((savedSearches) => {
         setLoading(false);
         setSavedSearches(savedSearches);
@@ -87,16 +98,32 @@ export const SaveSearchSelector = ({
   // not explicitly dependent on user changes, but fetchSavedSearches is, so will still fire
   useEffect(() => {
     fetchSavedSearches()
-      .then(() => {
-        if (newSavedSearches.length) {
-          // this works now but may not if once we introduce token refreshes.
-          // if a token changes without clearing the newSavedSearches list on the parent
-          // we could accidentally select a saved search on token refresh
-          setSelectedSavedSearch(newSavedSearches[0]);
-        }
-      })
+      .then(() => setRunPostFetchActions(true))
       .catch(noop);
   }, [fetchSavedSearches, newSavedSearches]);
+
+  // run post fetch action effect to set select with correct value after fetch
+  // split this out from the fetch useEffect so that we wouldn't have to deal with the
+  // extra triggers there
+  useEffect(() => {
+    if (runPostFetchActions) {
+      const savedSearchQueryValue = searchParams.get("savedSearch");
+      const savedSearchToSetInSelectAfterFetch =
+        savedSearchQueryValue ||
+        (newSavedSearches.length && newSavedSearches[0]);
+      if (savedSearchToSetInSelectAfterFetch) {
+        // this works now but may not if once we introduce token refreshes.
+        // if a token changes without clearing the newSavedSearches list on the parent
+        // we could accidentally select a saved search on token refresh
+        setApplyingSavedSearch(true);
+        setSelectedSavedSearch(savedSearchToSetInSelectAfterFetch);
+        if (savedSearchQueryValue) {
+          removeQueryParam("savedSearch");
+        }
+      }
+      setRunPostFetchActions(false);
+    }
+  }, [runPostFetchActions, searchParams, newSavedSearches, removeQueryParam]);
 
   // reset saved search selector on search change
   useEffect(() => {

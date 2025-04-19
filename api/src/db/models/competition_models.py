@@ -3,9 +3,13 @@ from datetime import date, datetime
 
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from src.constants.lookup_constants import CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.lookup_models import LkCompetitionOpenToApplicant, LkFormFamily
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
 
@@ -27,6 +31,28 @@ class Competition(ApiSchemaTable, TimestampMixin):
     closing_date: Mapped[date | None]
     grace_period: Mapped[int | None] = mapped_column(BigInteger)
     contact_info: Mapped[str | None]
+
+    form_family: Mapped[FormFamily | None] = mapped_column(
+        "form_family_id",
+        LookupColumn(LkFormFamily),
+        ForeignKey(LkFormFamily.form_family_id),
+        index=True,
+    )
+    opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
+    )
+    open_to_applicants: AssociationProxy[set[CompetitionOpenToApplicant]] = association_proxy(
+        "link_competition_open_to_applicant",
+        "competition_open_to_applicant",
+        creator=lambda obj: LinkCompetitionOpenToApplicant(competition_open_to_applicant=obj),
+    )
+    is_electronic_required: Mapped[bool | None]
+    expected_application_count: Mapped[int | None]
+    expected_application_size_mb: Mapped[int | None] = mapped_column(BigInteger)
+    is_multi_package: Mapped[bool | None]
+    agency_download_url: Mapped[str | None]
+    is_legacy_workspace_compatible: Mapped[bool | None]
+    can_send_mail: Mapped[bool | None]
 
     competition_forms: Mapped[list["CompetitionForm"]] = relationship(
         "CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan"
@@ -106,6 +132,10 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
+    application_forms: Mapped[list["ApplicationForm"]] = relationship(
+        "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
+    )
+
 
 class ApplicationForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_form"
@@ -122,3 +152,16 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), nullable=False)
     form: Mapped[Form] = relationship(Form)
     application_response: Mapped[dict] = mapped_column(JSONB, nullable=False)
+
+
+class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "link_competition_open_to_applicant"
+
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Competition.competition_id), primary_key=True
+    )
+    competition_open_to_applicant_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
+        primary_key=True,
+    )

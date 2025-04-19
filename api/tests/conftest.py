@@ -1,5 +1,6 @@
 import logging
 import uuid
+from os import path
 
 import _pytest.monkeypatch
 import boto3
@@ -187,6 +188,7 @@ def test_foreign_schema(db_schema_prefix):
 @pytest.fixture(scope="session")
 def search_client() -> search.SearchClient:
     client = search.SearchClient()
+
     try:
         yield client
     finally:
@@ -194,6 +196,33 @@ def search_client() -> search.SearchClient:
         # in a way that didn't clean it up, delete
         # all indexes at the end of a run that start with test
         client.delete_index("test-*")
+
+
+@pytest.fixture(scope="session")
+def search_attachment_pipeline(search_client) -> str:
+    pipeline_name = "test-multi-attachment"
+    search_client.put_pipeline(
+        {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                        "ignore_missing": True,
+                    }
+                }
+            ],
+        },
+        pipeline_name=pipeline_name,
+    )
+
+    return pipeline_name
 
 
 @pytest.fixture(scope="session")
@@ -222,11 +251,29 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     return alias
 
 
-@pytest.fixture(scope="class")
-def opportunity_search_index_class(search_client, monkeypatch):
+@pytest.fixture(scope="session")
+def agency_index(search_client, monkeypatch_session):
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test-agency-index-{uuid.uuid4().int}"
+
+    search_client.create_index(index_name)
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-agency-index-*")
+
+
+@pytest.fixture(scope="session")
+def agency_index_alias(search_client, monkeypatch_session):
     # Note we don't actually create anything, this is just a random name
-    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
-    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    alias = f"test-agency-index-alias-{uuid.uuid4().int}"
+    monkeypatch_session.setenv("AGENCY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
 
@@ -465,3 +512,27 @@ class BaseTestClass:
             db_session.execute(text(f"TRUNCATE TABLE {test_foreign_schema}.{table.name}"))
 
         db_session.commit()
+
+
+###################
+# File fixtures
+###################
+
+
+@pytest.fixture
+def fixture_from_file():
+    """
+    Fixture to read a fixture file content based given a file path relative to
+     the tests/fixtures/ directory.
+
+    Example:
+    def test_foo(fixture_from_file):
+        mock_data = fixture_from_file("/fix/data.json")
+    """
+
+    def _file_reader(file_path: str):
+        full_file_path = path.join(path.dirname(__file__), ".", "fixtures", file_path.lstrip("/"))
+        with open(full_file_path, "r") as f:
+            return f.read()
+
+    return _file_reader

@@ -9,12 +9,14 @@ from src.api.application_alpha.application_schemas import (
     ApplicationFormGetResponseSchema,
     ApplicationFormUpdateRequestSchema,
     ApplicationFormUpdateResponseSchema,
+    ApplicationGetResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
 )
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
+from src.services.applications.get_application import get_application
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.update_application_form import update_application_form
 
@@ -89,10 +91,37 @@ def application_form_get(
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
     with db_session.begin():
-        application_form = get_application_form(db_session, application_id, app_form_id)
+        application_form, warnings = get_application_form(db_session, application_id, app_form_id)
+
+    return response.ApiResponse(
+        message="Success",
+        data=application_form,
+        warnings=warnings,
+    )
+
+
+@application_blueprint.get("/applications/<uuid:application_id>")
+@application_blueprint.output(ApplicationGetResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_key_auth)
+@flask_db.with_db_session()
+def application_get(
+    db_session: db.Session,
+    application_id: UUID,
+) -> response.ApiResponse:
+    """Get an application by ID"""
+    add_extra_data_to_current_request_logs(
+        {
+            "application.application_id": application_id,
+        }
+    )
+    logger.info("GET /alpha/applications/:application_id")
+
+    with db_session.begin():
+        application = get_application(db_session, application_id)
 
     # Return the application form data
     return response.ApiResponse(
         message="Success",
-        data=application_form,
+        data=application,
     )

@@ -1,7 +1,7 @@
 "use client";
 
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { QueryContext } from "src/services/search/QueryProvider";
 
 import { useContext, useEffect } from "react";
 import { Pagination } from "@trussworks/react-uswds";
