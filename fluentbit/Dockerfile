@@ -61,4 +61,4 @@ ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
 COPY fluentbit.conf /fluent-bit/etc/fluent-bit.conf
 
-CMD ["-c", "/fluent-bit/etc/fluent-bit.conf"]
+CMD ["-e", "/fluent-bit/bin/out_newrelic.so", "-e", "/fluent-bit/bin/out_cloudwatch.so", "-c", "/fluent-bit/etc/fluent-bit.conf"]
