@@ -12,12 +12,13 @@ RUN apt-get update && apt-get install -y \
   libc6-dev \
   git \
   wget \
+  libyaml-0-2 \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Golang from official distribution (more reliable than package manager)
 RUN wget https://golang.org/dl/go1.20.12.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.20.12.linux-amd64.tar.gz && \
-    rm go1.20.12.linux-amd64.tar.gz
+  tar -C /usr/local -xzf go1.20.12.linux-amd64.tar.gz && \
+  rm go1.20.12.linux-amd64.tar.gz
 
 # Set up Go environment
 ENV PATH=$PATH:/usr/local/go/bin:/root/go/bin
@@ -25,9 +26,9 @@ ENV GOPATH=/root/go
 
 # Install required Go tools
 RUN mkdir -p /root/go/bin && \
-    go version && \
-    go install golang.org/x/lint/golint@latest && \
-    go install github.com/golang/mock/mockgen@latest
+  go version && \
+  go install golang.org/x/lint/golint@latest && \
+  go install github.com/golang/mock/mockgen@latest
 
 FROM fluent/fluent-bit:4.0.0 AS fluentbit
 
