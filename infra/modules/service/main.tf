@@ -215,35 +215,6 @@ resource "aws_ecs_task_definition" "app" {
       systemControls = []
       volumesFrom    = []
     },
-    {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.new_relic_fluent_bit_version,
-      memory                 = local.new_relic_fluent_bit_memory,
-      cpu                    = local.new_relic_fluent_bit_cpu,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-        }
-      },
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
-          "awslogs-region"        = data.aws_region.current.name,
-          "awslogs-stream-prefix" = local.log_stream_prefix
-        }
-      }
-      secrets = [
-        {
-          name      = "apiKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }
-      ]
-    },
   ])
 
   # Take the larger of the two values for CPU and Memory and multiply by 2
