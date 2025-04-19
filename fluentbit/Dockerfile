@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS build
+FROM ubuntu:24.04 AS build
 
 # Install ca-certificates first for proper repository access
 RUN apt-get update && apt-get install -y ca-certificates gnupg curl && \
@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
   git \
   wget \
   libyaml-0-2 \
+  libpq-dev \
+  bison \
+  gawk \
+  python3 \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Golang from official distribution (more reliable than package manager)
@@ -38,6 +42,7 @@ COPY --from=fluentbit /fluent-bit /fluent-bit
 
 # New Relic plugin
 ADD https://github.com/newrelic/newrelic-fluent-bit-output/releases/download/v2.3.0/out_newrelic-linux-amd64-2.3.0.so /fluent-bit/bin/out_newrelic.so
+RUN chmod a+x /fluent-bit/bin/out_newrelic.so
 
 # AWS CloudWatch plugin
 ADD https://github.com/aws/amazon-cloudwatch-logs-for-fluent-bit/archive/refs/tags/v1.9.4.zip /tmp/cloudwatch-logs.zip
@@ -49,7 +54,8 @@ RUN unzip /tmp/cloudwatch-logs.zip -d /tmp/ && \
   export GOPATH=/root/go && \
   go version && \
   make && \
-  cp ./bin/cloudwatch.so /fluent-bit/bin/out_cloudwatch.so
+  cp ./bin/cloudwatch.so /fluent-bit/bin/out_cloudwatch.so && \
+  chmod a+x /fluent-bit/bin/out_cloudwatch.so
 
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
