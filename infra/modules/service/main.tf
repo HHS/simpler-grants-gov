@@ -131,43 +131,6 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.fluent_bit_image_url,
-      memory                 = 256,
-      cpu                    = 512,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-          config-file-type        = "file"
-          config-file-value       = "/fluent-bit/etc/fluent-bit.conf"
-        }
-      }
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
-          "awslogs-region"        = data.aws_region.current.name,
-          "awslogs-stream-prefix" = local.log_stream_prefix
-        }
-      }
-      secrets = [
-        {
-          name      = "licenseKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
-        }
-      ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.container_name },
-        { name : "log_group_name", value : local.log_group_name },
-        { name : "FLB_LOG_LEVEL", value : "debug" },
-      ],
-    },
-    {
       name                   = local.container_name,
       image                  = local.image_url,
       memory                 = var.memory,
@@ -214,6 +177,43 @@ resource "aws_ecs_task_definition" "app" {
       mountPoints    = []
       systemControls = []
       volumesFrom    = []
+    },
+    {
+      name                   = "${local.container_name}-fluentbit"
+      image                  = local.fluent_bit_image_url,
+      memory                 = 256,
+      cpu                    = 512,
+      networkMode            = "awsvpc",
+      essential              = true,
+      readonlyRootFilesystem = false,
+      firelensConfiguration = {
+        type = "fluentbit",
+        options = {
+          enable-ecs-log-metadata = "true"
+          config-file-type        = "file"
+          config-file-value       = "/fluent-bit/etc/fluent-bit.conf"
+        }
+      }
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-region"        = data.aws_region.current.name,
+          "awslogs-stream-prefix" = local.log_stream_prefix
+        }
+      }
+      secrets = [
+        {
+          name      = "licenseKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/api/${var.environment_name}/new-relic-license-key"
+        }
+      ]
+      environment = [
+        { name : "aws_region", value : data.aws_region.current.name },
+        { name : "container_name", value : local.container_name },
+        { name : "log_group_name", value : local.log_group_name },
+        { name : "FLB_LOG_LEVEL", value : "debug" },
+      ],
     },
   ])
 
