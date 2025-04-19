@@ -16,5 +16,5 @@ locals {
 
   github_actions_role_name                = "${local.project_name}-github-actions"
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
-  latest_fluent_bit_commit                = "31a82958a38c2b50087bcff085c08d0f15c5bb97"
+  latest_fluent_bit_commit                = "05bd0c4e3b443068c2caddd7b4eb8f86d325ec7e"
 }
