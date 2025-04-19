@@ -172,19 +172,17 @@ resource "aws_ecs_task_definition" "app" {
       volumesFrom    = []
     },
     {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.fluent_bit_image_url,
-      memory                 = 256,
-      cpu                    = 512,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
+      name                     = "${local.container_name}-fluentbit"
+      image                    = local.fluent_bit_image_url,
+      memory                   = 256,
+      cpu                      = 512,
+      networkMode              = "awsvpc",
+      readonly_root_filesystem = false,
+      essential                = true,
       firelensConfiguration = {
         type = "fluentbit",
         options = {
           enable-ecs-log-metadata = "true"
-          config-file-type        = "file"
-          config-file-value       = "/fluent-bit/etc/fluent-bit.conf"
         }
       }
       logConfiguration = {
