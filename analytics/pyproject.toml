@@ -22,6 +22,7 @@ plotly = "^5.15.0"
 pydantic = "^2.0.3"
 python = "~3.13"
 slack-sdk = "^3.23.0"
+sqlparse = ">=0.5.0"
 typer = { extras = ["all"], version = "^0.15.0" }
 sqlalchemy = "^2.0.30"
 pydantic-settings = "^2.3.4"
@@ -53,6 +54,10 @@ python_version = "3.12"
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = ["plotly.*", "dynaconf.*", "newrelic.*"]
+
+[[tool.mypy.overrides]]
+module = "sqlparse"
+ignore_missing_imports = true
 
 [tool.pylint."MESSAGE CONTROL"]
 disable = [
