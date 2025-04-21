@@ -27,6 +27,8 @@ COPY --from=fluentbit /fluent-bit /fluent-bit
 
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
+ENV FLB_LOG_LEVEL=debug
+
 COPY fluentbit.conf /fluent-bit/etc/fluent-bit.conf
 
 CMD ["-c", "/fluent-bit/etc/fluent-bit.conf"]
