@@ -11,4 +11,4 @@ env APP_NAME=fluentbit make release-build
 env APP_NAME=fluentbit make release-publish
 ```
 
-After you deploy a new version of fluentbit, store it the git commit has you just deployed inside of `infra/project-config/main.tf`. That image version should now deploy beside all of our primary application containers.
+After you publish a new version of fluentbit, store it the git commit has you just deployed inside of the `fluent-bit-commit` SSM parameter. The next deploy of our services will then start using that commit.
