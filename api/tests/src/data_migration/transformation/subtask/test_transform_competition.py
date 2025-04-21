@@ -26,10 +26,6 @@ class TestTransformCompetition(BaseTransformTestClass):
         # Use cascade delete to properly handle foreign key constraints
         cascade_delete_from_db_table(db_session, Competition)
 
-        # Clean staging tables directly
-        db_session.execute(text(f"DELETE FROM {test_staging_schema}.tcompetition"))
-        db_session.execute(text(f"DELETE FROM {test_staging_schema}.topportunity_cfda"))
-
         # Clean opportunity tables
         cascade_delete_from_db_table(db_session, OpportunityAssistanceListing)
         cascade_delete_from_db_table(db_session, Opportunity)
