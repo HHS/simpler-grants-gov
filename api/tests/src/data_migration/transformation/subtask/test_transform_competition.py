@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy import text
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import tests.src.db.models.factories as f
