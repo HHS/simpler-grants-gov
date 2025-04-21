@@ -92,7 +92,7 @@ def xls_reader(file_path: str) -> str:
 
 @dataclass
 class TextExtractorConfig:
-    extractor: Callable[[bytes | str], str] = lambda data: data
+    extractor: Callable[[bytes], str] | Callable[[str], str] = lambda data: data
     read_mode: str = "r"
     reader: Callable[[str], bytes | str] | None = None
 
@@ -147,7 +147,7 @@ class TextExtractor:
             raise UnsupportedTextExtractorFileType(err)
 
 
-def _xls_dict_to_string(xls_dict: dict[str, list[list]]) -> str:
+def _xls_dict_to_string(xls_dict: dict) -> str:
     xls_data = []
     for sheet_name, rows in xls_dict.items():
         xls_data.append(sheet_name)
