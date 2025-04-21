@@ -1,20 +1,8 @@
-import { Meta, StoryFn } from "@storybook/react";
-
 import React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
+import InfoTooltip from "src/components/InfoTooltip";
 
-import InfoTooltip, {
-  InfoTooltipProps,
-} from "../../src/components/InfoTooltip";
-
-const decorators = [
-  (Story: StoryFn) => (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-      <Story />
-    </div>
-  ),
-];
-
-export default {
+const meta = {
   title: "Components/InfoTooltip",
   component: InfoTooltip,
   argTypes: {
@@ -25,15 +13,21 @@ export default {
       },
     },
   },
-  decorators,
-} as Meta;
+  decorators: [
+    (Story) => (
+      <div style={{ padding: "50px" }}>
+        <Story />
+      </div>
+    ),
+  ],
+} satisfies Meta<typeof InfoTooltip>;
 
-const Template: StoryFn<InfoTooltipProps> = (args: InfoTooltipProps) => (
-  <InfoTooltip {...args} />
-);
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default = Template.bind({});
-Default.args = {
-  text: "This is an informational tooltip",
-  position: "top",
+export const Default: Story = {
+  args: {
+    text: "This is an informational tooltip",
+    position: "top",
+  },
 };
