@@ -5,10 +5,17 @@ import pytest
 
 import tests.src.db.models.factories as f
 from src.adapters.aws import S3Config
-from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
+from src.constants.lookup_constants import (
+    ApplicantType,
+    CompetitionOpenToApplicant,
+    FormFamily,
+    FundingCategory,
+    FundingInstrument,
+)
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
 from src.db.models.agency_models import Agency
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
@@ -801,3 +808,243 @@ def validate_opportunity_attachment(
             assert contents.encode() == source_attachment.file_lob
         else:
             assert contents.encode() != source_attachment.file_lob
+
+
+def setup_competition(
+    db_session,
+    create_existing: bool = False,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    opportunity: Opportunity | None = None,
+    opportunity_assistance_listing_id: int | None = None,
+    source_values: dict | None = None,
+    all_fields_null: bool = False,
+) -> staging.competition.Tcompetition:
+    """Setup a competition record for testing transformation"""
+
+    # Default values for non-nullable fields
+    values = {
+        "competitionid": "COMP123",
+        "familyid": 15,  # SF-424
+        "competitiontitle": "Test Competition",
+        "openingdate": date(2023, 1, 1),
+        "closingdate": date(2023, 12, 31),
+        "contactinfo": "John Doe, john.doe@example.com",
+        "graceperiod": 10,
+        "opentoapplicanttype": 1,  # ORGANIZATION
+        "electronic_required": "Y",
+        "expected_appl_num": 50,
+        "expected_appl_size": 5,
+        "ismulti": "Y",
+        "agency_dwnld_url": "https://example.com/download",
+        "package_id": "PKG123",
+        "is_wrkspc_compatible": "Y",  # This field is required by the database schema
+        "sendmail": "Y",
+        "created_date": datetime(2023, 1, 1, 12, 0, 0),
+        "last_upd_date": datetime(2023, 1, 15, 12, 0, 0),
+        "dialect": "X",  # This field is required by the database schema
+    }
+
+    # Override with any specified values
+    if source_values:
+        values.update(source_values)
+
+    # Ensure required fields are never None
+    if "is_wrkspc_compatible" not in values or values["is_wrkspc_compatible"] is None:
+        values["is_wrkspc_compatible"] = "Y"
+    if "dialect" not in values or values["dialect"] is None:
+        values["dialect"] = "X"
+
+    # Set all fields to None if requested, except for required fields
+    if all_fields_null:
+        for key in values.keys():
+            # Skip required fields that can't be null
+            if key not in ["is_deleted", "transformed_at", "is_wrkspc_compatible", "dialect"]:
+                values[key] = None
+
+    # Set up the opportunity_cfda_id
+    if opportunity and opportunity_assistance_listing_id:
+        values["opp_cfda_id"] = opportunity_assistance_listing_id
+
+        # Create the staging TopportunityCfda record if it doesn't exist
+        existing_cfda = (
+            db_session.query(staging.opportunity.TopportunityCfda)
+            .filter(
+                staging.opportunity.TopportunityCfda.opp_cfda_id
+                == opportunity_assistance_listing_id
+            )
+            .one_or_none()
+        )
+
+        if not existing_cfda:
+            f.StagingTopportunityCfdaFactory.create(
+                opp_cfda_id=opportunity_assistance_listing_id,
+                opportunity_id=opportunity.opportunity_id,
+                opportunity=None,  # Prevent factory from creating another opportunity
+            )
+
+    elif opportunity:
+        # Create an assistance listing if none was specified
+        opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity
+        )
+        values["opp_cfda_id"] = opportunity_assistance_listing.opportunity_assistance_listing_id
+
+        # Create the staging TopportunityCfda record
+        f.StagingTopportunityCfdaFactory.create(
+            opp_cfda_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
+            opportunity_id=opportunity.opportunity_id,
+            opportunity=None,  # Prevent factory from creating another opportunity
+        )
+
+    competition = f.StagingTcompetitionFactory(
+        is_deleted=is_delete,
+        transformed_at=datetime(2023, 1, 1) if is_already_processed else None,
+        **values,
+    )
+
+    # Create the target record if requested
+    if create_existing:
+        # Convert form_family
+        form_family = None
+        if competition.familyid == 12:
+            form_family = FormFamily.SF_424_INDIVIDUAL
+        elif competition.familyid == 14:
+            form_family = FormFamily.RR
+        elif competition.familyid == 15:
+            form_family = FormFamily.SF_424
+        elif competition.familyid == 16:
+            form_family = FormFamily.SF_424_MANDATORY
+        elif competition.familyid == 17:
+            form_family = FormFamily.SF_424_SHORT_ORGANIZATION
+
+        # Create link objects for open_to_applicants
+        open_to_applicants = set()
+        if competition.opentoapplicanttype == 1:
+            open_to_applicants.add(CompetitionOpenToApplicant.ORGANIZATION)
+        elif competition.opentoapplicanttype == 2:
+            open_to_applicants.add(CompetitionOpenToApplicant.INDIVIDUAL)
+        elif competition.opentoapplicanttype == 3:
+            open_to_applicants.add(CompetitionOpenToApplicant.INDIVIDUAL)
+            open_to_applicants.add(CompetitionOpenToApplicant.ORGANIZATION)
+
+        competition_record = Competition(
+            legacy_competition_id=competition.comp_id,
+            public_competition_id=competition.competitionid,
+            legacy_package_id=competition.package_id,
+            competition_title=competition.competitiontitle,
+            opening_date=competition.openingdate,
+            closing_date=competition.closingdate,
+            grace_period=competition.graceperiod,
+            contact_info=competition.contactinfo,
+            form_family=form_family,
+            opportunity=opportunity,
+            opportunity_id=opportunity.opportunity_id if opportunity else None,
+            opportunity_assistance_listing_id=(
+                opportunity_assistance_listing_id or competition.opp_cfda_id
+            ),
+            is_electronic_required=(
+                competition.electronic_required == "Y" if competition.electronic_required else None
+            ),
+            expected_application_count=competition.expected_appl_num,
+            expected_application_size_mb=competition.expected_appl_size,
+            is_multi_package=competition.ismulti == "Y" if competition.ismulti else None,
+            agency_download_url=competition.agency_dwnld_url,
+            is_legacy_workspace_compatible=(
+                competition.is_wrkspc_compatible == "Y"
+                if competition.is_wrkspc_compatible
+                else None
+            ),
+            can_send_mail=competition.sendmail == "Y" if competition.sendmail else None,
+            created_at=competition.created_date,
+            updated_at=competition.last_upd_date,
+            open_to_applicants=open_to_applicants,  # Use the association proxy directly
+        )
+
+        db_session.add(competition_record)
+        db_session.commit()
+
+    return competition
+
+
+def validate_competition(
+    db_session, source_competition: staging.competition.Tcompetition, expect_in_db: bool = True
+) -> None:
+    """Validate that a competition was transformed correctly."""
+    competition = (
+        db_session.query(Competition)
+        .filter(Competition.legacy_competition_id == source_competition.comp_id)
+        .one_or_none()
+    )
+
+    if not expect_in_db:
+        assert competition is None
+        return
+
+    assert competition is not None
+    assert competition.public_competition_id == source_competition.competitionid
+    assert competition.legacy_package_id == source_competition.package_id
+    assert competition.competition_title == source_competition.competitiontitle
+    assert competition.opening_date == source_competition.openingdate
+    assert competition.closing_date == source_competition.closingdate
+    assert competition.grace_period == source_competition.graceperiod
+    assert competition.contact_info == source_competition.contactinfo
+
+    # Check form_family mapping
+    if source_competition.familyid == 12:
+        assert competition.form_family == FormFamily.SF_424_INDIVIDUAL
+    elif source_competition.familyid == 14:
+        assert competition.form_family == FormFamily.RR
+    elif source_competition.familyid == 15:
+        assert competition.form_family == FormFamily.SF_424
+    elif source_competition.familyid == 16:
+        assert competition.form_family == FormFamily.SF_424_MANDATORY
+    elif source_competition.familyid == 17:
+        assert competition.form_family == FormFamily.SF_424_SHORT_ORGANIZATION
+    else:
+        assert competition.form_family is None
+
+    # Get the actual open_to_applicant enum values through the relationship
+    applicant_types = competition.open_to_applicants
+
+    # Check open_to_applicants mapping
+    if source_competition.opentoapplicanttype == 1:
+        assert CompetitionOpenToApplicant.ORGANIZATION in applicant_types
+        assert CompetitionOpenToApplicant.INDIVIDUAL not in applicant_types
+    elif source_competition.opentoapplicanttype == 2:
+        assert CompetitionOpenToApplicant.INDIVIDUAL in applicant_types
+        assert CompetitionOpenToApplicant.ORGANIZATION not in applicant_types
+    elif source_competition.opentoapplicanttype == 3:
+        assert CompetitionOpenToApplicant.INDIVIDUAL in applicant_types
+        assert CompetitionOpenToApplicant.ORGANIZATION in applicant_types
+    else:
+        assert len(applicant_types) == 0
+
+    # Check boolean conversions
+    if source_competition.electronic_required == "Y":
+        assert competition.is_electronic_required is True
+    elif source_competition.electronic_required == "N":
+        assert competition.is_electronic_required is False
+    else:
+        assert competition.is_electronic_required is None
+
+    if source_competition.ismulti == "Y":
+        assert competition.is_multi_package is True
+    elif source_competition.ismulti == "N":
+        assert competition.is_multi_package is False
+    else:
+        assert competition.is_multi_package is None
+
+    if source_competition.is_wrkspc_compatible == "Y":
+        assert competition.is_legacy_workspace_compatible is True
+    elif source_competition.is_wrkspc_compatible == "N":
+        assert competition.is_legacy_workspace_compatible is False
+    else:
+        assert competition.is_legacy_workspace_compatible is None
+
+    if source_competition.sendmail == "Y":
+        assert competition.can_send_mail is True
+    elif source_competition.sendmail == "N":
+        assert competition.can_send_mail is False
+    else:
+        assert competition.can_send_mail is None

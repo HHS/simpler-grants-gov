@@ -16,6 +16,7 @@ from src.data_migration.transformation.subtask.transform_applicant_type import (
 from src.data_migration.transformation.subtask.transform_assistance_listing import (
     TransformAssistanceListing,
 )
+from src.data_migration.transformation.subtask.transform_competition import TransformCompetition
 from src.data_migration.transformation.subtask.transform_funding_category import (
     TransformFundingCategory,
 )
@@ -49,6 +50,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_opportunity_attachment: bool = (
         True  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
     )
+    enable_competition: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION
 
 
 class TransformOracleDataTask(Task):
@@ -96,3 +98,6 @@ class TransformOracleDataTask(Task):
 
         if self.transform_config.enable_opportunity_attachment:
             TransformOpportunityAttachment(self).run()
+
+        if self.transform_config.enable_competition:
+            TransformCompetition(self).run()
