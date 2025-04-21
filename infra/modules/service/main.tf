@@ -179,6 +179,7 @@ resource "aws_ecs_task_definition" "app" {
       networkMode              = "awsvpc",
       readonly_root_filesystem = false,
       essential                = true,
+      readonlyRootFilesystem   = false,
       firelensConfiguration = {
         type = "fluentbit",
         options = {
