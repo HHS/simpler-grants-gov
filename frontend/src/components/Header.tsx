@@ -1,27 +1,37 @@
 "use client";
 
-import clsx from "clsx";
-import GrantsLogo from "public/img/grants-logo.svg";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useSnackbar } from "src/hooks/useSnackbar";
-import { useUser } from "src/services/auth/useUser";
-import { IndexType } from "src/types/generalTypes";
-import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import GrantsLogo from "public/img/grants-logo.svg";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSnackbar } from "src/hooks/useSnackbar";
+import { useUser } from "src/services/auth/useUser";
+import { IndexType } from "src/types/generalTypes";
+import {
+  isCurrentPath,
+  isExternalLink,
+} from "src/utils/generalUtils";
+
 import {
   GovBanner,
+  Header as USWDSHeader,
   NavMenuButton,
   PrimaryNav,
   Title,
-  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
@@ -51,7 +61,7 @@ const NavLink = ({
 }) => {
   let iconBtnClass, linkTarget;
 
-  if (href && isExternalLink(href)) {
+  if (isExternalLink(href)) {
     iconBtnClass = "icon-btn";
     linkTarget = "_blank";
   }
@@ -60,7 +70,7 @@ const NavLink = ({
     <Link href={href} key={href} className={classes} target={linkTarget}>
       <div onClick={onClick} className={iconBtnClass}>
         {text}
-        {href && isExternalLink(href) && (
+        {isExternalLink(href) && (
           <USWDSIcon name="launch" className="usa-icon--size-2" />
         )}
       </div>
@@ -152,7 +162,7 @@ const NavLinks = ({
           }
           // mark as current if any child page is active
           return children.some((child) => {
-            return child?.href && isCurrentPath(child.href, currentPath);
+            return child?.isCurrentPath(child.href, currentPath);
           });
         } else {
           return isCurrentPath(href, currentPath);

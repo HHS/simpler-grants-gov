@@ -126,5 +126,5 @@ export const isCurrentPath = (href: string, currentPath: string): boolean =>
   !!currentPath.match(new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`));
 
 export function isExternalLink(href: string): boolean {
-  return !!href.includes("http");
+  return !!(href && href.includes("http"));
 }
