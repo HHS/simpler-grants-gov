@@ -186,6 +186,10 @@ resource "aws_ecs_task_definition" "app" {
           enable-ecs-log-metadata = "true"
         }
       }
+      command = [
+        "-c",
+        "/fluent-bit/etc/fluent-bit.conf"
+      ],
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -196,8 +200,14 @@ resource "aws_ecs_task_definition" "app" {
       }
       portMappings = [
         {
+          # "forward" ports
           containerPort = 24224,
           hostPort      = 24224,
+        },
+        {
+          # "tcp" ports
+          containerPort = 8877,
+          hostPort      = 8877,
         }
       ],
       secrets = [
