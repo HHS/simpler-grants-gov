@@ -64,7 +64,6 @@ export const messages = {
     },
     description: {
       title: "Description",
-      summary: "Summary",
       eligibility: "Eligibility",
       eligible_applicants: "Eligible applicants",
       additional_info: "Additional information",
