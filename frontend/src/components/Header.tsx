@@ -6,7 +6,7 @@ import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
-import { isCurrentPath } from "src/utils/generalUtils";
+import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -37,10 +37,6 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-function isExternalLink(href: string): boolean {
-  return !!href.includes("https");
-}
 
 const NavLink = ({
   href = "",
@@ -224,7 +220,10 @@ const NavLinks = ({
         <NavLink
           href={link.href}
           key={link.href}
-          onClick={closeDropdownAndMobileNav}
+          onClick={() => {
+            closeMobileNav;
+            setActiveNavDropdownIndex(null);
+          }}
           text={link.text}
           classes={clsx({
             "usa-nav__link": true,

@@ -124,3 +124,7 @@ export const queryParamsToQueryString = (dict: OptionalStringDict) => {
 // note that the regexp is taking into account /en & /es localized pathnames
 export const isCurrentPath = (href: string, currentPath: string): boolean =>
   !!currentPath.match(new RegExp(`^(?:/e[ns])?${href.split("?")[0]}`));
+
+export function isExternalLink(href: string): boolean {
+  return !!href.includes("http");
+}
