@@ -196,8 +196,8 @@ resource "aws_ecs_task_definition" "app" {
       }
       portMappings = [
         {
-          containerPort = "24224",
-          hostPort      = "24224",
+          containerPort = 24224,
+          hostPort      = 24224,
         }
       ],
       secrets = [

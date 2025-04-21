@@ -16,5 +16,5 @@ locals {
 
   github_actions_role_name                = "${local.project_name}-github-actions"
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
-  latest_fluent_bit_commit                = "7283daf227cd7ba9c2c37f68f1b4b2270c9c5bf3" # move into SSM when iteration is done
+  latest_fluent_bit_commit                = "845279b41b9f232abf8c3cce35c0d5c33f444d9b" # move into SSM when iteration is done
 }
