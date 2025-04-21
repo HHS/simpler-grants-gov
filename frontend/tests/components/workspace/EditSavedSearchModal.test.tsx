@@ -10,7 +10,6 @@ const mockUseUser = jest.fn(() => ({
 }));
 
 const clientFetchMock = jest.fn();
-const mockSearchParams = new URLSearchParams();
 const routerPush = jest.fn(() => Promise.resolve(true));
 
 jest.mock("next/navigation", () => ({
@@ -18,9 +17,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: routerPush,
   }),
-  useSearchParams: jest.fn(
-    () => mockSearchParams,
-  ) as jest.Mock<URLSearchParams>,
 }));
 
 jest.mock("src/services/auth/useUser", () => ({
