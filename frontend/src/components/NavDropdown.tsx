@@ -2,6 +2,8 @@ import {
   Dispatch,
   JSX,
   SetStateAction,
+  useEffect,
+  useState,
 } from "react";
 
 import clsx from "clsx";
@@ -29,33 +31,33 @@ export default function NavDropdown({
   menuItems,
   setActiveNavDropdownIndex,
 }: NavDropdownProps): JSX.Element {
-  // const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   function handleToggle() {
-    const activeIndex: IndexType = activeNavDropdownIndex ? null : index;
+    const activeIndex: IndexType = isOpen ? null : index;
     setActiveNavDropdownIndex(activeIndex);
   }
 
-  // useEffect(() => {
-  //   setIsOpen(activeNavDropdownIndex === index);
-  // }, [activeNavDropdownIndex, index]);
+  useEffect(() => {
+    setIsOpen(activeNavDropdownIndex === index);
+  }, [activeNavDropdownIndex, index]);
 
   return (
     <>
       <NavDropDownButton
         label={linkText}
         menuId={linkText}
-        isOpen={activeNavDropdownIndex === null}
+        isOpen={isOpen}
         onToggle={() => handleToggle()}
         className={clsx({
           "usa-current": isCurrent,
-          "simpler-subnav-open": activeNavDropdownIndex === null,
+          "simpler-subnav-open": isOpen,
         })}
       />
       <Menu
         id={linkText}
         items={menuItems}
-        isOpen={activeNavDropdownIndex === null}
+        isOpen={isOpen}
         className="margin-top-05"
       />
     </>
