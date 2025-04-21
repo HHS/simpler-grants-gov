@@ -194,6 +194,12 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
+      portMappings = [
+        {
+          containerPort = "24224",
+          hostPort      = "24224",
+        }
+      ],
       secrets = [
         {
           name      = "licenseKey",
