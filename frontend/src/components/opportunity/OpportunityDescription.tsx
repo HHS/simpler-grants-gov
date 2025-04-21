@@ -57,7 +57,7 @@ const SummaryDescriptionDisplay = ({
         }}
       />
       <ContentDisplayToggle
-        showCallToAction={t("show_summary")}
+        showCallToAction={t("show_description")}
         hideCallToAction={t("hide_summary_description")}
         positionButtonBelowContent={false}
       >
@@ -90,9 +90,10 @@ const OpportunityDescription = ({
   return (
     <>
       <div className="usa-prose margin-top-3">
-        <h2>{t("title")}</h2>
-        <OpportunityDownload attachments={attachments} />
-        <h3>{t("summary")}</h3>
+        <div className="display-block tablet:display-flex usa-prose flex-align-end">
+          <h2 className="flex-1">{t("title")}</h2>
+          <OpportunityDownload attachments={attachments} />
+        </div>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
         />
@@ -108,7 +109,7 @@ const OpportunityDescription = ({
           }}
         />
         <h2>{t("contact_info")}</h2>
-        <h3>{t("description")}</h3>
+        <h3>{t("contact_description")}</h3>
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
