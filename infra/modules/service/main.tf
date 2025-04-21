@@ -155,7 +155,12 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port,
           hostPort      = var.container_port,
           protocol      = "tcp"
-        }
+        },
+        {
+          # fluent bit "forward" ports
+          containerPort = 24224,
+          hostPort      = 24224,
+        },
       ],
       linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
@@ -200,15 +205,10 @@ resource "aws_ecs_task_definition" "app" {
       }
       portMappings = [
         {
-          # "forward" ports
+          # fluent bit "forward" ports
           containerPort = 24224,
           hostPort      = 24224,
         },
-        {
-          # "tcp" ports
-          containerPort = 8877,
-          hostPort      = 8877,
-        }
       ],
       secrets = [
         {
