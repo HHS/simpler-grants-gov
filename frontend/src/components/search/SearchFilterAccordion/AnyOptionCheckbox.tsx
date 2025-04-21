@@ -16,7 +16,7 @@ export const AnyOptionCheckbox = ({
   queryParamKey: string;
 }) => {
   const { setQueryParam } = useSearchParamUpdater();
-  const id = `${title}-any`;
+  const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
   const t = useTranslations("Search.accordion");
   const label = `${t("any")} ${title.toLowerCase()}`;
 
