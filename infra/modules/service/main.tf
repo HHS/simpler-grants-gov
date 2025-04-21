@@ -155,12 +155,7 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port,
           hostPort      = var.container_port,
           protocol      = "tcp"
-        },
-        {
-          # fluent bit "forward" ports
-          containerPort = 24224,
-          hostPort      = 24224,
-        },
+        }
       ],
       linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
@@ -193,7 +188,7 @@ resource "aws_ecs_task_definition" "app" {
       }
       command = [
         "-c",
-        "/fluent-bit/etc/fluent-bit.conf"
+        "/fluent-bit/etc/fluent-bit-custom.conf"
       ],
       logConfiguration = {
         logDriver = "awslogs",
@@ -203,13 +198,6 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
-      portMappings = [
-        {
-          # fluent bit "forward" ports
-          containerPort = 24224,
-          hostPort      = 24224,
-        },
-      ],
       secrets = [
         {
           name      = "licenseKey",
