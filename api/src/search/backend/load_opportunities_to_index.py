@@ -26,11 +26,11 @@ from src.db.models.opportunity_models import (
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.text_extractor import TextExtractor, extract_text_from_file
+from src.util.text_extractor import extract_text_from_file, get_text_extractor_configs
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_ATTACHMENT_SUFFIXES = set(TextExtractor.get_configs())
+ALLOWED_ATTACHMENT_SUFFIXES = set(get_text_extractor_configs().keys())
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
