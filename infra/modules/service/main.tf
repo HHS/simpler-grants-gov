@@ -22,6 +22,10 @@ data "external" "deploy_github_sha" {
   program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
+data "aws_ssm_parameter" "fluent_bit_commit" {
+  name = "/fluent-bit-commit"
+}
+
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -31,7 +35,7 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
   fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
-  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${module.project_config.fluent_bit_commit}"
+  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${data.aws_ssm_parameter.fluent_bit_commit.value}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 

@@ -50,7 +50,3 @@ output "project_name" {
 output "system_notifications_config" {
   value = local.system_notifications_config
 }
-
-output "fluent_bit_commit" {
-  value = data.aws_ssm_parameter.fluent_bit_commit
-}
