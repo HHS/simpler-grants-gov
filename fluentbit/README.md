@@ -11,4 +11,4 @@ env APP_NAME=fluentbit make release-build
 env APP_NAME=fluentbit make release-publish
 ```
 
-After you publish a new version of fluentbit, store it the git commit has you just deployed inside of the `fluent-bit-commit` SSM parameter. The next deploy of our services will then start using that commit.
+After you publish a new version of fluentbit, store it the git commit has you just deployed inside of the `fluent-bit-commit` [SSM parameter](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/fluent-bit-commit/). The next deploy of our services will then start using that commit.
