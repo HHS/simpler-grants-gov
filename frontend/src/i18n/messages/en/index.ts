@@ -76,6 +76,7 @@ export const messages = {
       hide_summary_description: "Hide full description",
       nofo_download: "Download Full Announcement (NOFO)",
       jump_to_documents: "Jump to all documents",
+      zip_download: "Download all",
     },
     documents: {
       title: "Documents",
@@ -543,6 +544,7 @@ export const messages = {
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
     accordion: {
+      any: "Any",
       titles: {
         funding: "Funding instrument",
         eligibility: "Eligibility",
