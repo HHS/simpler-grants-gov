@@ -4,6 +4,7 @@ FROM ubuntu:24.04 AS build
 
 # fluentbit requires a subset of these installs to be present at runtime.
 # This list can almost certainly be decreased very slightly.
+# But testing exactly which packages can be remove would be painful.
 RUN apt-get update && apt-get install -y \
   curl \
   unzip \
