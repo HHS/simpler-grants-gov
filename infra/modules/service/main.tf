@@ -177,6 +177,12 @@ resource "aws_ecs_task_definition" "app" {
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
+      healthCheck = {
+        timeout     = 5,
+        interval    = 10,
+        startPeriod = 30,
+        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
+      },
       firelensConfiguration = {
         type = "fluentbit",
         options = {
