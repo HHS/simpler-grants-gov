@@ -223,7 +223,6 @@ def transform_open_to_applicants(applicant_type: int | None) -> set[CompetitionO
     if applicant_type is None:
         return set()
 
-    print(applicant_type)
     # Map the single values
     if applicant_type == 1:
         return {CompetitionOpenToApplicant.ORGANIZATION}
