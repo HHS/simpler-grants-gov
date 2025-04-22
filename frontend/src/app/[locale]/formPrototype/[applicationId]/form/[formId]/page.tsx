@@ -83,15 +83,16 @@ async function FormPage({ params }: formPageProps) {
     formId,
   );
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
-  try {
-    validateUiSchema(form_ui_schema);
-  } catch (e) {
-    console.error("Error validating form", e);
+
+  const schemaErrors = validateUiSchema(form_ui_schema);
+  if (schemaErrors) {
+    console.error("Error validating form", schemaErrors);
     return <TopLevelError />;
   }
 
   let formSchema = {};
   try {
+    // creates single object for json schema from references
     formSchema = await $RefParser.dereference(form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
@@ -99,30 +100,32 @@ async function FormPage({ params }: formPageProps) {
   }
 
   return (
-    <GridContainer>
-      <BetaAlert />
-      <h1>Form demo for &quot;{form_name}&quot; form</h1>
-      <legend className="usa-legend">
-        The following is a demo of the apply forms.
-      </legend>
-      <p>
-        Required fields are marked with an asterisk (
-        <abbr
-          title="required"
-          className="usa-hint usa-hint--required text-no-underline"
-        >
-          *
-        </abbr>
-        ).
-      </p>
-      <ApplyForm
-        savedFormData={application_response}
-        formSchema={formSchema}
-        uiSchema={form_ui_schema}
-        formId={form_id}
-        applicationId={applicationId}
-      />
-    </GridContainer>
+    <>
+      <BetaAlert containerClasses="margin-top-5" />
+      <GridContainer>
+        <h1>Form demo for &quot;{form_name}&quot; form</h1>
+        <legend className="usa-legend">
+          The following is a demo of the apply forms.
+        </legend>
+        <p>
+          Required fields are marked with an asterisk (
+          <abbr
+            title="required"
+            className="usa-hint usa-hint--required text-no-underline"
+          >
+            *
+          </abbr>
+          ).
+        </p>
+        <ApplyForm
+          savedFormData={application_response}
+          formSchema={formSchema}
+          uiSchema={form_ui_schema}
+          formId={form_id}
+          applicationId={applicationId}
+        />
+      </GridContainer>
+    </>
   );
 }
 
