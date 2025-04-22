@@ -51,12 +51,20 @@ class TransformCompetition(AbstractTransformSubTask):
                     if not opportunity:
                         logger.warning(
                             "Competition references opportunity that doesn't exist in target schema",
-                            extra={"competition_id": source_competition.comp_id, "opportunity_id": opportunity_id},
+                            extra={
+                                "competition_id": source_competition.comp_id,
+                                "opportunity_id": opportunity_id,
+                            },
                         )
                         opportunity_id = None
                         opportunity_assistance_listing_id = None
 
-                self.process_competition(source_competition, target_competition, opportunity_id, opportunity_assistance_listing_id)
+                self.process_competition(
+                    source_competition,
+                    target_competition,
+                    opportunity_id,
+                    opportunity_assistance_listing_id,
+                )
             except ValueError:
                 self.increment(
                     transform_constants.Metrics.TOTAL_ERROR_COUNT,
@@ -68,7 +76,11 @@ class TransformCompetition(AbstractTransformSubTask):
                 )
 
     def process_competition(
-        self, source_competition: Tcompetition, target_competition: Competition | None, opportunity_id: int | None, opportunity_assistance_listing_id: int | None
+        self,
+        source_competition: Tcompetition,
+        target_competition: Competition | None,
+        opportunity_id: int | None,
+        opportunity_assistance_listing_id: int | None,
     ) -> None:
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,

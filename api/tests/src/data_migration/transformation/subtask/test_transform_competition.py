@@ -10,7 +10,6 @@ from src.data_migration.transformation.subtask.transform_competition import (
 )
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
@@ -177,7 +176,7 @@ class TestTransformCompetition(BaseTransformTestClass):
                 competition,
                 None,
                 opportunity.opportunity_id,
-                opportunity_assistance_listing.opportunity_assistance_listing_id
+                opportunity_assistance_listing.opportunity_assistance_listing_id,
             )
 
     def test_process_competition_with_invalid_applicant_type(
@@ -213,5 +212,5 @@ class TestTransformCompetition(BaseTransformTestClass):
                 competition,
                 None,
                 opportunity.opportunity_id,
-                opportunity_assistance_listing.opportunity_assistance_listing_id
+                opportunity_assistance_listing.opportunity_assistance_listing_id,
             )
