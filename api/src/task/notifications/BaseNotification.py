@@ -22,7 +22,7 @@ class BaseNotification(ABC):
     def collect_notifications(
         self,
     ) -> dict[UUID, list[UserSavedOpportunity]] | dict[UUID, list[UserSavedSearch]] | None:
-        """Collect notifications for users (either saved opportunities or searches)."""
+        """Collect notifications for users"""
         pass
 
     @abstractmethod

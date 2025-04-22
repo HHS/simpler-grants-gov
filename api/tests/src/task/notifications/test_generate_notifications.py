@@ -12,11 +12,8 @@ from src.db.models.user_models import (
     UserSavedOpportunity,
     UserSavedSearch,
 )
-from src.task.notifications.generate_notifications import (
-    NotificationConstants,
-    NotificationTask,
-    _strip_pagination_params,
-)
+from src.task.notifications.constants import NotificationConstants
+from src.task.notifications.generate_notifications import NotificationTask, _strip_pagination_params
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
@@ -59,8 +56,10 @@ def test_search_notifications_cli(
     setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
-
     # Create a saved search that needs notification
+    import pdb
+
+    pdb.set_trace()
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
         search_query={"keywords": "test"},

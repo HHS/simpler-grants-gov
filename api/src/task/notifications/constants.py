@@ -2,9 +2,6 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import List
 
-from src.db.models.user_models import UserSavedOpportunity, UserSavedSearch
-
-
 class NotificationConstants(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
@@ -25,12 +22,3 @@ class EmailData:
     subject: str
     content: dict
     notification_reason: NotificationConstants
-
-
-@dataclass
-class NotificationContainer:
-    """Container for collecting notifications for a single user"""
-
-    saved_opportunities: list[UserSavedOpportunity] = field(default_factory=list)
-    saved_searches: list[UserSavedSearch] = field(default_factory=list)
-    closing_opportunities: list[UserSavedOpportunity] = field(default_factory=list)

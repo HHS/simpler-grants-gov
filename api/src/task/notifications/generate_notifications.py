@@ -12,7 +12,7 @@ from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotification
-from src.task.notifications.constants import EmailData, NotificationContainer
+from src.task.notifications.constants import EmailData
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
@@ -53,7 +53,6 @@ class NotificationTask(Task):
         super().__init__(db_session)
         self.config = GenerateNotificationsConfig()
 
-        self.user_notification_map: dict[uuid.UUID, NotificationContainer] = {}
         self.search_client = search_client
         self.pinpoint_client = pinpoint_client
         self.app_id = pinpoint_app_id

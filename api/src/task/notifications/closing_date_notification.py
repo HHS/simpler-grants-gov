@@ -60,25 +60,25 @@ class ClosingDateNotification(BaseNotification):
         )
 
         results = self.db_session.execute(stmt).scalars().all()
-        closing_soon_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
+        closing_date_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
 
         for result in results:
             user_id = result.user_id
-            closing_soon_opportunities.setdefault(user_id, []).append(result)
+            closing_date_opportunities.setdefault(user_id, []).append(result)
 
         logger.info(
             "Collected closing date notifications",
             extra={
-                "user_count": len(closing_soon_opportunities),
+                "user_count": len(closing_date_opportunities),
                 "total_notifications": sum(
-                    len(closing_soon_opportunities)
-                    for container in closing_soon_opportunities.values()
+                    len(closing_date_opportunities)
+                    for container in closing_date_opportunities.values()
                 ),
             },
         )
-        self.collected_data = closing_soon_opportunities or None
+        self.collected_data = closing_date_opportunities or None
 
-        return closing_soon_opportunities or None
+        return closing_date_opportunities or None
 
     def prepare_notification(
         self, closing_date_data: dict[UUID, list[UserSavedOpportunity]]
