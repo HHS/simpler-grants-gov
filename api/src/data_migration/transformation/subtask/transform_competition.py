@@ -69,7 +69,9 @@ class TransformCompetition(AbstractTransformSubTask):
 
         # One major thing to call out is how a competition connects to an opportunity in the old system.
         # These always needed to go via opportunity_cfda (now opportunity assistance listing).
-        if source_competition.opp_cfda_id is not None:
+        if source_competition.opp_cfda_id is None:
+             raise ValueError("Some sort of message")
+        ...
             # Look up the assistance listing to find the opportunity ID
             opportunity_cfda = self.db_session.execute(
                 select(TopportunityCfda).where(
