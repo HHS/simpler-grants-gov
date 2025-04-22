@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import UserProvider from "src/services/auth/UserProvider";
 import { useUser } from "src/services/auth/useUser";
 
@@ -19,16 +19,26 @@ const UseUserConsumer = () => {
   );
 };
 
+const renderWrappedConsumer = () => {
+  const { rerender } = render(
+    <UserProvider>
+      <UseUserConsumer />
+    </UserProvider>,
+  );
+  return () =>
+    rerender(
+      <UserProvider>
+        <UseUserConsumer />
+      </UserProvider>,
+    );
+};
+
 describe("useUser", () => {
   afterEach(() => jest.clearAllMocks());
   it("renders with the expected state on successful fetch", async () => {
     debouncedUserFetcherMock.mockResolvedValue("this is where a user would be");
 
-    render(
-      <UserProvider>
-        <UseUserConsumer />
-      </UserProvider>,
-    );
+    renderWrappedConsumer();
 
     const errorDisplay = await screen.findByTestId("error");
     const userDisplay = await screen.findByTestId("user");
@@ -43,11 +53,7 @@ describe("useUser", () => {
 
   it("renders with the expected state on error", async () => {
     debouncedUserFetcherMock.mockResolvedValue(null);
-    render(
-      <UserProvider>
-        <UseUserConsumer />
-      </UserProvider>,
-    );
+    renderWrappedConsumer();
 
     const errorDisplay = await screen.findByTestId("error");
     const userDisplay = await screen.findByTestId("user");
@@ -58,5 +64,78 @@ describe("useUser", () => {
 
     expect(userDisplay).toBeEmptyDOMElement();
     expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+  });
+  it("sets user as logged out if second fetch for user comes back without a token", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
+    const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.token).toEqual("a token");
+    });
+
+    expect(result.current.hasBeenLoggedOut).toEqual(false);
+
+    debouncedUserFetcherMock.mockReturnValue({ token: "" });
+
+    await result.current.refreshUser();
+
+    await waitFor(() => {
+      expect(result.current.user?.token).toEqual("");
+    });
+    expect(result.current.hasBeenLoggedOut).toEqual(true);
+  });
+  describe("logoutLocalUser", () => {
+    it("removes user token", async () => {
+      debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
+      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("a token");
+      });
+
+      result.current.logoutLocalUser();
+
+      await waitFor(() => expect(result.current.user?.token).toEqual(""));
+    });
+  });
+  describe("refreshIfExpired", () => {
+    it("makes fetch call if token is expired", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "a token",
+        expiresAt: Date.now() - 10000,
+      });
+      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("a token");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpired();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(2);
+    });
+    it("does not make fetch call if token is not expired", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "a token",
+        expiresAt: Date.now() + 10000,
+      });
+      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("a token");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpired();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
