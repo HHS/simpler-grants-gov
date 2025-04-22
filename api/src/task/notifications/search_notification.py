@@ -20,6 +20,8 @@ def _strip_pagination_params(search_query: dict) -> dict:
 
 
 class SearchNotification(BaseNotification):
+    collected_data: dict | None = None
+
     def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]]  | None:
         """Collect notifications for changed saved searches"""
         stmt = select(UserSavedSearch).where(
@@ -57,7 +59,8 @@ class SearchNotification(BaseNotification):
                 ),
             },
         )
-        return updated_saved_searches if updated_saved_searches else None
+        self.collected_data = updated_saved_searches or None
+        return updated_saved_searches or None
 
     def prepare_notification(
         self, saved_search_data: dict[UUID, list[UserSavedSearch]]

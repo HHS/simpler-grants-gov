@@ -20,7 +20,7 @@ from src.db.models.user_models import (
 )
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotification
-from src.task.notifications.constants import EmailData, NotificationContainer
+from src.task.notifications.constants import EmailData, NotificationContainer, NotificationConstants
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
@@ -83,8 +83,11 @@ class NotificationTask(Task):
         data = SearchNotification(self.db_session, self.search_client).notification_data()
         self.send_notifications(data)
 
-        data = ClosingDateNotification(self.db_session).notification_data()
+        closing_notification = ClosingDateNotification(self.db_session)
+        data = closing_notification.notification_data()
         self.send_notifications(data)
+        closing_notification.create_user_opportunity_notification_log()
+
 
     def send_notifications(self, data: EmailData) -> None:
         """Send collected notifications to users"""
@@ -111,6 +114,7 @@ class NotificationTask(Task):
                             "user_id": user_id,
                         },
                     )
+                    notification_log.notification_sent = True
 
                 except Exception:
                     # Notification log will be updated in the finally block
@@ -118,9 +122,7 @@ class NotificationTask(Task):
                         "Failed to send notification email",
                         extra={"user_id": user_id, "email": email},
                     )
-                else:
-                    notification_log.notification_sent = True
-                    self.db_session.add(notification_log)
+
 
 
 def _strip_pagination_params(search_query: dict) -> dict:

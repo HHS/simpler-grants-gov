@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpportunityNotification(BaseNotification):
-
+    collected_data: dict | None = None
     def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
         """Collect notifications for changed opportunities that users are tracking"""
         stmt = (
@@ -38,7 +38,9 @@ class OpportunityNotification(BaseNotification):
             extra={"user_count": len(saved_opportunities), "total_notifications": len(results)},
         )
 
-        return saved_opportunities if saved_opportunities else None
+        self.collected_data = saved_opportunities or None
+
+        return saved_opportunities or None
 
     def prepare_notification(
         self, saved_data: dict[UUID, list[UserSavedOpportunity]]
