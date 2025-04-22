@@ -107,7 +107,7 @@ UI_SCHEMA = [
         "children": [
             {
                 "type": "section",
-                "label": "6a. Project Title ",
+                "label": "6a. Project Title",
                 "name": "ProjectTitle",
                 "children": [{"type": "field", "definition": "/properties/ProjectTitle"}],
             },
@@ -119,7 +119,7 @@ UI_SCHEMA = [
             },
             {
                 "type": "section",
-                "label": "6c. Proposed Project ",
+                "label": "6c. Proposed Project",
                 "name": "ProposedProjectHeader",
                 "children": [
                     {"type": "field", "definition": "/properties/FundingPeriodStartDate"},
