@@ -34,13 +34,6 @@ class GenerateNotificationsConfig(PydanticBaseEnvConfig):
     app_id: str = Field(alias="PINPOINT_APP_ID")
     frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
-    send_update_notification: bool = Field(default=False, alias="SEND_UPDATE_NOTIFICATION")
-    send_closing_soon_notification: bool = Field(
-        default=False, alias="SEND_CLOSING_SOON_NOTIFICATION"
-    )
-    send_search_notification: bool = Field(default=True, alias="SEND_SEARCH_NOTIFICATION")
-
-
 CONTACT_INFO = (
     "mailto:support@grants.gov\n"
     "1-800-518-4726\n"
@@ -83,15 +76,15 @@ class NotificationTask(Task):
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
-        if self.config.send_update_notification:
-            data = OpportunityNotification(self.db_session).notification_data()
-            self.send_notifications(data)
-        if self.config.send_search_notification:
-            data = SearchNotification(self.db_session, self.search_client).notification_data()
-            self.send_notifications(data)
-        if self.config.send_closing_soon_notification:
-            data = ClosingDateNotification(self.db_session).notification_data()
-            self.send_notifications(data)
+
+        data = OpportunityNotification(self.db_session).notification_data()
+        self.send_notifications(data)
+
+        data = SearchNotification(self.db_session, self.search_client).notification_data()
+        self.send_notifications(data)
+
+        data = ClosingDateNotification(self.db_session).notification_data()
+        self.send_notifications(data)
 
     def send_notifications(self, data: EmailData) -> None:
         """Send collected notifications to users"""
