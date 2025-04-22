@@ -162,7 +162,7 @@ const NavLinks = ({
           }
           // mark as current if any child page is active
           return children.some((child) => {
-            return child?.isCurrentPath(child.href, currentPath);
+            return child?.href && isCurrentPath(child.href, currentPath);
           });
         } else {
           return isCurrentPath(href, currentPath);
