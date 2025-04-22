@@ -16,16 +16,18 @@ export function generateMetadata() {
 
 function FormPrototypePage() {
   return (
-    <GridContainer>
-      <BetaAlert />
-      <h1>Apply form prototype</h1>
-      <legend className="usa-legend">
-        The following is a demo of the apply process.
-      </legend>
-      <p>
-        <CreateApplicationButton />
-      </p>
-    </GridContainer>
+    <>
+      <BetaAlert containerClasses="margin-top-5" />
+      <GridContainer>
+        <h1>Apply form prototype</h1>
+        <legend className="usa-legend">
+          The following is a demo of the apply process.
+        </legend>
+        <p>
+          <CreateApplicationButton />
+        </p>
+      </GridContainer>
+    </>
   );
 }
 

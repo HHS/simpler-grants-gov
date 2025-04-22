@@ -78,14 +78,16 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
 
   return (
-    <GridContainer>
-      <BetaAlert />
-      <h1>Form demo application page</h1>
-      <legend className="usa-legend">
-        The following is a list of available forms.
-      </legend>
-      <FormLinks forms={forms} applicationId={applicationId} />
-    </GridContainer>
+    <>
+      <BetaAlert containerClasses="margin-top-5" />
+      <GridContainer>
+        <h1>Form demo application page</h1>
+        <legend className="usa-legend">
+          The following is a list of available forms.
+        </legend>
+        <FormLinks forms={forms} applicationId={applicationId} />
+      </GridContainer>
+    </>
   );
 }
 
