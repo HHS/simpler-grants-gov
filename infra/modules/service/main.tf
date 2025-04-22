@@ -161,6 +161,9 @@ resource "aws_ecs_task_definition" "app" {
       } : null,
       logConfiguration = {
         logDriver = "awsfirelens",
+        options = {
+          Name = "stdout"
+        }
       }
       mountPoints    = []
       systemControls = []
