@@ -85,6 +85,7 @@ ignore = [
   "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
   "TD003",   # missing an issue link on TODO
   "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
+  "TC006",   # Changing all cast calls to strings instead of actual types
 ]
 
 [tool.ruff.lint.flake8-builtins]
