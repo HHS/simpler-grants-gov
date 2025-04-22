@@ -2,6 +2,8 @@ import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import UserProvider from "src/services/auth/UserProvider";
 import { useUser } from "src/services/auth/useUser";
 
+import { PropsWithChildren } from "react";
+
 const debouncedUserFetcherMock = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
@@ -32,6 +34,10 @@ const renderWrappedConsumer = () => {
       </UserProvider>,
     );
 };
+
+const wrapper = ({ children }: PropsWithChildren) => (
+  <UserProvider>{children}</UserProvider>
+);
 
 describe("useUser", () => {
   afterEach(() => jest.clearAllMocks());
@@ -88,7 +94,6 @@ describe("useUser", () => {
   describe("logoutLocalUser", () => {
     it("removes user token", async () => {
       debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
-      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
@@ -106,7 +111,6 @@ describe("useUser", () => {
         token: "a token",
         expiresAt: Date.now() - 10000,
       });
-      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
@@ -124,7 +128,6 @@ describe("useUser", () => {
         token: "a token",
         expiresAt: Date.now() + 10000,
       });
-      const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {

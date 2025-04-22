@@ -14,6 +14,16 @@ const mockUseUser = jest.fn(() => ({
   user: {
     token: "faketoken",
   },
+  hasBeenLoggedOut: false,
+}));
+
+const mockShowSnackbar = jest.fn();
+
+const mockUseSnackBar = jest.fn(() => ({
+  showSnackbar: () => mockShowSnackbar() as unknown,
+  Snackbar: () => <></>,
+  hideSnackbar: jest.fn(),
+  snackbarIsVisible: true,
 }));
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
@@ -43,6 +53,10 @@ jest.mock("src/components/RouteChangeWatcher", () => ({
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
+}));
+
+jest.mock("src/hooks/useSnackbar", () => ({
+  useSnackbar: () => mockUseSnackBar() as unknown,
 }));
 
 describe("Header", () => {
@@ -240,4 +254,15 @@ describe("Header", () => {
       expect(eventsLink).toBeInTheDocument();
     });
   });
+
+  // it("shows snackbar if user has been logged out", () => {
+  //   mockUseUser.mockReturnValue({
+  //     user: {
+  //       token: "a token",
+  //     },
+  //     hasBeenLoggedOut: true,
+  //   });
+  //   render(<Header {...props} />);
+  //   expect(mockShowSnackbar).toHaveBeenCalledTimes(1);
+  // });
 });
