@@ -9,8 +9,8 @@ type TooltipProps = {
   position?: "top" | "bottom" | "left" | "right" | undefined;
   wrapperclasses?: string;
   className?: string;
-  children: ReactNode;
-  asCustom?: ForwardRefExoticComponent<any>;
+  children?: ReactNode;
+  asCustom?: ForwardRefExoticComponent<Omit<React.HTMLProps<HTMLElement>, "ref"> & React.RefAttributes<HTMLElement>>;
 };
 
 export const TooltipWrapper = (props: TooltipProps) => {
