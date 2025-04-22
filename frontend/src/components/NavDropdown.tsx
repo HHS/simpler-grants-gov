@@ -1,9 +1,18 @@
+import {
+  Dispatch,
+  JSX,
+  SetStateAction,
+  useEffect,
+} from "react";
+
 import clsx from "clsx";
 import { noop } from "lodash";
 import { IndexType } from "src/types/generalTypes";
 
-import { Dispatch, JSX, SetStateAction, useEffect } from "react";
-import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
+import {
+  Menu,
+  NavDropDownButton,
+} from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: IndexType;
@@ -47,7 +56,7 @@ export default function NavDropdown({
               document.addEventListener(
                 "click",
                 () => {
-                  isOpen = false;
+                  setActiveNavDropdownIndex(null);
                 },
                 { once: true },
               ),
