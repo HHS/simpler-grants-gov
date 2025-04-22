@@ -1,22 +1,15 @@
 import logging
 from datetime import timedelta
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from sqlalchemy import and_, exists, select
 
 from src.adapters import db
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
-from src.adapters.search import SearchClient
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
-from src.db.models.user_models import (
-    User,
-    UserNotificationLog,
-    UserOpportunityNotificationLog,
-    UserSavedOpportunity,
-)
+from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants, NotificationData
+from src.task.notifications.constants import EmailData, NotificationConstants
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -94,8 +87,10 @@ class ClosingDateNotification(BaseNotification):
         notification: dict[UUID, str] = {}
         to_address_list: List[str] = []
 
-
         for user_id, saved_items in closing_date_data.items():
+            user_email = self._get_user_email(user_id)
+            if not user_email:
+                continue
             if len(saved_items) == 1:
                 # Single opportunity closing
                 opportunity = saved_items[0]

@@ -1,26 +1,18 @@
 import logging
 import uuid
-from dataclasses import dataclass, field
-from enum import StrEnum
 
 import botocore.client
 from pydantic import Field
-from sqlalchemy import select
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
-from src.db.models.user_models import (
-    User,
-    UserNotificationLog,
-    UserSavedOpportunity,
-    UserSavedSearch,
-)
+from src.db.models.user_models import UserNotificationLog
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotification
-from src.task.notifications.constants import EmailData, NotificationConstants, NotificationContainer
+from src.task.notifications.constants import EmailData, NotificationContainer
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
@@ -33,14 +25,6 @@ logger = logging.getLogger(__name__)
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
     app_id: str = Field(alias="PINPOINT_APP_ID")
     frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
-
-
-CONTACT_INFO = (
-    "mailto:support@grants.gov\n"
-    "1-800-518-4726\n"
-    "24 hours a day, 7 days a week\n"
-    "Closed on federal holidays"
-)
 
 
 @task_blueprint.cli.command(
@@ -79,15 +63,15 @@ class NotificationTask(Task):
         """Main task logic to collect and send notifications"""
 
         data = OpportunityNotification(self.db_session).notification_data()
-        self.send_notifications(data)
+        data and self.send_notifications(data)
 
         data = SearchNotification(self.db_session, self.search_client).notification_data()
-        self.send_notifications(data)
+        data and self.send_notifications(data)
 
         closing_notification = ClosingDateNotification(self.db_session)
         data = closing_notification.notification_data()
-        self.send_notifications(data)
-        closing_notification.create_user_opportunity_notification_log()
+        data and self.send_notifications(data)
+        data and closing_notification.create_user_opportunity_notification_log()
 
     def send_notifications(self, data: EmailData) -> None:
         """Send collected notifications to users"""
@@ -122,4 +106,3 @@ class NotificationTask(Task):
                         "Failed to send notification email",
                         extra={"user_id": user_id, "email": email},
                     )
-

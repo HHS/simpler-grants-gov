@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -8,12 +8,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.adapters.search import SearchClient
 from src.db.models.user_models import User, UserSavedOpportunity, UserSavedSearch
-from src.task.notifications.constants import (
-    EmailData,
-    NotificationConstants,
-    NotificationContainer,
-    NotificationData,
-)
+from src.task.notifications.constants import EmailData
 
 logger = logging.getLogger(__name__)
 
@@ -26,24 +21,14 @@ class BaseNotification(ABC):
     @abstractmethod
     def collect_notifications(
         self,
-    ) -> NotificationData | None:
+    ) -> dict[UUID, list[UserSavedOpportunity]] | dict[UUID, list[UserSavedSearch]] | None:
         """Collect notifications for users (either saved opportunities or searches)."""
         pass
 
-    def get_user_email(self, user_id: UUID) -> str | None:
-
-        # Fetch user details
-        user = self.db_session.execute(
-            select(User).where(User.user_id == user_id)
-        ).scalar_one_or_none()
-
-        if not user or not user.email:
-            logger.warning("No email found for user", extra={"user_id": user.user_id})
-            return
-        return user.email
-
     @abstractmethod
-    def prepare_notification(self, saved_data: NotificationData) -> EmailData:
+    def prepare_notification(
+        self, saved_data: dict[UUID, list[UserSavedOpportunity]] | dict[UUID, list[UserSavedSearch]]
+    ) -> EmailData:
         """Prepare notification content (email data)"""
         pass
 
@@ -52,3 +37,15 @@ class BaseNotification(ABC):
         collected_data = self.collect_notifications()
         if collected_data:
             return self.prepare_notification(collected_data)
+        return
+
+    def _get_user_email(self, user_id: UUID) -> str | None:
+
+        # Fetch user details
+        user = self.db_session.execute(
+            select(User).where(User.user_id == user_id)
+        ).scalar_one_or_none()
+
+        if not user or not user.email:
+            logger.warning("No email found for user", extra={"user_id": user.user_id})
+        return user.email

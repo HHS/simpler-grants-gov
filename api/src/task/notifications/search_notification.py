@@ -3,10 +3,10 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from src.db.models.user_models import User, UserSavedSearch
+from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants, NotificationData
+from src.task.notifications.constants import EmailData, NotificationConstants
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)

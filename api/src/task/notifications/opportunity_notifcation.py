@@ -5,9 +5,9 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.db.models.opportunity_models import OpportunityChangeAudit
-from src.db.models.user_models import User, UserNotificationLog, UserSavedOpportunity
+from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants, NotificationData
+from src.task.notifications.constants import EmailData, NotificationConstants
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class OpportunityNotification(BaseNotification):
         to_address_list: List[str] = []
 
         for user_id, saved_items in saved_data.items():
-            user_email = self.get_user_email(user_id)
+            user_email = self._get_user_email(user_id)
             if not user_email:
                 continue
 

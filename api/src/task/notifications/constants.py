@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import List
-from uuid import UUID
 
 from src.db.models.user_models import UserSavedOpportunity, UserSavedSearch
 
@@ -10,12 +9,6 @@ class NotificationConstants(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
-
-
-@dataclass
-class NotificationData:
-    type: NotificationConstants
-    data: dict[UUID, list[UserSavedOpportunity]] | dict[UUID, list[UserSavedSearch]]
 
 
 # TODO: Confirm with team if we want to use these metrics
