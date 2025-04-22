@@ -57,6 +57,8 @@ const ApplyForm = ({
       <form
         className="usa-form usa-form--large flex-1 margin-top-neg-5"
         action={formAction}
+        // turns off html5 validation so all error displays are consistent
+        noValidate
       >
         <ApplyFormSuccessMessage message={successMessage} />
         <ApplyFormErrorMessage
