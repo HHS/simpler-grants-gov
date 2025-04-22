@@ -35,6 +35,12 @@ def test_extract_text_from_file_returns_none_unsupported_file_type() -> None:
     assert extract_text_from_file("unsupported_file_type.not_today") is None
 
 
+def test_extract_text_from_file_char_limit(fixture_file_path) -> None:
+    mock_file_path = fixture_file_path(f"{TEST_FILE_DIR}/text_data.txt")
+    assert len(extract_text_from_file(mock_file_path, char_limit=1)) == 1
+    assert len(extract_text_from_file(mock_file_path)) > 1
+
+
 @pytest.mark.parametrize(
     "fixture_file_path_val,expected",
     [

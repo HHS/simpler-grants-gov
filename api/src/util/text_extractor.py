@@ -46,10 +46,16 @@ class TextExtractorError(Exception):
 
 
 def extract_text_from_file(
-    file_path: str, file_type: str | None = None, raise_on_error: bool = False
+    file_path: str,
+    file_type: str | None = None,
+    raise_on_error: bool = False,
+    char_limit: int | None = None,
 ) -> str | None:
     try:
-        return TextExtractor(file_path, file_type=file_type).get_text()
+        extracted_text = TextExtractor(file_path, file_type=file_type).get_text()
+        if char_limit is not None:
+            return extracted_text[:char_limit]
+        return extracted_text
     except Exception as e:
         if raise_on_error:
             raise e

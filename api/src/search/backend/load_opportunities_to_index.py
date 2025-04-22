@@ -31,6 +31,7 @@ from src.util.text_extractor import extract_text_from_file, get_text_extractor_c
 logger = logging.getLogger(__name__)
 
 ALLOWED_ATTACHMENT_SUFFIXES = set(get_text_extractor_configs().keys())
+TEXT_EXTRACTOR_CHAR_LIMIT = 100000
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -60,6 +61,8 @@ class LoadOpportunitiesToIndex(Task):
         RECORDS_LOADED = "records_loaded"
         TEST_RECORDS_SKIPPED = "test_records_skipped"
         BATCHES_PROCESSED = "batches_processed"
+        ATTACHMENTS_PROCESSED = "attachments_processed"
+        ATTACHMENTS_UNPROCESSED = "attachments_unprocessed"
 
     def __init__(
         self,
@@ -343,8 +346,15 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            if self.filter_attachment(att):
-                file_text = extract_text_from_file(att.file_location)
+            if not self.filter_attachment(att):
+                self.increment(self.Metrics.ATTACHMENTS_UNPROCESSED)
+                continue
+            try:
+                file_text = extract_text_from_file(
+                    att.file_location,
+                    char_limit=TEXT_EXTRACTOR_CHAR_LIMIT,
+                    raise_on_error=True,
+                )
                 attachments.append(
                     {
                         "filename": att.file_name,
@@ -352,6 +362,12 @@ class LoadOpportunitiesToIndex(Task):
                             "content": file_text,
                         },
                     }
+                )
+                self.increment(self.Metrics.ATTACHMENTS_PROCESSED)
+            except Exception as e:
+                self.increment(self.Metrics.ATTACHMENTS_UNPROCESSED)
+                logger.warning(
+                    "text-extractor: error extracting text", extra={"err": e, "attachment": att}
                 )
 
         return attachments
