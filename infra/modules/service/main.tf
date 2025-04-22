@@ -162,7 +162,7 @@ resource "aws_ecs_task_definition" "app" {
       logConfiguration = {
         logDriver = "awsfirelens",
         options = {
-          Name = "stdout"
+          Name = "forward"
         }
       }
       mountPoints    = []
