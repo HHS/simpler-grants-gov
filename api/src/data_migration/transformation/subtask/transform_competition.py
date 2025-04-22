@@ -79,66 +79,29 @@ class TransformCompetition(AbstractTransformSubTask):
         logger.info("Processing competition", extra=extra)
 
         if source_competition.is_deleted:
+            # handle delete
             self._handle_delete(
                 source=source_competition,
                 target=target_competition,
                 record_type=transform_constants.COMPETITION,
                 extra=extra,
             )
-            # Update transformed_at timestamp to mark it as processed
-            source_competition.transformed_at = self.transform_time
-            return
+        elif opportunity_id is None:
+            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
+            # we'll make sure the opportunity actually exists
+            raise ValueError("Competition references opportunity that doesn't exist")
+        else:
+            # insert/update
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_competition is None
 
-        # Find the related opportunity and opportunity_assistance_listing
-        opportunity_id = None
-        opportunity_assistance_listing_id = None
-
-        # One major thing to call out is how a competition connects to an opportunity in the old system.
-        # These always needed to go via opportunity_cfda (now opportunity assistance listing).
-        if source_competition.opp_cfda_id is None:
-             raise ValueError("Some sort of message")
-        ...
-            # Look up the assistance listing to find the opportunity ID
-            opportunity_cfda = self.db_session.execute(
-                select(TopportunityCfda).where(
-                    TopportunityCfda.opp_cfda_id == source_competition.opp_cfda_id
-                )
-            ).scalar_one_or_none()
-
-            if opportunity_cfda:
-                opportunity_id = opportunity_cfda.opportunity_id
-                opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
-
-                # Make sure the opportunity exists in our target table
-                opportunity = self.db_session.execute(
-                    select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
-                ).scalar_one_or_none()
-
-                if not opportunity:
-                    logger.warning(
-                        "Competition references opportunity that doesn't exist in target schema",
-                        extra={**extra, "opportunity_id": opportunity_id},
-                    )
-                    opportunity_id = None
-                    opportunity_assistance_listing_id = None
-
-        # To avoid incrementing metrics for records we fail to transform, record
-        # here whether it's an insert/update and we'll increment after transforming
-        is_insert = target_competition is None
-
-        if opportunity_id is None:
-            logger.warning(
-                "Competition references opportunity that doesn't exist",
-                extra={**extra, "opportunity_id": opportunity_id},
+            transformed_competition = transform_competition(
+                source_competition,
+                target_competition,
+                opportunity_id,
+                opportunity_assistance_listing_id,
             )
-            return
-
-        transformed_competition = transform_competition(
-            source_competition,
-            target_competition,
-            opportunity_id,
-            opportunity_assistance_listing_id,
-        )
 
             if is_insert:
                 self.increment(
