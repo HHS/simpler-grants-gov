@@ -1001,25 +1001,34 @@ class FormFactory(BaseFactory):
     form_json_schema = {
         "type": "object",
         "title": "Test form for testing",
+        "required": ["Title", "Email"],
         "properties": {
-            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
-            "Description": {
-                "title": "Description for application",
+            "Date": {"type": "string", "title": "Date of application ", "format": "date"},
+            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
+            "Email": {
                 "type": "string",
-                "minLength": 0,
+                "title": "Email",
+                "format": "email",
+                "maxLength": 60,
+                "minLength": 1,
+            },
+            "Description": {
+                "type": "string",
+                "title": "Description for application",
                 "maxLength": 15,
+                "minLength": 0,
             },
             "ApplicationNumber": {
-                "title": "Application number",
                 "type": "number",
-                "minLength": 1,
+                "title": "Application number",
                 "maxLength": 120,
+                "minLength": 1,
             },
-            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
         },
     }
     form_ui_schema = [
         {"type": "field", "definition": "/properties/Title"},
+        {"type": "field", "definition": "/properties/Email"},
         {"type": "field", "definition": "/properties/Description"},
         {"type": "field", "definition": "/properties/ApplicationNumber"},
         {"type": "field", "definition": "/properties/Date"},
