@@ -238,7 +238,7 @@ def get_sql_file_paths() -> dict[int, str]:
     sql_file_directory = f"{Path(__file__).resolve().parent}/migrations/versions"
 
     # get list of sorted filenames
-    filename_list = sorted(os.listdir(sql_file_directory))
+    filename_list = sorted(os.listdir(sql_file_directory))  # noqa: PTH208
 
     # expected filename format: {4_digit_version_number}_{short_description}.sql
     # example: 0003_alter_tables_set_default_timestamp.sql
