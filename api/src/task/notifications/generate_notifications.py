@@ -20,7 +20,7 @@ from src.db.models.user_models import (
 )
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotification
-from src.task.notifications.constants import EmailData, NotificationContainer, NotificationConstants
+from src.task.notifications.constants import EmailData, NotificationConstants, NotificationContainer
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
     app_id: str = Field(alias="PINPOINT_APP_ID")
     frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
+
 
 CONTACT_INFO = (
     "mailto:support@grants.gov\n"
@@ -88,7 +89,6 @@ class NotificationTask(Task):
         self.send_notifications(data)
         closing_notification.create_user_opportunity_notification_log()
 
-
     def send_notifications(self, data: EmailData) -> None:
         """Send collected notifications to users"""
 
@@ -123,10 +123,3 @@ class NotificationTask(Task):
                         extra={"user_id": user_id, "email": email},
                     )
 
-
-
-def _strip_pagination_params(search_query: dict) -> dict:
-    """Remove pagination parameters from a search query"""
-    search_query = search_query.copy()
-    search_query.pop("pagination", None)
-    return search_query

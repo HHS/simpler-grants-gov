@@ -5,15 +5,16 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.db.models.opportunity_models import OpportunityChangeAudit
-from src.db.models.user_models import User, UserSavedOpportunity, UserNotificationLog
+from src.db.models.user_models import User, UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import NotificationConstants, NotificationData, EmailData
+from src.task.notifications.constants import EmailData, NotificationConstants, NotificationData
 
 logger = logging.getLogger(__name__)
 
 
 class OpportunityNotification(BaseNotification):
     collected_data: dict | None = None
+
     def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
         """Collect notifications for changed opportunities that users are tracking"""
         stmt = (
@@ -42,9 +43,7 @@ class OpportunityNotification(BaseNotification):
 
         return saved_opportunities or None
 
-    def prepare_notification(
-        self, saved_data: dict[UUID, list[UserSavedOpportunity]]
-    ) -> EmailData:
+    def prepare_notification(self, saved_data: dict[UUID, list[UserSavedOpportunity]]) -> EmailData:
 
         notification: dict[UUID, str] = {}
         to_address_list: List[str] = []

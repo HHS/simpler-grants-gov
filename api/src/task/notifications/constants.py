@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import StrEnum, Enum
+from enum import Enum, StrEnum
 from typing import List
 from uuid import UUID
 
@@ -10,6 +10,7 @@ class NotificationConstants(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
+
 
 @dataclass
 class NotificationData:
@@ -36,6 +37,7 @@ class EmailData:
 @dataclass
 class NotificationContainer:
     """Container for collecting notifications for a single user"""
+
     saved_opportunities: list[UserSavedOpportunity] = field(default_factory=list)
     saved_searches: list[UserSavedSearch] = field(default_factory=list)
     closing_opportunities: list[UserSavedOpportunity] = field(default_factory=list)

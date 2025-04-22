@@ -8,7 +8,12 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.adapters.search import SearchClient
 from src.db.models.user_models import User, UserSavedOpportunity, UserSavedSearch
-from src.task.notifications.constants import EmailData, NotificationConstants, NotificationContainer, NotificationData
+from src.task.notifications.constants import (
+    EmailData,
+    NotificationConstants,
+    NotificationContainer,
+    NotificationData,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +42,8 @@ class BaseNotification(ABC):
             return
         return user.email
 
-
     @abstractmethod
-    def prepare_notification(self, saved_data: NotificationData ) -> EmailData:
+    def prepare_notification(self, saved_data: NotificationData) -> EmailData:
         """Prepare notification content (email data)"""
         pass
 

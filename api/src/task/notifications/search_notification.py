@@ -6,7 +6,7 @@ from sqlalchemy import select
 from src.db.models.user_models import User, UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import NotificationConstants, NotificationData, EmailData
+from src.task.notifications.constants import EmailData, NotificationConstants, NotificationData
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ def _strip_pagination_params(search_query: dict) -> dict:
 class SearchNotification(BaseNotification):
     collected_data: dict | None = None
 
-    def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]]  | None:
+    def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]] | None:
         """Collect notifications for changed saved searches"""
         stmt = select(UserSavedSearch).where(
             UserSavedSearch.last_notified_at < datetime_util.utcnow()
