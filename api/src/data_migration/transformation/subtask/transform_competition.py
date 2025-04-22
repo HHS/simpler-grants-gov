@@ -30,7 +30,33 @@ class TransformCompetition(AbstractTransformSubTask):
 
         for source_competition, target_competition in competitions:
             try:
-                self.process_competition(source_competition, target_competition)
+                opportunity_cfda = self.db_session.execute(
+                    select(TopportunityCfda).where(
+                        TopportunityCfda.opp_cfda_id == source_competition.opp_cfda_id
+                    )
+                ).scalar_one_or_none()
+
+                opportunity_id = None
+                opportunity_assistance_listing_id = None
+
+                if opportunity_cfda:
+                    opportunity_id = opportunity_cfda.opportunity_id
+                    opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
+
+                    # Make sure the opportunity exists in our target table
+                    opportunity = self.db_session.execute(
+                        select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
+                    ).scalar_one_or_none()
+
+                    if not opportunity:
+                        logger.warning(
+                            "Competition references opportunity that doesn't exist in target schema",
+                            extra={"competition_id": source_competition.comp_id, "opportunity_id": opportunity_id},
+                        )
+                        opportunity_id = None
+                        opportunity_assistance_listing_id = None
+
+                self.process_competition(source_competition, target_competition, opportunity_id, opportunity_assistance_listing_id)
             except ValueError:
                 self.increment(
                     transform_constants.Metrics.TOTAL_ERROR_COUNT,
@@ -42,7 +68,7 @@ class TransformCompetition(AbstractTransformSubTask):
                 )
 
     def process_competition(
-        self, source_competition: Tcompetition, target_competition: Competition | None
+        self, source_competition: Tcompetition, target_competition: Competition | None, opportunity_id: int | None, opportunity_assistance_listing_id: int | None
     ) -> None:
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,
@@ -59,71 +85,32 @@ class TransformCompetition(AbstractTransformSubTask):
                 record_type=transform_constants.COMPETITION,
                 extra=extra,
             )
-            # Update transformed_at timestamp to mark it as processed
-            source_competition.transformed_at = self.transform_time
-            return
-
-        # Find the related opportunity and opportunity_assistance_listing
-        opportunity_id = None
-        opportunity_assistance_listing_id = None
-
-        # One major thing to call out is how a competition connects to an opportunity in the old system.
-        # These always needed to go via opportunity_cfda (now opportunity assistance listing).
-        if source_competition.opp_cfda_id is not None:
-            # Look up the assistance listing to find the opportunity ID
-            opportunity_cfda = self.db_session.execute(
-                select(TopportunityCfda).where(
-                    TopportunityCfda.opp_cfda_id == source_competition.opp_cfda_id
-                )
-            ).scalar_one_or_none()
-
-            if opportunity_cfda:
-                opportunity_id = opportunity_cfda.opportunity_id
-                opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
-
-                # Make sure the opportunity exists in our target table
-                opportunity = self.db_session.execute(
-                    select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
-                ).scalar_one_or_none()
-
-                if not opportunity:
-                    logger.warning(
-                        "Competition references opportunity that doesn't exist in target schema",
-                        extra={**extra, "opportunity_id": opportunity_id},
-                    )
-                    opportunity_id = None
-                    opportunity_assistance_listing_id = None
-
-        # To avoid incrementing metrics for records we fail to transform, record
-        # here whether it's an insert/update and we'll increment after transforming
-        is_insert = target_competition is None
-
-        if opportunity_id is None:
-            logger.warning(
-                "Competition references opportunity that doesn't exist",
-                extra={**extra, "opportunity_id": opportunity_id},
-            )
-            return
-
-        transformed_competition = transform_competition(
-            source_competition,
-            target_competition,
-            opportunity_id,
-            opportunity_assistance_listing_id,
-        )
-
-        if is_insert:
-            self.increment(
-                transform_constants.Metrics.TOTAL_RECORDS_INSERTED,
-                prefix=transform_constants.COMPETITION,
-            )
-            self.db_session.add(transformed_competition)
+        elif opportunity_id is None:
+            raise ValueError("Competition references opportunity that doesn't exist")
         else:
-            self.increment(
-                transform_constants.Metrics.TOTAL_RECORDS_UPDATED,
-                prefix=transform_constants.COMPETITION,
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_competition is None
+
+            transformed_competition = transform_competition(
+                source_competition,
+                target_competition,
+                opportunity_id,
+                opportunity_assistance_listing_id,
             )
-            self.db_session.merge(transformed_competition)
+
+            if is_insert:
+                self.increment(
+                    transform_constants.Metrics.TOTAL_RECORDS_INSERTED,
+                    prefix=transform_constants.COMPETITION,
+                )
+                self.db_session.add(transformed_competition)
+            else:
+                self.increment(
+                    transform_constants.Metrics.TOTAL_RECORDS_UPDATED,
+                    prefix=transform_constants.COMPETITION,
+                )
+                self.db_session.merge(transformed_competition)
 
         logger.info("Processed competition", extra=extra)
         source_competition.transformed_at = self.transform_time
@@ -161,6 +148,7 @@ def transform_competition(
     target_competition.closing_date = source_competition.closingdate
     target_competition.grace_period = source_competition.graceperiod
     target_competition.contact_info = source_competition.contactinfo
+    target_competition.opportunity_assistance_listing_id = opportunity_assistance_listing_id
 
     # Transform form family ID to enum value
     target_competition.form_family = transform_form_family(source_competition.familyid)
@@ -189,7 +177,6 @@ def transform_competition(
     )
 
     target_competition.can_send_mail = transform_util.convert_yn_bool(source_competition.sendmail)
-    target_competition.opportunity_assistance_listing_id = opportunity_assistance_listing_id
 
     # Handle timestamps
     transform_util.transform_update_create_timestamp(

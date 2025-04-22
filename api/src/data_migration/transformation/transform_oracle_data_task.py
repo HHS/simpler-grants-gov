@@ -50,7 +50,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_opportunity_attachment: bool = (
         True  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
     )
-    enable_competition: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION
+    enable_competition: bool = False  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION
 
 
 class TransformOracleDataTask(Task):
