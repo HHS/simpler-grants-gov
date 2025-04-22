@@ -1,12 +1,22 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
-import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { useUser } from "src/services/auth/useUser";
+import {
+  RefObject,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { useTranslations } from "next-intl";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Loading from "src/components/Loading";
+import SimplerAlert from "src/components/SimplerAlert";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import { useClientFetch } from "src/hooks/useClientFetch";
+import { useIsSSR } from "src/hooks/useIsSSR";
+import { useUser } from "src/services/auth/useUser";
+
 import {
   Button,
   Modal,
@@ -15,10 +25,6 @@ import {
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
-
-import Loading from "src/components/Loading";
-import SimplerAlert from "src/components/SimplerAlert";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SuccessContent({
   modalRef,
@@ -63,12 +69,12 @@ export function DeleteSavedSearchModal({
   const t = useTranslations("SavedSearches.deleteModal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
-  const { replaceQueryParams } = useSearchParamUpdater();
   const isSSR = useIsSSR();
   const { clientFetch } = useClientFetch<Response>(
     "Error deleting saved search",
     { jsonResponse: false, authGatedRequest: true },
   );
+  const router = useRouter();
 
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -85,9 +91,7 @@ export function DeleteSavedSearchModal({
     })
       .then(() => {
         setUpdated(true);
-        // this should trigger a page refresh, which will trigger refetching saved searches,
-        // which will update the name in the list
-        replaceQueryParams({ status: `${savedSearchId}-${Date.now()}` });
+        router.refresh();
       })
       .catch((error) => {
         setApiError(true);
@@ -96,7 +100,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [clientFetch, user?.token, replaceQueryParams, savedSearchId]);
+  }, [user?.token, savedSearchId, router, clientFetch]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

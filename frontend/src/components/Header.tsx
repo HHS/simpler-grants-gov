@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Suspense,
   useCallback,
@@ -248,6 +247,9 @@ const NavLinks = ({
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
+    navLinkList,
+    currentNavItemIndex,
+    closeMobileNav,
   ]);
 
   return (

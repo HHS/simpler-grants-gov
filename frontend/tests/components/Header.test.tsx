@@ -1,14 +1,23 @@
-import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
-import { render, screen } from "tests/react-utils";
-
 import { ReadonlyURLSearchParams } from "next/navigation";
-
+import { Response } from "node-fetch";
 import Header from "src/components/Header";
+import {
+  render,
+  screen,
+  waitFor,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const props = {
   locale: "en",
 };
+
+const mockUseUser = jest.fn(() => ({
+  user: {
+    token: "faketoken",
+  },
+}));
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
@@ -33,6 +42,10 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 
 jest.mock("src/components/RouteChangeWatcher", () => ({
   RouteChangeWatcher: () => <></>,
+}));
+
+jest.mock("src/services/auth/useUser", () => ({
+  useUser: () => mockUseUser(),
 }));
 
 describe("Header", () => {
@@ -68,9 +81,15 @@ describe("Header", () => {
       "href",
       "/",
     );
+<<<<<<< HEAD
     expect(screen.getByRole("link", { name: /search/i })).toHaveAttribute(
       "href",
       "/search",
+=======
+    expect(screen.getByRole("link", { name: /subscribe/i })).toHaveAttribute(
+      "href",
+      "/subscribe",
+>>>>>>> main
     );
 
     await userEvent.click(menuButton);
@@ -83,9 +102,13 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
+<<<<<<< HEAD
     const govBanner = screen.getByRole("button", {
       name: /Here’s how you know/i,
     });
+=======
+    const govBanner = screen.getByRole("button", { name: /Here’s how you know/i });
+>>>>>>> main
 
     expect(govBanner).toBeInTheDocument();
 
@@ -141,7 +164,6 @@ describe("Header", () => {
     rerender(<Header />);
     const queryLink = screen.getByRole("link", { name: "Search" });
     expect(queryLink).toHaveClass("usa-current");
-
     usePathnameMock.mockReturnValue("/opportunity/35");
     rerender(<Header />);
     const allLinks = await screen.findAllByRole("link");
@@ -150,15 +172,46 @@ describe("Header", () => {
     });
   });
 
+  it("closes an open subnav on the next click", async () => {
+    userEvent.setup({ skipHover: true });
+    render(<Header {...props} />);
+
+    const workspaceButton = screen.getByRole("button", {
+      name: "Workspace",
+    });
+    expect(workspaceButton).toHaveAttribute("aria-expanded", "false");
+    
+    // the submenu assertions are not strictly necessary, but I could not get the timing to work right
+    // to get tests to pass correctly without them, so leaving them in
+    // eslint-disable-next-line testing-library/no-node-access
+    const subMenu = workspaceButton.nextSibling;
+    expect(subMenu).not.toBeVisible();
+    
+    await userEvent.click(workspaceButton);
+    
+    await waitFor(() =>
+      expect(workspaceButton).toHaveAttribute("aria-expanded", "true"),
+    );
+    await waitFor(() => expect(subMenu).toBeVisible());
+    
+    const anywhereElse = screen.getByText("Home");
+    await userEvent.click(anywhereElse);
+    
+    await waitFor(() =>
+      expect(workspaceButton).toHaveAttribute("aria-expanded", "false"),
+    );
+    await waitFor(() => expect(subMenu).not.toBeVisible());
+  });
+
   describe("About", () => {
-    it("shows About as the active nav item when on Vision page", () => {
+    it("shows About as the active nav item when on Vision page", async () => {
       usePathnameMock.mockReturnValue("/vision");
       render(<Header />);
 
       const homeLink = screen.getByRole("button", { name: /About/i });
       expect(homeLink).toHaveClass("usa-current");
     });
-    it("shows About as the active nav item when on Roadmap page", () => {
+    it("shows About as the active nav item when on Roadmap page", async () => {
       usePathnameMock.mockReturnValue("/roadmap");
       render(<Header />);
 

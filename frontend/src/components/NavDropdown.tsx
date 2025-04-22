@@ -3,10 +3,10 @@ import {
   JSX,
   SetStateAction,
   useEffect,
-  useState,
 } from "react";
 
 import clsx from "clsx";
+import { noop } from "lodash";
 import { IndexType } from "src/types/generalTypes";
 
 import {
@@ -31,7 +31,7 @@ export default function NavDropdown({
   menuItems,
   setActiveNavDropdownIndex,
 }: NavDropdownProps): JSX.Element {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  let isOpen = activeNavDropdownIndex === index;
 
   function handleToggle() {
     const activeIndex: IndexType = isOpen ? null : index;
@@ -39,7 +39,7 @@ export default function NavDropdown({
   }
 
   useEffect(() => {
-    setIsOpen(activeNavDropdownIndex === index);
+    isOpen = activeNavDropdownIndex === index;
   }, [activeNavDropdownIndex, index]);
 
   return (
@@ -48,7 +48,22 @@ export default function NavDropdown({
         label={linkText}
         menuId={linkText}
         isOpen={isOpen}
-        onToggle={() => handleToggle()}
+        onClick={(e) => {
+          handleToggle()
+          if (!isOpen) {
+            e.stopPropagation();
+            requestAnimationFrame(() => 
+              document.addEventListener(
+                "click",
+                () => {
+                  isOpen = false;
+                },
+                { once: true },
+              )
+            )
+          }}
+        }
+        onToggle={noop}
         className={clsx({
           "usa-current": isCurrent,
           "simpler-subnav-open": isOpen,

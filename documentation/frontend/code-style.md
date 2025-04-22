@@ -36,6 +36,8 @@ The main things to focus on are:
 - don't abuse (or maybe even use) abbreviations
 - think about searchability
 
+Also, `camelCase` should be used by default. Objects coming in from outside sources, such as API response payloads, may use `snake_case`, and there is no need to avoid using snake case in those instances, but any newly defined variables within the Next.js app should use camel case.
+
 ### Promises
 
 Constants that represent unresolved promises should be named `varNamePromise(s)`.
@@ -59,4 +61,10 @@ Classes for different flavors of API errors are established in errors.ts, use th
 
 ### Snapshots & Page Component Tests
 
-We have observed that running typical Jest unit tests on dynamic Next JS page level components is complicated and generally does not provide much value. When creating any new pages, feel free to rely on snapshot based tests rather than functional tests for these components.
+We have observed that running typical Jest unit tests on dynamic Next.js page level components is complicated and generally does not provide much value. When creating any new pages, feel free to rely on snapshot based tests rather than functional tests for these components.
+
+## Page Metadata
+
+By default page titles should follow the format:
+
+`<Page Name> | Simpler.Grants.gov`
