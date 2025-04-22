@@ -81,15 +81,9 @@ describe("Header", () => {
       "href",
       "/",
     );
-<<<<<<< HEAD
     expect(screen.getByRole("link", { name: /search/i })).toHaveAttribute(
       "href",
       "/search",
-=======
-    expect(screen.getByRole("link", { name: /subscribe/i })).toHaveAttribute(
-      "href",
-      "/subscribe",
->>>>>>> main
     );
 
     await userEvent.click(menuButton);
@@ -102,13 +96,9 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
-<<<<<<< HEAD
     const govBanner = screen.getByRole("button", {
       name: /Here’s how you know/i,
     });
-=======
-    const govBanner = screen.getByRole("button", { name: /Here’s how you know/i });
->>>>>>> main
 
     expect(govBanner).toBeInTheDocument();
 
