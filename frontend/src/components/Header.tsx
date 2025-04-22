@@ -1,26 +1,32 @@
 "use client";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { isCurrentPath } from "src/utils/generalUtils";
 
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
+  Header as USWDSHeader,
   Menu,
   NavDropDownButton,
   NavMenuButton,
   PrimaryNav,
   Title,
-  Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
@@ -86,8 +92,10 @@ const NavLinks = ({
     const anonymousNavLinks: PrimaryLink[] = [
       { text: t("home"), href: "/" },
       getSearchLink(path.includes("/search")),
-      { text: t("roadmap"), href: "/roadmap" },
-      { text: t("vision"), href: "/vision" },
+      { text: t("about"), children:[
+          { text: t("vision"), href: "/vision" },
+          { text: t("roadmap"), href: "/roadmap" }
+      ]},
       { text: t("subscribe"), href: "/subscribe" },
     ];
     if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {

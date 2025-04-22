@@ -61,6 +61,11 @@ describe("Header", () => {
     global.fetch = originalFetch;
   });
 
+  it("renders Header navbar menu", () => {
+    const { container } = render(<Header />);
+    expect(container).toMatchSnapshot();
+  });
+
   it("toggles the mobile nav menu", async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -76,9 +81,9 @@ describe("Header", () => {
       "href",
       "/",
     );
-    expect(screen.getByRole("link", { name: /roadmap/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /subscribe/i })).toHaveAttribute(
       "href",
-      "/roadmap",
+      "/subscribe",
     );
 
     await userEvent.click(menuButton);
@@ -91,9 +96,7 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
-    const govBanner = screen.getByRole("button", {
-      name: "Here’s how you know",
-    });
+    const govBanner = screen.getByRole("button", { name: /Here’s how you know/i });
 
     expect(govBanner).toBeInTheDocument();
 
@@ -149,7 +152,6 @@ describe("Header", () => {
     rerender(<Header />);
     const queryLink = screen.getByRole("link", { name: "Search" });
     expect(queryLink).toHaveClass("usa-current");
-
     usePathnameMock.mockReturnValue("/opportunity/35");
     rerender(<Header />);
     const allLinks = await screen.findAllByRole("link");
@@ -166,26 +168,58 @@ describe("Header", () => {
       name: "Workspace",
     });
     expect(workspaceButton).toHaveAttribute("aria-expanded", "false");
-
+    
     // the submenu assertions are not strictly necessary, but I could not get the timing to work right
     // to get tests to pass correctly without them, so leaving them in
     // eslint-disable-next-line testing-library/no-node-access
     const subMenu = workspaceButton.nextSibling;
     expect(subMenu).not.toBeVisible();
-
+    
     await userEvent.click(workspaceButton);
-
+    
     await waitFor(() =>
       expect(workspaceButton).toHaveAttribute("aria-expanded", "true"),
     );
     await waitFor(() => expect(subMenu).toBeVisible());
-
+    
     const anywhereElse = screen.getByText("Home");
     await userEvent.click(anywhereElse);
-
+    
     await waitFor(() =>
       expect(workspaceButton).toHaveAttribute("aria-expanded", "false"),
     );
     await waitFor(() => expect(subMenu).not.toBeVisible());
+  });
+
+  describe("About", () => {
+    it("shows About as the active nav item when on Vision page", async () => {
+      usePathnameMock.mockReturnValue("/vision");
+      render(<Header />);
+
+      const homeLink = screen.getByRole("button", { name: /About/i });
+      expect(homeLink).toHaveClass("usa-current");
+    });
+    it("shows About as the active nav item when on Roadmap page", async () => {
+      usePathnameMock.mockReturnValue("/roadmap");
+      render(<Header />);
+
+      const homeLink = screen.getByRole("button", { name: /About/i });
+      expect(homeLink).toHaveClass("usa-current");
+    });
+    it("renders About submenu", async () => {
+      const { container } = render(<Header />);
+
+      expect(screen.queryByRole("link", { name: /Our Vision/i })).not.toBeInTheDocument();
+      
+      const aboutBtn = screen.getByRole("button", { name: /About/i });
+      
+      await userEvent.click(aboutBtn);
+      
+      expect(container).toMatchSnapshot();
+      expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
+      
+      const visionLink = screen.getByRole("link", { name: /Our Vision/i });
+      expect(visionLink).toBeInTheDocument()
+    });
   });
 });
