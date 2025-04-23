@@ -234,7 +234,7 @@ describe("Header", () => {
       await userEvent.click(communityBtn);
 
       expect(container).toMatchSnapshot();
-      expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
+      expect(communityBtn).toHaveAttribute("aria-expanded", "true");
 
       const eventsLink = screen.getByRole("link", { name: /Events/i });
       expect(eventsLink).toBeInTheDocument();
