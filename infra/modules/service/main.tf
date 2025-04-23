@@ -5,10 +5,6 @@ data "aws_ecr_repository" "app" {
   name  = var.image_repository_name
 }
 
-module "project_config" {
-  source = "../../project-config"
-}
-
 data "external" "whoami" {
   program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
@@ -22,20 +18,22 @@ data "external" "deploy_github_sha" {
   program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
-data "aws_ssm_parameter" "fluent_bit_commit" {
-  name = "/fluent-bit-commit"
-}
-
 locals {
+  # The image is via https://docs.newrelic.com/install/aws-logs/?service=ECS&forward_ECS=sidecar_firelens
+  # 533243300146 is an AWS account belonging to New Relic.
+  # Use the following command to get a list of available versions:
+  # aws ecr list-images --repository-name newrelic/logging-firelens-fluentbit --registry-id 533243300146 --query "imageIds[].imageTag" --output text
+  new_relic_fluent_bit_repo_arn = "arn:aws:ecr:${data.aws_region.current.name}:533243300146:repository/newrelic/logging-firelens-fluentbit"
+  new_relic_fluent_bit_version  = "533243300146.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/newrelic/logging-firelens-fluentbit:2.3.0"
+  new_relic_fluent_bit_cpu      = 256
+  new_relic_fluent_bit_memory   = 1024
+
   alb_name                = var.service_name
   cluster_name            = var.service_name
   container_name          = var.service_name
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
-  fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
-  fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
-  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${data.aws_ssm_parameter.fluent_bit_commit.value}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
@@ -162,8 +160,12 @@ resource "aws_ecs_task_definition" "app" {
       logConfiguration = {
         logDriver = "awsfirelens",
         options = {
-          Name = "forward"
-        }
+          Name = "newrelic",
+        },
+        secretOptions = [{
+          name      = "apiKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
+        }]
       }
       mountPoints    = []
       systemControls = []
@@ -171,24 +173,18 @@ resource "aws_ecs_task_definition" "app" {
     },
     {
       name                   = "${local.container_name}-fluentbit"
-      image                  = local.fluent_bit_image_url,
-      memory                 = 256,
-      cpu                    = 512,
+      image                  = local.new_relic_fluent_bit_version,
+      memory                 = local.new_relic_fluent_bit_memory,
+      cpu                    = local.new_relic_fluent_bit_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
-      healthCheck = {
-        timeout     = 5,
-        interval    = 10,
-        startPeriod = 30,
-        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
-      },
       firelensConfiguration = {
         type = "fluentbit",
         options = {
           enable-ecs-log-metadata = "true"
         }
-      }
+      },
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -199,15 +195,10 @@ resource "aws_ecs_task_definition" "app" {
       }
       secrets = [
         {
-          name      = "licenseKey",
+          name      = "apiKey",
           valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
         }
       ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.container_name },
-        { name : "log_group_name", value : local.log_group_name },
-      ],
     },
   ])
 
@@ -215,8 +206,8 @@ resource "aws_ecs_task_definition" "app" {
   # We need to do this because the task definition requires an aggregate value for CPU and Memory.
   # We can't simply add them together, because the resulting value needs to be on this list
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
-  cpu    = var.cpu > 256 ? var.cpu * 2 : 256 * 2
-  memory = var.memory > 512 ? var.memory * 2 : 512 * 2
+  cpu    = var.cpu > local.new_relic_fluent_bit_cpu ? var.cpu * 2 : local.new_relic_fluent_bit_cpu * 2
+  memory = var.memory > local.new_relic_fluent_bit_memory ? var.memory * 2 : local.new_relic_fluent_bit_memory * 2
 
   requires_compatibilities = ["FARGATE"]
 
