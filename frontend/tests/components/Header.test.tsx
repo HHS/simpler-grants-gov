@@ -1,10 +1,13 @@
-import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
-import { render, screen, waitFor } from "tests/react-utils";
-
 import { ReadonlyURLSearchParams } from "next/navigation";
-
+import { Response } from "node-fetch";
 import Header from "src/components/Header";
+import {
+  render,
+  screen,
+  waitFor,
+} from "tests/react-utils";
+
+import userEvent from "@testing-library/user-event";
 
 const props = {
   locale: "en",
@@ -220,6 +223,23 @@ describe("Header", () => {
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
       const visionLink = screen.getByRole("link", { name: /Our Vision/i });
+      expect(visionLink).toBeInTheDocument();
+    });
+    it("renders Community submenu", async () => {
+      const { container } = render(<Header />);
+
+      expect(
+        screen.queryByRole("link", { name: /Events/i }),
+      ).not.toBeInTheDocument();
+
+      const aboutBtn = screen.getByRole("button", { name: /Community/i });
+
+      await userEvent.click(aboutBtn);
+
+      expect(container).toMatchSnapshot();
+      expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
+
+      const visionLink = screen.getByRole("link", { name: /Events/i });
       expect(visionLink).toBeInTheDocument();
     });
   });
