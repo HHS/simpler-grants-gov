@@ -1,18 +1,9 @@
-import {
-  Dispatch,
-  JSX,
-  SetStateAction,
-  useEffect,
-} from "react";
-
 import clsx from "clsx";
-import { noop } from "lodash";
+import { noop, toNumber } from "lodash";
 import { IndexType } from "src/types/generalTypes";
 
-import {
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Dispatch, JSX, SetStateAction, useEffect, useState } from "react";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: IndexType;
@@ -31,37 +22,61 @@ export default function NavDropdown({
   menuItems,
   setActiveNavDropdownIndex,
 }: NavDropdownProps): JSX.Element {
-  let isOpen = activeNavDropdownIndex === index;
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  function handleToggle() {
-    const activeIndex: IndexType = isOpen ? null : index;
+  function eventHandler(e: any) {
+    const dropdowns = document.getElementsByName("navDropDownButton");
+    let dropdownClicked = false;
+    for (let dropdown of dropdowns) {
+      if (dropdown.contains(e.target)) {
+        dropdownClicked = true;
+      }
+    }
+
+    let targetId = null;
+    if (dropdownClicked) {
+      let targetNode = e.target;
+      if (e.target.localName === "span") {
+        targetNode = targetNode.parentNode;
+      }
+      if (!targetNode.className.includes("simpler-subnav-open")) {
+        targetId = toNumber(targetNode.id);
+      }
+    }
+    setActiveNavDropdownIndex(targetId);
+  }
+
+  function handleToggle(e: any) {
+    let activeIndex: IndexType = isOpen ? null : index;
+    if (!!activeIndex) {
+      e.stopPropagation();
+      requestAnimationFrame(() =>
+        document.addEventListener(
+          "click",
+          function (e) {
+            eventHandler(e);
+          },
+          { once: true },
+        ),
+      );
+    }
     setActiveNavDropdownIndex(activeIndex);
   }
 
   useEffect(() => {
-    isOpen = activeNavDropdownIndex === index;
+    setIsOpen(activeNavDropdownIndex === index);
   }, [activeNavDropdownIndex, index]);
 
   return (
     <>
       <NavDropDownButton
+        id={index.toString()}
+        name="navDropDownButton"
         label={linkText}
         menuId={linkText}
         isOpen={isOpen}
-        onClick={(e) => {
-          handleToggle();
-          if (!isOpen) {
-            e.stopPropagation();
-            requestAnimationFrame(() =>
-              document.addEventListener(
-                "click",
-                () => {
-                  setActiveNavDropdownIndex(null);
-                },
-                { once: true },
-              ),
-            );
-          }
+        onClick={function (e: any) {
+          handleToggle(e);
         }}
         onToggle={noop}
         className={clsx({

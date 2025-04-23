@@ -1,13 +1,10 @@
-import { ReadonlyURLSearchParams } from "next/navigation";
-import { Response } from "node-fetch";
-import Header from "src/components/Header";
-import {
-  render,
-  screen,
-  waitFor,
-} from "tests/react-utils";
-
 import userEvent from "@testing-library/user-event";
+import { Response } from "node-fetch";
+import { render, screen, waitFor } from "tests/react-utils";
+
+import { ReadonlyURLSearchParams } from "next/navigation";
+
+import Header from "src/components/Header";
 
 const props = {
   locale: "en",
@@ -170,23 +167,23 @@ describe("Header", () => {
       name: "Workspace",
     });
     expect(workspaceButton).toHaveAttribute("aria-expanded", "false");
-    
+
     // the submenu assertions are not strictly necessary, but I could not get the timing to work right
     // to get tests to pass correctly without them, so leaving them in
     // eslint-disable-next-line testing-library/no-node-access
     const subMenu = workspaceButton.nextSibling;
     expect(subMenu).not.toBeVisible();
-    
+
     await userEvent.click(workspaceButton);
-    
+
     await waitFor(() =>
       expect(workspaceButton).toHaveAttribute("aria-expanded", "true"),
     );
     await waitFor(() => expect(subMenu).toBeVisible());
-    
+
     const anywhereElse = screen.getByText("Home");
     await userEvent.click(anywhereElse);
-    
+
     await waitFor(() =>
       expect(workspaceButton).toHaveAttribute("aria-expanded", "false"),
     );
