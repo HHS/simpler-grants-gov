@@ -214,7 +214,7 @@ class TextExtractor:
         except Exception as e:
             raise UnprocessableFileContent(
                 f"UnprocessableFileContent: Could not read {self.file_type} content: {e}"
-            )
+            ) from e
 
     def _validate_file_type(self) -> None:
         if not self.file_path.lower().endswith(self.file_type):
