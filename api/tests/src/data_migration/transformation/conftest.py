@@ -822,28 +822,8 @@ def setup_competition(
 ) -> staging.competition.Tcompetition:
     """Setup a competition record for testing transformation"""
 
-    # Default values for non-nullable fields
-    values = {
-        "competitionid": "COMP123",
-        "familyid": 15,  # SF-424
-        "competitiontitle": "Test Competition",
-        "openingdate": date(2023, 1, 1),
-        "closingdate": date(2023, 12, 31),
-        "contactinfo": "John Doe, john.doe@example.com",
-        "graceperiod": 10,
-        "opentoapplicanttype": 1,  # ORGANIZATION
-        "electronic_required": "Y",
-        "expected_appl_num": 50,
-        "expected_appl_size": 5,
-        "ismulti": "Y",
-        "agency_dwnld_url": "https://example.com/download",
-        "package_id": "PKG123",
-        "is_wrkspc_compatible": "Y",  # This field is required by the database schema
-        "sendmail": "Y",
-        "created_date": datetime(2023, 1, 1, 12, 0, 0),
-        "last_upd_date": datetime(2023, 1, 15, 12, 0, 0),
-        "dialect": "X",  # This field is required by the database schema
-    }
+    # Put any hard-coded values here, otherwise rely on factories
+    values = {}
 
     # Override with any specified values
     if source_values:
