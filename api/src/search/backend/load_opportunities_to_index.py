@@ -367,7 +367,12 @@ class LoadOpportunitiesToIndex(Task):
             except Exception as e:
                 self.increment(self.Metrics.ATTACHMENTS_UNPROCESSED)
                 logger.warning(
-                    "text-extractor: error extracting text", extra={"err": e, "attachment": att}
+                    "text-extractor: error extracting text",
+                    extra={
+                        "err": e,
+                        "attachment_id": att.attachment_id,
+                        "opportunity_id": att.opportunity_id,
+                    },
                 )
 
         return attachments
