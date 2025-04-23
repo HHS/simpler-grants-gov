@@ -193,7 +193,8 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         attachments = record[0]["attachments"]
 
         expected_number_of_processed_attachments = 1
-        expected_number_of_unprocessed_attachments = 1
+        expected_number_of_skipped_attachments = 1
+        expected_number_of_failed_attachments = 0
 
         # assert only one (allowed) opportunity attachment was uploaded
         assert len(attachments) == expected_number_of_processed_attachments
@@ -207,9 +208,15 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         )
         assert (
             load_opportunities_to_index.metrics[
-                load_opportunities_to_index.Metrics.ATTACHMENTS_UNPROCESSED
+                load_opportunities_to_index.Metrics.ATTACHMENTS_SKIPPED
             ]
-            == expected_number_of_unprocessed_attachments
+            == expected_number_of_skipped_attachments
+        )
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.ATTACHMENTS_FAILED
+            ]
+            == expected_number_of_failed_attachments
         )
 
         # assert correct attachment was uploaded

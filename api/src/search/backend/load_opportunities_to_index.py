@@ -62,7 +62,8 @@ class LoadOpportunitiesToIndex(Task):
         TEST_RECORDS_SKIPPED = "test_records_skipped"
         BATCHES_PROCESSED = "batches_processed"
         ATTACHMENTS_PROCESSED = "attachments_processed"
-        ATTACHMENTS_UNPROCESSED = "attachments_unprocessed"
+        ATTACHMENTS_FAILED = "attachments_failed"
+        ATTACHMENTS_SKIPPED = "attachments_skipped"
 
     def __init__(
         self,
@@ -347,7 +348,7 @@ class LoadOpportunitiesToIndex(Task):
         attachments = []
         for att in opp_attachments:
             if not self.filter_attachment(att):
-                self.increment(self.Metrics.ATTACHMENTS_UNPROCESSED)
+                self.increment(self.Metrics.ATTACHMENTS_SKIPPED)
                 continue
             try:
                 file_text = extract_text_from_file(
@@ -365,7 +366,7 @@ class LoadOpportunitiesToIndex(Task):
                 )
                 self.increment(self.Metrics.ATTACHMENTS_PROCESSED)
             except Exception as e:
-                self.increment(self.Metrics.ATTACHMENTS_UNPROCESSED)
+                self.increment(self.Metrics.ATTACHMENTS_FAILED)
                 logger.warning(
                     "text-extractor: error extracting text",
                     extra={

@@ -92,7 +92,7 @@ def extract_text_from_html(html_string: str) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extracting text from html: {e}"
-        )
+        ) from e
 
 
 def extract_text_from_pdf(file_data: bytes) -> str:
@@ -109,7 +109,7 @@ def extract_text_from_pdf(file_data: bytes) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extracting text from pdf: {e}"
-        )
+        ) from e
 
 
 def extract_text_from_pptx(file_data: bytes) -> str:
@@ -129,7 +129,7 @@ def extract_text_from_pptx(file_data: bytes) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extraction text from pptx: {e}"
-        )
+        ) from e
 
 
 def extract_text_from_rft(rtf_data: str) -> str:
@@ -138,7 +138,7 @@ def extract_text_from_rft(rtf_data: str) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extracting text from rtf: {e}"
-        )
+        ) from e
 
 
 def extract_text_from_docx(file_data: bytes) -> str:
@@ -148,7 +148,7 @@ def extract_text_from_docx(file_data: bytes) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extracting text from docx: {e}"
-        )
+        ) from e
 
 
 def extract_text_from_xls(file_data: bytes) -> str:
@@ -164,7 +164,7 @@ def extract_text_from_xls(file_data: bytes) -> str:
     except Exception as e:
         raise UnprocessableFileContent(
             f"UnprocessableFileContent: Error extracting text from xls: {e}"
-        )
+        ) from e
 
 
 def _xls_dict_to_string(xls_dict: dict) -> str:
