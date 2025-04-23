@@ -37,7 +37,9 @@ const InfoTooltip = ({
       asCustom={IconWrapper}
       className={className}
       data-testid="tooltipWrapper"
-    />
+    >
+      <></>
+    </TooltipWrapper>
   );
 };
 

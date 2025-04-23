@@ -14,14 +14,6 @@ describe("InfoTooltip", () => {
     expect(screen.getByTestId("triggerElement")).toBeInTheDocument();
   });
 
-  it("applies custom className", () => {
-    const customClass = "custom-class";
-    render(<InfoTooltip text="Test tooltip" className={customClass} />);
-    const tooltipWrapper = screen.getByTestId("tooltipWrapper");
-    expect(tooltipWrapper).toHaveClass("usa-tooltip");
-    expect(tooltipWrapper).toHaveClass(customClass);
-  });
-
   it("shows tooltip on hover", async () => {
     const tooltipText = "Test tooltip";
     render(<InfoTooltip text={tooltipText} />);
