@@ -9,6 +9,10 @@ import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
+import {
+  eligbilityValueToGroup,
+  eligibilityValueToLabel,
+} from "../search/SearchFilterAccordion/SearchFilterOptions";
 
 type OpportunityDescriptionProps = {
   summary: Summary;
@@ -43,14 +47,47 @@ type ApplicantTypeKey = keyof typeof ApplicantType;
 
 const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   if (!applicantTypes || !applicantTypes.length) {
-    return "--";
+    return <div>--</div>;
   }
-  return applicantTypes.map((type, index) => {
-    if (type in ApplicantType) {
-      return <p key={index}>{ApplicantType[type as ApplicantTypeKey]}</p>;
-    }
-    return <p key={index}>{type}</p>;
-  });
+
+  const applicantTypeGroups = applicantTypes.reduce(
+    (groupedApplicantTypes, applicantType) => {
+      const group = eligbilityValueToGroup[applicantType];
+      if (!groupedApplicantTypes[group]) {
+        groupedApplicantTypes[group] = [applicantType];
+      } else {
+        groupedApplicantTypes[group].push(applicantType);
+      }
+      return groupedApplicantTypes;
+    },
+    {} as { [key: string]: string[] },
+  );
+
+  return (
+    <>
+      {Object.entries(applicantTypeGroups).map(
+        ([groupName, applicantTypeValues]) => {
+          return (
+            <div key={`eligibility-group${groupName}`}>
+              <h4>{groupName.toUpperCase()}</h4>
+              <ul>
+                {applicantTypeValues.map((value) => (
+                  <li key={value}>{eligibilityValueToLabel[value]}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        },
+      )}
+    </>
+  );
+
+  // return applicantTypes.map((type, index) => {
+  //   if (type in ApplicantType) {
+  //     return <p key={index}>{ApplicantType[type as ApplicantTypeKey]}</p>;
+  //   }
+  //   return <p key={index}>{type}</p>;
+  // });
 };
 
 const SummaryDescriptionDisplay = ({
