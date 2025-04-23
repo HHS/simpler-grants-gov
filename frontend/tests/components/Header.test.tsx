@@ -15,6 +15,7 @@ const mockUseUser = jest.fn(() => ({
     token: "faketoken",
   },
   hasBeenLoggedOut: false,
+  resetHasBeenLoggedOut: jest.fn(),
 }));
 
 const mockShowSnackbar = jest.fn();
@@ -255,14 +256,15 @@ describe("Header", () => {
     });
   });
 
-  // it("shows snackbar if user has been logged out", () => {
-  //   mockUseUser.mockReturnValue({
-  //     user: {
-  //       token: "a token",
-  //     },
-  //     hasBeenLoggedOut: true,
-  //   });
-  //   render(<Header {...props} />);
-  //   expect(mockShowSnackbar).toHaveBeenCalledTimes(1);
-  // });
+  it("shows snackbar if user has been logged out", () => {
+    mockUseUser.mockReturnValue({
+      user: {
+        token: "a token",
+      },
+      hasBeenLoggedOut: true,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
+    render(<Header {...props} />);
+    expect(mockShowSnackbar).toHaveBeenCalledTimes(1);
+  });
 });
