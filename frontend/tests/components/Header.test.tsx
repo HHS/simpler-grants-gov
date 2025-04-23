@@ -231,7 +231,7 @@ describe("Header", () => {
 
       const communityBtn = screen.getByRole("button", { name: /Community/i });
 
-      await userEvent.click(aboutBtn);
+      await userEvent.click(communityBtn);
 
       expect(container).toMatchSnapshot();
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
