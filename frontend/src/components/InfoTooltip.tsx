@@ -15,7 +15,7 @@ const InfoTooltip = ({
   className,
 }: InfoTooltipProps) => {
   const IconWrapper = forwardRef<HTMLSpanElement, React.HTMLProps<HTMLSpanElement>>((props, ref) => (
-    <span 
+    <span
       {...props}
       ref={ref}
       style={{ cursor: 'help' }}
@@ -26,7 +26,7 @@ const InfoTooltip = ({
       />
     </span>
   ));
-  
+
   IconWrapper.displayName = 'IconWrapper';
 
   return (

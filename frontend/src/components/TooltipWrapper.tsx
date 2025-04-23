@@ -16,7 +16,7 @@ type TooltipProps = {
 export const TooltipWrapper = (props: TooltipProps) => {
   const { children = <span />, className, ...rest } = props;
   return (
-    <Tooltip 
+    <Tooltip
       {...rest}
       aria-label={props.title}
       wrapperclasses={`usa-tooltip ${className || ''}`}
