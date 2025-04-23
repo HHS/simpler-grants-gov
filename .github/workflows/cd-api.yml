@@ -45,7 +45,9 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
+        # dev deploys disabled so the https://github.com/HHS/simpler-grants-gov/pull/4303 can be tested
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod"]' || github.ref_name == 'main' && '["staging"]' || '["staging"]')  }}
+        # envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
