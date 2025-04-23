@@ -237,7 +237,7 @@ describe("Header", () => {
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
       const eventsLink = screen.getByRole("link", { name: /Events/i });
-      expect(visionLink).toBeInTheDocument();
+      expect(eventsLink).toBeInTheDocument();
     });
   });
 });
