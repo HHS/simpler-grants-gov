@@ -55,7 +55,7 @@ export const useClientFetch = <T>(
         throw new Error(`${errorMessage}: ${response.status}`);
       }
     },
-    [errorMessage, fetchWithAuthCheck, jsonResponse],
+    [],
   );
   return {
     clientFetch,
