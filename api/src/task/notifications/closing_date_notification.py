@@ -1,15 +1,15 @@
 import logging
 from datetime import timedelta
-from typing import List
 from uuid import UUID
 
+import botocore.client
 from sqlalchemy import and_, exists, select
 
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
-from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants
+from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.constants import EmailData, NotificationReasons
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -23,13 +23,19 @@ CONTACT_INFO = (
 
 
 class ClosingDateNotification(BaseNotification):
-    collected_data: dict | None = None
 
-    def __init__(self, db_session: db.Session):
-        super().__init__(
-            db_session,
-        )
-        self.frontend_base_url = None
+    def __init__(
+        self,
+        db_session: db.Session,
+        app_id: str | None = None,
+        pinpoint_client: botocore.client.BaseClient | None = None,
+        frontend_base_url: str | None = None,
+    ):
+        super().__init__(db_session)
+        self.app_id = app_id
+        self.pinpoint_client = pinpoint_client
+        self.frontend_base_url = frontend_base_url
+        self.collected_data: dict | None = None
 
     def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
         """Collect notifications for opportunities closing in two weeks"""
@@ -78,14 +84,14 @@ class ClosingDateNotification(BaseNotification):
         )
         self.collected_data = closing_date_opportunities or None
 
-        return closing_date_opportunities or None
+        return closing_date_opportunities
 
     def prepare_notification(
         self, closing_date_data: dict[UUID, list[UserSavedOpportunity]]
     ) -> EmailData:
 
         notification: dict[UUID, str] = {}
-        to_address_list: List[str] = []
+        to_address_list: list[str] = []
 
         for user_id, saved_items in closing_date_data.items():
             user_email = self._get_user_email(user_id)
@@ -148,24 +154,32 @@ class ClosingDateNotification(BaseNotification):
             to_addresses=to_address_list,
             subject="Applications for your bookmarked funding opportunities are due soon",
             content=notification,
-            notification_reason=NotificationConstants.CLOSING_DATE_REMINDER,
+            notification_reason=NotificationReasons.CLOSING_DATE_REMINDER,
         )
 
     def create_user_opportunity_notification_log(self) -> None:
-        for user_id, saved_items in self.collected_data.items():
-            for closing_opportunity in saved_items:
-                if len(closing_opportunity) > 0:
-                    # Create notification log entry
-                    opp_notification_log = UserOpportunityNotificationLog(
-                        user_id=user_id,
-                        opportunity_id=closing_opportunity.opportunity_id,
-                    )
-                    self.db_session.add(opp_notification_log)
+        if self.collected_data:
+            for user_id, saved_items in self.collected_data.items():
+                for closing_opportunity in saved_items:
+                    if len(closing_opportunity) > 0:
+                        # Create notification log entry
+                        opp_notification_log = UserOpportunityNotificationLog(
+                            user_id=user_id,
+                            opportunity_id=closing_opportunity.opportunity_id,
+                        )
+                        self.db_session.add(opp_notification_log)
 
-            logger.info(
-                "Successfully sent closing date reminder",
-                extra={
-                    "user_id": user_id,
-                    "opportunity_ids": [opp.opportunity_id for opp in saved_items],
-                },
-            )
+                logger.info(
+                    "Successfully sent closing date reminder",
+                    extra={
+                        "user_id": user_id,
+                        "opportunity_ids": [opp.opportunity_id for opp in saved_items],
+                    },
+                )
+
+    def run_task(self) -> None:
+        """Override to define the task logic"""
+        data = self.notification_data()
+        if data:
+            self.send_notifications(data, self.pinpoint_client, self.app_id)
+            self.create_user_opportunity_notification_log()

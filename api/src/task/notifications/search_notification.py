@@ -3,10 +3,12 @@ from uuid import UUID
 
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.adapters.search as search
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
-from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants
+from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.constants import EmailData, NotificationReasons
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -20,7 +22,18 @@ def _strip_pagination_params(search_query: dict) -> dict:
 
 
 class SearchNotification(BaseNotification):
-    collected_data: dict | None = None
+
+    def __init__(
+        self,
+        db_session: db.Session,
+        search_client: search.SearchClient | None = None,
+        app_id: str | None = None,
+        pinpoint_client: str | None = None,
+    ):
+        super().__init__(db_session)
+        self.search_client = search_client
+        self.app_id = app_id
+        self.pinpoint_client = pinpoint_client
 
     def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]] | None:
         """Collect notifications for changed saved searches"""
@@ -59,7 +72,6 @@ class SearchNotification(BaseNotification):
                 ),
             },
         )
-        self.collected_data = updated_saved_searches or None
         return updated_saved_searches or None
 
     def prepare_notification(
@@ -70,5 +82,11 @@ class SearchNotification(BaseNotification):
             to_addresses=[],
             subject="",
             content={},
-            notification_reason=NotificationConstants.SEARCH_UPDATES,
+            notification_reason=NotificationReasons.SEARCH_UPDATES,
         )
+
+    def run_task(self) -> None:
+        """Override to define the task logic"""
+        data = self.notification_data()
+        if data:
+            self.send_notifications(data, self.pinpoint_client, self.app_id)

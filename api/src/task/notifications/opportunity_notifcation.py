@@ -2,18 +2,28 @@ import logging
 from typing import List
 from uuid import UUID
 
+import botocore.client
 from sqlalchemy import select
 
+from src.adapters import db
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
-from src.task.notifications.BaseNotification import BaseNotification
-from src.task.notifications.constants import EmailData, NotificationConstants
+from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.constants import EmailData, NotificationReasons
 
 logger = logging.getLogger(__name__)
 
 
 class OpportunityNotification(BaseNotification):
-    collected_data: dict | None = None
+    def __init__(
+        self,
+        db_session: db.Session,
+        app_id: str,
+        pinpoint_client: botocore.client.BaseClient | None = None,
+    ):
+        super().__init__(db_session)
+        self.app_id = app_id
+        self.pinpoint_client = pinpoint_client
 
     def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
         """Collect notifications for changed opportunities that users are tracking"""
@@ -39,8 +49,6 @@ class OpportunityNotification(BaseNotification):
             extra={"user_count": len(saved_opportunities), "total_notifications": len(results)},
         )
 
-        self.collected_data = saved_opportunities or None
-
         return saved_opportunities or None
 
     def prepare_notification(self, saved_data: dict[UUID, list[UserSavedOpportunity]]) -> EmailData:
@@ -61,5 +69,11 @@ class OpportunityNotification(BaseNotification):
             to_addresses=to_address_list,
             subject="Updates to Your Saved Opportunities",
             content=notification,
-            notification_reason=NotificationConstants.OPPORTUNITY_UPDATES,
+            notification_reason=NotificationReasons.OPPORTUNITY_UPDATES,
         )
+
+    def run_task(self) -> None:
+        """Override to define the task logic"""
+        data = self.notification_data()
+        if data:
+            self.send_notifications(data, self.pinpoint_client, self.app_id)

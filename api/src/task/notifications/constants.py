@@ -1,8 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import List
 
-class NotificationConstants(StrEnum):
+
+class NotificationReasons(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
@@ -21,4 +22,4 @@ class EmailData:
     to_addresses: List[str]
     subject: str
     content: dict
-    notification_reason: NotificationConstants
+    notification_reason: NotificationReasons

@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import botocore.client
 from pydantic import Field
@@ -8,11 +7,8 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
-from src.db.models.user_models import UserNotificationLog
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotification
-from src.task.notifications.constants import EmailData
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
@@ -49,59 +45,39 @@ class NotificationTask(Task):
         pinpoint_client: botocore.client.BaseClient | None = None,
         pinpoint_app_id: str | None = None,
         frontend_base_url: str | None = None,
+        generate_notification_config: GenerateNotificationsConfig | None = None,
     ) -> None:
         super().__init__(db_session)
-        self.config = GenerateNotificationsConfig()
 
         self.search_client = search_client
         self.pinpoint_client = pinpoint_client
         self.app_id = pinpoint_app_id
         self.frontend_base_url = frontend_base_url
 
+        if generate_notification_config is None:
+            generate_notification_config = GenerateNotificationsConfig()
+        self.generate_notification_config = generate_notification_config
+
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
 
-        data = OpportunityNotification(self.db_session).notification_data()
-        data and self.send_notifications(data)
+        # run opportunity notification
+        OpportunityNotification(
+            db_session=self.db_session, app_id=self.app_id, pinpoint_client=self.pinpoint_client
+        ).run_task()
 
-        data = SearchNotification(self.db_session, self.search_client).notification_data()
-        data and self.send_notifications(data)
+        # run search notification
+        SearchNotification(
+            db_session=self.db_session,
+            search_client=self.search_client,
+            app_id=self.app_id,
+            pinpoint_client=self.pinpoint_client,
+        ).run_task()
 
-        closing_notification = ClosingDateNotification(self.db_session)
-        data = closing_notification.notification_data()
-        data and self.send_notifications(data)
-        data and closing_notification.create_user_opportunity_notification_log()
-
-    def send_notifications(self, data: EmailData) -> None:
-        """Send collected notifications to users"""
-
-        for email in data.to_addresses:
-            for user_id, message in data.content.items():
-                notification_log = UserNotificationLog(
-                    user_id=user_id,
-                    notification_reason=data.notification_reason,
-                    notification_sent=False,  # Default to False, update on success
-                )
-                self.db_session.add(notification_log)
-                try:
-                    send_pinpoint_email_raw(
-                        to_address=email,
-                        subject=data.subject,
-                        message=message,
-                        pinpoint_client=self.pinpoint_client,
-                        app_id=self.config.app_id,
-                    )
-                    logger.info(
-                        "Successfully sent notification to user",
-                        extra={
-                            "user_id": user_id,
-                        },
-                    )
-                    notification_log.notification_sent = True
-
-                except Exception:
-                    # Notification log will be updated in the finally block
-                    logger.exception(
-                        "Failed to send notification email",
-                        extra={"user_id": user_id, "email": email},
-                    )
+        # run closing notification
+        ClosingDateNotification(
+            db_session=self.db_session,
+            app_id=self.app_id,
+            pinpoint_client=self.pinpoint_client,
+            frontend_base_url=self.frontend_base_url,
+        ).run_task()
