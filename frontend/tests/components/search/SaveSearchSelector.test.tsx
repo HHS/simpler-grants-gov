@@ -176,7 +176,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(4);
+    expect(clientFetchMock).toHaveBeenCalledTimes(3);
   });
   it("sets selected search based on savedSearch query parameter", async () => {
     mockUseUser.mockReturnValue({ user: { token: "first token" } });
