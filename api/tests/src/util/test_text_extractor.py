@@ -3,6 +3,7 @@ import pytest
 from src.util.text_extractor import (
     FileTypeMismatchTextExtractorError,
     TextExtractor,
+    UnprocessableFileContent,
     UnsupportedTextExtractorFileType,
     extract_text_from_file,
 )
@@ -65,3 +66,14 @@ def test_extract_pdf_text(fixture_file_path, fixture_file_path_val, expected) ->
     fixture_file_path = fixture_file_path(fixture_file_path_val)
     given = extract_text_from_file(fixture_file_path)
     assert given == expected
+
+
+def test_unprocessable_file_content(fixture_file_path):
+    with pytest.raises(UnprocessableFileContent, match="UnprocessableFileContent"):
+        extract_text_from_file(
+            fixture_file_path(f"{TEST_FILE_DIR}/bytes_named_as_text.txt"), raise_on_error=True
+        )
+        extract_text_from_file(
+            fixture_file_path(f"{TEST_FILE_DIR}/text_data_as_bytes_content.pdf"),
+            raise_on_error=True,
+        )

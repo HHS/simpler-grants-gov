@@ -15,6 +15,9 @@ from src.util.file_util import read_file
 
 logger = logging.getLogger(__name__)
 
+TEXT_EXTRACTOR_LOG_PREFIX = "TextExtractor:"
+TEXT_EXTRACTOR_ERR_LOG_PREFIX = f"{TEXT_EXTRACTOR_LOG_PREFIX} error:"
+
 
 @cache
 def get_text_extractor_configs() -> dict:
@@ -33,15 +36,28 @@ def get_text_extractor_configs() -> dict:
     }
 
 
-class UnsupportedTextExtractorFileType(Exception):
+class BaseTextExtractorError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = f"{TEXT_EXTRACTOR_ERR_LOG_PREFIX} {message}"
+
+    def __str__(self) -> str:
+        return self.message
+
+
+class UnsupportedTextExtractorFileType(BaseTextExtractorError):
     pass
 
 
-class FileTypeMismatchTextExtractorError(Exception):
+class FileTypeMismatchTextExtractorError(BaseTextExtractorError):
     pass
 
 
-class TextExtractorError(Exception):
+class UnprocessableFileContent(BaseTextExtractorError):
+    pass
+
+
+class TextExtractorUnknownError(BaseTextExtractorError):
     pass
 
 
@@ -51,6 +67,14 @@ def extract_text_from_file(
     raise_on_error: bool = False,
     char_limit: int | None = None,
 ) -> str | None:
+    """Get text content from a file
+
+    If raise_on_error set to True, the following exceptions will be raised:
+        UnsupportedTextExtractorFileType
+        FileTypeMismatchTextExtractorError
+        UnprocessableFileContent
+        TextExtractorUnknownError
+    """
     try:
         extracted_text = TextExtractor(file_path, file_type=file_type).get_text()
         if char_limit is not None:
@@ -63,54 +87,94 @@ def extract_text_from_file(
 
 
 def extract_text_from_html(html_string: str) -> str:
-    return "\n".join(BeautifulSoup(html_string, "html.parser").stripped_strings)
+    try:
+        return "\n".join(BeautifulSoup(html_string, "html.parser").stripped_strings)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extracting text from html: {e}"
+        )
 
 
 def extract_text_from_pdf(file_data: bytes) -> str:
-    with BytesIO(file_data) as stream:
-        reader = PdfReader(stream)
-        number_of_pages = len(reader.pages)
-        text_data = []
-        for page_number in range(number_of_pages):
-            page = reader.pages[page_number]
-            if text := page.extract_text().strip():
-                text_data.append(text)
-        return "\n".join(text_data)
+    try:
+        with BytesIO(file_data) as stream:
+            reader = PdfReader(stream)
+            number_of_pages = len(reader.pages)
+            text_data = []
+            for page_number in range(number_of_pages):
+                page = reader.pages[page_number]
+                if text := page.extract_text().strip():
+                    text_data.append(text)
+            return "\n".join(text_data)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extracting text from pdf: {e}"
+        )
 
 
 def extract_text_from_pptx(file_data: bytes) -> str:
-    with BytesIO(file_data) as stream:
-        presentation = pptx.Presentation(stream)
-        text_runs = []
-        for slide in presentation.slides:
-            for shape in slide.shapes:
-                if not shape.has_text_frame:
-                    continue
-                for paragraph in shape.text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        if text := run.text.strip():
-                            text_runs.append(text)
-        return "\n".join(text_runs)
+    try:
+        with BytesIO(file_data) as stream:
+            presentation = pptx.Presentation(stream)
+            text_runs = []
+            for slide in presentation.slides:
+                for shape in slide.shapes:
+                    if not shape.has_text_frame:
+                        continue
+                    for paragraph in shape.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            if text := run.text.strip():
+                                text_runs.append(text)
+            return "\n".join(text_runs)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extraction text from pptx: {e}"
+        )
 
 
 def extract_text_from_rft(rtf_data: str) -> str:
-    return rtf_to_text(rtf_data)
+    try:
+        return rtf_to_text(rtf_data)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extracting text from rtf: {e}"
+        )
 
 
 def extract_text_from_docx(file_data: bytes) -> str:
-    with BytesIO(file_data) as stream:
-        return "\n".join(paragraph.text for paragraph in Document(stream).paragraphs)
+    try:
+        with BytesIO(file_data) as stream:
+            return "\n".join(paragraph.text for paragraph in Document(stream).paragraphs)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extracting text from docx: {e}"
+        )
 
 
 def extract_text_from_xls(file_data: bytes) -> str:
     # Get all rows from every sheet in the xlsx file.
     all_data = {}
-    with BytesIO(file_data) as stream:
-        excel_file = pandas.ExcelFile(stream)
-        for sheet_name in excel_file.sheet_names:
-            xls_data = pandas.read_excel(excel_file, sheet_name=sheet_name, dtype=str)
-            all_data[sheet_name] = xls_data.astype(str).values.tolist()
-        return _xls_dict_to_string(all_data)
+    try:
+        with BytesIO(file_data) as stream:
+            excel_file = pandas.ExcelFile(stream)
+            for sheet_name in excel_file.sheet_names:
+                xls_data = pandas.read_excel(excel_file, sheet_name=sheet_name, dtype=str)
+                all_data[sheet_name] = xls_data.astype(str).values.tolist()
+            return _xls_dict_to_string(all_data)
+    except Exception as e:
+        raise UnprocessableFileContent(
+            f"UnprocessableFileContent: Error extracting text from xls: {e}"
+        )
+
+
+def _xls_dict_to_string(xls_dict: dict) -> str:
+    xls_data = []
+    for sheet_name, rows in xls_dict.items():
+        xls_data.append(sheet_name)
+        for row in rows:
+            xls_data.append(",".join(str(i) for i in row))
+        xls_data.append("")
+    return "\n".join(xls_data)
 
 
 @dataclass
@@ -131,30 +195,31 @@ class TextExtractor:
         self.config = get_text_extractor_configs()[self.file_type]
 
     def get_text(self) -> str:
+        logger.info(f"{TEXT_EXTRACTOR_LOG_PREFIX} start: {self.file_path=} {self.file_type=}")
         try:
-            return self.config.extractor(self._read_file_data()).strip()
+            extracted_data = self.config.extractor(self._read_file_data()).strip()
+            logger.info(
+                f"{TEXT_EXTRACTOR_LOG_PREFIX} success: {self.file_path=} {self.file_type=} characters_extracted={len(extracted_data)}"
+            )
+            return extracted_data
+        except BaseTextExtractorError as e:
+            raise e
         except Exception as e:
-            err = f"TextExtractorError: Could not extract text from file {self.file_path} - {self.file_type}: {e}"
-            logger.exception(err)
-            raise TextExtractorError(err) from e
+            err = f"TextExtractorUnknownError: Unknown error extracting text from file {self.file_path=} - {self.file_type=}: {e}"
+            raise TextExtractorUnknownError(err) from e
 
     def _read_file_data(self) -> bytes | str:
-        return read_file(self.file_path, self.config.read_mode)
+        try:
+            return read_file(self.file_path, self.config.read_mode)
+        except Exception as e:
+            raise UnprocessableFileContent(
+                f"UnprocessableFileContent: Could not read {self.file_type} content: {e}"
+            )
 
     def _validate_file_type(self) -> None:
         if not self.file_path.lower().endswith(self.file_type):
-            err = f"Mismatch file type: {self.file_path} must end with {self.file_type}"
+            err = f"FileTypeMismatchTextExtractorError: {self.file_path} must end with {self.file_type}"
             raise FileTypeMismatchTextExtractorError(err)
         if self.file_type not in set(get_text_extractor_configs().keys()):
-            err = f"Unsupported file type: {self.file_type}"
+            err = f"UnsupportedTextExtractorFileType: {self.file_type}"
             raise UnsupportedTextExtractorFileType(err)
-
-
-def _xls_dict_to_string(xls_dict: dict) -> str:
-    xls_data = []
-    for sheet_name, rows in xls_dict.items():
-        xls_data.append(sheet_name)
-        for row in rows:
-            xls_data.append(",".join(str(i) for i in row))
-        xls_data.append("")
-    return "\n".join(xls_data)
