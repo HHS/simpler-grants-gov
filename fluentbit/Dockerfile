@@ -31,9 +31,11 @@ ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
 ENV FLB_LOG_LEVEL=debug
 
+# The healthcheck is used to determine if the container is running.
+# AWS doesn't use it, but it's useful for local development.
 HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
   CMD ["curl", "http://localhost:80/api/v1/health"]
 
-COPY fluentbit.conf /fluent-bit/etc/fluent-bit-custom.conf
+COPY fluentbit.yml /fluent-bit/etc/fluent-bit-custom.yml
 
-CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.conf"]
+CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.yml"]

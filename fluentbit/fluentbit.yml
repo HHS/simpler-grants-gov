@@ -1,0 +1,26 @@
+service:
+  http_server: On
+  http_listen: 0.0.0.0
+  http_port: 80
+
+pipeline:
+  inputs:
+    - name: forward
+      listen: 0.0.0.0
+      port: 24224
+
+  outputs:
+    - name: nrlogs
+      match: "**"
+      license_key: ${licenseKey}
+
+    - name: cloudwatch_logs
+      match: "**"
+      log_group_name: ${log_group_name}
+      log_stream_name: ${container_name}/${container_id}
+      region: ${aws_region}
+      auto_create_group: true
+      log_format: json
+
+    - name: stdout
+      match: "**"
