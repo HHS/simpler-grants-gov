@@ -166,7 +166,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(3);
+    expect(clientFetchMock).toHaveBeenCalledTimes(2);
 
     rerender(
       <SaveSearchSelector
