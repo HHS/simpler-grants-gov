@@ -66,7 +66,7 @@ export default function NavDropdown({
     if (activeIndex) {
       e.stopPropagation();
       requestAnimationFrame(() =>
-        // eslint-disable-next-line
+        // @ts-ignore
         document.addEventListener("click", (ev: MouseEvent<Element, MouseEvent>): void => eventHandler(ev), {
           once: true,
         }),
@@ -87,6 +87,7 @@ export default function NavDropdown({
         label={linkText}
         menuId={linkText}
         isOpen={isOpen}
+        // @ts-ignore
         onClick={(e: MouseEvent<HTMLButtonElement, MouseEvent>) =>
           handleToggle(e)
         }
