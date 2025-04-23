@@ -1,3 +1,7 @@
+import clsx from "clsx";
+import { noop, toNumber } from "lodash";
+import { IndexType } from "src/types/generalTypes";
+
 import {
   Dispatch,
   JSX,
@@ -6,18 +10,7 @@ import {
   useEffect,
   useState,
 } from "react";
-
-import clsx from "clsx";
-import {
-  noop,
-  toNumber,
-} from "lodash";
-import { IndexType } from "src/types/generalTypes";
-
-import {
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: IndexType;
@@ -66,10 +59,14 @@ export default function NavDropdown({
     if (activeIndex) {
       e.stopPropagation();
       requestAnimationFrame(() =>
-        // @ts-ignore
-        document.addEventListener("click", (ev: MouseEvent<Element, MouseEvent>): void => eventHandler(ev), {
-          once: true,
-        }),
+        document.addEventListener(
+          "click",
+          // @ts-ignore
+          (ev: MouseEvent<Element, MouseEvent>): void => eventHandler(ev),
+          {
+            once: true,
+          },
+        ),
       );
     }
     setActiveNavDropdownIndex(activeIndex);
