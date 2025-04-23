@@ -54,7 +54,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
-    domain_verification_map: dict | None = None
+    domain_verification_map: dict = Field(default_factory=dict)
 
     def model_post_init(self, _context: Any) -> None:
         self.domain_verification_map = {}
