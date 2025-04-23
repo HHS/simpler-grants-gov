@@ -69,7 +69,7 @@ export const SaveSearchSelector = ({
         console.error("Error fetching saved searches", e);
         setApiError(e as Error);
       });
-  }, [clientFetch, user?.token, setSavedSearches]);
+  }, [user?.token, setSavedSearches]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list
