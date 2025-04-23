@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { noop, toNumber } from "lodash";
+import { last, noop, split, toNumber } from "lodash";
 import { IndexType } from "src/types/generalTypes";
 
 import {
@@ -43,7 +43,9 @@ export default function NavDropdown({
           targetNode = targetNode.parentNode as HTMLElement;
         }
         if (!targetNode.className.includes("simpler-subnav-open")) {
-          targetId = toNumber(targetNode.id);
+          const nodeIdParts: Array<string> = split(targetNode.id, "-");
+          const dropdownId: number = toNumber(last(nodeIdParts));
+          targetId = dropdownId;
         }
         break;
       }
@@ -71,7 +73,7 @@ export default function NavDropdown({
   return (
     <>
       <NavDropDownButton
-        id={index.toString()}
+        id={`nav-dropdown-button-${index}`}
         name="navDropDownButton"
         label={linkText}
         menuId={linkText}

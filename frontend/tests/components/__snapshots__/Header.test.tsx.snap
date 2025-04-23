@@ -337,7 +337,7 @@ exports[`Header About renders About submenu 1`] = `
               aria-expanded="true"
               class="usa-accordion__button usa-nav__link usa-current simpler-subnav-open"
               data-testid="navDropDownButton"
-              id="2"
+              id="nav-dropdown-button-2"
               name="navDropDownButton"
               type="button"
             >
@@ -381,7 +381,7 @@ exports[`Header About renders About submenu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-              id="3"
+              id="nav-dropdown-button-3"
               name="navDropDownButton"
               type="button"
             >
@@ -472,7 +472,7 @@ exports[`Header About renders About submenu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-              id="4"
+              id="nav-dropdown-button-4"
               name="navDropDownButton"
               type="button"
             >
@@ -877,7 +877,7 @@ exports[`Header renders Header navbar menu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-              id="2"
+              id="nav-dropdown-button-2"
               name="navDropDownButton"
               type="button"
             >
@@ -922,7 +922,7 @@ exports[`Header renders Header navbar menu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-              id="3"
+              id="nav-dropdown-button-3"
               name="navDropDownButton"
               type="button"
             >
@@ -1013,7 +1013,7 @@ exports[`Header renders Header navbar menu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-              id="4"
+              id="nav-dropdown-button-4"
               name="navDropDownButton"
               type="button"
             >
