@@ -25,7 +25,7 @@ class OpportunityNotification(BaseNotification):
         self.app_id = app_id
         self.pinpoint_client = pinpoint_client
 
-    def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
+    def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]]:
         """Collect notifications for changed opportunities that users are tracking"""
         stmt = (
             select(UserSavedOpportunity)
@@ -49,7 +49,7 @@ class OpportunityNotification(BaseNotification):
             extra={"user_count": len(saved_opportunities), "total_notifications": len(results)},
         )
 
-        return saved_opportunities or None
+        return saved_opportunities
 
     def prepare_notification(self, saved_data: dict[UUID, list[UserSavedOpportunity]]) -> EmailData:
 

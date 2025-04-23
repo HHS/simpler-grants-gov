@@ -26,8 +26,8 @@ class SearchNotification(BaseNotification):
     def __init__(
         self,
         db_session: db.Session,
-        search_client: search.SearchClient | None = None,
-        app_id: str | None = None,
+        search_client: search.SearchClient,
+        app_id: str,
         pinpoint_client: str | None = None,
     ):
         super().__init__(db_session)
@@ -35,7 +35,7 @@ class SearchNotification(BaseNotification):
         self.app_id = app_id
         self.pinpoint_client = pinpoint_client
 
-    def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]] | None:
+    def collect_notifications(self) -> dict[UUID, list[UserSavedSearch]]:
         """Collect notifications for changed saved searches"""
         stmt = select(UserSavedSearch).where(
             UserSavedSearch.last_notified_at < datetime_util.utcnow()
@@ -72,7 +72,7 @@ class SearchNotification(BaseNotification):
                 ),
             },
         )
-        return updated_saved_searches or None
+        return updated_saved_searches
 
     def prepare_notification(
         self, saved_search_data: dict[UUID, list[UserSavedSearch]]

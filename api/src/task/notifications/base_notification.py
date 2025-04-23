@@ -19,7 +19,7 @@ class BaseNotification(Task):
     @abstractmethod
     def collect_notifications(
         self,
-    ) -> dict[UUID, list[Any]] | None:
+    ) -> dict[UUID, list[Any]]:
         """Collect notifications for users"""
         pass
 
@@ -30,7 +30,7 @@ class BaseNotification(Task):
 
     def notification_data(self) -> EmailData | None:
         """Fetch collected notifications and prepare email data."""
-        collected_data: dict[UUID, list[Any]] | None = self.collect_notifications()
+        collected_data: dict[UUID, list[Any]] = self.collect_notifications()
         if collected_data:
             return self.prepare_notification(collected_data)
         return None
@@ -53,7 +53,7 @@ class BaseNotification(Task):
         self,
         data: EmailData,
         pinpoint_client: botocore.client.BaseClient | None,
-        app_id: str | None,
+        app_id: str,
     ) -> None:
         """Send collected notifications to users"""
 

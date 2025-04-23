@@ -27,7 +27,7 @@ class ClosingDateNotification(BaseNotification):
     def __init__(
         self,
         db_session: db.Session,
-        app_id: str | None = None,
+        app_id: str,
         pinpoint_client: botocore.client.BaseClient | None = None,
         frontend_base_url: str | None = None,
     ):
@@ -37,7 +37,7 @@ class ClosingDateNotification(BaseNotification):
         self.frontend_base_url = frontend_base_url
         self.collected_data: dict | None = None
 
-    def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]] | None:
+    def collect_notifications(self) -> dict[UUID, list[UserSavedOpportunity]]:
         """Collect notifications for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
 
@@ -82,7 +82,7 @@ class ClosingDateNotification(BaseNotification):
                 ),
             },
         )
-        self.collected_data = closing_date_opportunities or None
+        self.collected_data = closing_date_opportunities
 
         return closing_date_opportunities
 

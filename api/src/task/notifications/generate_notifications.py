@@ -51,7 +51,6 @@ class NotificationTask(Task):
 
         self.search_client = search_client
         self.pinpoint_client = pinpoint_client
-        self.app_id = pinpoint_app_id
         self.frontend_base_url = frontend_base_url
 
         if generate_notification_config is None:
@@ -63,21 +62,23 @@ class NotificationTask(Task):
 
         # run opportunity notification
         OpportunityNotification(
-            db_session=self.db_session, app_id=self.app_id, pinpoint_client=self.pinpoint_client
+            db_session=self.db_session,
+            app_id=self.generate_notification_config.app_id,
+            pinpoint_client=self.pinpoint_client,
         ).run_task()
 
         # run search notification
         SearchNotification(
             db_session=self.db_session,
             search_client=self.search_client,
-            app_id=self.app_id,
+            app_id=self.generate_notification_config.app_id,
             pinpoint_client=self.pinpoint_client,
         ).run_task()
 
         # run closing notification
         ClosingDateNotification(
             db_session=self.db_session,
-            app_id=self.app_id,
+            app_id=self.generate_notification_config.app_id,
             pinpoint_client=self.pinpoint_client,
             frontend_base_url=self.frontend_base_url,
         ).run_task()
