@@ -23,6 +23,6 @@ Getting setup for testing the first time is a multi-stage process
 4. 2 terminals
 
   - `docker run -p 24224:24224 -e licenseKey=key -e log_group_name=my-log-group -e aws_region=us-east-1 docker.io/library/simpler-grants-gov-fluentbit:latest`
-  - `echo '{"cat": "hat"}' | fluentcat -`
+  - `echo '{"cat": "hat"}' | fluent-cat -`
 
 5. You should see your json echo'ed into terminal 1
