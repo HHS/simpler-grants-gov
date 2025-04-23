@@ -90,6 +90,7 @@
     * [Cross-Program Team Health Survey Tool](product/decisions/adr/2024-12-06-team-health-survey-tool.md)
     * [Adding Slack Users to SimplerGrants Slack Workspace](product/decisions/adr/2024-12-17-adding-slack-users.md)
     * [Repo organization](product/decisions/adr/2025-01-02-repo-organization.md)
+    * [Internal knowledge management](product/decisions/adr/2025-04-18-internal-knowledge-management.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)
     * [CI/CD interface](product/decisions/infra/0001-ci-cd-interface.md)
