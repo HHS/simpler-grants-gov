@@ -1,4 +1,5 @@
 service:
+  # The http service is used for healthchecks and such.
   http_server: On
   http_listen: 0.0.0.0
   http_port: 80
@@ -7,14 +8,14 @@ pipeline:
   inputs:
     - name: forward
       listen: 0.0.0.0
-      port: 24224
+      port: 24224 # the default port for fluentbit
 
   outputs:
-    - name: nrlogs
+    - name: nrlogs # new relic logs
       match: "**"
       license_key: ${licenseKey}
 
-    - name: cloudwatch_logs
+    - name: cloudwatch_logs # aws cloudwatch logs
       match: "**"
       log_group_name: ${log_group_name}
       log_stream_name: ${container_name}/${container_id}
@@ -22,5 +23,5 @@ pipeline:
       auto_create_group: true
       log_format: json
 
-    - name: stdout
+    - name: stdout # stdout logs for debugging
       match: "**"
