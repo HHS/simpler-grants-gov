@@ -33,7 +33,7 @@ export default function NavDropdown({
 
   // closes all navs unless the click event falls on a currently closed drop down
   // in which case, set that drop down as active
-  function closeNavs(e: MouseEvent) {
+  function closeNavs(e: Event) {
     let targetId = null;
     const dropdowns = document.getElementsByName("navDropDownButton");
     for (const dropdown of dropdowns) {
@@ -42,47 +42,23 @@ export default function NavDropdown({
         if (targetNode.localName === "span") {
           targetNode = targetNode.parentNode as HTMLElement;
         }
-        targetId = toNumber(targetNode.id);
+        if (!targetNode.className.includes("simpler-subnav-open")) {
+          targetId = toNumber(targetNode.id);
+        }
         break;
-      }
-    }
-    setActiveNavDropdownIndex(targetId);
-    const dropdowns = document.getElementsByName("navDropDownButton");
-    let dropdownClicked = false;
-    for (const dropdown of dropdowns) {
-      if (dropdown.contains(e.target as Node)) {
-        dropdownClicked = true;
-      }
-    }
-
-    let targetId = null;
-    if (dropdownClicked) {
-      let targetNode: HTMLElement = e.target as HTMLElement;
-      if (targetNode.localName === "span") {
-        targetNode = targetNode.parentNode as HTMLElement;
-      }
-      const targetNodeClass: string = targetNode.className;
-      if (!targetNodeClass.includes("simpler-subnav-open")) {
-        targetId = toNumber(targetNode.id);
       }
     }
     setActiveNavDropdownIndex(targetId);
   }
 
-  function handleToggle(e: MouseEvent<HTMLButtonElement, MouseEvent>) {
+  function handleToggle(e: MouseEvent) {
     const activeIndex: IndexType = isOpen ? null : index;
     if (activeIndex) {
       e.stopPropagation();
       requestAnimationFrame(() =>
-        document.addEventListener(
-          "click",
-          // eslint-disable-next-line
-          // @ts-ignore
-          (ev: MouseEvent<Element, MouseEvent>): void => eventHandler(ev),
-          {
-            once: true,
-          },
-        ),
+        document.addEventListener("click", (ev: Event): void => closeNavs(ev), {
+          once: true,
+        }),
       );
     }
     setActiveNavDropdownIndex(activeIndex);
@@ -100,11 +76,7 @@ export default function NavDropdown({
         label={linkText}
         menuId={linkText}
         isOpen={isOpen}
-        // eslint-disable-next-line
-        // @ts-ignore
-        onClick={(e: MouseEvent<HTMLButtonElement, MouseEvent>) =>
-          handleToggle(e)
-        }
+        onClick={(e) => handleToggle(e)}
         onToggle={noop}
         className={clsx({
           "usa-current": isCurrent,
