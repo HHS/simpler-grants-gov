@@ -49,13 +49,6 @@ class TransformCompetition(AbstractTransformSubTask):
                     ).scalar_one_or_none()
 
                     if not opportunity:
-                        logger.warning(
-                            "Competition references opportunity that doesn't exist in target schema",
-                            extra={
-                                "competition_id": source_competition.comp_id,
-                                "opportunity_id": opportunity_id,
-                            },
-                        )
                         opportunity_id = None
                         opportunity_assistance_listing_id = None
 
