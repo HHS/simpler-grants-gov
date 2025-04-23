@@ -11,7 +11,6 @@ locals {
   build_repository_config = {
     name           = local.image_repository_name
     region         = local.image_repository_region
-    network_name   = local.shared_network_name
     account_name   = local.image_repository_account_name
     account_id     = local.image_repository_account_id
     repository_arn = "arn:aws:ecr:${local.image_repository_region}:${local.image_repository_account_id}:repository/${local.image_repository_name}"
