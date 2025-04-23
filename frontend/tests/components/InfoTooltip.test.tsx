@@ -17,9 +17,8 @@ describe("InfoTooltip", () => {
     const customClass = "custom-class";
     render(<InfoTooltip text="Test tooltip" className={customClass} />);
     const tooltipWrapper = screen.getByTestId("tooltipWrapper");
-    console.log('Tooltip className:', tooltipWrapper.className);
-    expect(tooltipWrapper.className).toContain("usa-tooltip");
-    expect(tooltipWrapper.className).toContain(customClass);
+    expect(tooltipWrapper).toHaveClass("usa-tooltip");
+    expect(tooltipWrapper).toHaveClass(customClass);
   });
 
   it("shows tooltip on hover", async () => {
