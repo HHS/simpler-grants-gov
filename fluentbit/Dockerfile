@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the fluentbit binary from the official image.
-FROM fluent/fluent-bit:4.0.0 AS fluentbit
+FROM fluent/fluent-bit:1.9.10 AS fluentbit
 
 FROM build AS release
 
