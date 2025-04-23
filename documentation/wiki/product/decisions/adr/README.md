@@ -50,3 +50,4 @@ The following list links to all of the ADRs we've adopted:
 * [Adding Slack Users to SimplerGrants Slack Workspace](2024-12-17-adding-slack-users.md)
 * [Repository organization](2025-01-02-repo-organization.md)
 * [Dedicated Forum for Simpler.Grants.gov Community](template.md)
+* [Confluence for internal knowledge management](2025-04-18-internal-knowledge-management.md)
