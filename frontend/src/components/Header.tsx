@@ -220,10 +220,7 @@ const NavLinks = ({
         <NavLink
           href={link.href}
           key={link.href}
-          onClick={() => {
-            closeMobileNav;
-            setActiveNavDropdownIndex(null);
-          }}
+          onClick={closeDropdownAndMobileNav}
           text={link.text}
           classes={clsx({
             "usa-nav__link": true,
@@ -238,8 +235,6 @@ const NavLinks = ({
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
-    navLinkList,
-    currentNavItemIndex,
     closeMobileNav,
   ]);
 

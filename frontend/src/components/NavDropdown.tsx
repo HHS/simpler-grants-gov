@@ -2,7 +2,14 @@ import clsx from "clsx";
 import { noop, toNumber } from "lodash";
 import { IndexType } from "src/types/generalTypes";
 
-import { Dispatch, JSX, SetStateAction, useEffect, useState } from "react";
+import {
+  Dispatch,
+  JSX,
+  MouseEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
@@ -24,40 +31,37 @@ export default function NavDropdown({
 }: NavDropdownProps): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  function eventHandler(e: any) {
+  function eventHandler(e: MouseEvent) {
     const dropdowns = document.getElementsByName("navDropDownButton");
     let dropdownClicked = false;
-    for (let dropdown of dropdowns) {
-      if (dropdown.contains(e.target)) {
+    for (const dropdown of dropdowns) {
+      if (dropdown.contains(e.target as Node)) {
         dropdownClicked = true;
       }
     }
 
     let targetId = null;
     if (dropdownClicked) {
-      let targetNode = e.target;
+      let targetNode: EventTarget = e.target;
       if (e.target.localName === "span") {
-        targetNode = targetNode.parentNode;
+        targetNode = targetNode.parentNode as EventTarget;
       }
-      if (!targetNode.className.includes("simpler-subnav-open")) {
+      const targetNodeClass: string = targetNode.className as string;
+      if (!targetNodeClass.includes("simpler-subnav-open")) {
         targetId = toNumber(targetNode.id);
       }
     }
     setActiveNavDropdownIndex(targetId);
   }
 
-  function handleToggle(e: any) {
-    let activeIndex: IndexType = isOpen ? null : index;
-    if (!!activeIndex) {
+  function handleToggle(e: MouseEvent<HTMLButtonElement, MouseEvent>) {
+    const activeIndex: IndexType = isOpen ? null : index;
+    if (activeIndex) {
       e.stopPropagation();
       requestAnimationFrame(() =>
-        document.addEventListener(
-          "click",
-          function (e) {
-            eventHandler(e);
-          },
-          { once: true },
-        ),
+        document.addEventListener("click", (e: MouseEvent) => eventHandler(e), {
+          once: true,
+        }),
       );
     }
     setActiveNavDropdownIndex(activeIndex);
@@ -75,9 +79,9 @@ export default function NavDropdown({
         label={linkText}
         menuId={linkText}
         isOpen={isOpen}
-        onClick={function (e: any) {
-          handleToggle(e);
-        }}
+        onClick={(e: MouseEvent<HTMLButtonElement, MouseEvent>) =>
+          handleToggle(e)
+        }
         onToggle={noop}
         className={clsx({
           "usa-current": isCurrent,

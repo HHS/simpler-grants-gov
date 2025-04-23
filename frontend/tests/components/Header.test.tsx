@@ -191,14 +191,14 @@ describe("Header", () => {
   });
 
   describe("About", () => {
-    it("shows About as the active nav item when on Vision page", async () => {
+    it("shows About as the active nav item when on Vision page", () => {
       usePathnameMock.mockReturnValue("/vision");
       render(<Header />);
 
       const homeLink = screen.getByRole("button", { name: /About/i });
       expect(homeLink).toHaveClass("usa-current");
     });
-    it("shows About as the active nav item when on Roadmap page", async () => {
+    it("shows About as the active nav item when on Roadmap page", () => {
       usePathnameMock.mockReturnValue("/roadmap");
       render(<Header />);
 
