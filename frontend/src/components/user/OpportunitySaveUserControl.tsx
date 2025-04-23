@@ -73,7 +73,7 @@ export const OpportunitySaveUserControl = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [fetchSaved, opportunityId, user?.token]);
+  }, [opportunityId, user?.token]);
 
   const messageText = saved
     ? savedError
