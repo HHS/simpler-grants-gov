@@ -10,7 +10,9 @@ type TooltipProps = {
   wrapperclasses?: string;
   className?: string;
   children?: ReactNode;
-  asCustom?: ForwardRefExoticComponent<Omit<React.HTMLProps<HTMLElement>, "ref"> & React.RefAttributes<HTMLElement>>;
+  asCustom?: ForwardRefExoticComponent<
+    Omit<React.HTMLProps<HTMLElement>, "ref"> & React.RefAttributes<HTMLElement>
+  >;
 };
 
 export const TooltipWrapper = (props: TooltipProps) => {
@@ -19,7 +21,7 @@ export const TooltipWrapper = (props: TooltipProps) => {
     <Tooltip
       {...rest}
       aria-label={props.title}
-      wrapperclasses={`usa-tooltip ${className || ''}`}
+      wrapperclasses={`usa-tooltip ${className || ""}`}
     >
       {children}
     </Tooltip>

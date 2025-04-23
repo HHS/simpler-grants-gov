@@ -1,4 +1,4 @@
-import { ReactNode, forwardRef } from "react";
+import { forwardRef, ReactNode } from "react";
 
 import { TooltipWrapper } from "./TooltipWrapper";
 import { USWDSIcon } from "./USWDSIcon";
@@ -14,20 +14,21 @@ const InfoTooltip = ({
   position = "top",
   className,
 }: InfoTooltipProps) => {
-  const IconWrapper = forwardRef<HTMLSpanElement, React.HTMLProps<HTMLSpanElement>>((props, ref) => (
+  const IconWrapper = forwardRef<
+    HTMLSpanElement,
+    React.HTMLProps<HTMLSpanElement>
+  >((props, ref) => (
     <span
       {...props}
       ref={ref}
-      style={{ cursor: 'help' }}
+      style={{ cursor: "help" }}
       className="text-secondary"
     >
-      <USWDSIcon
-        name="info_outline"
-      />
+      <USWDSIcon name="info_outline" />
     </span>
   ));
 
-  IconWrapper.displayName = 'IconWrapper';
+  IconWrapper.displayName = "IconWrapper";
 
   return (
     <TooltipWrapper
@@ -40,6 +41,6 @@ const InfoTooltip = ({
   );
 };
 
-InfoTooltip.displayName = 'InfoTooltip';
+InfoTooltip.displayName = "InfoTooltip";
 
 export default InfoTooltip;
