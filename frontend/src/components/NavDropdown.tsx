@@ -42,9 +42,9 @@ export default function NavDropdown({
 
     let targetId = null;
     if (dropdownClicked) {
-      let targetNode: EventTarget = e.target;
-      if (e.target.localName === "span") {
-        targetNode = targetNode.parentNode as EventTarget;
+      let targetNode: HTMLElement = e.target as HTMLElement;
+      if (targetNode.localName === "span") {
+        targetNode = targetNode.parentNode as HTMLElement;
       }
       const targetNodeClass: string = targetNode.className as string;
       if (!targetNodeClass.includes("simpler-subnav-open")) {
