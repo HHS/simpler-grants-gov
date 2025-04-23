@@ -155,7 +155,7 @@ describe("SaveSearchSelector", () => {
       />,
     );
 
-    expect(clientFetchMock).toHaveBeenCalledTimes(2);
+    expect(clientFetchMock).toHaveBeenCalledTimes(1);
     mockUseUser.mockReturnValue({ user: { token: "second token" } });
 
     rerender(
