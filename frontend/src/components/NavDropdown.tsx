@@ -31,7 +31,22 @@ export default function NavDropdown({
 }: NavDropdownProps): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  function eventHandler(e: MouseEvent) {
+  // closes all navs unless the click event falls on a currently closed drop down
+  // in which case, set that drop down as active
+  function closeNavs(e: MouseEvent) {
+    let targetId = null;
+    const dropdowns = document.getElementsByName("navDropDownButton");
+    for (const dropdown of dropdowns) {
+      if (dropdown.contains(e.target as Node)) {
+        let targetNode: HTMLElement = e.target as HTMLElement;
+        if (targetNode.localName === "span") {
+          targetNode = targetNode.parentNode as HTMLElement;
+        }
+        targetId = toNumber(targetNode.id);
+        break;
+      }
+    }
+    setActiveNavDropdownIndex(targetId);
     const dropdowns = document.getElementsByName("navDropDownButton");
     let dropdownClicked = false;
     for (const dropdown of dropdowns) {
