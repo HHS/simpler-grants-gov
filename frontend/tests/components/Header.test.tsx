@@ -229,7 +229,7 @@ describe("Header", () => {
         screen.queryByRole("link", { name: /Events/i }),
       ).not.toBeInTheDocument();
 
-      const aboutBtn = screen.getByRole("button", { name: /Community/i });
+      const communityBtn = screen.getByRole("button", { name: /Community/i });
 
       await userEvent.click(aboutBtn);
 
