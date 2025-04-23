@@ -31,7 +31,7 @@ export function ExportSearchResultsButton() {
         );
       })
       .catch(console.error);
-  }, [clientFetch, searchParams]);
+  }, [searchParams]);
 
   return (
     <div
