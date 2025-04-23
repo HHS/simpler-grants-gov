@@ -1,7 +1,3 @@
-import clsx from "clsx";
-import { noop, toNumber } from "lodash";
-import { IndexType } from "src/types/generalTypes";
-
 import {
   Dispatch,
   JSX,
@@ -10,7 +6,18 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
+
+import clsx from "clsx";
+import {
+  noop,
+  toNumber,
+} from "lodash";
+import { IndexType } from "src/types/generalTypes";
+
+import {
+  Menu,
+  NavDropDownButton,
+} from "@trussworks/react-uswds";
 
 interface NavDropdownProps {
   activeNavDropdownIndex: IndexType;
@@ -46,7 +53,7 @@ export default function NavDropdown({
       if (targetNode.localName === "span") {
         targetNode = targetNode.parentNode as HTMLElement;
       }
-      const targetNodeClass: string = targetNode.className as string;
+      const targetNodeClass: string = targetNode.className;
       if (!targetNodeClass.includes("simpler-subnav-open")) {
         targetId = toNumber(targetNode.id);
       }
@@ -59,7 +66,8 @@ export default function NavDropdown({
     if (activeIndex) {
       e.stopPropagation();
       requestAnimationFrame(() =>
-        document.addEventListener("click", (e: MouseEvent) => eventHandler(e), {
+        // eslint-disable-next-line
+        document.addEventListener("click", (ev: MouseEvent<Element, MouseEvent>): void => eventHandler(ev), {
           once: true,
         }),
       );
