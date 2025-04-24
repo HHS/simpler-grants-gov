@@ -15,11 +15,9 @@ describe("OpportunityEligibility", () => {
     render(<OpportunityEligibility applicantTypes={fakeApplicantTypes} />);
 
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByText("State Governments")).toBeInTheDocument();
+    expect(screen.getByText("State governments")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Nonprofits without 501(c)(3), other than institutions of higher education",
-      ),
+      screen.getByText("Nonprofits non-higher education with 501(c)(3)"),
     ).toBeInTheDocument();
   });
 
@@ -44,13 +42,11 @@ describe("applicantTypesToGroups", () => {
         "small_businesses",
       ]),
     ).toEqual({
-      government: ["State Governments"],
-      education: ["Independent School Districts"],
-      business: ["Small Businesses"],
+      government: ["State governments"],
+      education: ["Independent school districts"],
+      business: ["Small businesses"],
       miscellaneous: ["Individuals"],
-      nonprofit: [
-        "Nonprofits without 501(c)(3), other than institutions of higher education",
-      ],
+      nonprofit: ["Nonprofits non-higher education with 501(c)(3)"],
     });
   });
   it("deals with unknown types", () => {
@@ -63,13 +59,11 @@ describe("applicantTypesToGroups", () => {
         "unknown_type",
       ]),
     ).toEqual({
-      government: ["State Governments"],
-      education: ["Independent School Districts"],
-      business: ["Small Businesses"],
+      government: ["State governments"],
+      education: ["Independent school districts"],
+      business: ["Small businesses"],
       miscellaneous: ["Individuals"],
-      nonprofit: [
-        "Nonprofits without 501(c)(3), other than institutions of higher education",
-      ],
+      nonprofit: ["Nonprofits non-higher education with 501(c)(3)"],
     });
   });
 });
