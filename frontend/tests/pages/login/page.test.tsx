@@ -1,8 +1,6 @@
 import { render } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/login/page";
 import SessionStorage from "src/services/auth/sessionStorage";
-
-import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import * as React from "react";
 
 const mockPush = jest.fn();
@@ -25,29 +23,10 @@ jest.mock("next/navigation", () => ({
 
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
-const mockConsoleError = jest.spyOn(console, "error");
 
 describe("Login Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const windowMock = {
-      location: {
-        pathname: "/",
-      },
-    };
-    Object.defineProperty(global, "window", {
-      value: windowMock,
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(() => {
-    Object.defineProperty(global, "window", {
-      value: undefined,
-      writable: true,
-      configurable: true,
-    });
   });
 
   it("should redirect to stored URL from session storage", () => {
@@ -101,21 +80,5 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(container).toHaveTextContent("Redirecting...");
-  });
-
-  it("should log error when window is undefined", () => {
-    const originalWindow = global.window;
-    delete (global as { window?: Window }).window;
-
-    try {
-      if (typeof window === "undefined") {
-        console.error("window is undefined");
-      }
-
-      expect(mockConsoleError).toHaveBeenCalledWith("window is undefined");
-      expect(mockPush).not.toHaveBeenCalled();
-    } finally {
-      (global as { window?: Window }).window = originalWindow;
-    }
   });
 });
