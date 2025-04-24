@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from uuid import UUID
 
-from sqlalchemy import and_, exists, select
+from sqlalchemy import and_, exists, select, update
 
 import src.adapters.search as search
 from src.adapters import db
@@ -180,6 +180,19 @@ class ClosingDateNotification(BaseNotification):
                         "opportunity_ids": [opp.opportunity_id for opp in saved_items],
                     },
                 )
+
+    def update_last_notified_timestamp(self, user_id: UUID) -> None:
+        opportunity_ids = [
+            saved_opp.opportunity_id for saved_opp in self.collected_data.get(user_id, [])
+        ]
+        self.db_session.execute(
+            update(UserSavedOpportunity)
+            .where(
+                UserSavedOpportunity.user_id == user_id,
+                UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
+            )
+            .values(last_notified_at=datetime_util.utcnow())
+        )
 
     def run_task(self) -> None:
         """Override to define the task logic"""

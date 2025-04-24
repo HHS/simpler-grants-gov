@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -89,6 +89,14 @@ class SearchNotification(BaseNotification):
                 )
             )
         return users_email_notifications
+
+    def update_last_notified_timestamp(self, user_id: UUID) -> None:
+        search_ids = [saved_search.saved_search_id for saved_search in self.collected_data[user_id]]
+        self.db_session.execute(
+            update(UserSavedSearch)
+            .where(UserSavedSearch.saved_search_id.in_(search_ids))
+            .values(last_notified_at=datetime_util.utcnow())
+        )
 
     def run_task(self) -> None:
         """Override to define the task logic"""

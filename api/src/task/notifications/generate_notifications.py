@@ -1,4 +1,5 @@
 import logging
+from enum import StrEnum
 
 import botocore.client
 from pydantic import Field
@@ -55,6 +56,12 @@ class NotificationTask(Task):
         if generate_notification_config is None:
             generate_notification_config = GenerateNotificationsConfig()
         self.generate_notification_config = generate_notification_config
+
+        class Metrics(StrEnum):
+            USERS_NOTIFIED = "users_notified"
+            OPPORTUNITIES_TRACKED = "opportunities_tracked"
+            SEARCHES_TRACKED = "searches_tracked"
+            NOTIFICATIONS_SENT = "notifications_sent"
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""

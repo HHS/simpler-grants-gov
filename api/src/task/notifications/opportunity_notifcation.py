@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import joinedload
 
 import src.adapters.search as search
@@ -10,6 +10,7 @@ from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotification
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
+from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class OpportunityNotification(BaseNotification):
         for result in results:
             user_id = result.user_id
             self.collected_data.setdefault(user_id, []).append(result)
+            self.collected_opportunity_ids = result.opportunity_id
 
         logger.info(
             "Collected opportunity notifications",
@@ -76,6 +78,19 @@ class OpportunityNotification(BaseNotification):
                 )
             )
         return users_email_notifications
+
+    def update_last_notified_timestamp(self, user_id: UUID) -> None:
+        opportunity_ids = [
+            saved_opp.opportunity_id for saved_opp in self.collected_data.get(user_id, [])
+        ]
+        self.db_session.execute(
+            update(UserSavedOpportunity)
+            .where(
+                UserSavedOpportunity.user_id == user_id,
+                UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
+            )
+            .values(last_notified_at=datetime_util.utcnow())
+        )
 
     def run_task(self) -> None:
         """Override to define the task logic"""

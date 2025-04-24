@@ -4,7 +4,7 @@ from abc import abstractmethod
 
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
-from src.task.notifications.constants import UserEmailNotification
+from src.task.notifications.constants import Metrics, UserEmailNotification
 from src.task.notifications.generate_notifications import NotificationTask
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,10 @@ class BaseNotification(NotificationTask):
     def prepare_notification(self) -> list[UserEmailNotification]:
         """Prepare notification content (email data)"""
         pass
+
+    @abstractmethod
+    def update_last_notified_timestamp(self, user_id: uuid.UUID) -> None:
+        """Record the time a notification was last sent to the user in the database"""
 
     def notification_data(self) -> list[UserEmailNotification]:
         """Fetch collected notifications and prepare email data."""
@@ -63,6 +67,8 @@ class BaseNotification(NotificationTask):
                     },
                 )
                 notification_log.notification_sent = True
+                self.increment(Metrics.NOTIFICATIONS_SENT)
+                self.update_last_notified_timestamp(user_notification.user_id)
 
             except Exception:
                 # Notification log will be updated in the finally block
