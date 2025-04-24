@@ -34,6 +34,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
     FundingCategory,
@@ -44,6 +45,8 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models import agency_models
+from src.db.models.lookup.lookup_registry import LookupRegistry
+from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -964,6 +967,13 @@ class CompetitionFactory(BaseFactory):
         size=lambda: random.randint(1, 2),
     )
 
+    open_to_applicants = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 2),
+        elements=[a for a in CompetitionOpenToApplicant],
+        unique=True,
+    )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -985,6 +995,22 @@ class CompetitionAssistanceListingFactory(BaseFactory):
     opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
     opportunity_assistance_listing_id = factory.LazyAttribute(
         lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
+    )
+
+
+class LinkCompetitionOpenToApplicantFactory(BaseFactory):
+    class Meta:
+        model = competition_models.LinkCompetitionOpenToApplicant
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    # We need to get both the ID and the relationship object
+    competition_open_to_applicant_id = factory.LazyFunction(
+        lambda: LookupRegistry.get_lookup_int_for_enum(
+            LkCompetitionOpenToApplicant,
+            random.choice(list(lookup_models.CompetitionOpenToApplicant)),
+        )
     )
 
 
@@ -2126,3 +2152,53 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
+
+
+class StagingTcompetitionFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.competition.Tcompetition
+
+    comp_id = factory.Sequence(lambda n: n)
+    competitionid = factory.Sequence(lambda n: f"COMP{n}")
+    familyid = factory.LazyFunction(lambda: random.choice([12, 14, 15, 16, 17]))
+    competitiontitle = factory.Faker("sentence")
+    openingdate = factory.Faker("date_between", start_date="-1y", end_date="+30d")
+    closingdate = factory.Faker("date_between", start_date="+30d", end_date="+1y")
+    contactinfo = factory.Faker("paragraph", nb_sentences=1)
+    graceperiod = factory.LazyFunction(lambda: random.randint(1, 30))
+    opentoapplicanttype = factory.LazyFunction(lambda: random.choice([1, 2, 3]))
+    electronic_required = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    expected_appl_num = factory.LazyFunction(lambda: random.randint(10, 500))
+    expected_appl_size = factory.LazyFunction(lambda: random.randint(1, 20))
+    ismulti = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    agency_dwnld_url = factory.Faker("url")
+    package_id = factory.Sequence(lambda n: f"PKG{n}")
+    # Required fields - must always have values
+    is_wrkspc_compatible = "Y"  # This cannot be None or null
+    dialect = "X"  # This cannot be None or null
+
+    created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
+    last_upd_date = factory.Faker("date_time_between", start_date="-11m", end_date="-1d")
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
+    class Params:
+        # Trait to set all nullable fields to None, preserve non-nullable fields
+        all_fields_null = factory.Trait(
+            competitionid=None,
+            familyid=None,
+            competitiontitle=None,
+            openingdate=None,
+            closingdate=None,
+            contactinfo=None,
+            graceperiod=None,
+            opentoapplicanttype=None,
+            electronic_required=None,
+            expected_appl_num=None,
+            expected_appl_size=None,
+            ismulti=None,
+            agency_dwnld_url=None,
+            package_id=None,
+            sendmail=None,
+            # is_wrkspc_compatible and dialect must NEVER be None
+        )
