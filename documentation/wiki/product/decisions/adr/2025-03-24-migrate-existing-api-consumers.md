@@ -13,7 +13,7 @@ We have a large existing S2S API client base split into two primary cohorts:
 1. Other Federal Government Agencies - Grantors, USASpending, etc.
 2. Applicants (data suggests this is primarily Universities, Hospital/Healthcare Groups, State/County/Local Governments)
 
-The level of S2S utilization, size of the user community, and the major differences between SOAP and REST and the authentication methods for the existing and Simpler APIs, leads us to the finding that we will need a way to continuing supporting the SOAP dialect of these APIs for the foreseeable future. Given that many API consumers are other Federal Agency IT Systems, we're anticipating needing a long runway, once the Simpler API has feature parity, to allow agencies to budget, contract, develop, and deploy changes to their systems that will consume the Simpler API instead of the SOAP API.
+The level of S2S utilization, size of the user community, and the major differences between SOAP and REST and the authentication methods for the existing and Simpler APIs, leads us to the finding that we will need a way to continue supporting the SOAP dialect of these APIs for the foreseeable future. Given that many API consumers are other Federal Agency IT Systems, we're anticipating needing a long runway, once the Simpler API has feature parity, to allow agencies to budget, contract, develop, and deploy changes to their systems that will consume the Simpler REST API instead of the SOAP API.
 
 Given that long timeline we have two options:
 
@@ -32,7 +32,7 @@ But the fundamental question is, how do we support existing SOAP consumers long 
 - Minimize impact of supporting the legacy system on new work/innovation
 - Ease of support for technical team
 - If consumers aren't required to implement both APIs concurrently for a period, data must appear unified behind a single API call for both SOAP and REST calls (for data that will exist in Simpler)
-  - This avoids breaking existing workflows before they can move off SOAP, and supports consumers moving to REST while still needing historical data.
+  - This avoids breaking existing workflows before they can move off SOAP
   - Supporting historical data directly in Simpler would require data migration to the Simpler system, but there will be periods when data is actively being generated in both systems, so migration isn't a good fit for ensuring all data is available from a single API call.
 
 ## Options Considered
@@ -87,7 +87,7 @@ This layer between the caller and the APIs allows Simpler data and functionality
 
   - Gives us more time to finish the REST API, without impacting ability of SOAP API consumers to pull data that does start to be represented in Simpler.
   - Smooths the transition for SOAP API Consumers, giving them more time to move to REST once it's complete, without any gaps in data/functionality.
-  - Introduces an option to shutdown the existing system before all SOAP consumers have migrated
+  - Introduces an option to shutdown the existing system before all SOAP consumers have migrated fully to REST
   - Allows incremental adoption of features in Simpler without data gaps or requiring Agencies to partially adopt the Simpler REST API.
   - Keeps the Simpler REST API from being restricted or limited to only things the existing SOAP API already does.
 
