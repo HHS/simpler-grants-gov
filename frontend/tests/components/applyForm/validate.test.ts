@@ -90,7 +90,7 @@ describe("validateFormData", () => {
         },
         {
           type: "field",
-          definition: "/properties/test123", // no numbers
+          definition: "/properties/test123!", // no special chars
         },
       ];
 
@@ -100,13 +100,13 @@ describe("validateFormData", () => {
         "/0/definition",
       );
       expect(schemaErrors && schemaErrors[0]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z]+$"',
+        'must match pattern "^/properties/[a-zA-Z0-9]+$"',
       );
       expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch(
         "/1/definition",
       );
       expect(schemaErrors && schemaErrors[7]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z]+$"',
+        'must match pattern "^/properties/[a-zA-Z0-9]+$"',
       );
     });
   });

@@ -29,7 +29,7 @@ const UiJsonSchema: RJSFSchema = {
         },
         definition: {
           type: "string",
-          pattern: "^/properties/[a-zA-Z]+$",
+          pattern: "^/properties/[a-zA-Z0-9]+$",
         },
       },
       required: ["type"],
@@ -46,23 +46,28 @@ const UiJsonSchema: RJSFSchema = {
     schema: {
       type: "object",
       properties: {
-        title: {
-          type: "string",
-        },
-        type: {
-          type: "string",
-          enum: ["boolean", "string", "number", "integer", "null"],
-        },
-        enum: {
-          type: "array",
-        },
-        pattern: {
-          type: "string",
-          enum: ["date", "email"],
+        schema: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+            },
+            type: {
+              type: "string",
+              enum: ["boolean", "string", "number", "integer", "null"],
+            },
+            enum: {
+              type: "array",
+            },
+            pattern: {
+              type: "string",
+              enum: ["date", "email"],
+            },
+          },
+          required: ["title", "type"],
+          additionalProperties: false,
         },
       },
-      required: ["title", "type"],
-      additionalProperties: false,
     },
     section: {
       type: "object",

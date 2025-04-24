@@ -1,6 +1,5 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get } from "lodash";
 import {
@@ -10,7 +9,7 @@ import {
 
 import { JSX } from "react";
 
-import { UiSchema, UiSchemaField } from "./types";
+import { FieldErrors, UiSchema, UiSchemaField } from "./types";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextareaWidget from "./widgets/TextAreaWidget";
@@ -33,7 +32,7 @@ export function buildForTreeRecursive({
   schema,
   uiSchema,
 }: {
-  errors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  errors: FieldErrors;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
@@ -151,12 +150,11 @@ const createField = ({
       minLength: minLength ?? undefined,
       maxLength: minLength ?? undefined,
       options: {
-        enumOptions: [{ value: "", label: "" }].concat(
-          schema.enum.map((label, index) => ({
-            value: String(index + 1),
-            label: String(label),
-          })),
-        ),
+        enumOptions: schema.enum.map((label, index) => ({
+          value: String(index + 1),
+          label: String(label),
+        })),
+        emptyValue: "- Select -",
       },
       schema,
       rawErrors,
@@ -185,7 +183,7 @@ export const buildField = ({
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
-  errors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  errors: FieldErrors;
   formData: object;
 }) => {
   const { definition, schema } = uiFieldObject;
@@ -211,7 +209,7 @@ export const buildField = ({
 };
 
 const formatFieldErrors = (
-  errors: ErrorObject<string, Record<string, unknown>, unknown>[],
+  errors: FieldErrors,
   definition: string | undefined,
   name: string,
 ) => {
