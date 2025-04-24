@@ -14,56 +14,11 @@ import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
+import { OpportunityEligibility } from "./OpportunityEligibility";
 
 type OpportunityDescriptionProps = {
   summary: Summary;
   attachments: OpportunityDocument[];
-};
-
-const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
-  if (!applicantTypes || !applicantTypes.length) {
-    return <div>--</div>;
-  }
-
-  const applicantTypeGroups = applicantTypes.reduce(
-    (groupedApplicantTypes, applicantType) => {
-      const group = eligbilityValueToGroup[applicantType];
-      const applicantTypeDisplay = eligibilityValueToLabel[applicantType];
-      if (!groupedApplicantTypes[group]) {
-        groupedApplicantTypes[group] = [applicantTypeDisplay];
-      } else {
-        groupedApplicantTypes[group].push(applicantTypeDisplay);
-      }
-      return groupedApplicantTypes;
-    },
-    {} as { [key: string]: string[] },
-  );
-
-  return (
-    <>
-      {Object.entries(applicantTypeGroups).map(
-        ([groupName, applicantTypes]) => {
-          return (
-            <div key={`eligibility-group${groupName}`}>
-              <h4>{upperFirst(groupName)}</h4>
-              <ul>
-                {applicantTypes.map((display) => (
-                  <li key={display}>{display}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        },
-      )}
-    </>
-  );
-
-  // return applicantTypes.map((type, index) => {
-  //   if (type in ApplicantType) {
-  //     return <p key={index}>{ApplicantType[type as ApplicantTypeKey]}</p>;
-  //   }
-  //   return <p key={index}>{type}</p>;
-  // });
 };
 
 const SummaryDescriptionDisplay = ({
@@ -148,7 +103,9 @@ const OpportunityDescription = ({
         />
         <h2>{t("eligibility")}</h2>
         <h3>{t("eligible_applicants")}</h3>
-        {eligibleApplicantsFormatter(summary.applicant_types || [])}
+        <OpportunityEligibility
+          applicantTypes={summary.applicant_types || []}
+        />
         <h3>{t("additional_info")}</h3>
         <div
           dangerouslySetInnerHTML={{

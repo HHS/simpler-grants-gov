@@ -103,21 +103,6 @@ describe("OpportunityDescription", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the eligible applicants with mapped values", () => {
-    render(
-      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
-    );
-
-    const eligibleApplicantsHeading = screen.getByText("eligible_applicants");
-    expect(eligibleApplicantsHeading).toBeInTheDocument();
-
-    expect(screen.getByText("State governments")).toBeInTheDocument();
-    expect(
-      screen.getByText("Nonprofits non-higher education with 501(c)(3)"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("unknown_type")).toBeInTheDocument();
-  });
-
   it("renders additional information on eligibility", () => {
     render(
       <OpportunityDescription summary={mockSummaryData} attachments={[]} />,

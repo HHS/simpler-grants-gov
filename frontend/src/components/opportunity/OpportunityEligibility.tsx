@@ -9,6 +9,9 @@ export const applicantTypesToGroups = (applicantTypes: string[]) =>
     (groupedApplicantTypes, applicantType) => {
       const group = eligbilityValueToGroup[applicantType];
       const applicantTypeDisplay = eligibilityValueToLabel[applicantType];
+      if (!group || !applicantTypeDisplay) {
+        return groupedApplicantTypes;
+      }
       if (!groupedApplicantTypes[group]) {
         groupedApplicantTypes[group] = [applicantTypeDisplay];
       } else {
