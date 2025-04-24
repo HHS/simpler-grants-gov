@@ -7,6 +7,7 @@ module "staging_config" {
   network_name                    = "staging"
   domain_name                     = "api.staging.simpler.grants.gov"
   enable_https                    = false
+  s3_cdn_domain_name              = "files.staging.simpler.grants.gov"
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service

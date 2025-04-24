@@ -7,6 +7,7 @@ module "dev_config" {
   network_name                    = "dev"
   domain_name                     = "api.dev.simpler.grants.gov"
   enable_https                    = false
+  s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
