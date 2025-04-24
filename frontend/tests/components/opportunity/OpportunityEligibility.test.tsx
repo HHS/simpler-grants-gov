@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react";
+/* eslint-disable testing-library/no-node-access */
+
+import { render, screen, within } from "@testing-library/react";
 
 import {
   applicantTypesToGroups,
@@ -11,13 +13,29 @@ const fakeApplicantTypes = [
 ];
 
 describe("OpportunityEligibility", () => {
-  it("renders the eligible applicants with mapped values", () => {
+  it("renders the eligible applicant types with mapped values", () => {
     render(<OpportunityEligibility applicantTypes={fakeApplicantTypes} />);
 
+    const governmentsHeading = screen.getByText("Government");
+    const nonprofitHeading = screen.getByText("Nonprofit");
+
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByText("State governments")).toBeInTheDocument();
+
+    expect(governmentsHeading).toBeInTheDocument();
+    expect(governmentsHeading.parentElement).toBeDefined();
     expect(
-      screen.getByText("Nonprofits non-higher education with 501(c)(3)"),
+      within(governmentsHeading.parentElement || new HTMLElement()).getByText(
+        "State governments",
+      ),
+    ).toBeInTheDocument();
+
+    expect(nonprofitHeading).toBeInTheDocument();
+    expect(nonprofitHeading.parentElement).toBeDefined();
+
+    expect(
+      within(nonprofitHeading.parentElement || new HTMLElement()).getByText(
+        "Nonprofits non-higher education with 501(c)(3)",
+      ),
     ).toBeInTheDocument();
   });
 
