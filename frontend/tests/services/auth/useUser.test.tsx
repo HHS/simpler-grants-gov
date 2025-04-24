@@ -73,7 +73,9 @@ describe("useUser", () => {
   });
   it("sets user as logged out if second fetch for user comes back without a token", async () => {
     debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
-    const wrapper = ({ children }) => <UserProvider>{children}</UserProvider>;
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <UserProvider>{children}</UserProvider>
+    );
     const { result } = renderHook(() => useUser(), { wrapper });
 
     await waitFor(() => {

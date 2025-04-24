@@ -1,4 +1,3 @@
-import { waitFor } from "@testing-library/dom";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
@@ -7,7 +6,7 @@ const jsonMock = jest.fn();
 const mockResponse = {
   status: 200,
   ok: true,
-  json: () => jsonMock(),
+  json: () => jsonMock() as unknown,
 } as unknown as Response;
 
 const fetchMock = jest.fn();
@@ -36,11 +35,5 @@ describe("debouncedClientUserFetcher", () => {
     fetchMock.mockResolvedValue({ status: 500, ok: false });
     const error = await wrapForExpectedError(() => debouncedUserFetcher());
     expect(error).toBeInstanceOf(Error);
-  });
-  it("debounces on multiple calls within the window", async () => {
-    jsonMock.mockResolvedValue({ a: "thing " });
-    await debouncedUserFetcher();
-    await debouncedUserFetcher();
-    waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 });

@@ -12,7 +12,7 @@ jest.mock("next/navigation", () => ({
 describe("useRouteChange", () => {
   it("calls the passed handler on load", () => {
     const mockHandler = jest.fn();
-    const { rerender } = renderHook(() => useRouteChange(mockHandler));
+    renderHook(() => useRouteChange(mockHandler));
     expect(mockHandler).toHaveBeenCalledTimes(1);
   });
   it("calls the passed handler whenenver path changes", () => {

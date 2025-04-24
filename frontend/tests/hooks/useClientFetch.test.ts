@@ -10,21 +10,21 @@ const jsonMock = jest.fn();
 const mockResponse = {
   status: 200,
   ok: true,
-  json: () => jsonMock(),
+  json: () => jsonMock() as unknown,
 } as unknown as Response;
 
 const fetchMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
-    refresh: () => refreshMock(),
+    refresh: () => refreshMock() as unknown,
   }),
 }));
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => ({
-    refreshIfExpired: () => refreshIfExpiredMock(),
-    refreshUser: () => refreshUserMock(),
+    refreshIfExpired: () => refreshIfExpiredMock() as unknown,
+    refreshUser: () => refreshUserMock() as unknown,
   }),
 }));
 
