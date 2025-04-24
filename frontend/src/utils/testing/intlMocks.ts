@@ -16,7 +16,6 @@ export const localeParams = new Promise<{ locale: string }>((resolve) => {
 
 // mocking all types of messages, could split by message type in the future
 export const mockMessages = {
-  
   Roadmap: {
     pageHeaderTitle: "Product roadmap",
     sections: {
