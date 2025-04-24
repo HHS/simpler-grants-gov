@@ -1,0 +1,280 @@
+import { Meta } from "@storybook/blocks";
+import { Unstyled } from '@storybook/blocks';
+
+<Meta title="Brand/Typography" />
+
+<style>
+{`
+  .typography-page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #333;
+    line-height: 1.6;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .typography-page h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eaecef;
+  }
+  
+  .typography-page h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #eaecef;
+  }
+  
+  .typography-page p {
+    margin-bottom: 1.5rem;
+  }
+  
+  .typography-page figure {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .typography-page figure img {
+    max-width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .typography-page figcaption {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+  
+  .dont-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 2rem 0;
+  }
+  
+  .dont-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .dont-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dont-item .img-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    padding: 1rem;
+  }
+  
+  .dont-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .dont-item p {
+    padding: 1rem;
+    margin: 0;
+    font-weight: 500;
+    background-color: #fff;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .unapproved-colors img,
+  .apply-effects img,
+  .stretch-distort img,
+  .outline img,
+  .low-contrast img,
+  .adjust-scale img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .adjust-spacing .img-container::before,
+  .change-typeface .img-container::after {
+    display: none;
+  }
+  
+  .low-contrast {
+    background-color: transparent;
+  }
+`}
+</style>
+
+<div className="typography-page">
+
+# Typography
+
+Typography is one of the most, if not the most, important communication tools for our brand. It carries our brand voice; with it, we establish our tone, personality, and message.
+
+## Primary Typeface
+# Public Sans
+
+Public Sans is a strong, neutral, open-source typeface for interfaces, text, and headings developed by USWDS. It is seen across US government websites and communications, giving Grants an additional source of credibility.
+
+<Unstyled>
+  <figure>
+     <img src="/brand/fonts/simple-grants-primary-typeface-PublicSans.png" alt="Simpler Grants Public Sans Overview" />
+  </figure>
+</Unstyled>
+
+<p> <a href="https://fonts.google.com/specimen/Public+Sans"> Download Public Sans </a>. Public Sans is already included in USWDS but should be added to HHS staff computers to maintain brand alignment in Simpler Grants material.</p>
+
+<Unstyled>
+  <figure>
+     <img src="/brand/fonts/simpler-grants-PublicSans-weights.png" alt="Public Sans weights" />
+  </figure>
+</Unstyled>
+
+## Secondary Typeface
+# Newsreader
+
+Newsreader is an open-source font from Production Type designed for on-screen, longer-form reading. Newsreader's shapes are open and familiar, fostering engaged reading, with features like optical sizes and large display cuts that maximize the type's ability to be expressive. In general, use Newsreader for content such as blog posts and informational page content that is longer than 2-3 paragraphs.
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simple-grants-secondary-typeface-Newreader.png" alt="Simpler Grants Newsreader" />
+  </figure>
+</Unstyled>
+
+<p> <a href="https://fonts.google.com/specimen/Newsreader"> Download NewsReader </a>. It should be added to HHS staff computers to maintain brand alignment.</p>
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-NewsReader-weights.png" alt="Simpler Grants Newsreader" />
+  </figure>
+</Unstyled>
+
+## Hierarchy
+
+Different type sizes should always have a relationship to one another. There is no exact rule, but select a base type size in a composition and make all other sizes proportionate to this foundation. Our brand defaults to a 1.35 type scale.
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-hierarchy.png" alt="Simpler Grants Hierarchy" />
+  </figure>
+</Unstyled>
+
+## Alternates
+
+Use these alternates when there are program limitations for typeface use, such as fallback fonts on the web or PowerPoint decks.
+
+## Arial
+
+Public Sans → Arial
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-alternative-PublicSans-Arial.png" alt="Public Sans → Arial" />
+  </figure>
+</Unstyled>
+
+Arial is installed on your computer.
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-Arial-weights.png" alt="Arial weights" />
+  </figure>
+</Unstyled>
+
+## Georgia
+
+Newsreader → Georgia
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-NewReader-Georgia.png" alt="Newsreader → Georgia" />
+  </figure>
+</Unstyled>
+
+<Unstyled>
+  <figure>
+    <img src="/brand/fonts/simpler-grants-Georgia-weights.png" alt="Georgia weights" />
+  </figure>
+</Unstyled>
+
+## Additional Don'ts
+
+<Unstyled>
+  <div className="dont-examples">
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-apply-effect.png" alt="Don't apply effects to type." />
+      </div>
+      <p>Do not apply effects.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-center-align.png" alt="Don't center align type." />
+      </div>
+      <p>Do not center align type.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-justify-text.png" alt="Don't justify text." />
+      </div>
+      <p>Do not justify text.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-outline.png" alt="Don't outline the type." />
+      </div>
+      <p>Do not outline the type.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-right-align.png" alt="Don't right align type." />
+      </div>
+      <p>Do not right align type.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-set-all-caps.png" alt="Don't set type in all caps." />
+      </div>
+      <p>Do not set type in all caps.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-set-all-lowercase.png" alt="Don't set type in all lowercase." />
+      </div>
+      <p>Do not set all type in all lowercase.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-set-too-low.png" alt="Don't set type too small." />
+      </div>
+      <p>Do not set type too small.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-use-low-contrast.png" alt="Don't use low contrast on type." />
+      </div>
+      <p>Do not use low contrast on type.</p>
+    </div>
+    <div className="dont-item">
+      <div className="img-container">
+        <img src="/brand/fonts/simpler-grants-donot-use-unapproved-facetype.png" alt="Don't use unapproved typefaces" />
+      </div>
+      <p>Do not use unapproved typefaces.</p>
+    </div>
+  </div>
+</Unstyled>
+</div>
