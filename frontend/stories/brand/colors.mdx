@@ -1,5 +1,335 @@
-import { Meta } from "@storybook/blocks";
+import { Meta, Unstyled } from "@storybook/blocks";
 
 <Meta title="Brand/Colors" />
 
-# Welcome to Simpler.Grants.Gov Colors
+<style>
+  {`
+  .colors-page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #333;
+    line-height: 1.6;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .colors-page h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eaecef;
+  }
+  
+  .colors-page h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #eaecef;
+  }
+  
+  .colors-page p {
+    margin-bottom: 1.5rem;
+  }
+  
+  .colors-page figure {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .colors-page figure img {
+    max-width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Updated color palette with circle labels */
+  .color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin: 2rem 0;
+  }
+  
+  .color-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+  }
+  
+  .color-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .color-circle::after {
+    content: attr(data-name);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    padding: 5px;
+    width: 100%;
+  }
+  
+  .color-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .color-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+  }
+  
+  .color-value {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  /* Circle background colors */
+  .slate-gray-bg { background-color: #171716; }
+  .forest-green-bg { background-color: #204e34; }
+  .patina-green-bg { background-color: #34e37e; }
+  .sky-blue-bg { background-color: #97D4EA; }
+  .water-blue-bg { background-color: #28A0CB; }
+  .cool-violet-bg { background-color: #B8A2E3; }
+  .warm-yellow-bg { background-color: #FACE00; }
+  
+  /* Circle text colors */
+  .light-text { color: white; }
+  .dark-text { color: black; }
+  
+  .color-families {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 2rem 0;
+  }
+  
+  .color-family {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .family-header {
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .color-swatch {
+    height: 40px;
+    width: 100%;
+  }
+  
+  .swatch-info {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .img-container img {
+    max-width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .img-container img:hover {
+    transform: scale(1.03);
+  }
+`}
+</style>
+
+<div className="colors-page">
+
+# Colors
+
+Color plays a significant role in our brand. The following values represent our core palette. These are used most often in the system and should be relied on when the color palette must be limited. Each of our colors is named for ideas that represent trust and accessibility.
+
+Patina Green, Forest Green, and Sky Blue should be used most frequently as the primary brand colors, with the remaining values being used as support.
+
+<Unstyled>
+  <div className="color-palette">
+    <div className="color-item">
+      <div
+        className="color-circle slate-gray-bg light-text"
+        data-name="Slate Gray"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Slate Gray</div>
+        <div className="color-value">gray-warm-90</div>
+        <div className="color-value">HEX: #171716</div>
+        <div className="color-value">RGB: 23/23/22</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle forest-green-bg light-text"
+        data-name="Forest Green"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Forest Green</div>
+        <div className="color-value">mint-70</div>
+        <div className="color-value">HEX: #204e34</div>
+        <div className="color-value">RGB: 32/78/52</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle patina-green-bg dark-text"
+        data-name="Patina Green"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Patina Green</div>
+        <div className="color-value">mint-40</div>
+        <div className="color-value">HEX: #34e37e</div>
+        <div className="color-value">RGB: 52/163/126</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle sky-blue-bg dark-text"
+        data-name="Sky Blue"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Sky Blue</div>
+        <div className="color-value">blue-cool-vivid-20</div>
+        <div className="color-value">HEX: #97D4EA</div>
+        <div className="color-value">RGB: 151/212/234</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle water-blue-bg light-text"
+        data-name="Water Blue"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Water Blue</div>
+        <div className="color-value">blue-cool-vivid-40</div>
+        <div className="color-value">HEX: #28A0CB</div>
+        <div className="color-value">RGB: 40/160/203</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle cool-violet-bg dark-text"
+        data-name="Cool Violet"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Cool Violet</div>
+        <div className="color-value">violet-30</div>
+        <div className="color-value">HEX: #B8A2E3</div>
+        <div className="color-value">RGB: 184/162/227</div>
+      </div>
+    </div>
+
+    <div className="color-item">
+      <div
+        className="color-circle warm-yellow-bg dark-text"
+        data-name="Warm Yellow"
+      ></div>
+      <div className="color-info">
+        <div className="color-name">Warm Yellow</div>
+        <div className="color-value">yellow-vivid-20</div>
+        <div className="color-value">HEX: #FACE00</div>
+        <div className="color-value">RGB: 250/206/0</div>
+      </div>
+    </div>
+  </div>
+</Unstyled>
+
+# Color Families
+
+The Grants color system is based on the design token system in USWDS. Each color family has 7-8 grades.
+
+<Unstyled>
+  <figure>
+    <img
+      src="/brand/colors/simple-grants-color-families.png"
+      alt="Color families"
+    />
+  </figure>
+</Unstyled>
+
+# Color & Accessibility
+
+Pairing colors together can be complex. Always consider the application, information, and audience when selecting values. Higher contrast combinations make information clearer, while lower contrast combinations can be helpful for graphic elements.
+
+Color contrast is crucial to legibility and accessibility in type. Always be sure there is enough contrast between the type and background. In most situations, type should be used in Gray or White, with color being used to create emphasis.
+
+<Unstyled>
+  <figure>
+    <img
+      src="/brand/colors/simpler-grants-color-accessibility.png"
+      alt="Color & Accessibility"
+    />
+  </figure>
+</Unstyled>
+
+# Additional don'ts
+
+Do not diminish the value of color in the brand. Avoid the following uses.
+
+<Unstyled>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+      <div className="dont-item">
+        <div className="img-container">
+          <img src="/brand/colors/simpler-grants-donot-use-unapproved-colors.png" alt="Don't use unapproved colors." />
+        </div>
+        <div style={{ textAlign: 'center', fontWeight: '500', marginTop: '10px' }}>
+        </div>
+      </div>
+      <div className="dont-item">
+        <div className="img-container">
+          <img src="/brand/colors/simpler-grants-donot-use-gradients.png" alt="Don't use gradients." />
+        </div>
+        <div style={{ textAlign: 'center', fontWeight: '500', marginTop: '10px' }}>
+        </div>
+      </div>
+      <div className="dont-item">
+        <div className="img-container">
+          <img src="/brand/colors/simpler-grants-donot-use-low-contrast-combinations.png" alt="Don't use low-contrast combinations." />
+        </div>
+        <div style={{ textAlign: 'center', fontWeight: '500', marginTop: '10px' }}>
+        </div>
+      </div>
+      <div className="dont-item">
+        <div className="img-container">
+          <img src="/brand/colors/simpler-grants-donot-use-only-accent-color-combinations.png" alt="Don't use only accent color combinations." />
+        </div>
+        <div style={{ textAlign: 'center', fontWeight: '500', marginTop: '10px' }}>
+        </div>
+      </div>
+    </div>
+</Unstyled>
+</div>
