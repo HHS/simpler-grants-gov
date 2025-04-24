@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import List
+from uuid import UUID
 
 
-class NotificationReasons(StrEnum):
+class NotificationReason(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
@@ -18,8 +18,9 @@ class Metrics(StrEnum):
 
 
 @dataclass
-class EmailData:
-    to_addresses: List[str]
+class UserEmailNotification:
+    user_id: UUID
+    user_email: str
     subject: str
-    content: dict
-    notification_reason: NotificationReasons
+    content: str
+    notification_reason: NotificationReason
