@@ -1,6 +1,10 @@
 import DOMPurify from "isomorphic-dompurify";
 import { upperFirst } from "lodash";
 import {
+  eligbilityValueToGroup,
+  eligibilityValueToLabel,
+} from "src/constants/opportunity";
+import {
   OpportunityDocument,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
@@ -10,10 +14,6 @@ import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
-import {
-  eligbilityValueToGroup,
-  eligibilityValueToLabel,
-} from "../search/SearchFilterAccordion/SearchFilterOptions";
 
 type OpportunityDescriptionProps = {
   summary: Summary;
