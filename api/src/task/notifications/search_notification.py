@@ -28,7 +28,7 @@ class SearchNotification(BaseNotification):
         db_session: db.Session,
         search_client: search.SearchClient,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, search_client)
         self.search_client = search_client
         self.collected_data: dict[UUID, list[UserSavedSearch]] = {}
 

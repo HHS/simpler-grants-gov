@@ -4,6 +4,7 @@ from uuid import UUID
 
 from sqlalchemy import and_, exists, select
 
+import src.adapters.search as search
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
@@ -26,9 +27,10 @@ class ClosingDateNotification(BaseNotification):
     def __init__(
         self,
         db_session: db.Session,
+        search_client: search.SearchClient,
         frontend_base_url: str | None = None,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, search_client)
         self.frontend_base_url = frontend_base_url
         self.collected_data: dict[UUID, list[UserSavedOpportunity]] = {}
 

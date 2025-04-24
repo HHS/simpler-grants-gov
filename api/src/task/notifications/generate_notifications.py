@@ -41,7 +41,7 @@ class NotificationTask(Task):
     def __init__(
         self,
         db_session: db.Session,
-        search_client: search.SearchClient | None = None,
+        search_client: search.SearchClient,
         pinpoint_client: botocore.client.BaseClient | None = None,
         frontend_base_url: str | None = None,
         generate_notification_config: GenerateNotificationsConfig | None = None,
@@ -61,7 +61,7 @@ class NotificationTask(Task):
 
         # run opportunity notification
         OpportunityNotification(
-            db_session=self.db_session,
+            db_session=self.db_session, search_client=self.search_client
         ).run_task()
 
         # run search notification
@@ -70,5 +70,6 @@ class NotificationTask(Task):
         # run closing notification
         ClosingDateNotification(
             db_session=self.db_session,
+            search_client=self.search_client,
             frontend_base_url=self.frontend_base_url,
         ).run_task()

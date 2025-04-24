@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
+import src.adapters.search as search
 from src.adapters import db
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
@@ -14,8 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 class OpportunityNotification(BaseNotification):
-    def __init__(self, db_session: db.Session):
-        super().__init__(db_session)
+    def __init__(self, db_session: db.Session, search_client: search.SearchClient):
+        super().__init__(
+            db_session,
+            search_client,
+        )
         self.collected_data: dict[UUID, list[UserSavedOpportunity]] = {}
 
     def collect_notifications(self) -> None:
