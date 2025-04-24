@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from typing import Any, Tuple
@@ -52,6 +53,17 @@ class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
+    domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
+    domain_verification_map: dict = Field(default_factory=dict)
+
+    def model_post_init(self, _context: Any) -> None:
+        self.domain_verification_map = {}
+        if self.domain_verification_content is not None:
+            try:
+                self.domain_verification_map = json.loads(self.domain_verification_content)
+            except Exception:
+                # This except is to prevent the entire API from starting up if the value is malformed
+                logger.exception("Could not load domain verification content")
 
 
 def create_app() -> APIFlask:
@@ -77,6 +89,8 @@ def create_app() -> APIFlask:
 
     if LegacySoapAPIConfig().soap_api_enabled:
         init_legacy_soap_api(app)
+
+    register_well_known(app, endpoint_config.domain_verification_map)
 
     return app
 
@@ -191,3 +205,17 @@ def register_robots_txt(app: APIFlask) -> None:
         Allow: /docs
         Disallow: /
         """
+
+
+def register_well_known(app: APIFlask, domain_verification_map: dict) -> None:
+    @app.get("/.well-known/pki-validation/<file_name>")
+    @app.doc(hide=True)
+    def get_domain_verification_content(file_name: str) -> tuple:
+        """Domain verification
+
+        This endpoint is responsible for domain verification related
+        to grants.gov S2S SOAP API.
+        """
+        if file_name in domain_verification_map:
+            return domain_verification_map[file_name], 200
+        return f"Could not find {file_name}", 404
