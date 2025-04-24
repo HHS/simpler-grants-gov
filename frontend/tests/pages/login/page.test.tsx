@@ -27,16 +27,6 @@ const mockGetItem = jest.spyOn(SessionStorage, "getItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
 const mockConsoleError = jest.spyOn(console, "error");
 
-const createMockRouter = (props = {}) => ({
-  back: jest.fn(),
-  forward: jest.fn(),
-  push: mockPush,
-  replace: jest.fn(),
-  refresh: jest.fn(),
-  prefetch: jest.fn(),
-  ...props,
-});
-
 describe("Login Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,18 +50,10 @@ describe("Login Page", () => {
     });
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
-    return render(
-      <AppRouterContext.Provider value={createMockRouter()}>
-        {ui}
-      </AppRouterContext.Provider>,
-    );
-  };
-
   it("should redirect to stored URL from session storage", () => {
     mockGetItem.mockReturnValue("/test-redirect-path");
 
-    renderWithRouter(<LoginPage />);
+    render(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
@@ -82,43 +64,40 @@ describe("Login Page", () => {
   it("should redirect to home if no redirect URL is stored", () => {
     mockGetItem.mockReturnValue(null);
 
-    renderWithRouter(<LoginPage />);
+    render(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    // 2 times because of the redirect to home
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
   it("should redirect to home if redirect URL is empty", () => {
     mockGetItem.mockReturnValue("");
 
-    renderWithRouter(<LoginPage />);
+    render(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    // 2 times because of the redirect to home
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
   it("should redirect to home if redirect URL doesn't start with /", () => {
     mockGetItem.mockReturnValue("https://malicious-site.com");
 
-    renderWithRouter(<LoginPage />);
+    render(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
-    // 2 times because of the redirect to home
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
   it("should display 'Redirecting...' text", () => {
     mockGetItem.mockReturnValue("/some-path");
 
-    const { container } = renderWithRouter(<LoginPage />);
+    const { container } = render(<LoginPage />);
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(container).toHaveTextContent("Redirecting...");
