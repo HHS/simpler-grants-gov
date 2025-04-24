@@ -124,4 +124,20 @@ describe("ApplyForm", () => {
       expect.any(FormData),
     );
   });
+  it("errors when form data is bad", () => {
+    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+
+    render(
+      <ApplyForm
+        applicationId="test"
+        savedFormData={{}}
+        formSchema={{}}
+        uiSchema={uiSchema}
+        formId="test"
+      />,
+    );
+    const alert = screen.getByTestId("alert");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent("Error rendering form");
+  });
 });
