@@ -6,7 +6,7 @@ module "staging_config" {
   environment                     = "staging"
   network_name                    = "staging"
   domain_name                     = "api.staging.simpler.grants.gov"
-  enable_https                    = false
+  enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
