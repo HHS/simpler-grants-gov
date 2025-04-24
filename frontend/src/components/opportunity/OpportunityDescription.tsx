@@ -1,9 +1,4 @@
 import DOMPurify from "isomorphic-dompurify";
-import { upperFirst } from "lodash";
-import {
-  eligbilityValueToGroup,
-  eligibilityValueToLabel,
-} from "src/constants/opportunity";
 import {
   OpportunityDocument,
   Summary,
