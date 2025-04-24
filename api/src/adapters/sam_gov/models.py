@@ -1,0 +1,146 @@
+"""Models for SAM.gov API client."""
+
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class EntityStatus(str, Enum):
+    """Entity status in SAM.gov."""
+
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+
+
+class EntityType(str, Enum):
+    """Entity type in SAM.gov."""
+
+    BUSINESS = "BUSINESS"
+    GOVERNMENT = "GOVERNMENT"
+    INDIVIDUAL = "INDIVIDUAL"
+
+
+class SensitivityLevel(str, Enum):
+    """Sensitivity level for SAM.gov API requests."""
+
+    PUBLIC = "PUBLIC"
+    FOUO = "FOUO"
+    SENSITIVE = "SENSITIVE"
+
+
+class FileType(str, Enum):
+    """File types available for SAM.gov extracts."""
+
+    ENTITY = "ENTITY"
+    EXCLUSION = "EXCLUSION"
+    SCR = "SCR"
+    BIO = "BIO"
+
+
+class FileFormat(str, Enum):
+    """File formats available for SAM.gov extracts."""
+
+    UTF8 = "UTF8"
+    ASCII = "ASCII"
+
+
+class ExtractType(str, Enum):
+    """Extract types available for SAM.gov."""
+
+    MONTHLY = "MONTHLY"
+    DAILY = "DAILY"
+
+
+class SamEntityRequest(BaseModel):
+    """Request model for SAM.gov Entity API."""
+
+    uei: str = Field(..., description="The Unique Entity ID to retrieve")
+
+
+class SamEntityResponse(BaseModel):
+    """Response model for SAM.gov Entity API."""
+
+    uei: str = Field(..., description="The Unique Entity ID")
+    legal_business_name: str = Field(..., description="Legal business name")
+    physical_address: dict[str, Any] = Field(..., description="Physical address")
+    mailing_address: dict[str, Any] | None = Field(None, description="Mailing address")
+    congressional_district: str | None = Field(None, description="Congressional district")
+    entity_status: EntityStatus = Field(..., description="Status of the entity")
+    entity_type: EntityType = Field(..., description="Type of entity")
+    expiration_date: datetime | None = Field(None, description="Expiration date")
+    created_date: datetime = Field(..., description="Date the entity was created")
+    last_updated_date: datetime = Field(..., description="Date the entity was last updated")
+
+
+class SamExtractRequest(BaseModel):
+    """Request model for SAM.gov Extract Downloads API."""
+
+    # Only one of fileName or fileType should be provided
+    file_name: str | None = Field(
+        None,
+        description="The specific file name to download (e.g., SAM_PUBLIC_MONTHLY_V2_20220406.ZIP)",
+    )
+    file_type: FileType | None = Field(
+        None, description="The type of extract file to download (ENTITY, EXCLUSION, SCR, BIO)"
+    )
+
+    # Parameters used with fileType
+    sensitivity: SensitivityLevel | None = Field(
+        None, description="The sensitivity level of the extract (PUBLIC, FOUO, SENSITIVE)"
+    )
+    extract_type: ExtractType | None = Field(
+        None, description="The type of extract (MONTHLY, DAILY)"
+    )
+    create_date: str | None = Field(
+        None, description="The specific date for the extract in YYYYMMDD format (e.g., 20220406)"
+    )
+    format: FileFormat | None = Field(
+        None, description="The format of the extract file (UTF8, ASCII)"
+    )
+    include_expired: bool | None = Field(None, description="Whether to include expired entities")
+
+    class Config:
+        """Pydantic config."""
+
+        validate_assignment = True
+
+    def to_params(self) -> dict[str, str | bool]:
+        """Convert the request to query parameters for the API request."""
+        params: dict[str, str | bool] = {}
+
+        if self.file_name:
+            params["fileName"] = self.file_name
+            # If fileName is specified, other params should not be included
+            return params
+
+        if self.file_type:
+            params["fileType"] = self.file_type.value
+
+        if self.sensitivity:
+            params["sensitivity"] = self.sensitivity.value
+
+        if self.extract_type:
+            params["extractType"] = self.extract_type.value
+
+        if self.create_date:
+            params["createDate"] = self.create_date
+
+        if self.format:
+            params["format"] = self.format.value
+
+        if self.include_expired is not None:
+            params["includeExpired"] = str(self.include_expired).lower()
+
+        return params
+
+
+class SamExtractResponse(BaseModel):
+    """Response metadata for a successful SAM.gov extract download."""
+
+    file_name: str = Field(..., description="The name of the downloaded file")
+    file_size: int = Field(..., description="The size of the downloaded file in bytes")
+    content_type: str = Field(..., description="The content type of the downloaded file")
+    sensitivity: SensitivityLevel = Field(..., description="The sensitivity level of the extract")
+    download_date: datetime = Field(..., description="When the extract was downloaded")
