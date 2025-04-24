@@ -4,7 +4,7 @@ from abc import abstractmethod
 
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
-from src.task.notifications.constants import Metrics, UserEmailNotification
+from src.task.notifications.constants import UserEmailNotification
 from src.task.notifications.generate_notifications import NotificationTask
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ class BaseNotification(NotificationTask):
                     },
                 )
                 notification_log.notification_sent = True
-                self.increment(Metrics.NOTIFICATIONS_SENT)
+
                 self.update_last_notified_timestamp(user_notification.user_id)
 
             except Exception:

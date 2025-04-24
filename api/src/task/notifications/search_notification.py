@@ -8,7 +8,7 @@ import src.adapters.search as search
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotification
-from src.task.notifications.constants import NotificationReason, UserEmailNotification
+from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -97,6 +97,8 @@ class SearchNotification(BaseNotification):
             .where(UserSavedSearch.saved_search_id.in_(search_ids))
             .values(last_notified_at=datetime_util.utcnow())
         )
+        self.increment(Metrics.SEARCHES_TRACKED, len(search_ids))
+        self.increment(Metrics.USERS_NOTIFIED)
 
     def run_task(self) -> None:
         """Override to define the task logic"""

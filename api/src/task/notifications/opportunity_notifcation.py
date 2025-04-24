@@ -9,7 +9,7 @@ from src.adapters import db
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotification
-from src.task.notifications.constants import NotificationReason, UserEmailNotification
+from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -91,6 +91,8 @@ class OpportunityNotification(BaseNotification):
             )
             .values(last_notified_at=datetime_util.utcnow())
         )
+        self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
+        self.increment(Metrics.USERS_NOTIFIED)
 
     def run_task(self) -> None:
         """Override to define the task logic"""
