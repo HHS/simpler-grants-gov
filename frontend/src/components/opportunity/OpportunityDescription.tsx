@@ -1,4 +1,5 @@
 import DOMPurify from "isomorphic-dompurify";
+import { upperFirst } from "lodash";
 import {
   OpportunityDocument,
   Summary,
@@ -19,32 +20,6 @@ type OpportunityDescriptionProps = {
   attachments: OpportunityDocument[];
 };
 
-enum ApplicantType {
-  state_governments = "State governments",
-  county_governments = "County governments",
-  city_or_township_governments = "City or township governments",
-  special_district_governments = "Special district governments",
-
-  independent_school_districts = "Independent school districts",
-  public_and_state_institutions_of_higher_education = "Public and state institutions of higher education",
-  private_institutions_of_higher_education = "Private institutions of higher education",
-
-  federally_recognized_native_american_tribal_governments = "Federally recognized Native American tribal governments",
-  other_native_american_tribal_organizations = "Other Native American tribal organizations",
-  public_and_indian_housing_authorities = "Public and Indian housing authorities",
-
-  nonprofits_non_higher_education_with_501c3 = "Nonprofits non-higher education with 501(c)(3)",
-  nonprofits_non_higher_education_without_501c3 = "Nonprofits non-higher education without 501(c)(3)",
-
-  individuals = "Individuals",
-  for_profit_organizations_other_than_small_businesses = "For-profit organizations other than small businesses",
-  small_businesses = "Small businesses",
-  other = "Other",
-  unrestricted = "Unrestricted",
-}
-
-type ApplicantTypeKey = keyof typeof ApplicantType;
-
 const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   if (!applicantTypes || !applicantTypes.length) {
     return <div>--</div>;
@@ -53,10 +28,11 @@ const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   const applicantTypeGroups = applicantTypes.reduce(
     (groupedApplicantTypes, applicantType) => {
       const group = eligbilityValueToGroup[applicantType];
+      const applicantTypeDisplay = eligibilityValueToLabel[applicantType];
       if (!groupedApplicantTypes[group]) {
-        groupedApplicantTypes[group] = [applicantType];
+        groupedApplicantTypes[group] = [applicantTypeDisplay];
       } else {
-        groupedApplicantTypes[group].push(applicantType);
+        groupedApplicantTypes[group].push(applicantTypeDisplay);
       }
       return groupedApplicantTypes;
     },
@@ -66,13 +42,13 @@ const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   return (
     <>
       {Object.entries(applicantTypeGroups).map(
-        ([groupName, applicantTypeValues]) => {
+        ([groupName, applicantTypes]) => {
           return (
             <div key={`eligibility-group${groupName}`}>
-              <h4>{groupName.toUpperCase()}</h4>
+              <h4>{upperFirst(groupName)}</h4>
               <ul>
-                {applicantTypeValues.map((value) => (
-                  <li key={value}>{eligibilityValueToLabel[value]}</li>
+                {applicantTypes.map((display) => (
+                  <li key={display}>{display}</li>
                 ))}
               </ul>
             </div>
