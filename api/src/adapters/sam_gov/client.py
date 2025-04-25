@@ -85,7 +85,9 @@ class SamGovClient(BaseSamGovClient):
         self.username = username or os.environ.get("SAM_GOV_USERNAME")
         self.password = password or os.environ.get("SAM_GOV_PASSWORD")
         self.api_url = config_api_url or api_url or os.environ.get("SAM_GOV_API_URL")
-        self.extract_url = config_extract_url or extract_url or os.environ.get("SAM_GOV_EXTRACT_URL")
+        self.extract_url = (
+            config_extract_url or extract_url or os.environ.get("SAM_GOV_EXTRACT_URL")
+        )
 
         if not self.api_url:
             raise ValueError(

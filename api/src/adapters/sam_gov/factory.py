@@ -28,7 +28,7 @@ def create_sam_gov_client(
     if use_mock is None:
         # Check environment variable - 'true' (case insensitive) means use mock
         use_mock = os.environ.get("SAM_GOV_USE_MOCK", "").lower() == "true"
-    
+
     # If use_mock is True or SAM_GOV_MOCK is 'true', use the mock client
     if use_mock or os.environ.get("SAM_GOV_MOCK") == "true":
         # Check if a custom mock data file is provided
