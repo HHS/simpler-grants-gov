@@ -12,7 +12,7 @@ import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
 import { UiSchema } from "./types";
-import { buildForTreeRecursive, getFieldsForNav } from "./utils";
+import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,
@@ -45,7 +45,7 @@ const ApplyForm = ({
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
   try {
-    fields = buildForTreeRecursive({
+    fields = buildFormTreeRecursive({
       errors: validationErrors,
       formData: formObject,
       schema: formSchema,

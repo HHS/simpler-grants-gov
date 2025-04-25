@@ -124,7 +124,7 @@ describe("ApplyForm", () => {
       expect.any(FormData),
     );
   });
-  it("errors when form data is bad", () => {
+  it("errors when form data is empty", () => {
     mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
@@ -132,6 +132,22 @@ describe("ApplyForm", () => {
         applicationId="test"
         savedFormData={{}}
         formSchema={{}}
+        uiSchema={uiSchema}
+        formId="test"
+      />,
+    );
+    const alert = screen.getByTestId("alert");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent("Error rendering form");
+  });
+  it("errors when form data does not conform to JSON schema", () => {
+    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+
+    render(
+      <ApplyForm
+        applicationId="test"
+        savedFormData={{}}
+        formSchema={{ arbitrayField: "arbirtrary value" }}
         uiSchema={uiSchema}
         formId="test"
       />,

@@ -8,7 +8,7 @@ import {
 } from "src/components/applyForm/types";
 import {
   buildField,
-  buildForTreeRecursive,
+  buildFormTreeRecursive,
   getApplicationResponse,
   shapeFormData,
 } from "src/components/applyForm/utils";
@@ -284,7 +284,7 @@ describe("buildField", () => {
   });
 });
 
-describe("buildForTreeRecursive", () => {
+describe("buildFormTreeRecursive", () => {
   it("should build a tree for a simple schema", () => {
     const schema: RJSFSchema = {
       type: "object",
@@ -302,7 +302,7 @@ describe("buildForTreeRecursive", () => {
     const errors: FieldErrors = [];
     const formData = { name: "John", age: 30 };
 
-    const result = buildForTreeRecursive({
+    const result = buildFormTreeRecursive({
       errors,
       formData,
       schema,
@@ -346,7 +346,7 @@ describe("buildForTreeRecursive", () => {
     const errors: FieldErrors = [];
     const formData = { address: { street: "123 Main St", city: "Metropolis" } };
 
-    const result = buildForTreeRecursive({
+    const result = buildFormTreeRecursive({
       errors,
       formData,
       schema,
@@ -369,7 +369,7 @@ describe("buildForTreeRecursive", () => {
     const errors: FieldErrors = [];
     const formData = { name: "John" };
 
-    const result = buildForTreeRecursive({
+    const result = buildFormTreeRecursive({
       errors,
       formData,
       schema,
@@ -414,7 +414,7 @@ describe("buildForTreeRecursive", () => {
     const errors: FieldErrors = [];
     const formData = { section: { field1: "Value 1", field2: "Value 2" } };
 
-    const result = buildForTreeRecursive({
+    const result = buildFormTreeRecursive({
       errors,
       formData,
       schema,

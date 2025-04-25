@@ -33,9 +33,24 @@ or provide its own definitions that can supplement or override the form schema:
 }
 ```
 
+The corresponding form schema for that field would be:
+
+```
+
+"properties": {
+   "TestField": {
+      "type": "string",
+      "title": "Date of application ",
+      "description": "This will be overwritten the by the schema.description entry above"
+      "format": "date"
+  }
+}
+
+```
+
 This can be used for descriptions or enums, but the form will fail if the UI Schema tries to change the field type as the validation is still determined by the form schema.
 
-A field can only exist with the `schema` key in the UI schema, however it won't be saved:
+A field can have a `schema` without a `definition`. However, this field will only exist in the UI. When the form is saved the field will not be included in the form data sent to the server.
 
 ```
 {

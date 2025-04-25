@@ -26,7 +26,7 @@ export const parseSchema = async (
   }
 };
 
-export function buildForTreeRecursive({
+export function buildFormTreeRecursive({
   errors,
   formData,
   schema,
