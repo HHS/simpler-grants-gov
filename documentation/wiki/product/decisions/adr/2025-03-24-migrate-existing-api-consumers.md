@@ -79,7 +79,7 @@ Create a SOAP API facade that initially just proxies calls through the the exist
 
 1. just by the existing SOAP API
 2. just by Simpler's REST API
-3. by both APIs, either to evaluate the responses and chose which to send to th caller, or to combine the responses into a single SOAP response that represents the data in both systems
+3. by both APIs, either to evaluate the responses and chose which to send to the caller, or to combine the responses into a single SOAP response that represents the data in both systems
 
 This layer between the caller and the APIs allows Simpler data and functionality to incrementally replace existing Grants.gov's without the S2S API consumers having to make changes or implement the REST API.
 
