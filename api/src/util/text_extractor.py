@@ -15,9 +15,6 @@ from src.util.file_util import read_file
 
 logger = logging.getLogger(__name__)
 
-TEXT_EXTRACTOR_LOG_PREFIX = "TextExtractor:"
-TEXT_EXTRACTOR_ERR_LOG_PREFIX = f"{TEXT_EXTRACTOR_LOG_PREFIX} error:"
-
 
 @cache
 def get_text_extractor_configs() -> dict:
@@ -39,7 +36,7 @@ def get_text_extractor_configs() -> dict:
 class BaseTextExtractorError(Exception):
     def __init__(self, message: str) -> None:
         super().__init__(message)
-        self.message = f"{TEXT_EXTRACTOR_ERR_LOG_PREFIX} {message}"
+        self.message = message
 
     def __str__(self) -> str:
         return self.message
@@ -195,11 +192,18 @@ class TextExtractor:
         self.config = get_text_extractor_configs()[self.file_type]
 
     def get_text(self) -> str:
-        logger.info(f"{TEXT_EXTRACTOR_LOG_PREFIX} start: {self.file_path=} {self.file_type=}")
+        logger.info(
+            "text extract start", extra={"file_path": self.file_path, "file_type": self.file_type}
+        )
         try:
             extracted_data = self.config.extractor(self._read_file_data()).strip()
             logger.info(
-                f"{TEXT_EXTRACTOR_LOG_PREFIX} success: {self.file_path=} {self.file_type=} characters_extracted={len(extracted_data)}"
+                "text extract success",
+                extra={
+                    "file_path": self.file_path,
+                    "file_type": self.file_type,
+                    "characters_extracted": len(extracted_data),
+                },
             )
             return extracted_data
         except BaseTextExtractorError as e:
