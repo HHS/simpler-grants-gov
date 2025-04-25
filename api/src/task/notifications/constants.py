@@ -21,6 +21,10 @@ class Metrics(StrEnum):
 class UserEmailNotification:
     user_id: UUID
     user_email: str
+    notification_reason: NotificationReason
     subject: str
     content: str
-    notification_reason: NotificationReason
+    notified_object_ids: list
+    is_notified: bool
+
+

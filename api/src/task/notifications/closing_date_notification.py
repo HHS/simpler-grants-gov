@@ -1,15 +1,17 @@
 import logging
+from abc import ABC
 from datetime import timedelta
 from uuid import UUID
 
 from sqlalchemy import and_, exists, select, update
+from sqlalchemy.orm import joinedload
 
-import src.adapters.search as search
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotification
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
+from src.task.task import Task
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -22,25 +24,25 @@ CONTACT_INFO = (
 )
 
 
-class ClosingDateNotification(BaseNotification):
+class ClosingDateNotification(BaseNotification, ABC):
 
     def __init__(
         self,
         db_session: db.Session,
-        search_client: search.SearchClient,
         frontend_base_url: str | None = None,
     ):
-        super().__init__(db_session, search_client)
-        self.frontend_base_url = frontend_base_url
-        self.collected_data: dict[UUID, list[UserSavedOpportunity]] = {}
+        super().__init__(db_session)
 
-    def collect_notifications(self) -> None:
+        self.frontend_base_url = frontend_base_url
+
+    def collect_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
 
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
             select(UserSavedOpportunity)
+            .options(joinedload(UserSavedOpportunity.user))
             .join(UserSavedOpportunity.opportunity)
             .join(
                 OpportunitySummary, OpportunitySummary.opportunity_id == Opportunity.opportunity_id
@@ -63,36 +65,22 @@ class ClosingDateNotification(BaseNotification):
         )
 
         results = self.db_session.execute(stmt).scalars().all()
-        closing_date_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
+        user_saved_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
 
         for result in results:
             user_id = result.user_id
-            closing_date_opportunities.setdefault(user_id, []).append(result)
+            if not result.user.email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
+            user_saved_opportunities.setdefault(user_id, []).append(result)
 
-        logger.info(
-            "Collected closing date notifications",
-            extra={
-                "user_count": len(closing_date_opportunities),
-                "total_notifications": sum(
-                    len(closing_date_opportunities)
-                    for container in closing_date_opportunities.values()
-                ),
-            },
-        )
-        self.collected_data = closing_date_opportunities
 
-    def prepare_notification(self) -> list[UserEmailNotification]:
         users_email_notifications: list[UserEmailNotification] = []
 
-        for user_id, saved_items in self.collected_data.items():
-            user = saved_items[0].user
-            if not user.email:
-                logger.warning("No email found for user", extra={"user_id": user.user_id})
-                continue
-            message = ""
-            if len(saved_items) == 1:
-                # Single opportunity closing
-                opportunity = saved_items[0].opportunity
+        for user_id, saved_items in user_saved_opportunities.items():
+            closing_opportunities : list = []
+            for saved_opportunity in saved_items:
+                opportunity = saved_opportunity.opportunity
                 close_date = (
                     opportunity.current_opportunity_summary.opportunity_summary.close_date
                     if opportunity.current_opportunity_summary
@@ -105,68 +93,87 @@ class ClosingDateNotification(BaseNotification):
                     )
                     continue
 
-                message = (
-                    "Applications for the following funding opportunity are due in two weeks:\n\n"
-                    f"<a href='{self.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity_title}</a>\n"
-                    f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
-                    "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                    "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
-                    "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
-                    "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
-                    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-                    "{CONTACT_INFO}"
-                )
+                closing_opportunities.append({"opportunity_id": opportunity.opportunity_id, "close_date": close_date})
 
-            elif len(saved_items) > 1:
-                # Multiple opportunities closing
-                message = (
-                    "Applications for the following funding opportunities are due in two weeks:\n\n"
-                )
-
-                for saved_opportunity in saved_items:
-                    opportunity = saved_opportunity.opportunity
-                    close_date_stmt = select(OpportunitySummary.close_date).where(
-                        OpportunitySummary.opportunity_id == opportunity.opportunity_id
-                    )
-                    close_date = self.db_session.execute(close_date_stmt).scalar_one_or_none()
-                    if close_date:
-                        message += (
-                            f"[{opportunity.opportunity_title}]\n"
-                            f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
-                        )
-
-                message += (
-                    "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                    "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
-                    "If you have questions, please contact the Grants.gov Contact Center:\n"
-                    "{CONTACT_INFO}"
-                )
+            message = self._build_notification_message(closing_opportunities)
 
             logger.info(
                 "Created closing date email notification",
-                extra={"user_id": user_id, "closing_opp_count": len(saved_items)},
+                extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
             )
-
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
-                    user_email=user.email,
+                    user_email=saved_items[0].user.email,
                     subject="Applications for your bookmarked funding opportunities are due soon",
                     content=message,
                     notification_reason=NotificationReason.CLOSING_DATE_REMINDER,
+                    notified_object_ids=[opp["opportunity_id"] for opp in closing_opportunities],
+                    is_notified=False # Default to False, update on success
                 )
             )
+        logger.info(
+            "Collected closing date opportunities for notification",
+            extra={
+                "user_count": len(users_email_notifications),
+                "total_closing_opportunities": sum(len(n.notified_object_ids) for n in users_email_notifications)
+            },
+        )
 
         return users_email_notifications
 
-    def create_user_opportunity_notification_log(self) -> None:
-        if self.collected_data:
-            for user_id, saved_items in self.collected_data.items():
-                for closing_opportunity in saved_items:
-                    # Create notification log entry
+
+
+    def _build_notification_message(self, closing_opportunities: list) -> str:
+        message = (
+            "Applications for the following funding opportunity are due in two weeks:\n\n")
+        if len(closing_opportunities) == 1:
+            message += (
+            f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0].opportunity_id}' target='_blank'>{closing_opportunities[0].opportunity_title}</a>\n"
+            f"Application due date: {closing_opportunities[0].close_date.strftime('%B %d, %Y')}\n\n"
+            "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
+            "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
+            "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
+            "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+            "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
+        )
+        else :
+            for closing_opp in closing_opportunities:
+                message += (
+                    f"[{closing_opp.opportunity.opportunity_title}]\n"
+                    f"Application due date: {closing_opp.strftime('%B %d, %Y')}\n\n"
+                )
+            message += (
+                "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
+                "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
+                "If you have questions, please contact the Grants.gov Contact Center:\n"
+
+            )
+
+        message += f"{CONTACT_INFO}"
+
+        return message
+
+    def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
+        for user_notification in user_notifications:
+            if user_notification.is_notified:
+                # Update UserSavedOpportunity
+                user_id = user_notification.user_id
+                opportunity_ids = user_notification.notified_object_ids
+                self.db_session.execute(
+                    update(UserSavedOpportunity)
+                    .where(
+                        UserSavedOpportunity.user_id == user_notification.user_id,
+                        UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
+                    )
+                    .values(last_notified_at=datetime_util.utcnow())
+                )
+
+                # Create notification log entry
+                for opp in opportunity_ids:
                     opp_notification_log = UserOpportunityNotificationLog(
                         user_id=user_id,
-                        opportunity_id=closing_opportunity.opportunity_id,
+                        opportunity_id=opp.opportunity_id,
                     )
                     self.db_session.add(opp_notification_log)
 
@@ -174,28 +181,11 @@ class ClosingDateNotification(BaseNotification):
                     "Successfully sent closing date reminder",
                     extra={
                         "user_id": user_id,
-                        "opportunity_ids": [opp.opportunity_id for opp in saved_items],
+                        "opportunity_ids": opportunity_ids,
                     },
                 )
 
-    def update_last_notified_timestamp(self, user_id: UUID) -> None:
-        opportunity_ids = [
-            close_date_opp.opportunity_id for close_date_opp in self.collected_data.get(user_id, [])
-        ]
-        self.db_session.execute(
-            update(UserSavedOpportunity)
-            .where(
-                UserSavedOpportunity.user_id == user_id,
-                UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
-            )
-            .values(last_notified_at=datetime_util.utcnow())
-        )
-        self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
-        self.increment(Metrics.USERS_NOTIFIED)
+                self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
 
-    def run_task(self) -> None:
-        """Override to define the task logic"""
-        prepared_notification = self.notification_data()
-        if self.notification_data():
-            self.send_notifications(prepared_notification)
-            self.create_user_opportunity_notification_log()
+
+

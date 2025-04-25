@@ -1,42 +1,44 @@
 import logging
 import uuid
+import botocore.client
 from abc import abstractmethod
-
+from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
-from src.task.notifications.constants import UserEmailNotification
-from src.task.notifications.generate_notifications import NotificationTask
+from src.task.notifications.constants import UserEmailNotification, Metrics
+from src.task.notifications.notification_runner import SendNotificationTask
 
 logger = logging.getLogger(__name__)
 
 
-class BaseNotification(NotificationTask):
+class BaseNotification(SendNotificationTask):
+    def __init__(self,  db_session: db.Session, pinpoint_client: botocore.client.BaseClient | None = None):
+        super().__init__(db_session)
+
+        self.pinpoint_client = pinpoint_client
+
 
     @abstractmethod
-    def collect_notifications(
+    def collect_email_notifications(
         self,
-    ) -> None:
-        """Collect notifications for users"""
-        pass
-
-    @abstractmethod
-    def prepare_notification(self) -> list[UserEmailNotification]:
-        """Prepare notification content (email data)"""
+    ) -> list[UserEmailNotification]:
+        """Collect email notifications for users"""
         pass
 
     @abstractmethod
     def update_last_notified_timestamp(self, user_id: uuid.UUID) -> None:
         """Record the time a notification was last sent to the user in the database"""
+        pass
 
-    def notification_data(self) -> list[UserEmailNotification]:
+    @abstractmethod
+    def post_notifications_process(self, notifications : list[UserEmailNotification]) -> None:
         """Fetch collected notifications and prepare email data."""
-        self.collect_notifications()
-        return self.prepare_notification()
+        pass
 
-    def send_notifications(self, data: list[UserEmailNotification]) -> None:
+    def send_notifications(self, notifications: list[UserEmailNotification]) -> None:
         """Send collected notifications to users"""
 
-        for user_notification in data:
+        for user_notification in notifications:
             logger.info(
                 "Sending notification to user",
                 extra={
@@ -56,7 +58,7 @@ class BaseNotification(NotificationTask):
                     subject=user_notification.subject,
                     message=user_notification.content,
                     pinpoint_client=self.pinpoint_client,
-                    app_id=self.generate_notification_config.app_id,
+                    app_id=self.notification_config.app_id,
                 )
                 logger.info(
                     "Successfully sent notification to user",
@@ -67,8 +69,9 @@ class BaseNotification(NotificationTask):
                     },
                 )
                 notification_log.notification_sent = True
+                user_notification.is_notified = True
 
-                self.update_last_notified_timestamp(user_notification.user_id)
+                self.increment(Metrics.USERS_NOTIFIED)
 
             except Exception:
                 # Notification log will be updated in the finally block
@@ -80,3 +83,9 @@ class BaseNotification(NotificationTask):
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
+
+    def run_task(self) -> None:
+        """Override to define the task logic"""
+        notifications = self.collect_email_notifications()
+        self.send_notifications(notifications)
+        self.post_notifications_process(notifications)
