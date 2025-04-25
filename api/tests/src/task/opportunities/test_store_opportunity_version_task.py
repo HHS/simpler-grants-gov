@@ -1,11 +1,10 @@
-from datetime import datetime
-
 import pytest
 
 from src.constants.lookup_constants import JobStatus
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.task_models import JobLog
 from src.task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
+from src.util import datetime_util
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -125,7 +124,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
 
         # run with a second update
         oca.opportunity.current_opportunity_summary = None
-        oca.updated_at = datetime.now()
+        oca.updated_at = datetime_util.utcnow()
         db_session.commit()
 
         store_opportunity_version_task.run()

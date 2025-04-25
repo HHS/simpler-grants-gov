@@ -41,6 +41,9 @@ class Competition(ApiSchemaTable, TimestampMixin):
     opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
     )
+    link_competition_open_to_applicant: Mapped[list["LinkCompetitionOpenToApplicant"]] = (
+        relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
+    )
     open_to_applicants: AssociationProxy[set[CompetitionOpenToApplicant]] = association_proxy(
         "link_competition_open_to_applicant",
         "competition_open_to_applicant",
@@ -160,8 +163,10 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition_open_to_applicant_id: Mapped[int] = mapped_column(
-        BigInteger,
+    competition: Mapped[Competition] = relationship(Competition)
+    competition_open_to_applicant: Mapped[CompetitionOpenToApplicant] = mapped_column(
+        "competition_open_to_applicant_id",
+        LookupColumn(LkCompetitionOpenToApplicant),
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )
