@@ -189,10 +189,11 @@ class TestSamGovClient:
 
     def test_api_key_in_query_params(self):
         """Test that the API key is included in the query parameters."""
-        client = SamGovClient(
+        config = SamGovConfig(
+            base_url="https://test-api.sam.gov",
             api_key="test-api-key",
-            api_url="https://test-api.sam.gov",
         )
+        client = SamGovClient(config)
 
         with requests_mock.Mocker() as m:
             m.get(

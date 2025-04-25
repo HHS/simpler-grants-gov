@@ -78,9 +78,6 @@ class SamExtractRequest(BaseModel):
             # If fileName is specified, other params should not be included
             return params
 
-        if self.file_type:
-            params["fileType"] = self.file_type.value
-
         if self.sensitivity:
             params["sensitivity"] = self.sensitivity.value
 

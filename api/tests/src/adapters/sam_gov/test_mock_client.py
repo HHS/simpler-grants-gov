@@ -3,9 +3,6 @@
 import json
 import os
 import tempfile
-from unittest import mock
-
-import pytest
 
 from src.adapters.sam_gov.mock_client import MockSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest, SensitivityLevel
