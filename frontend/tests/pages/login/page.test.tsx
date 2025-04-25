@@ -9,9 +9,6 @@ jest.mock("react", () => {
   const actualModule = jest.requireActual<typeof React>("react");
   return {
     ...actualModule,
-    useEffect: (callback: () => void) => {
-      callback();
-    },
   };
 });
 
