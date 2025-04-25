@@ -1,7 +1,7 @@
-import { ExternalRoutes } from "src/constants/routes";
-
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { ExternalRoutes } from "src/constants/routes";
+
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "./USWDSIcon";
@@ -23,13 +23,6 @@ const Hero = () => {
             {t("content")}
           </p>
         </div>
-        <Link
-          href="/search"
-          passHref
-          className="usa-button usa-button--secondary usa-button--big margin-bottom-2"
-        >
-          {t("search_link")}
-        </Link>
         <span className="usa-dark-background bg-transparent">
           <Link
             className="usa-button usa-button--small usa-button--unstyled usa-button--inverse desktop:position-absolute top-3 right-0 margin-y-1 desktop:margin-y-3 desktop:margin-x-4"
