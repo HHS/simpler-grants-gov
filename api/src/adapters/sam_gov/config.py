@@ -1,7 +1,6 @@
 """Configuration for SAM.gov API client."""
 
 import os
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -11,7 +10,7 @@ class SamGovConfig(BaseModel):
 
     base_url: str = "https://open.gsa.gov/api/sam-entity-extracts-api"
     extract_url: str = "https://open.gsa.gov/api/sam-entity-extracts-api/extracts"
-    api_key: Optional[str] = None
+    api_key:str | None = None
     timeout: int = 30  # Timeout in seconds
 
     @classmethod
