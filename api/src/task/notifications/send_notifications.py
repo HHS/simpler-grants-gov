@@ -1,6 +1,4 @@
 
-from pydantic import Field
-
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
@@ -12,12 +10,8 @@ from src.task.notifications.closing_date_notification import ClosingDateNotifica
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
 from src.task.notifications.search_notification import SearchNotification
 from src.task.task import Task
-from src.util.env_config import PydanticBaseEnvConfig
+from tests.conftest import db_session
 
-
-class SendNotificationsConfig(PydanticBaseEnvConfig):
-    app_id: str = Field(alias="PINPOINT_APP_ID")
-    frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
 @task_blueprint.cli.command(
     "generate-notifications", help="Send notifications for opportunity and search changes"
@@ -34,26 +28,20 @@ class SendNotificationTask(Task):
     Metrics = constants.Metrics
 
     def __init__(self, db_session: db.Session,
-                 search_client: search.SearchClient | None = None,
-                 notification_config: SendNotificationsConfig | None = None) -> None:
+                 search_client: search.SearchClient | None = None
+                 ) -> None:
         super().__init__(db_session)
-
         self.search_client = search_client
-        if notification_config is None:
-            notification_config = SendNotificationsConfig()
-        self.notification_config = notification_config
+
 
 
     def run_task(self) -> None:
-        # run opportunity notification
-        OpportunityNotification(self).run()
-        # run search notification
-        SearchNotification(self).run()
+        # # run opportunity notification
+        # OpportunityNotification(db_session=self.db_session).run()
+        # # run search notification
+        # SearchNotification(db_session=self.db_session, search_client=self.search_client).run()
         # run closing notification
-        ClosingDateNotification(self).run()
-
-
-
+        ClosingDateNotification(db_session=self.db_session).run()
 
 
 

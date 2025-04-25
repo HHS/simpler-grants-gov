@@ -1,21 +1,30 @@
 import logging
 import uuid
+from pydantic import Field
+
 import botocore.client
 from abc import abstractmethod
 from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications.constants import UserEmailNotification, Metrics
-from src.task.notifications.notification_runner import SendNotificationTask
+from src.task.task import Task
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+class SendNotificationsConfig(PydanticBaseEnvConfig):
+    app_id: str = Field(alias="PINPOINT_APP_ID")
+    frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
-class BaseNotification(SendNotificationTask):
-    def __init__(self,  db_session: db.Session, pinpoint_client: botocore.client.BaseClient | None = None):
-        super().__init__(db_session)
+class BaseNotification(Task):
+    def __init__(self,  db_session: db.Session, pinpoint_client: botocore.client.BaseClient | None = None, notification_config: SendNotificationsConfig | None = None):
+        super().__init__(db_session, )
 
         self.pinpoint_client = pinpoint_client
+        if notification_config is None:
+            notification_config = SendNotificationsConfig()
+        self.notification_config = notification_config
 
 
     @abstractmethod
@@ -23,11 +32,6 @@ class BaseNotification(SendNotificationTask):
         self,
     ) -> list[UserEmailNotification]:
         """Collect email notifications for users"""
-        pass
-
-    @abstractmethod
-    def update_last_notified_timestamp(self, user_id: uuid.UUID) -> None:
-        """Record the time a notification was last sent to the user in the database"""
         pass
 
     @abstractmethod

@@ -1,5 +1,5 @@
 import logging
-from abc import ABC
+
 from datetime import timedelta
 from uuid import UUID
 
@@ -11,7 +11,6 @@ from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotification
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
-from src.task.task import Task
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -23,8 +22,7 @@ CONTACT_INFO = (
     "Closed on federal holidays"
 )
 
-
-class ClosingDateNotification(BaseNotification, ABC):
+class ClosingDateNotification(BaseNotification):
 
     def __init__(
         self,
@@ -35,7 +33,7 @@ class ClosingDateNotification(BaseNotification, ABC):
 
         self.frontend_base_url = frontend_base_url
 
-    def collect_notifications(self) -> list[UserEmailNotification]:
+    def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
 
@@ -93,25 +91,26 @@ class ClosingDateNotification(BaseNotification, ABC):
                     )
                     continue
 
-                closing_opportunities.append({"opportunity_id": opportunity.opportunity_id, "close_date": close_date})
+                closing_opportunities.append({"opportunity_id": opportunity.opportunity_id, "opportunity_title": opportunity.opportunity_title, "close_date": close_date})
 
-            message = self._build_notification_message(closing_opportunities)
+            if closing_opportunities:
+                message = self._build_notification_message(closing_opportunities)
 
-            logger.info(
-                "Created closing date email notification",
-                extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
-            )
-            users_email_notifications.append(
-                UserEmailNotification(
-                    user_id=user_id,
-                    user_email=saved_items[0].user.email,
-                    subject="Applications for your bookmarked funding opportunities are due soon",
-                    content=message,
-                    notification_reason=NotificationReason.CLOSING_DATE_REMINDER,
-                    notified_object_ids=[opp["opportunity_id"] for opp in closing_opportunities],
-                    is_notified=False # Default to False, update on success
+                logger.info(
+                    "Created closing date email notification",
+                    extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
-            )
+                users_email_notifications.append(
+                    UserEmailNotification(
+                        user_id=user_id,
+                        user_email=saved_items[0].user.email,
+                        subject="Applications for your bookmarked funding opportunities are due soon",
+                        content=message,
+                        notification_reason=NotificationReason.CLOSING_DATE_REMINDER,
+                        notified_object_ids=[opp["opportunity_id"] for opp in closing_opportunities],
+                        is_notified=False # Default to False, update on success
+                    )
+                )
         logger.info(
             "Collected closing date opportunities for notification",
             extra={
@@ -129,8 +128,8 @@ class ClosingDateNotification(BaseNotification, ABC):
             "Applications for the following funding opportunity are due in two weeks:\n\n")
         if len(closing_opportunities) == 1:
             message += (
-            f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0].opportunity_id}' target='_blank'>{closing_opportunities[0].opportunity_title}</a>\n"
-            f"Application due date: {closing_opportunities[0].close_date.strftime('%B %d, %Y')}\n\n"
+            f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0]["opportunity_id"]}' target='_blank'>{closing_opportunities[0]["opportunity_title"]}</a>\n"
+            f"Application due date: {closing_opportunities[0]["close_date"].strftime('%B %d, %Y')}\n\n"
             "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
             "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
             "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
@@ -140,7 +139,7 @@ class ClosingDateNotification(BaseNotification, ABC):
         else :
             for closing_opp in closing_opportunities:
                 message += (
-                    f"[{closing_opp.opportunity.opportunity_title}]\n"
+                    f"[{closing_opp["opportunity_title"]}]\n"
                     f"Application due date: {closing_opp.strftime('%B %d, %Y')}\n\n"
                 )
             message += (
@@ -170,10 +169,10 @@ class ClosingDateNotification(BaseNotification, ABC):
                 )
 
                 # Create notification log entry
-                for opp in opportunity_ids:
+                for opp_id in opportunity_ids:
                     opp_notification_log = UserOpportunityNotificationLog(
                         user_id=user_id,
-                        opportunity_id=opp.opportunity_id,
+                        opportunity_id=opp_id,
                     )
                     self.db_session.add(opp_notification_log)
 
@@ -186,6 +185,5 @@ class ClosingDateNotification(BaseNotification, ABC):
                 )
 
                 self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
-
 
 
