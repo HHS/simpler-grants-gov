@@ -152,8 +152,29 @@ describe("ApplyForm", () => {
         formId="test"
       />,
     );
-    const alert = screen.getByTestId("alert");
-    expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent("Error rendering form");
+
+    const errorMessage = screen.queryByText("Error rendering form");
+    expect(errorMessage).toBeInTheDocument();
+  });
+  it("does not error when saved form data does not conform to form schema", () => {
+    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+
+    render(
+      <ApplyForm
+        applicationId="test"
+        savedFormData={{ arbitrayField: "arbirtrary value" }}
+        formSchema={formSchema}
+        uiSchema={uiSchema}
+        formId="test"
+      />,
+    );
+
+    // form is still correctly built
+    const nameLabel = screen.getByText("test name");
+    expect(nameLabel).toBeInTheDocument();
+    expect(nameLabel).toHaveAttribute("for", "name");
+
+    const errorMessage = screen.queryByText("Error rendering form");
+    expect(errorMessage).not.toBeInTheDocument();
   });
 });
