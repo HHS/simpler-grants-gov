@@ -12,4 +12,4 @@ Fixes #ISSUE
 
 ## Validation steps
 
-<!-- Manual testing intstructions, as well as any helpful references (screenshots, GIF demos, code examples or output) -->
+<!-- Manual testing instructions, as well as any helpful references (screenshots, GIF demos, code examples or output) -->
