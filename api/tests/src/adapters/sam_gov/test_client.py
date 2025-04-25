@@ -10,7 +10,7 @@ from requests.exceptions import Timeout
 
 from src.adapters.sam_gov.client import SamGovClient
 from src.adapters.sam_gov.config import SamGovConfig
-from src.adapters.sam_gov.models import SamExtractRequest, SensitivityLevel
+from src.adapters.sam_gov.models import SamExtractRequest
 
 
 class TestSamGovClient:
@@ -65,8 +65,7 @@ class TestSamGovClient:
             file_content = b"Mock extract file content"
             file_name = "SAM_PUBLIC_MONTHLY_V2_20220406.ZIP"
 
-            # Create the request with explicit sensitivity
-            request = SamExtractRequest(file_name=file_name, sensitivity=SensitivityLevel.PUBLIC)
+            request = SamExtractRequest(file_name=file_name)
 
             # Mock the API response with API key in query params
             with requests_mock.Mocker() as m:
@@ -88,7 +87,6 @@ class TestSamGovClient:
                 assert response.file_name == file_name
                 assert response.file_size == len(file_content)
                 assert response.content_type == "application/zip"
-                assert response.sensitivity == SensitivityLevel.PUBLIC
 
                 # Verify the file was downloaded
                 with open(output_path, "rb") as f:
@@ -107,7 +105,7 @@ class TestSamGovClient:
         try:
             # Create the request
             file_name = "NONEXISTENT_FILE.ZIP"
-            request = SamExtractRequest(file_name=file_name, sensitivity=SensitivityLevel.PUBLIC)
+            request = SamExtractRequest(file_name=file_name)
 
             # Mock a 404 response from the API
             with requests_mock.Mocker() as m:
@@ -137,7 +135,7 @@ class TestSamGovClient:
         try:
             # Create the request
             file_name = "ERROR_FILE.ZIP"
-            request = SamExtractRequest(file_name=file_name, sensitivity=SensitivityLevel.PUBLIC)
+            request = SamExtractRequest(file_name=file_name)
 
             # Mock a 500 error response from the API
             with requests_mock.Mocker() as m:
@@ -167,7 +165,7 @@ class TestSamGovClient:
         try:
             # Create the request
             file_name = "TIMEOUT_FILE.ZIP"
-            request = SamExtractRequest(file_name=file_name, sensitivity=SensitivityLevel.PUBLIC)
+            request = SamExtractRequest(file_name=file_name)
 
             # Mock a timeout by raising a Timeout exception
             with requests_mock.Mocker() as m:

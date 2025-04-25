@@ -139,7 +139,7 @@ class MockSamGovClient(BaseSamGovClient):
             file_name=file_name,
             file_size=file_size,
             content_type=self.extracts[file_name]["content_type"],
-            sensitivity=request.sensitivity or self.extracts[file_name]["sensitivity"],
+            sensitivity=SensitivityLevel.PUBLIC,
             download_date=datetime.now(),
         )
 

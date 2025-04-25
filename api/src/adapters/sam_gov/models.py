@@ -59,10 +59,6 @@ class SamExtractRequest(BaseModel):
         ...,
         description="The specific file name to download (e.g., SAM_PUBLIC_MONTHLY_V2_20220406.ZIP)",
     )
-    sensitivity: SensitivityLevel = Field(
-        SensitivityLevel.PUBLIC,
-        description="The sensitivity level of the extract (PUBLIC, FOUO, SENSITIVE)",
-    )
 
     class Config:
         """Pydantic config."""
@@ -77,9 +73,6 @@ class SamExtractRequest(BaseModel):
             params["fileName"] = self.file_name
             # If fileName is specified, other params should not be included
             return params
-
-        if self.sensitivity:
-            params["sensitivity"] = self.sensitivity.value
 
         return params
 

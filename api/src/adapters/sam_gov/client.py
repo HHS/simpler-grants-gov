@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 import requests
 
 from src.adapters.sam_gov.config import SamGovConfig
-from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
+from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
 from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
@@ -163,7 +163,7 @@ class SamGovClient(BaseSamGovClient):
                 file_name=filename or os.path.basename(output_path),
                 file_size=content_length or os.path.getsize(output_path),
                 content_type=content_type,
-                sensitivity=extract_request.sensitivity,
+                sensitivity=SensitivityLevel.PUBLIC,
                 download_date=datetime.now(),
             )
 
