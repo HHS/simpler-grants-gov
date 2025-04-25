@@ -6,6 +6,7 @@ module "dev_config" {
   environment                     = "dev"
   network_name                    = "dev"
   domain_name                     = "api.dev.simpler.grants.gov"
+  s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
