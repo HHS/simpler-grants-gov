@@ -218,7 +218,7 @@ class SamGovClient(BaseSamGovClient):
             logging.info(f"Downloading SAM.gov extract from {url}")
             logging.debug(f"Request parameters: {params}")
 
-            response = requests.get(url, params=params, headers=headers, stream=True)
+            response = requests.get(url, params=params, headers=headers, stream=True, timeout=30)
 
             if not response.ok:
                 error_message = (
