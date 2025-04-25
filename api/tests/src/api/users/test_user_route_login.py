@@ -167,11 +167,33 @@ def test_user_login_flow_error_in_http_error_internal_302(client, monkeypatch):
     assert redirect_url.path == "/v1/users/login/result"
 
 
-def test_user_login_flow_error_in_auth_response_302(client, monkeypatch):
+def test_user_login_flow_access_denied_in_auth_response_302(client, monkeypatch):
     """Test behavior when we get a redirect back from login.gov with an error"""
 
     def override():
         return {"error": "access_denied", "error_description": "user does not have access"}
+
+    monkeypatch.setattr("tests.lib.auth_test_utils.oauth_param_override", override)
+
+    resp = client.get("/v1/users/login", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    # Because it was a 403 error, the error message is passed through as a description
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "User declined to login"
+
+    # We still redirected through every endpoint
+    assert len(resp.history) == 3
+
+
+def test_user_login_flow_error_in_auth_response_302(client, monkeypatch):
+    """Test behavior when we get a redirect back from login.gov with an error"""
+
+    def override():
+        return {"error": "invalid_request", "error_description": "user does not have access"}
 
     monkeypatch.setattr("tests.lib.auth_test_utils.oauth_param_override", override)
 

@@ -4,6 +4,7 @@ import os
 from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
+from flask import Response
 from flask_cors import CORS
 from pydantic import Field
 
@@ -210,12 +211,12 @@ def register_robots_txt(app: APIFlask) -> None:
 def register_well_known(app: APIFlask, domain_verification_map: dict) -> None:
     @app.get("/.well-known/pki-validation/<file_name>")
     @app.doc(hide=True)
-    def get_domain_verification_content(file_name: str) -> tuple:
+    def get_domain_verification_content(file_name: str) -> Response:
         """Domain verification
 
         This endpoint is responsible for domain verification related
         to grants.gov S2S SOAP API.
         """
         if file_name in domain_verification_map:
-            return domain_verification_map[file_name], 200
-        return f"Could not find {file_name}", 404
+            return Response(domain_verification_map[file_name], mimetype="text/plain", status=200)
+        return Response(f"Could not find {file_name}", mimetype="text/plain", status=404)
