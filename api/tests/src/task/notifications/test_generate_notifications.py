@@ -12,9 +12,11 @@ from src.db.models.user_models import (
     UserSavedOpportunity,
     UserSavedSearch,
 )
-from src.task.notifications.constants import NotificationReasons
-from src.task.notifications.generate_notifications import NotificationTask
-from src.task.notifications.search_notification import _strip_pagination_params
+from src.task.notifications.generate_notifications import (
+    NotificationConstants,
+    NotificationTask,
+    _strip_pagination_params,
+)
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
@@ -69,7 +71,7 @@ def test_search_notifications_cli(
 
     notification_logs_count = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationReasons.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
         .count()
     )
 
@@ -94,7 +96,7 @@ def test_search_notifications_cli(
     # Verify notification log was created
     notification_logs = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationReasons.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
         .all()
     )
     assert len(notification_logs) == notification_logs_count + 1
@@ -218,7 +220,7 @@ def test_notification_log_creation(
 
     log = notification_logs[0]
     assert log.user_id == user.user_id
-    assert log.notification_reason == NotificationReasons.OPPORTUNITY_UPDATES
+    assert log.notification_reason == NotificationConstants.OPPORTUNITY_UPDATES
     assert log.notification_sent is True
 
 
@@ -305,8 +307,8 @@ def test_combined_notifications_cli(
 
     notification_reasons = {log.notification_reason for log in notification_logs}
     assert notification_reasons == {
-        NotificationReasons.OPPORTUNITY_UPDATES,
-        NotificationReasons.SEARCH_UPDATES,
+        NotificationConstants.OPPORTUNITY_UPDATES,
+        NotificationConstants.SEARCH_UPDATES,
     }
 
     # Verify last_notified_at was updated for both
@@ -357,7 +359,7 @@ def test_grouped_search_queries_cli(
     # Verify notification logs were created for both users
     notification_logs = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationReasons.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
         .all()
     )
     assert len(notification_logs) == 2
@@ -417,7 +419,7 @@ def test_search_notifications_on_index_change(
         db_session.query(UserNotificationLog)
         .filter(
             UserNotificationLog.user_id == user.user_id,
-            UserNotificationLog.notification_reason == NotificationReasons.SEARCH_UPDATES,
+            UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES,
         )
         .all()
     )
@@ -436,7 +438,7 @@ def test_search_notifications_on_index_change(
         db_session.query(UserNotificationLog)
         .filter(
             UserNotificationLog.user_id == user.user_id,
-            UserNotificationLog.notification_reason == NotificationReasons.SEARCH_UPDATES,
+            UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES,
         )
         .all()
     )
@@ -496,7 +498,7 @@ def test_closing_date_notifications(
         db_session.execute(
             select(UserNotificationLog).where(
                 UserNotificationLog.notification_reason
-                == NotificationReasons.CLOSING_DATE_REMINDER
+                == NotificationConstants.CLOSING_DATE_REMINDER
             )
         )
         .scalars()
@@ -543,7 +545,7 @@ def test_closing_date_notification_not_sent_twice(
         db_session.execute(
             select(UserNotificationLog).where(
                 UserNotificationLog.notification_reason
-                == NotificationReasons.CLOSING_DATE_REMINDER
+                == NotificationConstants.CLOSING_DATE_REMINDER
             )
         )
         .scalars()
