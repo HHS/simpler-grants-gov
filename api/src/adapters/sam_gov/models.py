@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -53,53 +52,17 @@ class ExtractType(str, Enum):
     DAILY = "DAILY"
 
 
-class SamEntityRequest(BaseModel):
-    """Request model for SAM.gov Entity API."""
-
-    uei: str = Field(..., description="The Unique Entity ID to retrieve")
-
-
-class SamEntityResponse(BaseModel):
-    """Response model for SAM.gov Entity API."""
-
-    uei: str = Field(..., description="The Unique Entity ID")
-    legal_business_name: str = Field(..., description="Legal business name")
-    physical_address: dict[str, Any] = Field(..., description="Physical address")
-    mailing_address: dict[str, Any] | None = Field(None, description="Mailing address")
-    congressional_district: str | None = Field(None, description="Congressional district")
-    entity_status: EntityStatus = Field(..., description="Status of the entity")
-    entity_type: EntityType = Field(..., description="Type of entity")
-    expiration_date: datetime | None = Field(None, description="Expiration date")
-    created_date: datetime = Field(..., description="Date the entity was created")
-    last_updated_date: datetime = Field(..., description="Date the entity was last updated")
-
-
 class SamExtractRequest(BaseModel):
     """Request model for SAM.gov Extract Downloads API."""
 
-    # Only one of fileName or fileType should be provided
-    file_name: str | None = Field(
-        None,
+    file_name: str = Field(
+        ...,
         description="The specific file name to download (e.g., SAM_PUBLIC_MONTHLY_V2_20220406.ZIP)",
     )
-    file_type: FileType | None = Field(
-        None, description="The type of extract file to download (ENTITY, EXCLUSION, SCR, BIO)"
+    sensitivity: SensitivityLevel = Field(
+        SensitivityLevel.PUBLIC,
+        description="The sensitivity level of the extract (PUBLIC, FOUO, SENSITIVE)",
     )
-
-    # Parameters used with fileType
-    sensitivity: SensitivityLevel | None = Field(
-        None, description="The sensitivity level of the extract (PUBLIC, FOUO, SENSITIVE)"
-    )
-    extract_type: ExtractType | None = Field(
-        None, description="The type of extract (MONTHLY, DAILY)"
-    )
-    create_date: str | None = Field(
-        None, description="The specific date for the extract in YYYYMMDD format (e.g., 20220406)"
-    )
-    format: FileFormat | None = Field(
-        None, description="The format of the extract file (UTF8, ASCII)"
-    )
-    include_expired: bool | None = Field(None, description="Whether to include expired entities")
 
     class Config:
         """Pydantic config."""
@@ -120,18 +83,6 @@ class SamExtractRequest(BaseModel):
 
         if self.sensitivity:
             params["sensitivity"] = self.sensitivity.value
-
-        if self.extract_type:
-            params["extractType"] = self.extract_type.value
-
-        if self.create_date:
-            params["createDate"] = self.create_date
-
-        if self.format:
-            params["format"] = self.format.value
-
-        if self.include_expired is not None:
-            params["includeExpired"] = str(self.include_expired).lower()
 
         return params
 

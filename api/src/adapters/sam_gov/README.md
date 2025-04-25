@@ -1,33 +1,50 @@
 # SAM.gov API Client
 
-This module provides a client for interacting with the SAM.gov Entity Extracts API (https://open.gsa.gov/api/sam-entity-extracts-api/).
+This module provides a client for interacting with the SAM.gov API, particularly for downloading data extracts.
 
 ## Features
 
-- Retrieve entity information from SAM.gov using Unique Entity IDs (UEIs)
+- Download data extracts from SAM.gov
 - Mock client for local development and testing
 - Factory pattern for easy client instantiation
 - Detailed error handling and logging
+- S3 support for downloading extracts directly to S3 buckets
 
 ## Usage
 
-### Basic Usage
+### Basic Extract Download
 
 ```python
-from src.adapters.sam_gov import create_sam_gov_client, SamEntityRequest
+from src.adapters.sam_gov import create_sam_gov_client, SamExtractRequest, SensitivityLevel
 
 # Create a client (uses environment variables for configuration)
 client = create_sam_gov_client()
 
-# Look up an entity by UEI
-entity = client.get_entity(SamEntityRequest(uei="ABCDEFGHIJK1"))
+# Define the extract request
+request = SamExtractRequest(
+    file_name="SAM_PUBLIC_MONTHLY_V2_20220406.ZIP",
+    sensitivity=SensitivityLevel.PUBLIC
+)
 
-if entity:
-    print(f"Found entity: {entity.legal_business_name}")
-    print(f"Status: {entity.entity_status}")
-    print(f"Type: {entity.entity_type}")
-else:
-    print("Entity not found")
+# Download the extract to a local file
+response = client.download_extract(request, "path/to/output.zip")
+
+print(f"Downloaded file: {response.file_name}")
+print(f"Size: {response.file_size} bytes")
+print(f"Content type: {response.content_type}")
+print(f"Download date: {response.download_date}")
+```
+
+### S3 Support
+
+The client supports downloading extracts directly to S3:
+
+```python
+# Download the extract to an S3 location
+response = client.download_extract(
+    request, 
+    "s3://your-bucket/path/to/extract.zip"
+)
 ```
 
 ### Using the Mock Client
@@ -54,6 +71,7 @@ from src.adapters.sam_gov import create_sam_gov_client, SamGovConfig
 # Create custom configuration
 config = SamGovConfig(
     base_url="https://custom-api.sam.gov",
+    extract_url="https://custom-api.sam.gov/extracts",
     api_key="your-api-key",
     timeout=10,
 )
@@ -62,26 +80,27 @@ config = SamGovConfig(
 client = create_sam_gov_client(config=config)
 ```
 
+## Authentication
+
+The SAM.gov API requires an API key for authentication. The client passes this key as a query parameter in the request URL.
+
 ## Environment Variables
 
 The client uses the following environment variables:
 
-- `SAM_GOV_API_BASE_URL`: Base URL for the SAM.gov API (default: `https://open.gsa.gov/api/sam-entity-extracts-api`)
+- `SAM_GOV_API_URL`: Base URL for the SAM.gov API
 - `SAM_GOV_API_KEY`: API key for authentication
-- `SAM_GOV_API_TIMEOUT`: Request timeout in seconds (default: `30`)
+- `SAM_GOV_EXTRACT_URL`: URL for the SAM.gov extract downloads API endpoint
 - `SAM_GOV_USE_MOCK`: Use mock client if set to "true", "1", or "yes"
-- `SAM_GOV_MOCK_DATA_FILE`: Path to a JSON file containing mock entity data
+- `SAM_GOV_MOCK_DATA_FILE`: Path to a JSON file containing mock extract metadata
+- `SAM_GOV_MOCK_EXTRACT_DIR`: Path to a directory containing mock extract files
 
-## Example Script
+## Implementation Details
 
-See `src/examples/sam_gov_client_example.py` for a complete example of using the client.
+The client handles various error cases:
+- Invalid parameters (missing file_name, API key, or API URL)
+- HTTP errors (404 Not Found, 500 Internal Server Error)
+- Timeout errors
+- IO errors when saving files
 
-Run it with:
-
-```bash
-# Using the real client
-python -m src.examples.sam_gov_client_example --uei ABCDEFGHIJK1
-
-# Using the mock client
-python -m src.examples.sam_gov_client_example --uei ABCDEFGHIJK1 --use-mock
-``` 
+The mock client simulates the SAM.gov API for testing and development purposes, generating mock files with random content or using pre-defined extract files from a specified directory. 

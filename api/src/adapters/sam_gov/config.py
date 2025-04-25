@@ -1,33 +1,26 @@
 """Configuration for SAM.gov API client."""
 
-import os
+from pydantic import Field
+from pydantic_settings import SettingsConfigDict
 
-from pydantic import BaseModel
+from src.util.env_config import PydanticBaseEnvConfig
 
 
-class SamGovConfig(BaseModel):
+class SamGovConfig(PydanticBaseEnvConfig):
     """Configuration for SAM.gov API client."""
 
-    base_url: str = "https://open.gsa.gov/api/sam-entity-extracts-api"
-    extract_url: str = "https://open.gsa.gov/api/sam-entity-extracts-api/extracts"
-    api_key:str | None = None
-    timeout: int = 30  # Timeout in seconds
+    model_config = SettingsConfigDict(env_prefix="SAM_GOV_", populate_by_name=True, extra="ignore")
 
-    @classmethod
-    def from_env(cls) -> "SamGovConfig":
-        """Create a config from environment variables."""
-        return cls(
-            base_url=os.environ.get(
-                "SAM_GOV_API_BASE_URL", "https://open.gsa.gov/api/sam-entity-extracts-api"
-            ),
-            extract_url=os.environ.get(
-                "SAM_GOV_EXTRACT_URL", "https://open.gsa.gov/api/sam-entity-extracts-api/extracts"
-            ),
-            api_key=os.environ.get("SAM_GOV_API_KEY"),
-            timeout=int(os.environ.get("SAM_GOV_API_TIMEOUT", "30")),
-        )
+    base_url: str = Field(
+        default="https://open.gsa.gov/api/sam-entity-extracts-api", alias="BASE_URL"
+    )
+    extract_url: str | None = Field(
+        default="https://open.gsa.gov/api/sam-entity-extracts-api/extracts", alias="EXTRACT_URL"
+    )
+    api_key: str | None = Field(default=None, alias="API_KEY")
+    timeout: int = Field(default=30, alias="API_TIMEOUT")  # Timeout in seconds
 
 
 def get_config() -> SamGovConfig:
     """Get the SAM.gov configuration from environment variables."""
-    return SamGovConfig.from_env()
+    return SamGovConfig()

@@ -43,17 +43,12 @@ def create_sam_gov_client(
     if config:
         return SamGovClient(config)
 
-    # Create a dictionary for client parameters
-    client_params = {
-        "api_key": os.environ.get("SAM_GOV_API_KEY"),
-        "username": os.environ.get("SAM_GOV_USERNAME"),
-        "password": os.environ.get("SAM_GOV_PASSWORD"),
-        "api_url": os.environ.get("SAM_GOV_API_URL"),
-        "extract_url": os.environ.get("SAM_GOV_EXTRACT_URL"),
-    }
+    # Load config from environment
+    sam_config = SamGovConfig()
 
-    # Override with provided values if any
+    # Apply any overrides
     if config_override:
-        client_params.update(config_override)
+        for key, value in config_override.items():
+            setattr(sam_config, key, value)
 
-    return SamGovClient(**client_params)
+    return SamGovClient(sam_config)
