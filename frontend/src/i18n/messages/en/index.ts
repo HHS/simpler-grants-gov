@@ -498,6 +498,21 @@ export const messages = {
       "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
     github_link: "Follow on GitHub",
   },
+  Experimental: {
+    title: "Test out our experimental features",
+    header: "Tell us what's working (and what's not)",
+    subheader1: "What you can do now",
+    content1: "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
+    try: 'Try the new simpler search',
+    subheader2: "What you can't do quite yet",
+    content2: "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+    feedback: "Send us your feedback and suggestions.",
+    feedbackP: "We're excited to hear from you to learn how we can improve.",
+    feedbackLink: "Contact us at simpler@grants.gov",
+    newFeatures: "Be the first to hear about new features.",
+    newFeaturesP: "Our newsletter delivers the latest news straight to your inbox.",
+    newFeaturesLink: "Subscribe to our newsletter"
+  },
   Footer: {
     agency_name: "Grants.gov",
     agency_contact_center: "Grants.gov Program Management Office",
