@@ -127,12 +127,11 @@ def _get_ecs_metadata() -> dict:
     # cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
 
     # Step function only
-    sfn_execution_id = os.environ.get("SFN_EXECUTION_ID")
-    sfn_id = sfn_execution_id.split(":")[-2] if sfn_execution_id is not None else None
+    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
 
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        "aws.step_function.id": sfn_id,
+        "scheduled_job_name": step_function_name,
     }

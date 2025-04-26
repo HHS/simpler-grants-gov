@@ -9,12 +9,20 @@ const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
 jest.mock("next/navigation", () => ({
   usePathname: () => usePathnameMock() as string,
+  useRouter: () => ({
+    refresh: () => undefined,
+  }),
 }));
 
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => ({
     checkFeatureFlag: () => true,
   }),
+}));
+
+jest.mock("src/hooks/useRouteChange", () => ({
+  // eslint-disable-next-line
+  useRouteChange: () => {},
 }));
 
 describe("LoginButtonModal", () => {

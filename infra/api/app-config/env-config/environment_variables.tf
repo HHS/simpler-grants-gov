@@ -75,5 +75,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-base-url"
     }
+
+    DOMAIN_VERIFICATION_CONTENT = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/domain-verification-content"
+    }
   }
 }

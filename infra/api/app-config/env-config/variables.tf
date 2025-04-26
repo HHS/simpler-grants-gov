@@ -24,6 +24,12 @@ variable "domain_name" {
   default     = null
 }
 
+variable "s3_cdn_domain_name" {
+  type        = string
+  description = "The domain name for the S3 CDN, used for static assets"
+  default     = null
+}
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"

@@ -12,10 +12,10 @@ export const FieldsetWidget = ({
 }) => {
   return (
     <Fieldset key={`${fieldName}-row`} id={fieldName}>
-      <FormGroup key={`${fieldName}-group`}>
+      <FormGroup key={`${fieldName}-group`} className="simpler-formgroup">
         <h4
           key={`${fieldName}-legend`}
-          className="usa-legend usa-legend--large"
+          className="usa-legend font-sans-lg margin-bottom-05 margin-top-5"
         >
           {label}
         </h4>

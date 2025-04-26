@@ -6,12 +6,13 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
+import { AnyOptionCheckbox } from "./AnyOptionCheckbox";
 
 export interface AccordionItemProps {
   title: React.ReactNode | string;
@@ -37,6 +38,7 @@ export interface SearchFilterAccordionProps {
   filterOptions: FilterOption[];
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
+  includeAnyOption?: boolean;
 }
 
 export interface FilterOptionWithChildren {
@@ -73,6 +75,7 @@ const AccordionContent = ({
   query,
   facetCounts,
   defaultEmptySelection,
+  includeAnyOption = true,
 }: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
@@ -90,18 +93,24 @@ const AccordionContent = ({
   };
 
   // all top level selectable filter options
-  const allOptionValues = filterOptions.reduce((values: string[], option) => {
-    if (option.children) {
-      return values;
-    }
-    values.push(option.value);
-    return values;
-  }, []);
+  const allOptionValues = useMemo(
+    () =>
+      new Set(
+        filterOptions.reduce((values: string[], option) => {
+          if (option.children) {
+            return values;
+          }
+          values.push(option.value);
+          return values;
+        }, []),
+      ),
+    [filterOptions],
+  );
 
-  const allSelected = new Set(allOptionValues);
+  const isNoneSelected = useMemo(() => query.size === 0, [query]);
 
   // need to add any existing relevant search params to the passed in set
-  // TODO: split this into two functions andimplement within the components where they're used to make it more testable
+  // TODO: split this into two functions and implement within the components where they're used to make it more testable
   const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
     if (all && newSelections) {
       // get existing current selected options for this accordion from url
@@ -125,13 +134,23 @@ const AccordionContent = ({
   return (
     <>
       <SearchFilterToggleAll
-        onSelectAll={() => toggleSelectAll(true, allSelected)}
+        onSelectAll={() => toggleSelectAll(true, allOptionValues)}
         onClearAll={() => toggleSelectAll(false, defaultEmptySelection)}
-        isAllSelected={areSetsEqual(allSelected, query)}
-        isNoneSelected={query.size === 0}
+        isAllSelected={areSetsEqual(allOptionValues, query)}
+        isNoneSelected={isNoneSelected}
       />
 
       <ul className="usa-list usa-list--unstyled">
+        {includeAnyOption && (
+          <li>
+            <AnyOptionCheckbox
+              title={title}
+              checked={isNoneSelected}
+              queryParamKey={queryParamKey}
+              defaultEmptySelection={defaultEmptySelection}
+            />
+          </li>
+        )}
         {filterOptions.map((option) => (
           <li key={option.id}>
             {/* If we have children, show a "section" dropdown, otherwise show just a checkbox */}
@@ -171,6 +190,7 @@ export function SearchFilterAccordion({
   query,
   facetCounts,
   defaultEmptySelection,
+  includeAnyOption = true,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -183,6 +203,7 @@ export function SearchFilterAccordion({
           query={query}
           facetCounts={facetCounts}
           defaultEmptySelection={defaultEmptySelection}
+          includeAnyOption={includeAnyOption}
         />
       ),
       expanded: !!query.size,

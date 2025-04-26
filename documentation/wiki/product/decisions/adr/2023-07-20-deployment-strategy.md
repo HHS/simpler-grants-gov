@@ -3,7 +3,7 @@
 * **Status:** Accepted
 * **Last Modified:** 2023-07-20
 * **Related Issue:** [187](https://github.com/HHS/simpler-grants-gov/issues/187)
-* **Deciders:** Lucas Brown, Daphne Gold, Sammy Steiner, Billy Daly
+* **Deciders:** Lucas, Daphne, Sammy, Billy
 * **Tags:** ADR
 
 ## Context and Problem Statement

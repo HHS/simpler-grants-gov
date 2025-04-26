@@ -252,6 +252,24 @@ def opportunity_index_alias(search_client, monkeypatch_session):
 
 
 @pytest.fixture(scope="session")
+def agency_index(search_client, monkeypatch_session):
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test-agency-index-{uuid.uuid4().int}"
+
+    search_client.create_index(index_name)
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-agency-index-*")
+
+
+@pytest.fixture(scope="session")
 def agency_index_alias(search_client, monkeypatch_session):
     # Note we don't actually create anything, this is just a random name
     alias = f"test-agency-index-alias-{uuid.uuid4().int}"

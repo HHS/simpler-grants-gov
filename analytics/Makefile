@@ -180,3 +180,9 @@ gh-data-export:
 	--output-file $(ISSUE_FILE) \
 	--temp-dir $(OUTPUT_DIR)
 
+mb-backup:
+	@echo "=> Backing up Metabase queries to disk"
+	@echo "====================================================="
+	$(POETRY) analytics metabase backup
+	@echo "====================================================="
+

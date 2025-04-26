@@ -52,6 +52,12 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
               {
                 "Name" : var.service_name,
                 "Command" : each.value.task_command
+                "Environment" : [
+                  {
+                    "Name" : "SCHEDULED_JOB_NAME",
+                    "Value" : each.key
+                  },
+                ]
               }
             ]
           }
@@ -69,6 +75,11 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
 
   tracing_configuration {
     enabled = true
+  }
+
+  tags = {
+    job  = each.key
+    name = "${var.service_name}-${each.key}"
   }
 }
 

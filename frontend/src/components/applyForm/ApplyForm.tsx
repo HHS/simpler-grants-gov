@@ -1,64 +1,104 @@
 "use client";
 
 import { RJSFSchema } from "@rjsf/utils";
+import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
-import { useActionState } from "react";
-import { Button, FormGroup } from "@trussworks/react-uswds";
+import { JSX, useActionState, useMemo } from "react";
+import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
-import { submitApplyForm } from "./actions";
+import { handleFormAction } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
+import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
 import { UiSchema } from "./types";
-import { buildForTreeRecursive, getWrappersForNav } from "./utils";
+import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
-  formSchema,
-  uiSchema,
+  applicationId,
   formId,
+  formSchema,
+  savedFormData,
+  uiSchema,
 }: {
-  formSchema: RJSFSchema;
-  uiSchema: UiSchema;
+  applicationId: string;
   formId: string;
+  formSchema: RJSFSchema;
+  savedFormData: object;
+  uiSchema: UiSchema;
 }) => {
   const { pending } = useFormStatus();
 
-  //   submitApplyForm.bind("", formId)
-
-  const [formState, formAction] = useActionState(submitApplyForm, {
+  const [formState, formAction] = useActionState(handleFormAction, {
+    applicationId,
     errorMessage: "",
-    validationErrors: [],
-    formData: new FormData(),
     formId,
+    formData: new FormData(),
+    successMessage: "",
+    validationErrors: [],
   });
-  const formObject = Object.fromEntries(formState.formData.entries());
-  const fields = buildForTreeRecursive(
-    formSchema,
-    uiSchema,
-    formState.validationErrors,
-    formObject,
-  );
-  const navFields = getWrappersForNav(uiSchema);
+
+  const { formData, errorMessage, successMessage, validationErrors } =
+    formState;
+
+  const formObject = !isEmpty(formData) ? formData : savedFormData;
+  const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+  let fields: JSX.Element[] = [];
+  try {
+    fields = buildFormTreeRecursive({
+      errors: validationErrors,
+      formData: formObject,
+      schema: formSchema,
+      uiSchema,
+    });
+  } catch (e) {
+    return (
+      <Alert type="error" heading="Error" headingLevel="h4">
+        Error rendering form
+      </Alert>
+    );
+  }
 
   return (
     <div className="usa-in-page-nav-container flex-justify">
       <ApplyFormNav fields={navFields} />
-      <form action={formAction}>
+      <form
+        className="usa-form usa-form--large flex-1 margin-top-neg-5"
+        action={formAction}
+        // turns off html5 validation so all error displays are consistent
+        noValidate
+      >
+        <ApplyFormSuccessMessage message={successMessage} />
         <ApplyFormErrorMessage
-          heading={formState.errorMessage}
-          errors={formState.validationErrors}
+          message={errorMessage}
+          errors={validationErrors}
         />
         <FormGroup>{fields}</FormGroup>
-        <Button
-          onClick={() =>
-            formState.validationErrors.length > 0
-              ? window.scrollTo({ top: 0, behavior: "smooth" })
-              : undefined
-          }
-          type="submit"
-        >
-          {pending ? "Submitting..." : "Submit"}
-        </Button>
+        <p>
+          <Button
+            data-testid="apply-form-save"
+            type="submit"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            secondary
+            name="apply-form-button"
+            value="save"
+          >
+            {pending ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            data-testid="apply-form-submit"
+            onClick={() =>
+              validationErrors.length > 0
+                ? window.scrollTo({ top: 0, behavior: "smooth" })
+                : undefined
+            }
+            name="apply-form-button"
+            value="submit"
+            type="submit"
+          >
+            {pending ? "Submitting..." : "Submit"}
+          </Button>
+        </p>
       </form>
     </div>
   );

@@ -3,6 +3,7 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 type Props = {
   bottomBorder?: "light" | "dark" | "none";
   children: React.ReactNode;
+  className?: string;
   gridGap?: true | "sm" | "md" | "lg" | "2px" | "05" | 1 | 2 | 3 | 4 | 5 | 6;
   paddingTop?: boolean;
   title?: string | React.ReactNode;
@@ -11,6 +12,7 @@ type Props = {
 
 const ContentLayout = ({
   bottomBorder = "none",
+  className = "",
   children,
   gridGap = true,
   paddingTop = true,
@@ -47,7 +49,7 @@ const ContentLayout = ({
         !paddingTop
           ? "padding-top-0 tablet:padding-top-0 desktop-lg:padding-top-0"
           : ""
-      } ${bborder}`}
+      } ${bborder} ${className}`}
     >
       {formattedTitle()}
       <Grid row gap={gridGap}>

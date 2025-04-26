@@ -2,7 +2,7 @@
 
 * **Status:** Accepted
 * **Last Modified:** 11/14/2024
-* **Deciders:** Lucas Brown, Julius Chang, Billy Daly, Sarah Knopp, Margaret Spring, Andy Cochran
+* **Deciders:** Lucas, Julius, Billy, Sarah, Margaret, Andy
 
 ## Overview
 

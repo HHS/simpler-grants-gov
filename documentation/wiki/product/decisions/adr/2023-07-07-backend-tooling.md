@@ -3,7 +3,7 @@
 * **Status:** Active
 * **Last Modified:** 2023-07-07
 * **Related Issue:** [#101](https://github.com/HHS/simpler-grants-gov/issues/101)
-* **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly
+* **Deciders:** Aaron, Daphne, Sammy, Gina, Lucas, Billy
 * **Tags:** ADR
 
 ## Context and Problem Statement

@@ -10,6 +10,6 @@ export interface FormDetail {
   form_ui_schema: UiSchema;
 }
 
-export interface formDetailApiResponse extends APIResponse {
+export interface FormDetailApiResponse extends APIResponse {
   data: FormDetail;
 }

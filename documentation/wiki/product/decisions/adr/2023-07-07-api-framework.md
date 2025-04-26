@@ -3,7 +3,7 @@
 * **Status:** Active
 * **Last Modified:** 2023-07-07
 * **Related Issue:** [#28](https://github.com/HHS/simpler-grants-gov/issues/28)
-* **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Gina Carson, Sumi Thaiveettil, Eshter Oke
+* **Deciders:** Lucas, Aaron, Billy, Sammy, Daphne, Gina, Sumi, Eshter
 
 ## Context and Problem Statement
 
