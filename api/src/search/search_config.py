@@ -5,6 +5,7 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 class SearchConfig(PydanticBaseEnvConfig):
     opportunity_search_index_alias: str = Field(default="opportunity-index-alias")
+    agency_search_index_alias: str = Field(default="agency-index-alias")
 
 
 _search_config: SearchConfig | None = None

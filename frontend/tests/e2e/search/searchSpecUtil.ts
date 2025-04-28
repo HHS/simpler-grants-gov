@@ -177,15 +177,27 @@ export async function toggleMobileSearchFilters(page: Page) {
   );
   await toggleButton.click();
 }
+
+export const getCountOfTopLevelFilterOptions = async (
+  page: Page,
+  filterType: string,
+): Promise<number> => {
+  const filterOptions = await page
+    .locator(`#opportunity-filter-${filterType} > ul > li > div > input`)
+    .all();
+
+  const ids = await Promise.all(
+    filterOptions.map((option) => option.getAttribute("id")),
+  );
+  return ids.filter((id) => !id?.match(/any$/)).length;
+};
+
 // returns the number of options available to be selected
 export const selectAllTopLevelFilterOptions = async (
   page: Page,
   filterType: string,
-): Promise<number> => {
+): Promise<undefined> => {
   // gather number of (top level) filter options for filter type
-  const numberOfFilterOptions = await page
-    .locator(`#opportunity-filter-${filterType} > ul > li > div > input`)
-    .count();
 
   // click select all for filter type
   const selectAllButton = page
@@ -195,8 +207,6 @@ export const selectAllTopLevelFilterOptions = async (
 
   // validate that url is updated
   await waitForURLContainsQueryParam(page, filterType);
-
-  return numberOfFilterOptions;
 };
 
 export const validateTopLevelAndNestedSelectedFilterCounts = async (

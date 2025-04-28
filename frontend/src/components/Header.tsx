@@ -3,24 +3,27 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
-import { isCurrentPath } from "src/utils/generalUtils";
+import { IndexType } from "src/types/generalTypes";
+import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
-  Menu,
-  NavDropDownButton,
   NavMenuButton,
   PrimaryNav,
   Title,
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
+import NavDropdown from "./NavDropdown";
+import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
@@ -46,12 +49,27 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
+  let iconBtnClass, linkTarget;
+
+  if (isExternalLink(href)) {
+    iconBtnClass = "icon-btn";
+    linkTarget = "_blank";
+  }
+
   return (
-    <Link href={href} key={href} className={classes}>
-      <div onClick={onClick}>{text}</div>
+    <Link href={href} key={href} className={classes} target={linkTarget}>
+      <div onClick={onClick} className={iconBtnClass}>
+        {text}
+        {isExternalLink(href) && (
+          <USWDSIcon name="launch" className="usa-icon--size-2" />
+        )}
+      </div>
     </Link>
   );
 };
+
+const wikiLink = "https://wiki.simpler.grants.gov/";
+const forumLink = "https://simplergrants.discourse.group/";
 
 const NavLinks = ({
   mobileExpanded,
@@ -76,16 +94,26 @@ const NavLinks = ({
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
 
-  // if we introduce more than one secondary nav this could be expanded to use an index rather than boolean
-  const [secondaryNavOpen, setSecondaryNavOpen] = useState<boolean>(false);
-
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
       { text: t("home"), href: "/" },
       getSearchLink(path.includes("/search")),
-      { text: t("roadmap"), href: "/roadmap" },
-      { text: t("research"), href: "/research" },
-      { text: t("subscribe"), href: "/subscribe" },
+      {
+        text: t("about"),
+        children: [
+          { text: t("vision"), href: "/vision" },
+          { text: t("roadmap"), href: "/roadmap" },
+        ],
+      },
+      {
+        text: t("community"),
+        children: [
+          { text: t("subscribe"), href: "/subscribe" },
+          { text: t("events"), href: "/events" },
+          { text: t("wiki"), href: wikiLink },
+          { text: t("forum"), href: forumLink },
+        ],
+      },
     ];
     if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
       return anonymousNavLinks;
@@ -139,6 +167,8 @@ const NavLinks = ({
   const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
     getCurrentNavItemIndex(path),
   );
+  const [activeNavDropdownIndex, setActiveNavDropdownIndex] =
+    useState<IndexType>(null);
 
   useEffect(() => {
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
@@ -149,6 +179,11 @@ const NavLinks = ({
       onToggleMobileNav();
     }
   }, [mobileExpanded, onToggleMobileNav]);
+
+  const closeDropdownAndMobileNav = useCallback(() => {
+    setActiveNavDropdownIndex(null);
+    closeMobileNav();
+  }, [closeMobileNav]);
 
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {
@@ -164,37 +199,28 @@ const NavLinks = ({
             <NavLink
               href={childLink.href}
               key={childLink.href}
-              onClick={closeMobileNav}
+              onClick={closeDropdownAndMobileNav}
               text={childLink.text}
             />
           );
         });
         return (
-          <>
-            <NavDropDownButton
-              label={link.text}
-              menuId={link.text}
-              isOpen={secondaryNavOpen}
-              onToggle={() => setSecondaryNavOpen(!secondaryNavOpen)}
-              className={clsx({
-                "usa-current": currentNavItemIndex === index,
-                "simpler-subnav-open": secondaryNavOpen,
-              })}
-            />
-            <Menu
-              id={link.text}
-              items={items}
-              isOpen={secondaryNavOpen}
-              className="margin-top-05"
-            />
-          </>
+          <NavDropdown
+            key={link.href}
+            activeNavDropdownIndex={activeNavDropdownIndex}
+            index={index}
+            isCurrent={currentNavItemIndex === index}
+            linkText={link.text}
+            menuItems={items}
+            setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+          />
         );
       }
       return (
         <NavLink
           href={link.href}
           key={link.href}
-          onClick={closeMobileNav}
+          onClick={closeDropdownAndMobileNav}
           text={link.text}
           classes={clsx({
             "usa-nav__link": true,
@@ -203,7 +229,13 @@ const NavLinks = ({
         />
       );
     });
-  }, [navLinkList, currentNavItemIndex, secondaryNavOpen, closeMobileNav]);
+  }, [
+    activeNavDropdownIndex,
+    closeDropdownAndMobileNav,
+    currentNavItemIndex,
+    navLinkList,
+    setActiveNavDropdownIndex,
+  ]);
 
   return (
     <PrimaryNav
@@ -218,6 +250,17 @@ const Header = ({ locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
+
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
+  const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
+    useSnackbar();
+
+  useEffect(() => {
+    if (hasBeenLoggedOut) {
+      showSnackbar(-1);
+      resetHasBeenLoggedOut();
+    }
+  }, [hasBeenLoggedOut, showSnackbar, resetHasBeenLoggedOut]);
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -244,6 +287,9 @@ const Header = ({ locale }: Props) => {
 
   return (
     <>
+      <Suspense>
+        <RouteChangeWatcher />
+      </Suspense>
       <div
         className={clsx({
           "usa-overlay": true,
@@ -296,6 +342,9 @@ const Header = ({ locale }: Props) => {
           />
         </div>
       </USWDSHeader>
+      <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
+        {t("tokenExpired")}
+      </Snackbar>
     </>
   );
 };

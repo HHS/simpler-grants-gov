@@ -256,7 +256,6 @@ class BoolSearchSchemaBuilder(BaseSearchSchemaBuilder):
         metadata = {}
         if example is not None:
             metadata["example"] = example
-
         self.schema_fields["one_of"] = fields.List(
             fields.Boolean(metadata=metadata), allow_none=True
         )

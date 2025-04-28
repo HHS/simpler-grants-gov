@@ -1,10 +1,10 @@
 # Data Replication Strategy & Tool
 
-- **Status:** Active
-- **Last Modified:** 2023-09-21
-- **Related Issue:** [#322](https://github.com/HHS/simpler-grants-gov/issues/322)
-- **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch, Curtis Mayer, Lorenzo Gomez, Marwan Abu-Fadel, Brandon Smith
-- **Tags:** Hosting, Infrastructure, Database
+* **Status:** Active
+* **Last Modified:** 2023-09-21
+* **Related Issue:** [#322](https://github.com/HHS/simpler-grants-gov/issues/322)
+* **Deciders:** Lucas, Billy, Sammy, Daphne, Aaron, Curtis, Lorenzo, Marwanl, Brandon
+* **Tags:** Hosting, Infrastructure, Database
 
 ## Context and Problem Statement
 
@@ -14,32 +14,32 @@ Additionally, the grants.gov database resides in another AWS account, which comp
 
 ## Decision Drivers
 
-- Data source and destination compatibility: rep tool should support the data sources used in the project (db, file systems) and is compatible with the target destination (db, warehouses, cloud storage).
-- Data volume and throughput: tool can handle the volume and throughput requirements of the data replication process efficiently.
-- Data transformation capabilities: replication tool can handle data transformation during the replication process, including data format conversions and schema changes.
-- Real-time vs. batch replication: determine whether real-time data replication or if batch replication at scheduled intervals is sufficient.
-- Latency and performance: consider the latency and performance to ensure timely data updates and minimal impact on system performance.
-- Security and encryption: replication tool provides adequate security features, including data encryption and secure data transmission.
-- Monitoring and alerting: to promptly identify and address replication issues.
-- Ease of use and configuration: Evaluate the tool's user-friendliness and ease of configuration, as complex setup processes can lead to inefficiencies.
-- Scalability: Determine if the replication tool can scale to accommodate future growth and increased data demands.
-- Cost: Consider the licensing and operational costs
-- Support and community: Assess availability of support options and the size and activity of the tool's user community.
+* Data source and destination compatibility: rep tool should support the data sources used in the project (db, file systems) and is compatible with the target destination (db, warehouses, cloud storage).
+* Data volume and throughput: tool can handle the volume and throughput requirements of the data replication process efficiently.
+* Data transformation capabilities: replication tool can handle data transformation during the replication process, including data format conversions and schema changes.
+* Real-time vs. batch replication: determine whether real-time data replication or if batch replication at scheduled intervals is sufficient.
+* Latency and performance: consider the latency and performance to ensure timely data updates and minimal impact on system performance.
+* Security and encryption: replication tool provides adequate security features, including data encryption and secure data transmission.
+* Monitoring and alerting: to promptly identify and address replication issues.
+* Ease of use and configuration: Evaluate the tool's user-friendliness and ease of configuration, as complex setup processes can lead to inefficiencies.
+* Scalability: Determine if the replication tool can scale to accommodate future growth and increased data demands.
+* Cost: Consider the licensing and operational costs
+* Support and community: Assess availability of support options and the size and activity of the tool's user community.
 
 ## Options Considered
 
 ### Data Replication
 
-- Use Production Database
-- Use AWS DMS (Database Migration Service)
-- Create new data pipelines from data sources
-- Import/Export DB snapshots weekly
+* Use Production Database
+* Use AWS DMS (Database Migration Service)
+* Create new data pipelines from data sources
+* Import/Export DB snapshots weekly
 
 ### Data Traffic
 
-- AWS VPC Pairing
-- AWS PrivateLink
-- Network Gateway with VPN
+* AWS VPC Pairing
+* AWS PrivateLink
+* Network Gateway with VPN
 
 ## Decision Outcome - Data Replication
 
@@ -49,21 +49,21 @@ Additionally, [AWS DMS and AWS VPC Pairing are FedRAMP compliant](https://aws.am
 
 ### Positive Consequences
 
-- This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
-- This approach allows us to only replicate what we need when we need it, reducing the cost of replication, and limiting our security exposure.
-- If we implement DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle database.
-- Data is extracted and replicated using a replica database as a source, rather than direct impact to the origin DB (production, test, etc.).
-- Security is confined to East-2 rather than allowing connections to the primary site.
-- Configurations are mostly made only against the replica database (some such as a new replication user will still be needed at the origin DB).
-- Performance impacts of the solution replication are limited to the replica database.
+* This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
+* This approach allows us to only replicate what we need when we need it, reducing the cost of replication, and limiting our security exposure.
+* If we implement DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle database.
+* Data is extracted and replicated using a replica database as a source, rather than direct impact to the origin DB (production, test, etc.).
+* Security is confined to East-2 rather than allowing connections to the primary site.
+* Configurations are mostly made only against the replica database (some such as a new replication user will still be needed at the origin DB).
+* Performance impacts of the solution replication are limited to the replica database.
 
 ### Negative Consequences
 
-- When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
-- Connection issues between VPC will cause archived redo logs to backlog on the replica source until connections are re-established (could theoretically cause storage issues if it persists long enough).
-- Replication monitoring is needed to ensure no backlogs, performance hits, etc.
-- Specific configurations to the replica may need to be made as new objects are added to the replication (new tables, etc). DDL in some instances normally does not transfer via CDC replication without manual intervention.
-- Additional maintenance times for all DB engine upgrades are needed to patch and update the replica.
+* When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
+* Connection issues between VPC will cause archived redo logs to backlog on the replica source until connections are re-established (could theoretically cause storage issues if it persists long enough).
+* Replication monitoring is needed to ensure no backlogs, performance hits, etc.
+* Specific configurations to the replica may need to be made as new objects are added to the replication (new tables, etc). DDL in some instances normally does not transfer via CDC replication without manual intervention.
+* Additional maintenance times for all DB engine upgrades are needed to patch and update the replica.
 
 ## Decision Outcome - Data Traffic
 
@@ -73,11 +73,11 @@ In support of this decision, MicroHealth and Nava will need to work together to 
 
 ### Positive Consequences
 
-- If we require more services within the VPCs to talk with each other, we will already have a tool configured for that
+* If we require more services within the VPCs to talk with each other, we will already have a tool configured for that
 
 ### Negative Consequences
 
-- This tool assumes MicroHealth and Nava will put security controls in place to limit the permitted traffic to only what's necessary, which will take some coordination between MicroHealth and Nava
+* This tool assumes MicroHealth and Nava will put security controls in place to limit the permitted traffic to only what's necessary, which will take some coordination between MicroHealth and Nava
 
 ## Security Implications
 
@@ -95,7 +95,7 @@ When permitting network traffic between two VPCs in AWS, [AWS provides several s
 
 AWS PrivateLink is not FedRAMP compliant. Notice it is not included on the [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/), however it is included on the [List of Canadian Center for Cyber Security compliant services](https://aws.amazon.com/compliance/services-in-scope/CCCS/), which shows its exclusion from the FedRAMP list isn't an oversight. Additionally, AWS PrivateLink does not encrypt traffic in transit as stated explicitly under the Security and Filtering section of [AWS PrivateLink FAQ](https://aws.amazon.com/privatelink/faqs/#Security_and_filtering). AWS PrivateLink is more expensive than VPC Peering, assuming the VPCs are in the same AZ, which is our plan, [data transfer is free with VPC Peering](https://aws.amazon.com/about-aws/whats-new/2021/05/amazon-vpc-announces-pricing-change-for-vpc-peering/), but AWS PrivateLink has a [service fee and data transfer bandwidth fee](https://aws.amazon.com/privatelink/pricing/).
 
-AWS Transit Gateway has a similar security posture to VPC Peering as [the underlying technology is the same](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/transit-gateway.html#:~:text=It%20uses%20the%20same%20underlying%20infrastructure%20as%20VPC%20peering), however, that solution is optimized for a hub and spoke VPC architecture with thousands of connected VPCs and is overly complicated for two VPCs to connect to each other.
+AWS Transit Gateway has a similar security posture to VPC Peering as [the underlying technology is the same](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/transit-gateway.html), however, that solution is optimized for a hub and spoke VPC architecture with thousands of connected VPCs and is overly complicated for two VPCs to connect to each other.
 
 Non AWS solutions require traffic to leave the AWS network and [traverse the public internet via internet gateways](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/software-vpn-1.html). While that traffic can be encrypted with a VPN, that is inherently less secure than keeping the traffic within the AWS boundary.
 
@@ -107,68 +107,69 @@ VPC Peering must be configured before DMS can complete, however in order to limi
 
 #### VPC Peering
 
-##### Nava
+**Nava**
 
-- Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
-  - if there are overlapping CIDR blocks create a new VPC with non overlapping CIDR blocks and migrate resources
-- Info to share with MicroHealth
-  - DMS security group ID
-  - DMS instance subnet CIDR block
-  - DMS instance IP address
-- [Create vpc peering connection](https://docs.aws.amazon.com/vpc/latest/peering/create-vpc-peering-connection.html)
-- [Update your security groups to reference peer security groups](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-security-groups.html)
-- - [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
+* Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
+  * if there are overlapping CIDR blocks create a new VPC with non overlapping CIDR blocks and migrate resources
+* Info to share with MicroHealth
+  * DMS security group ID
+  * DMS instance subnet CIDR block
+  * DMS instance IP address
+* [Create vpc peering connection](https://docs.aws.amazon.com/vpc/latest/peering/create-vpc-peering-connection.html)
+* [Update your security groups to reference peer security groups](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-security-groups.html)
+*
+  * [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
-##### MicroHealth
+**MicroHealth**
 
-- Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
-- Share information with Nava:
-  - Region information for the VPC
-  - AZ info for the DB
-  - Account ID
-  - VPC ID
-  - Database or new data replication security group ID
-- [Accept VPC Peering connection request](https://docs.aws.amazon.com/vpc/latest/peering/accept-vpc-peering-connection.html)
-- [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html)
-- [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
+* Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
+* Share information with Nava:
+  * Region information for the VPC
+  * AZ info for the DB
+  * Account ID
+  * VPC ID
+  * Database or new data replication security group ID
+* [Accept VPC Peering connection request](https://docs.aws.amazon.com/vpc/latest/peering/accept-vpc-peering-connection.html)
+* [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html)
+* [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
 #### AWS DMS Service
 
-##### Nava
+**Nava**
 
-- Create a user with AWS Identity and Access Management (IAM) credentials that allows you to launch Amazon RDS and AWS Database Migration Service (AWS DMS) instances in your AWS Region.
-- Size your target PostgreSQL database host based on the current db host load profile.
-- Create the schemas in the target database
-- Create the AWS DMS user to connect to your target database, and substitute our own username and password:
-  - ```
+* Create a user with AWS Identity and Access Management (IAM) credentials that allows you to launch Amazon RDS and AWS Database Migration Service (AWS DMS) instances in your AWS Region.
+* Size your target PostgreSQL database host based on the current db host load profile.
+* Create the schemas in the target database
+* Create the AWS DMS user to connect to your target database, and substitute our own username and password:
+  * ```
     CREATE USER <postgresql_dms_user> WITH PASSWORD '<password>';
     ALTER USER <postgresql_dms_user> WITH SUPERUSER;
     ```
-- Create a user for AWS SCT.
-  - ```
+* Create a user for AWS SCT.
+  * ```
     CREATE USER <postgresql_sct_user> WITH PASSWORD '<password>';
     GRANT CONNECT ON DATABASE database_name TO <postgresql_sct_user>;
     GRANT USAGE ON SCHEMA schema_name TO <postgresql_sct_user>;
     GRANT SELECT ON ALL TABLES IN SCHEMA schema_name TO <postgresql_sct_user>;
     GRANT ALL ON ALL SEQUENCES IN SCHEMA schema_name TO <postgresql_sct_user>;
     ```
-- [Convert the Oracle Schema to PostgreSQL](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.convertschema.html)
-- [Create an AWS DMS Replication Instance](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createreplicationinstance.html) using terraform
-- [Create AWS DMS Source and Target Endpoints](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createsourcetargetendpoints.html)
-- [Create and Run Your AWS DMS Migration Task](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createmigrationtask.html)
+* [Convert the Oracle Schema to PostgreSQL](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.convertschema.html)
+* [Create an AWS DMS Replication Instance](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createreplicationinstance.html) using terraform
+* [Create AWS DMS Source and Target Endpoints](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createsourcetargetendpoints.html)
+* [Create and Run Your AWS DMS Migration Task](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createmigrationtask.html)
 
-##### MicroHealth
+**MicroHealth**
 
-- Communicate the load profile of the current source Oracle database host. Consider CPU, memory, and IOPS.
-- ensure that ARCHIVELOG MODE is on to provide information to LogMiner. AWS DMS uses LogMiner to read information from the archive logs so that AWS DMS can capture changes.
-  - Retaining archive logs for 24 hours is usually sufficient
-- supplemental logging to be enabled on your source database
-- identification key logging be enabled
-  - You can set this option at the database or table level
-- Create or configure a database account to be used by AWS DMS
-  - [Instructions Guide](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html)
-  - AWS DMS requires the following privileges (note, there is one create for session, the rest are select)
-  - ```
+* Communicate the load profile of the current source Oracle database host. Consider CPU, memory, and IOPS.
+* ensure that ARCHIVELOG MODE is on to provide information to LogMiner. AWS DMS uses LogMiner to read information from the archive logs so that AWS DMS can capture changes.
+  * Retaining archive logs for 24 hours is usually sufficient
+* supplemental logging to be enabled on your source database
+* identification key logging be enabled
+  * You can set this option at the database or table level
+* Create or configure a database account to be used by AWS DMS
+  * [Instructions Guide](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html)
+  * AWS DMS requires the following privileges (note, there is one create for session, the rest are select)
+  * ```
     GRANT CREATE SESSION TO <db_user>;
     GRANT SELECT ANY TRANSACTION TO <db_user>;
     GRANT SELECT ON V_$ARCHIVED_LOG TO <db_user>;
@@ -208,16 +209,15 @@ VPC Peering must be configured before DMS can complete, however in order to limi
     GRANT SELECT on V_$LOGMNR_CONTENTS to <db_user>;
     GRANT LOGMINING to <db_user>; -– Required only if the Oracle version is 12c or higher.
     ```
-- Add the exposeViews=true extra connection attribute to your source endpoint
-- Provide the username and password for the DMS db account to Nava
-
-- Run the following command in RDS to ensure that logs are retained: `exec rdsadmin.rdsadmin_util.set_configuration('archivelog retention hours',24);`
-- Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;`
-- Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD');`
-- Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA (PRIMARY KEY) COLUMNS;`
-- Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD','PRIMARY KEY');`
-- Create a user for AWS SCT:
-  - ```
+* Add the exposeViews=true extra connection attribute to your source endpoint
+* Provide the username and password for the DMS db account to Nava
+* Run the following command in RDS to ensure that logs are retained: `exec rdsadmin.rdsadmin_util.set_configuration('archivelog retention hours',24);`
+* Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;`
+* Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD');`
+* Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA (PRIMARY KEY) COLUMNS;`
+* Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD','PRIMARY KEY');`
+* Create a user for AWS SCT:
+  * ```
     CREATE USER <oracle_sct_user> IDENTIFIED BY password;
     GRANT CONNECT TO <oracle_sct_user>;
     GRANT SELECT_CATALOG_ROLE TO <oracle_sct_user>;
@@ -234,14 +234,14 @@ Currently the beta AWS account is designated as a lower environment and therefor
 
 Connect to the Microhealth lower environment replica database, that contains only fixture data, for the lower environment.
 
-- **Pros**
-  - No additional cost for data storage
-  - Easiest to set up
-- **Cons**
-  - Additional load and db connections could degrade performance of critical grants.gov operations
-  - No data transformation possible
-  - Significantly increases traffic between VPCs
-  - beta application and availability will be dependant on grant.gov's database availability without necessary alarms or troubleshooting access
+* **Pros**
+  * No additional cost for data storage
+  * Easiest to set up
+* **Cons**
+  * Additional load and db connections could degrade performance of critical grants.gov operations
+  * No data transformation possible
+  * Significantly increases traffic between VPCs
+  * beta application and availability will be dependant on grant.gov's database availability without necessary alarms or troubleshooting access
 
 ### Use AWS DMS
 
@@ -249,39 +249,39 @@ Create a new Postgres Database in the Beta lower and production environments and
 
 For this solution we will only replicate opportunities data at first to limit the cost of storage and restrict our environment to publicly accessible data. However, we will build it with the intention of making it easy to add tables to the replication, or even replicating the entire database when that becomes necessary.
 
-- **Pros**
-  - DMS is AWS's best practice tool for our use case
-  - Negligible impact to source database, even with replicating ongoing changes
-  - Replicating only public data reduces our security criticality
-  - Ability to transform data is part of the DMS tool and well documented
-  - Ensures that simpler.grants.gov service remains available even if grants.gov has unexpected or planned downtime
-  - Limits the cross VPC traffic to just DMS
-- **Cons**
-  - Additional Cost
-  - Networking support and coordination required from MH
+* **Pros**
+  * DMS is AWS's best practice tool for our use case
+  * Negligible impact to source database, even with replicating ongoing changes
+  * Replicating only public data reduces our security criticality
+  * Ability to transform data is part of the DMS tool and well documented
+  * Ensures that simpler.grants.gov service remains available even if grants.gov has unexpected or planned downtime
+  * Limits the cross VPC traffic to just DMS
+* **Cons**
+  * Additional Cost
+  * Networking support and coordination required from MH
 
 ### Create new data pipelines from data sources
 
 Create new data pipelines from the source of truth similar to the production database. Instead of copying the production schema, design a new database schema that incorporates all the lessons learned from running the current production database as well as designing the new schema for additional requirements that the current schema is not optimized or able to meet.
 
-- **Pros**
-  - No impact to production database
-  - Facilitates moving off expensive Oracle database
-  - Can optimize database schema for current and future requirements
-- **Cons**
-  - We do not have clear requirements for current and existing APIs to design the schema around and will have to work on that first
-  - Very long time to deliver
-  - Team is not currently staffed to support this work
+* **Pros**
+  * No impact to production database
+  * Facilitates moving off expensive Oracle database
+  * Can optimize database schema for current and future requirements
+* **Cons**
+  * We do not have clear requirements for current and existing APIs to design the schema around and will have to work on that first
+  * Very long time to deliver
+  * Team is not currently staffed to support this work
 
 ### Import/Export DB snapshots weekly
 
 MicroHealth will export a database snapshot on a weekly basis that we will use to update our database on a weekly basis. The exports will be done during times of low database usage so as to have negligible impact on production operations. However, the data will be up to seven days old.
 
-- **Pros**
-  - Negligible impact to production database
-  - Simple to do manually and also to automate
-- **Cons**
-  - Data will be up to 7 days old
+* **Pros**
+  * Negligible impact to production database
+  * Simple to do manually and also to automate
+* **Cons**
+  * Data will be up to 7 days old
 
 ## Pros and Cons of the Options - Data Traffic
 
@@ -289,43 +289,43 @@ MicroHealth will export a database snapshot on a weekly basis that we will use t
 
 Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow traffic between the two VPCs. For security, lock down the VPC Peering to only allow traffic between the DMS instance in the Nava account and the database instance or database load balancer in the Microhealth account. All traffic between VPCs using VPC Peering is encrypted. Additionally, the traffic between VPCs stays within the AWS Global Backbone and never makes its way to the public internet. Finally, AWS VPC Peering is a FedRAMP compliant AWS feature.
 
-- **Pros**
-  - Many layers of security: encryption in transit, traffic stays off public internet, additional manual controls
-  - AWS best practice for multi-VPC DMS configuration
-  - FedRAMP compliant
-  - Free to operate
-- **Cons**
-  - Requires configuration on both Nava and MicroHealth sides
-  - cost for bandwidth
+* **Pros**
+  * Many layers of security: encryption in transit, traffic stays off public internet, additional manual controls
+  * AWS best practice for multi-VPC DMS configuration
+  * FedRAMP compliant
+  * Free to operate
+* **Cons**
+  * Requires configuration on both Nava and MicroHealth sides
+  * cost for bandwidth
 
 ### AWS PrivateLink
 
 AWS PrivateLink provides private connectivity between virtual private clouds (VPCs), supported AWS services, and on-premises networks without exposing traffic to the public internet. Using AWS PrivateLink a VPC can expose interface VPC endpoints, similar to APIs, for others to query. This is a one way connection through a VPC barrier, instead of the two way connection provided by VPC Peering. Additionally, other security tools can be leveraged to enhance security of AWS PrivateLink, like security groups and VPC endpoint policies, which is similar to VPC Peering. AWS PrivateLink is compatible with DMS across VPCs, however it is not FedRAMP compliant.
 
-- **Pros**
-  - One way connection
-  - Traffic stays off the public internet
-- **Cons**
-  - Does not provide encryption
-  - Anyone can connect
-  - Not FedRAMP compliant
-  - There is a cost to operate and cost for bandwidth
+* **Pros**
+  * One way connection
+  * Traffic stays off the public internet
+* **Cons**
+  * Does not provide encryption
+  * Anyone can connect
+  * Not FedRAMP compliant
+  * There is a cost to operate and cost for bandwidth
 
 ### AWS Transit Gateway
 
 The AWS Transit service consolidates the AWS VPC routing configuration for a region with a hub-and-spoke architecture. This service uses the same technology as VPC Peering, but instead of connecting VPC directly, they connect through another service called a Transit Gateway. This solution is recommended if many VPCs need to connect to each other across regions as VPC Peering gets significantly more complicated when more than a few VPCs are involved.
 
-- **Pros**
-  - Similar to VPC Peering
-- **Cons**
-  - More complicated to implement than VPC Peering
-  - More expensive than VPC Peering
+* **Pros**
+  * Similar to VPC Peering
+* **Cons**
+  * More complicated to implement than VPC Peering
+  * More expensive than VPC Peering
 
 ## Links
 
-- [AWS DMS](https://aws.amazon.com/dms/)
-- [AWS DMS Cross VPC Config](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.VPC.html#CHAP_ReplicationInstance.VPC.Configurations.ScenarioVPCPeer)
-- [What is VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
-- [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
-- [AWS VPC to AWS VPC Connectivity Options](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/amazon-vpc-to-amazon-vpc-connectivity-options.html)
-- [Multi-VPC Network Infrastructure Whitepaper](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html)
+* [AWS DMS](https://aws.amazon.com/dms/)
+* [AWS DMS Cross VPC Config](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.VPC.html#CHAP_ReplicationInstance.VPC.Configurations.ScenarioVPCPeer)
+* [What is VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
+* [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
+* [AWS VPC to AWS VPC Connectivity Options](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/amazon-vpc-to-amazon-vpc-connectivity-options.html)
+* [Multi-VPC Network Infrastructure Whitepaper](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html)

@@ -1,3 +1,4 @@
+import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
 import {
   SavedSearchRecord,
@@ -61,12 +62,16 @@ export const handleDeleteSavedSearch = async (
   return (await response.json()) as APIResponse;
 };
 
-export const fetchSavedSearches = async (
-  token: string,
-  userId: string,
-): Promise<SavedSearchRecord[]> => {
+export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    console.warn(
+      "user fetching saved searches not logged in (should not happen)",
+    );
+    return [];
+  }
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const body = {
     pagination: {
@@ -80,7 +85,7 @@ export const fetchSavedSearches = async (
       ],
     },
   };
-  const subPath = `${userId}/saved-searches/list`;
+  const subPath = `${session.user_id}/saved-searches/list`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
     additionalHeaders: ssgToken,

@@ -11,9 +11,10 @@ test.afterEach(async ({ context }) => {
   await context.close();
 });
 
-test("redirects if not logged in", async ({ page }) => {
+test("shows unauthenticated state if not logged in", async ({ page }) => {
   await page.goto("/saved-grants");
-  await expect(page).toHaveTitle("Unauthenticated | Simpler.Grants.gov");
+  const h4 = page.locator(".usa-alert__body .usa-alert__heading");
+  await expect(h4).toHaveText("Not signed in");
 });
 
 // reenable after https://github.com/HHS/simpler-grants-gov/issues/3791

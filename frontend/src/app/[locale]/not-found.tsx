@@ -28,7 +28,7 @@ export default function NotFound() {
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15 measure-2">
         <h1>{t("title")}</h1>
         <p className="margin-bottom-2">{t("message_content_1")}</p>
-        <Link className="usa-button" href="/" key="returnToHome">
+        <Link className="usa-link" href="/" key="returnToHome">
           {t("visit_homepage_button")}
         </Link>
       </GridContainer>

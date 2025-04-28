@@ -5,31 +5,18 @@
 
 ## Install Prerequisites 
 
-## Development Environment: Docker vs. Native
-
-This package runs in Docker by default, but can also be configured to run natively without Docker. Choose the option that's best for you, and then install the prerequisites for that option:
-
-- [Run with Docker](#run-with-docker)
-- [Run Natively](#run-natively)
-
-#### Run with Docker 
+This package runs in Docker by default.
 
 **Prerequisites**
 
 - **Docker** [Installation options](https://docs.docker.com/desktop/setup/install/mac-install/) 
-- **docker-compose** [Installation options](https://formulae.brew.sh/formula/docker-compose)
-
-#### Run Natively
-
-**Prerequisites**
-
 - **Python version 3.12:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python, or [asdf](https://asdf-vm.com/)
 - **Poetry:** [Install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx)
 - **GitHub CLI:** [Install the GitHub CLI](https://github.com/cli/cli#installation)
 - **Postgres:** [Installation options for macOS](https://www.postgresql.org/download/macosx/)
 - **Psycopg:** [Installation options](https://www.psycopg.org/psycopg3/docs/basic/install.html)
 
-### Install the Package
+## Install the Package
 
 **Steps**
 
@@ -51,6 +38,12 @@ This package runs in Docker by default, but can also be configured to run native
 6. Edit `local.env` and set the value of DB_HOST accordingly
 7. Run `make test-audit` to confirm the application is running correctly
 
+## Start the Services
+
+```bash
+cd simpler-grants-gov/analytics
+docker-compose up -d
+```
 
 ## Invoke Commands on the Service
 
@@ -111,3 +104,10 @@ make lint
 ```bash
 make unit-test
 ```
+
+### Troubleshoot: How To Run Metabase on Apple Silicon
+
+On a MacBook Pro with M3 chip, if the Metabase service (i.e. `grants-metabase`)
+fails to launch and/or crashes after `docker compose up`, refer to the following 
+article: [How To Run Metabase with Docker on Apple Silicon](./run-metabase-on-apple-silicon.md)
+

@@ -68,10 +68,3 @@ export const fetchAgenciesEndpoint = {
   namespace: "agencies",
   method: "POST" as ApiMethod,
 };
-
-export const fetchApplicationsEndpoint = {
-  basePath: environment.API_URL,
-  version: "alpha",
-  namespace: "applications",
-  method: "POST" as ApiMethod,
-};
