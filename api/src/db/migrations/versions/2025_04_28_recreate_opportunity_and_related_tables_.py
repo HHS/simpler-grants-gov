@@ -1,8 +1,8 @@
 """Recreate Opportunity and related tables to use UUIDs
 
-Revision ID: d363c1d86b14
-Revises: ced7b793bb3e
-Create Date: 2025-04-07 20:20:59.394800
+Revision ID: 7962ce400424
+Revises: 5b5bf313f879
+Create Date: 2025-04-28 13:25:49.268828
 
 """
 
@@ -10,14 +10,11 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-from src.db.migrations.utils import (
-    remove_opportunity_search_index_queue_trigger_function,
-    setup_opportunity_search_index_queue_trigger_function,
-)
+from src.db.migrations.utils import setup_opportunity_search_index_queue_trigger_function
 
 # revision identifiers, used by Alembic.
-revision = "d363c1d86b14"
-down_revision = "ced7b793bb3e"
+revision = "7962ce400424"
+down_revision = "5b5bf313f879"
 branch_labels = None
 depends_on = None
 
@@ -112,52 +109,6 @@ def upgrade():
         op.f("opportunity_opportunity_title_idx"),
         "opportunity",
         ["opportunity_title"],
-        unique=False,
-        schema="api",
-    )
-    op.create_table(
-        "competition",
-        sa.Column("competition_id", sa.UUID(), nullable=False),
-        sa.Column("opportunity_id", sa.UUID(), nullable=False),
-        sa.Column("legacy_competition_id", sa.BigInteger(), nullable=True),
-        sa.Column("public_competition_id", sa.Text(), nullable=True),
-        sa.Column("legacy_package_id", sa.Text(), nullable=True),
-        sa.Column("competition_title", sa.Text(), nullable=True),
-        sa.Column("opening_date", sa.Date(), nullable=True),
-        sa.Column("closing_date", sa.Date(), nullable=True),
-        sa.Column("grace_period", sa.BigInteger(), nullable=True),
-        sa.Column("contact_info", sa.Text(), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["opportunity_id"],
-            ["api.opportunity.opportunity_id"],
-            name=op.f("competition_opportunity_id_opportunity_fkey"),
-        ),
-        sa.PrimaryKeyConstraint("competition_id", name=op.f("competition_pkey")),
-        schema="api",
-    )
-    op.create_index(
-        op.f("competition_legacy_competition_id_idx"),
-        "competition",
-        ["legacy_competition_id"],
-        unique=False,
-        schema="api",
-    )
-    op.create_index(
-        op.f("competition_opportunity_id_idx"),
-        "competition",
-        ["opportunity_id"],
         unique=False,
         schema="api",
     )
@@ -287,8 +238,8 @@ def upgrade():
     op.create_table(
         "opportunity_summary",
         sa.Column("opportunity_summary_id", sa.UUID(), nullable=False),
-        sa.Column("legacy_opportunity_id", sa.BigInteger(), nullable=False),
         sa.Column("opportunity_id", sa.UUID(), nullable=False),
+        sa.Column("legacy_opportunity_id", sa.BigInteger(), nullable=False),
         sa.Column("summary_description", sa.Text(), nullable=True),
         sa.Column("is_cost_sharing", sa.Boolean(), nullable=True),
         sa.Column("is_forecast", sa.Boolean(), nullable=False),
@@ -468,9 +419,26 @@ def upgrade():
         schema="api",
     )
     op.create_table(
-        "application",
-        sa.Column("application_id", sa.UUID(), nullable=False),
+        "competition",
         sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("opportunity_id", sa.UUID(), nullable=False),
+        sa.Column("legacy_competition_id", sa.BigInteger(), nullable=True),
+        sa.Column("public_competition_id", sa.Text(), nullable=True),
+        sa.Column("legacy_package_id", sa.Text(), nullable=True),
+        sa.Column("competition_title", sa.Text(), nullable=True),
+        sa.Column("opening_date", sa.Date(), nullable=True),
+        sa.Column("closing_date", sa.Date(), nullable=True),
+        sa.Column("grace_period", sa.BigInteger(), nullable=True),
+        sa.Column("contact_info", sa.Text(), nullable=True),
+        sa.Column("form_family_id", sa.Integer(), nullable=True),
+        sa.Column("opportunity_assistance_listing_id", sa.UUID(), nullable=True),
+        sa.Column("is_electronic_required", sa.Boolean(), nullable=True),
+        sa.Column("expected_application_count", sa.Integer(), nullable=True),
+        sa.Column("expected_application_size_mb", sa.BigInteger(), nullable=True),
+        sa.Column("is_multi_package", sa.Boolean(), nullable=True),
+        sa.Column("agency_download_url", sa.Text(), nullable=True),
+        sa.Column("is_legacy_workspace_compatible", sa.Boolean(), nullable=True),
+        sa.Column("can_send_mail", sa.Boolean(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -484,110 +452,44 @@ def upgrade():
             nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["competition_id"],
-            ["api.competition.competition_id"],
-            name=op.f("application_competition_id_competition_fkey"),
-        ),
-        sa.PrimaryKeyConstraint("application_id", name=op.f("application_pkey")),
-        schema="api",
-    )
-    op.create_index(
-        op.f("application_competition_id_idx"),
-        "application",
-        ["competition_id"],
-        unique=False,
-        schema="api",
-    )
-    op.create_table(
-        "competition_assistance_listing",
-        sa.Column("competition_id", sa.UUID(), nullable=False),
-        sa.Column("opportunity_assistance_listing_id", sa.UUID(), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["competition_id"],
-            ["api.competition.competition_id"],
-            name=op.f("competition_assistance_listing_competition_id_competition_fkey"),
+            ["form_family_id"],
+            ["api.lk_form_family.form_family_id"],
+            name=op.f("competition_form_family_id_lk_form_family_fkey"),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_assistance_listing_id"],
             ["api.opportunity_assistance_listing.opportunity_assistance_listing_id"],
             name=op.f(
-                "competition_assistance_listing_opportunity_assistance_listing_id_opportunity_assistance_listing_fkey"
+                "competition_opportunity_assistance_listing_id_opportunity_assistance_listing_fkey"
             ),
         ),
-        sa.PrimaryKeyConstraint(
-            "competition_id",
-            "opportunity_assistance_listing_id",
-            name=op.f("competition_assistance_listing_pkey"),
+        sa.ForeignKeyConstraint(
+            ["opportunity_id"],
+            ["api.opportunity.opportunity_id"],
+            name=op.f("competition_opportunity_id_opportunity_fkey"),
         ),
+        sa.PrimaryKeyConstraint("competition_id", name=op.f("competition_pkey")),
         schema="api",
     )
-    op.create_table(
-        "competition_form",
-        sa.Column("competition_id", sa.UUID(), nullable=False),
-        sa.Column("form_id", sa.UUID(), nullable=False),
-        sa.Column("is_required", sa.Boolean(), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["competition_id"],
-            ["api.competition.competition_id"],
-            name=op.f("competition_form_competition_id_competition_fkey"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["form_id"], ["api.form.form_id"], name=op.f("competition_form_form_id_form_fkey")
-        ),
-        sa.PrimaryKeyConstraint("competition_id", "form_id", name=op.f("competition_form_pkey")),
+    op.create_index(
+        op.f("competition_form_family_id_idx"),
+        "competition",
+        ["form_family_id"],
+        unique=False,
         schema="api",
     )
-    op.create_table(
-        "competition_instruction",
-        sa.Column("competition_instruction_id", sa.UUID(), nullable=False),
-        sa.Column("competition_id", sa.UUID(), nullable=False),
-        sa.Column("file_location", sa.Text(), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["competition_id"],
-            ["api.competition.competition_id"],
-            name=op.f("competition_instruction_competition_id_competition_fkey"),
-        ),
-        sa.PrimaryKeyConstraint(
-            "competition_instruction_id",
-            "competition_id",
-            name=op.f("competition_instruction_pkey"),
-        ),
+    op.create_index(
+        op.f("competition_legacy_competition_id_idx"),
+        "competition",
+        ["legacy_competition_id"],
+        unique=False,
+        schema="api",
+    )
+    op.create_index(
+        op.f("competition_opportunity_id_idx"),
+        "competition",
+        ["opportunity_id"],
+        unique=False,
         schema="api",
     )
     op.create_table(
@@ -832,6 +734,164 @@ def upgrade():
         schema="api",
     )
     op.create_table(
+        "application",
+        sa.Column("application_id", sa.UUID(), nullable=False),
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.competition.competition_id"],
+            name=op.f("application_competition_id_competition_fkey"),
+        ),
+        sa.PrimaryKeyConstraint("application_id", name=op.f("application_pkey")),
+        schema="api",
+    )
+    op.create_index(
+        op.f("application_competition_id_idx"),
+        "application",
+        ["competition_id"],
+        unique=False,
+        schema="api",
+    )
+    op.create_table(
+        "competition_assistance_listing",
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("opportunity_assistance_listing_id", sa.UUID(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.competition.competition_id"],
+            name=op.f("competition_assistance_listing_competition_id_competition_fkey"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["opportunity_assistance_listing_id"],
+            ["api.opportunity_assistance_listing.opportunity_assistance_listing_id"],
+            name=op.f(
+                "competition_assistance_listing_opportunity_assistance_listing_id_opportunity_assistance_listing_fkey"
+            ),
+        ),
+        sa.PrimaryKeyConstraint(
+            "competition_id",
+            "opportunity_assistance_listing_id",
+            name=op.f("competition_assistance_listing_pkey"),
+        ),
+        schema="api",
+    )
+    op.create_table(
+        "competition_form",
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("form_id", sa.UUID(), nullable=False),
+        sa.Column("is_required", sa.Boolean(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.competition.competition_id"],
+            name=op.f("competition_form_competition_id_competition_fkey"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["form_id"], ["api.form.form_id"], name=op.f("competition_form_form_id_form_fkey")
+        ),
+        sa.PrimaryKeyConstraint("competition_id", "form_id", name=op.f("competition_form_pkey")),
+        schema="api",
+    )
+    op.create_table(
+        "competition_instruction",
+        sa.Column("competition_instruction_id", sa.UUID(), nullable=False),
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("file_location", sa.Text(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.competition.competition_id"],
+            name=op.f("competition_instruction_competition_id_competition_fkey"),
+        ),
+        sa.PrimaryKeyConstraint(
+            "competition_instruction_id",
+            "competition_id",
+            name=op.f("competition_instruction_pkey"),
+        ),
+        schema="api",
+    )
+    op.create_table(
+        "link_competition_open_to_applicant",
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("competition_open_to_applicant_id", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.competition.competition_id"],
+            name=op.f("link_competition_open_to_applicant_competition_id_competition_fkey"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_open_to_applicant_id"],
+            ["api.lk_competition_open_to_applicant.competition_open_to_applicant_id"],
+            name=op.f(
+                "link_competition_open_to_applicant_competition_open_to_applicant_id_lk_competition_open_to_applicant_fkey"
+            ),
+        ),
+        sa.PrimaryKeyConstraint(
+            "competition_id",
+            "competition_open_to_applicant_id",
+            name=op.f("link_competition_open_to_applicant_pkey"),
+        ),
+        schema="api",
+    )
+    op.create_table(
         "application_form",
         sa.Column("application_form_id", sa.UUID(), nullable=False),
         sa.Column("application_id", sa.UUID(), nullable=False),
@@ -860,6 +920,7 @@ def upgrade():
         sa.PrimaryKeyConstraint("application_form_id", name=op.f("application_form_pkey")),
         schema="api",
     )
+    # ### end Alembic commands ###
     # TODO: Do we need to save data currently in field
     op.drop_column("user_saved_search", "searched_opportunity_ids", schema="api")
     op.add_column(
@@ -868,54 +929,55 @@ def upgrade():
         schema="api",
     )
 
-    # ### end Alembic commands ###
-
-    # Setups up the next transformation process to reprocess data from staging tables and repopulate the system.
+    # Sets up the next transformation process to reprocess data from staging tables and repopulate the system.
     op.execute("UPDATE staging.topportunity SET transformed_at = NULL where is_deleted = FALSE")
     op.execute(
         "UPDATE staging.topportunity_cfda SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute("UPDATE staging.tsynopsis SET transformed_at = NULL where is_deleted = FALSE")
-    op.execute("UPDATE staging.tsynopsis_hist SET transformed_at = NULL where is_deleted = FALSE")
     op.execute("UPDATE staging.tforecast SET transformed_at = NULL where is_deleted = FALSE")
-    op.execute("UPDATE staging.tforecast_hist SET transformed_at = NULL where is_deleted = FALSE")
     op.execute(
         "UPDATE staging.tapplicanttypes_forecast SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    op.execute(
-        "UPDATE staging.tapplicanttypes_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute(
         "UPDATE staging.tapplicanttypes_synopsis SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute(
-        "UPDATE staging.tapplicanttypes_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    op.execute(
         "UPDATE staging.tfundactcat_forecast SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    op.execute(
-        "UPDATE staging.tfundactcat_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute(
         "UPDATE staging.tfundactcat_synopsis SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute(
-        "UPDATE staging.tfundactcat_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    op.execute(
         "UPDATE staging.tfundinstr_forecast SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    op.execute(
-        "UPDATE staging.tfundinstr_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
     )
     op.execute(
         "UPDATE staging.tfundinstr_synopsis SET transformed_at = NULL where is_deleted = FALSE"
     )
-    op.execute(
-        "UPDATE staging.tfundinstr_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
-    )
-    # op.execute("UPDATE staging.tgroups SET transformed_at = NULL") # -- Do not need to reprocess agency data
+    # -- Do not need to reprocess agency data
+    # op.execute("UPDATE staging.tgroups SET transformed_at = NULL")
+
+    # -- Do not need to reproduce _hist tables
+    # op.execute("UPDATE staging.tsynopsis_hist SET transformed_at = NULL where is_deleted = FALSE")
+    # op.execute("UPDATE staging.tforecast_hist SET transformed_at = NULL where is_deleted = FALSE")
+    # op.execute(
+    #     "UPDATE staging.tapplicanttypes_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
+    # op.execute(
+    #     "UPDATE staging.tapplicanttypes_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
+    # op.execute(
+    #     "UPDATE staging.tfundactcat_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
+    # op.execute(
+    #     "UPDATE staging.tfundactcat_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
+    # op.execute(
+    #     "UPDATE staging.tfundinstr_forecast_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
+    # op.execute(
+    #     "UPDATE staging.tfundinstr_synopsis_hist SET transformed_at = NULL where is_deleted = FALSE"
+    # )
 
     # Add search index triggers
     setup_opportunity_search_index_queue_trigger_function(
@@ -934,23 +996,22 @@ def upgrade():
 
 
 def downgrade():
-    # Drop search index triggers
-    remove_opportunity_search_index_queue_trigger_function(
-        op,
-        [
-            "opportunity",
-            "opportunity_assistance_listing",
-            "current_opportunity_summary",
-            "opportunity_summary",
-            "link_opportunity_summary_funding_instrument",
-            "link_opportunity_summary_funding_category",
-            "link_opportunity_summary_applicant_type",
-            "opportunity_attachment",
-        ],
-    )
-
     # ### commands auto generated by Alembic - please adjust! ###
+    op.alter_column(
+        "user_saved_search",
+        "searched_opportunity_ids",
+        existing_type=postgresql.ARRAY(sa.UUID()),
+        type_=postgresql.ARRAY(sa.BIGINT()),
+        existing_nullable=False,
+        schema="api",
+    )
     op.drop_table("application_form", schema="api")
+    op.drop_table("link_competition_open_to_applicant", schema="api")
+    op.drop_table("competition_instruction", schema="api")
+    op.drop_table("competition_form", schema="api")
+    op.drop_table("competition_assistance_listing", schema="api")
+    op.drop_index(op.f("application_competition_id_idx"), table_name="application", schema="api")
+    op.drop_table("application", schema="api")
     op.drop_index(
         op.f("link_opportunity_summary_funding_instrument_opportunity_summary_id_idx"),
         table_name="link_opportunity_summary_funding_instrument",
@@ -1000,11 +1061,12 @@ def downgrade():
         schema="api",
     )
     op.drop_table("current_opportunity_summary", schema="api")
-    op.drop_table("competition_instruction", schema="api")
-    op.drop_table("competition_form", schema="api")
-    op.drop_table("competition_assistance_listing", schema="api")
-    op.drop_index(op.f("application_competition_id_idx"), table_name="application", schema="api")
-    op.drop_table("application", schema="api")
+    op.drop_index(op.f("competition_opportunity_id_idx"), table_name="competition", schema="api")
+    op.drop_index(
+        op.f("competition_legacy_competition_id_idx"), table_name="competition", schema="api"
+    )
+    op.drop_index(op.f("competition_form_family_id_idx"), table_name="competition", schema="api")
+    op.drop_table("competition", schema="api")
     op.drop_table("user_saved_opportunity", schema="api")
     op.drop_index(
         op.f("user_opportunity_notification_log_user_id_idx"),
@@ -1057,11 +1119,6 @@ def downgrade():
         schema="api",
     )
     op.drop_table("opportunity_assistance_listing", schema="api")
-    op.drop_index(op.f("competition_opportunity_id_idx"), table_name="competition", schema="api")
-    op.drop_index(
-        op.f("competition_legacy_competition_id_idx"), table_name="competition", schema="api"
-    )
-    op.drop_table("competition", schema="api")
     op.drop_index(op.f("opportunity_opportunity_title_idx"), table_name="opportunity", schema="api")
     op.drop_index(
         op.f("opportunity_opportunity_category_id_idx"), table_name="opportunity", schema="api"
@@ -1073,12 +1130,4 @@ def downgrade():
     op.drop_index(op.f("opportunity_agency_code_idx"), table_name="opportunity", schema="api")
     op.drop_table("opportunity", schema="api")
     op.drop_table("form", schema="api")
-
-    # Restore saved search opportunity ids to BigInt array
-    op.drop_column("user_saved_search", "searched_opportunity_ids", schema="api")
-    op.add_column(
-        "user_saved_search",
-        sa.Column("searched_opportunity_ids", postgresql.ARRAY(sa.BigInteger()), nullable=False),
-        schema="api",
-    )
     # ### end Alembic commands ###
