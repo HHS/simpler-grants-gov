@@ -1,9 +1,25 @@
-FROM fluent/fluent-bit:1.9.10 AS fluentbit
+# Build on top of the buildpack-deps image so that we have a
+# standard selection of tools available (ls, cat, etc.)
+# This produces a large image overall,
+# but the image is dramatically easier to work with.
+FROM buildpack-deps:oracular AS build
 
-ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
+# Copy the fluentbit binary from the official image.
+FROM fluent/fluent-bit:4.0.1 AS fluentbit
+
+FROM build AS release
+
+COPY --from=fluentbit /fluent-bit/bin/fluent-bit /fluent-bit/bin/fluent-bit
 
 ENV FLB_LOG_LEVEL=debug
 
-COPY fluentbit.conf /fluent-bit/etc/fluent-bit-custom.conf
+# The healthcheck is used to determine if the container is running.
+# AWS doesn't use it, but it's useful for local development.
+HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
+  CMD ["curl", "http://localhost:80/api/v1/health"]
 
-CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.conf"]
+COPY fluentbit.yml /fluent-bit/etc/fluentbit.yml
+
+ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
+
+CMD ["-c", "/fluent-bit/etc/fluentbit.yml"]
