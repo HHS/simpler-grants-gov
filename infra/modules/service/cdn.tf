@@ -3,7 +3,7 @@ locals {
   # We do not currently do this, though.
   default_origin_id        = "default"
   ssl_protocols            = ["TLSv1.2"]
-  minimum_protocol_version = "TLSv1"
+  minimum_protocol_version = "TLSv1.2_2021"
   enable_cdn               = var.enable_alb_cdn || var.enable_s3_cdn
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
