@@ -1,5 +1,4 @@
 import logging
-
 from datetime import timedelta
 from uuid import UUID
 
@@ -21,6 +20,7 @@ CONTACT_INFO = (
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
 )
+
 
 class ClosingDateNotification(BaseNotification):
 
@@ -72,11 +72,10 @@ class ClosingDateNotification(BaseNotification):
                 continue
             user_saved_opportunities.setdefault(user_id, []).append(result)
 
-
         users_email_notifications: list[UserEmailNotification] = []
 
         for user_id, saved_items in user_saved_opportunities.items():
-            closing_opportunities : list = []
+            closing_opportunities: list = []
             for saved_opportunity in saved_items:
                 opportunity = saved_opportunity.opportunity
                 close_date = (
@@ -91,7 +90,13 @@ class ClosingDateNotification(BaseNotification):
                     )
                     continue
 
-                closing_opportunities.append({"opportunity_id": opportunity.opportunity_id, "opportunity_title": opportunity.opportunity_title, "close_date": close_date})
+                closing_opportunities.append(
+                    {
+                        "opportunity_id": opportunity.opportunity_id,
+                        "opportunity_title": opportunity.opportunity_title,
+                        "close_date": close_date,
+                    }
+                )
 
             if closing_opportunities:
                 message = self._build_notification_message(closing_opportunities)
@@ -107,36 +112,37 @@ class ClosingDateNotification(BaseNotification):
                         subject="Applications for your bookmarked funding opportunities are due soon",
                         content=message,
                         notification_reason=NotificationReason.CLOSING_DATE_REMINDER,
-                        notified_object_ids=[opp["opportunity_id"] for opp in closing_opportunities],
-                        is_notified=False # Default to False, update on success
+                        notified_object_ids=[
+                            opp["opportunity_id"] for opp in closing_opportunities
+                        ],
+                        is_notified=False,  # Default to False, update on success
                     )
                 )
         logger.info(
             "Collected closing date opportunities for notification",
             extra={
                 "user_count": len(users_email_notifications),
-                "total_closing_opportunities": sum(len(n.notified_object_ids) for n in users_email_notifications)
+                "total_closing_opportunities": sum(
+                    len(n.notified_object_ids) for n in users_email_notifications
+                ),
             },
         )
 
         return users_email_notifications
 
-
-
     def _build_notification_message(self, closing_opportunities: list) -> str:
-        message = (
-            "Applications for the following funding opportunity are due in two weeks:\n\n")
+        message = "Applications for the following funding opportunity are due in two weeks:\n\n"
         if len(closing_opportunities) == 1:
             message += (
-            f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0]["opportunity_id"]}' target='_blank'>{closing_opportunities[0]["opportunity_title"]}</a>\n"
-            f"Application due date: {closing_opportunities[0]["close_date"].strftime('%B %d, %Y')}\n\n"
-            "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-            "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
-            "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
-            "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
-            "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-        )
-        else :
+                f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0]["opportunity_id"]}' target='_blank'>{closing_opportunities[0]["opportunity_title"]}</a>\n"
+                f"Application due date: {closing_opportunities[0]["close_date"].strftime('%B %d, %Y')}\n\n"
+                "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
+                "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
+                "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
+                "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+                "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
+            )
+        else:
             for closing_opp in closing_opportunities:
                 message += (
                     f"[{closing_opp["opportunity_title"]}]\n"
@@ -146,7 +152,6 @@ class ClosingDateNotification(BaseNotification):
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
                 "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
                 "If you have questions, please contact the Grants.gov Contact Center:\n"
-
             )
 
         message += f"{CONTACT_INFO}"
@@ -177,13 +182,12 @@ class ClosingDateNotification(BaseNotification):
                     self.db_session.add(opp_notification_log)
 
                 logger.info(
-                    "Successfully sent closing date reminder",
+                    "Updated notification log",
                     extra={
                         "user_id": user_id,
                         "opportunity_ids": opportunity_ids,
+                        "notification_reason": user_notification.notification_reason,
                     },
                 )
 
                 self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
-
-

@@ -2,6 +2,7 @@ import logging
 from uuid import UUID
 
 from sqlalchemy import select, update
+from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -28,19 +29,24 @@ class SearchNotification(BaseNotification):
         db_session: db.Session,
         search_client: search.SearchClient,
     ):
-        super().__init__(db_session, search_client)
+        super().__init__(db_session)
         self.search_client = search_client
-        self.collected_data: dict[UUID, list[UserSavedSearch]] = {}
 
-    def collect_notifications(self) -> None:
+    def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed saved searches"""
-        stmt = select(UserSavedSearch).where(
-            UserSavedSearch.last_notified_at < datetime_util.utcnow()
+        stmt = (
+            select(UserSavedSearch)
+            .options(joinedload(UserSavedSearch.user))
+            .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
         )
         saved_searches = self.db_session.execute(stmt).scalars()
 
         query_map: dict[str, list[UserSavedSearch]] = {}
         for saved_search in saved_searches:
+            user_id = saved_search.user_id
+            if not saved_search.user.email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
             search_query = _strip_pagination_params(saved_search.search_query)
             query_key = str(search_query)
 
@@ -58,6 +64,28 @@ class SearchNotification(BaseNotification):
                     user_id = saved_search.user_id
                     updated_saved_searches.setdefault(user_id, []).append(saved_search)
                     saved_search.searched_opportunity_ids = list(current_results)
+
+        users_email_notifications: list[UserEmailNotification] = []
+
+        for user_id, saved_items in updated_saved_searches.items():
+            logger.info(
+                "Created changed search email notification",
+                extra={"user_id": user_id, "changed_search_count": len(saved_items)},
+            )
+            users_email_notifications.append(
+                UserEmailNotification(
+                    user_id=user_id,
+                    user_email=saved_items[0].user.email,
+                    subject="Updates to Your Saved Opportunities",
+                    content="",
+                    notification_reason=NotificationReason.SEARCH_UPDATES,
+                    notified_object_ids=[
+                        saved_search.saved_search_id for saved_search in saved_items
+                    ],
+                    is_notified=False,  # Default to False, update on success
+                )
+            )
+
         logger.info(
             "Collected search notifications",
             extra={
@@ -68,38 +96,25 @@ class SearchNotification(BaseNotification):
                 ),
             },
         )
-        self.collected_data = updated_saved_searches
 
-    def prepare_notification(self) -> list[UserEmailNotification]:
-        users_email_notifications: list[UserEmailNotification] = []
-
-        for user_id, saved_items in self.collected_data.items():
-            user = saved_items[0].user
-            if not user.email:
-                logger.warning("No email found for user", extra={"user_id": user.user_id})
-                continue
-
-            users_email_notifications.append(
-                UserEmailNotification(
-                    user_id=user_id,
-                    user_email=user.email,
-                    subject="Updates to Your Saved Opportunities",
-                    content="",
-                    notification_reason=NotificationReason.OPPORTUNITY_UPDATES,
-                )
-            )
         return users_email_notifications
 
-    def update_last_notified_timestamp(self, user_id: UUID) -> None:
-        search_ids = [saved_search.saved_search_id for saved_search in self.collected_data[user_id]]
-        self.db_session.execute(
-            update(UserSavedSearch)
-            .where(UserSavedSearch.saved_search_id.in_(search_ids))
-            .values(last_notified_at=datetime_util.utcnow())
-        )
-        self.increment(Metrics.SEARCHES_TRACKED, len(search_ids))
-        self.increment(Metrics.USERS_NOTIFIED)
-
-    def run_task(self) -> None:
-        """Override to define the task logic"""
-        self.notification_data()
+    def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
+        for user_notification in user_notifications:
+            if user_notification.is_notified:
+                self.db_session.execute(
+                    update(UserSavedSearch)
+                    .where(
+                        UserSavedSearch.saved_search_id.in_(user_notification.notified_object_ids)
+                    )
+                    .values(last_notified_at=datetime_util.utcnow())
+                )
+                logger.info(
+                    "Updated notification log",
+                    extra={
+                        "user_id": user_notification.user_id,
+                        "search_ids": user_notification.notified_object_ids,
+                        "notification_reason": user_notification.notification_reason,
+                    },
+                )
+                self.increment(Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids))

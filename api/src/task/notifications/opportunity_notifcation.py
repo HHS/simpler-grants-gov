@@ -4,7 +4,6 @@ from uuid import UUID
 from sqlalchemy import select, update
 from sqlalchemy.orm import joinedload
 
-import src.adapters.search as search
 from src.adapters import db
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
@@ -16,14 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class OpportunityNotification(BaseNotification):
-    def __init__(self, db_session: db.Session, search_client: search.SearchClient):
+    def __init__(self, db_session: db.Session):
         super().__init__(
             db_session,
-            search_client,
         )
-        self.collected_data: dict[UUID, list[UserSavedOpportunity]] = {}
 
-    def collect_notifications(self) -> None:
+    def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
         stmt = (
             select(UserSavedOpportunity)
@@ -37,65 +34,73 @@ class OpportunityNotification(BaseNotification):
         )
 
         results = self.db_session.execute(stmt).scalars().all()
-        if not results:
-            return
+        changed_saved_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
 
         for result in results:
             user_id = result.user_id
-            self.collected_data.setdefault(user_id, []).append(result)
-            self.collected_opportunity_ids = result.opportunity_id
-
-        logger.info(
-            "Collected opportunity notifications",
-            extra={"user_count": len(self.collected_data), "total_notifications": len(results)},
-        )
-
-    def prepare_notification(self) -> list[UserEmailNotification]:
-        users_email_notifications: list[UserEmailNotification] = []
-        if not self.collected_data:
-            return users_email_notifications
-
-        for user_id, saved_items in self.collected_data.items():
-            user = saved_items[0].user
-            if not user.email:
-                logger.warning("No email found for user", extra={"user_id": user.user_id})
+            if not result.user.email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
+            changed_saved_opportunities.setdefault(user_id, []).append(result)
 
+        users_email_notifications: list[UserEmailNotification] = []
+
+        for user_id, saved_items in changed_saved_opportunities.items():
             message = f"You have updates to {len(saved_items)} saved opportunities"
 
             logger.info(
-                "Created update email notification",
-                extra={"user_id": user_id, "opportunity_count": len(saved_items)},
+                "Created changed opportunity email notifications",
+                extra={"user_id": user_id, "changed_opportunities_count": len(saved_items)},
             )
 
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
-                    user_email=user.email,
+                    user_email=saved_items[0].user.email,
                     subject="Updates to Your Saved Opportunities",
                     content=message,
                     notification_reason=NotificationReason.OPPORTUNITY_UPDATES,
+                    notified_object_ids=[opp.opportunity_id for opp in saved_items],
+                    is_notified=False,  # Default to False, update on success
                 )
             )
+
+        logger.info(
+            "Collected updated opportunity notifications",
+            extra={
+                "user_count": len(changed_saved_opportunities),
+                "total_opportunities_count": sum(
+                    len(changed_opportunity)
+                    for changed_opportunity in changed_saved_opportunities.values()
+                ),
+            },
+        )
+
         return users_email_notifications
 
-    def update_last_notified_timestamp(self, user_id: UUID) -> None:
-        opportunity_ids = [
-            saved_opp.opportunity_id for saved_opp in self.collected_data.get(user_id, [])
-        ]
-        self.db_session.execute(
-            update(UserSavedOpportunity)
-            .where(
-                UserSavedOpportunity.user_id == user_id,
-                UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
-            )
-            .values(last_notified_at=datetime_util.utcnow())
-        )
-        self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
-        self.increment(Metrics.USERS_NOTIFIED)
+    def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
+        for user_notification in user_notifications:
+            if user_notification.is_notified:
+                self.db_session.execute(
+                    update(UserSavedOpportunity)
+                    .where(
+                        UserSavedOpportunity.user_id == user_notification.user_id,
+                        UserSavedOpportunity.opportunity_id.in_(
+                            user_notification.notified_object_ids
+                        ),
+                    )
+                    .values(last_notified_at=datetime_util.utcnow())
+                )
 
-    def run_task(self) -> None:
-        """Override to define the task logic"""
-        prepared_notification = self.notification_data()
-        if prepared_notification:
-            self.send_notifications(prepared_notification)
+                logger.info(
+                    "Updated notification log",
+                    extra={
+                        "user_id": user_notification.user_id,
+                        "opportunity_ids": user_notification.notified_object_ids,
+                        "notification_reason": user_notification.notification_reason,
+                    },
+                )
+
+                self.increment(
+                    Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
+                )

@@ -26,5 +26,3 @@ class UserEmailNotification:
     content: str
     notified_object_ids: list
     is_notified: bool
-
-
