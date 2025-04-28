@@ -6,6 +6,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
 from typing import Iterator, Sequence
+import uuid
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -160,7 +161,7 @@ class LoadOpportunitiesToIndex(Task):
             .limit(self.config.incremental_load_batch_size)
         )
 
-    def _handle_incremental_upserts(self, existing_opportunity_ids: set[int]) -> None:
+    def _handle_incremental_upserts(self, existing_opportunity_ids: set[uuid.UUID]) -> None:
         """Handle updates/inserts of opportunities into the search index when running incrementally"""
         while True:
             # Check elapsed_time before starting new batch processing
@@ -227,7 +228,7 @@ class LoadOpportunitiesToIndex(Task):
 
             self.increment(self.Metrics.BATCHES_PROCESSED)
 
-    def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
+    def _handle_incremental_delete(self, existing_opportunity_ids: set[uuid.UUID]) -> None:
         """Handle deletion of opportunities when running incrementally
 
         Scenarios in which we delete an opportunity from the index:
@@ -238,7 +239,7 @@ class LoadOpportunitiesToIndex(Task):
         """
 
         # Fetch the opportunity IDs of opportunities we would expect to be in the index
-        opportunity_ids_we_want_in_search: set[int] = set(
+        opportunity_ids_we_want_in_search: set[uuid.UUID] = set(
             self.db_session.execute(
                 select(Opportunity.legacy_opportunity_id)
                 .join(CurrentOpportunitySummary)
@@ -318,14 +319,14 @@ class LoadOpportunitiesToIndex(Task):
             .partitions()
         )
 
-    def fetch_existing_opportunity_ids_in_index(self) -> set[int]:
+    def fetch_existing_opportunity_ids_in_index(self) -> set[uuid.UUID]:
         if not self.search_client.alias_exists(self.index_name):
             raise RuntimeError(
                 "Alias %s does not exist, please run the full refresh job before the incremental job"
                 % self.index_name
             )
 
-        opportunity_ids: set[int] = set()
+        opportunity_ids: set[uuid.UUID] = set()
 
         for response in self.search_client.scroll(
             self.config.alias_name,
