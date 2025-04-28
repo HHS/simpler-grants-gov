@@ -212,7 +212,7 @@ resource "aws_ecs_task_definition" "app" {
   # The valid combinations are listed in the AWS documentation below.
   # The input values for `cpu` and `memory` are the values for the application container,
   # We need some extra room inside of the task definition to account for sidecars.
-  #
+  # To create this extra room, we multiply the `cpu` and `memory` values by 2.
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
   cpu    = var.cpu * 2
   memory = var.memory * 2
