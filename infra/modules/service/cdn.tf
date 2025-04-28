@@ -16,7 +16,7 @@ locals {
   #     then use the domain name of the S3 bucket
   #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is null,
   #     then return null
-  cdn_domain_name         = var.enable_alb_cdn && var.domain != null ? var.domain : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
+  cdn_domain_name         = var.enable_alb_cdn && var.domain_name != null ? var.domain_name : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
   cdn_domain_name_env_var = local.cdn_domain_name != null ? local.cdn_domain_name : length(aws_cloudfront_distribution.cdn) != 0 ? aws_cloudfront_distribution.cdn[0].domain_name : null
   cdn_certificate_arn     = var.enable_s3_cdn ? var.s3_cdn_certificate_arn : var.enable_alb_cdn ? var.certificate_arn : null
 

@@ -128,12 +128,6 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
-variable "domain" {
-  description = "The domain name for the service"
-  type        = string
-  default     = null
-}
-
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
