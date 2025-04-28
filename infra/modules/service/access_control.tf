@@ -98,7 +98,7 @@ data "aws_iam_policy_document" "task_executor" {
 }
 
 data "aws_iam_policy_document" "runtime_logs" {
-  # Allow fluentbit to push logs to Cloudwatch at runtime.
+  # Allow fluentbit to create logs group / push logs to Cloudwatch at runtime.
   statement {
     actions = [
       "logs:CreateLogStream",
