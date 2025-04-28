@@ -38,8 +38,8 @@ class Competition(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkFormFamily.form_family_id),
         index=True,
     )
-    opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
+    opportunity_assistance_listing_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
     )
     link_competition_open_to_applicant: Mapped[list["LinkCompetitionOpenToApplicant"]] = (
         relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
