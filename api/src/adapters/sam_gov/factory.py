@@ -1,61 +1,30 @@
 """Factory for creating SAM.gov clients."""
 
-from typing import Any, Dict
+import logging
+import os
 
 from src.adapters.sam_gov.client import BaseSamGovClient, SamGovClient
-from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.mock_client import MockSamGovClient
 
+logger = logging.getLogger(__name__)
 
-def create_sam_gov_client(
-    use_mock: bool = False,
-    config: SamGovConfig | None = None,
-    config_override: Dict[str, Any] | None = None,
-    mock_data_file: str | None = None,
-    mock_extract_dir: str | None = None,
-) -> BaseSamGovClient:
+
+def create_sam_gov_client() -> BaseSamGovClient:
     """
-    Create a SAM.gov API client based on provided parameters.
+    Create and return the appropriate SAM.gov client based on environment variables.
 
-    Args:
-        use_mock: Whether to use the mock client.
-        config: Optional SamGovConfig object to use for configuration.
-        config_override: Optional dictionary with values to override config properties.
-        mock_data_file: Optional path to a JSON file with mock extract metadata.
-        mock_extract_dir: Optional path to a directory with mock extract files.
+    Uses mock client if USE_MOCK_SAM_GOV_CLIENT=true or for local development,
+    otherwise uses the real client.
 
     Returns:
-        A SAM.gov API client instance
+        BaseSamGovClient: A SAM.gov client implementation
     """
-    # If use_mock is True, return a mock client
+    api_url = os.environ.get("SAM_API_URL", "https://open.gsa.gov/api/sam-entity-extracts-api/")
+    use_mock = os.environ.get("USE_MOCK_SAM_GOV_CLIENT", "true").lower() == "true"
+
     if use_mock:
-        return MockSamGovClient(
-            mock_data_file=mock_data_file,
-            mock_extract_dir=mock_extract_dir,
-        )
-
-    # If config is provided, use that
-    if config:
-        # Create a copy if we need to apply overrides
-        if config_override:
-            sam_config = SamGovConfig(
-                base_url=config.base_url,
-                extract_url=config.extract_url,
-                api_key=config.api_key,
-                timeout=config.timeout,
-            )
-            # Apply any overrides
-            for key, value in config_override.items():
-                setattr(sam_config, key, value)
-            return SamGovClient(sam_config)
-        return SamGovClient(config)
-
-    # Load config from environment and apply overrides
-    sam_config = SamGovConfig()
-
-    # Apply any overrides
-    if config_override:
-        for key, value in config_override.items():
-            setattr(sam_config, key, value)
-
-    return SamGovClient(sam_config)
+        logger.info("Using mock SAM.gov client")
+        return MockSamGovClient()
+    else:
+        logger.info("Using real SAM.gov client")
+        return SamGovClient(api_url=api_url)

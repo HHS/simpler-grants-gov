@@ -144,3 +144,14 @@ class FormFamily(StrEnum):
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
+
+
+class SamGovExtractType(StrEnum):
+    MONTHLY = "monthly"
+    DAILY = "daily"
+
+
+class SamGovProcessingStatus(StrEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"

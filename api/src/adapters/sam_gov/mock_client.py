@@ -4,10 +4,12 @@ import json
 import logging
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List, Optional
 
-from src.adapters.sam_gov.client import BaseSamGovClient
+from src.adapters.sam_gov.client import BaseSamGovClient, SamExtractInfo
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
+from src.util import datetime_util
 from src.util.file_util import is_s3_path, open_stream
 
 logger = logging.getLogger(__name__)
@@ -171,3 +173,47 @@ class MockSamGovClient(BaseSamGovClient):
         if file_path and self.mock_extract_dir:
             os.makedirs(self.mock_extract_dir, exist_ok=True)
             shutil.copyfile(file_path, os.path.join(self.mock_extract_dir, file_name))
+
+    def get_monthly_extract_info(self) -> Optional[SamExtractInfo]:
+        """
+        Get mock information about the latest monthly extract
+
+        Returns a fixed mock response
+        """
+        logger.info("Using mock SAM.gov client to get monthly extract info")
+
+        # Return mock data for the first day of the current month
+        current_date = datetime_util.utcnow()
+        first_day_of_month = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        return SamExtractInfo(
+            url="https://example.com/sam/monthly/extract.zip",
+            filename=f"sam_monthly_extract_{first_day_of_month.strftime('%Y%m')}.zip",
+            updated_at=first_day_of_month,
+        )
+
+    def get_daily_extract_info(self) -> List[SamExtractInfo]:
+        """
+        Get mock information about available daily extracts
+
+        Returns fixed mock responses for the last 5 days
+        """
+        logger.info("Using mock SAM.gov client to get daily extract info")
+
+        # Generate mock data for the last 5 days
+        current_date = datetime_util.utcnow()
+        daily_extracts = []
+
+        for day_offset in range(5):
+            date = current_date - timedelta(days=day_offset)
+            date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            daily_extracts.append(
+                SamExtractInfo(
+                    url=f"https://example.com/sam/daily/extract_{date.strftime('%Y%m%d')}.zip",
+                    filename=f"sam_daily_extract_{date.strftime('%Y%m%d')}.zip",
+                    updated_at=date,
+                )
+            )
+
+        return daily_extracts
