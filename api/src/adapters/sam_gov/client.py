@@ -9,12 +9,21 @@ from typing import Any
 from urllib.parse import urljoin
 
 import requests
+from pydantic import BaseModel
 
 from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
 from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
+
+
+class SamExtractInfo(BaseModel):
+    """Information about a SAM.gov extract file"""
+
+    url: str
+    filename: str
+    updated_at: datetime
 
 
 class BaseSamGovClient(abc.ABC, metaclass=abc.ABCMeta):
@@ -36,6 +45,16 @@ class BaseSamGovClient(abc.ABC, metaclass=abc.ABCMeta):
             IOError: If there is an error saving the file.
             requests.exceptions.RequestException: If there is an error with the API request.
         """
+        pass
+
+    @abc.abstractmethod
+    def get_monthly_extract_info(self) -> SamExtractInfo | None:
+        """Get information about the latest monthly extract"""
+        pass
+
+    @abc.abstractmethod
+    def get_daily_extract_info(self) -> list[SamExtractInfo]:
+        """Get information about available daily extracts"""
         pass
 
 
@@ -240,3 +259,23 @@ class SamGovClient(BaseSamGovClient):
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling SAM.gov API: {e}")
             raise
+
+    def get_monthly_extract_info(self) -> SamExtractInfo | None:
+        """
+        Get information about the latest monthly extract
+
+        Makes a real API call to SAM.gov
+        """
+        # In a real implementation, this would call the SAM.gov API
+        # For now, we'll raise an error as this should be implemented when we have API access
+        raise NotImplementedError("Real SAM.gov API client not yet implemented")
+
+    def get_daily_extract_info(self) -> list[SamExtractInfo]:
+        """
+        Get information about available daily extracts
+
+        Makes a real API call to SAM.gov
+        """
+        # In a real implementation, this would call the SAM.gov API
+        # For now, we'll raise an error as this should be implemented when we have API access
+        raise NotImplementedError("Real SAM.gov API client not yet implemented")

@@ -55,7 +55,7 @@ class TestSamExtractsTask(BaseTestClass):
     @pytest.fixture
     def task(self, db_session, mock_s3_bucket, mock_sam_gov_client, setup_data):
         """Create an instance of the task with mock dependencies
-        
+
         Note: This fixture is function-scoped to work with mock_s3_bucket,
         but still benefits from the class-scoped db_session and mock_sam_gov_client.
         """
@@ -71,7 +71,7 @@ class TestSamExtractsTask(BaseTestClass):
         """Test the task can be created and initialized correctly"""
         # Create and check the task directly
         task = SamExtractsTask(db_session, mock_sam_gov_client)
-        
+
         # Verify the task has the expected attributes
         assert task.db_session == db_session
         assert task.sam_gov_client == mock_sam_gov_client
@@ -82,7 +82,7 @@ class TestSamExtractsTask(BaseTestClass):
         # Reset the mocks before starting the test
         mock_sam_gov_client.reset_mock()
         task.increment.reset_mock()
-        
+
         # Mock the actual download function to avoid making network requests
         with patch.object(
             task,
@@ -107,7 +107,7 @@ class TestSamExtractsTask(BaseTestClass):
         # Reset the mocks before starting the test
         mock_sam_gov_client.reset_mock()
         task.increment.reset_mock()
-        
+
         # Add a record for an existing monthly extract
         existing_extract = SamExtractFile(
             extract_type=SamGovExtractType.MONTHLY,
@@ -141,7 +141,7 @@ class TestSamExtractsTask(BaseTestClass):
         # Reset the mocks before starting the test
         mock_sam_gov_client.reset_mock()
         task.increment.reset_mock()
-        
+
         # Add a record for an existing monthly extract
         existing_monthly = SamExtractFile(
             extract_type=SamGovExtractType.MONTHLY,
