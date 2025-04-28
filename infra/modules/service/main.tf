@@ -170,7 +170,7 @@ resource "aws_ecs_task_definition" "app" {
       name                   = "${local.container_name}-fluentbit"
       image                  = local.fluent_bit_image_url,
       memory                 = 256,
-      cpu                    = 512,
+      cpu                    = 256,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
@@ -208,12 +208,14 @@ resource "aws_ecs_task_definition" "app" {
     },
   ])
 
-  # Take the larger of the two values for CPU and Memory and multiply by 2
-  # We need to do this because the task definition requires an aggregate value for CPU and Memory.
-  # We can't simply add them together, because the resulting value needs to be on this list
+  # The CPU and memory values need to be one of the valid combinations for Fargate tasks.
+  # The valid combinations are listed in the AWS documentation below.
+  # The input values for `cpu` and `memory` are the values for the application container,
+  # We need some extra room inside of the task definition to account for sidecars.
+  #
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
-  cpu    = var.cpu > 256 ? var.cpu * 2 : 256 * 2
-  memory = var.memory > 512 ? var.memory * 2 : 512 * 2
+  cpu    = var.cpu * 2
+  memory = var.memory * 2
 
   requires_compatibilities = ["FARGATE"]
 
