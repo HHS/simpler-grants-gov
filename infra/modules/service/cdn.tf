@@ -114,7 +114,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
   }
 
   restrictions {
@@ -156,4 +156,5 @@ resource "aws_cloudfront_distribution" "cdn" {
   #checkov:skip=CKV2_AWS_32: Configure response headers policy in future work
   #checkov:skip=CKV_AWS_374: Ignore the geo restriction
   #checkov:skip=CKV_AWS_305: We don't need a default root object... we don't need to redirect / to index.html.
+  #checkov:skip=CKV_AWS_34: Rely on browser-land redirects
 }
