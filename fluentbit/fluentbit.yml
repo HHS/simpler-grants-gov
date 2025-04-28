@@ -18,7 +18,7 @@ pipeline:
     - name: cloudwatch_logs # aws cloudwatch logs
       match: "**"
       log_group_name: ${log_group_name}
-      log_stream_name: ${container_name}/${container_id}
+      log_stream_name: ${container_name}g
       region: ${aws_region}
       auto_create_group: true
       log_format: json
