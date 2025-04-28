@@ -114,7 +114,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = local.cdn_certificate_arn == null ? "allow-all" : "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
   }
 
   restrictions {
