@@ -9,7 +9,7 @@ FROM fluent/fluent-bit:4.0.1 AS fluentbit
 
 FROM build AS release
 
-COPY --from=fluentbit /fluent-bit/bin/fluent-bit /fluent-bit/bin/fluent-bit
+COPY --from=fluentbit /fluent-bit /fluent-bit
 
 ENV FLB_LOG_LEVEL=debug
 
