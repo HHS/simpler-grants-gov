@@ -11,6 +11,8 @@ FROM build AS release
 
 COPY --from=fluentbit /fluent-bit /fluent-bit
 
+ENV FLB_LOG_LEVEL=debug
+
 # The healthcheck is used to determine if the container is running.
 # AWS doesn't use it, but it's useful for local development.
 HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
