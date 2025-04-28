@@ -1,14 +1,23 @@
 service:
   # The http service is used for healthchecks and such.
   http_server: On
-  http_listen: 0.0.0.0
   http_port: 80
 
 pipeline:
   inputs:
+    # https://docs.fluentbit.io/manual/pipeline/inputs/forward
     - name: forward
-      listen: 0.0.0.0
       port: 24224 # the default port for fluentbit
+
+    # https://docs.fluentbit.io/manual/pipeline/inputs/forward
+    # https://github.com/aws/aws-for-fluent-bit/blob/mainline/troubleshooting/debugging.md
+    - name: forward
+      unix_path: /var/run/fluent.sock # aws custom unix socket
+
+    # https://docs.fluentbit.io/manual/pipeline/inputs/forward
+    # https://github.com/aws/aws-for-fluent-bit/blob/mainline/troubleshooting/debugging.md
+    - name: tcp
+      port: 8877 # aws custom port
 
   outputs:
     - name: nrlogs # new relic logs
