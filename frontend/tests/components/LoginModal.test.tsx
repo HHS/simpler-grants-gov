@@ -1,15 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
 
 import { LoginModal } from "src/components/LoginModal";
 
+const mockSetItem = jest.fn();
+
 jest.mock("src/services/auth/sessionStorage", () => ({
   __esModule: true,
   default: {
-    setItem: jest.fn(),
+    setItem: mockSetItem,
   },
 }));
 
@@ -84,7 +85,7 @@ describe("LoginModal", () => {
     const signInButton = screen.getByText("Sign In");
     fireEvent.click(signInButton);
 
-    expect(SessionStorage.setItem).toHaveBeenCalledWith(
+    expect(mockSetItem).toHaveBeenCalledWith(
       "login-redirect",
       "/test-path?param=value",
     );
