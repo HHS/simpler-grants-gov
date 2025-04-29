@@ -2,8 +2,6 @@
 
 import abc
 import logging
-import os
-import re
 from datetime import datetime
 from typing import Any
 from urllib.parse import urljoin
@@ -12,8 +10,8 @@ import requests
 from pydantic import BaseModel
 
 from src.adapters.sam_gov.config import SamGovConfig
-from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
-from src.util.file_util import open_stream
+from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
+from src.util.file_util import get_file_length_bytes, open_stream
 
 logger = logging.getLogger(__name__)
 
@@ -163,26 +161,23 @@ class SamGovClient(BaseSamGovClient):
 
             # Get headers for metadata
             content_type = response.headers.get("Content-Type", "")
-            content_disposition = response.headers.get("Content-Disposition", "")
             content_length = int(response.headers.get("Content-Length", 0))
-
-            # Try to extract the filename from Content-Disposition
-            filename = None
-            disposition_match = re.search(r'filename="?([^";]+)"?', content_disposition)
-            if disposition_match:
-                filename = disposition_match.group(1)
 
             # Save the file
             with open_stream(output_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
 
+            # Get file size using file_util to properly handle both local and S3 paths
+            file_size = content_length
+            if not file_size:
+                file_size = get_file_length_bytes(output_path)
+
             # Build response object
             extract_response = SamExtractResponse(
-                file_name=filename or os.path.basename(output_path),
-                file_size=content_length or os.path.getsize(output_path),
+                file_name=extract_request.file_name,
+                file_size=file_size,
                 content_type=content_type,
-                sensitivity=SensitivityLevel.PUBLIC,
                 download_date=datetime.now(),
             )
 
