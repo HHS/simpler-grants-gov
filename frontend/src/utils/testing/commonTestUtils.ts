@@ -27,7 +27,7 @@ class NoErrorThrownError extends Error {}
   pass it into this wrapper, which will spit out the error as a return value
   see https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-conditional-expect.md
 */
-export const wrapForExpectedError = async <TError>(
+export const wrapForExpectedError = async <TError = Error>(
   originalFunction: () => unknown,
 ): Promise<TError> => {
   try {

@@ -2,7 +2,11 @@
  * @jest-environment node
  */
 
-import { DELETE, POST, PUT } from "src/app/api/user/saved-searches/route";
+import {
+  deleteSearchHandler,
+  saveSearchHandler,
+  updateSavedSearchHandler,
+} from "src/app/api/user/saved-searches/handler";
 
 import { NextRequest } from "next/server";
 
@@ -86,7 +90,7 @@ describe("saved searches POST request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedSearch());
+    const response = await saveSearchHandler(fakeRequestForSavedSearch());
     const json = (await response.json()) as { message: string };
 
     expect(response.status).toBe(200);
@@ -99,7 +103,7 @@ describe("saved searches POST request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await POST(fakeRequestForSavedSearch());
+    const response = await saveSearchHandler(fakeRequestForSavedSearch());
     expect(response.status).toBe(401);
     expect(mockHandleSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -108,7 +112,7 @@ describe("saved searches POST request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedSearch(""));
+    const response = await saveSearchHandler(fakeRequestForSavedSearch(""));
     expect(response.status).toBe(400);
     expect(mockHandleSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -117,7 +121,9 @@ describe("saved searches POST request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedSearch("give me a 501"));
+    const response = await saveSearchHandler(
+      fakeRequestForSavedSearch("give me a 501"),
+    );
     expect(response.status).toBe(501);
     expect(mockHandleSavedSearch).toHaveBeenCalledTimes(1);
   });
@@ -126,7 +132,9 @@ describe("saved searches POST request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedSearch("give me an error"));
+    const response = await saveSearchHandler(
+      fakeRequestForSavedSearch("give me an error"),
+    );
     expect(response.status).toBe(500);
     expect(mockHandleSavedSearch).toHaveBeenCalledTimes(1);
   });
@@ -138,7 +146,9 @@ describe("saved searches PUT request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await PUT(fakeRequestForUpdateSearch());
+    const response = await updateSavedSearchHandler(
+      fakeRequestForUpdateSearch(),
+    );
     const json = (await response.json()) as { message: string };
 
     expect(response.status).toBe(200);
@@ -151,7 +161,9 @@ describe("saved searches PUT request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await PUT(fakeRequestForUpdateSearch());
+    const response = await updateSavedSearchHandler(
+      fakeRequestForUpdateSearch(),
+    );
     expect(response.status).toBe(401);
     expect(mockHandleUpdateSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -160,7 +172,9 @@ describe("saved searches PUT request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await PUT(fakeRequestForUpdateSearch(""));
+    const response = await updateSavedSearchHandler(
+      fakeRequestForUpdateSearch(""),
+    );
     expect(response.status).toBe(400);
     expect(mockHandleUpdateSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -169,7 +183,9 @@ describe("saved searches PUT request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await PUT(fakeRequestForUpdateSearch("give me a 501"));
+    const response = await updateSavedSearchHandler(
+      fakeRequestForUpdateSearch("give me a 501"),
+    );
     expect(response.status).toBe(501);
     expect(mockHandleUpdateSavedSearch).toHaveBeenCalledTimes(1);
   });
@@ -178,7 +194,9 @@ describe("saved searches PUT request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await PUT(fakeRequestForUpdateSearch("give me an error"));
+    const response = await updateSavedSearchHandler(
+      fakeRequestForUpdateSearch("give me an error"),
+    );
     expect(response.status).toBe(500);
     expect(mockHandleUpdateSavedSearch).toHaveBeenCalledTimes(1);
   });
@@ -190,7 +208,7 @@ describe("saved searches DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await DELETE(fakeRequestForDeleteSearch());
+    const response = await deleteSearchHandler(fakeRequestForDeleteSearch());
     const json = (await response.json()) as { message: string };
 
     expect(response.status).toBe(200);
@@ -203,7 +221,7 @@ describe("saved searches DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await DELETE(fakeRequestForDeleteSearch());
+    const response = await deleteSearchHandler(fakeRequestForDeleteSearch());
     expect(response.status).toBe(401);
     expect(mockHandleDeleteSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -212,7 +230,7 @@ describe("saved searches DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await DELETE(fakeRequestForDeleteSearch(""));
+    const response = await deleteSearchHandler(fakeRequestForDeleteSearch(""));
     expect(response.status).toBe(400);
     expect(mockHandleDeleteSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -221,7 +239,9 @@ describe("saved searches DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await DELETE(fakeRequestForDeleteSearch("give me a 501"));
+    const response = await deleteSearchHandler(
+      fakeRequestForDeleteSearch("give me a 501"),
+    );
     expect(response.status).toBe(501);
     expect(mockHandleDeleteSavedSearch).toHaveBeenCalledTimes(1);
   });
@@ -230,7 +250,7 @@ describe("saved searches DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await DELETE(
+    const response = await deleteSearchHandler(
       fakeRequestForDeleteSearch("give me an error"),
     );
     expect(response.status).toBe(500);
