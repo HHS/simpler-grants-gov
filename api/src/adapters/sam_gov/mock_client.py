@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from src.adapters.sam_gov.client import BaseSamGovClient, SamExtractInfo
-from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
+from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
 from src.util import datetime_util
 from src.util.file_util import is_s3_path, open_stream
 
@@ -19,27 +19,22 @@ MOCK_EXTRACTS = {
     "SAM_PUBLIC_MONTHLY_V2_20220406.ZIP": {
         "size": 1024 * 1024 * 5,  # 5MB
         "content_type": "application/zip",
-        "sensitivity": SensitivityLevel.PUBLIC,
     },
     "SAM_FOUO_MONTHLY_V2_20220406.ZIP": {
         "size": 1024 * 1024 * 10,  # 10MB
         "content_type": "application/zip",
-        "sensitivity": SensitivityLevel.FOUO,
     },
     "SAM_SENSITIVE_MONTHLY_V3_20220406.ZIP": {
         "size": 1024 * 1024 * 15,  # 15MB
         "content_type": "application/zip",
-        "sensitivity": SensitivityLevel.SENSITIVE,
     },
     "SAM_Exclusions_Public_Extract_V2_22096.ZIP": {
         "size": 1024 * 1024 * 2,  # 2MB
         "content_type": "application/zip",
-        "sensitivity": SensitivityLevel.PUBLIC,
     },
     "FASCSAOrders23277.CSV": {
         "size": 1024 * 512,  # 512KB
         "content_type": "text/csv",
-        "sensitivity": SensitivityLevel.PUBLIC,
     },
 }
 
@@ -98,15 +93,6 @@ class MockSamGovClient(BaseSamGovClient):
                 self.extracts[file_name] = {
                     "size": os.path.getsize(os.path.join(self.mock_extract_dir, file_name)),
                     "content_type": "application/zip" if file_name.endswith(".ZIP") else "text/csv",
-                    "sensitivity": (
-                        SensitivityLevel.SENSITIVE
-                        if "SENSITIVE" in file_name
-                        else (
-                            SensitivityLevel.FOUO
-                            if "FOUO" in file_name
-                            else SensitivityLevel.PUBLIC
-                        )
-                    ),
                 }
             else:
                 raise ValueError(f"Mock extract file not found: {file_name}")
@@ -141,7 +127,6 @@ class MockSamGovClient(BaseSamGovClient):
             file_name=file_name,
             file_size=file_size,
             content_type=self.extracts[file_name]["content_type"],
-            sensitivity=SensitivityLevel.PUBLIC,
             download_date=datetime.now(),
         )
 
@@ -150,7 +135,6 @@ class MockSamGovClient(BaseSamGovClient):
         file_name: str,
         size: int = 1024 * 1024,
         content_type: str = "application/zip",
-        sensitivity: SensitivityLevel = SensitivityLevel.PUBLIC,
         file_path: str | None = None,
     ) -> None:
         """Add a mock extract file to the available extracts.
@@ -159,14 +143,12 @@ class MockSamGovClient(BaseSamGovClient):
             file_name: Name of the extract file.
             size: Size in bytes of the extract file.
             content_type: Content type of the extract file.
-            sensitivity: Sensitivity level of the extract.
             file_path: Optional path to an actual file to use as the extract.
                       If provided, the size parameter will be ignored.
         """
         self.extracts[file_name] = {
             "size": size,
             "content_type": content_type,
-            "sensitivity": sensitivity,
         }
 
         # If a file path is provided, copy it to the mock_extract_dir if available

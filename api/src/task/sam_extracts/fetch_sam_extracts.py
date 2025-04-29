@@ -25,7 +25,7 @@ class SamExtractsConfig(PydanticBaseEnvConfig):
     """Configuration for SAM extracts fetching task"""
 
     sam_api_url: str = Field(
-        alias="SAM_API_URL", default="https://open.gsa.gov/api/sam-entity-extracts-api/"
+        alias="SAM_API_URL", default="https://api.sam.gov/data-services/v1/extracts"
     )
     s3_bucket: str = Field(alias="SAM_EXTRACTS_S3_BUCKET")
     s3_prefix: str = Field(alias="SAM_EXTRACTS_S3_PREFIX", default="sam-extracts/")

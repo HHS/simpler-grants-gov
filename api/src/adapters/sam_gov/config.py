@@ -11,12 +11,8 @@ class SamGovConfig(PydanticBaseEnvConfig):
 
     model_config = SettingsConfigDict(env_prefix="SAM_GOV_", populate_by_name=True, extra="ignore")
 
-    base_url: str = Field(
-        default="https://open.gsa.gov/api/sam-entity-extracts-api", alias="BASE_URL"
-    )
-    extract_url: str | None = Field(
-        default="https://open.gsa.gov/api/sam-entity-extracts-api/extracts", alias="EXTRACT_URL"
-    )
+    base_url: str = Field(default="https://api.sam.gov/data-services/v1/extracts", alias="BASE_URL")
+    extract_url: str | None = Field(default=None, alias="EXTRACT_URL")
     api_key: str | None = Field(default=None, alias="API_KEY")
     timeout: int = Field(default=30, alias="API_TIMEOUT")  # Timeout in seconds
 
