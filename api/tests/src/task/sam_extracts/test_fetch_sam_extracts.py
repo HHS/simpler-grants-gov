@@ -15,6 +15,7 @@ from tests.lib.db_testing import cascade_delete_from_db_table
 CURRENT_DATE = datetime(2025, 4, 10, 12, 0, 0)
 MONTHLY_EXTRACT_DATE = datetime(2025, 4, 1, 0, 0, 0)
 DAILY_EXTRACT_DATE = datetime(2025, 4, 10, 0, 0, 0)
+FIFTH_OF_MONTH_DATE = datetime(2025, 4, 5, 12, 0, 0)
 
 
 class TestSamExtractsTask(BaseTestClass):
@@ -59,6 +60,52 @@ class TestSamExtractsTask(BaseTestClass):
         return mock_client
 
     @pytest.fixture
+    def mock_sam_gov_client_for_fifth(self):
+        """Mock for SamGovClient with daily extracts up to the 5th"""
+        mock_client = MagicMock(spec=BaseSamGovClient)
+
+        # Mock the monthly extract for April
+        monthly_info = SamExtractInfo(
+            url="https://example.com/monthly/april",
+            filename="SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
+            updated_at=datetime(2025, 4, 1, 0, 0, 0),
+        )
+        mock_client.get_monthly_extract_info.return_value = monthly_info
+
+        # Mock daily extracts for days 1, 3, and 5 of April
+        daily_info_1 = SamExtractInfo(
+            url="https://example.com/daily/20250401",
+            filename="SAM_FOUO_DAILY_V2_20250401.ZIP",
+            updated_at=datetime(2025, 4, 1, 0, 0, 0),
+        )
+        daily_info_3 = SamExtractInfo(
+            url="https://example.com/daily/20250403",
+            filename="SAM_FOUO_DAILY_V2_20250403.ZIP",
+            updated_at=datetime(2025, 4, 3, 0, 0, 0),
+        )
+        daily_info_5 = SamExtractInfo(
+            url="https://example.com/daily/20250405",
+            filename="SAM_FOUO_DAILY_V2_20250405.ZIP",
+            updated_at=datetime(2025, 4, 5, 0, 0, 0),
+        )
+
+        # Include an extract from March which should be filtered out
+        daily_info_old = SamExtractInfo(
+            url="https://example.com/daily/20250331",
+            filename="SAM_FOUO_DAILY_V2_20250331.ZIP",
+            updated_at=datetime(2025, 3, 31, 0, 0, 0),
+        )
+
+        mock_client.get_daily_extract_info.return_value = [
+            daily_info_old,
+            daily_info_1,
+            daily_info_3,
+            daily_info_5,
+        ]
+
+        return mock_client
+
+    @pytest.fixture
     def task(self, db_session, mock_s3_bucket, mock_sam_gov_client, setup_data):
         """Create an instance of the task with mock dependencies
 
@@ -66,6 +113,17 @@ class TestSamExtractsTask(BaseTestClass):
         but still benefits from the class-scoped db_session and mock_sam_gov_client.
         """
         task = SamExtractsTask(db_session, mock_sam_gov_client)
+        # Set up the task with necessary config for testing
+        task.config.s3_bucket = mock_s3_bucket
+        task.config.s3_prefix = "test-prefix/"
+        # Add mock for increment method to track metric calls
+        task.increment = MagicMock()
+        return task
+
+    @pytest.fixture
+    def task_for_fifth(self, db_session, mock_s3_bucket, mock_sam_gov_client_for_fifth, setup_data):
+        """Create a task instance specifically for the fifth of the month test"""
+        task = SamExtractsTask(db_session, mock_sam_gov_client_for_fifth)
         # Set up the task with necessary config for testing
         task.config.s3_bucket = mock_s3_bucket
         task.config.s3_prefix = "test-prefix/"
@@ -186,13 +244,21 @@ class TestSamExtractsTask(BaseTestClass):
         with patch.object(
             task, "_fetch_monthly_extract", return_value=MONTHLY_EXTRACT_DATE
         ) as mock_fetch_monthly:
-            with patch.object(task, "_fetch_daily_extracts") as mock_fetch_daily:
-                # Run the task
-                task.run_task()
+            # Mock _get_latest_extract_date to return a date in the current month
+            # This ensures the task knows it has already processed extracts this month
+            with patch.object(
+                task, "_get_latest_extract_date", return_value=CURRENT_DATE
+            ) as mock_get_latest:
+                with patch.object(task, "_fetch_daily_extracts") as mock_fetch_daily:
+                    # Run the task
+                    task.run_task()
 
-                # Verify methods were called correctly
-                mock_fetch_monthly.assert_called_once()
-                mock_fetch_daily.assert_called_once_with(after_date=MONTHLY_EXTRACT_DATE)
+                    # Verify methods were called correctly
+                    mock_fetch_monthly.assert_called_once()
+                    # Assert _get_latest_extract_date was called twice (once for monthly, once for daily)
+                    assert mock_get_latest.call_count == 2
+                    # Since monthly_fetched is not None, it should call with after_date=monthly_fetched
+                    mock_fetch_daily.assert_called_once_with(after_date=MONTHLY_EXTRACT_DATE)
 
     @freeze_time(CURRENT_DATE)
     def test_run_task_no_new_monthly(self, task, db_session):
@@ -238,3 +304,55 @@ class TestSamExtractsTask(BaseTestClass):
                     mock_fetch_monthly.assert_called_once()
                     # This test is expecting fetch_daily_extracts to be called with no arguments
                     mock_fetch_daily.assert_called_once_with()
+
+    @freeze_time(FIFTH_OF_MONTH_DATE)
+    def test_run_task_on_fifth_of_month(
+        self, task_for_fifth, db_session, mock_sam_gov_client_for_fifth
+    ):
+        """Test running the task on the 5th of the month with no previous runs this month"""
+        # Reset the mocks
+        mock_sam_gov_client_for_fifth.reset_mock()
+        task_for_fifth.increment.reset_mock()
+
+        # Create a mock for _download_and_store_extract to return appropriate paths
+        download_return_values = [
+            # Monthly return value
+            "test-prefix/monthly/2025-04-01/SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
+            # Daily return values (for days 1, 3, and 5)
+            "test-prefix/daily/2025-04-01/SAM_FOUO_DAILY_V2_20250401.ZIP",
+            "test-prefix/daily/2025-04-03/SAM_FOUO_DAILY_V2_20250403.ZIP",
+            "test-prefix/daily/2025-04-05/SAM_FOUO_DAILY_V2_20250405.ZIP",
+        ]
+
+        download_mock = MagicMock(side_effect=download_return_values)
+
+        # Run the task with our mocks
+        with patch.object(task_for_fifth, "_download_and_store_extract", download_mock):
+            # Run the task
+            task_for_fifth.run_task()
+
+            # Verify monthly extract was fetched
+            mock_sam_gov_client_for_fifth.get_monthly_extract_info.assert_called_once()
+
+            # Verify daily extracts were fetched
+            mock_sam_gov_client_for_fifth.get_daily_extract_info.assert_called_once()
+
+            # Verify the downloads happened 4 times (1 monthly + 3 daily for April)
+            # March extract should NOT be downloaded because it's before the first of the month
+            assert download_mock.call_count == 4
+
+            # Verify metrics were incremented properly
+            assert task_for_fifth.increment.call_count >= 4
+
+            # Check that MONTHLY_EXTRACTS_FETCHED was incremented
+            task_for_fifth.increment.assert_any_call(
+                task_for_fifth.Metrics.MONTHLY_EXTRACTS_FETCHED
+            )
+
+            # Check that DAILY_EXTRACTS_FETCHED was incremented for each daily extract
+            daily_increments = [
+                call
+                for call in task_for_fifth.increment.call_args_list
+                if call.args[0] == task_for_fifth.Metrics.DAILY_EXTRACTS_FETCHED
+            ]
+            assert len(daily_increments) == 3, "Should have incremented daily metric 3 times"
