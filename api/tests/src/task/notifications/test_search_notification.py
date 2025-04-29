@@ -41,10 +41,12 @@ def clear_notification_logs(db_session):
     db_session.query(UserSavedOpportunity).delete()
     db_session.query(UserSavedSearch).delete()
 
+
 @pytest.fixture(autouse=True)
 def cleanup_opportunities(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedOpportunity)
+
 
 def test_search_notifications_cli(
     cli_runner,
@@ -132,7 +134,7 @@ def test_grouped_search_queries_cli(
     clear_notification_logs,
     user,
     user_with_email,
-    setup_search_data
+    setup_search_data,
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
     # Create two users with the same search query

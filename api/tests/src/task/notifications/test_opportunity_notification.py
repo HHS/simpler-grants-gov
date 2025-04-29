@@ -25,10 +25,12 @@ def clear_notification_logs(db_session):
     db_session.query(UserNotificationLog).delete()
     db_session.query(UserSavedOpportunity).delete()
 
+
 @pytest.fixture(autouse=True)
 def cleanup_opportunities(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedOpportunity)
+
 
 def test_opportunity_notifications(
     cli_runner,

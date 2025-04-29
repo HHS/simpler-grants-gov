@@ -30,6 +30,7 @@ def clear_notification_logs(db_session):
     db_session.query(UserNotificationLog).delete()
     db_session.query(UserOpportunityNotificationLog).delete()
 
+
 @pytest.fixture(autouse=True)
 def cleanup_opportunities(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
@@ -160,7 +161,13 @@ def test_closing_date_notification_not_sent_twice(
 
 
 def test_post_notification_log_creation(
-    cli_runner, db_session, search_client, enable_factory_create, clear_notification_logs, user, user_with_email
+    cli_runner,
+    db_session,
+    search_client,
+    enable_factory_create,
+    clear_notification_logs,
+    user,
+    user_with_email,
 ):
     """Test that notification logs are created when notifications are sent"""
     # Create an opportunity closing in 2 weeks that needs notification
