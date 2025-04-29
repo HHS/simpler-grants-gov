@@ -208,11 +208,15 @@ resource "aws_ecs_task_definition" "app" {
     },
   ])
 
-  # The CPU and memory values need to be one of the valid combinations for Fargate tasks.
+  # The CPU and memory values for the task definition need to be one of the valid combinations for Fargate tasks.
   # The valid combinations are listed in the AWS documentation below.
-  # The input values for `cpu` and `memory` are the values for the application container,
-  # We need some extra room inside of the task definition to account for sidecars.
-  # To create this extra room, we multiply the `cpu` and `memory` values by 2.
+  #
+  # The input values for `var.cpu` and `var.memory` are the values for the application container,
+  # not the value for the task definition.
+  #
+  # Because `var.cpu` and `var.memory` are the values for the application container,
+  # we need to create extra room in the task definition for the application container
+  #
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
   cpu    = var.cpu * 2
   memory = var.memory * 2
