@@ -63,16 +63,7 @@ export default function middleware(request: NextRequest): NextResponse {
     });
   }
 
-  // disable logging of prefetch requests, see https://github.com/vercel/next.js/discussions/37736#discussioncomment-11985169
-  // note that given next internals, this could break. If logs start looking weird, remove this check
-  const isPrefetch =
-    request.headers.get("sec-fetch-mode") === "cors" &&
-    request.headers.get("sec-fetch-dest") === "empty" &&
-    request.headers.get("next-url") !== null;
-
-  if (!isPrefetch) {
-    logRequest(request);
-  }
+  logRequest(request);
 
   return response;
 }

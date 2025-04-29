@@ -41,11 +41,21 @@ export const logger = pino(pinoConfig);
 export const logRequest = (request: NextRequest) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
-  logger.info({
-    url,
-    method,
-    userAgent: headers.get("user-agent"),
-    acceptLanguage: headers.get("accept-language"),
-    awsTraceId: headers.get("X-Amz-Cf-Id"),
-  });
+
+  // disable logging of prefetch requests, see https://github.com/vercel/next.js/discussions/37736#discussioncomment-11985169
+  // note that given next internals, this could break. If logs start looking weird, remove this check
+  const isPrefetch =
+    headers.get("next-url") !== null &&
+    headers.get("sec-fetch-mode") === "cors" &&
+    headers.get("sec-fetch-dest") === "empty";
+
+  if (!isPrefetch) {
+    logger.info({
+      url,
+      method,
+      userAgent: headers.get("user-agent"),
+      acceptLanguage: headers.get("accept-language"),
+      awsTraceId: headers.get("X-Amz-Cf-Id"),
+    });
+  }
 };
