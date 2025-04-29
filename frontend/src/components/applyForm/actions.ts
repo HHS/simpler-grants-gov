@@ -1,5 +1,6 @@
 "use server";
 
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
@@ -9,7 +10,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 import { redirect } from "next/navigation";
 
 import { FieldErrors } from "./types";
-import { parseSchema, shapeFormData } from "./utils";
+import { shapeFormData } from "./utils";
 import { validateJsonBySchema } from "./validate";
 
 type applyFormErrors = {
@@ -114,7 +115,7 @@ const handleSave = async (
 };
 
 async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
-  let formSchema = <FormDetail>{};
+  let formDetail = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
     if (response.status_code !== 200) {
@@ -123,11 +124,17 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
         response,
       );
     }
-    formSchema = response.data;
+    formDetail = response.data;
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
   }
-  return await parseSchema(formSchema.form_json_schema);
+  let formSchema = {};
+  try {
+    formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+  } catch (e) {
+    console.error("Error parsing JSON schema", e);
+  }
+  return formSchema;
 }
 
 function formValidate({

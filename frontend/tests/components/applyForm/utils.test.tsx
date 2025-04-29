@@ -9,6 +9,7 @@ import {
 import {
   buildField,
   buildFormTreeRecursive,
+  determineFieldType,
   getApplicationResponse,
   shapeFormData,
 } from "src/components/applyForm/utils";
@@ -440,5 +441,47 @@ describe("getApplicationResponse", () => {
     const result = getApplicationResponse(forms, "test");
 
     expect(result).toEqual({ test: "test" });
+  });
+});
+
+describe("determineFieldType", () => {
+  it("should return proper fields", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/test",
+    };
+    const fieldSchema: RJSFSchema = {
+      type: "string" as const,
+      title: "test",
+    };
+    const textField = determineFieldType({ uiFieldObject, fieldSchema });
+    expect(textField).toEqual("Text");
+    const selectFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      enum: ["test"],
+    };
+    const selectField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: selectFieldSchema,
+    });
+    expect(selectField).toEqual("Select");
+    const checkboxFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      type: "boolean",
+    };
+    const checkboxField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: checkboxFieldSchema,
+    });
+    expect(checkboxField).toEqual("Checkbox");
+    const textAreaFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      maxLength: 256,
+    };
+    const textAreaField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: textAreaFieldSchema,
+    });
+    expect(textAreaField).toEqual("TextArea");
   });
 });

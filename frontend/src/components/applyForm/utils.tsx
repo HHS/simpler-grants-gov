@@ -1,4 +1,3 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get } from "lodash";
@@ -22,17 +21,6 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
-
-// resolves $refs in schemas for single schema object
-export const parseSchema = async (
-  schema: RJSFSchema,
-): Promise<RJSFSchema | undefined> => {
-  try {
-    return (await $RefParser.dereference(schema)) as RJSFSchema;
-  } catch (e) {
-    console.error("Error parsing JSON schema", e);
-  }
-};
 
 export function buildFormTreeRecursive({
   errors,

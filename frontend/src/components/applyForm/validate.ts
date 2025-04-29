@@ -3,7 +3,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
 // JSON Schema for the UiSchema, accepts either a "field" or "section"
-const UiJsonSchema: RJSFSchema = {
+export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
   items: {
