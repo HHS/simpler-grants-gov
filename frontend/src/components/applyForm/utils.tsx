@@ -11,7 +11,6 @@ import { JSX } from "react";
 
 import {
   FieldErrors,
-  SchemaField,
   UiSchema,
   UiSchemaField,
   UswdsWidgetProps,
@@ -153,7 +152,7 @@ export const getFieldSchema = ({
   if (definition && schema) {
     return {
       ...getSchemaObjectFromPointer(formSchema, definition),
-      ...(schema as SchemaField),
+      ...schema,
     } as RJSFSchema;
   } else if (definition) {
     return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;

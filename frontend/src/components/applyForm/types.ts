@@ -48,9 +48,13 @@ export type UiSchemaField = {
 } & (
   | {
       definition: `/properties/${string}`;
-      schema: undefined;
+      schema?: undefined;
     }
-  | { schema: SchemaField; definition: undefined }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: `/properties/${string}`;
+      schema?: SchemaField;
+    }
 );
 
 export interface UiSchemaSection {
