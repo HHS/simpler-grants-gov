@@ -99,6 +99,6 @@ describe("useClientFetch", () => {
       result.current.clientFetch("http://wherever"),
     );
     expect(jsonMock).toHaveBeenCalledTimes(0);
-    expect((error as Error).message).toEqual("an error!: 500");
+    expect(error.message).toEqual("an error!: 500");
   });
 });
