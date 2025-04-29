@@ -21,7 +21,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - images (static files in public/images/ directory)
      */
-    "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.icon).*)",
+    "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.ico).*)",
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:
