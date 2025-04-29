@@ -4,15 +4,15 @@ import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
-import { useActionState, useMemo } from "react";
-import { Button, FormGroup } from "@trussworks/react-uswds";
+import { JSX, useActionState, useMemo } from "react";
+import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
 import { UiSchema } from "./types";
-import { buildForTreeRecursive, getFieldsForNav } from "./utils";
+import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,
@@ -42,14 +42,22 @@ const ApplyForm = ({
     formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
-  const fields = buildForTreeRecursive({
-    errors: validationErrors,
-    formData: formObject,
-    schema: formSchema,
-    uiSchema,
-  });
-
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+  let fields: JSX.Element[] = [];
+  try {
+    fields = buildFormTreeRecursive({
+      errors: validationErrors,
+      formData: formObject,
+      schema: formSchema,
+      uiSchema,
+    });
+  } catch (e) {
+    return (
+      <Alert type="error" heading="Error" headingLevel="h4">
+        Error rendering form
+      </Alert>
+    );
+  }
 
   return (
     <div className="usa-in-page-nav-container flex-justify">
@@ -57,6 +65,8 @@ const ApplyForm = ({
       <form
         className="usa-form usa-form--large flex-1 margin-top-neg-5"
         action={formAction}
+        // turns off html5 validation so all error displays are consistent
+        noValidate
       >
         <ApplyFormSuccessMessage message={successMessage} />
         <ApplyFormErrorMessage

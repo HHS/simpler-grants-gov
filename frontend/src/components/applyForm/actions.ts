@@ -1,7 +1,6 @@
 "use server";
 
 import { RJSFSchema } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
@@ -9,12 +8,13 @@ import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 
+import { FieldErrors } from "./types";
 import { parseSchema, shapeFormData } from "./utils";
 import { validateFormData } from "./validate";
 
 type applyFormErrors = {
   errorMessage: string;
-  validationErrors: ErrorObject<string, Record<string, unknown>, unknown>[];
+  validationErrors: FieldErrors;
 };
 type applyFormResponse = {
   applicationId: string;

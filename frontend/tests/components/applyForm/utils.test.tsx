@@ -1,7 +1,22 @@
 import { RJSFSchema } from "@rjsf/utils";
+import { render, screen } from "@testing-library/react";
 
-import { shapeFormData } from "src/components/applyForm/utils";
-import { validateFormSchema } from "src/components/applyForm/validate";
+import {
+  FieldErrors,
+  UiSchema,
+  UiSchemaField,
+} from "src/components/applyForm/types";
+import {
+  buildField,
+  buildFormTreeRecursive,
+  getApplicationResponse,
+  shapeFormData,
+} from "src/components/applyForm/utils";
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  useCallback: (fn: unknown) => fn,
+}));
 
 describe("shapeFormData", () => {
   it("should shape form data to the form schema", () => {
@@ -111,8 +126,6 @@ describe("shapeFormData", () => {
       todos: ["email", "write"],
     };
 
-    validateFormSchema(formSchema);
-
     const formData = new FormData();
     formData.append("street", "test street");
     formData.append("name", "test");
@@ -135,5 +148,297 @@ describe("shapeFormData", () => {
 
     const data = shapeFormData(formData, formSchema);
     expect(data).toMatchObject(shapedFormData);
+  });
+});
+
+describe("buildField", () => {
+  it("should build a field with basic properties", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/name",
+      schema: {
+        type: "string",
+        title: "Name",
+        maxLength: 50,
+      },
+    };
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name", maxLength: 50 },
+      },
+      required: ["name"],
+    };
+
+    const errors: FieldErrors = [];
+    const formData = { name: "Jane Doe" };
+
+    const BuiltField = buildField({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+    });
+    render(BuiltField);
+
+    const label = screen.getByTestId("label");
+    expect(label).toHaveAttribute("for", "name");
+    expect(label).toHaveAttribute("id", "label-for-name");
+
+    const required = screen.getByText("*");
+    expect(required).toBeInTheDocument();
+
+    const field = screen.getByTestId("name");
+    expect(field).toBeInTheDocument();
+    expect(field).toBeRequired();
+    expect(field).toHaveAttribute("type", "text");
+    expect(field).toHaveAttribute("maxLength", "50");
+    expect(field).toHaveValue("Jane Doe");
+  });
+
+  it("should handle fields with no definition", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      schema: {
+        type: "number",
+        title: "Age",
+      },
+    };
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        age: { type: "number", title: "Age" },
+      },
+    };
+
+    const errors: FieldErrors = [];
+    const formData = {};
+
+    const BuiltField = buildField({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+    });
+    render(BuiltField);
+
+    const label = screen.getByTestId("label");
+    expect(label).toHaveAttribute("for", "Age");
+    expect(label).toHaveAttribute("id", "label-for-Age");
+
+    const field = screen.getByTestId("Age");
+    expect(field).toBeInTheDocument();
+    expect(field).not.toBeRequired();
+    expect(field).toHaveAttribute("type", "number");
+    // the fields not in the json schema do not have values
+    expect(field).not.toHaveValue();
+  });
+
+  it("should handle fields with errors", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/email",
+    };
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        email: { type: "string", title: "Email" },
+      },
+    };
+
+    const errors = [
+      {
+        instancePath: "/email",
+        schemaPath: "#/properties/email",
+        keyword: "format",
+        params: { format: "email" },
+        message: "Invalid email format",
+      },
+    ];
+
+    const formData = { email: "invalid-email" };
+
+    const BuiltField = buildField({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+    });
+    render(BuiltField);
+
+    const label = screen.getByTestId("label");
+    expect(label).toHaveAttribute("for", "email");
+    expect(label).toHaveAttribute("id", "label-for-email");
+
+    const error = screen.getByTestId("errorMessage");
+    expect(error).toBeInTheDocument();
+    expect(error).toHaveAttribute("role", "alert");
+    expect(error).toHaveTextContent("Invalid email format");
+
+    const field = screen.getByTestId("email");
+    expect(field).toBeInTheDocument();
+    expect(error).toHaveClass("usa-error-message");
+  });
+});
+
+describe("buildFormTreeRecursive", () => {
+  it("should build a tree for a simple schema", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name" },
+        age: { type: "number", title: "Age" },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      { type: "field", definition: "/properties/name" },
+      { type: "field", definition: "/properties/age" },
+    ];
+
+    const errors: FieldErrors = [];
+    const formData = { name: "John", age: 30 };
+
+    const result = buildFormTreeRecursive({
+      errors,
+      formData,
+      schema,
+      uiSchema,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe("wrapper-for-name");
+    expect(result[1].key).toBe("wrapper-for-age");
+  });
+
+  it("should build a tree for a nested schema", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        address: {
+          type: "object",
+          properties: {
+            street: { type: "string", title: "Street" },
+            city: { type: "string", title: "City" },
+          },
+        },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      {
+        name: "address",
+        type: "section",
+        label: "Address",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/address/properties/street",
+          },
+          { type: "field", definition: "/properties/address/properties/city" },
+        ],
+      },
+    ];
+
+    const errors: FieldErrors = [];
+    const formData = { address: { street: "123 Main St", city: "Metropolis" } };
+
+    const result = buildFormTreeRecursive({
+      errors,
+      formData,
+      schema,
+      uiSchema,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe("address-wrapper");
+  });
+
+  it("should handle empty uiSchema gracefully", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name" },
+      },
+    };
+
+    const uiSchema: UiSchema = [];
+    const errors: FieldErrors = [];
+    const formData = { name: "John" };
+
+    const result = buildFormTreeRecursive({
+      errors,
+      formData,
+      schema,
+      uiSchema,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it("should handle nested children in uiSchema", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        section: {
+          type: "object",
+          properties: {
+            field1: { type: "string", title: "Field 1" },
+            field2: { type: "string", title: "Field 2" },
+          },
+        },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      {
+        name: "section",
+        type: "section",
+        label: "Section",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/section/properties/field1",
+          },
+          {
+            type: "field",
+            definition: "/properties/section/properties/field2",
+          },
+        ],
+      },
+    ];
+
+    const errors: FieldErrors = [];
+    const formData = { section: { field1: "Value 1", field2: "Value 2" } };
+
+    const result = buildFormTreeRecursive({
+      errors,
+      formData,
+      schema,
+      uiSchema,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe("section-wrapper");
+  });
+});
+
+describe("getApplicationResponse", () => {
+  it("should return a structured response for valid input", () => {
+    const forms = [
+      {
+        application_form_id: "test",
+        application_id: "test",
+        application_response: { test: "test" },
+        form_id: "test",
+      },
+    ];
+
+    const result = getApplicationResponse(forms, "test");
+
+    expect(result).toEqual({ test: "test" });
   });
 });
