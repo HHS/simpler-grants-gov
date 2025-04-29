@@ -29,28 +29,34 @@ class TestSamExtractsTask(BaseTestClass):
         # Clean up after tests
         cascade_delete_from_db_table(db_session, SamExtractFile)
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture
     def mock_sam_gov_client(self):
-        """Create a mock SAM.gov client that returns predictable data"""
-        client = MagicMock(spec=BaseSamGovClient)
-        client.get_monthly_extract_info.return_value = SamExtractInfo(
-            url="https://example.com/sam/monthly.zip",
-            filename="monthly.zip",
+        """Mock for SamGovClient"""
+        # Create a mock client directly instead of patching
+        mock_client = MagicMock(spec=BaseSamGovClient)
+
+        # Mock the monthly extract
+        monthly_info = SamExtractInfo(
+            url="https://example.com/monthly",
+            filename="SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
             updated_at=MONTHLY_EXTRACT_DATE,
         )
-        client.get_daily_extract_info.return_value = [
-            SamExtractInfo(
-                url="https://example.com/sam/daily-04-05.zip",
-                filename="daily-04-05.zip",
-                updated_at=datetime(2025, 4, 5, 0, 0, 0),
-            ),
-            SamExtractInfo(
-                url="https://example.com/sam/daily-04-10.zip",
-                filename="daily-04-10.zip",
-                updated_at=DAILY_EXTRACT_DATE,
-            ),
-        ]
-        return client
+        mock_client.get_monthly_extract_info.return_value = monthly_info
+
+        # Mock the daily extracts
+        daily_info_1 = SamExtractInfo(
+            url="https://example.com/daily1",
+            filename="SAM_FOUO_DAILY_V2_20250405.ZIP",
+            updated_at=datetime(2025, 4, 5),
+        )
+        daily_info_2 = SamExtractInfo(
+            url="https://example.com/daily2",
+            filename="SAM_FOUO_DAILY_V2_20250410.ZIP",
+            updated_at=datetime(2025, 4, 10),
+        )
+        mock_client.get_daily_extract_info.return_value = [daily_info_1, daily_info_2]
+
+        return mock_client
 
     @pytest.fixture
     def task(self, db_session, mock_s3_bucket, mock_sam_gov_client, setup_data):
@@ -87,7 +93,7 @@ class TestSamExtractsTask(BaseTestClass):
         with patch.object(
             task,
             "_download_and_store_extract",
-            return_value="test-prefix/monthly/2025-04-01/monthly.zip",
+            return_value="test-prefix/monthly/2025-04-01/SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
         ):
             # Run the function
             result = task._fetch_monthly_extract()
@@ -112,8 +118,8 @@ class TestSamExtractsTask(BaseTestClass):
         existing_extract = SamExtractFile(
             extract_type=SamGovExtractType.MONTHLY,
             extract_date=MONTHLY_EXTRACT_DATE,
-            filename="monthly.zip",
-            s3_path="test-prefix/monthly/2025-04-01/monthly.zip",
+            filename="SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
+            s3_path="test-prefix/monthly/2025-04-01/SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
             status=SamGovProcessingStatus.COMPLETED,
         )
         db_session.add(existing_extract)
@@ -146,8 +152,8 @@ class TestSamExtractsTask(BaseTestClass):
         existing_monthly = SamExtractFile(
             extract_type=SamGovExtractType.MONTHLY,
             extract_date=MONTHLY_EXTRACT_DATE,
-            filename="monthly.zip",
-            s3_path="test-prefix/monthly/2025-04-01/monthly.zip",
+            filename="SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
+            s3_path="test-prefix/monthly/2025-04-01/SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
             status=SamGovProcessingStatus.COMPLETED,
         )
         db_session.add(existing_monthly)
@@ -157,7 +163,7 @@ class TestSamExtractsTask(BaseTestClass):
         with patch.object(
             task,
             "_download_and_store_extract",
-            return_value="test-prefix/daily/2025-04-10/daily-04-10.zip",
+            return_value="test-prefix/daily/2025-04-10/SAM_FOUO_DAILY_V2_20250410.ZIP",
         ):
             # Run the function
             task._fetch_daily_extracts(after_date=MONTHLY_EXTRACT_DATE)
@@ -195,8 +201,8 @@ class TestSamExtractsTask(BaseTestClass):
         existing_monthly = SamExtractFile(
             extract_type=SamGovExtractType.MONTHLY,
             extract_date=MONTHLY_EXTRACT_DATE,
-            filename="monthly.zip",
-            s3_path="test-prefix/monthly/2025-04-01/monthly.zip",
+            filename="SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
+            s3_path="test-prefix/monthly/2025-04-01/SAM_PUBLIC_MONTHLY_V2_20250401.ZIP",
             status=SamGovProcessingStatus.COMPLETED,
         )
         db_session.add(existing_monthly)
