@@ -102,6 +102,12 @@ data "aws_acm_certificate" "cert" {
   most_recent = true
 }
 
+data "aws_acm_certificate" "s3_cdn_cert" {
+  count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
+  domain      = local.service_config.s3_cdn_domain_name
+  most_recent = true
+}
+
 data "aws_iam_policy" "app_db_access_policy" {
   count = module.app_config.has_database ? 1 : 0
   name  = local.database_config.app_access_policy_name
@@ -145,9 +151,11 @@ module "service" {
   public_subnet_ids  = data.aws_subnets.public.ids
   private_subnet_ids = data.aws_subnets.private.ids
 
-  certificate_arn = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
-  domain_name     = local.service_config.domain_name
-  hosted_zone_id  = null
+  certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
+  domain_name            = local.service_config.domain_name
+  s3_cdn_domain_name     = local.service_config.s3_cdn_domain_name
+  s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
+  hosted_zone_id         = null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

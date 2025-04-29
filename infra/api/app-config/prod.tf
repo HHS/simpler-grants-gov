@@ -7,6 +7,7 @@ module "prod_config" {
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
   enable_https                    = true
+  s3_cdn_domain_name              = "files.simpler.grants.gov"
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service

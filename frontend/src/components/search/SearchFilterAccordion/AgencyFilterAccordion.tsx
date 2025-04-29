@@ -1,8 +1,8 @@
+import { FilterOption } from "src/types/search/searchResponseTypes";
+
 import { useTranslations } from "next-intl";
 
-import SearchFilterAccordion, {
-  FilterOption,
-} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 // functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
 // with prefetched options we have a synchronous render

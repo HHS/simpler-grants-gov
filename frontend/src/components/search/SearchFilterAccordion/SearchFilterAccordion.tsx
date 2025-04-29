@@ -3,7 +3,11 @@
 import { camelCase } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
-import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
+import {
+  FilterOption,
+  FilterOptionWithChildren,
+  ValidSearchQueryParam,
+} from "src/types/search/searchResponseTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
 import { useContext, useMemo } from "react";
@@ -23,14 +27,6 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface FilterOption {
-  children?: FilterOption[];
-  id: string;
-  isChecked?: boolean;
-  label: string;
-  value: string;
-}
-
 export interface SearchFilterAccordionProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
@@ -39,14 +35,6 @@ export interface SearchFilterAccordionProps {
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
-}
-
-export interface FilterOptionWithChildren {
-  id: string;
-  label: string;
-  value: string;
-  isChecked?: boolean;
-  children: FilterOption[];
 }
 
 const AccordionTitle = ({
