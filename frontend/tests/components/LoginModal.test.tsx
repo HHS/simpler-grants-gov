@@ -7,12 +7,14 @@ import { LoginModal } from "src/components/LoginModal";
 
 const mockSetItem = jest.fn();
 
-jest.mock("src/services/auth/sessionStorage", () => ({
-  __esModule: true,
-  default: {
-    setItem: mockSetItem,
-  },
-}));
+jest.mock("src/services/auth/sessionStorage", () => {
+  return {
+    __esModule: true,
+    default: {
+      setItem: (...args: any[]) => mockSetItem(...args),
+    },
+  };
+});
 
 const mockLocation = {
   pathname: "/test-path",
