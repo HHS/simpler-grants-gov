@@ -18,8 +18,8 @@ const formSchema: RJSFSchema = {
     dob: { type: "string", format: "date", title: "Date of birth" },
     address: { type: "string", title: "test address" },
     state: { type: "string", title: "test state" },
-    checkbox: { type: "boolean", title: "I agree"},
-    textarea: { type: "string", maxLength: 256, title: "Text area"}
+    checkbox: { type: "boolean", title: "I agree" },
+    textarea: { type: "string", maxLength: 256, title: "Text area" },
   },
   required: ["name"],
 };
@@ -64,9 +64,9 @@ const uiSchema: UiSchema = [
         type: "field",
         definition: "/properties/address",
         widget: "Select",
-        schema : {
+        schema: {
           enum: ["test select option"],
-        }
+        },
       },
       {
         type: "field",
