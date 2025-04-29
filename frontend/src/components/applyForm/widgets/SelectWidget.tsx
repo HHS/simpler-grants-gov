@@ -67,7 +67,6 @@ function SelectWidget<
   const selectValue = value ? String(value) : "";
   // uswds recommends a combo box for lists larger than 15
   const useCombo = enums && enums.length > 15;
-
   const enumOptions = useMemo(() => {
     if (!enums) return [];
     return !useCombo && optEmptyVal
@@ -146,10 +145,10 @@ function SelectWidget<
       >
         {Array.isArray(enumOptions) &&
           !useCombo &&
-          enumOptions.map(({ label }) => {
+          enumOptions.map(({ label, value }) => {
             const disabled = enumDisabled && enumDisabled.indexOf(label) !== -1;
             return (
-              <option key={label} value={String(label)} disabled={disabled}>
+              <option key={label} value={String(value)} disabled={disabled}>
                 {label}
               </option>
             );

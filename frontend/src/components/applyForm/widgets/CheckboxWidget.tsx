@@ -69,7 +69,8 @@ function CheckboxWidget<
         label={label}
         labelDescription={description}
         name={id}
-        value={value ? "true" : "false"}
+        // for a single checkbox, the value is always true
+        value={"true"}
         defaultChecked={Boolean(value)}
         required={required}
         disabled={disabled || readonly}

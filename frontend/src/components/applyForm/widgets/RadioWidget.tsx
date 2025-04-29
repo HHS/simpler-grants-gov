@@ -90,7 +90,7 @@ function RadioWidget<
         title={title}
         required={required}
         description={description}
-      />{" "}
+      />
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
@@ -112,8 +112,8 @@ function RadioWidget<
               key={optionId(id, i)}
               disabled={disabled || itemDisabled || readonly}
               autoFocus={autofocus && i === 0}
-              defaultValue={updateOnInput ? undefined : String(i)}
-              value={updateOnInput ? String(i) : undefined}
+              defaultValue={updateOnInput ? undefined : String(option.value)}
+              value={updateOnInput ? String(option.value) : undefined}
               onChange={updateOnInput ? handleChange : undefined}
               onBlur={updateOnInput ? handleBlur : undefined}
               onFocus={updateOnInput ? handleFocus : undefined}

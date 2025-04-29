@@ -198,8 +198,8 @@ export const buildField = ({
   if (type === "Select") {
     const enums = fieldSchema.enum ? fieldSchema.enum : [];
     options = {
-      enumOptions: enums.map((label, index) => ({
-        value: String(index + 1),
+      enumOptions: enums.map((label) => ({
+        value: String(label),
         label: String(label),
       })),
       emptyValue: "- Select -",
@@ -363,7 +363,9 @@ export const shapeFormData = <T extends object>(
               : item,
           );
         } else {
-          result[key] = data[key];
+          if (data[key]) {
+            result[key] = data[key];
+          }
         }
       }
     }

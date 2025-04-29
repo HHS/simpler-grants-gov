@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 
 import { FieldErrors } from "./types";
 import { parseSchema, shapeFormData } from "./utils";
-import { validateFormData } from "./validate";
+import { validateJsonBySchema } from "./validate";
 
 type applyFormErrors = {
   errorMessage: string;
@@ -36,19 +36,18 @@ export async function handleFormAction(
       errorMessage: "Error submitting form",
       formData,
       formId,
-      successMessage,
+      successMessage: "",
       validationErrors: [],
     };
   }
-
-  const { validationErrors, errorMessage } = formValidate({
-    formData,
-    formSchema,
-  });
   const applicationFormData = shapeFormData<ApplicationResponseDetail>(
     formData,
     formSchema,
   );
+  const { validationErrors, errorMessage } = formValidate({
+    formData: applicationFormData,
+    formSchema,
+  });
   if (validationErrors.length) {
     await handleSave(applicationFormData, applicationId, formId);
     return {
@@ -135,10 +134,10 @@ function formValidate({
   formData,
   formSchema,
 }: {
-  formData: FormData;
+  formData: ApplicationResponseDetail;
   formSchema: RJSFSchema;
 }): applyFormErrors {
-  const errors = validateFormData(formData, formSchema);
+  const errors = validateJsonBySchema(formData, formSchema);
   if (errors) {
     return {
       errorMessage: "Error submitting form",
