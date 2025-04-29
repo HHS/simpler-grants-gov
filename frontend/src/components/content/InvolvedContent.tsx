@@ -1,10 +1,11 @@
 import { useTranslations } from "next-intl";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 import {
   Grid,
   GridContainer,
 } from "@trussworks/react-uswds";
+
+import IconInfo from "./IconInfo";
 
 const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code"
 const discourseLink = "https://simplergrants.discourse.group/"
@@ -32,18 +33,13 @@ const InvolvedContent = () => {
         >
           <Grid row className="padding-y-2" gap="md">
             <Grid col={6}>
-              <USWDSIcon
-                name="code"
-                className="usa-icon--size-4 text-middle"
-                aria-label="code-icon"
+              <IconInfo
+                description={t("technicalDescription")}
+                iconName="code"
+                link={codeLink}
+                linkText={t("technicalLink")}
+                title={t("technicalTitle")}
               />
-              <h3>{t("technicalTitle")}</h3>
-              <p className="font-sans-md line-height-sans-4">{t("technicalDescription")}</p>
-              <a href={codeLink}className="font-sans-md line-height-sans-4"
-              target="_blank"
-              rel="noopener noreferrer">
-                {t("technicalLink")}
-              </a>
               <br />
               <a href={discourseLink} className="font-sans-md line-height-sans-4"
               target="_blank"
@@ -52,19 +48,13 @@ const InvolvedContent = () => {
               </a>
             </Grid>
             <Grid col={6}>
-              <USWDSIcon
-                name="chat"
-                className="usa-icon--size-4 text-middle"
-                aria-label="chat-icon"
+              <IconInfo
+                description={t("participateDescription")}
+                iconName="chat"
+                link={participateLink}
+                linkText={t("participateLink")}
+                title={t("participateTitle")}
               />
-              <h3>{t("participateTitle")}</h3>
-              <p className="font-sans-md line-height-sans-4">{t("participateDescription")}</p>
-              <a
-                href={participateLink}
-                target="_blank"
-                rel="noopener noreferrer">
-                {t("participateLink")}
-              </a>
             </Grid>
           </Grid>
         </Grid>
