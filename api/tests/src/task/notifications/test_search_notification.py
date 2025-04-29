@@ -134,7 +134,6 @@ def test_grouped_search_queries_cli(
     clear_notification_logs,
     user,
     user_with_email,
-    setup_search_data,
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
     # Create two users with the same search query
@@ -213,10 +212,14 @@ def test_search_notifications_on_index_change(
         opportunity_id=999,
         opportunity_title="New Test Opportunity",
     )
-    factories.OpportunitySummaryFactory.build(
+    summary = factories.OpportunitySummaryFactory.build(
         opportunity=new_opportunity,
         summary_description="This should appear in test search results",
     )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=new_opportunity, opportunity_summary=summary
+    )
+
     json_record = schema.dump(new_opportunity)
     search_client.bulk_upsert(opportunity_index, [json_record], "opportunity_id")
 

@@ -123,9 +123,12 @@ def test_notification_log_creation(
     """Test that notification logs are created when notifications are sent"""
     # Create a saved opportunity that needs notification
     opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    factories.OpportunitySummaryFactory.create(
+    summary = factories.OpportunitySummaryFactory.create(
         opportunity=opportunity,
         close_date=datetime_util.utcnow() + timedelta(days=21),
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity, opportunity_summary=summary
     )
     saved_opportunity = factories.UserSavedOpportunityFactory.create(
         user=user,
@@ -165,9 +168,12 @@ def test_no_notification_log_when_no_updates(
     """Test that no notification log is created when there are no updates"""
     # Create a saved opportunity that doesn't need notification
     opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    factories.OpportunitySummaryFactory.create(
+    summary = factories.OpportunitySummaryFactory.create(
         opportunity=opportunity,
         close_date=datetime_util.utcnow() + timedelta(days=21),
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity, opportunity_summary=summary
     )
     factories.UserSavedOpportunityFactory.create(
         user=user,
