@@ -10,6 +10,8 @@ import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManage
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
+import { logRequest } from "./services/logger/simplerLogger";
+
 export const config = {
   matcher: [
     /*
@@ -19,7 +21,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - images (static files in public/images/ directory)
      */
-    "/((?!api|_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest).*)",
+    "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.icon).*)",
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:
@@ -40,10 +42,10 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
-  const response = featureFlagsManager.middleware(
-    request,
-    i18nMiddleware(request),
-  );
+  const response = request.url.match(/api\//)
+    ? featureFlagsManager.middleware(request, NextResponse.next())
+    : featureFlagsManager.middleware(request, i18nMiddleware(request));
+
   // in Next 15 there is an experimental `unauthorized` function that will send a 401
   // code to the client and display an unauthorized page
   // see https://nextjs.org/docs/app/api-reference/functions/unauthorized
@@ -60,5 +62,17 @@ export default function middleware(request: NextRequest): NextResponse {
       headers: response.headers,
     });
   }
+
+  // disable logging of prefetch requests, see https://github.com/vercel/next.js/discussions/37736#discussioncomment-11985169
+  // note that given next internals, this could break. If logs start looking weird, remove this check
+  const isPrefetch =
+    request.headers.get("sec-fetch-mode") === "cors" &&
+    request.headers.get("sec-fetch-dest") === "empty" &&
+    request.headers.get("next-url") !== null;
+
+  if (!isPrefetch) {
+    logRequest(request);
+  }
+
   return response;
 }
