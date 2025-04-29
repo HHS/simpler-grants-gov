@@ -209,8 +209,7 @@ def test_search_notifications_on_index_change(
     # Update the search index with new data that will change the results
     schema = OpportunityV1Schema()
     new_opportunity = factories.OpportunityFactory.create(
-        opportunity_id=999,
-        opportunity_title="New Test Opportunity",
+        opportunity_id=999, opportunity_title="New Test Opportunity", no_current_summary=True
     )
     summary = factories.OpportunitySummaryFactory.build(
         opportunity=new_opportunity,
