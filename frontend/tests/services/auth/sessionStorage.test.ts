@@ -8,14 +8,14 @@ describe("SessionStorage", () => {
     originalConsoleError = console.error;
     console.error = mockConsoleError;
 
-    Object.defineProperty(window, 'sessionStorage', {
+    Object.defineProperty(window, "sessionStorage", {
       value: {
         getItem: jest.fn(),
         setItem: jest.fn(),
         removeItem: jest.fn(),
         clear: jest.fn(),
       },
-      writable: true
+      writable: true,
     });
 
     jest.clearAllMocks();
@@ -32,40 +32,30 @@ describe("SessionStorage", () => {
     });
 
     it("returns false when window is undefined", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockImplementation(() => {
-          console.error(
-            "sessionStorage is not available:",
-            new Error("Window is undefined"),
-          );
-          return false;
-        });
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockImplementation(() => {
+        console.error("sessionStorage is not available:", new Error("Window is undefined"));
+        return false;
+      });
 
       expect(SessionStorage.isSessionStorageAvailable()).toBe(false);
       expect(console.error).toHaveBeenCalled();
     });
 
     it("returns false when sessionStorage is undefined", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockImplementation(() => {
-          console.error(
-            "sessionStorage is not available:",
-            new Error("SessionStorage is undefined"),
-          );
-          return false;
-        });
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockImplementation(() => {
+        console.error("sessionStorage is not available:", new Error("SessionStorage is undefined"));
+        return false;
+      });
 
       expect(SessionStorage.isSessionStorageAvailable()).toBe(false);
       expect(console.error).toHaveBeenCalled();
     });
 
     it("returns false and logs error when exception is thrown", () => {
-      Object.defineProperty(window, 'sessionStorage', {
+      Object.defineProperty(window, "sessionStorage", {
         get() {
           throw new Error("Access denied");
-        }
+        },
       });
 
       expect(SessionStorage.isSessionStorageAvailable()).toBe(false);
@@ -80,9 +70,7 @@ describe("SessionStorage", () => {
     });
 
     it("does nothing when sessionStorage is not available", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockReturnValue(false);
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockReturnValue(false);
 
       SessionStorage.setItem("testKey", "testValue");
       expect(window.sessionStorage.setItem).not.toHaveBeenCalled();
@@ -113,9 +101,7 @@ describe("SessionStorage", () => {
     });
 
     it("returns null when sessionStorage is not available", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockReturnValue(false);
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockReturnValue(false);
 
       expect(SessionStorage.getItem("testKey")).toBeNull();
       expect(window.sessionStorage.getItem).not.toHaveBeenCalled();
@@ -138,9 +124,7 @@ describe("SessionStorage", () => {
     });
 
     it("does nothing when sessionStorage is not available", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockReturnValue(false);
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockReturnValue(false);
 
       SessionStorage.removeItem("testKey");
       expect(window.sessionStorage.removeItem).not.toHaveBeenCalled();
@@ -163,9 +147,7 @@ describe("SessionStorage", () => {
     });
 
     it("does nothing when sessionStorage is not available", () => {
-      jest
-        .spyOn(SessionStorage, "isSessionStorageAvailable")
-        .mockReturnValue(false);
+      jest.spyOn(SessionStorage, "isSessionStorageAvailable").mockReturnValue(false);
 
       SessionStorage.clear();
       expect(window.sessionStorage.clear).not.toHaveBeenCalled();
