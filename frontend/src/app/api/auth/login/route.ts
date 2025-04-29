@@ -1,16 +1,13 @@
 import { environment } from "src/constants/environments";
 
+import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  try {
-    if (!environment.AUTH_LOGIN_URL) {
-      throw new Error("AUTH_LOGIN_URL not defined");
-    }
-    return NextResponse.redirect(environment.AUTH_LOGIN_URL);
-  } catch (error) {
-    return new NextResponse(error as string, { status: 500 });
+  if (!environment.AUTH_LOGIN_URL) {
+    return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
+  redirect(environment.AUTH_LOGIN_URL);
 }

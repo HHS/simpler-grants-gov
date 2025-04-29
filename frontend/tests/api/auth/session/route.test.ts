@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/auth/session/route";
+import { getUserSession } from "src/app/api/auth/session/handler";
 
 const getSessionMock = jest.fn();
 const responseJsonMock = jest.fn((something: unknown) => something);
@@ -26,7 +26,7 @@ describe("session GET request", () => {
       token: "fakeToken",
     }));
 
-    await GET();
+    await getUserSession();
 
     expect(getSessionMock).toHaveBeenCalledTimes(1);
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
@@ -35,7 +35,7 @@ describe("session GET request", () => {
 
   it("returns a resopnse with an empty token if no session token exists", async () => {
     getSessionMock.mockImplementation(() => null);
-    await GET();
+    await getUserSession();
 
     expect(getSessionMock).toHaveBeenCalledTimes(1);
     expect(responseJsonMock).toHaveBeenCalledTimes(1);

@@ -1,36 +1,7 @@
-import { readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
-import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const opportunityId = (await params).id;
+import { getSavedOpportunityHandler } from "./handler";
 
-  try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to get saved opportunity");
-    }
-    const savedOpportunities = await getSavedOpportunity(
-      session.token,
-      session.user_id,
-      Number(opportunityId),
-    );
-    return new Response(JSON.stringify(savedOpportunities), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (e) {
-    const { status, message } = readError(e as Error, 500);
-    return Response.json(
-      {
-        message: `Error fetching saved opportunity: ${message}`,
-      },
-      { status },
-    );
-  }
-}
+export const GET = respondWithTraceAndLogs<{ id: string }>(
+  getSavedOpportunityHandler,
+);
