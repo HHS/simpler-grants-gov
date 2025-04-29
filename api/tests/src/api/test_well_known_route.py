@@ -4,7 +4,8 @@ DV_FILE_NAME = "dv.txt"
 
 def test_get_well_known_200(client):
     response = client.get(f"/.well-known/pki-validation/{DV_FILE_NAME}")
-    assert response.text == "data"
+    assert response.text == "data\non\nnewlines"
+    assert response.content_type == "text/plain; charset=utf-8"
     assert response.status_code == 200
 
 

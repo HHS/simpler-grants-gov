@@ -164,6 +164,12 @@ variable "s3_cdn_bucket_name" {
   default     = null
 }
 
+variable "s3_cdn_certificate_arn" {
+  description = "The ARN of the certificate to use for the S3 CDN"
+  type        = string
+  default     = null
+}
+
 variable "s3_cdn_domain_name" {
   description = "The domain name of the S3 bucket to use for the S3 CDN"
   type        = string

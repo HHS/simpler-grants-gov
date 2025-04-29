@@ -7,8 +7,7 @@ import {
   SearchFetcherActionType,
   SortOptions,
 } from "src/types/search/searchRequestTypes";
-
-import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { FilterOption } from "src/types/search/searchResponseTypes";
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,

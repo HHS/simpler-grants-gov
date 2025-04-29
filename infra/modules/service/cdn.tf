@@ -18,6 +18,7 @@ locals {
   #     then return null
   cdn_domain_name         = var.enable_alb_cdn && var.domain != null ? var.domain : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
   cdn_domain_name_env_var = local.cdn_domain_name != null ? local.cdn_domain_name : length(aws_cloudfront_distribution.cdn) != 0 ? aws_cloudfront_distribution.cdn[0].domain_name : null
+  cdn_certificate_arn     = var.enable_s3_cdn ? var.s3_cdn_certificate_arn : var.enable_alb_cdn ? var.certificate_arn : null
 
   # The domain name of the origin, ie. where the content is being served from.
   #   - If the origin is an ALB, this is the DNS name of the ALB
@@ -71,12 +72,12 @@ resource "aws_cloudfront_distribution" "cdn" {
       custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = var.certificate_arn == null ? "http-only" : "https-only"
+        origin_protocol_policy = local.cdn_certificate_arn == null ? "http-only" : "https-only"
         origin_ssl_protocols   = local.ssl_protocols
       }
 
       dynamic "origin_shield" {
-        for_each = var.certificate_arn == null ? [1] : []
+        for_each = local.cdn_certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -93,7 +94,7 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_access_control_id = aws_cloudfront_origin_access_control.cdn[0].id
 
       dynamic "origin_shield" {
-        for_each = var.certificate_arn == null ? [1] : []
+        for_each = local.cdn_certificate_arn == null ? [1] : []
         content {
           enabled              = true
           origin_shield_region = data.aws_region.current.name
@@ -113,7 +114,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = var.certificate_arn == null ? "allow-all" : "redirect-to-https"
+    viewer_protocol_policy = local.cdn_certificate_arn == null ? "allow-all" : "redirect-to-https"
   }
 
   restrictions {
@@ -123,9 +124,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   dynamic "viewer_certificate" {
-    for_each = var.certificate_arn != null ? [1] : []
+    for_each = local.cdn_certificate_arn != null ? [1] : []
     content {
-      acm_certificate_arn            = var.certificate_arn
+      acm_certificate_arn            = local.cdn_certificate_arn
       cloudfront_default_certificate = false
       minimum_protocol_version       = local.minimum_protocol_version
       ssl_support_method             = "sni-only"
@@ -133,9 +134,8 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   dynamic "viewer_certificate" {
-    for_each = var.certificate_arn == null ? [1] : []
+    for_each = local.cdn_certificate_arn == null ? [1] : []
     content {
-      acm_certificate_arn            = var.certificate_arn
       cloudfront_default_certificate = true
       minimum_protocol_version       = local.minimum_protocol_version
     }
