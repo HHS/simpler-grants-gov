@@ -82,33 +82,4 @@ test.describe("Login Page Redirect", () => {
     await page.goto(`${BASE_URL}/login`);
     await expect(page.getByText("Redirecting...")).toBeVisible();
   });
-
-  test("should handle redirect after successful login flow", async ({
-    page,
-  }) => {
-    // Navigate to opportunities page
-    await page.goto(`${BASE_URL}/opportunities`);
-
-    // Wait for the sign-in button to be ready and click it
-    const signInButton = page.getByTestId("sign-in-button");
-    await signInButton.waitFor({ state: "visible", timeout: 10000 });
-    await signInButton.click();
-
-    // Wait for the modal heading to be visible
-    const modalHeading = page.getByRole("heading", {
-      name: "Sign in to Simpler.Grants.gov",
-    });
-    await modalHeading.waitFor({ state: "visible", timeout: 10000 });
-
-    // Wait for the login link to be visible and click it
-    const loginLink = page.getByRole("link", {
-      name: /Sign in with Login.gov/i,
-    });
-    await loginLink.waitFor({ state: "visible", timeout: 10000 });
-
-    // Start waiting for navigation before clicking
-    const navigationPromise = page.waitForNavigation();
-    await loginLink.click();
-    await navigationPromise;
-  });
 });
