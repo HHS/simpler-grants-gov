@@ -31,9 +31,13 @@ const UiJsonSchema: RJSFSchema = {
           type: "string",
           pattern: "^/properties/[a-zA-Z0-9]+$",
         },
+        widget: {
+          type: "string",
+          enum: ["Checkbox", "Text", "TextArea", "Radio", "Select"],
+        },
       },
       required: ["type"],
-      oneOf: [
+      anyOf: [
         {
           required: ["schema"],
         },

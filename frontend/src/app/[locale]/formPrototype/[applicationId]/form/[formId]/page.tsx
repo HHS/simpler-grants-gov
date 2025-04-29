@@ -86,7 +86,11 @@ async function FormPage({ params }: formPageProps) {
 
   const schemaErrors = validateUiSchema(form_ui_schema);
   if (schemaErrors) {
-    console.error("Error validating form", form_ui_schema, schemaErrors);
+    console.error(
+      "Error validating form ui schema",
+      form_ui_schema,
+      schemaErrors,
+    );
     return <TopLevelError />;
   }
 

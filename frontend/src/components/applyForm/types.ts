@@ -40,11 +40,18 @@ export type FieldErrors = ErrorObject<
   unknown
 >[];
 
+export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+
 export type UiSchemaField = {
   type: "field";
-  definition?: `/properties/${string}`;
-  schema?: SchemaField;
-};
+  widget?: WidgetTypes;
+} & (
+  | {
+      definition: `/properties/${string}`;
+      schema: undefined;
+    }
+  | { schema: SchemaField; definition: undefined }
+);
 
 export interface UiSchemaSection {
   type: "section";

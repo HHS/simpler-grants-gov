@@ -17,6 +17,7 @@ import {
   ComboBox,
   ComboBoxOption,
   ErrorMessage,
+  FormGroup,
   Select,
 } from "@trussworks/react-uswds";
 
@@ -43,35 +44,36 @@ function SelectWidget<
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
 >({
-  schema,
   id,
-  options,
-  value,
-  required,
   disabled,
+  options,
   readonly,
-  multiple = false,
+  required,
+  schema,
+  value,
   autofocus = false,
-  updateOnInput = false,
+  multiple = false,
   rawErrors = [],
+  updateOnInput = false,
   // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
+  const { title, description } = schema;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
-  const { title, description } = schema;
+  const enums = opts && opts?.length > 0 ? opts : [];
   const selectValue = value ? String(value) : "";
   // uswds recommends a combo box for lists larger than 15
-  const useCombo = opts && opts.length > 15;
+  const useCombo = enums && enums.length > 15;
 
   const enumOptions = useMemo(() => {
-    if (!opts) return [];
+    if (!enums) return [];
     return !useCombo && optEmptyVal
-      ? [...[{ value: "", label: optEmptyVal as string }], ...opts]
-      : opts;
-  }, [useCombo, optEmptyVal, opts]);
+      ? [...[{ value: "", label: optEmptyVal as string }], ...enums]
+      : enums;
+  }, [useCombo, optEmptyVal, enums]);
 
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
@@ -115,7 +117,7 @@ function SelectWidget<
   const Widget = useCombo ? ComboBox : Select;
 
   return (
-    <div key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel
         idFor={id}
         title={title}
@@ -153,7 +155,7 @@ function SelectWidget<
             );
           })}
       </Widget>
-    </div>
+    </FormGroup>
   );
 }
 

@@ -8,7 +8,12 @@ import {
 } from "@rjsf/utils";
 
 import { FocusEvent, useCallback, useMemo } from "react";
-import { ErrorMessage, Fieldset, Radio } from "@trussworks/react-uswds";
+import {
+  ErrorMessage,
+  Fieldset,
+  FormGroup,
+  Radio,
+} from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { FieldLabel } from "./FieldLabel";
@@ -24,24 +29,23 @@ function RadioWidget<
   F extends FormContextType = never,
 >({
   id,
-  schema,
-  options,
-  value,
-  required,
   disabled,
+  options,
+  schema,
+  required,
   readonly,
+  value,
   autofocus = false,
-  updateOnInput = false,
   rawErrors = [],
+  updateOnInput = false,
   // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
+  const { title, enum: enumFromSchema, description } = schema;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumDisabled, emptyValue } = options;
-
-  const { title, enum: enumFromSchema } = schema;
 
   const enumOptions = useMemo(
     () =>
@@ -85,8 +89,13 @@ function RadioWidget<
       : undefined;
 
   return (
-    <Fieldset id={id}>
-      <FieldLabel idFor={id} title={title} required={required} />
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
+      <FieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description}
+      />{" "}
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
@@ -117,7 +126,7 @@ function RadioWidget<
             />
           );
         })}
-    </Fieldset>
+    </FormGroup>
   );
 }
 

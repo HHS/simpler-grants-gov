@@ -9,10 +9,19 @@ import {
 
 import { JSX } from "react";
 
-import { FieldErrors, UiSchema, UiSchemaField } from "./types";
+import {
+  FieldErrors,
+  SchemaField,
+  UiSchema,
+  UiSchemaField,
+  UswdsWidgetProps,
+  WidgetTypes,
+} from "./types";
+import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
+import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
-import TextareaWidget from "./widgets/TextAreaWidget";
+import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
 // resolves $refs in schemas for single schema object
@@ -59,7 +68,7 @@ export function buildFormTreeRecursive({
             label: node.label,
             name: node.name,
           });
-        } else if (!parent && "definition" in node) {
+        } else if (!parent && ("definition" in node || "schema" in node)) {
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
@@ -112,67 +121,55 @@ export function buildFormTreeRecursive({
   return acc;
 }
 
-const createField = ({
-  id,
-  required = false,
-  minLength = null,
-  maxLength = null,
-  schema,
-  rawErrors,
-  value,
+// json schema doesn't describe UI so types are infered if widget not supplied
+export const determineFieldType = ({
+  uiFieldObject,
+  fieldSchema,
 }: {
-  id: string;
-  required: boolean | undefined;
-  minLength: number | null;
-  maxLength: number | null;
-  schema: RJSFSchema;
-  rawErrors: string[] | undefined;
-  value: string | number | undefined;
-}) => {
-  const disabled = schema.type === "null";
-  if (maxLength && Number(maxLength) > 255) {
-    return TextareaWidget({
-      id,
-      disabled,
-      required,
-      minLength: minLength ?? undefined,
-      maxLength,
-      options: {},
-      schema,
-      rawErrors,
-      value,
-    });
-  } else if (schema.enum?.length) {
-    return SelectWidget({
-      disabled,
-      id,
-      required,
-      minLength: minLength ?? undefined,
-      maxLength: minLength ?? undefined,
-      options: {
-        enumOptions: schema.enum.map((label, index) => ({
-          value: String(index + 1),
-          label: String(label),
-        })),
-        emptyValue: "- Select -",
-      },
-      schema,
-      rawErrors,
-      value,
-    });
-  } else {
-    return TextWidget({
-      id,
-      disabled,
-      required,
-      minLength: minLength ?? undefined,
-      maxLength: minLength ?? undefined,
-      options: {},
-      schema,
-      rawErrors,
-      value,
-    });
+  uiFieldObject: UiSchemaField;
+  fieldSchema: RJSFSchema;
+}): WidgetTypes => {
+  const { widget } = uiFieldObject;
+  if (widget) return widget;
+  if (fieldSchema.enum?.length) {
+    return "Select";
+  } else if (fieldSchema.type === "boolean") {
+    return "Checkbox";
+  } else if (fieldSchema.maxLength && fieldSchema.maxLength > 255) {
+    return "TextArea";
   }
+  return "Text";
+};
+
+// either schema or definition is required, and schema fields take precedence
+export const getFieldSchema = ({
+  uiFieldObject,
+  formSchema,
+}: {
+  uiFieldObject: UiSchemaField;
+  formSchema: RJSFSchema;
+}): RJSFSchema => {
+  const { definition, schema } = uiFieldObject;
+  if (definition && schema) {
+    return {
+      ...getSchemaObjectFromPointer(formSchema, definition),
+      ...(schema as SchemaField),
+    };
+  } else if (definition) {
+    return getSchemaObjectFromPointer(formSchema, definition);
+  }
+  return schema as RJSFSchema;
+};
+
+const widgetFunctions: Record<
+  WidgetTypes,
+  (widgetProps: UswdsWidgetProps) => JSX.Element
+> = {
+  Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
+  TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
+  Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
+  Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
+  Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
 };
 
 export const buildField = ({
@@ -187,24 +184,39 @@ export const buildField = ({
   formData: object;
 }) => {
   const { definition, schema } = uiFieldObject;
+  const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
   const name = definition
     ? definition.split("/")[definition.split("/").length - 1]
     : (schema?.title ?? "untitled").replace(" ", "-");
-  // TODO: parse UI schema in single function
-  const fieldSchema = definition
-    ? (getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema)
-    : schema;
+
   const rawErrors = formatFieldErrors(errors, definition, name);
   const value = get(formData, name) as string | number | undefined;
+  const type = determineFieldType({ uiFieldObject, fieldSchema });
 
-  return createField({
+  // TODO: move schema mutations to own function
+  const disabled = fieldSchema.type === "null";
+  let options = {};
+  if (type === "Select") {
+    const enums = fieldSchema.enum ? fieldSchema.enum : [];
+    options = {
+      enumOptions: enums.map((label, index) => ({
+        value: String(index + 1),
+        label: String(label),
+      })),
+      emptyValue: "- Select -",
+    };
+  }
+
+  return widgetFunctions[type]({
     id: name,
+    disabled,
     required: (formSchema.required ?? []).includes(name),
-    minLength: fieldSchema?.minLength ? fieldSchema.minLength : null,
-    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : null,
+    minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
+    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
     schema: fieldSchema as RJSFSchema,
     rawErrors,
     value,
+    options,
   });
 };
 
