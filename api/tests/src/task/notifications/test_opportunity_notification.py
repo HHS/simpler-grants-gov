@@ -72,7 +72,12 @@ def test_opportunity_notifications(
 
     # Verify the log contains the correct metrics
     log_records = [
-        r for r in caplog.records if "Successfully sent notification to user" in r.message
+        r
+        for r in caplog.records
+        if (
+            "Successfully sent notification to user" in r.message
+            and r.__dict__.get("notification_reason") == NotificationReason.OPPORTUNITY_UPDATES
+        )
     ]
     assert len(log_records) == 1
     extra = log_records[0].__dict__

@@ -60,6 +60,13 @@ class SearchClient:
                 "index": {"number_of_shards": shard_count, "number_of_replicas": replica_count},
                 "analysis": analysis,
             },
+            "mappings": {
+                "properties": {
+                    "opportunity_id": {"type": "integer"},
+                    "summary.post_date": {"type": "date"},
+                    # Add other explicit mappings here if needed in the future
+                }
+            },
         }
 
         logger.info("Creating search index %s", index_name, extra={"index_name": index_name})

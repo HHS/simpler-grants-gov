@@ -26,12 +26,28 @@ def user_with_email(db_session, user, monkeypatch):
 
 @pytest.fixture
 def setup_search_data(opportunity_index, opportunity_index_alias, search_client):
-    # Load into the search index
-    schema = OpportunityV1Schema()
-    json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
-    search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
-    # Swap the search index alias
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+    # Check if the alias exists and points to the right index
+    try:
+        existing_index_mapping = search_client._client.cat.aliases(
+            opportunity_index_alias, format="json"
+        )
+        if not existing_index_mapping or opportunity_index not in [
+            mapping.get("index") for mapping in existing_index_mapping
+        ]:
+            # If no mapping exists or our index isn't among them, create the mapping
+            # Load into the search index
+            schema = OpportunityV1Schema()
+            json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
+            search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+            # Swap the search index alias
+            search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+    except Exception:
+        # In case of any error, recreate the index and alias
+        schema = OpportunityV1Schema()
+        json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
+        search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+        # Swap the search index alias
+        search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
 
 @pytest.fixture
@@ -133,6 +149,7 @@ def test_grouped_search_queries_cli(
     enable_factory_create,
     clear_notification_logs,
     user,
+    setup_search_data,
     user_with_email,
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
@@ -195,6 +212,7 @@ def test_search_notifications_on_index_change(
     opportunity_index,
     search_client,
     clear_notification_logs,
+    setup_search_data,
 ):
     """Test that verifies notifications are generated when search results change due to index updates"""
     # Create a saved search with initial results
@@ -258,7 +276,7 @@ def test_search_notifications_on_index_change(
 
 
 def test_pagination_params_are_stripped_from_search_query(
-    cli_runner, db_session, enable_factory_create, user, clear_notification_logs
+    cli_runner, db_session, enable_factory_create, user, clear_notification_logs, setup_search_data
 ):
     """Test that pagination parameters are stripped from search queries"""
     saved_search = factories.UserSavedSearchFactory.create(
