@@ -11,11 +11,12 @@ import { ErrorObject } from "ajv";
 import { HTMLAttributes } from "react";
 
 export type SchemaField = {
-  type: string;
-  title: string;
+  type?: string;
+  title?: string;
   minLength?: number;
   maxLength?: number;
   format?: string;
+  enum?: string[];
   description?: string;
 };
 
