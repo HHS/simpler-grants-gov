@@ -5,9 +5,9 @@ import {
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
-import IndexGoalContent from "src/components/content/IndexGoalContent";
-import ProcessAndResearchContent
-  from "src/components/content/ProcessAndResearchContent";
+import BuildingContent from "src/components/content/BuildingContent";
+import ExperimentalContent from "src/components/content/ExperimentalContent";
+import InvolvedContent from "src/components/content/InvolvedContent";
 import Hero from "src/components/Hero";
 import { LocalizedPageProps } from "src/types/intl";
 
@@ -28,8 +28,13 @@ export default function Home({ params }: LocalizedPageProps) {
   return (
     <>
       <Hero />
-      <IndexGoalContent />
-      <ProcessAndResearchContent />
+      <div className="bg-base-lightest">
+        <ExperimentalContent />
+      </div>
+      <BuildingContent />
+      <div className="bg-base-lightest">
+        <InvolvedContent />
+      </div>
     </>
   );
 }

@@ -503,15 +503,30 @@ export const messages = {
     header: "Tell us what's working (and what's not)",
     subheader1: "What you can do now",
     content1: "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-    try: 'Try the new simpler search',
+    tryLink: 'Try the new simpler search',
     subheader2: "What you can't do quite yet",
     content2: "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
-    feedback: "Send us your feedback and suggestions.",
-    feedbackP: "We're excited to hear from you to learn how we can improve.",
+    feedbackTitle: "Send us your feedback and suggestions.",
+    feedbackDescription: "We're excited to hear from you to learn how we can improve.",
     feedbackLink: "Contact us at simpler@grants.gov",
-    newFeatures: "Be the first to hear about new features.",
-    newFeaturesP: "Our newsletter delivers the latest news straight to your inbox.",
+    newFeaturesTitle: "Be the first to hear about new features.",
+    newFeaturesDescription: "Our newsletter delivers the latest news straight to your inbox.",
     newFeaturesLink: "Subscribe to our newsletter"
+  },
+  Building: {
+    title: "Building with you, not for you", 
+    content1: "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+    content2: "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build."
+  },
+  Involved: {
+    title: "More ways to get involved",
+    technicalTitle: "Contribute your technical expertise",
+    technicalDescription: "We're always excited to welcome new open source developers to our community.",
+    technicalLink: "Learn how to contribute code",
+    participateTitle: "Participate in user research",
+    participateDescription: "Be a part of the design process by taking part in usability tests and interviews.",
+    participateLink: "Sign up to participate in future studies",
+    discourseLink: "Chat on the Discourse forum"
   },
   Footer: {
     agency_name: "Grants.gov",
