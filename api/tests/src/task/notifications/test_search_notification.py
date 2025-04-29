@@ -6,12 +6,14 @@ from sqlalchemy import select
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.generate_notifications import NotificationConstants
 from src.task.notifications.search_notification import _strip_pagination_params
 from src.util import datetime_util
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
 
@@ -28,7 +30,6 @@ def setup_search_data(opportunity_index, opportunity_index_alias, search_client)
     schema = OpportunityV1Schema()
     json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
     search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
-
     # Swap the search index alias
     search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
@@ -40,16 +41,20 @@ def clear_notification_logs(db_session):
     db_session.query(UserSavedOpportunity).delete()
     db_session.query(UserSavedSearch).delete()
 
+@pytest.fixture(autouse=True)
+def cleanup_opportunities(db_session):
+    cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
 def test_search_notifications_cli(
     cli_runner,
     db_session,
+    setup_search_data,
     enable_factory_create,
     user,
     user_with_email,
     caplog,
     clear_notification_logs,
-    setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
 
@@ -127,6 +132,7 @@ def test_grouped_search_queries_cli(
     clear_notification_logs,
     user,
     user_with_email,
+    setup_search_data
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
     # Create two users with the same search query

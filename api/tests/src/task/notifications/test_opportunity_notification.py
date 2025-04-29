@@ -4,9 +4,12 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.constants import NotificationReason
+from src.task.notifications.email_notification import EmailNotificationTask
 from src.util import datetime_util
+from tests.lib.db_testing import cascade_delete_from_db_table
 
 
 @pytest.fixture
@@ -22,17 +25,22 @@ def clear_notification_logs(db_session):
     db_session.query(UserNotificationLog).delete()
     db_session.query(UserSavedOpportunity).delete()
 
+@pytest.fixture(autouse=True)
+def cleanup_opportunities(db_session):
+    cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
-def test_opportunity_notifications_cli(
+def test_opportunity_notifications(
     cli_runner,
     db_session,
+    search_client,
     enable_factory_create,
     user,
     user_with_email,
     caplog,
     clear_notification_logs,
 ):
-    """Simple test that verifies we can invoke the notification task via CLI"""
+    """Test that notifications are sent for updated opportunities"""
     # Create a saved opportunity that needs notification
     opportunity = factories.OpportunityFactory.create()
     saved_opportunity = factories.UserSavedOpportunityFactory.create(
@@ -47,13 +55,18 @@ def test_opportunity_notifications_cli(
 
     _clear_mock_responses()
 
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    # Run the notification task
+    task = EmailNotificationTask(db_session, search_client)
+    task.run()
 
-    assert result.exit_code == 0
-
-    # Verify expected log messages
-    assert "Collected updated opportunity notifications" in caplog.text
-    assert "Sending notification to user" in caplog.text
+    # Verify notification log was created
+    notification_logs = (
+        db_session.query(UserNotificationLog)
+        .filter(UserNotificationLog.notification_reason == NotificationReason.OPPORTUNITY_UPDATES)
+        .all()
+    )
+    assert len(notification_logs) == 1
+    assert notification_logs[0].user_id == user.user_id
 
     # Verify the log contains the correct metrics
     log_records = [
@@ -66,7 +79,7 @@ def test_opportunity_notifications_cli(
 
 
 def test_last_notified_at_updates(
-    cli_runner, db_session, enable_factory_create, user, user_with_email
+    cli_runner, db_session, search_client, enable_factory_create, user, user_with_email
 ):
     """Test that last_notified_at gets updated after sending notifications"""
     # Create an opportunity that was updated after the last notification
@@ -84,8 +97,8 @@ def test_last_notified_at_updates(
     original_notification_time = saved_opp.last_notified_at
 
     # Run the notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
-    assert result.exit_code == 0
+    task = EmailNotificationTask(db_session, search_client)
+    task.run()
 
     # Refresh the saved opportunity from the database
     db_session.refresh(saved_opp)
@@ -97,7 +110,13 @@ def test_last_notified_at_updates(
 
 
 def test_notification_log_creation(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs, user, user_with_email
+    cli_runner,
+    db_session,
+    search_client,
+    enable_factory_create,
+    clear_notification_logs,
+    user,
+    user_with_email,
 ):
     """Test that notification logs are created when notifications are sent"""
     # Create a saved opportunity that needs notification
@@ -118,8 +137,8 @@ def test_notification_log_creation(
     )
 
     # Run the notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
-    assert result.exit_code == 0
+    task = EmailNotificationTask(db_session, search_client)
+    task.run()
 
     # Verify notification log was created
     notification_logs = db_session.query(UserNotificationLog).all()
@@ -133,7 +152,13 @@ def test_notification_log_creation(
 
 
 def test_no_notification_log_when_no_updates(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs, user, user_with_email
+    cli_runner,
+    db_session,
+    search_client,
+    enable_factory_create,
+    clear_notification_logs,
+    user,
+    user_with_email,
 ):
     """Test that no notification log is created when there are no updates"""
     # Create a saved opportunity that doesn't need notification
@@ -149,9 +174,8 @@ def test_no_notification_log_when_no_updates(
     )
 
     # Run the notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
-
-    assert result.exit_code == 0
+    task = EmailNotificationTask(db_session, search_client)
+    task.run()
 
     # Verify no notification log was created
     notification_logs = db_session.query(UserNotificationLog).all()

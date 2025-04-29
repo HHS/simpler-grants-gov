@@ -30,7 +30,7 @@ class EmailNotificationTask(Task):
     def __init__(
         self,
         db_session: db.Session,
-        search_client: search.SearchClient | None = None,
+        search_client: search.SearchClient,
         notification_config: EmailNotificationConfig | None = None,
     ) -> None:
         super().__init__(db_session)
@@ -42,7 +42,7 @@ class EmailNotificationTask(Task):
     def run_task(self) -> None:
         # run opportunity notification
         OpportunityNotification(db_session=self.db_session).run()
-        # # run search notification
+        # run search notification
         SearchNotification(db_session=self.db_session, search_client=self.search_client).run()
-        # # run closing notification
+        # run closing notification
         ClosingDateNotification(db_session=self.db_session).run()

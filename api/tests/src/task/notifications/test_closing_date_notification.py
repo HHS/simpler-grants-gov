@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     UserNotificationLog,
     UserOpportunityNotificationLog,
@@ -13,6 +14,7 @@ from src.db.models.user_models import (
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.util import datetime_util
+from tests.lib.db_testing import cascade_delete_from_db_table
 
 
 @pytest.fixture
@@ -26,8 +28,12 @@ def user_with_email(db_session, user, monkeypatch):
 def clear_notification_logs(db_session):
     """Clear all notification logs"""
     db_session.query(UserNotificationLog).delete()
-    db_session.query(UserSavedOpportunity).delete()
     db_session.query(UserOpportunityNotificationLog).delete()
+
+@pytest.fixture(autouse=True)
+def cleanup_opportunities(db_session):
+    cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
 
 def test_closing_date_notifications(
@@ -154,7 +160,7 @@ def test_closing_date_notification_not_sent_twice(
 
 
 def test_post_notification_log_creation(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs, user, user_with_email
+    cli_runner, db_session, search_client, enable_factory_create, clear_notification_logs, user, user_with_email
 ):
     """Test that notification logs are created when notifications are sent"""
     # Create an opportunity closing in 2 weeks that needs notification
@@ -174,8 +180,8 @@ def test_post_notification_log_creation(
     )
 
     # Run the notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
-    assert result.exit_code == 0
+    task = EmailNotificationTask(db_session, search_client)
+    task.run()
 
     # Verify notification log was created
     notification_logs = db_session.query(UserNotificationLog).all()

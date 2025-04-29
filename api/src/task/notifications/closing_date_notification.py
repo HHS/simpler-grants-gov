@@ -66,15 +66,17 @@ class ClosingDateNotification(BaseNotification):
         user_saved_opportunities: dict[UUID, list[UserSavedOpportunity]] = {}
 
         for result in results:
-            user_id = result.user_id
-            if not result.user.email:
-                logger.warning("No email found for user", extra={"user_id": user_id})
-                continue
-            user_saved_opportunities.setdefault(user_id, []).append(result)
+            user_saved_opportunities.setdefault(result.user_id, []).append(result)
 
         users_email_notifications: list[UserEmailNotification] = []
 
         for user_id, saved_items in user_saved_opportunities.items():
+            user_email: str = saved_items[0].user.email if saved_items[0].user.email else ""
+
+            if not user_email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
+
             closing_opportunities: list = []
             for saved_opportunity in saved_items:
                 opportunity = saved_opportunity.opportunity
@@ -108,7 +110,7 @@ class ClosingDateNotification(BaseNotification):
                 users_email_notifications.append(
                     UserEmailNotification(
                         user_id=user_id,
-                        user_email=saved_items[0].user.email,
+                        user_email=user_email,
                         subject="Applications for your bookmarked funding opportunities are due soon",
                         content=message,
                         notification_reason=NotificationReason.CLOSING_DATE_REMINDER,

@@ -38,14 +38,16 @@ class OpportunityNotification(BaseNotification):
 
         for result in results:
             user_id = result.user_id
-            if not result.user.email:
-                logger.warning("No email found for user", extra={"user_id": user_id})
-                continue
             changed_saved_opportunities.setdefault(user_id, []).append(result)
 
         users_email_notifications: list[UserEmailNotification] = []
 
         for user_id, saved_items in changed_saved_opportunities.items():
+            user_email: str = saved_items[0].user.email if saved_items[0].user.email else ""
+
+            if not user_email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
             message = f"You have updates to {len(saved_items)} saved opportunities"
 
             logger.info(
@@ -56,7 +58,7 @@ class OpportunityNotification(BaseNotification):
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
-                    user_email=saved_items[0].user.email,
+                    user_email=user_email,
                     subject="Updates to Your Saved Opportunities",
                     content=message,
                     notification_reason=NotificationReason.OPPORTUNITY_UPDATES,

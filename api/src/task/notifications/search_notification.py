@@ -39,14 +39,10 @@ class SearchNotification(BaseNotification):
             .options(joinedload(UserSavedSearch.user))
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
         )
-        saved_searches = self.db_session.execute(stmt).scalars()
+        saved_searches = self.db_session.execute(stmt).scalars().all()
 
         query_map: dict[str, list[UserSavedSearch]] = {}
         for saved_search in saved_searches:
-            user_id = saved_search.user_id
-            if not saved_search.user.email:
-                logger.warning("No email found for user", extra={"user_id": user_id})
-                continue
             search_query = _strip_pagination_params(saved_search.search_query)
             query_key = str(search_query)
 
@@ -68,6 +64,12 @@ class SearchNotification(BaseNotification):
         users_email_notifications: list[UserEmailNotification] = []
 
         for user_id, saved_items in updated_saved_searches.items():
+            user_email: str = saved_items[0].user.email if saved_items[0].user.email else ""
+
+            if not user_email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
+
             logger.info(
                 "Created changed search email notification",
                 extra={"user_id": user_id, "changed_search_count": len(saved_items)},
@@ -75,7 +77,7 @@ class SearchNotification(BaseNotification):
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
-                    user_email=saved_items[0].user.email,
+                    user_email=user_email,
                     subject="Updates to Your Saved Opportunities",
                     content="",
                     notification_reason=NotificationReason.SEARCH_UPDATES,
