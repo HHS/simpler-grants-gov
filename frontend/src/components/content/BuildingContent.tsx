@@ -1,11 +1,8 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import BuildingImage from "public/img/homepage-building.jpg";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 const BuildingContent = () => {
   const t = useTranslations("Building");

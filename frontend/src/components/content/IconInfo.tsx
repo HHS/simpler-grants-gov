@@ -1,5 +1,6 @@
-import { USWDSIcon } from "src/components/USWDSIcon";
 import { UswdsIconNames } from "src/types/generalTypes";
+
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type Props = {
   description: string;
@@ -14,7 +15,7 @@ export default function IconInfo({
   iconName,
   link,
   linkText,
-  title
+  title,
 }: Props): JSX.Element {
   return (
     <>
@@ -25,13 +26,14 @@ export default function IconInfo({
       />
       <h3>{title}</h3>
       <p className="font-sans-md line-height-sans-4">{description}</p>
-      <a 
+      <a
         href={link}
         className="font-sans-md line-height-sans-4"
         target="_blank"
-        rel="noopener noreferrer">
+        rel="noopener noreferrer"
+      >
         {linkText}
       </a>
     </>
   );
-};
+}

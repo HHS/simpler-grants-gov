@@ -1,9 +1,5 @@
-import {
-  render,
-  screen,
-} from "tests/react-utils";
-
-deimport EventsHero from "src/app/[locale]/events/EventsHero";
+import EventsHero from "src/app/[locale]/events/EventsHero";
+import { render, screen } from "tests/react-utils";
 
 describe("Events Hero Content", () => {
   it("Renders without errors", () => {

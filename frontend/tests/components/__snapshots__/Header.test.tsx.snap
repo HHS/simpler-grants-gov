@@ -337,11 +337,8 @@ exports[`Header About renders About submenu 1`] = `
               aria-expanded="true"
               class="usa-accordion__button usa-nav__link usa-current simpler-subnav-open"
               data-testid="navDropDownButton"
-<<<<<<< HEAD
-=======
               id="nav-dropdown-button-2"
               name="navDropDownButton"
->>>>>>> main
               type="button"
             >
               <span>
@@ -359,11 +356,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/vision"
                 >
                   <div>
-<<<<<<< HEAD
-                    Our Vision
-=======
                     Our vision
->>>>>>> main
                   </div>
                 </a>
               </li>
@@ -374,11 +367,7 @@ exports[`Header About renders About submenu 1`] = `
                   href="/roadmap"
                 >
                   <div>
-<<<<<<< HEAD
-                    Product Roadmap
-=======
                     Product roadmap
->>>>>>> main
                   </div>
                 </a>
               </li>
@@ -387,16 +376,6 @@ exports[`Header About renders About submenu 1`] = `
           <li
             class="usa-nav__primary-item"
           >
-<<<<<<< HEAD
-            <a
-              class="usa-nav__link"
-              href="/subscribe"
-            >
-              <div>
-                Subscribe
-              </div>
-            </a>
-=======
             <button
               aria-controls="Community"
               aria-expanded="false"
@@ -484,24 +463,17 @@ exports[`Header About renders About submenu 1`] = `
                 </a>
               </li>
             </ul>
->>>>>>> main
           </li>
           <li
             class="usa-nav__primary-item"
           >
             <button
               aria-controls="Workspace"
-<<<<<<< HEAD
-              aria-expanded="true"
-              class="usa-accordion__button usa-nav__link simpler-subnav-open"
-              data-testid="navDropDownButton"
-=======
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
               id="nav-dropdown-button-4"
               name="navDropDownButton"
->>>>>>> main
               type="button"
             >
               <span>
@@ -510,10 +482,7 @@ exports[`Header About renders About submenu 1`] = `
             </button>
             <ul
               class="usa-nav__submenu margin-top-05"
-<<<<<<< HEAD
-=======
               hidden=""
->>>>>>> main
               id="Workspace"
             >
               <li
@@ -544,32 +513,6 @@ exports[`Header About renders About submenu 1`] = `
       </nav>
     </div>
   </header>
-<<<<<<< HEAD
-  <div
-    aria-hidden="true"
-    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
-    data-testid="snackbar"
-    role="status"
-  >
-    You've been logged out. Please sign in again.
-    <button
-      aria-label="close"
-      class="usa-button usa-button--unstyled padding-left-2 text-white"
-      data-testid="snackbar-close"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="usa-icon"
-        role="img"
-      >
-        <use
-          href="/img.jpg#close"
-        />
-      </svg>
-    </button>
-  </div>
-=======
 </div>
 `;
 
@@ -1086,7 +1029,6 @@ exports[`Header About renders Community submenu 1`] = `
       </nav>
     </div>
   </header>
->>>>>>> main
 </div>
 `;
 
@@ -1427,11 +1369,8 @@ exports[`Header renders Header navbar menu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-<<<<<<< HEAD
-=======
               id="nav-dropdown-button-2"
               name="navDropDownButton"
->>>>>>> main
               type="button"
             >
               <span>
@@ -1450,11 +1389,7 @@ exports[`Header renders Header navbar menu 1`] = `
                   href="/vision"
                 >
                   <div>
-<<<<<<< HEAD
-                    Our Vision
-=======
                     Our vision
->>>>>>> main
                   </div>
                 </a>
               </li>
@@ -1465,11 +1400,7 @@ exports[`Header renders Header navbar menu 1`] = `
                   href="/roadmap"
                 >
                   <div>
-<<<<<<< HEAD
-                    Product Roadmap
-=======
                     Product roadmap
->>>>>>> main
                   </div>
                 </a>
               </li>
@@ -1478,16 +1409,6 @@ exports[`Header renders Header navbar menu 1`] = `
           <li
             class="usa-nav__primary-item"
           >
-<<<<<<< HEAD
-            <a
-              class="usa-nav__link"
-              href="/subscribe"
-            >
-              <div>
-                Subscribe
-              </div>
-            </a>
-=======
             <button
               aria-controls="Community"
               aria-expanded="false"
@@ -1575,7 +1496,6 @@ exports[`Header renders Header navbar menu 1`] = `
                 </a>
               </li>
             </ul>
->>>>>>> main
           </li>
           <li
             class="usa-nav__primary-item"
@@ -1585,11 +1505,8 @@ exports[`Header renders Header navbar menu 1`] = `
               aria-expanded="false"
               class="usa-accordion__button usa-nav__link"
               data-testid="navDropDownButton"
-<<<<<<< HEAD
-=======
               id="nav-dropdown-button-4"
               name="navDropDownButton"
->>>>>>> main
               type="button"
             >
               <span>
@@ -1629,32 +1546,5 @@ exports[`Header renders Header navbar menu 1`] = `
       </nav>
     </div>
   </header>
-<<<<<<< HEAD
-  <div
-    aria-hidden="true"
-    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
-    data-testid="snackbar"
-    role="status"
-  >
-    You've been logged out. Please sign in again.
-    <button
-      aria-label="close"
-      class="usa-button usa-button--unstyled padding-left-2 text-white"
-      data-testid="snackbar-close"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="usa-icon"
-        role="img"
-      >
-        <use
-          href="/img.jpg#close"
-        />
-      </svg>
-    </button>
-  </div>
-=======
->>>>>>> main
 </div>
 `;

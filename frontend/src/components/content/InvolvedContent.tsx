@@ -1,22 +1,17 @@
 import { useTranslations } from "next-intl";
-
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import IconInfo from "./IconInfo";
 
-const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code"
-const discourseLink = "https://simplergrants.discourse.group/"
-const participateLink = "https://ethn.io/91822"
+const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code";
+const discourseLink = "https://simplergrants.discourse.group/";
+const participateLink = "https://ethn.io/91822";
 
 const InvolvedContent = () => {
   const t = useTranslations("Involved");
 
   return (
-    <GridContainer data-testid="involved-content"
-    className="padding-y-6">
+    <GridContainer data-testid="involved-content" className="padding-y-6">
       <Grid row gap="md">
         <Grid
           tablet={{
@@ -41,9 +36,12 @@ const InvolvedContent = () => {
                 title={t("technicalTitle")}
               />
               <br />
-              <a href={discourseLink} className="font-sans-md line-height-sans-4"
-              target="_blank"
-              rel="noopener noreferrer">
+              <a
+                href={discourseLink}
+                className="font-sans-md line-height-sans-4"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {t("discourseLink")}
               </a>
             </Grid>
