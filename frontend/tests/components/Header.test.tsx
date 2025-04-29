@@ -17,6 +17,17 @@ const mockUseUser = jest.fn(() => ({
   user: {
     token: "faketoken",
   },
+  hasBeenLoggedOut: false,
+  resetHasBeenLoggedOut: jest.fn(),
+}));
+
+const mockShowSnackbar = jest.fn();
+
+const mockUseSnackBar = jest.fn(() => ({
+  showSnackbar: () => mockShowSnackbar() as unknown,
+  Snackbar: () => <></>,
+  hideSnackbar: jest.fn(),
+  snackbarIsVisible: true,
 }));
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
@@ -46,6 +57,10 @@ jest.mock("src/components/RouteChangeWatcher", () => ({
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
+}));
+
+jest.mock("src/hooks/useSnackbar", () => ({
+  useSnackbar: () => mockUseSnackBar() as unknown,
 }));
 
 describe("Header", () => {
@@ -81,9 +96,9 @@ describe("Header", () => {
       "href",
       "/",
     );
-    expect(screen.getByRole("link", { name: /subscribe/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /search/i })).toHaveAttribute(
       "href",
-      "/subscribe",
+      "/search",
     );
 
     await userEvent.click(menuButton);
@@ -96,7 +111,9 @@ describe("Header", () => {
   it("displays expandable government banner", async () => {
     render(<Header />);
 
-    const govBanner = screen.getByRole("button", { name: /Here’s how you know/i });
+    const govBanner = screen.getByRole("button", {
+      name: /Here’s how you know/i,
+    });
 
     expect(govBanner).toBeInTheDocument();
 
@@ -192,14 +209,14 @@ describe("Header", () => {
   });
 
   describe("About", () => {
-    it("shows About as the active nav item when on Vision page", async () => {
+    it("shows About as the active nav item when on Vision page", () => {
       usePathnameMock.mockReturnValue("/vision");
       render(<Header />);
 
       const homeLink = screen.getByRole("button", { name: /About/i });
       expect(homeLink).toHaveClass("usa-current");
     });
-    it("shows About as the active nav item when on Roadmap page", async () => {
+    it("shows About as the active nav item when on Roadmap page", () => {
       usePathnameMock.mockReturnValue("/roadmap");
       render(<Header />);
 
@@ -209,17 +226,48 @@ describe("Header", () => {
     it("renders About submenu", async () => {
       const { container } = render(<Header />);
 
-      expect(screen.queryByRole("link", { name: /Our Vision/i })).not.toBeInTheDocument();
-      
+      expect(
+        screen.queryByRole("link", { name: /Our Vision/i }),
+      ).not.toBeInTheDocument();
+
       const aboutBtn = screen.getByRole("button", { name: /About/i });
-      
+
       await userEvent.click(aboutBtn);
-      
+
       expect(container).toMatchSnapshot();
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
-      
+
       const visionLink = screen.getByRole("link", { name: /Our Vision/i });
-      expect(visionLink).toBeInTheDocument()
+      expect(visionLink).toBeInTheDocument();
     });
+    it("renders Community submenu", async () => {
+      const { container } = render(<Header />);
+
+      expect(
+        screen.queryByRole("link", { name: /Events/i }),
+      ).not.toBeInTheDocument();
+
+      const communityBtn = screen.getByRole("button", { name: /Community/i });
+
+      await userEvent.click(communityBtn);
+
+      expect(container).toMatchSnapshot();
+      expect(communityBtn).toHaveAttribute("aria-expanded", "true");
+
+      const eventsLink = screen.getByRole("link", { name: /Events/i });
+      expect(eventsLink).toBeInTheDocument();
+    });
+  });
+
+  it("shows snackbar if user has been logged out", () => {
+    mockUseUser.mockReturnValue({
+      user: {
+        token: "a token",
+      },
+      hasBeenLoggedOut: true,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
+    render(<Header {...props} />);
+    expect(mockShowSnackbar).toHaveBeenCalledTimes(1);
   });
 });
