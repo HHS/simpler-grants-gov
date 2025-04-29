@@ -61,8 +61,10 @@ const OpportunityDocuments = ({
   const t = useTranslations("OpportunityListing.documents");
 
   return (
-    <div className="usa-prose margin-top-6">
-      <h2 id="opportunity_documents">{t("title")}</h2>
+    <Grid row className="margin-top-6">
+      <Grid col={8} className="usa-prose">
+        <h2 id="opportunity_documents">{t("title")}</h2>
+      </Grid>
       {documents.length > 0 ? (
         <>
           <Grid col={4} className="text-right">
@@ -80,7 +82,7 @@ const OpportunityDocuments = ({
       ) : (
         <p>{t("noDocuments")}</p>
       )}
-    </div>
+    </Grid>
   );
 };
 
