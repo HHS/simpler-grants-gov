@@ -8,12 +8,7 @@ import {
 } from "@rjsf/utils";
 
 import { FocusEvent, useCallback, useMemo } from "react";
-import {
-  ErrorMessage,
-  Fieldset,
-  FormGroup,
-  Radio,
-} from "@trussworks/react-uswds";
+import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { FieldLabel } from "./FieldLabel";

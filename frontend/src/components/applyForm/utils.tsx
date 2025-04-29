@@ -154,9 +154,9 @@ export const getFieldSchema = ({
     return {
       ...getSchemaObjectFromPointer(formSchema, definition),
       ...(schema as SchemaField),
-    };
+    } as RJSFSchema;
   } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition);
+    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
   }
   return schema as RJSFSchema;
 };
@@ -213,7 +213,7 @@ export const buildField = ({
     required: (formSchema.required ?? []).includes(name),
     minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
     maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
-    schema: fieldSchema as RJSFSchema,
+    schema: fieldSchema,
     rawErrors,
     value,
     options,

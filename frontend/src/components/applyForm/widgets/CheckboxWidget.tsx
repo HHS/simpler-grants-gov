@@ -55,7 +55,8 @@ function CheckboxWidget<
 
   const label = required ? (
     <>
-      {title} <span className="usa-hint usa-hint--required text-no-underline">*</span>
+      {title}{" "}
+      <span className="usa-hint usa-hint--required text-no-underline">*</span>
     </>
   ) : (
     title
