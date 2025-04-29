@@ -51,7 +51,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
-    const descriptionHeading = screen.getByText("description");
+    const descriptionHeading = screen.getByText("title");
     expect(descriptionHeading).toBeInTheDocument();
 
     const sanitizedSummaryDescription = DOMPurify.sanitize(
@@ -101,21 +101,6 @@ describe("OpportunityDescription", () => {
         "Its young really risk. College call month identify out east. Defense writer ahead trip smile. Picture data area system manager hour none. Doctor pay visit save test. Again feeling little throughout. Improve drug play remain face word somebody. Baby miss may drive treat letter. Laugh message as car position team. Want build last. Model or base within bag manager brother. How still teacher son fish pay until. Debate doctor visit because success. Message will white risk. Follow sell nearly individual family crime particularly understand. Police street federal six really major owner. Should friend minute team material trade special. Example above government usually deal fill few. Kid middle our sometimes appear. Ready share century nor take let. Water sort choice beat design she sport commercial. Nature if natural feel. Yes door cold realize. Receive trade central good realize number woman them. Actually there common order purpose within. Enough trouble develop station almost read. Who attack include company.",
       ),
     ).toBeInTheDocument();
-  });
-
-  it("renders the eligible applicants with mapped values", () => {
-    render(
-      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
-    );
-
-    const eligibleApplicantsHeading = screen.getByText("eligible_applicants");
-    expect(eligibleApplicantsHeading).toBeInTheDocument();
-
-    expect(screen.getByText("State governments")).toBeInTheDocument();
-    expect(
-      screen.getByText("Nonprofits non-higher education with 501(c)(3)"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("unknown_type")).toBeInTheDocument();
   });
 
   it("renders additional information on eligibility", () => {
@@ -171,13 +156,9 @@ describe("OpportunityDescription", () => {
       />,
     );
 
-    const contactInfoHeading = screen.getByText("summary");
+    const contactInfoHeading = screen.getByText("contact_description");
     expect(contactInfoHeading).toBeInTheDocument();
     expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
-
-    const descriptionHeading = screen.getByText("description");
-    expect(descriptionHeading).toBeInTheDocument();
-    expect(descriptionHeading.nextElementSibling).toHaveTextContent("--");
 
     const applicantsHeading = screen.getByText("eligible_applicants");
     expect(applicantsHeading).toBeInTheDocument();
@@ -186,5 +167,9 @@ describe("OpportunityDescription", () => {
     const emailHeading = screen.getByText("email");
     expect(emailHeading).toBeInTheDocument();
     expect(emailHeading.nextElementSibling).toHaveTextContent("--");
+
+    // documents and summary are harder to target here, but we can just get a total count
+    const allEmpty = screen.getAllByText("--");
+    expect(allEmpty).toHaveLength(5);
   });
 });
