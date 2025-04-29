@@ -63,47 +63,6 @@ export const saveSearchHandler = async (request: Request) => {
   }
 };
 
-export const PUT = async (request: Request) => {
-  try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to save opportunity");
-    }
-    const savedSearchBody = (await request.json()) as OptionalStringDict;
-
-    if (!savedSearchBody.name || !savedSearchBody.searchId) {
-      throw new BadRequestError(
-        "Necessary fields not supplied to update saved search",
-      );
-    }
-
-    const response = await handleUpdateSavedSearch(
-      session.token,
-      session.user_id,
-      savedSearchBody.searchId,
-      savedSearchBody.name,
-    );
-    if (!response || response.status_code !== 200) {
-      throw new ApiRequestError(
-        `Error updating search: ${response.message}`,
-        "APIRequestError",
-        response.status_code,
-      );
-    }
-    return Response.json({
-      message: "Update search success",
-    });
-  } catch (e) {
-    const { status, message } = readError(e as Error, 500);
-    return Response.json(
-      {
-        message: `Error attempting to save search: ${message}`,
-      },
-      { status },
-    );
-  }
-};
-
 export const deleteSearchHandler = async (request: Request) => {
   try {
     const session = await getSession();
