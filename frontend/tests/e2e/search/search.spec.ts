@@ -12,6 +12,7 @@ import {
   expectCheckboxIDIsChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
+  getCountOfTopLevelFilterOptions,
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
   getNumberOfOpportunitySearchResults,
@@ -250,10 +251,13 @@ test.describe("Search page tests", () => {
     ];
 
     filterTypes.forEach((filterType) => {
-      test(`correctly clears and selects all for ${filterType} filters`, async ({
+      test(`correctly clears and selects all for ${filterType} filter`, async ({
         page,
       }, { project }) => {
+        const unselectedUrl = "http://127.0.0.1:3000/search";
+
         const camelCaseFilterType = camelCase(filterType);
+
         // load search page
         await page.goto("/search");
 
@@ -263,7 +267,7 @@ test.describe("Search page tests", () => {
         }
         await Promise.all([
           waitForSearchResultsInitialLoad(page),
-          waitForFilterOptions(page, "agency"),
+          waitForFilterOptions(page, camelCaseFilterType),
         ]);
 
         const initialSearchResultsCount =
@@ -271,10 +275,12 @@ test.describe("Search page tests", () => {
 
         await clickAccordionWithTitle(page, filterType);
 
-        const numberOfFilterOptions = await selectAllTopLevelFilterOptions(
+        const numberOfFilterOptions = await getCountOfTopLevelFilterOptions(
           page,
           camelCaseFilterType,
         );
+
+        await selectAllTopLevelFilterOptions(page, camelCaseFilterType);
 
         // validate that new search results are returned
         let updatedSearchResultsCount =
@@ -289,7 +295,13 @@ test.describe("Search page tests", () => {
           .all();
 
         await Promise.all(
-          checkboxes.map((checkbox) => expect(checkbox).toBeChecked()),
+          checkboxes.map((checkbox) => {
+            return checkbox.getAttribute("id").then((id) => {
+              if (!id?.match(/any$/)) {
+                return expect(checkbox).toBeChecked();
+              }
+            });
+          }),
         );
 
         // validate that the correct number of filter options is displayed
@@ -310,7 +322,7 @@ test.describe("Search page tests", () => {
           .click();
 
         // validate that url is updated
-        await waitForUrl(page, "http://127.0.0.1:3000/search");
+        await waitForUrl(page, unselectedUrl);
 
         // validate that new search results are returned
         updatedSearchResultsCount =
@@ -325,12 +337,110 @@ test.describe("Search page tests", () => {
           .all();
 
         await Promise.all(
-          checkboxes.map((checkbox) => expect(checkbox).not.toBeChecked()),
+          checkboxes.map((checkbox) => {
+            return checkbox.getAttribute("id").then((id) => {
+              if (!id?.match(/any$/)) {
+                return expect(checkbox).not.toBeChecked();
+              }
+            });
+          }),
         );
 
         // validate that the correct number of filter options is displayed
         await expect(accordionButton).toHaveText(filterType);
       });
+    });
+
+    test(`correctly clears and selects all for status filter`, async ({
+      page,
+    }, { project }) => {
+      const unselectedUrl = "http://127.0.0.1:3000/search?status=none";
+
+      const camelCaseFilterType = "status";
+
+      // load search page
+      await page.goto("/search");
+
+      // open accordion for filter type
+      if (project.name.match(/[Mm]obile/)) {
+        await toggleMobileSearchFilters(page);
+      }
+      await Promise.all([
+        waitForSearchResultsInitialLoad(page),
+        waitForFilterOptions(page, camelCaseFilterType),
+      ]);
+
+      const initialSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+
+      const numberOfFilterOptions = await getCountOfTopLevelFilterOptions(
+        page,
+        camelCaseFilterType,
+      );
+
+      await selectAllTopLevelFilterOptions(page, camelCaseFilterType);
+
+      // validate that new search results are returned
+      const updatedSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+      expect(initialSearchResultsCount).not.toBe(updatedSearchResultsCount);
+
+      // validate that checkboxes are checked
+      let checkboxes = await page
+        .locator(
+          `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
+        )
+        .all();
+
+      await Promise.all(
+        checkboxes.map((checkbox) => {
+          return checkbox.getAttribute("id").then((id) => {
+            if (!id?.match(/any$/)) {
+              return expect(checkbox).toBeChecked();
+            }
+          });
+        }),
+      );
+
+      // validate that the correct number of filter options is displayed
+      const accordionButton = page.locator(
+        `button[data-testid="accordionButton_opportunity-filter-${camelCaseFilterType}"]`,
+      );
+
+      await expect(accordionButton).toHaveText(
+        `Opportunity status${numberOfFilterOptions}`,
+      );
+
+      // click clear all
+      await page
+        .locator(
+          `#opportunity-filter-${camelCaseFilterType} button:has-text("Clear All")`,
+        )
+        .first()
+        .click();
+
+      // validate that url is updated
+      await waitForUrl(page, unselectedUrl);
+
+      // validate that checkboxes are not checked
+      checkboxes = await page
+        .locator(
+          `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
+        )
+        .all();
+
+      await Promise.all(
+        checkboxes.map((checkbox) => {
+          return checkbox.getAttribute("id").then((id) => {
+            if (!id?.match(/any$/)) {
+              return expect(checkbox).not.toBeChecked();
+            }
+          });
+        }),
+      );
+
+      // validate that the correct number of filter options is displayed
+      await expect(accordionButton).toHaveText("Opportunity status");
     });
 
     /*
@@ -367,7 +477,9 @@ test.describe("Search page tests", () => {
       // gather number of (top level) filter options
       // and select all top level filter options
       const numberOfTopLevelFilterOptions =
-        await selectAllTopLevelFilterOptions(page, "agency");
+        await getCountOfTopLevelFilterOptions(page, "agency");
+
+      await selectAllTopLevelFilterOptions(page, "agency");
 
       const topLevelSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);

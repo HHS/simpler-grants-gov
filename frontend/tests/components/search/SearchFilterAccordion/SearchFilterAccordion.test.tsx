@@ -2,13 +2,12 @@ import "@testing-library/jest-dom/extend-expect";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { FilterOption } from "src/types/search/searchResponseTypes";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SearchFilterAccordion, {
-  FilterOption,
-} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 const initialFilterOptions: FilterOption[] = [
   {

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { noop } from "lodash";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -85,7 +86,22 @@ const UserDropdown = ({
         // @ts-ignore: Type 'Element' is not assignable to type 'string'
         label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
-        onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
+        onClick={(e) => {
+          if (!userProfileMenuOpen) {
+            setUserProfileMenuOpen(true);
+            e.stopPropagation();
+            requestAnimationFrame(() =>
+              document.addEventListener(
+                "click",
+                () => {
+                  setUserProfileMenuOpen(false);
+                },
+                { once: true },
+              ),
+            );
+          }
+        }}
+        onToggle={noop}
         isCurrent={false}
         menuId="user-control"
       />

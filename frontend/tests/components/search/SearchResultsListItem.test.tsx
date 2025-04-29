@@ -9,14 +9,14 @@ import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 describe("SearchResultsListItem", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
-      <SearchResultsListItem opportunity={mockOpportunity} />,
+      <SearchResultsListItem index={1} opportunity={mockOpportunity} />,
     );
     const results = await waitFor(() => axe(container));
     expect(results).toHaveNoViolations();
   });
 
   it("renders opportunity title and number", () => {
-    render(<SearchResultsListItem opportunity={mockOpportunity} />);
+    render(<SearchResultsListItem index={1} opportunity={mockOpportunity} />);
     expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
   });
@@ -31,7 +31,9 @@ describe("SearchResultsListItem", () => {
         },
       };
 
-      render(<SearchResultsListItem opportunity={opportunityWithDate} />);
+      render(
+        <SearchResultsListItem index={1} opportunity={opportunityWithDate} />,
+      );
       expect(screen.getByText(ui_date)).toBeInTheDocument();
     });
   });

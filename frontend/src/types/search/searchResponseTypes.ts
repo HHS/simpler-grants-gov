@@ -49,3 +49,15 @@ export interface SearchAPIResponse extends APIResponse {
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }
+
+export interface FilterOption {
+  children?: FilterOption[];
+  id: string;
+  isChecked?: boolean;
+  label: string;
+  value: string;
+}
+
+export interface FilterOptionWithChildren extends FilterOption {
+  children: FilterOption[];
+}
