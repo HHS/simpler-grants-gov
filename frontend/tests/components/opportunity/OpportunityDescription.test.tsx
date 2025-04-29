@@ -51,7 +51,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
-    const descriptionHeading = screen.getByText("description");
+    const descriptionHeading = screen.getByText("title");
     expect(descriptionHeading).toBeInTheDocument();
 
     const sanitizedSummaryDescription = DOMPurify.sanitize(
@@ -156,13 +156,9 @@ describe("OpportunityDescription", () => {
       />,
     );
 
-    const contactInfoHeading = screen.getByText("summary");
+    const contactInfoHeading = screen.getByText("contact_description");
     expect(contactInfoHeading).toBeInTheDocument();
     expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
-
-    const descriptionHeading = screen.getByText("description");
-    expect(descriptionHeading).toBeInTheDocument();
-    expect(descriptionHeading.nextElementSibling).toHaveTextContent("--");
 
     const applicantsHeading = screen.getByText("eligible_applicants");
     expect(applicantsHeading).toBeInTheDocument();
@@ -171,5 +167,9 @@ describe("OpportunityDescription", () => {
     const emailHeading = screen.getByText("email");
     expect(emailHeading).toBeInTheDocument();
     expect(emailHeading.nextElementSibling).toHaveTextContent("--");
+
+    // documents and summary are harder to target here, but we can just get a total count
+    const allEmpty = screen.getAllByText("--");
+    expect(allEmpty).toHaveLength(5);
   });
 });

@@ -61,32 +61,28 @@ const OpportunityDocuments = ({
   const t = useTranslations("OpportunityListing.documents");
 
   return (
-    <>
-      <Grid row>
-        <Grid col={8}>
-          <h2 id="opportunity_documents">{t("title")}</h2>
-        </Grid>
-
-        {documents.length > 0 ? (
-          <>
-            <Grid col={4} className="text-right">
-              <ZipDownloadButton
-                opportunityId={opportunityId}
-              ></ZipDownloadButton>
-            </Grid>
-
-            <Table className="width-full">
-              <DocumentTable
-                documents={documents}
-                opportunityId={opportunityId}
-              />
-            </Table>
-          </>
-        ) : (
-          <p>--</p>
-        )}
+    <Grid row className="margin-top-6">
+      <Grid col={8} className="usa-prose">
+        <h2 id="opportunity_documents">{t("title")}</h2>
       </Grid>
-    </>
+      {documents.length > 0 ? (
+        <>
+          <Grid col={4} className="text-right">
+            <ZipDownloadButton
+              opportunityId={opportunityId}
+            ></ZipDownloadButton>
+          </Grid>
+          <Table className="width-full">
+            <DocumentTable
+              documents={documents}
+              opportunityId={opportunityId}
+            />
+          </Table>
+        </>
+      ) : (
+        <p>{t("noDocuments")}</p>
+      )}
+    </Grid>
   );
 };
 
