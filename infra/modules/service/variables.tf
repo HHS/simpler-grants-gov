@@ -221,11 +221,13 @@ variable "hosted_zone_id" {
 variable "image_repository_arn" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_repository_url" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_tag" {

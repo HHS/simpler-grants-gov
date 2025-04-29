@@ -30,6 +30,18 @@ data "aws_subnets" "public" {
   }
 }
 
+data "aws_security_groups" "aws_services" {
+  filter {
+    name   = "group-name"
+    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+}
+
 locals {
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
@@ -96,6 +108,8 @@ module "service" {
   healthcheck_command      = null
   healthcheck_path         = "/"
 
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+
   extra_environment_variables = merge(local.service_config.extra_environment_variables, {
     ENVIRONMENT = var.environment_name
     MB_DB_PORT  = data.aws_rds_cluster.db_cluster.port
@@ -109,11 +123,10 @@ module "service" {
     }],
   )
 
-  app_access_policy_arn      = null
-  migrator_access_policy_arn = null
-
   db_vars = {
-    security_group_ids = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+    security_group_ids         = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+    app_access_policy_arn      = null
+    migrator_access_policy_arn = null
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster.endpoint
       port        = data.aws_rds_cluster.db_cluster.port
