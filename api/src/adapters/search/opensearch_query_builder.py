@@ -263,8 +263,22 @@ class SearchQueryBuilder:
 
         # Base request
         page_offset = self.page_size * (self.page_number - 1)
+        page_size = self.page_size
+        # OpenSearch will error if you try to request records
+        # past the 10,000th record. To prevent someone from
+        # hitting that error case, we modify pagination params
+        # to not let someone fetch the 10,001th record (or more)
+        # If the page offset is more than 10k, there are no
+        # valid results, so set the pagination to exactly 10k
+        # with a page size of 0 - which will always give 0 results
+        if page_offset > 10000:
+            page_offset = 10000
+            page_size = 0
+        elif page_offset + page_size > 10000:
+            page_size = 10000 - page_offset
+
         request: dict[str, typing.Any] = {
-            "size": self.page_size,
+            "size": page_size,
             "from": page_offset,
             # Always include the scores in the response objects
             # even if we're sorting by non-relevancy

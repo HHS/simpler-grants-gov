@@ -39,7 +39,7 @@ import { JWTPayload } from "jose";
 export interface UserProfile {
   email?: string;
   token: string;
-  expiresAt: Date;
+  expiresAt?: number;
   user_id: string;
 }
 
@@ -65,4 +65,8 @@ export type UserProviderState = {
   error?: Error;
   isLoading: boolean;
   refreshUser: () => Promise<void>;
+  hasBeenLoggedOut: boolean;
+  logoutLocalUser: () => void;
+  resetHasBeenLoggedOut: () => void;
+  refreshIfExpired: () => Promise<boolean | undefined>;
 };

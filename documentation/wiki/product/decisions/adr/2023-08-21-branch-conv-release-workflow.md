@@ -3,7 +3,7 @@
 * **Status:** Accepted.
 * **Last Modified:** 2023-08-21
 * **Related Issue:** [#185](https://github.com/HHS/simpler-grants-gov/issues/185)
-* **Deciders:** Daphne Gold, Sammy Steiner, Billy Daly, Lucas Brown
+* **Deciders:** Daphne, Sammy, Billy, Lucas
 * **Tags:** process, workflow, change management
 
 ## Context and Problem Statement

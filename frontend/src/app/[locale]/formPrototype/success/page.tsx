@@ -3,7 +3,7 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
+import { Alert } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 
@@ -17,11 +17,17 @@ export function generateMetadata() {
 
 function FormSuccess() {
   return (
-    <GridContainer>
+    <>
       <BetaAlert />
       <h1>Form Demo Success</h1>
-      You successfully submitted the form.
-    </GridContainer>
+      <Alert
+        heading="Successful form submission"
+        headingLevel="h3"
+        type="success"
+      >
+        You successfully submitted the form.
+      </Alert>
+    </>
   );
 }
 

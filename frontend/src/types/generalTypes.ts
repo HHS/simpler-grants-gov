@@ -1,15 +1,16 @@
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
-export interface LayoutProps {
-  children: React.ReactNode;
-  params: Promise<{
-    locale: string;
-  }>;
-}
+type Only<T, U> = {
+  [P in keyof T]: T[P];
+} & {
+  [P in keyof U]?: never;
+};
 
-export interface OptionalStringDict {
-  [key: string]: string | undefined;
-}
+// exported Types ----
+
+export type Either<T, U> = Only<T, U> | Only<U, T>;
+
+export type IndexType = number | null;
 
 export type UswdsIconNames =
   | "accessibility_new"
@@ -256,6 +257,16 @@ export type UswdsIconNames =
   | "zoom_out_map"
   | "zoom_out";
 
+// exported Interfaces ----
+export interface LayoutProps {
+  children: React.ReactNode;
+  params: Promise<{
+    locale: string;
+  }>;
+}
+export interface OptionalStringDict {
+  [key: string]: string | undefined;
+}
 export interface ParsedError {
   message?: string;
   searchInputs?: OptionalStringDict;

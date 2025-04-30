@@ -6,8 +6,25 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
+import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
+
+export type SchemaField = {
+  type: string;
+  title: string;
+  minLength?: number;
+  maxLength?: number;
+  format?: string;
+  description?: string;
+};
+
+export interface FormSchema {
+  $schema: string;
+  type: string;
+  properties: Record<string, SchemaField>;
+  required?: string[];
+}
 
 export interface FormData {
   [key: string]: FormDataEntryValue;
@@ -17,37 +34,26 @@ export interface SetFormDataFunction {
   (data: FormData): void;
 }
 
-export interface UiSchemaField {
+export type FieldErrors = ErrorObject<
+  string,
+  Record<string, unknown>,
+  unknown
+>[];
+
+export type UiSchemaField = {
   type: "field";
-  definition: string;
-}
+  definition?: `/properties/${string}`;
+  schema?: SchemaField;
+};
 
 export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  number: string;
-  children: (UiSchemaField | UiSchemaSection)[];
+  children: Array<UiSchemaField | UiSchemaSection>;
 }
 
-export type UiSchema =
-  | (UiSchemaField | UiSchemaSection)
-  | (UiSchemaField | UiSchemaSection)[];
-
-export type SchemaField = {
-  type: string;
-  title: string;
-  minLength?: number;
-  maxLength?: number;
-  format?: string;
-};
-
-export interface FormSchema {
-  $schema: string;
-  type: string;
-  properties: Record<string, SchemaField>;
-  required?: string[];
-}
+export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
 
 export type TextTypes =
   | "text"
@@ -84,7 +90,7 @@ export interface UswdsWidgetProps<
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
-    emptyValue?: string;
+    emptyValue?: string | undefined;
   };
   hideLabel?: boolean;
   multiple?: boolean;

@@ -4,10 +4,10 @@
 * **Last Modified:** 2023-12-18
 * **Related Issue:** [#845](https://github.com/HHS/simpler-grants-gov/issues/845)
 * **Deciders:**
-  * Lucas Brown
-  * Aaron Couch
-  * Michael Chouinard
-  * Billy Daly
+  * Lucas&#x20;
+  * Aaron&#x20;
+  * Michael&#x20;
+  * Billy&#x20;
 * **Tags:** analytics, data
 
 ## Context and Problem Statement

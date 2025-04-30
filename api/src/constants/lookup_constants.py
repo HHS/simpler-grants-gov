@@ -131,3 +131,16 @@ class JobStatus(StrEnum):
     STARTED = "started"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class FormFamily(StrEnum):
+    SF_424 = "sf-424"
+    SF_424_INDIVIDUAL = "sf-424-individual"
+    RR = "r&r"
+    SF_424_MANDATORY = "sf-424-mandatory"
+    SF_424_SHORT_ORGANIZATION = "sf-424-short-organization"
+
+
+class CompetitionOpenToApplicant(StrEnum):
+    INDIVIDUAL = "individual"
+    ORGANIZATION = "organization"

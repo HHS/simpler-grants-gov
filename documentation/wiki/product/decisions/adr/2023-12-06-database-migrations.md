@@ -3,7 +3,7 @@
 * **Status:** Accepted
 * **Last Modified:** 2023-12-06
 * **Related Issue:** [#779](https://github.com/HHS/simpler-grants-gov/issues/779)
-* **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Michael Chouinard
+* **Deciders:** Lucas, Aaron, Billy, Sammy, Michael
 * **Tags:** Database, Backend
 
 ## Context and Problem Statement

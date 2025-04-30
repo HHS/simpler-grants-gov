@@ -24,6 +24,7 @@ import src.adapters.db as db
 import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
+import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
@@ -34,6 +35,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
     FundingCategory,
@@ -44,6 +46,8 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models import agency_models
+from src.db.models.lookup.lookup_registry import LookupRegistry
+from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -962,6 +966,8 @@ class CompetitionFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
+    form_family = factory.fuzzy.FuzzyChoice(lookup_models.FormFamily)
+
     public_competition_id = sometimes_none("ABC-134-56789")
     legacy_package_id = sometimes_none("PKG-00260155")
 
@@ -984,6 +990,13 @@ class CompetitionFactory(BaseFactory):
         "tests.src.db.models.factories.CompetitionFormFactory",
         factory_related_name="competition",
         size=lambda: random.randint(1, 2),
+    )
+
+    open_to_applicants = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 2),
+        elements=[a for a in CompetitionOpenToApplicant],
+        unique=True,
     )
 
 
@@ -1010,6 +1023,22 @@ class CompetitionAssistanceListingFactory(BaseFactory):
     )
 
 
+class LinkCompetitionOpenToApplicantFactory(BaseFactory):
+    class Meta:
+        model = competition_models.LinkCompetitionOpenToApplicant
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    # We need to get both the ID and the relationship object
+    competition_open_to_applicant_id = factory.LazyFunction(
+        lambda: LookupRegistry.get_lookup_int_for_enum(
+            LkCompetitionOpenToApplicant,
+            random.choice(list(lookup_models.CompetitionOpenToApplicant)),
+        )
+    )
+
+
 class FormFactory(BaseFactory):
     class Meta:
         model = competition_models.Form
@@ -1023,25 +1052,34 @@ class FormFactory(BaseFactory):
     form_json_schema = {
         "type": "object",
         "title": "Test form for testing",
+        "required": ["Title", "Email"],
         "properties": {
-            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
-            "Description": {
-                "title": "Description for application",
+            "Date": {"type": "string", "title": "Date of application ", "format": "date"},
+            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
+            "Email": {
                 "type": "string",
-                "minLength": 0,
+                "title": "Email",
+                "format": "email",
+                "maxLength": 60,
+                "minLength": 1,
+            },
+            "Description": {
+                "type": "string",
+                "title": "Description for application",
                 "maxLength": 15,
+                "minLength": 0,
             },
             "ApplicationNumber": {
-                "title": "Application number",
                 "type": "number",
-                "minLength": 1,
+                "title": "Application number",
                 "maxLength": 120,
+                "minLength": 1,
             },
-            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
         },
     }
     form_ui_schema = [
         {"type": "field", "definition": "/properties/Title"},
+        {"type": "field", "definition": "/properties/Email"},
         {"type": "field", "definition": "/properties/Description"},
         {"type": "field", "definition": "/properties/ApplicationNumber"},
         {"type": "field", "definition": "/properties/Date"},
@@ -1128,6 +1166,8 @@ class AgencyContactInfoFactory(BaseFactory):
 class AgencyFactory(BaseFactory):
     class Meta:
         model = agency_models.Agency
+
+    agency_id = Generators.UuidObj
 
     agency_name = factory.Faker("agency_name")
 
@@ -1963,6 +2003,7 @@ class TuserAccountFactory(BaseFactory):
         abstract = True
 
     user_account_id = factory.Sequence(lambda n: n)
+    user_id = Generators.UuidObj
     full_name = factory.Faker("name")
     email_address = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
@@ -1984,7 +2025,7 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
     @classmethod
     def _setup_next_sequence(cls):
         if _db_session is not None:
-            value = _db_session.query(func.max(foreign.user.TuserAccount.user_id)).scalar()
+            value = _db_session.query(func.max(foreign.user.TuserAccount.user_account_id)).scalar()
             if value is not None:
                 return value + 1
         return 1
@@ -2000,6 +2041,57 @@ class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
             full_name=None,
             email_address=None,
         )
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.TuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class TuserAccountMapperFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    ext_user_id = Generators.UuidObj
+    ext_issuer = factory.Faker("word")
+    last_auth_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    source_type = "GOV"
+    is_deleted = factory.Faker("boolean")
+
+
+class StagingTuserAccountMapperFactory(TuserAccountMapperFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserAccountMapper
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(staging.user.TuserAccountMapper.user_account_id)
+            ).scalar()
+
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class ForeignTuserAccountMapperFactory(TuserAccountMapperFactory):
+    class Meta:
+        model = foreign.user.TuserAccountMapper
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(foreign.user.TuserAccountMapper.user_account_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+        return 1
 
 
 ##
@@ -2094,3 +2186,53 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
+
+
+class StagingTcompetitionFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.competition.Tcompetition
+
+    comp_id = factory.Sequence(lambda n: n)
+    competitionid = factory.Sequence(lambda n: f"COMP{n}")
+    familyid = factory.LazyFunction(lambda: random.choice([12, 14, 15, 16, 17]))
+    competitiontitle = factory.Faker("sentence")
+    openingdate = factory.Faker("date_between", start_date="-1y", end_date="+30d")
+    closingdate = factory.Faker("date_between", start_date="+30d", end_date="+1y")
+    contactinfo = factory.Faker("paragraph", nb_sentences=1)
+    graceperiod = factory.LazyFunction(lambda: random.randint(1, 30))
+    opentoapplicanttype = factory.LazyFunction(lambda: random.choice([1, 2, 3]))
+    electronic_required = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    expected_appl_num = factory.LazyFunction(lambda: random.randint(10, 500))
+    expected_appl_size = factory.LazyFunction(lambda: random.randint(1, 20))
+    ismulti = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    agency_dwnld_url = factory.Faker("url")
+    package_id = factory.Sequence(lambda n: f"PKG{n}")
+    # Required fields - must always have values
+    is_wrkspc_compatible = "Y"  # This cannot be None or null
+    dialect = "X"  # This cannot be None or null
+
+    created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
+    last_upd_date = factory.Faker("date_time_between", start_date="-11m", end_date="-1d")
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
+    class Params:
+        # Trait to set all nullable fields to None, preserve non-nullable fields
+        all_fields_null = factory.Trait(
+            competitionid=None,
+            familyid=None,
+            competitiontitle=None,
+            openingdate=None,
+            closingdate=None,
+            contactinfo=None,
+            graceperiod=None,
+            opentoapplicanttype=None,
+            electronic_required=None,
+            expected_appl_num=None,
+            expected_appl_size=None,
+            ismulti=None,
+            agency_dwnld_url=None,
+            package_id=None,
+            sendmail=None,
+            # is_wrkspc_compatible and dialect must NEVER be None
+        )

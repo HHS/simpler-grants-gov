@@ -2,7 +2,7 @@
 
 * **Status:** Active
 * **Last Modified:**&#x31;2/16/2024
-* **Deciders:** Sarah Knopp, Billy Daly, Lucas Brown, Margaret Spring
+* **Deciders:** Sarah, Billy, Lucas, Margaret
 
 ## Context and Problem Statement
 
