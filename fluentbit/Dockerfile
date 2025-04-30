@@ -16,8 +16,10 @@ COPY --from=fluentbit /fluent-bit /fluent-bit
 HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
   CMD ["curl", "http://localhost:80/api/v1/health"]
 
-COPY fluentbit.yml /fluent-bit/etc/fluentbit.yml
+# We copy into `/fluent-bit/etc/fluent-bit-custom.yml` because AWS
+# will overwrite any `/fluent-bit/etc/fluent-bit.yml` on the container.
+COPY fluentbit.yml /fluent-bit/etc/fluent-bit-custom.yml
 
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
-CMD ["-c", "/fluent-bit/etc/fluentbit.yml"]
+CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.yml"]
