@@ -11,7 +11,7 @@ jest.mock("src/services/auth/sessionStorage", () => {
   return {
     __esModule: true,
     default: {
-      setItem: (...args: any[]) => mockSetItem(...args),
+      setItem: (key: string, value: string): void => mockSetItem(key, value),
     },
   };
 });
