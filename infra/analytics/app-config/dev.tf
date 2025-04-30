@@ -6,6 +6,11 @@ module "dev_config" {
   account_name   = "dev"
   environment    = "dev"
   network_name   = "dev"
+
+  database_instance_count = 2
+  database_min_capacity   = 2
+  database_max_capacity   = 2
+
   service_override_extra_environment_variables = {
     # In dev, only show the results in the AWS console
     ACTION = "show-results"
