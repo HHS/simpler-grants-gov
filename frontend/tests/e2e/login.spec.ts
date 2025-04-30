@@ -5,7 +5,7 @@ const BASE_URL = "http://127.0.0.1:3000";
 test.describe("Login Page Redirect", () => {
   test.beforeEach(async ({ page }) => {
     // Clear session storage before each test
-    await page.goto(`${BASE_URL}/`);
+    await page.goto(`/`);
     await page.evaluate(() => {
       if (window.sessionStorage) {
         window.sessionStorage.clear();
@@ -41,16 +41,16 @@ test.describe("Login Page Redirect", () => {
   test("should redirect to home page when no redirect URL is stored", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/login`);
-    await expect(page).toHaveURL(`${BASE_URL}/`);
+    await page.goto(`/login`);
+    await expect(page).toHaveURL(`/`);
   });
 
   test("should redirect to stored URL after login", async ({ page }) => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
-    await page.goto(`${BASE_URL}/login`);
-    await expect(page).toHaveURL(`${BASE_URL}/opportunities`);
+    await page.goto(`/login`);
+    await expect(page).toHaveURL(`/opportunities`);
   });
 
   test("should redirect to home page when stored URL is empty", async ({
@@ -59,8 +59,8 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "");
     });
-    await page.goto(`${BASE_URL}/login`);
-    await expect(page).toHaveURL(`${BASE_URL}/`);
+    await page.goto(`/login`);
+    await expect(page).toHaveURL(`/`);
   });
 
   test("should redirect to home page when stored URL is external", async ({
@@ -69,8 +69,8 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "https://external.com");
     });
-    await page.goto(`${BASE_URL}/login`);
-    await expect(page).toHaveURL(`${BASE_URL}/`);
+    await page.goto(`/login`);
+    await expect(page).toHaveURL(`/`);
   });
 
   test('should display "Redirecting..." text while redirecting', async ({
@@ -79,7 +79,7 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`/login`);
     await expect(page.getByText("Redirecting...")).toBeVisible();
   });
 });
