@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 import pytest
@@ -24,14 +25,19 @@ def user_with_email(db_session, user, monkeypatch):
     return user
 
 
-@pytest.fixture
-def setup_search_data(opportunity_index, opportunity_index_alias, search_client):
+@pytest.fixture(scope="module")
+def setup_opensearch_data(opportunity_index_alias, search_client):
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
     # Load into the search index
     schema = OpportunityV1Schema()
     json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
-    search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+
+    search_client.bulk_upsert(index_name, json_records, "opportunity_id")
     # Swap the search index alias
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+    search_client.swap_alias_index(index_name, opportunity_index_alias)
+
+    yield index_name
 
 
 @pytest.fixture
@@ -43,23 +49,24 @@ def clear_notification_logs(db_session):
 
 
 @pytest.fixture(autouse=True)
-def cleanup_opportunities(db_session):
+def clear_data(db_session):
+    """Clear all notification logs"""
+    db_session.query(UserNotificationLog).delete()
     cascade_delete_from_db_table(db_session, Opportunity)
-    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
+    db_session.query(UserSavedOpportunity).delete()
+    db_session.query(UserSavedSearch).delete()
 
 
 def test_search_notifications_cli(
     cli_runner,
     db_session,
-    setup_search_data,
+    setup_opensearch_data,
     enable_factory_create,
     user,
     user_with_email,
     caplog,
-    clear_notification_logs,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
-
     # Create a saved search that needs notification
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
@@ -131,7 +138,6 @@ def test_grouped_search_queries_cli(
     cli_runner,
     db_session,
     enable_factory_create,
-    clear_notification_logs,
     user,
     user_with_email,
 ):
@@ -192,9 +198,8 @@ def test_search_notifications_on_index_change(
     enable_factory_create,
     user,
     user_with_email,
-    opportunity_index,
+    setup_opensearch_data,
     search_client,
-    clear_notification_logs,
 ):
     """Test that verifies notifications are generated when search results change due to index updates"""
     # Create a saved search with initial results
@@ -220,7 +225,7 @@ def test_search_notifications_on_index_change(
     )
 
     json_record = schema.dump(new_opportunity)
-    search_client.bulk_upsert(opportunity_index, [json_record], "opportunity_id")
+    search_client.bulk_upsert(setup_opensearch_data, [json_record], "opportunity_id")
 
     # Run the notification task
     task = EmailNotificationTask(db_session, search_client)
@@ -258,7 +263,7 @@ def test_search_notifications_on_index_change(
 
 
 def test_pagination_params_are_stripped_from_search_query(
-    cli_runner, db_session, enable_factory_create, user, clear_notification_logs
+    cli_runner, db_session, enable_factory_create, user
 ):
     """Test that pagination parameters are stripped from search queries"""
     saved_search = factories.UserSavedSearchFactory.create(

@@ -41,8 +41,8 @@ class EmailNotificationTask(Task):
 
     def run_task(self) -> None:
         # run opportunity notification
-        SearchNotification(db_session=self.db_session, search_client=self.search_client).run()
-        # run search notification
         OpportunityNotification(db_session=self.db_session).run()
+        # run search notification
+        SearchNotification(db_session=self.db_session, search_client=self.search_client).run()
         # run closing notification
         ClosingDateNotification(db_session=self.db_session).run()

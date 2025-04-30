@@ -14,6 +14,7 @@ def clear_data(db_session):
     db_session.query(UserSavedSearch).delete()
     db_session.commit()
 
+
 def test_user_update_saved_search(client, db_session, user, user_auth_token):
     saved_search = UserSavedSearchFactory.create(
         user=user, name="Save Search", search_query={"keywords": "python"}
@@ -79,7 +80,11 @@ def test_user_update_saved_search_unauthorized(
 
 
 def test_user_update_saved_search_no_auth(
-    client, enable_factory_create, db_session, user, user_auth_token,
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
 ):
     saved_search = UserSavedSearchFactory.create(
         user=user, name="Save Search", search_query={"keywords": "python"}

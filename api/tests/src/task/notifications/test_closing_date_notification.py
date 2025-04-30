@@ -24,21 +24,17 @@ def user_with_email(db_session, user, monkeypatch):
     return user
 
 
-@pytest.fixture
-def clear_notification_logs(db_session):
+@pytest.fixture(autouse=True)
+def clear_data(db_session):
     """Clear all notification logs"""
     db_session.query(UserNotificationLog).delete()
     db_session.query(UserOpportunityNotificationLog).delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup_opportunities(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
-    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
+    db_session.query(UserSavedOpportunity).delete()
 
 
 def test_closing_date_notifications(
-    db_session, enable_factory_create, user_with_email, search_client, clear_notification_logs
+    db_session, enable_factory_create, user_with_email, search_client
 ):
     """Test that notifications are sent for opportunities closing in two weeks"""
     two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
@@ -68,7 +64,6 @@ def test_closing_date_notifications(
     )
 
     _clear_mock_responses()
-
     # Run the notification task
     task = EmailNotificationTask(db_session, search_client)
     task.run()
@@ -101,7 +96,7 @@ def test_closing_date_notifications(
 
 
 def test_closing_date_notification_not_sent_twice(
-    db_session, enable_factory_create, user_with_email, search_client, clear_notification_logs
+    db_session, enable_factory_create, user_with_email, search_client
 ):
     """Test that closing date notifications aren't sent multiple times for the same opportunity"""
     two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
@@ -165,7 +160,6 @@ def test_post_notification_log_creation(
     db_session,
     search_client,
     enable_factory_create,
-    clear_notification_logs,
     user,
     user_with_email,
 ):

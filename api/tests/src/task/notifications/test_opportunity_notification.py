@@ -19,17 +19,12 @@ def user_with_email(db_session, user, monkeypatch):
     return user
 
 
-@pytest.fixture
-def clear_notification_logs(db_session):
+@pytest.fixture(autouse=True)
+def clear_data(db_session):
     """Clear all notification logs"""
     db_session.query(UserNotificationLog).delete()
     db_session.query(UserSavedOpportunity).delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup_opportunities(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
-    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
 
 def test_opportunity_notifications(
@@ -40,7 +35,6 @@ def test_opportunity_notifications(
     user,
     user_with_email,
     caplog,
-    clear_notification_logs,
 ):
     """Test that notifications are sent for updated opportunities"""
     # Create a saved opportunity that needs notification
@@ -116,7 +110,6 @@ def test_notification_log_creation(
     db_session,
     search_client,
     enable_factory_create,
-    clear_notification_logs,
     user,
     user_with_email,
 ):
@@ -161,7 +154,6 @@ def test_no_notification_log_when_no_updates(
     db_session,
     search_client,
     enable_factory_create,
-    clear_notification_logs,
     user,
     user_with_email,
 ):
