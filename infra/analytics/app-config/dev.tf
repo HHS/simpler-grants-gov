@@ -10,8 +10,8 @@ module "dev_config" {
     # In dev, only show the results in the AWS console
     ACTION = "show-results"
   }
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "data.dev.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications
