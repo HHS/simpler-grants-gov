@@ -1019,7 +1019,7 @@ class FormFactory(BaseFactory):
         model = competition_models.Form
 
     form_id = Generators.UuidObj
-    form_name = factory.Faker("bs")
+    form_name = "Test form"
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
@@ -1027,10 +1027,9 @@ class FormFactory(BaseFactory):
     form_json_schema = {
         "type": "object",
         "title": "Test form for testing",
-        "required": ["Title", "Email"],
+        "required": ["Title", "Email", "Agreement"],
         "properties": {
             "Date": {"type": "string", "title": "Date of application ", "format": "date"},
-            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
             "Email": {
                 "type": "string",
                 "title": "Email",
@@ -1038,10 +1037,11 @@ class FormFactory(BaseFactory):
                 "maxLength": 60,
                 "minLength": 1,
             },
+            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
             "Description": {
                 "type": "string",
                 "title": "Description for application",
-                "maxLength": 15,
+                "maxLength": 500,
                 "minLength": 0,
             },
             "ApplicationNumber": {
@@ -1050,14 +1050,46 @@ class FormFactory(BaseFactory):
                 "maxLength": 120,
                 "minLength": 1,
             },
+            "Location": {
+                "type": "string",
+                "title": "Location",
+                "description": "This should be overwritten",
+                "enum": ["Earth", "Moon", "Ort Cloud"],
+            },
+            "Vibe": {
+                "type": "string",
+                "title": "Vibe",
+                "description": "This describes the current state",
+                "enum": ["Vibing", "Not vibing"],
+            },
+            "Agreement": {
+                "type": "boolean",
+                "title": "I agree",
+                "description": "Agree to agree that the thing is the thing",
+            },
         },
     }
     form_ui_schema = [
         {"type": "field", "definition": "/properties/Title"},
-        {"type": "field", "definition": "/properties/Email"},
-        {"type": "field", "definition": "/properties/Description"},
-        {"type": "field", "definition": "/properties/ApplicationNumber"},
         {"type": "field", "definition": "/properties/Date"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/Email"},
+        {
+            "type": "field",
+            "definition": "/properties/Location",
+            "schema": {"description": "Let us know where you are"},
+        },
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Vibe", "widget": "Radio"},
+        {"type": "field", "definition": "/properties/Agreement"},
+        {
+            "type": "field",
+            "schema": {
+                "type": "null",
+                "title": "Post populated",
+                "description": "Completed by Grants.gov upon submission.",
+            },
+        },
     ]
 
 
