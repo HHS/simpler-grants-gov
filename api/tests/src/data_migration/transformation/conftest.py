@@ -225,7 +225,7 @@ def setup_funding_instrument(
 
     source_funding_instrument = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fi_id=legacy_lookup_value,
@@ -620,7 +620,7 @@ def validate_funding_instrument(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_instrument.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_instrument.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_instrument.opportunity_id,
         )
         .scalar()
     )
