@@ -5,13 +5,11 @@
 FROM buildpack-deps:oracular AS build
 
 # Copy the fluentbit binary from the official image.
-FROM fluent/fluent-bit:4.0.0 AS fluentbit
+FROM fluent/fluent-bit:4.0.1 AS fluentbit
 
 FROM build AS release
 
 COPY --from=fluentbit /fluent-bit /fluent-bit
-
-ENV FLB_LOG_LEVEL=debug
 
 # The healthcheck is used to determine if the container is running.
 # AWS doesn't use it, but it's useful for local development.

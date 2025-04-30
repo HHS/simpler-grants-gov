@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "task_executor" {
     ]
     resources = [
       "${aws_cloudwatch_log_group.service_logs.arn}:*",
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:service/${var.service_name}-fluentbit:log-stream:${var.service_name}/${var.service_name}-fluentbit/*"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:service/${var.service_name}*"
     ]
   }
 
@@ -68,15 +68,15 @@ data "aws_iam_policy_document" "task_executor" {
     }
   }
 
-  # Allow ECS to download images for New Relic
+  # Allow ECS to download images for fluentbit
   statement {
-    sid = "ECRPullAccessNewRelic"
+    sid = "ECRPullAccessFluentbit"
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
       "ecr:GetDownloadUrlForLayer",
     ]
-    resources = [local.new_relic_fluent_bit_repo_arn]
+    resources = [local.fluent_bit_repo_arn]
   }
 
   statement {
@@ -99,10 +99,29 @@ data "aws_iam_policy_document" "task_executor" {
   }
 }
 
+data "aws_iam_policy_document" "runtime_logs" {
+  # Allow fluentbit to create logs group / push logs to Cloudwatch at runtime.
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
+    ]
+    resources = [
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:service/${var.service_name}*"
+    ]
+  }
+}
+
 resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
   role   = aws_iam_role.task_executor.id
   policy = data.aws_iam_policy_document.task_executor.json
+}
+
+resource "aws_iam_policy" "runtime_logs" {
+  name   = "${var.service_name}-task-executor-role-policy"
+  policy = data.aws_iam_policy_document.runtime_logs.json
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies" {
@@ -110,4 +129,9 @@ resource "aws_iam_role_policy_attachment" "extra_policies" {
 
   role       = aws_iam_role.app_service.name
   policy_arn = each.value
+}
+
+resource "aws_iam_role_policy_attachment" "runtime_logs" {
+  role       = aws_iam_role.app_service.name
+  policy_arn = aws_iam_policy.runtime_logs.arn
 }
