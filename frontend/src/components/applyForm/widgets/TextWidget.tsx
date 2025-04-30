@@ -23,19 +23,19 @@ function TextWidget<
   F extends FormContextType = never,
 >({
   id,
-  value,
-  required,
   disabled,
   readonly,
+  required,
   schema,
-  options = {},
+  value,
   autofocus = false,
+  options = {},
+  rawErrors = [],
   updateOnInput = false,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
-  rawErrors = [],
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
