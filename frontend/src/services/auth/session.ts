@@ -9,6 +9,7 @@ import {
   encrypt,
   newExpirationDate,
 } from "src/services/auth/sessionUtils";
+import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
@@ -72,15 +73,15 @@ export const createSession = async (token: string) => {
 };
 
 // returns the necessary user info from decrypted login gov token
-// plus client token and expiration
+// plus api token and expiration
 export const getSession = async (): Promise<UserSession | null> => {
   if (!clientJwtKey || !loginGovJwtKey) {
     initializeSessionSecrets();
   }
   const cookie = await cookies();
-  const sessionToken = cookie.get("session")?.value;
-  if (!sessionToken) return null;
-  const payload = await decryptClientToken(sessionToken);
+  const clientSessionToken = cookie.get("session")?.value;
+  if (!clientSessionToken) return null;
+  const payload = await decryptClientToken(clientSessionToken);
   if (!payload) {
     return null;
   }
@@ -95,4 +96,17 @@ export const getSession = async (): Promise<UserSession | null> => {
         expiresAt: exp ? exp * 1000 : undefined,
       }
     : null;
+};
+
+// for use when we want to refresh a user's token expiration
+export const refreshSession = async (
+  apiSessionToken: string,
+): Promise<UserSession | null> => {
+  // update expiration on the API
+  await postTokenRefresh();
+  // re-encrypt the existing API token with a new expiration date
+  // or do we want to use a new token that comes down from the postTokenRefresh call?
+  await createSession(apiSessionToken);
+  // return the new decrypted session
+  return getSession();
 };
