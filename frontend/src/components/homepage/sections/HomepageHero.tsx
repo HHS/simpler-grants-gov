@@ -34,7 +34,7 @@ const Hero = () => {
               className="usa-icon usa-icon--size-3"
               aria-label="Github"
             />
-            {t("github_link")}
+            {t("githubLink")}
           </Link>
         </span>
       </GridContainer>

@@ -15,7 +15,7 @@ const defaultContentByType = (type: AwardDataKeys) =>
   type === "expected_awards" ? "--" : "$--";
 
 const OpportunityAwardGridRow = ({ title, content }: Props) => {
-  const t = useTranslations("OpportunityListing.award_info");
+  const t = useTranslations("OpportunityListing.awardInfo");
 
   return (
     <div className="border radius-md border-base-lighter padding-x-2">

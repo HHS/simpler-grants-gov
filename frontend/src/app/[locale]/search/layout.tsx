@@ -13,13 +13,13 @@ export default function SearchLayout({ children, params }: LayoutProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const t = useTranslations("Search.beta_alert");
+  const t = useTranslations("Search.betaAlert");
 
   return (
     <>
       <BetaAlert
         containerClasses="margin-top-5"
-        heading={t("alert_title")}
+        heading={t("alertTitle")}
         alertMessage={t.rich("alert", {
           mailToGrants: (chunks) => (
             <a href="mailto:simpler@grants.gov">{chunks}</a>

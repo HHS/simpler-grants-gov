@@ -27,7 +27,7 @@ const OpportunityCTA = ({ id }: { id: number }) => {
 
   const content = (
     <>
-      <span>{t("apply_content")}</span>
+      <span>{t("applyContent")}</span>
       <a
         href={legacyOpportunityURL}
         target="_blank"
@@ -35,7 +35,7 @@ const OpportunityCTA = ({ id }: { id: number }) => {
         className="display-block"
       >
         <Button type="button" outline={true} className="margin-top-2">
-          <span>{t("button_content")}</span>
+          <span>{t("buttonContent")}</span>
           <USWDSIcon name="launch" className="usa-icon--size-4 text-middle" />
         </Button>
       </a>
@@ -44,7 +44,7 @@ const OpportunityCTA = ({ id }: { id: number }) => {
 
   return (
     <div className="margin-top-2">
-      <OpportunityContentBox title={t("apply_title")} content={content} />
+      <OpportunityContentBox title={t("applyTitle")} content={content} />
     </div>
   );
 };
