@@ -1,4 +1,5 @@
 import { createSession } from "src/services/auth/session";
+import { newExpirationDate } from "src/services/auth/sessionUtils";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     return redirect("/unauthenticated");
   }
   try {
-    await createSession(token);
+    await createSession(token, newExpirationDate());
   } catch (_e) {
     console.error("Error creating session for token", { token });
     console.error(_e);

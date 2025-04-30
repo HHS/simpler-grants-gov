@@ -55,25 +55,39 @@ const decryptLoginGovToken = async (
   return (payload as UserSession) ?? null;
 };
 
-// sets client token on cookie
-export const createSession = async (token: string) => {
+// ecrypts the api token into client token, then sets client token on cookie
+export const createSession = async (token: string, expiration: Date) => {
   if (!clientJwtKey) {
     initializeSessionSecrets();
   }
-  const expiresAt = newExpirationDate();
-  const session = await encrypt(token, expiresAt, clientJwtKey);
+  const session = await encrypt(token, expiration, clientJwtKey);
   const cookie = await cookies();
   cookie.set("session", session, {
     httpOnly: true,
     secure: environment.ENVIRONMENT === "prod",
-    expires: expiresAt,
+    expires: expiration,
     sameSite: "lax",
     path: "/",
   });
 };
 
+// sets a client token based on an API token and expiration, then
+// returns the user info as in getSession.
+// Similar to running createSession & getSession, but skips unnecessarily decrypting the client token after encrypting
+const createAndReturnSession = async (token: string, expiration: Date) => {
+  await createSession(token, expiration);
+  const apiSession = await decryptLoginGovToken(token);
+  return apiSession
+    ? {
+        ...apiSession,
+        token,
+        expiresAt: expiration ? expiration.getTime() : undefined,
+      }
+    : null;
+};
+
 // returns the necessary user info from decrypted login gov token
-// plus api token and expiration
+// plus the encrypted api token and expiration decrypted from the client token
 export const getSession = async (): Promise<UserSession | null> => {
   if (!clientJwtKey || !loginGovJwtKey) {
     initializeSessionSecrets();
@@ -91,22 +105,23 @@ export const getSession = async (): Promise<UserSession | null> => {
     ? {
         ...session,
         token,
-        // expiration timestamp in the token is in seconds, in order to compare using
+        // expiration timestamp in the login.gov token is in seconds, in order to compare using
         // JS date functions it should be in ms
         expiresAt: exp ? exp * 1000 : undefined,
       }
     : null;
 };
 
-// for use when we want to refresh a user's token expiration
+// for use whenever we want to refresh a user's token expiration
+// note that the API token itself is not updated other than bumping the expiration
 export const refreshSession = async (
   apiSessionToken: string,
 ): Promise<UserSession | null> => {
-  // update expiration on the API
-  await postTokenRefresh();
-  // re-encrypt the existing API token with a new expiration date
-  // or do we want to use a new token that comes down from the postTokenRefresh call?
-  await createSession(apiSessionToken);
-  // return the new decrypted session
-  return getSession();
+  // update expiration on the API side
+  await postTokenRefresh({
+    additionalHeaders: { "X-SGG-Token": apiSessionToken },
+  });
+  // re-encrypt the existing API token with a refreshed expiration date
+  // and return decrypted user info
+  return createAndReturnSession(apiSessionToken, newExpirationDate());
 };
