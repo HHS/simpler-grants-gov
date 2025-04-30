@@ -5,7 +5,7 @@ import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
 
 import { LoginModal } from "src/components/LoginModal";
 
-const mockSetItem = jest.fn();
+const mockSetItem = jest.fn<void, [string, string]>();
 
 jest.mock("src/services/auth/sessionStorage", () => {
   return {
