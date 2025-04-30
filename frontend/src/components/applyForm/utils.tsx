@@ -148,7 +148,7 @@ export const getFieldSchema = ({
   return schema as RJSFSchema;
 };
 
-const widgetFunctions: Record<
+const widgetComponents: Record<
   WidgetTypes,
   (widgetProps: UswdsWidgetProps) => JSX.Element
 > = {
@@ -194,7 +194,7 @@ export const buildField = ({
     };
   }
 
-  return widgetFunctions[type]({
+  return widgetComponents[type]({
     id: name,
     disabled,
     required: (formSchema.required ?? []).includes(name),
