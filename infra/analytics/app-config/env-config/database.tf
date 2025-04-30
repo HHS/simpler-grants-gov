@@ -6,6 +6,8 @@ locals {
     migrator_username           = "migrator"
     schema_name                 = "app"
     instance_count              = var.database_instance_count
+    max_capacity                = var.database_max_capacity
+    min_capacity                = var.database_min_capacity
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
 
