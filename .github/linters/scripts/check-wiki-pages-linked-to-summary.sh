@@ -11,7 +11,9 @@ MISSING_FILES="${TEMP_DIR}/missing-from-summary.txt"
 mkdir -p tmp # create tmp directory
 
 # list all of the markdown files in the wiki directory
-find "${WIKI_DIR}" -name "*.md" |\
+find "${WIKI_DIR}" -name "*.md" | \
+ # remove internal GitBook files that we don't expect in the Summary
+ grep -v ".gitbook/includes" | \
  # make file paths relative to the root of the wiki directory
  sed -E "s|${WIKI_DIR}/(.*)|\1|" |\
  # filter out the SUMMARY.md file

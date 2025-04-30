@@ -10,8 +10,8 @@ module "staging_config" {
     # In staging, post results to the #z_bot-analytics-ci-test channel in slack
     ACTION = "post-results"
   }
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "data.staging.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

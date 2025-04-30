@@ -5,6 +5,7 @@ locals {
     app_username                = "app"
     migrator_username           = "migrator"
     schema_name                 = "app"
+    instance_count              = var.database_instance_count
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
 
