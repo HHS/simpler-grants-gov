@@ -105,15 +105,15 @@ export const mockMessages = {
           ],
         ],
       },
-      get_there: {
+      getThere: {
         title: "How we get there",
         contentTitle: "Guided by research, shaped by your experience",
-        paragraph_1:
+        paragraph1:
           "To build a better Grants.gov, we listen to the people who use it. Through ongoing research, user feedback, and real conversations with applicants and grantors, we identify challenges and prioritize opportunities for improvement.",
-        paragraph_2:
+        paragraph2:
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
-        link_text_1: "Read more about the research on our public wiki",
-        link_text_2: "Sign up to participate in future user studies",
+        linkText1: "Read more about the research on our public wiki",
+        linkText2: "Sign up to participate in future user studies",
       },
     },
   },

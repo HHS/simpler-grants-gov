@@ -11,7 +11,7 @@ const IndexGoalContent = () => {
   return (
     <ContentLayout data-testid="goal-content" bottomBorder="light">
       <Grid tabletLg={{ col: 6 }}>
-        <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
+        <p className="usa-intro padding-bottom-2">{t("goal.paragraph1")}</p>
         <Link href="/subscribe" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             <span className="margin-right-5">{t("goal.cta")}</span>
@@ -25,16 +25,16 @@ const IndexGoalContent = () => {
       </Grid>
       <Grid tabletLg={{ col: 6 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
-          {t("goal.title_2")}
+          {t("goal.title2")}
         </h3>
         <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-          {t("goal.paragraph_2")}
+          {t("goal.paragraph2")}
         </p>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
-          {t("goal.title_3")}
+          {t("goal.title3")}
         </h3>
         <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-          {t("goal.paragraph_3")}
+          {t("goal.paragraph3")}
         </p>
       </Grid>
     </ContentLayout>

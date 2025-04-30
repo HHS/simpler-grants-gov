@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Subscribe.page_title"),
-    description: t("Subscribe.meta_description"),
+    title: t("Subscribe.pageTitle"),
+    description: t("Subscribe.metaDescription"),
   };
 
   return meta;
@@ -41,7 +41,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
         </p>
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
-            <p className="usa-intro">{t("paragraph_1")}</p>
+            <p className="usa-intro">{t("paragraph1")}</p>
             {t.rich("list", {
               ul: (chunks) => (
                 <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4">

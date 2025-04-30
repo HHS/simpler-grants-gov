@@ -96,7 +96,7 @@ export default function SearchResultsListItem({
               </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
-              <strong>{t("resultsListItem.opportunity_number")}</strong>
+              <strong>{t("resultsListItem.opportunityNumber")}</strong>
               {opportunity?.opportunity_number}
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function SearchResultsListItem({
           <div className="overflow-hidden font-body-xs">
             {/* TODO: Better way to format as a dollar amounts */}
             <span className="desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
-              <strong>{t("resultsListItem.award_ceiling")}</strong>
+              <strong>{t("resultsListItem.awardCeiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
               </span>

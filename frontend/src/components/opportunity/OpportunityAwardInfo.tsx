@@ -20,7 +20,7 @@ type TranslationKeys =
   | "category_explanation";
 
 const OpportunityAwardInfo = ({ opportunityData }: Props) => {
-  const t = useTranslations("OpportunityListing.award_info");
+  const t = useTranslations("OpportunityListing.awardInfo");
 
   const formatCurrency = (number: number | null) => {
     if (number) {

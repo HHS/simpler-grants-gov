@@ -37,10 +37,10 @@ export async function generateMetadata({
 }) {
   const { id, locale } = await params;
   const t = await getTranslations({ locale });
-  let title = `${t("OpportunityListing.page_title")}`;
+  let title = `${t("OpportunityListing.pageTitle")}`;
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
-    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title || ""}`;
+    title = `${t("OpportunityListing.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
@@ -49,7 +49,7 @@ export async function generateMetadata({
   }
   const meta: Metadata = {
     title,
-    description: t("OpportunityListing.meta_description"),
+    description: t("OpportunityListing.metaDescription"),
   };
   return meta;
 }

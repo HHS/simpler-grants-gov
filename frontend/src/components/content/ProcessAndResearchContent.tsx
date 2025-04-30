@@ -15,15 +15,15 @@ const ProcessAndResearchContent = () => {
     >
       <Grid tabletLg={{ col: 6 }}>
         <h2 className="tablet-lg:font-sans-l desktop-lg:font-sans-xl">
-          {t("process_and_research.title_1")}
+          {t("processAndResearch.title1")}
         </h2>
         <p className="font-sans-md line-height-sans-4 padding-bottom-2 desktop-lg:line-height-sans-6">
-          {t("process_and_research.paragraph_1")}
+          {t("processAndResearch.paragraph1")}
         </p>
         <Link href="/roadmap" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             <span className="margin-right-5">
-              {t("process_and_research.cta_1")}
+              {t("processAndResearch.cta1")}
             </span>
             <USWDSIcon
               name="arrow_forward"
@@ -35,15 +35,15 @@ const ProcessAndResearchContent = () => {
       </Grid>
       <Grid tabletLg={{ col: 6 }}>
         <h2 className="tablet-lg:font-sans-l desktop-lg:font-sans-xl">
-          {t("process_and_research.title_2")}
+          {t("processAndResearch.title2")}
         </h2>
         <p className="font-sans-md line-height-sans-4 padding-bottom-2 desktop-lg:line-height-sans-6">
-          {t("process_and_research.paragraph_2")}
+          {t("processAndResearch.paragraph2")}
         </p>
         <Link href="research" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             <span className="margin-right-5">
-              {t("process_and_research.cta_2")}
+              {t("processAndResearch.cta2")}
             </span>
             <USWDSIcon
               name="arrow_forward"

@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Subscribe.page_title"),
-    description: t("Index.meta_description"),
+    title: t("Subscribe.pageTitle"),
+    description: t("Index.metaDescription"),
   };
 
   return meta;
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 export default function Unsubscribe({ params }: LocalizedPageProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
-  const t = useTranslations("Unsubscription_confirmation");
+  const t = useTranslations("UnsubscriptionConfirmation");
 
   return (
     <>
@@ -41,9 +41,9 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
         </p>
         <Grid row gap className="flex-align-start">
           <Grid>
-            <p className="usa-intro">{t("paragraph_1")}</p>
+            <p className="usa-intro">{t("paragraph")}</p>
             <Link className="usa-button margin-bottom-4" href="/subscribe">
-              {t("button_resub")}
+              {t("buttonResub")}
             </Link>
           </Grid>
         </Grid>

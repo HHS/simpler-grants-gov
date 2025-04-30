@@ -28,7 +28,7 @@ const Hero = () => {
           passHref
           className="usa-button usa-button--secondary usa-button--big margin-bottom-2"
         >
-          {t("search_link")}
+          {t("searchLink")}
         </Link>
         <span className="usa-dark-background bg-transparent">
           <Link
@@ -41,7 +41,7 @@ const Hero = () => {
               className="usa-icon usa-icon--size-3"
               aria-label="Github"
             />
-            {t("github_link")}
+            {t("githubLink")}
           </Link>
         </span>
       </GridContainer>

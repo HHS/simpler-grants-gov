@@ -21,7 +21,7 @@ export default function Layout({ children, locale }: Props) {
     <UserProvider>
       <div className="display-flex flex-column minh-viewport">
         <a className="usa-skipnav" href="#main-content">
-          {t("Layout.skip_to_main")}
+          {t("Layout.skipToMain")}
         </a>
         <Header locale={locale} />
         <main id="main-content" className="border-top-0">
