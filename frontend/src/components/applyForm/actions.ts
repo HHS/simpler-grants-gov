@@ -29,6 +29,7 @@ export async function handleFormAction(
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
+  const sumbitType = formData.get("apply-form-button");
 
   const formSchema = await getFormSchema(formId);
   if (!formSchema) {
@@ -53,10 +54,13 @@ export async function handleFormAction(
     await handleSave(applicationFormData, applicationId, formId);
     return {
       applicationId,
-      errorMessage,
+      errorMessage:
+        sumbitType === "save"
+          ? "Form validation errors"
+          : "Unable to submit due to form validation errors",
       formData: applicationFormData,
       formId,
-      successMessage,
+      successMessage: "Form saved",
       validationErrors,
     };
   } else {
@@ -66,7 +70,7 @@ export async function handleFormAction(
       formId,
     );
     if (saveSuccess) {
-      if (formData.get("apply-form-button") === "submit") {
+      if (sumbitType === "submit") {
         redirect(`/formPrototype/success`);
       } else {
         return {
@@ -147,7 +151,7 @@ function formValidate({
   const errors = validateJsonBySchema(formData, formSchema);
   if (errors) {
     return {
-      errorMessage: "Error submitting form",
+      errorMessage: "Form validation errors",
       validationErrors: errors,
     };
   } else {
