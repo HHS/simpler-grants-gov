@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class CallbackParams(BaseModel):
-    code: str
+    code: str | None = None
     state: str
     error: str | None = None
     error_description: str | None = None
@@ -59,10 +59,19 @@ def handle_login_gov_callback_request(
 
     # If we got an error back in the callback, raise an exception
     # The only two documented error values are access_denied and invalid_request
-    # which would both indicate an issue in our configuration and we'll treat as a 5xx internal error
     if callback_params.error is not None:
+        # access_denied means "The user has either cancelled or declined to authorize the client"
+        # so raise a 401 and redirect them back to the frontend
+        if callback_params.error == "access_denied":
+            raise_flask_error(401, "User declined to login")
+
+        # Otherwise it's an invalid request which indicates a problem with our configuration
         error_message = f"{callback_params.error} {callback_params.error_description}"
         raise_flask_error(500, error_message)
+
+    # This shouldn't be possible, if there is no error, this should always be set
+    if callback_params.code is None:
+        raise_flask_error(500, "Missing code in request")
 
     # If the state value we received isn't a valid UUID
     # then it's likely someone randomly calling the endpoint

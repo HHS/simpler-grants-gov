@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, ForeignKey, and_
+from sqlalchemy import ForeignKey, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
@@ -129,8 +129,8 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
         default=datetime_util.utcnow,
         server_default=sqlnow(),
     )
-    # TODO: Migrate to using UUIDs instead
-    searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger))
+
+    searched_opportunity_ids: Mapped[list[uuid.UUID]] = mapped_column(ARRAY(UUID))
 
 
 class UserNotificationLog(ApiSchemaTable, TimestampMixin):

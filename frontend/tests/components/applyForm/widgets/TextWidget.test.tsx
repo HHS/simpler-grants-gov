@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 
@@ -16,6 +16,8 @@ const WidgetProps = {
   required: undefined,
   options: {},
 };
+
+const mockOnChange = jest.fn();
 
 describe("TextWidget", () => {
   it("renders the value content and title", () => {
@@ -49,6 +51,36 @@ describe("TextWidget", () => {
     expect(input).toHaveAttribute("type", "email");
   });
 
+  it("renders number input type", async () => {
+    const props = {
+      ...WidgetProps,
+      schema: { ...WidgetProps.schema, type: "number" as const },
+    };
+    render(<TextWidget {...props} />);
+    const input = await screen.findByTestId("test");
+    expect(input).toHaveAttribute("type", "number");
+  });
+
+  it("renders password input type", async () => {
+    const props = {
+      ...WidgetProps,
+      schema: { ...WidgetProps.schema, format: "password" },
+    };
+    render(<TextWidget {...props} />);
+    const input = await screen.findByTestId("test");
+    expect(input).toHaveAttribute("type", "password");
+  });
+
+  it("renders date input type", async () => {
+    const props = {
+      ...WidgetProps,
+      schema: { ...WidgetProps.schema, format: "date" },
+    };
+    render(<TextWidget {...props} />);
+    const input = await screen.findByTestId("test");
+    expect(input).toHaveAttribute("type", "date");
+  });
+
   it("renders datalist when examples are provided", () => {
     const props = {
       ...WidgetProps,
@@ -61,17 +93,6 @@ describe("TextWidget", () => {
   });
 
   it("ignores onChange event", () => {
-    const mockOnChange = jest.fn();
-    const props = { ...WidgetProps, onChange: mockOnChange };
-    render(<TextWidget {...props} />);
-    const input = screen.getByRole("textbox");
-    input.focus();
-    input.blur();
-    expect(mockOnChange).not.toHaveBeenCalled();
-  });
-
-  it("handles onChange event", () => {
-    const mockOnChange = jest.fn();
     const props = {
       ...WidgetProps,
       onChange: mockOnChange,
@@ -82,5 +103,35 @@ describe("TextWidget", () => {
     input.focus();
     input.blur();
     expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  it("handles onBlur, onFocus events", () => {
+    const mockOnBlur = jest.fn();
+    const mockOnFocus = jest.fn();
+    const props = {
+      ...WidgetProps,
+      onBlur: mockOnBlur,
+      onFocus: mockOnFocus,
+      updateOnInput: true,
+    };
+    render(<TextWidget {...props} />);
+    const input = screen.getByRole("textbox");
+    input.focus();
+    input.blur();
+    expect(mockOnBlur).toHaveBeenCalled();
+    expect(mockOnFocus).toHaveBeenCalled();
+  });
+
+  it("handles onChange event", () => {
+    const props = {
+      ...WidgetProps,
+      onChange: mockOnChange,
+      updateOnInput: true,
+    };
+    render(<TextWidget {...props} />);
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "123" } });
+    expect(mockOnChange).toHaveBeenCalled();
   });
 });

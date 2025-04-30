@@ -27,11 +27,11 @@ describe("/api/auth/callback GET handler", () => {
     expect(redirectError.digest).toContain(";/login;");
   });
 
-  it("if no token exists on query param, does not call createSession and redirects to unauthorized page", async () => {
+  it("if no token exists on query param, does not call createSession and redirects to unauthenticated page", async () => {
     const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
       GET(new NextRequest("https://simpler.grants.gov")),
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
-    expect(redirectError.digest).toContain(";/unauthorized;");
+    expect(redirectError.digest).toContain(";/unauthenticated;");
   });
 });

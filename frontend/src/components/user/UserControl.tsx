@@ -1,8 +1,10 @@
 import clsx from "clsx";
+import { noop } from "lodash";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import {
   IconListContent,
@@ -84,7 +86,22 @@ const UserDropdown = ({
         // @ts-ignore: Type 'Element' is not assignable to type 'string'
         label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
-        onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
+        onClick={(e) => {
+          if (!userProfileMenuOpen) {
+            setUserProfileMenuOpen(true);
+            e.stopPropagation();
+            requestAnimationFrame(() =>
+              document.addEventListener(
+                "click",
+                () => {
+                  setUserProfileMenuOpen(false);
+                },
+                { once: true },
+              ),
+            );
+          }
+        }}
+        onToggle={noop}
         isCurrent={false}
         menuId="user-control"
       />
@@ -105,14 +122,18 @@ const UserDropdown = ({
 export const UserControl = () => {
   const t = useTranslations("Header");
 
-  const { user, refreshUser } = useUser();
+  const { user, logoutLocalUser } = useUser();
+  const router = useRouter();
 
   const logout = useCallback(async (): Promise<void> => {
+    // this isn't using the clientFetch hook because we don't really need all that added functionality here
     await fetch("/api/auth/logout", {
       method: "POST",
     });
-    await refreshUser();
-  }, [refreshUser]);
+
+    logoutLocalUser();
+    router.refresh();
+  }, [logoutLocalUser, router]);
 
   return (
     <>

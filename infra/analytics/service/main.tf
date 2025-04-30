@@ -37,9 +37,13 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
-    environment = var.environment_name
-    description = "Application resources created in ${var.environment_name} environment"
+    app          = module.app_config.app_name
+    environment  = var.environment_name
+    service_name = local.service_name
+    description  = "Application resources created in ${var.environment_name} environment"
   })
+
+  service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
   # All non-default terraform workspaces are considered temporary.
   # Temporary environments do not have deletion protection enabled.
@@ -166,7 +170,7 @@ module "service" {
   } : null
 
   enable_load_balancer     = false
-  readonly_root_filesystem = false
+  readonly_root_filesystem = true
 
   extra_environment_variables = merge(
     {
@@ -175,7 +179,8 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
-    local.service_config.extra_environment_variables
+    local.service_config.extra_environment_variables,
+    local.api_analytics_bucket_environment_variables
   )
 
   secrets = concat(

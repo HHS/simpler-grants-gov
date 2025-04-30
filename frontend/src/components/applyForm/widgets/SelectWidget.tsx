@@ -1,15 +1,26 @@
 import {
-  enumOptionsIndexForValue,
   enumOptionsValueForIndex,
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
+import { noop } from "lodash";
 
-import { ChangeEvent, FocusEvent, SyntheticEvent, useCallback } from "react";
-import { ErrorMessage, Select } from "@trussworks/react-uswds";
+import {
+  ChangeEvent,
+  FocusEvent,
+  SyntheticEvent,
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  ComboBox,
+  ComboBoxOption,
+  ErrorMessage,
+  Select,
+} from "@trussworks/react-uswds";
 
-import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
+import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { FieldLabel } from "./FieldLabel";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
@@ -49,9 +60,18 @@ function SelectWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
-  const { title } = schema;
-  const emptyValue = multiple ? [] : undefined;
+  const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
+  const { title, description } = schema;
+  const selectValue = value ? String(value) : "";
+  // uswds recommends a combo box for lists larger than 15
+  const useCombo = opts && opts.length > 15;
+
+  const enumOptions = useMemo(() => {
+    if (!opts) return [];
+    return !useCombo && optEmptyVal
+      ? [...[{ value: "", label: optEmptyVal as string }], ...opts]
+      : opts;
+  }, [useCombo, optEmptyVal, opts]);
 
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
@@ -85,11 +105,6 @@ function SelectWidget<
     [onChange, multiple, enumOptions, optEmptyVal],
   );
 
-  const selectedIndexes = enumOptionsIndexForValue<S>(
-    value,
-    enumOptions,
-    multiple,
-  );
   const error = rawErrors.length ? true : undefined;
   const describedby = error
     ? `error-for-${id}`
@@ -97,37 +112,47 @@ function SelectWidget<
       ? `label-for-${id}`
       : undefined;
 
+  const Widget = useCombo ? ComboBox : Select;
+
   return (
     <div key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
+      <FieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description}
+      />
 
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
-      <Select
+
+      <Widget
+        // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
+        key={selectValue}
         id={id}
         name={id}
         multiple={multiple}
-        value={
-          typeof selectedIndexes === "undefined" ? emptyValue : selectedIndexes
-        }
+        defaultValue={updateOnInput ? undefined : selectValue}
+        value={updateOnInput ? selectValue : undefined}
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}
-        onChange={updateOnInput ? handleChange : undefined}
+        onChange={updateOnInput ? handleChange : noop}
         onBlur={updateOnInput ? handleBlur : undefined}
+        options={useCombo ? (enumOptions as ComboBoxOption[]) : []}
         onFocus={updateOnInput ? handleFocus : undefined}
         aria-describedby={describedby}
       >
         {Array.isArray(enumOptions) &&
-          enumOptions.map(({ value, label }) => {
-            const disabled =
-              enumDisabled && enumDisabled.indexOf(value as TextTypes) !== -1;
+          !useCombo &&
+          enumOptions.map(({ label }) => {
+            const disabled = enumDisabled && enumDisabled.indexOf(label) !== -1;
             return (
               <option key={label} value={String(label)} disabled={disabled}>
                 {label}
               </option>
             );
           })}
-      </Select>
+      </Widget>
     </div>
   );
 }

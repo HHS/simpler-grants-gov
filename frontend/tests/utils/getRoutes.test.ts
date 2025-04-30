@@ -10,7 +10,9 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/dev/feature-flags",
       "/error",
-      "/formPrototype/1",
+      "/events",
+      "/formPrototype/[applicationId]/form/[formId]",
+      "/formPrototype/[applicationId]",
       "/formPrototype",
       "/formPrototype/success",
       "/health",
@@ -27,7 +29,7 @@ describe("getNextRoutes", () => {
       "/subscribe",
       "/subscribe/unsubscribe",
       "/unauthenticated",
-      "/unauthorized",
+      "/vision",
     ]);
   });
 });

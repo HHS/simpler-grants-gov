@@ -3,7 +3,7 @@
 * **Status:** Accepted
 * **Last Modified:** 2023-07-24
 * **Related Issue:** [#99](https://github.com/HHS/simpler-grants-gov/issues/99)
-* **Deciders:** Lucas Brown, Billy Daly, Sarah Knopp, Sumi Thaiveettil
+* **Deciders:** Lucas, Billy, Sarah, Sumi
 * **Tags:** communucations, open source, video conferencing
 
 ## Context and Problem Statement

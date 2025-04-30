@@ -130,6 +130,11 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
   tracing_configuration {
     enabled = true
   }
+
+  tags = {
+    job  = each.key
+    name = "${var.service_name}-${each.key}"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "file_upload_jobs" {

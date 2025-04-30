@@ -76,6 +76,27 @@ const nextConfig = {
           },
         ],
       },
+      // don't cache user specific pages: saved-grants, saved-search-queries
+      {
+        source: "/saved:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
+      // don't cache if users has a session cookie
+      {
+        source: "/:path*",
+        has: [{ type: "cookie", key: "session" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
     ];
   },
   basePath,

@@ -29,8 +29,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-jest.mock("src/services/fetch/fetchers/clientSavedSearchFetcher", () => ({
-  obtainSavedSearches: () => Promise.resolve([fakeSavedSearch]),
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: () => Promise.resolve([fakeSavedSearch]),
+  }),
 }));
 
 describe("SaveSearchPanel", () => {
