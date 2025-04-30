@@ -1,13 +1,15 @@
-import { Metadata } from "next";
-import { LocalizedPageProps } from "src/types/intl";
-
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
-import BuildingContent from "src/components/content/BuildingContent";
-import ExperimentalContent from "src/components/content/ExperimentalContent";
-import InvolvedContent from "src/components/content/InvolvedContent";
+import { Metadata } from "next";
+import {
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import Hero from "src/components/Hero";
+import BuildingContent from "src/components/homepage/BuildingContent";
+import ExperimentalContent from "src/components/homepage/ExperimentalContent";
+import InvolvedContent from "src/components/homepage/InvolvedContent";
+import { LocalizedPageProps } from "src/types/intl";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
