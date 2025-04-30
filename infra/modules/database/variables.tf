@@ -3,11 +3,6 @@ variable "environment_name" {
   description = "name of the application environment"
 }
 
-variable "access_policy_name" {
-  description = "name of the IAM policy to create that will be provide the ability to connect to the database as a user that will have read/write access."
-  type        = string
-}
-
 variable "app_access_policy_name" {
   description = "name of the IAM policy to create that will provide the service the ability to connect to the database as a user that will have read/write access."
   type        = string
