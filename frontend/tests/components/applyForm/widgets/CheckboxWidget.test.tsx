@@ -13,7 +13,7 @@ const WidgetProps = {
   options: {},
 };
 
-describe("RadioWidget", () => {
+describe("CheckboxWidget", () => {
   it("renders the title and description", () => {
     render(<CheckboxWidget {...WidgetProps} />);
     expect(screen.getByText("I agree")).toBeInTheDocument();

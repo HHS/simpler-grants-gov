@@ -11,6 +11,7 @@ import {
   buildFormTreeRecursive,
   determineFieldType,
   getApplicationResponse,
+  getFieldSchema,
   shapeFormData,
 } from "src/components/applyForm/utils";
 
@@ -483,5 +484,49 @@ describe("determineFieldType", () => {
       fieldSchema: textAreaFieldSchema,
     });
     expect(textAreaField).toEqual("TextArea");
+  });
+});
+
+describe("getFieldSchema", () => {
+  it("should return the schema for a single field with only a definition", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name", maxLength: 50 },
+      },
+    };
+
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/name",
+    };
+
+    const result = getFieldSchema({ uiFieldObject, formSchema });
+    expect(result).toEqual({ type: "string", title: "Name", maxLength: 50 });
+  });
+
+  it("should merge the schema from the uiFieldObject with the form schema", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name", maxLength: 50 },
+      },
+    };
+
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/name",
+      schema: { title: "Custom Name", minLength: 5 },
+    };
+
+    const result = getFieldSchema({ uiFieldObject, formSchema });
+    expect(result).toEqual({
+      type: "string",
+      // overridden the beh uiFieldObject schema
+      title: "Custom Name",
+      maxLength: 50,
+      // added from the uiFieldObject schema
+      minLength: 5,
+    });
   });
 });
