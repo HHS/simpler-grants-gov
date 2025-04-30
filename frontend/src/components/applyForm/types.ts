@@ -54,7 +54,7 @@ export type UiSchemaField = {
   | { schema: SchemaField; definition?: undefined }
   | {
       definition: `/properties/${string}`;
-      schema?: SchemaField;
+      schema: SchemaField;
     }
 );
 
