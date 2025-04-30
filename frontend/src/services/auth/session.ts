@@ -71,21 +71,6 @@ export const createSession = async (token: string, expiration: Date) => {
   });
 };
 
-// sets a client token based on an API token and expiration, then
-// returns the user info as in getSession.
-// Similar to running createSession & getSession, but skips unnecessarily decrypting the client token after encrypting
-const createAndReturnSession = async (token: string, expiration: Date) => {
-  await createSession(token, expiration);
-  const apiSession = await decryptLoginGovToken(token);
-  return apiSession
-    ? {
-        ...apiSession,
-        token,
-        expiresAt: expiration ? expiration.getTime() : undefined,
-      }
-    : null;
-};
-
 // returns the necessary user info from decrypted login gov token
 // plus the encrypted api token and expiration decrypted from the client token
 export const getSession = async (): Promise<UserSession | null> => {
@@ -108,6 +93,24 @@ export const getSession = async (): Promise<UserSession | null> => {
         // expiration timestamp in the login.gov token is in seconds, in order to compare using
         // JS date functions it should be in ms
         expiresAt: exp ? exp * 1000 : undefined,
+      }
+    : null;
+};
+
+// sets a client token based on an API token and expiration, then
+// returns the user info as in getSession.
+// Similar to running createSession & getSession, but skips unnecessarily decrypting the client token after encrypting
+export const createAndReturnSession = async (
+  token: string,
+  expiration: Date,
+) => {
+  await createSession(token, expiration);
+  const apiSession = await decryptLoginGovToken(token);
+  return apiSession
+    ? {
+        ...apiSession,
+        token,
+        expiresAt: expiration ? expiration.getTime() : undefined,
       }
     : null;
 };
