@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Homepage Building Content matches snapshot 1`] = `
+<div>
+  <div
+    class="grid-container"
+    data-testid="homepage-building"
+  >
+    <div
+      class="grid-row grid-gap-md padding-6"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col"
+        data-testid="grid"
+      >
+        <img
+          alt="events-img"
+          class="height-auto position-relative padding-right-6 padding-top-3"
+          data-nimg="1"
+          decoding="async"
+          height="40"
+          loading="lazy"
+          src="/_next/image?url=%2Fimg.jpg&w=96&q=75"
+          srcset="/_next/image?url=%2Fimg.jpg&w=48&q=75 1x, /_next/image?url=%2Fimg.jpg&w=96&q=75 2x"
+          style="color: transparent;"
+          width="40"
+        />
+      </div>
+      <div
+        class="tablet:grid-col"
+        data-testid="grid"
+      >
+        <div
+          class=""
+          data-testid="grid"
+        >
+          <h1>
+            Building with you, not for you
+          </h1>
+        </div>
+        <div
+          class=""
+          data-testid="grid"
+        >
+          <p
+            class="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+          >
+            Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.
+          </p>
+          <p
+            class="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+          >
+            All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

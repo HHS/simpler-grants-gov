@@ -14,10 +14,9 @@ const InvolvedContent = () => {
   return (
     <HomePageSection
       className="padding-y-6 bg-base-lightest"
-      data-testid="homepage-involved"
       title={t("title")}
     >
-      <Grid row className="padding-y-2" gap="md">
+      <Grid row className="padding-y-2" data-testid="homepage-involved" gap="md">
         <Grid col={6}>
           <IconInfo
             description={t("technicalDescription")}

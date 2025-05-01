@@ -21,10 +21,9 @@ const ExperimentalContent = () => {
   return (
     <HomePageSection
       className="bg-base-lightest"
-      data-testid="homepage-experimental"
       title={t("title")}
     >
-      <h2>{t("canDoHeader")}</h2>
+      <h2 data-testid="homepage-experimental">{t("canDoHeader")}</h2>
       <h3>{t("canDoSubHeader")}</h3>
       <p className="font-sans-md line-height-sans-4">{t("canDoParagraph")}</p>
       <a href={trySearchLink} target="_blank" rel="noopener noreferrer">

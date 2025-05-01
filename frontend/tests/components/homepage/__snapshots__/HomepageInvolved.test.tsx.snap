@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Homepage Involved Content matches snapshot 1`] = `
+<div>
+  <div
+    class="padding-y-6 bg-base-lightest"
+  >
+    <div
+      class="grid-container display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6"
+      data-testid="gridContainer"
+    >
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <div
+          class="tablet-lg:grid-col-4"
+          data-testid="grid"
+        >
+          <h2
+            class="margin-0 font-sans-lg tablet:font-sans-xl tablet-lg:maxw-card-lg"
+          >
+            More ways to get involved
+          </h2>
+        </div>
+        <div
+          class="tablet-lg:grid-col-8 margin-top-2 margin-bottom-0 tablet-lg:margin-0"
+          data-testid="grid"
+        >
+          <div
+            class="grid-row grid-gap-md padding-y-2"
+            data-testid="homepage-involved"
+          >
+            <div
+              class="grid-col-6"
+              data-testid="grid"
+            >
+              <svg
+                aria-hidden="true"
+                class="usa-icon usa-icon--size-4 text-middle"
+                role="img"
+              >
+                <use
+                  href="/img.jpg#code"
+                />
+              </svg>
+              <h3>
+                Contribute your technical expertise
+              </h3>
+              <p
+                class="font-sans-md line-height-sans-4"
+              >
+                We're always excited to welcome new open source developers to our community.
+              </p>
+              <a
+                class="font-sans-md line-height-sans-4"
+                href="https://wiki.simpler.grants.gov/get-involved/github-code"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Learn how to contribute code
+              </a>
+              <br />
+              <a
+                class="font-sans-md line-height-sans-4"
+                href="https://simplergrants.discourse.group/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Chat on the Discourse forum
+              </a>
+            </div>
+            <div
+              class="grid-col-6"
+              data-testid="grid"
+            >
+              <svg
+                aria-hidden="true"
+                class="usa-icon usa-icon--size-4 text-middle"
+                role="img"
+              >
+                <use
+                  href="/img.jpg#chat"
+                />
+              </svg>
+              <h3>
+                Participate in user research
+              </h3>
+              <p
+                class="font-sans-md line-height-sans-4"
+              >
+                Be a part of the design process by taking part in usability tests and interviews.
+              </p>
+              <a
+                class="font-sans-md line-height-sans-4"
+                href="https://ethn.io/91822"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Sign up to participate in future studies
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

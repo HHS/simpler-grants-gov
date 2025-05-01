@@ -10,7 +10,7 @@ const Hero = () => {
 
   return (
     <div
-      data-testid="hero"
+      data-testid="homepage-hero"
       className="hero bg-primary-darkest text-white overflow-hidden"
     >
       <GridContainer className="hero--container padding-y-1 tablet:padding-y-3 tablet-lg:padding-y-10 desktop-lg:padding-top-15 desktop-lg:padding-bottom-10 position-relative">
