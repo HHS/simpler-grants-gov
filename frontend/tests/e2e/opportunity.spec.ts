@@ -19,46 +19,88 @@ test("has page attributes", async ({ page }) => {
   await expect(page.getByText("Application process")).toBeVisible();
 });
 
-test("can expand and collapse summary", async ({ page }) => {
-  await expect(page.getByText("Show full summary")).toBeVisible();
-  await expect(page.getByText("Hide full description")).not.toBeVisible();
+// a bit tough to target the content display toggles on the page, since they have the same text and there's
+// nothing really special about the markup surrounding them
+test("can expand and collapse opportunity description", async ({ page }) => {
+  const descriptionExpander = page.locator(
+    "div[data-testid='opportunity-description'] div[data-testid='content-display-toggle']",
+  );
+
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).not.toBeVisible();
   const divCountBeforeExpanding = await page.locator("div:visible").count();
 
-  await page.getByRole("button", { name: /^Show full summary$/ }).click();
+  await descriptionExpander
+    .getByRole("button", { name: /^Show full description$/ })
+    .click();
 
   // validate that summary has been expanded
-  await expect(page.getByText("Show full summary")).not.toBeVisible();
-  await expect(page.getByText("Hide full description")).toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).not.toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).toBeVisible();
   const divCountAfterExpanding = await page.locator("div:visible").count();
   expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
 
-  await page.getByRole("button", { name: /^Hide full description$/ }).click();
+  await descriptionExpander
+    .getByRole("button", { name: /^Hide full description$/ })
+    .click();
 
   // validate that summary has been collapsed
-  await expect(page.getByText("Show full summary")).toBeVisible();
-  await expect(page.getByText("Hide full description")).not.toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).not.toBeVisible();
   const divCountAfterCollapsing = await page.locator("div:visible").count();
   expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
 });
 
-test("can expand and collapse description", async ({ page }) => {
-  await expect(page.getByText("Show full description")).toBeVisible();
-  await expect(page.getByText("Hide full description")).not.toBeVisible();
+test("can expand and collapse close date description", async ({ page }) => {
+  const descriptionExpander = page.locator(
+    "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
+  );
+
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).not.toBeVisible();
   const divCountBeforeExpanding = await page.locator("div:visible").count();
 
-  await page.getByRole("button", { name: /^Show full description$/ }).click();
+  await descriptionExpander
+    .getByRole("button", { name: /^Show full description$/ })
+    .click();
 
-  // validate that description has been expanded
-  await expect(page.getByText("Show full description")).not.toBeVisible();
-  await expect(page.getByText("Hide full description")).toBeVisible();
+  // validate that summary has been expanded
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).not.toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).toBeVisible();
   const divCountAfterExpanding = await page.locator("div:visible").count();
   expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
 
-  await page.getByRole("button", { name: /^Hide full description$/ }).click();
+  await descriptionExpander
+    .getByRole("button", { name: /^Hide full description$/ })
+    .click();
 
-  // validate that description has been collapsed
-  await expect(page.getByText("Show full description")).toBeVisible();
-  await expect(page.getByText("Hide full description")).not.toBeVisible();
+  // validate that summary has been collapsed
+  await expect(
+    descriptionExpander.getByText("Show full description"),
+  ).toBeVisible();
+  await expect(
+    descriptionExpander.getByText("Hide full description"),
+  ).not.toBeVisible();
   const divCountAfterCollapsing = await page.locator("div:visible").count();
   expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
 });
