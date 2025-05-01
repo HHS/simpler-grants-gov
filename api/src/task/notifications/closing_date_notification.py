@@ -148,7 +148,7 @@ class ClosingDateNotification(BaseNotification):
             for closing_opp in closing_opportunities:
                 message += (
                     f"[{closing_opp["opportunity_title"]}]\n"
-                    f"Application due date: {closing_opp.strftime('%B %d, %Y')}\n\n"
+                    f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
                 )
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
@@ -191,5 +191,3 @@ class ClosingDateNotification(BaseNotification):
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
-
-                self.increment(Metrics.OPPORTUNITIES_TRACKED, len(opportunity_ids))
