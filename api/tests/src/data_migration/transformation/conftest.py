@@ -131,7 +131,7 @@ def setup_synopsis_forecast(
         source_values["revision_number"] = revision_number
 
     if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_summary = factory_cls.create(
         **source_values,
@@ -471,7 +471,7 @@ def get_summary_from_source(db_session, source_summary):
     opportunity_summary = (
         db_session.query(OpportunitySummary)
         .filter(
-            OpportunitySummary.opportunity_id == source_summary.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_summary.opportunity_id,
             OpportunitySummary.is_forecast == is_forecast,
             # Populate existing to force it to fetch updates from the DB
         )
