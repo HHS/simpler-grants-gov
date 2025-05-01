@@ -5,10 +5,7 @@ import {
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
-import Hero from "src/components/Hero";
-import BuildingContent from "src/components/homepage/BuildingContent";
-import ExperimentalContent from "src/components/homepage/ExperimentalContent";
-import InvolvedContent from "src/components/homepage/InvolvedContent";
+import HomePageSections from "src/components/homepage/HomePageSections";
 import { LocalizedPageProps } from "src/types/intl";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -26,15 +23,6 @@ export default function Home({ params }: LocalizedPageProps) {
   setRequestLocale(locale);
 
   return (
-    <>
-      <Hero />
-      <div className="bg-base-lightest">
-        <ExperimentalContent />
-      </div>
-      <BuildingContent />
-      <div className="bg-base-lightest">
-        <InvolvedContent />
-      </div>
-    </>
+    <HomePageSections />
   );
 }

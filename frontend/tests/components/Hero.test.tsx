@@ -1,6 +1,8 @@
-import { render, screen } from "tests/react-utils";
-
-import Hero from "src/components/Hero";
+import Hero from "src/components/homepage/sections/HomepageHero";
+import {
+  render,
+  screen,
+} from "tests/react-utils";
 
 describe("Hero", () => {
   it("Renders without errors", () => {

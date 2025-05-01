@@ -1,4 +1,4 @@
-import GoalContent from "src/components/homepage/ExperimentalContent";
+import GoalContent from "src/components/homepage/sections/HomepageExperimental";
 import {
   render,
   screen,

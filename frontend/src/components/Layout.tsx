@@ -1,7 +1,6 @@
-import UserProvider from "src/services/auth/UserProvider";
-
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import UserProvider from "src/services/auth/UserProvider";
 
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";

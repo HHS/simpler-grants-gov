@@ -1,6 +1,6 @@
-import { Meta } from "@storybook/react";
+import Hero from "src/components/homepage/sections/HomepageHero";
 
-import Hero from "src/components/Hero";
+import { Meta } from "@storybook/react";
 
 const meta: Meta<typeof Hero> = {
   title: "Components/Hero",
