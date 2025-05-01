@@ -1,19 +1,13 @@
-import {
-  useMessages,
-  useTranslations,
-} from "next-intl";
-import Image from "next/image";
 import BuildingImage from "public/img/homepage-building.jpg";
 
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { useMessages, useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 const BuildingContent = () => {
   const t = useTranslations("Homepage.sections.building");
-    const messages = useMessages() as unknown as IntlMessages;
-    const { paragraphs } = messages.Homepage.sections.building;
+  const messages = useMessages() as unknown as IntlMessages;
+  const { paragraphs } = messages.Homepage.sections.building;
 
   return (
     <GridContainer data-testid="homepage-building">
@@ -38,13 +32,14 @@ const BuildingContent = () => {
             <h1>{t("title")}</h1>
           </Grid>
           <Grid>
-            {
-              paragraphs.map((paragraph: string, paragraphIdx: number) => (
-                <p className="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance" key={paragraphIdx}>
-                  {paragraph}
-                </p>
-              ))
-            }
+            {paragraphs.map((paragraph: string, paragraphIdx: number) => (
+              <p
+                className="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+                key={paragraphIdx}
+              >
+                {paragraph}
+              </p>
+            ))}
           </Grid>
         </Grid>
       </Grid>

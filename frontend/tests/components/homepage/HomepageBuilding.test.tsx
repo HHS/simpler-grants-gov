@@ -1,9 +1,6 @@
-import HomepageBuilding
-  from "src/components/homepage/sections/HomepageBuilding";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
+import { render, screen } from "tests/react-utils";
+
+import HomepageBuilding from "src/components/homepage/sections/HomepageBuilding";
 
 describe("Homepage Building Content", () => {
   it("matches snapshot", () => {

@@ -1,9 +1,6 @@
-import HomepageExperimental
-  from "src/components/homepage/sections/HomepageExperimental";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
+import { render, screen } from "tests/react-utils";
+
+import HomepageExperimental from "src/components/homepage/sections/HomepageExperimental";
 
 describe("Homepage Experimental Content", () => {
   it("matches snapshot", () => {

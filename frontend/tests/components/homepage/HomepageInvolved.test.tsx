@@ -1,9 +1,6 @@
-import HomepageInvolved
-  from "src/components/homepage/sections/HomepageInvolved";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
+import { render, screen } from "tests/react-utils";
+
+import HomepageInvolved from "src/components/homepage/sections/HomepageInvolved";
 
 describe("Homepage Involved Content", () => {
   it("matches snapshot", () => {

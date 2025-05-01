@@ -26,20 +26,20 @@ export const messages = {
           },
           {
             description:
-            "Our newsletter delivers the latest news straight to your inbox.",
+              "Our newsletter delivers the latest news straight to your inbox.",
             http: "https://simpler.grants.gov/subscribe",
             iconName: "mail",
             link: "Subscribe to our newsletter",
             title: "Be the first to hear about new features.",
-          }
-        ]
+          },
+        ],
       },
       building: {
         title: "Building with you, not for you",
         paragraphs: [
-            "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
-            "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
-        ]
+          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+        ],
       },
       involved: {
         title: "More ways to get involved",
