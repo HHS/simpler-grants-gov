@@ -111,7 +111,10 @@ def transform_opportunity(
 
     # We always create a new opportunity record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
-    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+    target_opportunity = Opportunity(
+        opportunity_id=existing_opportunity.opportunity_id if existing_opportunity else None,
+        legacy_opportunity_id=source_opportunity.opportunity_id,
+    )
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle
