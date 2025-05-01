@@ -144,3 +144,9 @@ class FormFamily(StrEnum):
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
+
+
+class SamGovImportType(StrEnum):
+    MONTHLY_EXTRACT = "monthly_extract"
+    DAILY_EXTRACT = "daily_extract"
+    API = "api"

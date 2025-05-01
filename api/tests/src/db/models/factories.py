@@ -21,6 +21,7 @@ from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.competition_models as competition_models
+import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
@@ -43,6 +44,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovImportType,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -2243,3 +2245,54 @@ class StagingTcompetitionFactory(AbstractStagingFactory):
             sendmail=None,
             # is_wrkspc_compatible and dialect must NEVER be None
         )
+
+
+# Factory for LkSamGovImportType
+class LkSamGovImportTypeFactory(BaseFactory):
+    class Meta:
+        model = lookup_models.LkSamGovImportType
+
+    sam_gov_import_type_id = factory.Iterator(SamGovImportType)
+    description = factory.LazyAttribute(lambda o: o.sam_gov_import_type_id.description)
+
+
+###################
+# Extract Factories
+###################
+
+
+class SamGovEntityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntity
+
+    sam_gov_entity_id = Generators.UuidObj
+    uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
+    legal_business_name = factory.Faker("company")
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+    ebiz_poc_email = factory.Faker("email")
+    ebiz_poc_first_name = factory.Faker("first_name")
+    ebiz_poc_last_name = factory.Faker("last_name")
+    has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+
+
+class SamGovEntityImportTypeFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntityImportType
+
+    sam_gov_entity_import_id = Generators.UuidObj
+    sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
+    sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
+    sam_gov_import_type_id = factory.SubFactory(LkSamGovImportTypeFactory)
+
+
+class OrganizationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.Organization
+
+    organization_id = Generators.UuidObj
+    sam_gov_entity = sometimes_none(factory.SubFactory(SamGovEntityFactory), none_chance=0.2)
+    sam_gov_entity_id = factory.LazyAttribute(
+        lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
+    )
