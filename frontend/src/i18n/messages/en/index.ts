@@ -34,6 +34,13 @@ export const messages = {
           }
         ]
       },
+      building: {
+        title: "Building with you, not for you",
+        paragraphs: [
+            "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+            "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+        ]
+      },
     }
   },
   Events: {
@@ -530,13 +537,6 @@ export const messages = {
       "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
-  },
-  Building: {
-    title: "Building with you, not for you",
-    content1:
-      "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
-    content2:
-      "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
   },
   Involved: {
     title: "More ways to get involved",
