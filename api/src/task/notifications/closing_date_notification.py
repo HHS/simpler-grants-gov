@@ -9,7 +9,7 @@ from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotification
-from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
+from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
