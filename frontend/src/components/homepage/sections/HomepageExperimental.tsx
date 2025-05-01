@@ -1,14 +1,22 @@
-import { useTranslations } from "next-intl";
-import { Button, Grid } from "@trussworks/react-uswds";
-
+import {
+  useMessages,
+  useTranslations,
+} from "next-intl";
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
+import { UswdsIconNames } from "src/types/generalTypes";
+
+import {
+  Button,
+  Grid,
+} from "@trussworks/react-uswds";
 
 const trySearchLink = "https://simpler.grants.gov/search";
-const subscribeLink = "https://simpler.grants.gov/subscribe";
 
 const ExperimentalContent = () => {
-  const t = useTranslations("Experimental");
+  const t = useTranslations("Homepage.sections.experimental");
+  const messages = useMessages() as unknown as IntlMessages;
+  const { iconSections } = messages.Homepage.sections.experimental;
 
   return (
     <HomePageSection
@@ -16,9 +24,9 @@ const ExperimentalContent = () => {
       data-testid="homepage-experimental"
       title={t("title")}
     >
-      <h2>{t("header")}</h2>
-      <h3>{t("subheader1")}</h3>
-      <p className="font-sans-md line-height-sans-4">{t("content1")}</p>
+      <h2>{t("canDoHeader")}</h2>
+      <h3>{t("canDoSubHeader")}</h3>
+      <p className="font-sans-md line-height-sans-4">{t("canDoParagraph")}</p>
       <a href={trySearchLink} target="_blank" rel="noopener noreferrer">
         <Button
           className="margin-y-2 usa-button--secondary"
@@ -28,27 +36,22 @@ const ExperimentalContent = () => {
           {t("tryLink")}
         </Button>
       </a>
-      <h3>{t("subheader2")}</h3>
-      <p className="font-sans-md line-height-sans-4">{t("content2")}</p>
+      <h3>{t("cantDoHeader")}</h3>
+      <p className="font-sans-md line-height-sans-4">{t("cantDoParagraph")}</p>
       <Grid row className="padding-y-2" gap="md">
-        <Grid col={6}>
-          <IconInfo
-            description={t("feedbackDescription")}
-            iconName="build"
-            link="mailto:simpler@grants.gov"
-            linkText={t("feedbackLink")}
-            title={t("feedbackTitle")}
-          />
-        </Grid>
-        <Grid col={6}>
-          <IconInfo
-            description={t("newFeaturesDescription")}
-            iconName="mail"
-            link={subscribeLink}
-            linkText={t("newFeaturesLink")}
-            title={t("newFeaturesTitle")}
-          />
-        </Grid>
+        {
+          iconSections.map((iconSection, iconSectionIdx) => (
+            <Grid col={6} key={`experimental-iconsection-${iconSectionIdx}`}>
+              <IconInfo
+                description={iconSection.description}
+                iconName={iconSection.iconName as UswdsIconNames}
+                link={iconSection.http}
+                linkText={iconSection.link}
+                title={iconSection.title}
+              />
+            </Grid>
+          ))
+        }
       </Grid>
     </HomePageSection>
   );

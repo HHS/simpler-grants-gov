@@ -1,4 +1,41 @@
 export const messages = {
+  Homepage: {
+    pageTitle: "Let's build a simpler Grants.gov together",
+    pageDescription:
+      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+    github_link: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "Test out our experimental features",
+        canDoHeader: "Tell us what's working (and what's not)",
+        canDoSubHeader: "What you can do now",
+        canDoParagraph:
+          "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
+        tryLink: "Try the new simpler search",
+        cantDoHeader: "What you can't do quite yet",
+        cantDoParagraph:
+          "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+        iconSections: [
+          {
+            description:
+              "We're excited to hear from you to learn how we can improve.",
+            http: "mailto:simpler@grants.gov",
+            iconName: "build",
+            link: "Contact us at simpler@grants.gov",
+            title: "Send us your feedback and suggestions.",
+          },
+          {
+            description:
+            "Our newsletter delivers the latest news straight to your inbox.",
+            http: "https://simpler.grants.gov/subscribe",
+            iconName: "mail",
+            link: "Subscribe to our newsletter",
+            title: "Be the first to hear about new features.",
+          }
+        ]
+      },
+    }
+  },
   Events: {
     pageTitle: "Events | Simpler.Grants.gov",
     pageDescription:
@@ -493,31 +530,6 @@ export const messages = {
       "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
-  },
-  Hero: {
-    title: "Let's build a simpler Grants.gov together",
-    content:
-      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
-    github_link: "Follow on GitHub",
-  },
-  Experimental: {
-    title: "Test out our experimental features",
-    header: "Tell us what's working (and what's not)",
-    subheader1: "What you can do now",
-    content1:
-      "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-    tryLink: "Try the new simpler search",
-    subheader2: "What you can't do quite yet",
-    content2:
-      "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
-    feedbackTitle: "Send us your feedback and suggestions.",
-    feedbackDescription:
-      "We're excited to hear from you to learn how we can improve.",
-    feedbackLink: "Contact us at simpler@grants.gov",
-    newFeaturesTitle: "Be the first to hear about new features.",
-    newFeaturesDescription:
-      "Our newsletter delivers the latest news straight to your inbox.",
-    newFeaturesLink: "Subscribe to our newsletter",
   },
   Building: {
     title: "Building with you, not for you",

@@ -1,13 +1,12 @@
-import { ExternalRoutes } from "src/constants/routes";
-
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import { ExternalRoutes } from "src/constants/routes";
+
 import { GridContainer } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-
 const Hero = () => {
-  const t = useTranslations("Hero");
+  const t = useTranslations("Homepage");
 
   return (
     <div
@@ -17,10 +16,10 @@ const Hero = () => {
       <GridContainer className="hero--container padding-y-1 tablet:padding-y-3 tablet-lg:padding-y-10 desktop-lg:padding-top-15 desktop-lg:padding-bottom-10 position-relative">
         <div className="hero--text position-relative z-100">
           <h1 className="text-ls-neg-2 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">
-            <span>{t("title")}</span>
+            <span>{t("pageTitle")}</span>
           </h1>
           <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance">
-            {t("content")}
+            {t("pageDescription")}
           </p>
         </div>
         <span className="usa-dark-background bg-transparent">
