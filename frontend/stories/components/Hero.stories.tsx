@@ -1,6 +1,6 @@
-import Hero from "src/components/homepage/sections/HomepageHero";
-
 import { Meta } from "@storybook/react";
+
+import Hero from "src/components/homepage/sections/HomepageHero";
 
 const meta: Meta<typeof Hero> = {
   title: "Components/Hero",

@@ -1,9 +1,8 @@
 import { useTranslations } from "next-intl";
-import HomePageSection from "src/components/homepage/homePageSection";
-
 import { Grid } from "@trussworks/react-uswds";
 
-import IconInfo from "../IconInfoSection";
+import HomePageSection from "src/components/homepage/homePageSection";
+import IconInfo from "src/components/homepage/IconInfoSection";
 
 const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code";
 const discourseLink = "https://simplergrants.discourse.group/";

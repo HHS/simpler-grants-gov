@@ -1,5 +1,6 @@
-import { USWDSIcon } from "src/components/USWDSIcon";
 import { UswdsIconNames } from "src/types/generalTypes";
+
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type Props = {
   description: string;

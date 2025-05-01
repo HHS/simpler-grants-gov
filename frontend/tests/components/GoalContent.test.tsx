@@ -1,8 +1,6 @@
+import { render, screen } from "tests/react-utils";
+
 import GoalContent from "src/components/homepage/sections/HomepageExperimental";
-import {
-  render,
-  screen,
-} from "tests/react-utils";
 
 describe("Goal Content", () => {
   it("Renders without errors", () => {

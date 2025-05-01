@@ -1,10 +1,10 @@
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { ExternalRoutes } from "src/constants/routes";
 
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "../../USWDSIcon";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const Hero = () => {
   const t = useTranslations("Hero");

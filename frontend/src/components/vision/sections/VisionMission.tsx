@@ -1,7 +1,5 @@
-import {
-  useMessages,
-  useTranslations,
-} from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
+
 import { USWDSIcon } from "src/components/USWDSIcon";
 import VisionPageSection from "src/components/vision/visionPageSection";
 

@@ -1,12 +1,8 @@
 import { useTranslations } from "next-intl";
+import { Button, Grid } from "@trussworks/react-uswds";
+
 import HomePageSection from "src/components/homepage/homePageSection";
-
-import {
-  Button,
-  Grid,
-} from "@trussworks/react-uswds";
-
-import IconInfo from "../IconInfoSection";
+import IconInfo from "src/components/homepage/IconInfoSection";
 
 const trySearchLink = "https://simpler.grants.gov/search";
 const subscribeLink = "https://simpler.grants.gov/subscribe";
@@ -24,7 +20,11 @@ const ExperimentalContent = () => {
       <h3>{t("subheader1")}</h3>
       <p className="font-sans-md line-height-sans-4">{t("content1")}</p>
       <a href={trySearchLink} target="_blank" rel="noopener noreferrer">
-        <Button className="margin-y-2 usa-button--secondary" type="button" size="big">
+        <Button
+          className="margin-y-2 usa-button--secondary"
+          type="button"
+          size="big"
+        >
           {t("tryLink")}
         </Button>
       </a>

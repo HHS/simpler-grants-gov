@@ -1,9 +1,5 @@
 import React from "react";
-
-import {
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 interface homePageSectionProps {
   children: React.ReactNode;
