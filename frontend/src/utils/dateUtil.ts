@@ -22,10 +22,10 @@ export function formatDate(dateStr: string | null): string {
 export const getConfiguredDayJs = () => dayjs;
 
 export const isExpired = (expiration?: number) =>
-  expiration && new Date(expiration) < new Date();
+  !!expiration && expiration < Date.now();
 
 // is a token less than 10 minutes from expiring?
 export const isExpiring = (expiration?: number) =>
   !isExpired(expiration) &&
-  expiration &&
-  new Date(expiration) < new Date(Date.now() + 10 * 60 * 1000);
+  !!expiration &&
+  expiration < Date.now() + 10 * 60 * 1000;
