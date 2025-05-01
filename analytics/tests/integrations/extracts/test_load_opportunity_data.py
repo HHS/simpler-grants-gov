@@ -98,4 +98,3 @@ def test_extract_copy_opportunity_data(
 
     # running again to verify that it does not break on the next call
     extract_copy_opportunity_data()
-
