@@ -331,7 +331,7 @@ def setup_opportunity_attachment(
 
     synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
         opportunity=None,
-        opportunity_id=opportunity.opportunity_id,
+        opportunity_id=opportunity.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         **source_values,
@@ -346,7 +346,7 @@ def setup_opportunity_attachment(
             outfile.write(f.fake.sentence(25))
 
         f.OpportunityAttachmentFactory.create(
-            attachment_id=synopsis_attachment.syn_att_id,
+            legacy_attachment_id=synopsis_attachment.syn_att_id,
             opportunity=opportunity,
             file_location=s3_path,
         )
@@ -774,7 +774,7 @@ def validate_opportunity_attachment(
 
     opportunity_attachment = (
         db_session.query(OpportunityAttachment)
-        .filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id)
+        .filter(OpportunityAttachment.legacy_attachment_id == source_attachment.syn_att_id)
         .one_or_none()
     )
 
@@ -787,8 +787,7 @@ def validate_opportunity_attachment(
         source_attachment,
         opportunity_attachment,
         [
-            ("syn_att_id", "attachment_id"),
-            ("opportunity_id", "opportunity_id"),
+            ("syn_att_id", "legacy_attachment_id"),
             ("mime_type", "mime_type"),
             ("file_name", "file_name"),
             ("file_desc", "file_description"),
