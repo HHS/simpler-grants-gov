@@ -5,7 +5,6 @@ import { useUser } from "src/services/auth/useUser";
 import { PropsWithChildren } from "react";
 
 const debouncedUserFetcherMock = jest.fn();
-const mockPostTokenRefresh = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
   debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,

@@ -4,7 +4,6 @@ import {
   getSession,
   refreshSession,
 } from "src/services/auth/session";
-import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
 
 const getCookiesMock = jest.fn(() => ({
   value: "some cookie value",
