@@ -1,15 +1,15 @@
 import { useTranslations } from "next-intl";
-import { Grid } from "@trussworks/react-uswds";
-
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
+
+import { Grid } from "@trussworks/react-uswds";
 
 const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code";
 const discourseLink = "https://simplergrants.discourse.group/";
 const participateLink = "https://ethn.io/91822";
 
 const InvolvedContent = () => {
-  const t = useTranslations("Involved");
+  const t = useTranslations("Homepage.sections.involved");
 
   return (
     <HomePageSection

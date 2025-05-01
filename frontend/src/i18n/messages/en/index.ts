@@ -41,7 +41,19 @@ export const messages = {
             "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
         ]
       },
-    }
+      involved: {
+        title: "More ways to get involved",
+        technicalTitle: "Contribute your technical expertise",
+        technicalDescription:
+          "We're always excited to welcome new open source developers to our community.",
+        technicalLink: "Learn how to contribute code",
+        participateTitle: "Participate in user research",
+        participateDescription:
+          "Be a part of the design process by taking part in usability tests and interviews.",
+        participateLink: "Sign up to participate in future studies",
+        discourseLink: "Chat on the Discourse forum",
+      },
+    },
   },
   Events: {
     pageTitle: "Events | Simpler.Grants.gov",
@@ -537,18 +549,6 @@ export const messages = {
       "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
-  },
-  Involved: {
-    title: "More ways to get involved",
-    technicalTitle: "Contribute your technical expertise",
-    technicalDescription:
-      "We're always excited to welcome new open source developers to our community.",
-    technicalLink: "Learn how to contribute code",
-    participateTitle: "Participate in user research",
-    participateDescription:
-      "Be a part of the design process by taking part in usability tests and interviews.",
-    participateLink: "Sign up to participate in future studies",
-    discourseLink: "Chat on the Discourse forum",
   },
   Footer: {
     agency_name: "Grants.gov",
