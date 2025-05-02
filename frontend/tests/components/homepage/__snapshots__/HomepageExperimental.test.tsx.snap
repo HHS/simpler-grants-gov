@@ -41,9 +41,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
             Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.
           </p>
           <a
-            href="https://simpler.grants.gov/search"
-            rel="noopener noreferrer"
-            target="_blank"
+            href="/search"
           >
             <button
               class="usa-button usa-button--big margin-y-2 usa-button--secondary"
@@ -59,7 +57,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
           <p
             class="font-sans-md line-height-sans-4"
           >
-            For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.
+            For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.
           </p>
           <div
             class="grid-row grid-gap-md padding-y-2"
@@ -118,7 +116,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               </p>
               <a
                 class="font-sans-md line-height-sans-4"
-                href="https://simpler.grants.gov/subscribe"
+                href="/subscribe"
                 rel="noopener noreferrer"
                 target="_blank"
               >
