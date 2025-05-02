@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class SamGovFactoryConfig(PydanticBaseEnvConfig):
     """Configuration for the SAM.gov client factory."""
 
-    model_config = SettingsConfigDict(env_prefix="SAM_EXTRACTS_")
+    model_config = SettingsConfigDict(env_prefix="SAM_GOV_EXTRACTS_")
 
     use_mock_client: bool = Field(default=True)
 
@@ -25,7 +25,7 @@ def create_sam_gov_client() -> BaseSamGovClient:
     """
     Create and return the appropriate SAM.gov client based on environment variables.
 
-    Uses mock client if SAM_EXTRACTS_USE_MOCK_CLIENT=true or for local development,
+    Uses mock client if SAM_GOV_EXTRACTS_USE_MOCK_CLIENT=true or for local development,
     otherwise uses the real client.
 
     Returns:

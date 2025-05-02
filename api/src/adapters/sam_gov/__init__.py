@@ -12,7 +12,6 @@ from src.adapters.sam_gov.models import (
     FileType,
     SamExtractRequest,
     SamExtractResponse,
-    SensitivityLevel,
 )
 
 __all__ = [
@@ -30,5 +29,4 @@ __all__ = [
     "FileType",
     "SamExtractRequest",
     "SamExtractResponse",
-    "SensitivityLevel",
 ]

@@ -21,14 +21,6 @@ class EntityType(str, Enum):
     INDIVIDUAL = "INDIVIDUAL"
 
 
-class SensitivityLevel(str, Enum):
-    """Sensitivity level for SAM.gov API requests."""
-
-    PUBLIC = "PUBLIC"
-    FOUO = "FOUO"
-    SENSITIVE = "SENSITIVE"
-
-
 class FileType(str, Enum):
     """File types available for SAM.gov extracts."""
 
@@ -83,7 +75,4 @@ class SamExtractResponse(BaseModel):
     file_name: str = Field(..., description="The name of the downloaded file")
     file_size: int = Field(..., description="The size of the downloaded file in bytes")
     content_type: str = Field(..., description="The content type of the downloaded file")
-    sensitivity: SensitivityLevel | None = Field(
-        None, description="The sensitivity level of the extract"
-    )
     download_date: datetime = Field(..., description="When the extract was downloaded")

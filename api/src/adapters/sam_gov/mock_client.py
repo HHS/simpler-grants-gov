@@ -1,9 +1,7 @@
 """Mock client for SAM.gov API for local development and testing."""
 
-import json
 import logging
 import os
-import shutil
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -42,29 +40,9 @@ MOCK_EXTRACTS = {
 class MockSamGovClient(BaseSamGovClient):
     """Mock client for SAM.gov API for local development and testing."""
 
-    def __init__(self, mock_data_file: str | None = None, mock_extract_dir: str | None = None):
-        """Initialize the mock client.
-
-        Args:
-            mock_data_file: Optional path to a JSON file containing mock extract metadata.
-                           If provided, will load mock extracts data from this file.
-            mock_extract_dir: Optional path to a directory containing mock extract files.
-                           If provided, will use these files for extract downloads.
-        """
+    def __init__(self) -> None:
+        """Initialize the mock client."""
         self.extracts = MOCK_EXTRACTS.copy()
-        self.mock_extract_dir = mock_extract_dir
-
-        # Load additional mock data from file if provided
-        if mock_data_file and os.path.exists(mock_data_file):
-            try:
-                with open(mock_data_file, "r") as f:
-                    additional_data = json.load(f)
-
-                # Add custom extract definitions if available
-                if "extracts" in additional_data and isinstance(additional_data["extracts"], dict):
-                    self.extracts.update(additional_data["extracts"])
-            except Exception as e:
-                logger.error(f"Error loading mock data from {mock_data_file}: {e}")
 
     def download_extract(self, request: SamExtractRequest, output_path: str) -> SamExtractResponse:
         """Download a mock extract file.
@@ -85,40 +63,19 @@ class MockSamGovClient(BaseSamGovClient):
 
         # Check if the requested file exists in our mock data
         if file_name not in self.extracts:
-            # Check if the requested file exists in the mock_extract_dir
-            if self.mock_extract_dir and os.path.exists(
-                os.path.join(self.mock_extract_dir, file_name)
-            ):
-                # Add it to our extracts dictionary
-                self.extracts[file_name] = {
-                    "size": os.path.getsize(os.path.join(self.mock_extract_dir, file_name)),
-                    "content_type": "application/zip" if file_name.endswith(".ZIP") else "text/csv",
-                }
-            else:
-                raise ValueError(f"Mock extract file not found: {file_name}")
+            raise ValueError(f"Mock extract file not found: {file_name}")
 
         # For local paths, ensure the output directory exists
         if not is_s3_path(output_path):
             os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
-        # If we have the file in mock_extract_dir, copy it to the output path
-        if self.mock_extract_dir and os.path.exists(os.path.join(self.mock_extract_dir, file_name)):
-            if is_s3_path(output_path):
-                # For S3 paths, we need to use open_stream to copy the file
-                with open(os.path.join(self.mock_extract_dir, file_name), "rb") as source_file:
-                    with open_stream(output_path, "wb") as target_file:
-                        target_file.write(source_file.read())
-            else:
-                # For local paths, we can use shutil.copyfile
-                shutil.copyfile(os.path.join(self.mock_extract_dir, file_name), output_path)
-        else:
-            # Create a mock file with random content
-            with open_stream(output_path, "wb") as f:
-                # Write random bytes to simulate file content
-                extract_size = self.extracts[file_name]["size"]
-                size_value = extract_size if isinstance(extract_size, int) else 1024 * 1024
-                mock_file_size = min(size_value, 1024 * 1024)  # Max 1MB for mock files
-                f.write(os.urandom(mock_file_size))
+        # Create a mock file with random content
+        with open_stream(output_path, "wb") as f:
+            # Write random bytes to simulate file content
+            extract_size = self.extracts[file_name]["size"]
+            size_value = extract_size if isinstance(extract_size, int) else 1024 * 1024
+            mock_file_size = min(size_value, 1024 * 1024)  # Max 1MB for mock files
+            f.write(os.urandom(mock_file_size))
 
         # For file size, use the extract's defined size
         file_size = self.extracts[file_name]["size"]
@@ -141,20 +98,23 @@ class MockSamGovClient(BaseSamGovClient):
 
         Args:
             file_name: Name of the extract file.
-            size: Size in bytes of the extract file.
+            size: Size in bytes of the extract file. If file_path is provided, this might be overwritten.
             content_type: Content type of the extract file.
             file_path: Optional path to an actual file to use as the extract.
-                      If provided, the size parameter will be ignored.
+                      If provided, the size will be derived from the file.
         """
+        actual_size = size
+        if file_path and os.path.exists(file_path):
+            actual_size = os.path.getsize(file_path)
+            # Note: The file content itself is not stored or copied anymore,
+            # only its metadata (name, size, content_type) is used.
+            # The download_extract method will generate random content
+            # based on this metadata if the file isn't in MOCK_EXTRACTS.
+
         self.extracts[file_name] = {
-            "size": size,
+            "size": actual_size,
             "content_type": content_type,
         }
-
-        # If a file path is provided, copy it to the mock_extract_dir if available
-        if file_path and self.mock_extract_dir:
-            os.makedirs(self.mock_extract_dir, exist_ok=True)
-            shutil.copyfile(file_path, os.path.join(self.mock_extract_dir, file_name))
 
     def get_monthly_extract_info(self) -> Optional[SamExtractInfo]:
         """

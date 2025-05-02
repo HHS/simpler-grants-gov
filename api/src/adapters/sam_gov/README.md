@@ -15,7 +15,7 @@ This module provides a client for interacting with the SAM.gov API, particularly
 ### Basic Extract Download
 
 ```python
-from src.adapters.sam_gov import create_sam_gov_client, SamExtractRequest, SensitivityLevel
+from src.adapters.sam_gov import create_sam_gov_client, SamExtractRequest
 
 # Create a client (uses environment variables for configuration)
 client = create_sam_gov_client()
@@ -23,7 +23,6 @@ client = create_sam_gov_client()
 # Define the extract request
 request = SamExtractRequest(
     file_name="SAM_PUBLIC_MONTHLY_V2_20220406.ZIP",
-    sensitivity=SensitivityLevel.PUBLIC
 )
 
 # Download the extract to a local file
@@ -90,7 +89,6 @@ The client uses the following environment variables:
 
 - `SAM_GOV_API_URL`: Base URL for the SAM.gov API
 - `SAM_GOV_API_KEY`: API key for authentication
-- `SAM_GOV_EXTRACT_URL`: URL for the SAM.gov extract downloads API endpoint
 - `SAM_GOV_USE_MOCK`: Use mock client if set to "true", "1", or "yes"
 - `SAM_GOV_MOCK_DATA_FILE`: Path to a JSON file containing mock extract metadata
 - `SAM_GOV_MOCK_EXTRACT_DIR`: Path to a directory containing mock extract files

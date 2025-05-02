@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 class SamExtractsConfig(PydanticBaseEnvConfig):
     """Configuration for SAM extracts fetching task"""
 
-    sam_api_url: str = Field(
-        alias="SAM_API_URL", default="https://api.sam.gov/data-services/v1/extracts"
+    sam_gov_api_url: str = Field(
+        alias="SAM_GOV_EXTRACTS_API_URL", default="https://api.sam.gov/data-services/v1/extracts"
     )
-    s3_bucket: str = Field(alias="SAM_EXTRACTS_S3_BUCKET")
-    s3_prefix: str = Field(alias="SAM_EXTRACTS_S3_PREFIX", default="sam-extracts/")
+    s3_bucket: str = Field(alias="SAM_GOV_EXTRACTS_S3_BUCKET")
+    s3_prefix: str = Field(alias="SAM_GOV_EXTRACTS_S3_PREFIX")
 
 
 @task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
@@ -163,7 +163,7 @@ class SamExtractsTask(Task):
                     "Successfully fetched monthly extract",
                     extra={
                         "extract_date": extract_date.isoformat(),
-                        "filename": monthly_info.filename,
+                        "sam_extract_filename": monthly_info.filename,
                         "s3_path": s3_path,
                     },
                 )
@@ -250,7 +250,7 @@ class SamExtractsTask(Task):
                         "Successfully fetched daily extract",
                         extra={
                             "extract_date": extract_date.isoformat(),
-                            "filename": extract_info.filename,
+                            "sam_extract_filename": extract_info.filename,
                             "s3_path": s3_path,
                         },
                     )
