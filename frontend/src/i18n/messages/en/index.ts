@@ -35,7 +35,7 @@ export const messages = {
         ],
       },
       building: {
-        title: "Building with you, not for you",
+        title: "Building <span>with</span> you, not <span>for</span> you",
         paragraphs: [
           "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
           "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",

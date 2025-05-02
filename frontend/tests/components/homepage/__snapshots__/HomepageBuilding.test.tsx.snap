@@ -36,7 +36,19 @@ exports[`Homepage Building Content matches snapshot 1`] = `
           data-testid="grid"
         >
           <h1>
-            Building with you, not for you
+            Building 
+            <span
+              class="text-italic"
+            >
+              with
+            </span>
+             you, not 
+            <span
+              class="text-italic"
+            >
+              for
+            </span>
+             you
           </h1>
         </div>
         <div

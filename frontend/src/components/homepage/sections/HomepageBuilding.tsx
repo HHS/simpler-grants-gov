@@ -1,8 +1,14 @@
+import {
+  useMessages,
+  useTranslations,
+} from "next-intl";
+import Image from "next/image";
 import BuildingImage from "public/img/homepage-building.jpg";
 
-import { useMessages, useTranslations } from "next-intl";
-import Image from "next/image";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import {
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
 const BuildingContent = () => {
   const t = useTranslations("Homepage.sections.building");
@@ -29,7 +35,11 @@ const BuildingContent = () => {
           }}
         >
           <Grid>
-            <h1>{t("title")}</h1>
+            <h1>
+              {t.rich("title", {
+                span: (chunks) => <span className="text-italic">{chunks}</span>,
+              })}
+            </h1>
           </Grid>
           <Grid>
             {paragraphs.map((paragraph: string, paragraphIdx: number) => (
