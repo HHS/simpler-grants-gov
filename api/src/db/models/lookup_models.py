@@ -319,6 +319,7 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
         )
 
+
 @LookupRegistry.register_lookup(APPLICATION_STATUS_CONFIG)
 class LkApplicationStatus(LookupTable, TimestampMixin):
     __tablename__ = "lk_application_status"

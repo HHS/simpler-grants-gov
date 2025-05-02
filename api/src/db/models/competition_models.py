@@ -7,14 +7,13 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import CompetitionOpenToApplicant, FormFamily
+from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
 )
-from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
 
@@ -140,9 +139,6 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
-    application_status_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey(LkApplicationStatus.application_status_id), nullable=True, index=True
-    )
     application_status: Mapped[ApplicationStatus | None] = mapped_column(
         "application_status_id",
         LookupColumn(LkApplicationStatus),

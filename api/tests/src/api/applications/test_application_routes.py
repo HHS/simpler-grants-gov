@@ -3,7 +3,7 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from src.db.models.competition_models import Application, ApplicationForm
+from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -698,3 +698,55 @@ def test_application_form_get_with_invalid_schema(
 
     # Should error
     assert response.status_code == 500
+    assert response.json["warnings"] == [
+        {"message": "Invalid application_response JSON", "type": "validation"}
+    ]
+
+
+def test_application_submit_success(client, enable_factory_create, db_session, api_auth_token):
+    """Test successful submission of an application"""
+    # Create an application in the IN_PROGRESS state
+    application = ApplicationFactory.create(status=ApplicationStatus.IN_PROGRESS)
+    application_id = str(application.application_id)
+
+    response = client.post(
+        f"/alpha/applications/{application_id}/submit",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify application status updated in the database
+    db_session.refresh(application)
+    assert application.status == ApplicationStatus.SUBMITTED
+
+
+@pytest.mark.parametrize(
+    "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+)
+def test_application_submit_forbidden(
+    client, enable_factory_create, db_session, api_auth_token, initial_status
+):
+    """Test submission fails if application is not in IN_PROGRESS status"""
+    # Create an application with a status other than IN_PROGRESS
+    application = ApplicationFactory.create(status=initial_status)
+    application_id = str(application.application_id)
+
+    response = client.post(
+        f"/alpha/applications/{application_id}/submit",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Assert forbidden response
+    assert response.status_code == 403
+    assert response.json["error_code"] == "FORBIDDEN"
+    assert (
+        f"Application cannot be submitted. It is currently in status: {initial_status.value}"
+        in response.json["message"]
+    )
+
+    # Verify application status remains unchanged
+    db_session.refresh(application)
+    assert application.status == initial_status
