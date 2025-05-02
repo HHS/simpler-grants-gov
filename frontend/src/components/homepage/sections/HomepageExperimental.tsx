@@ -1,16 +1,11 @@
-import {
-  useMessages,
-  useTranslations,
-} from "next-intl";
-import Link from "next/link";
-import HomePageSection from "src/components/homepage/homePageSection";
-import IconInfo from "src/components/homepage/IconInfoSection";
 import { UswdsIconNames } from "src/types/generalTypes";
 
-import {
-  Button,
-  Grid,
-} from "@trussworks/react-uswds";
+import { useMessages, useTranslations } from "next-intl";
+import Link from "next/link";
+import { Button, Grid } from "@trussworks/react-uswds";
+
+import HomePageSection from "src/components/homepage/homePageSection";
+import IconInfo from "src/components/homepage/IconInfoSection";
 
 const ExperimentalContent = () => {
   const t = useTranslations("Homepage.sections.experimental");

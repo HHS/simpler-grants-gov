@@ -1,8 +1,9 @@
-import { JSX } from "react";
+import { UswdsIconNames } from "src/types/generalTypes";
 
 import Link from "next/link";
+import { JSX } from "react";
+
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { UswdsIconNames } from "src/types/generalTypes";
 
 type Props = {
   description: string;
