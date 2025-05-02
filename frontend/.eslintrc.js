@@ -30,7 +30,7 @@ module.exports = {
   overrides: [
     // Lint config specific to Test files
     {
-      files: [ "tests/**/*.test.tsx"],
+      files: ["tests/**/*.test.tsx"],
       plugins: ["jest"],
       extends: [
         "plugin:jest/recommended",
