@@ -1,8 +1,8 @@
 """Add application status table and field
 
-Revision ID: 2b4c19543395
+Revision ID: 462b5b67c0ea
 Revises: 3b0705202c54
-Create Date: 2025-05-01 16:03:57.468495
+Create Date: 2025-05-02 17:17:28.799500
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2b4c19543395"
+revision = "462b5b67c0ea"
 down_revision = "3b0705202c54"
 branch_labels = None
 depends_on = None
@@ -40,13 +40,6 @@ def upgrade():
     op.add_column(
         "application", sa.Column("application_status_id", sa.Integer(), nullable=True), schema="api"
     )
-    op.create_index(
-        op.f("application_application_status_id_idx"),
-        "application",
-        ["application_status_id"],
-        unique=False,
-        schema="api",
-    )
     op.create_foreign_key(
         op.f("application_application_status_id_lk_application_status_fkey"),
         "application",
@@ -66,9 +59,6 @@ def downgrade():
         "application",
         schema="api",
         type_="foreignkey",
-    )
-    op.drop_index(
-        op.f("application_application_status_id_idx"), table_name="application", schema="api"
     )
     op.drop_column("application", "application_status_id", schema="api")
     op.drop_table("lk_application_status", schema="api")
