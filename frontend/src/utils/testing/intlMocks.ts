@@ -43,58 +43,49 @@ export const mockMessages = {
     },
   },
   Homepage: {
-    pageTitle: "Let's build a simpler Grants.gov together",
+    pageTitle: "Test Title",
     pageDescription:
-      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+      "Test page description",
     github_link: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "Test out our experimental features",
-        canDoHeader: "Tell us what's working (and what's not)",
-        canDoSubHeader: "What you can do now",
+        title: "experimental test title",
+        canDoHeader: "test can do header",
+        canDoSubHeader: "test can do subheader",
         canDoParagraph:
-          "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-        tryLink: "Try the new simpler search",
-        cantDoHeader: "What you can't do quite yet",
+          "test can do paragraph",
+        tryLink: "test try link",
+        cantDoHeader: "test cant do header",
         cantDoParagraph:
-          "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+          "test cant do paragraph",
         iconSections: [
           {
             description:
-              "We're excited to hear from you to learn how we can improve.",
-            http: "mailto:simpler@grants.gov",
-            iconName: "build",
-            link: "Contact us at simpler@grants.gov",
-            title: "Send us your feedback and suggestions.",
-          },
-          {
-            description:
-              "Our newsletter delivers the latest news straight to your inbox.",
-            http: "https://simpler.grants.gov/subscribe",
-            iconName: "mail",
-            link: "Subscribe to our newsletter",
-            title: "Be the first to hear about new features.",
-          },
-        ],
+              "test icon section description",
+            http: "test iconSections http",
+            iconName: "test iconSections iconName",
+            link: "test iconSections link",
+            title: "test iconSections title",
+          }
+        ]
       },
       building: {
-        title: "Building with you, not for you",
+        title: "test building title",
         paragraphs: [
-          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
-          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+          "test building paragraph",
         ],
       },
       involved: {
-        title: "More ways to get involved",
-        technicalTitle: "Contribute your technical expertise",
+        title: "test title",
+        technicalTitle: "test technical title",
         technicalDescription:
-          "We're always excited to welcome new open source developers to our community.",
-        technicalLink: "Learn how to contribute code",
-        participateTitle: "Participate in user research",
+          "test technical description",
+        technicalLink: "test technical link",
+        participateTitle: "test participate title",
         participateDescription:
-          "Be a part of the design process by taking part in usability tests and interviews.",
-        participateLink: "Sign up to participate in future studies",
-        discourseLink: "Chat on the Discourse forum",
+          "test participate description",
+        participateLink: "test participate link",
+        discourseLink: "test discourse link",
       },
     },
   },
