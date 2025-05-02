@@ -27,7 +27,7 @@ export const messages = {
           {
             description:
               "Our newsletter delivers the latest news straight to your inbox.",
-            http: "https://simpler.grants.gov/subscribe",
+            http: "/subscribe",
             iconName: "mail",
             link: "Subscribe to our newsletter",
             title: "Be the first to hear about new features.",
