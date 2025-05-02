@@ -15,7 +15,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
   }),
 }));
 
-jest.mock("src/utils/generalUtils", () => ({
+jest.mock("src/utils/uiUtils", () => ({
   saveBlobToFile: (...args: unknown[]): unknown => mockSaveBlobToFile(...args),
 }));
 

@@ -100,21 +100,6 @@ export const stringToBoolean = (
   mightRepresentABoolean: string | undefined,
 ): boolean => mightRepresentABoolean === "true";
 
-// a hack to get filenames to work on blob based downloads across all browsers
-// see https://stackoverflow.com/a/48968694
-export const saveBlobToFile = (blob: Blob, filename: string) => {
-  const temporaryLink = document.createElement("a");
-  document.body.appendChild(temporaryLink);
-  const url = window.URL.createObjectURL(blob);
-  temporaryLink.href = url;
-  temporaryLink.download = filename;
-  temporaryLink.click();
-  setTimeout(() => {
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(temporaryLink);
-  }, 0);
-};
-
 export const queryParamsToQueryString = (dict: OptionalStringDict) => {
   return Object.entries(dict).reduce((queryString, [key, value]) => {
     return value ? `${queryString}${key}=${value}&` : queryString;

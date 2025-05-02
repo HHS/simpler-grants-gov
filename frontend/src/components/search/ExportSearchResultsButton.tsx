@@ -2,7 +2,7 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
-import { saveBlobToFile } from "src/utils/generalUtils";
+import { saveBlobToFile } from "src/utils/uiUtils";
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
