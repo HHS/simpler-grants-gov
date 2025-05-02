@@ -274,3 +274,5 @@ export interface ParsedError {
   type?: string;
   details?: FrontendErrorDetails;
 }
+
+export type FeatureFlags = { [name: string]: boolean };

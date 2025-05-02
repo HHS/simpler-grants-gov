@@ -1,7 +1,5 @@
-import {
-  defaultFeatureFlags,
-  FeatureFlags,
-} from "src/constants/defaultFeatureFlags";
+import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
+import { FeatureFlags } from "src/types/generalTypes";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";

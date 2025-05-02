@@ -2,10 +2,8 @@
  * @file Service for checking and managing feature flags
  */
 
-import {
-  defaultFeatureFlags,
-  FeatureFlags,
-} from "src/constants/defaultFeatureFlags";
+import { assignWith } from "lodash";
+import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { featureFlags } from "src/constants/environments";
 import {
   FEATURE_FLAGS_KEY,
@@ -14,7 +12,8 @@ import {
   parseFeatureFlagsFromString,
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
-import { OptionalStringDict } from "src/types/generalTypes";
+import { FeatureFlags, OptionalStringDict } from "src/types/generalTypes";
+import { stringToBoolean } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -38,7 +37,7 @@ export class FeatureFlagsManager {
   // this supports easier integration of the class on the client side, as server side flags can be passed down
   private _envVarFlags;
 
-  constructor(envVarFlags: FeatureFlags) {
+  constructor(envVarFlags: OptionalStringDict) {
     this._envVarFlags = envVarFlags;
   }
 
@@ -46,7 +45,7 @@ export class FeatureFlagsManager {
     return { ...this._defaultFeatureFlags };
   }
 
-  private get featureFlagsFromEnvironment(): FeatureFlags {
+  private get featureFlagsFromEnvironment(): OptionalStringDict {
     return { ...this._envVarFlags };
   }
 
@@ -60,10 +59,16 @@ export class FeatureFlagsManager {
 
   */
   get featureFlags(): FeatureFlags {
-    return {
-      ...this.defaultFeatureFlags,
-      ...this.featureFlagsFromEnvironment,
-    };
+    return assignWith(
+      { ...this.defaultFeatureFlags },
+      this.featureFlagsFromEnvironment,
+      (defaultValue: boolean, featureFlagValue: string) => {
+        if (featureFlagValue === undefined) {
+          return defaultValue;
+        }
+        return stringToBoolean(featureFlagValue);
+      },
+    );
   }
 
   /**

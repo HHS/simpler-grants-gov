@@ -2,14 +2,12 @@
 
 import Cookies from "js-cookie";
 import { isBoolean } from "lodash";
-import {
-  defaultFeatureFlags,
-  FeatureFlags,
-} from "src/constants/defaultFeatureFlags";
+import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import {
   FEATURE_FLAGS_KEY,
   getCookieExpiration,
 } from "src/services/featureFlags/featureFlagHelpers";
+import { FeatureFlags } from "src/types/generalTypes";
 
 import { useCallback, useEffect, useState } from "react";
 
