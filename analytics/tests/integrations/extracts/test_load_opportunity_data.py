@@ -95,6 +95,5 @@ def test_extract_copy_opportunity_data(
         assert user_save_opp_result.fetchone()[0] == 9
         assert user_save_search_result.fetchone()[0] == 5
 
-
     # running again to verify that it does not break on the next call
     extract_copy_opportunity_data()

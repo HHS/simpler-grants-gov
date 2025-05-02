@@ -15,7 +15,6 @@ class OpportunityTables(StrEnum):
     USER_SAVED_SEARCH = "user_saved_search"
 
 
-
 LK_OPPORTUNITY_STATUS_COLS = (
     "OPPORTUNITY_STATUS_ID",
     "DESCRIPTION",
@@ -98,7 +97,7 @@ USER_SAVED_OPPORTUNITY_COLS = (
     "OPPORTUNITY_ID",
     "CREATED_AT",
     "UPDATED_AT",
-    "LAST_NOTIFIED_AT"
+    "LAST_NOTIFIED_AT",
 )
 USER_SAVED_SEARCH_COLS = (
     "SAVED_SEARCH_ID",
