@@ -14,6 +14,7 @@ from src.db.models.lookup_models import (
     LkCompetitionOpenToApplicant,
     LkFormFamily,
 )
+from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
 
@@ -142,7 +143,12 @@ class Application(ApiSchemaTable, TimestampMixin):
     application_status_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey(LkApplicationStatus.application_status_id), nullable=True, index=True
     )
-    application_status: Mapped[LkApplicationStatus | None] = relationship(LkApplicationStatus)
+    application_status: Mapped[ApplicationStatus | None] = mapped_column(
+        "application_status_id",
+        LookupColumn(LkApplicationStatus),
+        ForeignKey(LkApplicationStatus.application_status_id),
+        primary_key=True,
+    )
 
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
