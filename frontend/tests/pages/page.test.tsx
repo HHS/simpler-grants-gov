@@ -2,11 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Home from "src/app/[locale]/page";
-import {
-  localeParams,
-  mockMessages,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
+import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -27,15 +23,15 @@ jest.mock("next-intl", () => ({
 
 describe("Home", () => {
   it("renders intro text", () => {
-    render(Home({ params: localeParams }));
+    render(Home());
 
-    const content = screen.getByText("Homepage.pageTitle");
+    const content = screen.getByText("pageTitle");
 
     expect(content).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
-    const { container } = render(Home({ params: localeParams }));
+    const { container } = render(Home());
     const results = await waitFor(() => axe(container));
 
     expect(results).toHaveNoViolations();

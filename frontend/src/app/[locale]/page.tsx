@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { use } from "react";
+import { getTranslations } from "next-intl/server";
 
 import HomePageSections from "src/components/homepage/HomePageSections";
 
@@ -16,9 +15,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export default function Home({ params }: LocalizedPageProps) {
-  const { locale } = use(params);
-  setRequestLocale(locale);
-
+export default function Home() {
   return <HomePageSections />;
 }
