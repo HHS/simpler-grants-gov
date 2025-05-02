@@ -1,12 +1,16 @@
-import { UswdsIconNames } from "src/types/generalTypes";
-
-import { useMessages, useTranslations } from "next-intl";
-import { Button, Grid } from "@trussworks/react-uswds";
-
+import {
+  useMessages,
+  useTranslations,
+} from "next-intl";
+import Link from "next/link";
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
+import { UswdsIconNames } from "src/types/generalTypes";
 
-const trySearchLink = "https://simpler.grants.gov/search";
+import {
+  Button,
+  Grid,
+} from "@trussworks/react-uswds";
 
 const ExperimentalContent = () => {
   const t = useTranslations("Homepage.sections.experimental");
@@ -18,7 +22,7 @@ const ExperimentalContent = () => {
       <h2 data-testid="homepage-experimental">{t("canDoHeader")}</h2>
       <h3>{t("canDoSubHeader")}</h3>
       <p className="font-sans-md line-height-sans-4">{t("canDoParagraph")}</p>
-      <a href={trySearchLink} target="_blank" rel="noopener noreferrer">
+      <Link href="/search">
         <Button
           className="margin-y-2 usa-button--secondary"
           type="button"
@@ -26,7 +30,7 @@ const ExperimentalContent = () => {
         >
           {t("tryLink")}
         </Button>
-      </a>
+      </Link>
       <h3>{t("cantDoHeader")}</h3>
       <p className="font-sans-md line-height-sans-4">{t("cantDoParagraph")}</p>
       <Grid row className="padding-y-2" gap="md">
