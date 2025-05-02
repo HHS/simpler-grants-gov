@@ -14,7 +14,7 @@ export const messages = {
         tryLink: "Try the new simpler search",
         cantDoHeader: "What you can't do quite yet",
         cantDoParagraph:
-          "For now, you need to visit Grants.gov to access more afvanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
         iconSections: [
           {
             description:
