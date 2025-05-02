@@ -4,7 +4,6 @@ on:
   workflow_call:
     inputs:
       version:
-        required: true
         description: "Version to run tests against"
         default: "main"
         type: string
