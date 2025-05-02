@@ -52,14 +52,14 @@ def xml_to_dict(xml_str: str, preserve_namespace: bool = False) -> dict:
     return {root_xml_dict_key: root_xml_dict_value}
 
 
-def _element_to_dict(xml_element: ElementTree.Element, preserve_namespace: bool = False) -> dict | str | None:
+def _element_to_dict(
+    xml_element: ElementTree.Element, preserve_namespace: bool = False
+) -> dict | str | None:
     # Initialize result with any element attributes.
     xml_dict = {**get_element_attributes(xml_element, preserve_namespace)}
 
-    # Process child elements if any.
+    # Process child elements if any. If no children, we are at a leaf node. Return the content if any.
     children = list(xml_element)
-
-    # If no children, we are at a leaf node. Return the content if any.
     if not children:
         return get_element_content(xml_element)
 
