@@ -144,7 +144,6 @@ class Application(ApiSchemaTable, TimestampMixin):
         "application_status_id",
         LookupColumn(LkApplicationStatus),
         ForeignKey(LkApplicationStatus.application_status_id),
-        primary_key=True,
     )
 
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
