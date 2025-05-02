@@ -20,8 +20,8 @@ The goal of the SimplerGrants initiative is to **make Grants.gov...**
 
 * **Easier for grant seekers**\
   Reduce applicant burden by simplifying the process of discovering and applying for grants.
-* **More accessible for underserved communities**\
-  Expand access to grant-eligible communities by designing for those who are underserved by the current grants process.
+* **More intuitive for non-experts**\
+  Build capacity for all grant-seeking communities by increasing their efficiency and effectiveness.
 * **More efficient for grantors**\
   Reduce grantor burden by streamlining the process of publishing and managing grants.
 *   **More transparent and participatory for the public**

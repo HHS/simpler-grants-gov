@@ -1,9 +1,9 @@
 import { RJSFSchema } from "@rjsf/utils";
-import Ajv, { ErrorObject } from "ajv";
+import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
 // JSON Schema for the UiSchema, accepts either a "field" or "section"
-const UiJsonSchema: RJSFSchema = {
+export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
   items: {
@@ -31,9 +31,13 @@ const UiJsonSchema: RJSFSchema = {
           type: "string",
           pattern: "^/properties/[a-zA-Z0-9]+$",
         },
+        widget: {
+          type: "string",
+          enum: ["Checkbox", "Text", "TextArea", "Radio", "Select"],
+        },
       },
       required: ["type"],
-      oneOf: [
+      anyOf: [
         {
           required: ["schema"],
         },
@@ -106,17 +110,7 @@ export const validateUiSchema = (data: object) => {
   return validateJsonBySchema(data, UiJsonSchema);
 };
 
-const getKeysWithValues = (formData: FormData) => {
-  const keysWithValue: { [key: string]: string } = {};
-  for (const [key, value] of formData.entries()) {
-    if (value && typeof value === "string") {
-      keysWithValue[key] = value;
-    }
-  }
-  return keysWithValue;
-};
-
-const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
+export const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
   const ajv = new Ajv({ allErrors: true, coerceTypes: true });
   addFormats(ajv);
   const validate = ajv.compile(schema);
@@ -126,17 +120,4 @@ const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
   } else {
     return validate.errors;
   }
-};
-
-export const validateFormData = (
-  formData: FormData,
-  schema: RJSFSchema,
-):
-  | ErrorObject<string, Record<string, unknown>, unknown>[]
-  | null
-  | false
-  | undefined
-  | [] => {
-  const data = getKeysWithValues(formData);
-  return validateJsonBySchema(data, schema);
 };
