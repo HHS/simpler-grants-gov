@@ -44,46 +44,38 @@ export const mockMessages = {
   },
   Homepage: {
     pageTitle: "Test Title",
-    pageDescription:
-      "Test page description",
+    pageDescription: "Test page description",
     github_link: "Follow on GitHub",
     sections: {
       experimental: {
         title: "experimental test title",
         canDoHeader: "test can do header",
         canDoSubHeader: "test can do subheader",
-        canDoParagraph:
-          "test can do paragraph",
+        canDoParagraph: "test can do paragraph",
         tryLink: "test try link",
         cantDoHeader: "test cant do header",
-        cantDoParagraph:
-          "test cant do paragraph",
+        cantDoParagraph: "test cant do paragraph",
         iconSections: [
           {
-            description:
-              "test icon section description",
+            description: "test icon section description",
             http: "test iconSections http",
             iconName: "test iconSections iconName",
             link: "test iconSections link",
             title: "test iconSections title",
-          }
-        ]
+          },
+        ],
       },
       building: {
         title: "test building title",
-        paragraphs: [
-          "test building paragraph",
-        ],
+        paragraphs: ["test building paragraph"],
       },
       involved: {
         title: "test title",
         technicalTitle: "test technical title",
-        technicalDescription:
-          "test technical description",
+        technicalDescription: "test technical description",
         technicalLink: "test technical link",
         participateTitle: "test participate title",
-        participateDescription:
-          "test participate description",
+        participateDescription: "test participate description",
         participateLink: "test participate link",
         discourseLink: "test discourse link",
       },
