@@ -1,0 +1,26 @@
+name: API Checks
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        description: "Version to run tests against"
+        default: "main"
+        type: string
+
+defaults:
+  run:
+    working-directory: ./bloom_nofos
+
+jobs:
+  lint-test:
+    name: API Lint, Format & Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: HHS/simpler-grants-pdf-builder
+          ref: ${{ inputs.version }}
+
+      - run: make test
