@@ -1,4 +1,4 @@
-import { FeatureFlags } from "src/types/generalTypes";
+export type FeatureFlags = { [name: string]: boolean };
 
 export const defaultFeatureFlags: FeatureFlags = {
   // Kill switches for search and opportunity pages, will show maintenance page when turned on

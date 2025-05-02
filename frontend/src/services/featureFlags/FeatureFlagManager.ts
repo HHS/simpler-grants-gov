@@ -2,7 +2,10 @@
  * @file Service for checking and managing feature flags
  */
 
-import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
+import {
+  defaultFeatureFlags,
+  FeatureFlags,
+} from "src/constants/defaultFeatureFlags";
 import { featureFlags } from "src/constants/environments";
 import {
   assignBaseFlags,
@@ -12,7 +15,7 @@ import {
   parseFeatureFlagsFromString,
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
-import { FeatureFlags, OptionalStringDict } from "src/types/generalTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";

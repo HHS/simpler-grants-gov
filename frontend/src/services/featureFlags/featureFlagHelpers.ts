@@ -1,5 +1,8 @@
-import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
-import { FeatureFlags, OptionalStringDict } from "src/types/generalTypes";
+import {
+  defaultFeatureFlags,
+  FeatureFlags,
+} from "src/constants/defaultFeatureFlags";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { stringToBoolean } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
