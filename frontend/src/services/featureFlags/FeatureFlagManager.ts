@@ -2,10 +2,10 @@
  * @file Service for checking and managing feature flags
  */
 
-import { assignWith } from "lodash";
 import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { featureFlags } from "src/constants/environments";
 import {
+  assignBaseFlags,
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
@@ -13,7 +13,6 @@ import {
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
 import { FeatureFlags, OptionalStringDict } from "src/types/generalTypes";
-import { stringToBoolean } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -59,15 +58,9 @@ export class FeatureFlagsManager {
 
   */
   get featureFlags(): FeatureFlags {
-    return assignWith(
-      { ...this.defaultFeatureFlags },
+    return assignBaseFlags(
+      this.defaultFeatureFlags,
       this.featureFlagsFromEnvironment,
-      (defaultValue: boolean, featureFlagValue: string) => {
-        if (featureFlagValue === undefined) {
-          return defaultValue;
-        }
-        return stringToBoolean(featureFlagValue);
-      },
     );
   }
 
