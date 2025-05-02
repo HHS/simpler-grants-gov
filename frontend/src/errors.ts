@@ -30,11 +30,11 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
  */
 
 export class NetworkError extends Error {
-  constructor(error: unknown, searchInputs?: QueryParamData) {
+  constructor(e: unknown, searchInputs?: QueryParamData) {
     const serializedSearchInputs = searchInputs
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
-    const message = error instanceof Error ? error.message : "Unknown Error";
+    const message = e instanceof Error ? e.message : "Unknown Error";
     const cause = {
       type: "NetworkError",
       searchInputs: serializedSearchInputs,

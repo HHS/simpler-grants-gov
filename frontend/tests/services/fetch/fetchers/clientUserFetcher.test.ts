@@ -33,7 +33,7 @@ describe("debouncedClientUserFetcher", () => {
   });
   it("throws on non 200", async () => {
     fetchMock.mockResolvedValue({ status: 500, ok: false });
-    const error = await wrapForExpectedError(() => debouncedUserFetcher());
-    expect(error).toBeInstanceOf(Error);
+    const e = await wrapForExpectedError(() => debouncedUserFetcher());
+    expect(e).toBeInstanceOf(Error);
   });
 });

@@ -50,9 +50,9 @@ export const OpportunitySaveUserControl = () => {
         body: JSON.stringify({ opportunityId }),
       });
       setSaved(data.type === "save");
-    } catch (error) {
+    } catch (e) {
       setSavedError(true);
-      console.error(error);
+      console.error(e);
     } finally {
       setshowMessage(true);
       setLoading(false);
@@ -67,8 +67,8 @@ export const OpportunitySaveUserControl = () => {
       .then((data) => {
         data && setSaved(true);
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((e) => {
+        console.error(e);
       })
       .finally(() => {
         setLoading(false);

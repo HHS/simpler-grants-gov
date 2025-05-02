@@ -76,22 +76,22 @@ function RadioWidget<
       ),
     [onFocus, id, enumOptions, emptyValue],
   );
-  const error = rawErrors.length ? true : undefined;
-  const describedby = error
-    ? `error-for-${id}`
+  const e = rawErrors.length ? true : undefined;
+  const describedby = e
+    ? `e-for-${id}`
     : title
       ? `label-for-${id}`
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup error={e} key={`wrapper-for-${id}`}>
       <FieldLabel
         idFor={id}
         title={title}
         required={required}
         description={description}
       />
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {e && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
           const checked = enumOptionsIsSelected<S>(option.value, value);

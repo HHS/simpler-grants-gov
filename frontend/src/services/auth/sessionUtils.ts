@@ -22,8 +22,8 @@ export const decrypt = async (
       algorithms: [algorithm],
     });
     return payload;
-  } catch (error) {
-    console.error(`Failed to decrypt session cookie with ${algorithm}`, error);
+  } catch (e) {
+    console.error(`Failed to decrypt session cookie with ${algorithm}`, e);
     return null;
   }
 };

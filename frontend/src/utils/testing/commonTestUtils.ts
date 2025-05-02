@@ -34,7 +34,7 @@ export const wrapForExpectedError = async <TError>(
     await originalFunction();
     // since the original function should throw, should never hit this next line
     throw new NoErrorThrownError();
-  } catch (error: unknown) {
-    return error as TError;
+  } catch (e: unknown) {
+    return e as TError;
   }
 };
