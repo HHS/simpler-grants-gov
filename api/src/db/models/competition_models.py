@@ -140,9 +140,6 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
-    application_status_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey(LkApplicationStatus.application_status_id), nullable=True, index=True
-    )
     application_status: Mapped[ApplicationStatus | None] = mapped_column(
         "application_status_id",
         LookupColumn(LkApplicationStatus),
