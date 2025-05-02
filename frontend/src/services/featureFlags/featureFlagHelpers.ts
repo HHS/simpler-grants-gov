@@ -102,10 +102,10 @@ export function getFeatureFlagsFromCookie(
     } else {
       parsedCookie = {};
     }
-  } catch (error) {
+  } catch (e) {
     // Something went wrong with getting this value, so we assume the cookie is blank
     // eslint-disable-next-line no-console
-    console.error(error);
+    console.error(e);
     parsedCookie = {};
   }
 

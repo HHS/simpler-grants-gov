@@ -89,22 +89,22 @@ export function createRequestBody(
  * Handle request errors
  */
 export function fetchErrorToNetworkError(
-  error: unknown,
+  e: unknown,
   searchInputs?: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
-  console.error(error);
+  console.error(e);
   return searchInputs
-    ? new NetworkError(error, searchInputs)
-    : new NetworkError(error);
+    ? new NetworkError(e, searchInputs)
+    : new NetworkError(e);
 }
 
 export const throwError = (responseBody: APIResponse, url: string) => {
-  const { status_code = 0, message = "", errors } = responseBody;
+  const { status_code = 0, message = "", e } = responseBody;
   console.error(`API request error at ${url} (${status_code}): ${message}`);
 
-  const details = (errors && errors[0]) || {};
+  const details = (e && e[0]) || {};
 
   switch (status_code) {
     case 400:

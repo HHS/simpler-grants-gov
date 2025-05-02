@@ -95,10 +95,10 @@ describe("useClientFetch", () => {
   it("throws if response is not an ok or 200", async () => {
     fetchMock.mockResolvedValue({ status: 500, ok: false });
     const { result } = renderHook(() => useClientFetch("an error!"));
-    const error = await wrapForExpectedError(() =>
+    const e = await wrapForExpectedError(() =>
       result.current.clientFetch("http://wherever"),
     );
     expect(jsonMock).toHaveBeenCalledTimes(0);
-    expect(error.message).toEqual("an error!: 500");
+    expect((e as Error).message).toEqual("an error!: 500");
   });
 });

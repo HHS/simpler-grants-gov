@@ -17,11 +17,11 @@ function isValidJSON(str: string) {
   }
 }
 
-export function SearchError({ error }: ErrorProps) {
+export function SearchError({ e }: ErrorProps) {
   const t = useTranslations("Search");
 
-  const parsedErrorData = isValidJSON(error.message)
-    ? (JSON.parse(error.message) as ParsedError)
+  const parsedErrorData = isValidJSON(e.message)
+    ? (JSON.parse(e.message) as ParsedError)
     : {};
 
   // note that the validation error will contain untranslated strings

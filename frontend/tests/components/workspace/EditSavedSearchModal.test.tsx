@@ -199,9 +199,9 @@ describe("EditSavedSearchModal", () => {
       />,
     );
 
-    const error = await screen.findByText("apiError");
+    const e = await screen.findByText("apiError");
 
-    expect(error).toBeInTheDocument();
+    expect(e).toBeInTheDocument();
   });
 
   it("displays a success message on successful save", async () => {

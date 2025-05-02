@@ -55,7 +55,7 @@ const ResolvedSearchResults = async ({
     searchResults = await searchResultsPromise;
   } catch (e) {
     const error = e as Error;
-    return <SearchError error={error} />;
+    return <SearchError e={error} />;
   }
 
   // if there are no results because we've requested a page beyond the number of total pages
