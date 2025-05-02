@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
 
 // import { waitForURLChange } from "./playwrightUtils";

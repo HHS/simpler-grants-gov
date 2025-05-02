@@ -30,7 +30,7 @@ module.exports = {
   overrides: [
     // Lint config specific to Test files
     {
-      files: ["tests/**"],
+      files: [ "tests/**/*.test.tsx"],
       plugins: ["jest"],
       extends: [
         "plugin:jest/recommended",
@@ -63,8 +63,6 @@ module.exports = {
         ],
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
         "@typescript-eslint/no-explicit-any": "error",
-        // Just warn since playwright tests may not use screen the way jest would
-        "testing-library/prefer-screen-queries": "warn",
         // Prevent unnecessary console statements
         "no-console": ["error", { allow: ["warn", "error"] }],
         "promise/catch-or-return": ["error", { allowFinally: true }],

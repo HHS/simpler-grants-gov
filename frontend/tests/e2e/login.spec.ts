@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
 
 const BASE_URL = "http://127.0.0.1:3000";
