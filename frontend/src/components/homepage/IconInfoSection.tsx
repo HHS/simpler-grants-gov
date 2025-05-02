@@ -1,5 +1,7 @@
 import { UswdsIconNames } from "src/types/generalTypes";
 
+import { JSX } from "react";
+
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type Props = {
