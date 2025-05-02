@@ -1,4 +1,3 @@
-import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Home from "src/app/[locale]/page";
@@ -7,6 +6,12 @@ import {
   mockMessages,
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
+
+import {
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -29,7 +34,7 @@ describe("Home", () => {
   it("renders intro text", () => {
     render(Home({ params: localeParams }));
 
-    const content = screen.getByText("goal.paragraph_1");
+    const content = screen.getByText("Homepage.pageTitle");
 
     expect(content).toBeInTheDocument();
   });
