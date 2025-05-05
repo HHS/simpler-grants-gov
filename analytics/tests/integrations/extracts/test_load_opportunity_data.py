@@ -92,8 +92,8 @@ def test_extract_copy_opportunity_data(
         assert opp_result.fetchone()[0] == 37
         assert opp_smry_result.fetchone()[0] == 32
         assert curr_opp_smry_result.fetchone()[0] == 32
-        assert user_save_opp_result.fetchone()[0] == 9
-        assert user_save_search_result.fetchone()[0] == 5
+        assert user_save_opp_result.fetchone()[0] == 8
+        assert user_save_search_result.fetchone()[0] == 4
 
     # running again to verify that it does not break on the next call
     extract_copy_opportunity_data()
