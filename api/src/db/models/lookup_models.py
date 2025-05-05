@@ -14,6 +14,7 @@ from src.constants.lookup_constants import (
     JobStatus,
     OpportunityCategory,
     OpportunityStatus,
+    SamGovImportType,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
@@ -143,6 +144,14 @@ COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
+    ]
+)
+
+SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
+    [
+        LookupStr(SamGovImportType.MONTHLY_EXTRACT, 1),
+        LookupStr(SamGovImportType.DAILY_EXTRACT, 2),
+        LookupStr(SamGovImportType.API, 3),
     ]
 )
 
@@ -317,6 +326,20 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
         return LkCompetitionOpenToApplicant(
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(SAM_GOV_IMPORT_TYPE_CONFIG)
+class LkSamGovImportType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_sam_gov_import_type"
+
+    sam_gov_import_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkSamGovImportType":
+        return LkSamGovImportType(
+            sam_gov_import_type_id=lookup.lookup_val, description=lookup.get_description()
         )
 
 
