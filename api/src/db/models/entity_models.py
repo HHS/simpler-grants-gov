@@ -30,7 +30,7 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
         back_populates="sam_gov_entity", cascade="all, delete-orphan"
     )
     organizations: Mapped[list["Organization"]] = relationship(
-        back_populates="sam_gov_entity", cascade="all, delete-orphan"
+        back_populates="sam_gov_entity",
     )
 
 
