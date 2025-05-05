@@ -8,6 +8,7 @@ on:
     paths:
       - "api/**"
       - "infra/api/**"
+      - "infra/modules/**"
   release:
     types: [published]
   workflow_dispatch:
