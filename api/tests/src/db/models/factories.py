@@ -44,6 +44,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovImportType,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -2274,6 +2275,7 @@ class SamGovEntityImportTypeFactory(BaseFactory):
     sam_gov_entity_import_id = Generators.UuidObj
     sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
     sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
+    sam_gov_import_type = factory.fuzzy.FuzzyChoice(SamGovImportType)
 
 
 class OrganizationFactory(BaseFactory):
