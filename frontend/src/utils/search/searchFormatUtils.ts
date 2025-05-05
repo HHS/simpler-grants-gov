@@ -9,11 +9,11 @@ import {
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
-  ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
 import {
   BackendFilterNames,
   FrontendFilterNames,
+  ValidSearchQueryParamData,
   validSearchQueryParamKeys,
 } from "src/types/search/searchResponseTypes";
 

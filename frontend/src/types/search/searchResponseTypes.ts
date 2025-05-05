@@ -61,3 +61,7 @@ export interface FilterOption {
 export interface FilterOptionWithChildren extends FilterOption {
   children: FilterOption[];
 }
+
+export type ValidSearchQueryParamData = {
+  [k in ValidSearchQueryParam]?: string;
+};

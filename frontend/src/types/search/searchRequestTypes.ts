@@ -1,5 +1,3 @@
-import { ValidSearchQueryParam } from "./searchResponseTypes";
-
 export interface SearchFilterRequestBody {
   opportunity_status?: { one_of: string[] };
   funding_instrument?: { one_of: string[] };
@@ -90,8 +88,4 @@ export type SavedSearchRecord = {
   name: string;
   saved_search_id: string;
   search_query: SavedSearchQuery;
-};
-
-export type ValidSearchQueryParamData = {
-  [k in ValidSearchQueryParam]?: string;
 };

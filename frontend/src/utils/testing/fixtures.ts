@@ -5,11 +5,11 @@ import {
   PaginationSortDirection,
   QueryParamData,
   SearchFetcherActionType,
-  ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
 import {
   FilterOption,
   SearchAPIResponse,
+  ValidSearchQueryParamData,
 } from "src/types/search/searchResponseTypes";
 
 export const mockOpportunity: BaseOpportunity = {
