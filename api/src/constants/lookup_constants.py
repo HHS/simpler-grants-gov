@@ -144,3 +144,9 @@ class FormFamily(StrEnum):
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
+
+
+class ApplicationStatus(StrEnum):
+    IN_PROGRESS = "in_progress"
+    SUBMITTED = "submitted"
+    ACCEPTED = "accepted"
