@@ -3,16 +3,15 @@ import uuid
 import pytest
 
 from src.db.models.user_models import UserSavedSearch, UserTokenSession
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
-    db_session.query(UserSavedSearch).delete()
-    db_session.query(UserTokenSession).delete()
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
+    cascade_delete_from_db_table(db_session, UserTokenSession)
     yield
-    db_session.query(UserSavedSearch).delete()
-    db_session.commit()
 
 
 def test_user_update_saved_search(client, db_session, user, user_auth_token):

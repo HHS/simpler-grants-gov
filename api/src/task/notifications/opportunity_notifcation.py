@@ -2,19 +2,19 @@ import logging
 from uuid import UUID
 
 from sqlalchemy import select, update
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserSavedOpportunity
-from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
 
-class OpportunityNotification(BaseNotification):
+class OpportunityNotification(BaseNotificationTask):
     def __init__(self, db_session: db.Session):
         super().__init__(
             db_session,
@@ -24,7 +24,7 @@ class OpportunityNotification(BaseNotification):
         """Collect notifications for changed opportunities that users are tracking"""
         stmt = (
             select(UserSavedOpportunity)
-            .options(joinedload(UserSavedOpportunity.user))
+            .options(selectinload(UserSavedOpportunity.user))
             .join(
                 OpportunityChangeAudit,
                 OpportunityChangeAudit.opportunity_id == UserSavedOpportunity.opportunity_id,

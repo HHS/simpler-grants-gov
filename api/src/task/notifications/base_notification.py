@@ -2,11 +2,10 @@ import logging
 import uuid
 from abc import abstractmethod
 
-import botocore.client
-
 from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
+from src.task.notifications import constants
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import Metrics, UserEmailNotification
 from src.task.task import Task
@@ -14,18 +13,18 @@ from src.task.task import Task
 logger = logging.getLogger(__name__)
 
 
-class BaseNotification(Task):
+class BaseNotificationTask(Task):
+    Metrics = constants.Metrics
+
     def __init__(
         self,
         db_session: db.Session,
-        pinpoint_client: botocore.client.BaseClient | None = None,
         notification_config: EmailNotificationConfig | None = None,
     ):
         super().__init__(
             db_session,
         )
 
-        self.pinpoint_client = pinpoint_client
         if notification_config is None:
             notification_config = EmailNotificationConfig()
         self.notification_config = notification_config
@@ -64,7 +63,6 @@ class BaseNotification(Task):
                     to_address=user_notification.user_email,
                     subject=user_notification.subject,
                     message=user_notification.content,
-                    pinpoint_client=self.pinpoint_client,
                     app_id=self.notification_config.app_id,
                 )
                 logger.info(
@@ -80,19 +78,21 @@ class BaseNotification(Task):
 
                 self.increment(Metrics.USERS_NOTIFIED)
 
-            except Exception:
+            except Exception as e:
                 # Notification log will be updated in the finally block
                 logger.exception(
-                    "Failed to send notification email",
+                    f"Failed to send notification email: {str(e)}",
                     extra={
                         "user_id": user_notification.user_id,
                         "email": user_notification.user_email,
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
+                # add metrics
 
     def run_task(self) -> None:
         """Override to define the task logic"""
-        notifications = self.collect_email_notifications()
-        self.send_notifications(notifications)
-        self.post_notifications_process(notifications)
+        with self.db_session.begin():
+            notifications = self.collect_email_notifications()
+            self.send_notifications(notifications)
+            self.post_notifications_process(notifications)

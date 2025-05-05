@@ -2,13 +2,13 @@ import logging
 from uuid import UUID
 
 from sqlalchemy import select, update
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 import src.adapters.search as search
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
-from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -22,7 +22,7 @@ def _strip_pagination_params(search_query: dict) -> dict:
     return search_query
 
 
-class SearchNotification(BaseNotification):
+class SearchNotification(BaseNotificationTask):
 
     def __init__(
         self,
@@ -36,7 +36,7 @@ class SearchNotification(BaseNotification):
         """Collect notifications for changed saved searches"""
         stmt = (
             select(UserSavedSearch)
-            .options(joinedload(UserSavedSearch.user))
+            .options(selectinload(UserSavedSearch.user))
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
         )
         saved_searches = self.db_session.execute(stmt).scalars().all()

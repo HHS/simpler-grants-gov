@@ -5,7 +5,7 @@ import pytest
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
+from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.util import datetime_util
@@ -22,9 +22,9 @@ def user_with_email(db_session, user, monkeypatch):
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
     """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
-    db_session.query(UserSavedOpportunity).delete()
+    cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
 
 
 def test_opportunity_notifications(

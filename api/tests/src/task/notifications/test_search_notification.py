@@ -8,7 +8,7 @@ import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
+from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.generate_notifications import NotificationConstants
@@ -40,21 +40,12 @@ def setup_opensearch_data(opportunity_index_alias, search_client):
     yield index_name
 
 
-@pytest.fixture
-def clear_notification_logs(db_session):
-    """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.query(UserSavedSearch).delete()
-
-
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
     """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
+    cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.query(UserSavedSearch).delete()
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
 
 
 def test_search_notifications_cli(

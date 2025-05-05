@@ -3,12 +3,12 @@ from datetime import timedelta
 from uuid import UUID
 
 from sqlalchemy import and_, exists, select, update
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
-from src.task.notifications.base_notification import BaseNotification
+from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -22,7 +22,7 @@ CONTACT_INFO = (
 )
 
 
-class ClosingDateNotification(BaseNotification):
+class ClosingDateNotification(BaseNotificationTask):
 
     def __init__(
         self,
@@ -40,7 +40,7 @@ class ClosingDateNotification(BaseNotification):
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
             select(UserSavedOpportunity)
-            .options(joinedload(UserSavedOpportunity.user))
+            .options(selectinload(UserSavedOpportunity.user))
             .join(UserSavedOpportunity.opportunity)
             .join(
                 OpportunitySummary, OpportunitySummary.opportunity_id == Opportunity.opportunity_id
@@ -156,7 +156,7 @@ class ClosingDateNotification(BaseNotification):
                 "If you have questions, please contact the Grants.gov Contact Center:\n"
             )
 
-        message += f"{CONTACT_INFO}"
+        message += CONTACT_INFO
 
         return message
 

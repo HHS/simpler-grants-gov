@@ -3,7 +3,6 @@ import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import db
 from src.task.ecs_background_task import ecs_background_task
-from src.task.notifications import constants
 from src.task.notifications.closing_date_notification import ClosingDateNotification
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.opportunity_notifcation import OpportunityNotification
@@ -25,8 +24,6 @@ def run_email_notification_task(db_session: db.Session, search_client: search.Se
 
 
 class EmailNotificationTask(Task):
-    Metrics = constants.Metrics
-
     def __init__(
         self,
         db_session: db.Session,

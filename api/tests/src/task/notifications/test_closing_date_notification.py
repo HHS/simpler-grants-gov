@@ -9,7 +9,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     UserNotificationLog,
     UserOpportunityNotificationLog,
-    UserSavedOpportunity,
+    UserSavedSearch,
 )
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
@@ -27,10 +27,10 @@ def user_with_email(db_session, user, monkeypatch):
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
     """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
-    db_session.query(UserOpportunityNotificationLog).delete()
+    cascade_delete_from_db_table(db_session, UserNotificationLog)
+    cascade_delete_from_db_table(db_session, UserOpportunityNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
-    db_session.query(UserSavedOpportunity).delete()
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
 
 
 def test_closing_date_notifications(
@@ -151,7 +151,6 @@ def test_closing_date_notification_not_sent_twice(
 
     # Verify no emails were sent
     mock_responses = _get_mock_responses()
-    print(mock_responses)
     assert len(mock_responses) == 0
 
 
