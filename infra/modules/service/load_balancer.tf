@@ -82,6 +82,9 @@ resource "aws_lb_listener" "alb_listener_https" {
   port              = 443
   protocol          = "HTTPS"
   certificate_arn   = var.certificate_arn
+  mutual_authentication {
+    mode = startswith(var.service_name, "api-") ? "passthrough" : "off"
+  }
 
   # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
   ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
