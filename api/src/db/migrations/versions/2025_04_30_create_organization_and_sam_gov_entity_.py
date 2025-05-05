@@ -1,7 +1,7 @@
 """Create organization and sam.gov entity DB tables
 
 Revision ID: 6c83a4294387
-Revises: 3b0705202c54
+Revises: 462b5b67c0ea
 Create Date: 2025-04-30 16:49:48.316390
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "6c83a4294387"
-down_revision = "3b0705202c54"
+down_revision = "462b5b67c0ea"
 branch_labels = None
 depends_on = None
 
