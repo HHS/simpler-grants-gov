@@ -88,7 +88,7 @@ class BaseNotificationTask(Task):
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
-                # add metrics
+                self.increment(Metrics.FAILED_TO_SEND)
 
     def run_task(self) -> None:
         """Override to define the task logic"""

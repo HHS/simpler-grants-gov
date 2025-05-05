@@ -15,6 +15,7 @@ class Metrics(StrEnum):
     OPPORTUNITIES_TRACKED = "opportunities_tracked"
     SEARCHES_TRACKED = "searches_tracked"
     NOTIFICATIONS_SENT = "notifications_sent"
+    FAILED_TO_SEND = "failed_to_send"
 
 
 @dataclass
