@@ -19,6 +19,19 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+      {
         // static pages are stored for 6 hours, refreshed in the background for
         // up to 10 minutes, and up to 12 hours if there is an error
         source: "/:path*",
