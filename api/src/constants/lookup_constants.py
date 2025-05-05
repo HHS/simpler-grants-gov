@@ -146,6 +146,12 @@ class CompetitionOpenToApplicant(StrEnum):
     ORGANIZATION = "organization"
 
 
+class SamGovImportType(StrEnum):
+    MONTHLY_EXTRACT = "monthly_extract"
+    DAILY_EXTRACT = "daily_extract"
+    API = "api"
+
+
 class ApplicationStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     SUBMITTED = "submitted"

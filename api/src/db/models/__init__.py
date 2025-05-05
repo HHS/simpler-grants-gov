@@ -4,6 +4,7 @@ from . import (
     agency_models,
     base,
     competition_models,
+    entity_models,
     extract_models,
     lookup_models,
     opportunity_models,
@@ -26,4 +27,5 @@ __all__ = [
     "extract_models",
     "task_models",
     "competition_models",
+    "entity_models",
 ]
