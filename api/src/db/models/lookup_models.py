@@ -4,6 +4,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -142,6 +143,14 @@ COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
+    ]
+)
+
+APPLICATION_STATUS_CONFIG = LookupConfig(
+    [
+        LookupStr(ApplicationStatus.IN_PROGRESS, 1),
+        LookupStr(ApplicationStatus.SUBMITTED, 2),
+        LookupStr(ApplicationStatus.ACCEPTED, 3),
     ]
 )
 
@@ -308,4 +317,18 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
         return LkCompetitionOpenToApplicant(
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(APPLICATION_STATUS_CONFIG)
+class LkApplicationStatus(LookupTable, TimestampMixin):
+    __tablename__ = "lk_application_status"
+
+    application_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkApplicationStatus":
+        return LkApplicationStatus(
+            application_status_id=lookup.lookup_val, description=lookup.get_description()
         )
