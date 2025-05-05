@@ -183,5 +183,5 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey("api.user.user_id"), primary_key=True
     )
 
-    application: Mapped[Application] = relationship(Application, back_populates="users")
+    application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="applications")
