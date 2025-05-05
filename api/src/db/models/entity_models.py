@@ -14,7 +14,7 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "sam_gov_entity"
 
     sam_gov_entity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    uei: Mapped[str] = mapped_column(Text, nullable=False, index=True)
+    uei: Mapped[str] = mapped_column(index=True)
     legal_business_name: Mapped[str]
     expiration_date: Mapped[date]
     ebiz_poc_email: Mapped[str]
