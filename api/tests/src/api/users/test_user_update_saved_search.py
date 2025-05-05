@@ -12,6 +12,8 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserSavedSearch)
     cascade_delete_from_db_table(db_session, UserTokenSession)
     yield
+    db_session.query(UserSavedSearch).delete()
+    db_session.commit()
 
 
 def test_user_update_saved_search(client, db_session, user, user_auth_token):
