@@ -44,7 +44,6 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
-    SamGovImportType,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -2247,15 +2246,6 @@ class StagingTcompetitionFactory(AbstractStagingFactory):
         )
 
 
-# Factory for LkSamGovImportType
-class LkSamGovImportTypeFactory(BaseFactory):
-    class Meta:
-        model = lookup_models.LkSamGovImportType
-
-    sam_gov_import_type_id = factory.Iterator(SamGovImportType)
-    description = factory.LazyAttribute(lambda o: o.sam_gov_import_type_id.description)
-
-
 ###################
 # Extract Factories
 ###################
@@ -2284,7 +2274,6 @@ class SamGovEntityImportTypeFactory(BaseFactory):
     sam_gov_entity_import_id = Generators.UuidObj
     sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
     sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
-    sam_gov_import_type_id = factory.SubFactory(LkSamGovImportTypeFactory)
 
 
 class OrganizationFactory(BaseFactory):

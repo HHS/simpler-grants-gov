@@ -1,11 +1,12 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import ForeignKey, Integer, Text
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from src.constants.lookup_constants import SamGovImportType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkSamGovImportType
 
@@ -42,8 +43,8 @@ class SamGovEntityImportType(ApiSchemaTable, TimestampMixin):
     sam_gov_entity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(SamGovEntity.sam_gov_entity_id), nullable=False
     )
-    sam_gov_import_type_id: Mapped[int] = mapped_column(
-        Integer,
+    sam_gov_import_type: Mapped[SamGovImportType] = mapped_column(
+        "sam_gov_import_type_id",
         LookupColumn(LkSamGovImportType),
         ForeignKey(LkSamGovImportType.sam_gov_import_type_id),
         nullable=False,
