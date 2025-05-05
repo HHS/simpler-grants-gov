@@ -8,6 +8,7 @@ import {
 } from "src/constants/defaultFeatureFlags";
 import { environment, featureFlags } from "src/constants/environments";
 import {
+  assignBaseFlags,
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
@@ -15,28 +16,9 @@ import {
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { stringToBoolean } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
-
-// doing a dumb implementation of lodash/assignWith since lodash is not allowed to be used in next middlware
-export const assignBaseFlags = (
-  defaultFlags: FeatureFlags,
-  envVarFlags: OptionalStringDict,
-) => {
-  const allFeatureFlagKeys = [
-    ...Object.keys(defaultFlags),
-    ...Object.keys(envVarFlags),
-  ];
-  return allFeatureFlagKeys.reduce((baseFlags, key) => {
-    baseFlags[key] =
-      envVarFlags[key] === undefined
-        ? defaultFlags[key]
-        : stringToBoolean(envVarFlags[key]);
-    return baseFlags;
-  }, {} as FeatureFlags);
-};
 
 /**
  * Class for reading and managing feature flags on the server.
