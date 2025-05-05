@@ -1,16 +1,18 @@
 import { expect, test } from "@playwright/test";
 
+import { fillSearchInputAndSubmit } from "./searchSpecUtil";
+
 test("should copy search query URL to clipboard", async ({ page }) => {
   await page.goto("/search");
 
-  const searchInput = page.getByLabel("Search terms Enter keywords,");
-  await searchInput.fill("education grants");
-  await searchInput.press("Enter");
-
-  await page.waitForURL(/.*search.*query=education\+grants.*/, {
-    timeout: 10000,
-  });
-
+  // this is dumb but webkit has an issue with trying to fill in the input too quickly
+  // if the expect in here fails, we give it another shot after 5 seconds
+  // this way we avoid an arbitrary timeout, and do not slow down the other tests
+  try {
+    await fillSearchInputAndSubmit("education grants", page);
+  } catch (e) {
+    await fillSearchInputAndSubmit("education grants", page);
+  }
   // Check if we need to show filters
   const showFiltersButton = page.getByRole("button", { name: "Show Filters" });
   if (await showFiltersButton.isVisible()) {

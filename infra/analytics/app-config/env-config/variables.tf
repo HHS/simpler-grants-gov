@@ -96,6 +96,16 @@ variable "database_instance_count" {
   default     = 1
 }
 
+variable "database_max_capacity" {
+  description = "Maximum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+}
+
+variable "database_min_capacity" {
+  description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+}
+
 variable "project_name" {
   type = string
 }
