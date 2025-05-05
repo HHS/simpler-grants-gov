@@ -1,5 +1,5 @@
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";

@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";

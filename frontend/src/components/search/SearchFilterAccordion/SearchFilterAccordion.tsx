@@ -5,8 +5,8 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import {
   FilterOption,
   FilterOptionWithChildren,
-  ValidSearchQueryParam,
-} from "src/types/search/searchResponseTypes";
+} from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 import { useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";

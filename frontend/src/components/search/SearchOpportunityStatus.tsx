@@ -1,7 +1,7 @@
 "use client";
 
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { useTranslations } from "next-intl";
 

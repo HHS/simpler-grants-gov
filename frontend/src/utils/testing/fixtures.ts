@@ -1,16 +1,14 @@
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   PaginationOrderBy,
   PaginationSortDirection,
   QueryParamData,
+  SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
-import {
-  FilterOption,
-  SearchAPIResponse,
-  ValidSearchQueryParamData,
-} from "src/types/search/searchResponseTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,

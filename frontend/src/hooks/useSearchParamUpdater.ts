@@ -1,7 +1,7 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
-import { ValidSearchQueryParamData } from "src/types/search/searchResponseTypes";
+import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
 import { paramsToFormattedQuery } from "src/utils/search/searchUtils";
 

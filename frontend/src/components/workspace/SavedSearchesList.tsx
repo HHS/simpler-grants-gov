@@ -2,7 +2,7 @@ import { omit } from "lodash";
 import {
   ValidSearchQueryParam,
   ValidSearchQueryParamData,
-} from "src/types/search/searchResponseTypes";
+} from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
 
 import Link from "next/link";
