@@ -23,6 +23,8 @@ TABLES_TO_EXTRACT = [
     "current_opportunity_summary",
     "lk_opportunity_category",
     "lk_opportunity_status",
+    "user_saved_search",
+    "user_saved_opportunity",
 ]
 
 
