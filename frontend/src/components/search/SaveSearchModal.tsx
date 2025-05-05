@@ -21,6 +21,7 @@ import {
 import Loading from "src/components/Loading";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { LoadingButton } from "../LoadingButton";
 
 function SaveSearchInput({
   validationError,
@@ -199,25 +200,25 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
             <div className="usa-prose">
               <p className="font-sans-2xs margin-y-4">{t("description")}</p>
             </div>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId="saveSearchApiError"
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
-                <SaveSearchInput
-                  validationError={validationError}
-                  updateSavedSearchName={setSavedSearchName}
-                />
-                <ModalFooter>
+            {apiError && (
+              <SimplerAlert
+                alertClick={() => setApiError(false)}
+                buttonId="saveSearchApiError"
+                messageText={t("apiError")}
+                type="error"
+              />
+            )}
+            <SaveSearchInput
+              validationError={validationError}
+              updateSavedSearchName={setSavedSearchName}
+            />
+            <ModalFooter>
+              {loading ? (
+                <LoadingButton id="save-search-button" message={t("loading")} />
+              ) : (
+                <>
                   <Button
-                    type={"button"}
+                    type="button"
                     onClick={handleSubmit}
                     data-testid="save-search-button"
                   >
@@ -232,9 +233,9 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
                   >
                     {t("cancelText")}
                   </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+                </>
+              )}
+            </ModalFooter>
           </>
         )}
       </Modal>

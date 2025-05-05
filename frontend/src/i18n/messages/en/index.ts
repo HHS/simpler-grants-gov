@@ -518,6 +518,7 @@ export const messages = {
       },
       modal: {
         title: "Name this search query",
+        loading: "Saving",
         description:
           "Save these search terms and filters with a name for easy access later.",
         inputLabel: "Name (Required)",
@@ -570,6 +571,7 @@ export const messages = {
       sortby: "Sort by",
     },
     editModal: {
+      loading: "Updating",
       title: "Edit name of search query",
       description:
         "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
@@ -582,6 +584,7 @@ export const messages = {
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
+      loading: "Deleting",
       title: "Delete saved query?",
       deleteText: "Yes, delete",
       cancelText: "Cancel",
