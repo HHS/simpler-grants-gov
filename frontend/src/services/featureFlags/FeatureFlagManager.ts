@@ -15,9 +15,28 @@ import {
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
 import { OptionalStringDict } from "src/types/generalTypes";
+import { stringToBoolean } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
+
+// doing a dumb implementation of lodash/assignWith since lodash is not allowed to be used in next middlware
+export const assignBaseFlags = (
+  defaultFlags: FeatureFlags,
+  envVarFlags: OptionalStringDict,
+) => {
+  const allFeatureFlagKeys = [
+    ...Object.keys(defaultFlags),
+    ...Object.keys(envVarFlags),
+  ];
+  return allFeatureFlagKeys.reduce((baseFlags, key) => {
+    baseFlags[key] =
+      envVarFlags[key] === undefined
+        ? defaultFlags[key]
+        : stringToBoolean(envVarFlags[key]);
+    return baseFlags;
+  }, {} as FeatureFlags);
+};
 
 /**
  * Class for reading and managing feature flags on the server.
@@ -38,7 +57,7 @@ export class FeatureFlagsManager {
   // this supports easier integration of the class on the client side, as server side flags can be passed down
   private _envVarFlags;
 
-  constructor(envVarFlags: FeatureFlags) {
+  constructor(envVarFlags: OptionalStringDict) {
     this._envVarFlags = envVarFlags;
   }
 
@@ -46,7 +65,7 @@ export class FeatureFlagsManager {
     return { ...this._defaultFeatureFlags };
   }
 
-  private get featureFlagsFromEnvironment(): FeatureFlags {
+  private get featureFlagsFromEnvironment(): OptionalStringDict {
     return { ...this._envVarFlags };
   }
 
@@ -60,10 +79,10 @@ export class FeatureFlagsManager {
 
   */
   get featureFlags(): FeatureFlags {
-    return {
-      ...this.defaultFeatureFlags,
-      ...this.featureFlagsFromEnvironment,
-    };
+    return assignBaseFlags(
+      this.defaultFeatureFlags,
+      this.featureFlagsFromEnvironment,
+    );
   }
 
   /**
