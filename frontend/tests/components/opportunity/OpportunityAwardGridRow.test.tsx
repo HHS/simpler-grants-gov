@@ -26,7 +26,7 @@ jest.mock("next-intl", () => ({
 
 describe("OpportunityAwardGridRow", () => {
   it("renders the title and content as strings", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = "Award Content";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -43,7 +43,7 @@ describe("OpportunityAwardGridRow", () => {
   });
 
   it("accepts number value for content", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = 456;
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -56,7 +56,7 @@ describe("OpportunityAwardGridRow", () => {
   });
 
   it("renders defaults when data is not present (money)", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = "";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -66,7 +66,7 @@ describe("OpportunityAwardGridRow", () => {
   });
 
   it("renders defaults when data is not present (not money)", () => {
-    const title = "expected_awards";
+    const title = "expectedAwards";
     const content = "";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
