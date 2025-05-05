@@ -12,12 +12,12 @@ type Props = {
 };
 
 type TranslationKeys =
-  | "cost_sharing"
-  | "funding_instrument"
-  | "opportunity_category"
-  | "opportunity_category_explanation"
-  | "funding_activity"
-  | "category_explanation";
+  | "costSharing"
+  | "fundingInstrument"
+  | "opportunityCategory"
+  | "opportunityCategoryExplanation"
+  | "fundingActivity"
+  | "categoryExplanation";
 
 const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.awardInfo");
