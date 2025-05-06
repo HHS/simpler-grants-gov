@@ -51,6 +51,7 @@
     "newrelic": "^12.7.0",
     "next": "^15.2.4",
     "next-intl": "^3.2.1",
+    "pino": "^9.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
