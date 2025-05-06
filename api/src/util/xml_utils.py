@@ -1,6 +1,8 @@
 from collections import defaultdict
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as DET
+
 
 class XMLToDictInvalidXML(Exception):
     pass
@@ -44,7 +46,7 @@ def xml_to_dict(xml_str: str, preserve_namespace: bool = False) -> dict:
             }
     """
     try:
-        root_element = ElementTree.fromstring(xml_str)
+        root_element = DET.fromstring(xml_str)
     except ElementTree.ParseError as e:
         raise XMLToDictInvalidXML(e) from e
     root_xml_dict_key = get_xml_dict_key(root_element.tag, preserve_namespace)

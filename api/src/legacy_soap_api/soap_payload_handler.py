@@ -1,6 +1,8 @@
 import re
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as DET
+
 from src.util.xml_utils import xml_to_dict
 
 
@@ -29,7 +31,7 @@ class SoapPayload:
         if not self.envelope:
             return None
         try:
-            root = ElementTree.fromstring(self.envelope)
+            root = DET.fromstring(self.envelope)
             body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
             if body is not None and len(body) > 0:
                 return body[0].tag.split("}")[-1]
