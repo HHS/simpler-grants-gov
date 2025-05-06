@@ -3,7 +3,7 @@ export const messages = {
     pageTitle: "Let's build a simpler Grants.gov together",
     pageDescription:
       "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
-    github_link: "Follow on GitHub",
+    githubLink: "Follow on GitHub",
     sections: {
       experimental: {
         title: "Test out our experimental features",
