@@ -128,12 +128,6 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
-variable "domain" {
-  description = "The domain name for the service"
-  type        = string
-  default     = null
-}
-
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
@@ -160,6 +154,12 @@ variable "enable_s3_cdn" {
 
 variable "s3_cdn_bucket_name" {
   description = "The name of the S3 bucket to use for the S3 CDN."
+  type        = string
+  default     = null
+}
+
+variable "s3_cdn_certificate_arn" {
+  description = "The ARN of the certificate to use for the S3 CDN"
   type        = string
   default     = null
 }
@@ -221,11 +221,13 @@ variable "hosted_zone_id" {
 variable "image_repository_arn" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_repository_url" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_tag" {

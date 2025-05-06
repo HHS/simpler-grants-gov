@@ -3,7 +3,9 @@
 import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@trussworks/react-uswds";
+import { Button, Link } from "@trussworks/react-uswds";
+
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type OpportunityDownloadProps = {
   attachments: OpportunityDocument[];
@@ -12,20 +14,14 @@ type OpportunityDownloadProps = {
 const OpportunityDownload = ({ attachments }: OpportunityDownloadProps) => {
   const t = useTranslations("OpportunityListing.description");
 
-  return (
-    <>
-      {attachments.length > 0 ? (
-        <div className="grid-row flex-justify">
-          <Link
-            className="flex-align-self-center"
-            href={"#opportunity_documents"}
-          >
-            {t("jump_to_documents")}
-          </Link>
-        </div>
-      ) : null}
-    </>
-  );
+  return attachments.length > 0 ? (
+    <Button type="button" unstyled>
+      <USWDSIcon name="arrow_downward" />
+      <Link className="flex-align-self-center" href={"#opportunity_documents"}>
+        {t("jump_to_documents")}
+      </Link>
+    </Button>
+  ) : null;
 };
 
 export default OpportunityDownload;

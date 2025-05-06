@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -7,10 +8,18 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import CompetitionOpenToApplicant, FormFamily
+from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.lookup_models import LkCompetitionOpenToApplicant, LkFormFamily
+from src.db.models.lookup_models import (
+    LkApplicationStatus,
+    LkCompetitionOpenToApplicant,
+    LkFormFamily,
+)
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+
+# Add conditional import for type checking
+if TYPE_CHECKING:
+    from src.db.models.user_models import ApplicationUser
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -40,6 +49,9 @@ class Competition(ApiSchemaTable, TimestampMixin):
     )
     opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
+    )
+    link_competition_open_to_applicant: Mapped[list["LinkCompetitionOpenToApplicant"]] = (
+        relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
     )
     open_to_applicants: AssociationProxy[set[CompetitionOpenToApplicant]] = association_proxy(
         "link_competition_open_to_applicant",
@@ -132,8 +144,20 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
+    application_status: Mapped[ApplicationStatus | None] = mapped_column(
+        "application_status_id",
+        LookupColumn(LkApplicationStatus),
+        ForeignKey(LkApplicationStatus.application_status_id),
+    )
+
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
+    )
+
+    application_users: Mapped[list["ApplicationUser"]] = relationship(
+        "ApplicationUser",
+        back_populates="application",
+        uselist=True,
     )
 
 
@@ -160,8 +184,10 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition_open_to_applicant_id: Mapped[int] = mapped_column(
-        BigInteger,
+    competition: Mapped[Competition] = relationship(Competition)
+    competition_open_to_applicant: Mapped[CompetitionOpenToApplicant] = mapped_column(
+        "competition_open_to_applicant_id",
+        LookupColumn(LkCompetitionOpenToApplicant),
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )

@@ -1,11 +1,11 @@
 "use client";
 
 import { camelCase } from "lodash";
+import { FilterOptionWithChildren } from "src/types/search/searchResponseTypes";
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-import { FilterOptionWithChildren } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SectionLinkCount from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
 import SectionLinkLabel from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";

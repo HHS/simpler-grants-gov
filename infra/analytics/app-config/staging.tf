@@ -6,12 +6,17 @@ module "staging_config" {
   account_name   = "staging"
   environment    = "staging"
   network_name   = "staging"
+
+  database_instance_count = 2
+  database_min_capacity   = 2
+  database_max_capacity   = 2
+
   service_override_extra_environment_variables = {
     # In staging, post results to the #z_bot-analytics-ci-test channel in slack
     ACTION = "post-results"
   }
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "data.staging.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

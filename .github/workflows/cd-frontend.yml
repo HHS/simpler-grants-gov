@@ -8,6 +8,7 @@ on:
     paths:
       - "frontend/**"
       - "infra/frontend/**"
+      - "infra/modules/**"
   release:
     types: [published]
   workflow_dispatch:

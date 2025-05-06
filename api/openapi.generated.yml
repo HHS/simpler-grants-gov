@@ -773,6 +773,38 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/submit:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbstractResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Submit an application
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities/list:
     post:
       parameters:
@@ -2911,6 +2943,19 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AbstractResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
         status_code:
           type: integer
           description: The HTTP status code

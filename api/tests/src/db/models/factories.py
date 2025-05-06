@@ -21,6 +21,7 @@ from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.competition_models as competition_models
+import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
@@ -34,6 +35,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
     FundingCategory,
@@ -42,8 +44,11 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovImportType,
 )
 from src.db.models import agency_models
+from src.db.models.lookup.lookup_registry import LookupRegistry
+from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -964,6 +969,13 @@ class CompetitionFactory(BaseFactory):
         size=lambda: random.randint(1, 2),
     )
 
+    open_to_applicants = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 2),
+        elements=[a for a in CompetitionOpenToApplicant],
+        unique=True,
+    )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -988,12 +1000,28 @@ class CompetitionAssistanceListingFactory(BaseFactory):
     )
 
 
+class LinkCompetitionOpenToApplicantFactory(BaseFactory):
+    class Meta:
+        model = competition_models.LinkCompetitionOpenToApplicant
+
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    # We need to get both the ID and the relationship object
+    competition_open_to_applicant_id = factory.LazyFunction(
+        lambda: LookupRegistry.get_lookup_int_for_enum(
+            LkCompetitionOpenToApplicant,
+            random.choice(list(lookup_models.CompetitionOpenToApplicant)),
+        )
+    )
+
+
 class FormFactory(BaseFactory):
     class Meta:
         model = competition_models.Form
 
     form_id = Generators.UuidObj
-    form_name = factory.Faker("bs")
+    form_name = "Test form"
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
@@ -1001,28 +1029,69 @@ class FormFactory(BaseFactory):
     form_json_schema = {
         "type": "object",
         "title": "Test form for testing",
+        "required": ["Title", "Email", "Agreement"],
         "properties": {
-            "Title": {"title": "Title", "type": "string", "minLength": 1, "maxLength": 60},
-            "Description": {
-                "title": "Description for application",
+            "Date": {"type": "string", "title": "Date of application ", "format": "date"},
+            "Email": {
                 "type": "string",
+                "title": "Email",
+                "format": "email",
+                "maxLength": 60,
+                "minLength": 1,
+            },
+            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
+            "Description": {
+                "type": "string",
+                "title": "Description for application",
+                "maxLength": 500,
                 "minLength": 0,
-                "maxLength": 15,
             },
             "ApplicationNumber": {
-                "title": "Application number",
                 "type": "number",
-                "minLength": 1,
+                "title": "Application number",
                 "maxLength": 120,
+                "minLength": 1,
             },
-            "Date": {"title": "Date of application ", "type": "string", "format": "date"},
+            "Location": {
+                "type": "string",
+                "title": "Location",
+                "description": "This should be overwritten",
+                "enum": ["Earth", "Moon", "Ort Cloud"],
+            },
+            "Vibe": {
+                "type": "string",
+                "title": "Vibe",
+                "description": "This describes the current state",
+                "enum": ["Vibing", "Not vibing"],
+            },
+            "Agreement": {
+                "type": "boolean",
+                "title": "I agree",
+                "description": "Agree to agree that the thing is the thing",
+            },
         },
     }
     form_ui_schema = [
         {"type": "field", "definition": "/properties/Title"},
-        {"type": "field", "definition": "/properties/Description"},
-        {"type": "field", "definition": "/properties/ApplicationNumber"},
         {"type": "field", "definition": "/properties/Date"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/Email"},
+        {
+            "type": "field",
+            "definition": "/properties/Location",
+            "schema": {"description": "Let us know where you are"},
+        },
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Vibe", "widget": "Radio"},
+        {"type": "field", "definition": "/properties/Agreement"},
+        {
+            "type": "field",
+            "schema": {
+                "type": "null",
+                "title": "Post populated",
+                "description": "Completed by Grants.gov upon submission.",
+            },
+        },
     ]
 
 
@@ -2126,3 +2195,95 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
+
+
+class StagingTcompetitionFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.competition.Tcompetition
+
+    comp_id = factory.Sequence(lambda n: n)
+    competitionid = factory.Sequence(lambda n: f"COMP{n}")
+    familyid = factory.LazyFunction(lambda: random.choice([12, 14, 15, 16, 17]))
+    competitiontitle = factory.Faker("sentence")
+    openingdate = factory.Faker("date_between", start_date="-1y", end_date="+30d")
+    closingdate = factory.Faker("date_between", start_date="+30d", end_date="+1y")
+    contactinfo = factory.Faker("paragraph", nb_sentences=1)
+    graceperiod = factory.LazyFunction(lambda: random.randint(1, 30))
+    opentoapplicanttype = factory.LazyFunction(lambda: random.choice([1, 2, 3]))
+    electronic_required = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    expected_appl_num = factory.LazyFunction(lambda: random.randint(10, 500))
+    expected_appl_size = factory.LazyFunction(lambda: random.randint(1, 20))
+    ismulti = factory.LazyFunction(lambda: random.choice(["Y", "N"]))
+    agency_dwnld_url = factory.Faker("url")
+    package_id = factory.Sequence(lambda n: f"PKG{n}")
+    # Required fields - must always have values
+    is_wrkspc_compatible = "Y"  # This cannot be None or null
+    dialect = "X"  # This cannot be None or null
+
+    created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
+    last_upd_date = factory.Faker("date_time_between", start_date="-11m", end_date="-1d")
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
+    class Params:
+        # Trait to set all nullable fields to None, preserve non-nullable fields
+        all_fields_null = factory.Trait(
+            competitionid=None,
+            familyid=None,
+            competitiontitle=None,
+            openingdate=None,
+            closingdate=None,
+            contactinfo=None,
+            graceperiod=None,
+            opentoapplicanttype=None,
+            electronic_required=None,
+            expected_appl_num=None,
+            expected_appl_size=None,
+            ismulti=None,
+            agency_dwnld_url=None,
+            package_id=None,
+            sendmail=None,
+            # is_wrkspc_compatible and dialect must NEVER be None
+        )
+
+
+###################
+# Extract Factories
+###################
+
+
+class SamGovEntityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntity
+
+    sam_gov_entity_id = Generators.UuidObj
+    uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
+    legal_business_name = factory.Faker("company")
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+    ebiz_poc_email = factory.Faker("email")
+    ebiz_poc_first_name = factory.Faker("first_name")
+    ebiz_poc_last_name = factory.Faker("last_name")
+    has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+
+
+class SamGovEntityImportTypeFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntityImportType
+
+    sam_gov_entity_import_id = Generators.UuidObj
+    sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
+    sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
+    sam_gov_import_type = factory.fuzzy.FuzzyChoice(SamGovImportType)
+
+
+class OrganizationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.Organization
+
+    organization_id = Generators.UuidObj
+    sam_gov_entity = sometimes_none(factory.SubFactory(SamGovEntityFactory), none_chance=0.2)
+    sam_gov_entity_id = factory.LazyAttribute(
+        lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
+    )

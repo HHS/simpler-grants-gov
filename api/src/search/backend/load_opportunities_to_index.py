@@ -1,4 +1,3 @@
-import base64
 import itertools
 import logging
 import os
@@ -25,15 +24,14 @@ from src.db.models.opportunity_models import (
     OpportunityChangeAudit,
 )
 from src.task.task import Task
-from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.text_extractor import extract_text_from_file, get_text_extractor_configs
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_ATTACHMENT_SUFFIXES = set(
-    ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
-)
+ALLOWED_ATTACHMENT_SUFFIXES = set(get_text_extractor_configs().keys())
+TEXT_EXTRACTOR_CHAR_LIMIT = 100000
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -63,6 +61,9 @@ class LoadOpportunitiesToIndex(Task):
         RECORDS_LOADED = "records_loaded"
         TEST_RECORDS_SKIPPED = "test_records_skipped"
         BATCHES_PROCESSED = "batches_processed"
+        ATTACHMENTS_PROCESSED = "attachments_processed"
+        ATTACHMENTS_FAILED = "attachments_failed"
+        ATTACHMENTS_SKIPPED = "attachments_skipped"
 
     def __init__(
         self,
@@ -346,18 +347,34 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            if self.filter_attachment(att):
-                with file_util.open_stream(
+            if not self.filter_attachment(att):
+                self.increment(self.Metrics.ATTACHMENTS_SKIPPED)
+                continue
+            try:
+                file_text = extract_text_from_file(
                     att.file_location,
-                    "rb",
-                ) as file:
-                    file_content = file.read()
-                    attachments.append(
-                        {
-                            "filename": att.file_name,
-                            "data": base64.b64encode(file_content).decode("utf-8"),
-                        }
-                    )
+                    char_limit=TEXT_EXTRACTOR_CHAR_LIMIT,
+                    raise_on_error=True,
+                )
+                attachments.append(
+                    {
+                        "filename": att.file_name,
+                        "attachment": {
+                            "content": file_text,
+                        },
+                    }
+                )
+                self.increment(self.Metrics.ATTACHMENTS_PROCESSED)
+            except Exception as e:
+                self.increment(self.Metrics.ATTACHMENTS_FAILED)
+                logger.warning(
+                    "text-extractor: error extracting text",
+                    extra={
+                        "err": e,
+                        "attachment_id": att.attachment_id,
+                        "opportunity_id": att.opportunity_id,
+                    },
+                )
 
         return attachments
 
@@ -410,7 +427,7 @@ class LoadOpportunitiesToIndex(Task):
                 self.index_name,
                 batch_json_records,
                 "opportunity_id",
-                pipeline="multi-attachment",
+                pipeline=None,
                 refresh=refresh,
             )
 

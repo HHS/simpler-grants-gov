@@ -6,15 +6,18 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
+import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
 
 export type SchemaField = {
-  type: string;
-  title: string;
+  type?: string;
+  title?: string;
   minLength?: number;
   maxLength?: number;
   format?: string;
+  enum?: string[];
+  description?: string;
 };
 
 export interface FormSchema {
@@ -32,20 +35,37 @@ export interface SetFormDataFunction {
   (data: FormData): void;
 }
 
+export type FieldErrors = ErrorObject<
+  string,
+  Record<string, unknown>,
+  unknown
+>[];
+
+export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+
 export type UiSchemaField = {
   type: "field";
-  definition?: `/properties/${string}`;
-  schema?: SchemaField;
-};
+  widget?: WidgetTypes;
+} & (
+  | {
+      definition: `/properties/${string}`;
+      schema?: undefined;
+    }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: `/properties/${string}`;
+      schema: SchemaField;
+    }
+);
 
 export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  children: Array<UiSchemaField> | UiSchemaSection;
+  children: Array<UiSchemaField | UiSchemaSection>;
 }
 
-export type UiSchema = Array<UiSchemaSection>;
+export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
 
 export type TextTypes =
   | "text"
@@ -82,7 +102,7 @@ export interface UswdsWidgetProps<
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
-    emptyValue?: string;
+    emptyValue?: string | undefined;
   };
   hideLabel?: boolean;
   multiple?: boolean;

@@ -192,8 +192,33 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         record = [d for d in resp.records if d.get("opportunity_id") == opportunity.opportunity_id]
         attachments = record[0]["attachments"]
 
+        expected_number_of_processed_attachments = 1
+        expected_number_of_skipped_attachments = 1
+        expected_number_of_failed_attachments = 0
+
         # assert only one (allowed) opportunity attachment was uploaded
-        assert len(attachments) == 1
+        assert len(attachments) == expected_number_of_processed_attachments
+
+        # assert processed attachment metrics
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.ATTACHMENTS_PROCESSED
+            ]
+            == expected_number_of_processed_attachments
+        )
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.ATTACHMENTS_SKIPPED
+            ]
+            == expected_number_of_skipped_attachments
+        )
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.ATTACHMENTS_FAILED
+            ]
+            == expected_number_of_failed_attachments
+        )
+
         # assert correct attachment was uploaded
         assert attachments[0]["filename"] == filename_1
         # assert data was b64encoded
