@@ -1,14 +1,7 @@
-import {
-  EditSavedSearchModal,
-} from "src/components/workspace/EditSavedSearchModal";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
+import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
 const mockUseUser = jest.fn(() => ({
   user: {
