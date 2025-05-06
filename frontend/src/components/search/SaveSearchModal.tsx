@@ -18,10 +18,9 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { LoadingButton } from "../LoadingButton";
 
 function SaveSearchInput({
   validationError,

@@ -140,7 +140,7 @@ export function DeleteSavedSearchModal({
             <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
             <div className="usa-prose">
               <p className="font-sans-2xs margin-y-4">
-                {t("description")} "{queryName}"?
+                {t("description")} &quot;{queryName}&quot;?
               </p>
             </div>
             <>
