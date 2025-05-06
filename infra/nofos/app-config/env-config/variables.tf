@@ -2,6 +2,13 @@ variable "app_name" {
   type = string
 }
 
+variable "enable_notifications" {
+  type        = bool
+  description = "Enable notifications for the application"
+  default     = false
+
+}
+
 variable "certificate_arn" {
   type        = string
   description = "The ARN of the certificate to use for the application"
