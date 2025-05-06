@@ -742,69 +742,71 @@ export const messages = {
       "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
     sections: {
       progress: {
-        title: "What we're working on right now",
+        title: "What we’re working on",
         contentItems: [
           [
             {
-              title: "Simpler application workflow prototype",
+              title: "Beta launch of Simpler Search on Grants.gov",
               content:
-                "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+                " We’re launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.<p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
             },
             {
-              title:
-                "Full support for opportunity page attachments (NOFOs/downloads)",
+              title: "New opportunities for open-source collaboration",
               content:
-                "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+                "We’re strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.<p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
             },
           ],
           [
             {
-              title: "Authentication via Login.gov",
+              title: "An ‘Apply’ workflow pilot",
               content:
-                "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+                "We’re piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.<p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
             },
             {
-              title: "Search & opportunity page improvements",
+              title: "SOAP Proxy for the ‘Apply’ workflow",
               content:
-                "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+                "We’re building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.<p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
+            },
+          ],
+          [
+            {
+              title: "User research on permissions",
+              content:
+                "We’re researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.<p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
+            },
+            {
+              title: "Automated API key management",
+              content:
+                "We’re building tools so authorized users can securely generate and manage their API keys independently without admin support.<p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
             },
           ],
         ],
         link: "View all deliverables on GitHub",
       },
       milestones: {
-        title: "Recent milestones reached",
-        contentTitle: "Late 2024",
+        title: "What we’ve delivered",
+        contentTitle: "Early 2025",
         contentItems: [
           {
-            title: "RESTful API launch",
+            title: "Simpler application workflow prototype",
             content:
-              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+              "We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities",
           },
           {
-            title: "Coding Challenge pilot",
+            title:
+              "Full support for opportunity page attachments (NOFOs/downloads",
             content:
-              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+              "The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.",
           },
           {
-            title: "Search UI usability test",
+            title: "Authentication via Login.gov",
             content:
-              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+              "Finalizing authentication enabled grant seekers to create an account using Login.gov’s single sign-on platform. This move reduced the steps and friction users experience when signing up.",
           },
           {
-            title: "Opportunity page launch",
+            title: "Search & opportunity page improvements",
             content:
-              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
-          },
-          {
-            title: "First Co-Design Group recruitment",
-            content:
-              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
-          },
-          {
-            title: "Search interface launch",
-            content:
-              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+              "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities..",
           },
         ],
       },
