@@ -3,10 +3,10 @@ import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import db
 from src.task.ecs_background_task import ecs_background_task
-from src.task.notifications.closing_date_notification import ClosingDateNotification
+from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.opportunity_notifcation import OpportunityNotification
-from src.task.notifications.search_notification import SearchNotification
+from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.task.notifications.search_notification import SearchNotificationTask
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 
@@ -38,8 +38,8 @@ class EmailNotificationTask(Task):
 
     def run_task(self) -> None:
         # run opportunity notification
-        OpportunityNotification(db_session=self.db_session).run()
+        OpportunityNotificationTask(db_session=self.db_session).run()
         # run search notification
-        SearchNotification(db_session=self.db_session, search_client=self.search_client).run()
+        SearchNotificationTask(db_session=self.db_session, search_client=self.search_client).run()
         # run closing notification
-        ClosingDateNotification(db_session=self.db_session).run()
+        ClosingDateNotificationTask(db_session=self.db_session).run()
