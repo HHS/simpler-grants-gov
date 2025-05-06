@@ -22,7 +22,7 @@ def _strip_pagination_params(search_query: dict) -> dict:
     return search_query
 
 
-class SearchNotification(BaseNotificationTask):
+class SearchNotificationTask(BaseNotificationTask):
 
     def __init__(
         self,

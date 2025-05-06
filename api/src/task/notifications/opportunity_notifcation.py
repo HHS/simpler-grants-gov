@@ -14,7 +14,7 @@ from src.util import datetime_util
 logger = logging.getLogger(__name__)
 
 
-class OpportunityNotification(BaseNotificationTask):
+class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session):
         super().__init__(
             db_session,

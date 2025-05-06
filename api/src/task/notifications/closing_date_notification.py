@@ -22,7 +22,7 @@ CONTACT_INFO = (
 )
 
 
-class ClosingDateNotification(BaseNotificationTask):
+class ClosingDateNotificationTask(BaseNotificationTask):
 
     def __init__(
         self,
