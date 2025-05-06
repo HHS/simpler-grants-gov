@@ -1,7 +1,7 @@
 """Add application_user table
 
 Revision ID: b4aad25f47bc
-Revises: 3b0705202c54
+Revises: 6c83a4294387
 Create Date: 2025-04-30 14:02:54.814779
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "b4aad25f47bc"
-down_revision = "3b0705202c54"
+down_revision = "6c83a4294387"
 branch_labels = None
 depends_on = None
 
