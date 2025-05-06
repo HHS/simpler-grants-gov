@@ -1,4 +1,4 @@
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { Icon } from "@trussworks/react-uswds";
 

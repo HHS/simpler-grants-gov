@@ -1,8 +1,10 @@
 import "server-only";
 
 import { fetchOpportunitySearch } from "src/services/fetch/fetchers/fetchers";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import {
+  QueryParamData,
+  SearchAPIResponse,
+} from "src/types/search/searchRequestTypes";
 import { formatSearchRequestBody } from "src/utils/search/searchFormatUtils";
 
 export const searchForOpportunities = async (searchInputs: QueryParamData) => {

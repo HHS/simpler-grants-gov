@@ -2,8 +2,10 @@ import {
   downloadOpportunities,
   searchForOpportunities,
 } from "src/services/fetch/fetchers/searchFetcher";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import {
+  QueryParamData,
+  SearchAPIResponse,
+} from "src/types/search/searchRequestTypes";
 import { searchFetcherParams } from "src/utils/testing/fixtures";
 
 const mockFetchOpportunitySearch = jest.fn().mockResolvedValue({

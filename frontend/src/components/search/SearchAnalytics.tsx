@@ -3,7 +3,7 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { omit } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes";
+import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
   setNewRelicCustomAttribute,
   unsetAllNewRelicQueryAttributes,

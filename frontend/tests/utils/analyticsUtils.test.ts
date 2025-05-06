@@ -1,4 +1,4 @@
-import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes";
+import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
   setNewRelicCustomAttribute,
   unsetAllNewRelicQueryAttributes,

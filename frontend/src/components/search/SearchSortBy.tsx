@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { SortOption } from "src/types/search/searchRequestTypes";
+import { SortOption } from "src/types/search/searchSortTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";

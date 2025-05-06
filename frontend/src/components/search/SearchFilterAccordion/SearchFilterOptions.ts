@@ -1,6 +1,6 @@
 import { omit } from "lodash";
 import { eligibilityTypes } from "src/constants/opportunity";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 export const eligibilityOptions: FilterOption[] = eligibilityTypes.map((type) =>
   omit(type, "group"),

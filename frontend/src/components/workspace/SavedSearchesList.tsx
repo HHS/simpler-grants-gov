@@ -1,6 +1,8 @@
 import { omit } from "lodash";
-import { ValidSearchQueryParamData } from "src/types/search/searchRequestTypes";
-import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
+import {
+  ValidSearchQueryParam,
+  ValidSearchQueryParamData,
+} from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
 
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "server only";
 
 import { fetchAgencies } from "src/services/fetch/fetchers/fetchers";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import { sortFilterOptions } from "src/utils/search/searchUtils";
 
 export interface RelevantAgencyRecord {

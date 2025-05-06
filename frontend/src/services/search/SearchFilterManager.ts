@@ -1,7 +1,5 @@
-import {
-  FilterOption,
-  ValidSearchQueryParam,
-} from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 type UpdateQueryParamsFunction = (
   checkedSet: Set<string>,

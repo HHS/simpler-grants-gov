@@ -6,8 +6,8 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import {
   FilterOption,
   FilterOptionWithChildren,
-  ValidSearchQueryParam,
-} from "src/types/search/searchResponseTypes";
+} from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { areSetsEqual } from "src/utils/search/searchUtils";
 
 import { useContext, useMemo } from "react";

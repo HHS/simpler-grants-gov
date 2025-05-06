@@ -1,7 +1,7 @@
 "use client";
 
 import { camelCase } from "lodash";
-import { FilterOptionWithChildren } from "src/types/search/searchResponseTypes";
+import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";

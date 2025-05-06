@@ -1,13 +1,13 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
+import { QuerySetParam } from "src/types/search/searchQueryTypes";
 import {
   QueryParamData,
-  QuerySetParam,
   SearchFetcherActionType,
-  SortOptions,
 } from "src/types/search/searchRequestTypes";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { SortOptions } from "src/types/search/searchSortTypes";
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,

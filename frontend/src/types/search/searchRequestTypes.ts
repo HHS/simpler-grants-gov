@@ -1,4 +1,9 @@
-import { ValidSearchQueryParam } from "./searchResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
+import { BackendFilterNames } from "./searchFilterTypes";
+import { FilterQueryParamData } from "./searchQueryTypes";
+import { SortOptions } from "./searchSortTypes";
 
 export interface SearchFilterRequestBody {
   opportunity_status?: { one_of: string[] };
@@ -41,43 +46,6 @@ export enum SearchFetcherActionType {
   Update = "update",
 }
 
-export type QuerySetParam = string | string[] | undefined;
-
-export type SortOptions =
-  | "relevancy"
-  | "postedDateDesc"
-  | "postedDateAsc"
-  | "closeDateDesc"
-  | "closeDateAsc"
-  | "opportunityTitleAsc"
-  | "opportunityTitleDesc"
-  | "agencyAsc"
-  | "agencyDesc"
-  | "opportunityNumberDesc"
-  | "opportunityNumberAsc";
-
-export type SortOption = {
-  label: string;
-  value: SortOptions;
-};
-
-export interface FilterQueryParamData {
-  status: Set<string>;
-  fundingInstrument: Set<string>;
-  eligibility: Set<string>;
-  agency: Set<string>;
-  category: Set<string>;
-}
-
-// used for now in the process of performing a search request. To be deprecated.
-export interface QueryParamData extends FilterQueryParamData {
-  page: number;
-  sortby: SortOptions | null;
-  query?: string | null;
-  actionType?: SearchFetcherActionType;
-  fieldChanged?: string;
-}
-
 // Search definition as formatted for storage as a saved search
 export type SavedSearchQuery = {
   filters: SearchFilterRequestBody;
@@ -92,6 +60,28 @@ export type SavedSearchRecord = {
   search_query: SavedSearchQuery;
 };
 
-export type ValidSearchQueryParamData = {
-  [k in ValidSearchQueryParam]?: string;
+export type SearchResponseData = BaseOpportunity[];
+
+export type FacetCounts = {
+  [key in BackendFilterNames]: {
+    [key: string]: number;
+  };
 };
+
+export interface SearchAPIResponse extends APIResponse {
+  data: SearchResponseData;
+  pagination_info: PaginationInfo;
+  facet_counts: FacetCounts;
+  // these are set on the frontend after fetch, not coming back from API
+  actionType?: SearchFetcherActionType;
+  fieldChanged?: string;
+}
+
+// used for now in the process of performing a search request. To be deprecated.
+export interface QueryParamData extends FilterQueryParamData {
+  page: number;
+  sortby: SortOptions | null;
+  query?: string | null;
+  actionType?: SearchFetcherActionType;
+  fieldChanged?: string;
+}

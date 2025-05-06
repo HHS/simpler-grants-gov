@@ -1,4 +1,4 @@
-import { validSearchQueryParamKeys } from "src/types/search/searchResponseTypes";
+import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 
 // note that the `newrelic` referenced here is the newrelic object added to window when
 // client side new relic scripts are loaded and run, rather than anything explicity imported
