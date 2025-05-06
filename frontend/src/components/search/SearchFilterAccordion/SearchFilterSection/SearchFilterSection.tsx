@@ -31,7 +31,6 @@ const SearchFilterSection = ({
   accordionTitle,
   query,
   isSectionAllSelected,
-  isSectionNoneSelected,
   value,
   facetCounts,
 }: SearchFilterSectionProps) => {
@@ -52,31 +51,15 @@ const SearchFilterSection = ({
     toggleSelectAll(false, currentSelections);
   }, [toggleSelectAll, accordionTitle, searchParams, allSectionOptions]);
 
-  // const isNoneSelected = useMemo(() => query.size === 0, [query]);
-  // const isNoneSelected = useMemo(() => {
-  //   return (
-  //     query.size === 0 ||
-  //     !option.children.some((childOption) => {
-  //       query.has(childOption.value);
-  //     })
-  //   );
-  // }, [query]);
+  const isSectionNoneSelected = useMemo(
+    () =>
+      query.size === 0 ||
+      !option.children.some((childOption) => query.has(childOption.value)),
+    [query, option.children],
+  );
 
-  const isNoneSelected =
-    query.size === 0 ||
-    !option.children.some((childOption) => {
-      query.has(childOption.value);
-    });
+  const selectionsFromOtherSections = useMemo(() => {}, []);
 
-  console.log("!!!", isNoneSelected);
-
-  // console.log(
-  //   "$$$",
-  //   option.children.some((childOption) => {
-  //     console.log("!!!", query, childOption.value);
-  //     query.has(childOption.value);
-  //   }),
-  // );
   return (
     <div>
       <div>{option.label}</div>
@@ -84,7 +67,8 @@ const SearchFilterSection = ({
         <AnyOptionCheckbox
           title={option.label}
           queryParamKey="agency"
-          checked={isNoneSelected}
+          checked={isSectionNoneSelected}
+          defaultEmptySelection={selectionsFromOtherSections}
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
           {option.children?.map((child) => (
