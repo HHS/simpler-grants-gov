@@ -35,7 +35,13 @@ function SaveSearchInput({
 
   return (
     <FormGroup error={!!validationError}>
-      <label htmlFor="saved-search-input">{t("inputLabel")}</label>
+      <label htmlFor="saved-search-input">
+        {t.rich("inputLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
+      </label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <TextInput
@@ -48,6 +54,8 @@ function SaveSearchInput({
           defaultValue={""}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
+          required
+          aria-required
         />
       </div>
     </FormGroup>
@@ -68,7 +76,13 @@ function SuccessContent({
     <>
       <ModalHeading id={`${modalId}-heading`}>{t("successTitle")}</ModalHeading>
       <div className="usa-prose">
-        <p className="font-sans-2xs margin-y-4">{t("successDescription")}</p>
+        <p className="font-sans-2xs margin-y-4">
+          {t.rich("successDescription", {
+            workspaceLink: (chunks) => (
+              <a href="/saved-search-queries">{chunks}</a>
+            ),
+          })}
+        </p>
       </div>
       <ModalFooter>
         <ModalToggleButton

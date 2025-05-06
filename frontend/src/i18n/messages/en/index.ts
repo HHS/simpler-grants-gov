@@ -521,14 +521,14 @@ export const messages = {
         loading: "Saving",
         description:
           "Save these search terms and filters with a name for easy access later.",
-        inputLabel: "Name (Required)",
+        inputLabel: "Name <required>(required)</required>",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",
         emptyNameError: "Please name this query.",
-        successTitle: "Success!",
+        successTitle: "Query successfully saved",
         successDescription:
-          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
@@ -575,7 +575,7 @@ export const messages = {
       title: "Edit name of search query",
       description:
         "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name (required)",
+      inputLabel: "Query name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
