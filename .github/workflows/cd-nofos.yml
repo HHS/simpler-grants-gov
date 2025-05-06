@@ -31,6 +31,8 @@ on:
 jobs:
   checks:
     uses: ./.github/workflows/ci-nofos.yml
+    with:
+      version: ${{ inputs.version || github.ref }}
 
   deploy:
     name: Deploy
