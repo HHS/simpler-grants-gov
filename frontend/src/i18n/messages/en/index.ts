@@ -270,146 +270,6 @@ export const messages = {
       },
     },
   },
-  Research: {
-    page_title: "Research | Simpler.Grants.gov",
-    intro: {
-      title: "Our existing research",
-      content:
-        "We conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
-    },
-    methodology: {
-      title: "The methodology",
-      paragraph_1:
-        "<p>Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. We recruited equitably to ensure a diverse pool of participants.</p><p>The quantity of participants was well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants.</p><p>With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.</p>",
-      title_2: "Research objectives:",
-      paragraph_2:
-        "<ul><li>Examine existing user journeys and behaviors, identifying how Grants.gov fits into their overall approach</li><li>Learn from user experiences, roles, challenges</li><li>Identify barriers and how a simpler Grants.gov can create a more intuitive user experience, especially for new users</li></ul>",
-      title_3: "Want to participate in user research?",
-      cta: "Sign up to join a usability study",
-    },
-    archetypes: {
-      title: "Applicant archetypes",
-      paragraph_1:
-        "Archetypes are compelling summaries that highlight the types of applicants that Grants.gov serves. They’re informed by and summarize user research data, and represent user behaviors, attitudes, motivations, pain points, and goals. We’ll use these archetypes to influence our design decisions, guide the product’s direction, and keep our work human-centered. ",
-      novice: {
-        title: "The Novice",
-        paragraph_1:
-          "Applicants lacking familiarity with the grant application process, including first-time or infrequent applicants and those who never apply",
-        paragraph_2:
-          "Novices are often new to the grants application process. They face a steep learning curve to find and apply for funding opportunities. Solving their needs will generate a more inclusive Grants.gov experience.",
-      },
-      collaborator: {
-        title: "The Collaborator",
-        paragraph_1:
-          "Applicants who've applied before, working with colleagues or partner organizations to increase their chances of success",
-        paragraph_2:
-          "Collaborators have more familiarity with Grants.gov. But they face challenges with coordinating application materials, and often resorting to tools and resources outside of Grants.gov.",
-      },
-      maestro: {
-        title: "The Maestro",
-        paragraph_1:
-          "Frequent applicants familiar with Grants.gov, who are often directly responsible for managing multiple applications at once",
-        paragraph_2:
-          "Maestros have an established approach to applying, which may include software and tools outside of Grants.gov. Their primary concerns are rooted in determining grant feasibility and staying ahead of deadlines.",
-      },
-      supervisor: {
-        title: "The Supervisor",
-        paragraph_1:
-          "Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros.",
-        paragraph_2:
-          "Supervisors are responsible for oversight, approvals, final submissions, and keeping registrations up to date. Their time is limited, as they're often busy with the organization's other needs.",
-      },
-    },
-    themes: {
-      title: "General themes",
-      paragraph_1:
-        "The existing Grants.gov website works best for those who use it regularly. Larger organizations and teams of Collaborators and Maestros are typically more familiar with the ins and outs of the system. To create a simpler Grants.gov with an intuitive user experience that addresses the needs of all archetypes, four themes were defined:",
-      title_2: "Frictionless functionality ",
-      paragraph_2:
-        "Reduce the burden on applicants and grantmakers, from both a process and systems perspective, by addressing the pain points that negatively affect their experience",
-      title_3: "Sophisticated self-direction",
-      paragraph_3:
-        "Meet users where they are during crucial moments, by providing a guided journey through opt-in contextual support that reduces their need to find help outside the system",
-      title_4: "Demystify the grants process",
-      paragraph_4:
-        "Ensure that all users have the same easy access to instructional and educational information that empowers them to have a smoother, informed, and confident user experience",
-      title_5: "Create an ownable identity",
-      paragraph_5:
-        "Create a presence that reflections our mission and supports our users through visual brand, content strategy, and user interface design systems",
-    },
-    impact: {
-      title: "Where can we have the most impact?",
-      paragraph_1:
-        "The most burden is on the Novice to become an expert on the grants process and system. In order to execute our mission, there is a need to improve awareness, access, and choice. This requires reaching out to those who are unfamiliar with the grant application process.",
-      paragraph_2: "There are many common barriers that users face:",
-      title_2:
-        "Are there challenges you’ve experienced that aren’t captured here?",
-      paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates</subscribe></strong> to be notified of upcoming user research efforts.",
-      boxes: [
-        {
-          title: "Digital connectivity",
-          content:
-            "Depending on availability and geography, a stable internet connection is not a guarantee to support a digital-only experience.",
-        },
-        {
-          title: "Organization size",
-          content:
-            "Not all organizations have dedicated resources for seeking grant funding. Many are 1-person shops who are trying to do it all.",
-        },
-        {
-          title: "Overworked",
-          content:
-            "New organizations are often too burdened with internal paperwork and infrastructure to support external funding and reporting.",
-        },
-        {
-          title: "Expertise",
-          content:
-            "Small organizations face higher turnover, and alumni often take their institutional knowledge and expertise with them when they leave.",
-        },
-        {
-          title: "Cognitive load",
-          content:
-            "Applicants often apply for funding through several agencies, requiring they learn multiple processes and satisfy varying requirements.",
-        },
-        {
-          title: "Language",
-          content:
-            "Applicants are faced with a lot of jargon without context or definitions, which is especially difficult when English is not their native language.",
-        },
-        {
-          title: "Education",
-          content:
-            "It often requires a high level of education to comprehend the complexity and language of funding opportunity announcements.",
-        },
-        {
-          title: "Lost at the start",
-          content:
-            "Novices don’t see a clear call-to-action for getting started, and they have trouble finding the one-on-one help at the beginning of the process.",
-        },
-        {
-          title: "Overwhelmed by search",
-          content:
-            "New applicants misuse the keyword search function and have trouble understanding the acronyms and terminology.",
-        },
-        {
-          title: "Confused by announcements",
-          content:
-            "Novices have difficulty determining their eligibility and understanding the details of the funding opportunity announcement.",
-        },
-        {
-          title: "Time",
-          content:
-            'Most individuals wear a lot of hats (community advocate, program lead, etc.) and "grants applicant" is only part of their responsibilities and requires efficiency.',
-        },
-        {
-          title: "Blindsided by requirements",
-          content:
-            "New applicants are caught off guard by SAM.gov registration and often miss the format and file name requirements.",
-        },
-      ],
-    },
-  },
   Subscribe: {
     pageTitle: "Subscribe | Simpler.Grants.gov",
     metaDescription:
@@ -486,7 +346,6 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
-      wiki: "Public wiki",
       research: "Research",
       roadmap: "Product roadmap",
       savedGrants: "Saved opportunities",
@@ -494,6 +353,7 @@ export const messages = {
       search: "Search",
       subscribe: "Subscribe",
       vision: "Our vision",
+      wiki: "Public wiki",
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",
