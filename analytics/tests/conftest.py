@@ -387,7 +387,7 @@ def _create_opportunity_table(conn: EtlDb.connection, schema: str) -> None:
         test_file_path = Path(__file__).resolve()
 
         # Construct the path to the SQL file
-        sql_file_path = (
+        migrations_path = (
             test_file_path.parent.parent
             / "src"
             / "analytics"
@@ -395,11 +395,17 @@ def _create_opportunity_table(conn: EtlDb.connection, schema: str) -> None:
             / "etldb"
             / "migrations"
             / "versions"
-            / "0007_add_opportunity_tables.sql"
         )
 
-        with open(sql_file_path) as file:
-            create_table_commands = file.read()
-            conn.execute(text(create_table_commands))
+        sql_files = [
+            "0007_add_opportunity_tables.sql",
+            "0010_add_user_saved_opportunity_and_search_tables.sql",
+        ]
+
+        for filename in sql_files:
+            sql_file_path = migrations_path / filename
+            with open(sql_file_path) as file:
+                sql_commands = file.read()
+                conn.execute(text(sql_commands))
 
     logger.info("Created opportunity tables")
