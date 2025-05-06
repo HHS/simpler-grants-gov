@@ -78,13 +78,12 @@ class BaseNotificationTask(Task):
 
                 self.increment(Metrics.USERS_NOTIFIED)
 
-            except Exception as e:
+            except Exception:
                 # Notification log will be updated in the finally block
                 logger.exception(
-                    f"Failed to send notification email: {str(e)}",
+                    "Failed to send notification email",
                     extra={
                         "user_id": user_notification.user_id,
-                        "email": user_notification.user_email,
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
