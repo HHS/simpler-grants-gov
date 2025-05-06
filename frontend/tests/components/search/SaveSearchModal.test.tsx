@@ -1,8 +1,16 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import { identity, noop } from "lodash";
+import {
+  identity,
+  noop,
+} from "lodash";
+import { SaveSearchModal } from "src/components/search/SaveSearchModal";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { SaveSearchModal } from "src/components/search/SaveSearchModal";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 
 const fakeSearchParams = new URLSearchParams();
 
@@ -43,6 +51,12 @@ describe("SaveSearchModal", () => {
     clientFetchMock.mockReset();
     jest.clearAllTimers();
   });
+
+    it("matches snapshot", () => {
+      const { container } = render(<SaveSearchModal onSave={noop} />);
+
+      expect(container).toMatchSnapshot();
+    });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(<SaveSearchModal onSave={noop} />);
 

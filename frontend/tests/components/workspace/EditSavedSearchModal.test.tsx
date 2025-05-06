@@ -1,7 +1,14 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  EditSavedSearchModal,
+} from "src/components/workspace/EditSavedSearchModal";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 
 const mockUseUser = jest.fn(() => ({
   user: {
@@ -39,6 +46,14 @@ describe("EditSavedSearchModal", () => {
   afterEach(() => {
     clientFetchMock.mockReset();
     jest.clearAllTimers();
+  });
+
+  it("matches snapshot", async () => {
+    const { container } = render(
+      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+    );
+
+    expect(container).toMatchSnapshot();
   });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
