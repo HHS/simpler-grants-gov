@@ -17,33 +17,47 @@ class TestSamGovClientFactory:
         {
             "SAM_GOV_API_KEY": "test-api-key",
             "SAM_GOV_BASE_URL": "https://test-api.sam.gov",
-            "SAM_GOV_EXTRACT_URL": "https://test-api.sam.gov/extracts",
+            "SAM_GOV_USE_MOCK": "false",
         },
     )
     def test_create_real_client(self):
         """Test creating a real client."""
-        client = create_sam_gov_client(use_mock=False)
+        client = create_sam_gov_client()
         assert isinstance(client, SamGovClient)
         assert not isinstance(client, MockSamGovClient)
 
+    @mock.patch.dict(
+        os.environ,
+        {
+            "SAM_GOV_USE_MOCK": "true",
+        },
+    )
     def test_create_mock_client(self):
         """Test creating a mock client."""
-        client = create_sam_gov_client(use_mock=True)
+        client = create_sam_gov_client()
         assert isinstance(client, MockSamGovClient)
 
     def test_create_client_with_config(self):
         """Test creating a client with custom config."""
-        config = SamGovConfig(base_url="https://custom-api.sam.gov", api_key="custom-key")
-        client = create_sam_gov_client(use_mock=False, config=config)
+        config = SamGovConfig(
+            base_url="https://custom-api.sam.gov", 
+            api_key="custom-key",
+            use_mock=False
+        )
+        client = create_sam_gov_client(config=config)
         assert isinstance(client, SamGovClient)
         assert client.api_url == "https://custom-api.sam.gov"
         assert client.api_key == "custom-key"
 
     def test_create_client_with_config_and_override(self):
         """Test creating a client with config and override values."""
-        config = SamGovConfig(base_url="https://custom-api.sam.gov", api_key="custom-key")
+        config = SamGovConfig(
+            base_url="https://custom-api.sam.gov", 
+            api_key="custom-key",
+            use_mock=False
+        )
         client = create_sam_gov_client(
-            use_mock=False, config=config, config_override={"api_key": "override-key"}
+            config=config, config_override={"api_key": "override-key"}
         )
         assert isinstance(client, SamGovClient)
         assert client.api_url == "https://custom-api.sam.gov"
@@ -55,11 +69,12 @@ class TestSamGovClientFactory:
         with mock.patch(
             "src.adapters.sam_gov.mock_client.MockSamGovClient.__init__", return_value=None
         ):
-            create_sam_gov_client(
+            config = SamGovConfig(
                 use_mock=True,
                 mock_data_file="/path/to/data.json",
-                mock_extract_dir="/path/to/extracts",
+                mock_extract_dir="/path/to/extracts"
             )
+            create_sam_gov_client(config=config)
 
             # Since we mocked the __init__ method, we'll manually assert that the factory tried to create
             # a MockSamGovClient with the correct parameters

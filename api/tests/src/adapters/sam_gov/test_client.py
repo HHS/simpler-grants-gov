@@ -43,8 +43,9 @@ class TestSamGovClient:
     )
     def test_init_with_default_config(self):
         """Test initializing the client with default configuration."""
-        # This will use the environment variables
-        client = SamGovClient()
+        # Create a config from environment variables
+        config = SamGovConfig()
+        client = SamGovClient(config)
         assert client.api_key == "env-api-key"
         assert client.api_url == "https://env-api.sam.gov"
 
@@ -70,7 +71,7 @@ class TestSamGovClient:
             # Mock the API response with API key in query params
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/download?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/extracts/v1/file?fileName={file_name}&api_key={config.api_key}",
                     content=file_content,
                     headers={
                         "Content-Type": "application/zip",
@@ -84,9 +85,10 @@ class TestSamGovClient:
 
                 # Verify the response
                 assert response is not None
-                assert response.file_name == file_name
+                assert response.file_name == output_path
                 assert response.file_size == len(file_content)
-                assert response.content_type == "application/zip"
+                # content_type was removed from the model
+                # assert response.content_type == "application/zip"
 
                 # Verify the file was downloaded
                 with open(output_path, "rb") as f:
@@ -110,7 +112,7 @@ class TestSamGovClient:
             # Mock a 404 response from the API
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/download?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/extracts/v1/file?fileName={file_name}&api_key={config.api_key}",
                     status_code=404,
                     json={"error": "File not found"},
                 )
@@ -140,7 +142,7 @@ class TestSamGovClient:
             # Mock a 500 error response from the API
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/download?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/extracts/v1/file?fileName={file_name}&api_key={config.api_key}",
                     status_code=500,
                     json={"error": "Internal server error"},
                 )
@@ -170,7 +172,7 @@ class TestSamGovClient:
             # Mock a timeout by raising a Timeout exception
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/download?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/extracts/v1/file?fileName={file_name}&api_key={config.api_key}",
                     exc=Timeout,
                 )
 

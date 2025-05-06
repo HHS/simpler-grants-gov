@@ -3,7 +3,6 @@
 import abc
 import logging
 import os
-import re
 from datetime import datetime
 from typing import Any
 from urllib.parse import urljoin
@@ -11,7 +10,7 @@ from urllib.parse import urljoin
 import requests
 
 from src.adapters.sam_gov.config import SamGovConfig
-from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse, SensitivityLevel
+from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
 from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
@@ -44,32 +43,24 @@ class SamGovClient(BaseSamGovClient):
 
     def __init__(
         self,
-        api_key: str | SamGovConfig | None = None,
-        api_url: str | None = None,
+        config: SamGovConfig,
     ):
         """Initialize the client.
 
         Args:
-            api_key: API key for SAM.gov API or a SamGovConfig object.
-            api_url: URL for the SAM.gov API. If not provided, the value from environment variable will be used.
+            config: Configuration object for the SAM.gov client.
         """
-        # Handle config object case
-        if isinstance(api_key, SamGovConfig):
-            config = api_key
-            self.api_key = config.api_key
-            self.api_url = config.base_url
-            self.extract_url = config.extract_url
-        else:
-            # Handle direct parameters or environment variables
-            config = SamGovConfig()
-            self.api_key = api_key or config.api_key
-            self.api_url = api_url or config.base_url
-            self.extract_url = config.extract_url
+        self.api_key = config.api_key
+        self.api_url = config.base_url
 
         # Validate required parameters
+        if not self.api_key:
+            raise ValueError(
+                "API key not found in the provided SamGovConfig. Ensure SAM_GOV_API_KEY is set."
+            )
         if not self.api_url:
             raise ValueError(
-                "API URL must be provided either directly, via config, or via environment variable."
+                "API URL not found in the provided SamGovConfig. Ensure SAM_GOV_BASE_URL is set or has a default."
             )
 
     def _build_headers(self) -> dict[str, str]:
@@ -114,11 +105,7 @@ class SamGovClient(BaseSamGovClient):
             raise ValueError("API URL must be provided for SAM.gov API access")
 
         # Build URL and parameters for file download
-        # Use extract_url if available, otherwise use api_url/download
-        if self.extract_url:
-            url = self.extract_url
-        else:
-            url = urljoin(self.api_url, "download")
+        url = urljoin(self.api_url, "extracts/v1/file")
 
         params = {"fileName": extract_request.file_name, "api_key": self.api_key}
 
@@ -143,15 +130,7 @@ class SamGovClient(BaseSamGovClient):
                 raise Exception(error_message)
 
             # Get headers for metadata
-            content_type = response.headers.get("Content-Type", "")
-            content_disposition = response.headers.get("Content-Disposition", "")
             content_length = int(response.headers.get("Content-Length", 0))
-
-            # Try to extract the filename from Content-Disposition
-            filename = None
-            disposition_match = re.search(r'filename="?([^";]+)"?', content_disposition)
-            if disposition_match:
-                filename = disposition_match.group(1)
 
             # Save the file
             with open_stream(output_path, "wb") as f:
@@ -160,10 +139,8 @@ class SamGovClient(BaseSamGovClient):
 
             # Build response object
             extract_response = SamExtractResponse(
-                file_name=filename or os.path.basename(output_path),
+                file_name=output_path,
                 file_size=content_length or os.path.getsize(output_path),
-                content_type=content_type,
-                sensitivity=SensitivityLevel.PUBLIC,
                 download_date=datetime.now(),
             )
 

@@ -5,7 +5,7 @@ import os
 import tempfile
 
 from src.adapters.sam_gov.mock_client import MockSamGovClient
-from src.adapters.sam_gov.models import SamExtractRequest, SensitivityLevel
+from src.adapters.sam_gov.models import SamExtractRequest
 
 
 class TestMockSamGovClient:
@@ -43,10 +43,11 @@ class TestMockSamGovClient:
 
             # Verify the extract metadata
             assert response is not None
-            assert response.file_name == "TEST_EXTRACT_FILE.ZIP"
+            assert response.file_name == output_path
             assert response.file_size == 1024 * 1024
-            assert response.content_type == "application/zip"
-            assert response.sensitivity == SensitivityLevel.PUBLIC
+            # These fields were removed from the model
+            # assert response.content_type == "application/zip"
+            # assert response.sensitivity == SensitivityLevel.PUBLIC
 
             # Verify the file was created
             assert os.path.exists(output_path)
