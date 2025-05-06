@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "the name of the application environment (e.g. dev, staging, prod)"
+        required: true
+        type: string
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+
+concurrency: cd-nofos-${{ inputs.environment }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: metabase
+          environment: ${{ inputs.environment }}
+
+      - name: Deploy metabase
+        run: make metabase-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ inputs.version }}
