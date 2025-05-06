@@ -23,7 +23,7 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
 
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info(
-        f"Application {application_id} status changed to {ApplicationStatus.SUBMITTED.value}"
+        "Application successfully submitted"
     )
 
     return application
