@@ -1,6 +1,15 @@
 name: NOFOs Checks
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/ci-nofos.yml
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to run tests against"
+        default: "main"
+        type: string
   workflow_dispatch:
     inputs:
       version:
