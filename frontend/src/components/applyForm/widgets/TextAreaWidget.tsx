@@ -52,11 +52,7 @@ function TextAreaWidget<
     [id, onFocus],
   );
   const e = rawErrors.length ? true : undefined;
-  const describedby = e
-    ? `e-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
   const inputValue = value !== undefined ? String(value) : "";
 
   return (

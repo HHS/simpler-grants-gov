@@ -82,11 +82,7 @@ function TextWidget<
     [onFocus, id],
   );
   const e = rawErrors.length ? true : undefined;
-  const describedby = e
-    ? `e-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
 
   return (
     <FormGroup error={e} key={`wrapper-for-${id}`}>
@@ -96,9 +92,7 @@ function TextWidget<
         required={required}
         description={description}
       />
-      {e && (
-        <ErrorMessage id={`e-for-${id}`}>{rawErrors[0]}</ErrorMessage>
-      )}
+      {e && <ErrorMessage id={`e-for-${id}`}>{rawErrors[0]}</ErrorMessage>}
       <TextInput
         data-testid={id}
         minLength={(minLength as number) ?? undefined}

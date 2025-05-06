@@ -107,11 +107,7 @@ function SelectWidget<
   );
 
   const e = rawErrors.length ? true : undefined;
-  const describedby = e
-    ? `e-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
 
   const Widget = useCombo ? ComboBox : Select;
 

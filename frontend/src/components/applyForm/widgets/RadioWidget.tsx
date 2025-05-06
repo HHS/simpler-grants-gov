@@ -77,11 +77,7 @@ function RadioWidget<
     [onFocus, id, enumOptions, emptyValue],
   );
   const e = rawErrors.length ? true : undefined;
-  const describedby = e
-    ? `e-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
 
   return (
     <FormGroup error={e} key={`wrapper-for-${id}`}>
