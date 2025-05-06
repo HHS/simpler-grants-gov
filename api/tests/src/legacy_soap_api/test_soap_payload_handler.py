@@ -59,17 +59,15 @@ class TestSoapPayload:
         given = soap_payload.to_dict()
         expected = {
             "Envelope": {
-                "Header": {
-                    "APIKey": "apikeyinheaderexample"
-                },
+                "Header": {"APIKey": "apikeyinheaderexample"},
                 "Body": {
                     "GetOpportunityListResponse": {
                         "OpportunityDetails": {
                             "OpeningDate": "2025-03-20-04:00",
-                            "ClosingDate": "2025-07-26-04:00"
+                            "ClosingDate": "2025-07-26-04:00",
                         }
                     }
-                }
+                },
             }
         }
         assert given == expected
