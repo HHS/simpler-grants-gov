@@ -33,13 +33,14 @@ jobs:
           ref: ${{ inputs.version }}
 
       - name: Set up Terraform
-        working-directory: simpler-grants-gov
         uses: ./.github/actions/setup-terraform
+        with:
+          working-directory: simpler-grants-gov
 
       - name: Configure AWS credentials
-        working-directory: simpler-grants-gov
         uses: ./.github/actions/configure-aws-credentials
         with:
+          working-directory: simpler-grants-gov
           app_name: nofos
           environment: ${{ inputs.environment }}
 
