@@ -51,9 +51,11 @@ function SuccessContent({
 export function DeleteSavedSearchModal({
   savedSearchId,
   deleteText,
+  queryName,
 }: {
   savedSearchId: string;
   deleteText: string;
+  queryName: string;
 }) {
   const modalId = useMemo(
     () => `delete-save-search-${savedSearchId}`,
@@ -136,6 +138,11 @@ export function DeleteSavedSearchModal({
         ) : (
           <>
             <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
+            <div className="usa-prose">
+              <p className="font-sans-2xs margin-y-4">
+                {t("description")} "{queryName}"?
+              </p>
+            </div>
             <>
               {apiError && (
                 <SimplerAlert

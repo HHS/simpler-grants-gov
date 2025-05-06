@@ -53,6 +53,7 @@ export const SavedSearchesList = ({
                     <DeleteSavedSearchModal
                       savedSearchId={savedSearch.id}
                       deleteText={deleteText}
+                      queryName={savedSearch.name}
                     />
                   </div>
                 </div>

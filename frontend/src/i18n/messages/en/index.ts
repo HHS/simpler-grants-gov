@@ -589,6 +589,7 @@ export const messages = {
       deleteText: "Yes, delete",
       cancelText: "Cancel",
       apiError: "Error deleting saved query. Try again later.",
+      description: "Delete ",
     },
   },
   SavedGrants: {
