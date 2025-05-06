@@ -1,8 +1,9 @@
-import { JSX } from "react";
+import { UswdsIconNames } from "src/types/generalTypes";
 
 import Link from "next/link";
+import { JSX } from "react";
+
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { UswdsIconNames } from "src/types/generalTypes";
 
 type Props = {
   description: string;
@@ -28,10 +29,7 @@ export default function IconInfo({
       />
       <h3>{title}</h3>
       <p className="font-sans-md line-height-sans-4">{description}</p>
-      <Link
-        href={link}
-        className="font-sans-md line-height-sans-4"
-      >
+      <Link href={link} className="font-sans-md line-height-sans-4">
         {linkText}
       </Link>
     </>
