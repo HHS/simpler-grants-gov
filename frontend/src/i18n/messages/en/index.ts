@@ -651,10 +651,10 @@ export const messages = {
         general: "About saved searches",
       },
       modal: {
-        title: "Save search query",
+        title: "Name this search query",
         description:
-          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
-        inputLabel: "Query name",
+          "Save these search terms and filters with a name for easy access later.",
+        inputLabel: "Name (Required)",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",
