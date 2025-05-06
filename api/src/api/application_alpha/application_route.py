@@ -138,14 +138,12 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     """Submit an application"""
     add_extra_data_to_current_request_logs(
         {
-            "application.application_id": application_id,
+            "application_id": application_id,
         }
     )
     logger.info("POST /alpha/applications/:application_id/submit")
 
     with db_session.begin():
-        # Call the service function to handle submission
-        # This will raise ForbiddenError or NotFoundError appropriately
         submit_application(db_session, application_id)
 
     # Return success response
