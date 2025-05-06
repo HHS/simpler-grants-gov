@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -15,6 +16,10 @@ from src.db.models.lookup_models import (
     LkFormFamily,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+
+# Add conditional import for type checking
+if TYPE_CHECKING:
+    from src.db.models.user_models import ApplicationUser
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -147,6 +152,12 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
+    )
+
+    application_users: Mapped[list["ApplicationUser"]] = relationship(
+        "ApplicationUser",
+        back_populates="application",
+        uselist=True,
     )
 
 
