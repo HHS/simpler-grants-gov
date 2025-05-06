@@ -65,9 +65,6 @@ export const handleDeleteSavedSearch = async (
 export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
   const session = await getSession();
   if (!session || !session.token) {
-    console.warn(
-      "user fetching saved searches not logged in (should not happen)",
-    );
     return [];
   }
   const ssgToken = {

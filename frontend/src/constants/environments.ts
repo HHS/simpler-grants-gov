@@ -21,6 +21,7 @@ const {
   AUTH_LOGIN_URL,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
+  NEXT_RUNTIME,
 } = process.env;
 
 export const featureFlags = {
@@ -51,4 +52,5 @@ export const environment: { [key: string]: string } = {
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   API_JWT_PUBLIC_KEY: API_JWT_PUBLIC_KEY || "",
   NEW_RELIC_ENABLED: NEW_RELIC_ENABLED || "false",
+  NEXT_RUNTIME: NEXT_RUNTIME || "",
 };
