@@ -194,49 +194,6 @@ export const messages = {
     page_title: "Simpler.Grants.gov",
     meta_description:
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
-    goal: {
-      paragraph_1:
-        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
-      title_2: "Grant seekers & applicants",
-      paragraph_2:
-        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
-      title_3: "Federal grantmaking agencies",
-      paragraph_3:
-        "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
-      cta: "Subscribe for project updates",
-    },
-    process_and_research: {
-      title_1: "The process",
-      title_2: "The research",
-      paragraph_1:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source, and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works, what can be improved, and what should happen next.",
-      paragraph_2:
-        "We conduct extensive research to gather insights from applicants, potential applicants, and grantmakers. You can sign up to participate and help inform and inspire new features as we build a simpler Grants.gov together.",
-      cta_1: "Learn about our progress",
-      cta_2: "Learn more about our research",
-    },
-    fo_title: "Improvements to funding opportunity announcements",
-    fo_paragraph_1:
-      "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
-    fo_paragraph_2:
-      "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
-    fo_title_2: "View our grant announcement prototypes",
-    fo_paragraph_3:
-      "We recently simplified the language of four grant announcements and applied visual and user‑centered design principles to increase their readability and usability.",
-    acl_prototype: "Link to ACL Notice of Funding Opportunity example pdf",
-    acf_prototype: "Link to ACF Notice of Funding Opportunity example pdf",
-    cdc_prototype: "Link to CDC Notice of Funding Opportunity example pdf",
-    samhsa_prototype:
-      "Link to SAMHSA Notice of Funding Opportunity example pdf",
-    fo_title_3: "We want to hear from you!",
-    fo_paragraph_4:
-      "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
-    fo_title_4:
-      "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
-    fo_paragraph_5:
-      "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
-    wtgi_paragraph_2:
-      "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
   },
   Vision: {
     pageTitle: "Vision | Simpler.Grants.gov",
