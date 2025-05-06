@@ -15,7 +15,7 @@ export const useClientFetch = <T>(
   eMessage: string,
   { jsonResponse = true, authGatedRequest = false } = {},
 ) => {
-  const { refreshIfExpired, refreshUser } = useUser();
+  const { refreshIfExpired, refreshUser, refreshIfExpiring } = useUser();
   const router = useRouter();
 
   const fetchWithAuthCheck = async (
@@ -27,6 +27,7 @@ export const useClientFetch = <T>(
       router.refresh();
       throw new Error("local token expired, logging out");
     }
+    await refreshIfExpiring();
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();

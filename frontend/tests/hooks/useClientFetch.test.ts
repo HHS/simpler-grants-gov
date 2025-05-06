@@ -4,6 +4,7 @@ import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const refreshMock = jest.fn();
 const refreshIfExpiredMock = jest.fn();
+const refreshIfExpiringMock = jest.fn();
 const refreshUserMock = jest.fn();
 const jsonMock = jest.fn();
 
@@ -25,6 +26,7 @@ jest.mock("src/services/auth/useUser", () => ({
   useUser: () => ({
     refreshIfExpired: () => refreshIfExpiredMock() as unknown,
     refreshUser: () => refreshUserMock() as unknown,
+    refreshIfExpiring: () => refreshIfExpiringMock() as unknown,
   }),
 }));
 
@@ -43,6 +45,7 @@ describe("useClientFetch", () => {
     const { result } = renderHook(() => useClientFetch("an error!"));
     await result.current.clientFetch("http://wherever");
     expect(refreshIfExpiredMock).toHaveBeenCalledTimes(1);
+    expect(refreshIfExpiringMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(refreshMock).toHaveBeenCalledTimes(0);
     expect(refreshUserMock).toHaveBeenCalledTimes(0);

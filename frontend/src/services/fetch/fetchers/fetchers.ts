@@ -11,6 +11,7 @@ import {
   toDynamicApplicationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
+  userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
 import {
   createRequestBody,
@@ -119,3 +120,5 @@ export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
+
+export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);

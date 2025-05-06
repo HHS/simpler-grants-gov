@@ -142,5 +142,74 @@ describe("useUser", () => {
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
     });
+    it("does not make a fetch call if there is no token (user is not logged in)", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "",
+      });
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpired();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("refreshIfExpiring", () => {
+    it("makes fetch call if token is expiring", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "a token",
+        expiresAt: Date.now() + 100000,
+      });
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("a token");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpiring();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(2);
+    });
+    it("does not make fetch call if token is not expiring", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "a token",
+        expiresAt: Date.now() + 10000000,
+      });
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("a token");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpiring();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    });
+    it("does not make a fetch call if there is no token (user is not logged in)", async () => {
+      debouncedUserFetcherMock.mockReturnValue({
+        token: "",
+      });
+      const { result } = renderHook(() => useUser(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.user?.token).toEqual("");
+      });
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await result.current.refreshIfExpiring();
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

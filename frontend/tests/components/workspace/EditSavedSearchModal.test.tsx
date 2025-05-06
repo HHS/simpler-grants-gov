@@ -40,6 +40,19 @@ describe("EditSavedSearchModal", () => {
     clientFetchMock.mockReset();
     jest.clearAllTimers();
   });
+
+  it("matches snapshot", async () => {
+    const { container } = render(
+      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+    );
+
+    const toggle = await screen.findByTestId(
+      "open-edit-saved-search-modal-button-1",
+    );
+    act(() => toggle.click());
+
+    expect(container).toMatchSnapshot();
+  });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
       <EditSavedSearchModal savedSearchId="1" editText="edit" />,

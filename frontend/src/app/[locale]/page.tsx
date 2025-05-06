@@ -1,13 +1,9 @@
 import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { use } from "react";
+import { getTranslations } from "next-intl/server";
 
-import BetaAlert from "src/components/BetaAlert";
-import IndexGoalContent from "src/components/content/IndexGoalContent";
-import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
-import Hero from "src/components/Hero";
+import HomePageSections from "src/components/homepage/HomePageSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -19,16 +15,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export default function Home({ params }: LocalizedPageProps) {
-  const { locale } = use(params);
-  setRequestLocale(locale);
-
-  return (
-    <>
-      <Hero />
-      <BetaAlert containerClasses="margin-top-5" />
-      <IndexGoalContent />
-      <ProcessAndResearchContent />
-    </>
-  );
+export default function Home() {
+  return <HomePageSections />;
 }
