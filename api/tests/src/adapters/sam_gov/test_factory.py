@@ -40,9 +40,7 @@ class TestSamGovClientFactory:
     def test_create_client_with_config(self):
         """Test creating a client with custom config."""
         config = SamGovConfig(
-            base_url="https://custom-api.sam.gov", 
-            api_key="custom-key",
-            use_mock=False
+            base_url="https://custom-api.sam.gov", api_key="custom-key", use_mock=False
         )
         client = create_sam_gov_client(config=config)
         assert isinstance(client, SamGovClient)
@@ -52,13 +50,9 @@ class TestSamGovClientFactory:
     def test_create_client_with_config_and_override(self):
         """Test creating a client with config and override values."""
         config = SamGovConfig(
-            base_url="https://custom-api.sam.gov", 
-            api_key="custom-key",
-            use_mock=False
+            base_url="https://custom-api.sam.gov", api_key="custom-key", use_mock=False
         )
-        client = create_sam_gov_client(
-            config=config, config_override={"api_key": "override-key"}
-        )
+        client = create_sam_gov_client(config=config, config_override={"api_key": "override-key"})
         assert isinstance(client, SamGovClient)
         assert client.api_url == "https://custom-api.sam.gov"
         assert client.api_key == "override-key"
@@ -72,7 +66,7 @@ class TestSamGovClientFactory:
             config = SamGovConfig(
                 use_mock=True,
                 mock_data_file="/path/to/data.json",
-                mock_extract_dir="/path/to/extracts"
+                mock_extract_dir="/path/to/extracts",
             )
             create_sam_gov_client(config=config)
 

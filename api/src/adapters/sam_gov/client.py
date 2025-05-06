@@ -2,8 +2,6 @@
 
 import abc
 import logging
-import os
-from datetime import datetime
 from typing import Any
 from urllib.parse import urljoin
 
@@ -105,7 +103,7 @@ class SamGovClient(BaseSamGovClient):
             raise ValueError("API URL must be provided for SAM.gov API access")
 
         # Build URL and parameters for file download
-        url = urljoin(self.api_url, "extracts/v1/file")
+        url = urljoin(self.api_url, "data-services/v1/extracts")
 
         params = {"fileName": extract_request.file_name, "api_key": self.api_key}
 
@@ -128,9 +126,6 @@ class SamGovClient(BaseSamGovClient):
                     pass
 
                 raise Exception(error_message)
-
-            # Get headers for metadata
-            content_length = int(response.headers.get("Content-Length", 0))
 
             # Save the file
             with open_stream(output_path, "wb") as f:

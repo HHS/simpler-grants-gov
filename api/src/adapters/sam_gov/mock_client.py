@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import shutil
-from datetime import datetime
 
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
@@ -109,9 +108,6 @@ class MockSamGovClient(BaseSamGovClient):
                 size_value = extract_size if isinstance(extract_size, int) else 1024 * 1024
                 mock_file_size = min(size_value, 1024 * 1024)  # Max 1MB for mock files
                 f.write(os.urandom(mock_file_size))
-
-        # For file size, use the extract's defined size
-        file_size = self.extracts[file_name]["size"]
 
         return SamExtractResponse(
             file_name=output_path,
