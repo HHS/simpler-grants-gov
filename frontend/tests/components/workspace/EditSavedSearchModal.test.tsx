@@ -46,6 +46,11 @@ describe("EditSavedSearchModal", () => {
       <EditSavedSearchModal savedSearchId="1" editText="edit" />,
     );
 
+    const toggle = await screen.findByTestId(
+      "open-edit-saved-search-modal-button-1",
+    );
+    act(() => toggle.click());
+
     expect(container).toMatchSnapshot();
   });
   it("displays a working modal toggle button", async () => {

@@ -44,8 +44,11 @@ describe("SaveSearchModal", () => {
     jest.clearAllTimers();
   });
 
-  it("matches snapshot", () => {
+  it("matches snapshot", async () => {
     const { container } = render(<SaveSearchModal onSave={noop} />);
+
+    const toggle = await screen.findByTestId("open-save-search-modal-button");
+    toggle.click();
 
     expect(container).toMatchSnapshot();
   });
