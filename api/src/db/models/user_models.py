@@ -113,6 +113,7 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
+    is_deleted: Mapped[bool] = mapped_column(default=False)
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
