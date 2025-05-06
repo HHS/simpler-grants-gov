@@ -6,6 +6,7 @@ on:
     branches:
       - "main"
     paths:
+      - ".github/workflows/cd-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
   release:

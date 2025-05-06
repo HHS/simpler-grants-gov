@@ -23,15 +23,26 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: simpler-grants-gov
+
+      - uses: actions/checkout@v4
+        with:
+          path: simpler-grants-pdf-builder
+          repository: HHS/simpler-grants-pdf-builder
+          ref: ${{ inputs.version }}
 
       - name: Set up Terraform
+        working-directory: simpler-grants-gov
         uses: ./.github/actions/setup-terraform
 
       - name: Configure AWS credentials
+        working-directory: simpler-grants-gov
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: metabase
+          app_name: nofos
           environment: ${{ inputs.environment }}
 
-      - name: Deploy metabase
-        run: make metabase-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ inputs.version }}
+      - name: Build Docker image
+        working-directory: simpler-grants-pdf-builder
+        run: make build
