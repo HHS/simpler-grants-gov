@@ -17,10 +17,6 @@ on:
         default: "main"
         type: string
 
-defaults:
-  run:
-    working-directory: ./bloom_nofos
-
 jobs:
   lint-test:
     name: Nofos Lint, Format & Tests
@@ -30,7 +26,5 @@ jobs:
         with:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}
-
-      - run: ls
 
       - run: make test
