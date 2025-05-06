@@ -1,4 +1,5 @@
 import {
+  assignBaseFlags,
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
@@ -56,16 +57,6 @@ describe("getFeatureFlagsFromCookie", () => {
       COOKIE_VALUE,
     );
   });
-
-  // // do we still need to support this?
-  // eslint-disable-next-line jest/no-disabled-tests, jest/no-commented-out-tests
-  // test("getter loads feature flags with server-side getServerSideProps cookies", () => {
-  //   const cookieRecord = {
-  //     // Was unable to override flag keys. Use feature flag class invocation default for now.
-  //     _ff: JSON.stringify(COOKIE_VALUE),
-  //   };
-  //   expect(getFeatureFlagsFromCookie(cookieRecord)).toEqual(COOKIE_VALUE);
-  // });
 
   test("does not error if the cookie value is empty", () => {
     expect(
@@ -198,6 +189,69 @@ describe("setCookie", () => {
       name: FEATURE_FLAGS_KEY,
       value: '{"anyFeatureFlagName":"anyValue"}',
       expires: expect.any(Date) as Date,
+    });
+  });
+});
+
+describe("assignBaseFlags", () => {
+  it("returns hardcoded default values if env vars not defined, and boolean versions of env var values if defined", () => {
+    expect(
+      assignBaseFlags(
+        {
+          somethingToDefault: true,
+          anotherThingToDefault: false,
+        },
+        {
+          envVarFlagOne: "true",
+          anotherEnvVarFlag: "false",
+        },
+      ),
+    ).toEqual({
+      somethingToDefault: true,
+      anotherThingToDefault: false,
+      envVarFlagOne: true,
+      anotherEnvVarFlag: false,
+    });
+  });
+  it("overrides default values with env var values where env var value is defined", () => {
+    expect(
+      assignBaseFlags(
+        {
+          somethingToDefault: true,
+          somethingToOverride: true,
+        },
+        {
+          somethingToOverride: "false",
+        },
+      ),
+    ).toEqual({
+      somethingToOverride: false,
+      somethingToDefault: true,
+    });
+  });
+  it("returns boolean values from all valid env vars", () => {
+    expect(
+      assignBaseFlags(
+        {
+          overrideMeOne: true,
+          secondToOverride: true,
+          alsoOverride: false,
+          noOverride: true,
+          badOverride: true,
+        },
+        {
+          overrideMeOne: "false",
+          secondToOverride: "false",
+          alsoOverride: "true",
+          badOverride: "untrue",
+        },
+      ),
+    ).toEqual({
+      overrideMeOne: false,
+      secondToOverride: false,
+      alsoOverride: true,
+      noOverride: true,
+      badOverride: false,
     });
   });
 });

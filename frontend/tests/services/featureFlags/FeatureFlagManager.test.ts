@@ -18,8 +18,8 @@ const mockGetFeatureFlagsFromCookie = jest.fn();
 
 jest.mock("src/constants/environments", () => ({
   featureFlags: {
-    fakeOne: true,
-    fakeTwo: false,
+    fakeOne: "true",
+    fakeTwo: "false",
     nonBool: "sure",
   },
 }));
@@ -107,7 +107,9 @@ describe("FeatureFlagsManager", () => {
         .spyOn(NextResponse.prototype, "cookies", "get")
         .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
 
-      const featureFlagsManager = new FeatureFlagsManager({ feature3: false });
+      const featureFlagsManager = new FeatureFlagsManager({
+        feature3: "false",
+      });
       featureFlagsManager.middleware(request, NextResponse.next());
       expect(mockSet).toHaveBeenCalledWith({
         expires: expect.any(Date) as jest.Expect,
@@ -130,7 +132,9 @@ describe("FeatureFlagsManager", () => {
         .spyOn(NextResponse.prototype, "cookies", "get")
         .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
 
-      const featureFlagsManager = new FeatureFlagsManager({ feature3: false });
+      const featureFlagsManager = new FeatureFlagsManager({
+        feature3: "false",
+      });
       featureFlagsManager.middleware(request, NextResponse.next());
       expect(mockSet).toHaveBeenCalledWith({
         expires: expect.any(Date) as jest.Expect,
@@ -226,8 +230,8 @@ describe("FeatureFlagsManager", () => {
         const modifiedCookieValue = {};
         mockFeatureFlagsCookie(modifiedCookieValue);
         const serverFeatureFlagsManager = new FeatureFlagsManager({
-          fakeOne: true,
-          fakeTwo: false,
+          fakeOne: "true",
+          fakeTwo: "false",
         });
 
         expect(
@@ -293,6 +297,38 @@ describe("FeatureFlagsManager", () => {
             searchParams,
           ),
         ).toBe(false);
+      });
+    });
+  });
+
+  describe("featureFlags (getter)", () => {
+    it("returns hardcoded default values if env vars not defined, and boolean versions of env var values if defined", () => {
+      mockDefaultFeatureFlags({
+        somethingToDefault: true,
+        anotherThingToDefault: false,
+      });
+      featureFlagsManager = new FeatureFlagsManager({
+        envVarFlagOne: "true",
+        anotherEnvVarFlag: "false",
+      });
+      expect(featureFlagsManager.featureFlags).toEqual({
+        somethingToDefault: true,
+        anotherThingToDefault: false,
+        envVarFlagOne: true,
+        anotherEnvVarFlag: false,
+      });
+    });
+    it("overrides default values with env var values where env var value is defined", () => {
+      mockDefaultFeatureFlags({
+        somethingToOverride: true,
+        somethingToDefault: true,
+      });
+      featureFlagsManager = new FeatureFlagsManager({
+        somethingToOverride: "false",
+      });
+      expect(featureFlagsManager.featureFlags).toEqual({
+        somethingToOverride: false,
+        somethingToDefault: true,
       });
     });
   });

@@ -1,5 +1,3 @@
-import { stringToBoolean } from "src/utils/generalUtils";
-
 const {
   NEXT_PUBLIC_BASE_PATH,
   USE_SEARCH_MOCK_DATA,
@@ -24,12 +22,12 @@ const {
 } = process.env;
 
 export const featureFlags = {
-  opportunityOff: stringToBoolean(FEATURE_OPPORTUNITY_OFF),
-  searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
-  authOn: stringToBoolean(FEATURE_AUTH_ON),
-  savedOpportunitiesOn: stringToBoolean(FEATURE_SAVED_OPPORTUNITIES_ON),
-  savedSearchesOn: stringToBoolean(FEATURE_SAVED_SEARCHES_ON),
-  applyFormPrototypeOff: stringToBoolean(FEATURE_APPLY_FORM_PROTOTYPE_OFF),
+  opportunityOff: FEATURE_OPPORTUNITY_OFF,
+  searchOff: FEATURE_SEARCH_OFF,
+  authOn: FEATURE_AUTH_ON,
+  savedOpportunitiesOn: FEATURE_SAVED_OPPORTUNITIES_ON,
+  savedSearchesOn: FEATURE_SAVED_SEARCHES_ON,
+  applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
 };
 
 // home for all interpreted server side environment variables

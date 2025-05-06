@@ -108,6 +108,7 @@ const Footer = () => {
                   <a
                     key="email"
                     href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}
+                    target="_blank"
                   >
                     {ExternalRoutes.EMAIL_SUPPORT}
                   </a>,

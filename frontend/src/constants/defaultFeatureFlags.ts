@@ -5,8 +5,8 @@ export const defaultFeatureFlags: FeatureFlags = {
   searchOff: false,
   opportunityOff: false,
   // should we show a sign in button in the header?
-  authOn: false,
-  savedOpportunitiesOn: false,
-  savedSearchesOn: false,
+  authOn: true,
+  savedOpportunitiesOn: true,
+  savedSearchesOn: true,
   applyFormPrototypeOff: true,
 };

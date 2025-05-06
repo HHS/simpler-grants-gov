@@ -1,5 +1,6 @@
 "use-client";
 
+import { useIsSSR } from "src/hooks/useIsSSR";
 import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
@@ -33,6 +34,7 @@ export const LoginModal = ({
   closeText: string;
   modalId: string;
 }) => {
+  const isSSR = useIsSSR();
   return (
     <Modal
       ref={modalRef}
@@ -41,6 +43,7 @@ export const LoginModal = ({
       aria-labelledby={`${modalId}-heading`}
       aria-describedby={`${modalId}-description`}
       id={modalId}
+      renderToPortal={!isSSR}
     >
       <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
       <div className="usa-prose">
