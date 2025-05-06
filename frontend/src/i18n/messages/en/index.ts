@@ -1,4 +1,60 @@
 export const messages = {
+  Homepage: {
+    pageTitle: "Let's build a simpler Grants.gov together",
+    pageDescription:
+      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+    github_link: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "Test out our experimental features",
+        canDoHeader: "Tell us what's working (and what's not)",
+        canDoSubHeader: "What you can do now",
+        canDoParagraph:
+          "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
+        tryLink: "Try the new simpler search",
+        cantDoHeader: "What you can't do quite yet",
+        cantDoParagraph:
+          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+        iconSections: [
+          {
+            description:
+              "We're excited to hear from you to learn how we can improve.",
+            http: "mailto:simpler@grants.gov",
+            iconName: "build",
+            link: "Contact us at simpler@grants.gov",
+            title: "Send us your feedback and suggestions.",
+          },
+          {
+            description:
+              "Our newsletter delivers the latest news straight to your inbox.",
+            http: "/subscribe",
+            iconName: "mail",
+            link: "Subscribe to our newsletter",
+            title: "Be the first to hear about new features.",
+          },
+        ],
+      },
+      building: {
+        title: "Building <span>with</span> you, not <span>for</span> you",
+        paragraphs: [
+          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+        ],
+      },
+      involved: {
+        title: "More ways to get involved",
+        technicalTitle: "Contribute your technical expertise",
+        technicalDescription:
+          "We're always excited to welcome new open source developers to our community.",
+        technicalLink: "Learn how to contribute code",
+        participateTitle: "Participate in user research",
+        participateDescription:
+          "Be a part of the design process by taking part in usability tests and interviews.",
+        participateLink: "Sign up to participate in future studies",
+        discourseLink: "Chat on the Discourse forum",
+      },
+    },
+  },
   Events: {
     pageTitle: "Events | Simpler.Grants.gov",
     pageDescription:
@@ -138,49 +194,6 @@ export const messages = {
     page_title: "Simpler.Grants.gov",
     meta_description:
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
-    goal: {
-      paragraph_1:
-        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
-      title_2: "Grant seekers & applicants",
-      paragraph_2:
-        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
-      title_3: "Federal grantmaking agencies",
-      paragraph_3:
-        "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
-      cta: "Subscribe for project updates",
-    },
-    process_and_research: {
-      title_1: "The process",
-      title_2: "The research",
-      paragraph_1:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source, and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works, what can be improved, and what should happen next.",
-      paragraph_2:
-        "We conduct extensive research to gather insights from applicants, potential applicants, and grantmakers. You can sign up to participate and help inform and inspire new features as we build a simpler Grants.gov together.",
-      cta_1: "Learn about our progress",
-      cta_2: "Learn more about our research",
-    },
-    fo_title: "Improvements to funding opportunity announcements",
-    fo_paragraph_1:
-      "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
-    fo_paragraph_2:
-      "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
-    fo_title_2: "View our grant announcement prototypes",
-    fo_paragraph_3:
-      "We recently simplified the language of four grant announcements and applied visual and user‑centered design principles to increase their readability and usability.",
-    acl_prototype: "Link to ACL Notice of Funding Opportunity example pdf",
-    acf_prototype: "Link to ACF Notice of Funding Opportunity example pdf",
-    cdc_prototype: "Link to CDC Notice of Funding Opportunity example pdf",
-    samhsa_prototype:
-      "Link to SAMHSA Notice of Funding Opportunity example pdf",
-    fo_title_3: "We want to hear from you!",
-    fo_paragraph_4:
-      "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
-    fo_title_4:
-      "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
-    fo_paragraph_5:
-      "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
-    wtgi_paragraph_2:
-      "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
   },
   Vision: {
     pageTitle: "Vision | Simpler.Grants.gov",
@@ -494,13 +507,6 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
-  Hero: {
-    title: "We're building a simpler Grants.gov!",
-    content:
-      "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
-    search_link: "Search for grants",
-    github_link: "Follow on GitHub",
-  },
   Footer: {
     agency_name: "Grants.gov",
     agency_contact_center: "Grants.gov Program Management Office",
@@ -651,10 +657,10 @@ export const messages = {
         general: "About saved searches",
       },
       modal: {
-        title: "Save search query",
+        title: "Name this search query",
         description:
-          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
-        inputLabel: "Query name",
+          "Save these search terms and filters with a name for easy access later.",
+        inputLabel: "Name (Required)",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",

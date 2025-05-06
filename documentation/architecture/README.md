@@ -25,7 +25,7 @@ flowchart TB
 
 This is an architecture diagram focusing on the AWS shared infrastructure managed by simpler.grants.gov
 
-![Grants gov system architecture](https://github.com/HHS/simpler-grants-gov/assets/5768468/15ac8a1e-f68c-4cdb-9a1b-e1e6c7302539)
+![Grants gov system architecture](https://github.com/user-attachments/assets/f4191c3e-d8a5-4094-b7c9-f45d5a9e08e1)
 
 It was generated via the LucidChart. You can find it inside the Nava LucidChart by viewing "Shared With Me" > "Nava" > "Grants.gov". You can also find it at [this shareable link](https://lucid.app/lucidchart/8d0fb4b2-fe85-4460-8df9-1255a506c5b6/edit?viewport_loc=-622%2C-233%2C5673%2C3098%2C0_0&invitationId=inv_a5fd77d9-d546-4b02-925a-6c3e254ccce7), if you already have access.
 
