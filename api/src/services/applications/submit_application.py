@@ -19,7 +19,7 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
     if application.application_status != ApplicationStatus.IN_PROGRESS:
         message = f"Application cannot be submitted. It is currently in status: {application.application_status}"
         logger.warning(f"Application {application_id} submission failed: {message}")
-        raise_flask_error(403, "FORBIDDEN", message)
+        raise_flask_error(403, message, validation_issues=[ValidationErrorDetail(type=ValidationErrorType.NOT_IN_PROGRESS, message="Application cannot be submitted, not currently in progress")])
 
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info(
