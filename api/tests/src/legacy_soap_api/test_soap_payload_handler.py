@@ -28,6 +28,13 @@ Content-ID:
 --uuid:cb40f637-4aa7-4771-abca-3130a73794dc--"""
 
 
+def test_invalid_soap_string():
+    soap_payload = SoapPayload("randomdata939023")
+    assert soap_payload.envelope is None
+    assert soap_payload.operation_name is None
+    assert soap_payload.to_dict() == {}
+
+
 class TestSoapPayload:
     @pytest.fixture(scope="class")
     def soap_payload(self):
@@ -46,4 +53,23 @@ class TestSoapPayload:
     def test_operation_name(self, soap_payload):
         given = soap_payload.operation_name
         expected = MOCK_SOAP_OPERATION_NAME
+        assert given == expected
+
+    def test_to_dict(self, soap_payload):
+        given = soap_payload.to_dict()
+        expected = {
+            "Envelope": {
+                "Header": {
+                    "APIKey": "apikeyinheaderexample"
+                },
+                "Body": {
+                    "GetOpportunityListResponse": {
+                        "OpportunityDetails": {
+                            "OpeningDate": "2025-03-20-04:00",
+                            "ClosingDate": "2025-07-26-04:00"
+                        }
+                    }
+                }
+            }
+        }
         assert given == expected

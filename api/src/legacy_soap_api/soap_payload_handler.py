@@ -1,6 +1,8 @@
 import re
 from xml.etree import ElementTree
 
+from src.util.xml_utils import xml_to_dict
+
 
 class SoapPayload:
     def __init__(self, soap_payload_str: str) -> None:
@@ -34,3 +36,8 @@ class SoapPayload:
             return None
         except ElementTree.ParseError:
             return None
+
+    def to_dict(self) -> dict:
+        if not self.envelope:
+            return {}
+        return xml_to_dict(self.envelope)
