@@ -24,7 +24,6 @@ on:
           - staging
           - prod
       version:
-        required: true
         default: "main"
         description: Tag or branch or SHA to deploy
 
@@ -32,7 +31,7 @@ jobs:
   checks:
     uses: ./.github/workflows/ci-nofos.yml
     with:
-      version: ${{ inputs.version || github.ref }}
+      version: ${{ inputs.version  }}
 
   deploy:
     name: Deploy
@@ -41,7 +40,7 @@ jobs:
     with:
       app_name: "nofos"
       environment: ${{ inputs.environment }}
-      version: ${{ inputs.version || github.ref }}
+      version: ${{ inputs.version }}
 
   send-slack-notification:
     if: failure()
