@@ -13,11 +13,13 @@ from src.api.application_alpha.application_schemas import (
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
 )
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.get_application import get_application
 from src.services.applications.get_application_form import get_application_form
+from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
@@ -125,3 +127,24 @@ def application_get(
         message="Success",
         data=application,
     )
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/submit")
+@application_blueprint.output(AbstractResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_key_auth)
+@flask_db.with_db_session()
+def application_submit(db_session: db.Session, application_id: UUID) -> response.ApiResponse:
+    """Submit an application"""
+    add_extra_data_to_current_request_logs(
+        {
+            "application_id": application_id,
+        }
+    )
+    logger.info("POST /alpha/applications/:application_id/submit")
+
+    with db_session.begin():
+        submit_application(db_session, application_id)
+
+    # Return success response
+    return response.ApiResponse(message="Success")
