@@ -55,7 +55,6 @@ locals {
   service_config                                 = local.environment_config.service_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
@@ -201,32 +200,9 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
-    module.app_config.enable_identity_provider ? [{
-      # name      = "COGNITO_CLIENT_SECRET"
-      # valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_USERNAME"
-      valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_PASSWORD"
-      valueFrom = data.aws_ssm_parameter.search_password_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_ENDPOINT"
-      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
-    }] : []
   )
 
-  extra_policies = merge(
-    {
-      # storage_access = module.storage.access_policy_arn
-    },
-    module.app_config.enable_identity_provider ? {
-      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
-  )
+  extra_policies = merge({}, {})
 
   is_temporary = local.is_temporary
 }

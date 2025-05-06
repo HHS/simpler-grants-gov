@@ -1,14 +1,3 @@
-output "search_config" {
-  value = var.has_search ? {
-    instance_type           = var.search_data_instance_type
-    instance_count          = var.search_data_instance_count
-    dedicated_master_type   = var.search_master_instance_type
-    engine_version          = var.search_engine_version
-    volume_size             = var.search_data_volume_size
-    availability_zone_count = var.search_availability_zone_count
-  } : null
-}
-
 output "database_config" {
   value = local.database_config
 }
@@ -27,7 +16,6 @@ output "service_config" {
     instance_memory                 = var.instance_memory
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
     domain_name                     = var.domain_name
-    s3_cdn_domain_name              = var.s3_cdn_domain_name
     enable_https                    = var.enable_https
     region                          = var.default_region
     cpu                             = var.instance_cpu
@@ -50,10 +38,6 @@ output "service_config" {
   }
 }
 
-output "identity_provider_config" {
-  value = local.identity_provider_config
-}
-
 output "notifications_config" {
   value = local.notifications_config
 }
@@ -71,10 +55,4 @@ output "scheduled_jobs" {
 
 output "s3_buckets" {
   value = local.s3_buckets
-}
-
-output "incident_management_service_integration" {
-  value = var.has_incident_management_service ? {
-    integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
-  } : null
 }
