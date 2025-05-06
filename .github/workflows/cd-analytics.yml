@@ -8,6 +8,7 @@ on:
     paths:
       - "analytics/**"
       - "infra/analytics/**"
+      - "infra/modules/**"
   release:
     types: [published]
   workflow_dispatch:
