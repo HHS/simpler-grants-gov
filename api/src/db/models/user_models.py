@@ -41,7 +41,7 @@ class User(ApiSchemaTable, TimestampMixin):
         viewonly=True,
     )
 
-    applications: Mapped[list["ApplicationUser"]] = relationship(
+    application_users: Mapped[list["ApplicationUser"]] = relationship(
         "ApplicationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
@@ -184,4 +184,4 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
     )
 
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
-    user: Mapped[User] = relationship(User, back_populates="applications")
+    user: Mapped[User] = relationship(User, back_populates="application_users")
