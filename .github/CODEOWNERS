@@ -1,4 +1,5 @@
 # Keep this document in sync with MAINTAINERS.md.
+# More generic / higher level paths should be listed first.
 
 * @mdragon # project lead
 
@@ -13,7 +14,9 @@
 /frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
 /documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
 
-/infra/               @acouch @coilysiren @mdragon
-/documentation/infra/ @acouch @coilysiren @mdragon
-/.github/             @acouch @coilysiren @mdragon
-/bin/                 @acouch @coilysiren @mdragon
+/infra/                    @acouch @coilysiren @mdragon
+/infra/nofos/              @acouch @coilysiren @mdragon @pcraig3
+/documentation/infra/      @acouch @coilysiren @mdragon
+/.github/                  @acouch @coilysiren @mdragon
+/.github/workflows/*nofos* @acouch @coilysiren @mdragon @pcraig3
+/bin/                      @acouch @coilysiren @mdragon
