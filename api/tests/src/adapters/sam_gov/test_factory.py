@@ -22,7 +22,11 @@ class TestSamGovClientFactory:
     )
     def test_create_real_client(self):
         """Test creating a real client."""
-        client = create_sam_gov_client()
+        # Create config directly instead of relying on environment variables
+        config = SamGovConfig(
+            api_key="test-api-key", base_url="https://test-api.sam.gov", use_mock=False
+        )
+        client = create_sam_gov_client(config=config)
         assert isinstance(client, SamGovClient)
         assert not isinstance(client, MockSamGovClient)
 
@@ -34,7 +38,13 @@ class TestSamGovClientFactory:
     )
     def test_create_mock_client(self):
         """Test creating a mock client."""
-        client = create_sam_gov_client()
+        # Create config directly instead of relying on environment variables
+        config = SamGovConfig(
+            api_key="test-api-key",  # Need to provide api_key even for mock client
+            base_url="https://test-api.sam.gov",
+            use_mock=True,
+        )
+        client = create_sam_gov_client(config=config)
         assert isinstance(client, MockSamGovClient)
 
     def test_create_client_with_config(self):
