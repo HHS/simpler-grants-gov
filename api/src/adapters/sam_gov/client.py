@@ -140,8 +140,6 @@ class SamGovClient(BaseSamGovClient):
             # Build response object
             extract_response = SamExtractResponse(
                 file_name=output_path,
-                file_size=content_length or os.path.getsize(output_path),
-                download_date=datetime.now(),
             )
 
             return extract_response

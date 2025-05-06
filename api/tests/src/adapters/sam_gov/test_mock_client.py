@@ -20,7 +20,6 @@ class TestMockSamGovClient:
                     "TEST_EXTRACT_FILE.ZIP": {
                         "size": 1024 * 1024,  # 1MB
                         "content_type": "application/zip",
-                        "sensitivity": "PUBLIC",
                     }
                 }
             }
@@ -44,7 +43,6 @@ class TestMockSamGovClient:
             # Verify the extract metadata
             assert response is not None
             assert response.file_name == output_path
-            assert response.file_size == 1024 * 1024
             # These fields were removed from the model
             # assert response.content_type == "application/zip"
             # assert response.sensitivity == SensitivityLevel.PUBLIC

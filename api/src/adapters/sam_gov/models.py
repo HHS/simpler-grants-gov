@@ -81,5 +81,3 @@ class SamExtractResponse(BaseModel):
     """Response metadata for a successful SAM.gov extract download."""
 
     file_name: str = Field(..., description="The name of the downloaded file")
-    file_size: int = Field(..., description="The size of the downloaded file in bytes")
-    download_date: datetime = Field(..., description="When the extract was downloaded")

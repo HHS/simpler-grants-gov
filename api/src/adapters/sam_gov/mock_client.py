@@ -115,8 +115,6 @@ class MockSamGovClient(BaseSamGovClient):
 
         return SamExtractResponse(
             file_name=output_path,
-            file_size=file_size,
-            download_date=datetime.now(),
         )
 
     def add_mock_extract(

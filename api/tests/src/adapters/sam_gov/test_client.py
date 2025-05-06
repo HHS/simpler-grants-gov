@@ -86,7 +86,6 @@ class TestSamGovClient:
                 # Verify the response
                 assert response is not None
                 assert response.file_name == output_path
-                assert response.file_size == len(file_content)
                 # content_type was removed from the model
                 # assert response.content_type == "application/zip"
 
