@@ -66,7 +66,7 @@ class BaseNotificationTask(Task):
                     app_id=self.notification_config.app_id,
                 )
                 logger.info(
-                    "Successfully sent notification to user",
+                    "Successfully delivered notification to user",
                     extra={
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,

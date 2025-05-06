@@ -86,7 +86,7 @@ def test_search_notifications_cli(
 
     # Verify the log contains the correct metrics
     log_records = [
-        r for r in caplog.records if "Successfully sent notification to user" in r.message
+        r for r in caplog.records if "Successfully delivered notification to user" in r.message
     ]
     assert len(log_records) == 1
     extra = log_records[0].__dict__
