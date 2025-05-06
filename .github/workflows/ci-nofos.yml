@@ -1,4 +1,4 @@
-name: API Checks
+name: NOFOs Checks
 
 on:
   workflow_call:
