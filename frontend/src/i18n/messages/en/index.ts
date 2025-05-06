@@ -3,7 +3,7 @@ export const messages = {
     pageTitle: "Let's build a simpler Grants.gov together",
     pageDescription:
       "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
-    github_link: "Follow on GitHub",
+    githubLink: "Follow on GitHub",
     sections: {
       experimental: {
         title: "Test out our experimental features",
@@ -367,16 +367,6 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
-<<<<<<< HEAD
-  Hero: {
-    title: "We're building a simpler Grants.gov!",
-    content:
-      "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
-    searchLink: "Search for grants",
-    githubLink: "Follow on GitHub",
-  },
-=======
->>>>>>> upstream/main
   Footer: {
     agencyName: "Grants.gov",
     agencyContactCenter: "Grants.gov Program Management Office",
