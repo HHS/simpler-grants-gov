@@ -1,5 +1,6 @@
 import {
   FilterOption,
+  SearchAPIResponse,
   ValidSearchQueryParam,
 } from "src/types/search/searchResponseTypes";
 
@@ -23,6 +24,7 @@ export async function SearchFilterAccordion({
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   let searchResults;
   try {

@@ -51,6 +51,8 @@ function Search({ searchParams, params }: SearchPageProps) {
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
 
+  const suspenseKey = JSON.stringify(resolvedSearchParams);
+
   return (
     <>
       <SearchAnalytics
@@ -78,6 +80,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                   fundingInstrument={fundingInstrument}
                   agency={agency}
                   searchResultsPromise={searchResultsPromise}
+                  suspenseKey={suspenseKey}
                 />
               </ContentDisplayToggle>
             </div>
@@ -87,6 +90,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                 query={query}
                 loadingMessage={t("loading")}
                 searchResultsPromise={searchResultsPromise}
+                suspenseKey={suspenseKey}
               ></SearchResults>
             </div>
           </div>

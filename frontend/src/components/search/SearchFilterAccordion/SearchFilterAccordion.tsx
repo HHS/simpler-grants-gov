@@ -200,9 +200,9 @@ export function SearchFilterAccordionUI({
   title,
   queryParamKey,
   query,
-  // facetCounts,
-  facetKey,
-  searchPromise,
+  facetCounts,
+  // facetKey,
+  // searchPromise,
   defaultEmptySelection,
   includeAnyOption = true,
 }: SearchFilterAccordionProps) {

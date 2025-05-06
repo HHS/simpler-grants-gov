@@ -13,6 +13,7 @@ import {
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
+import { SearchFilterAccordionUI } from "./SearchFilterAccordion/SearchFilterAccordion";
 
 const defaultFacetCounts = {
   funding_instrument: {},
@@ -28,11 +29,12 @@ const SearchAccordionFallback = ({
   queryParamKey,
   query,
 }) => (
-  <SearchFilterAccordion
+  <SearchFilterAccordionUI
     filterOptions={filterOptions}
     title={title}
     queryParamKey={queryParamKey}
     query={query}
+    facetCounts={{}}
   />
 );
 
@@ -43,6 +45,7 @@ export default async function SearchFilters({
   category,
   opportunityStatus,
   searchResultsPromise,
+  suspenseKey,
 }: {
   fundingInstrument: Set<string>;
   eligibility: Set<string>;
@@ -59,6 +62,7 @@ export default async function SearchFilters({
   return (
     <>
       <Suspense
+        key={suspenseKey}
         fallback={
           <SearchAccordionFallback
             filterOptions={fundingOptions}
@@ -79,6 +83,7 @@ export default async function SearchFilters({
         />
       </Suspense>
       <Suspense
+        key={suspenseKey}
         fallback={
           <SearchAccordionFallback
             filterOptions={eligibilityOptions}
@@ -99,6 +104,7 @@ export default async function SearchFilters({
         />
       </Suspense>
       <Suspense
+        key={suspenseKey}
         fallback={
           <SearchAccordionFallback
             filterOptions={categoryOptions}
