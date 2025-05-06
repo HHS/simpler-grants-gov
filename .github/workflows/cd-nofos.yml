@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - ".github/workflows/cd-nofos.yml"
+      - ".github/workflows/deploy-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
   release:
