@@ -14,12 +14,14 @@ defaults:
 
 jobs:
   lint-test:
-    name: API Lint, Format & Tests
+    name: Nofos Lint, Format & Tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}
+
+      - run: ls
 
       - run: make test
