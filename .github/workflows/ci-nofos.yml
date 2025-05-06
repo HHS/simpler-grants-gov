@@ -19,7 +19,7 @@ on:
 
 jobs:
   lint-test:
-    name: Nofos Lint, Format & Tests
+    name: NOFOs Lint, Format & Tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
