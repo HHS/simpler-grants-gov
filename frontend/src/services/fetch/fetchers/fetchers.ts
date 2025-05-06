@@ -56,6 +56,7 @@ export function requesterForEndpoint({
       ...additionalHeaders,
     };
 
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     let response;
     try {
       response = await fetch(url, {

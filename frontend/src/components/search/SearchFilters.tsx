@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { SearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordionAsync";
 import {
   categoryOptions,
   eligibilityOptions,
@@ -21,6 +21,20 @@ const defaultFacetCounts = {
   funding_category: {},
   opportunity_status: {},
 };
+
+const SearchAccordionFallback = ({
+  filterOptions,
+  title,
+  queryParamKey,
+  query,
+}) => (
+  <SearchFilterAccordion
+    filterOptions={filterOptions}
+    title={title}
+    queryParamKey={queryParamKey}
+    query={query}
+  />
+);
 
 export default async function SearchFilters({
   fundingInstrument,
@@ -38,67 +52,72 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = getAgenciesForFilterOptions();
+  // const agenciesPromise = getAgenciesForFilterOptions();
 
-  let searchResults;
-  try {
-    searchResults = await searchResultsPromise;
-  } catch (e) {
-    console.error("Search error, cannot set filter facets", e);
-  }
-
-  const facetCounts = searchResults?.facet_counts || defaultFacetCounts;
+  // const facetCounts = searchResults?.facet_counts || defaultFacetCounts;
 
   return (
     <>
-      <SearchOpportunityStatus
-        query={opportunityStatus}
-        facetCounts={facetCounts.opportunity_status}
-      />
-      <SearchFilterAccordion
-        filterOptions={fundingOptions}
-        query={fundingInstrument}
-        queryParamKey="fundingInstrument"
-        title={t("accordion.titles.funding")}
-        facetCounts={facetCounts.funding_instrument || {}}
-      />
-      <SearchFilterAccordion
-        filterOptions={eligibilityOptions}
-        query={eligibility}
-        queryParamKey={"eligibility"}
-        title={t("accordion.titles.eligibility")}
-        facetCounts={facetCounts.applicant_type || {}}
-      />
       <Suspense
         fallback={
-          <Accordion
-            bordered={true}
-            items={[
-              {
-                title: t("accordion.titles.agency"),
-                content: [],
-                expanded: false,
-                id: "opportunity-filter-agency-disabled",
-                headingLevel: "h2",
-              },
-            ]}
-            multiselectable={true}
-            className="margin-top-4"
+          <SearchAccordionFallback
+            filterOptions={fundingOptions}
+            query={fundingInstrument}
+            queryParamKey="fundingInstrument"
+            title={t("accordion.titles.funding")}
           />
         }
       >
-        <AgencyFilterAccordion
-          query={agency}
-          agencyOptionsPromise={agenciesPromise}
+        <SearchFilterAccordion
+          searchResultsPromise={searchResultsPromise}
+          facetKey="funding_instrument"
+          filterOptions={fundingOptions}
+          query={fundingInstrument}
+          queryParamKey="fundingInstrument"
+          title={t("accordion.titles.funding")}
+          // facetCounts={facetCounts.funding_instrument || {}}
         />
       </Suspense>
-      <SearchFilterAccordion
-        filterOptions={categoryOptions}
-        query={category}
-        queryParamKey={"category"}
-        title={t("accordion.titles.category")}
-        facetCounts={facetCounts.funding_category || {}}
-      />
+      <Suspense
+        fallback={
+          <SearchAccordionFallback
+            filterOptions={eligibilityOptions}
+            query={eligibility}
+            queryParamKey={"eligibility"}
+            title={t("accordion.titles.eligibility")}
+          />
+        }
+      >
+        <SearchFilterAccordion
+          searchResultsPromise={searchResultsPromise}
+          facetKey="eligibility"
+          filterOptions={eligibilityOptions}
+          query={eligibility}
+          queryParamKey={"eligibility"}
+          title={t("accordion.titles.eligibility")}
+          // facetCounts={facetCounts.applicant_type || {}}
+        />
+      </Suspense>
+      <Suspense
+        fallback={
+          <SearchAccordionFallback
+            filterOptions={categoryOptions}
+            query={category}
+            queryParamKey={"category"}
+            title={t("accordion.titles.category")}
+          />
+        }
+      >
+        <SearchFilterAccordion
+          searchResultsPromise={searchResultsPromise}
+          facetKey="funding_category"
+          filterOptions={categoryOptions}
+          query={category}
+          queryParamKey={"category"}
+          title={t("accordion.titles.category")}
+          // facetCounts={facetCounts.funding_category || {}}
+        />
+      </Suspense>
     </>
   );
 }
