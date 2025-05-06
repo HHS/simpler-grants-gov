@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def submit_application(db_session: db.Session, application_id: UUID) -> Application:
-    logger.info(f"Submitting application {application_id}")
+    logger.info("Processing application submit")
 
     application = get_application(db_session, application_id)
 
