@@ -214,6 +214,6 @@ class SamGovClient(BaseSamGovClient):
             response.raise_for_status()
             return response
 
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error when calling SAM.gov API: {e}")
+        except requests.exceptions.RequestException:
+            logger.exception("Error when calling SAM.gov API")
             raise
