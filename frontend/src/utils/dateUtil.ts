@@ -3,6 +3,7 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
+import { clientTokenRefreshInterval } from "src/constants/auth";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -20,3 +21,12 @@ export function formatDate(dateStr: string | null): string {
 }
 
 export const getConfiguredDayJs = () => dayjs;
+
+export const isExpired = (expiration?: number) =>
+  !!expiration && expiration < Date.now();
+
+// is a token less than 10 minutes from expiring?
+export const isExpiring = (expiration?: number) =>
+  !isExpired(expiration) &&
+  !!expiration &&
+  expiration < Date.now() + clientTokenRefreshInterval;
