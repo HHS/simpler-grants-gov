@@ -87,8 +87,6 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               <a
                 class="font-sans-md line-height-sans-4"
                 href="mailto:simpler@grants.gov"
-                rel="noopener noreferrer"
-                target="_blank"
               >
                 Contact us at simpler@grants.gov
               </a>
@@ -117,8 +115,6 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               <a
                 class="font-sans-md line-height-sans-4"
                 href="/subscribe"
-                rel="noopener noreferrer"
-                target="_blank"
               >
                 Subscribe to our newsletter
               </a>

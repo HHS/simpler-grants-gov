@@ -1,9 +1,8 @@
-import { UswdsIconNames } from "src/types/generalTypes";
-
-import Link from "next/link";
 import { JSX } from "react";
 
+import Link from "next/link";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { UswdsIconNames } from "src/types/generalTypes";
 
 type Props = {
   description: string;
@@ -32,8 +31,6 @@ export default function IconInfo({
       <Link
         href={link}
         className="font-sans-md line-height-sans-4"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         {linkText}
       </Link>

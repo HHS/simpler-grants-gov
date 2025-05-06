@@ -55,8 +55,6 @@ exports[`Homepage Involved Content matches snapshot 1`] = `
               <a
                 class="font-sans-md line-height-sans-4"
                 href="https://wiki.simpler.grants.gov/get-involved/github-code"
-                rel="noopener noreferrer"
-                target="_blank"
               >
                 Learn how to contribute code
               </a>
@@ -94,8 +92,6 @@ exports[`Homepage Involved Content matches snapshot 1`] = `
               <a
                 class="font-sans-md line-height-sans-4"
                 href="https://ethn.io/91822"
-                rel="noopener noreferrer"
-                target="_blank"
               >
                 Sign up to participate in future studies
               </a>
