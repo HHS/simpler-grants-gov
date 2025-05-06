@@ -28,10 +28,12 @@ function SaveSearchInput({
   validationError,
   updateSavedSearchName,
   id,
+  defaultValue = "",
 }: {
   validationError?: string;
   updateSavedSearchName: (name: string) => void;
   id: string;
+  defaultValue?: string;
 }) {
   const t = useTranslations("Search.saveSearch.modal");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,7 +56,7 @@ function SaveSearchInput({
           })}
           id={`edit-saved-search-input-${id}`}
           name={`edit-saved-search-${id}`}
-          defaultValue={""}
+          defaultValue={defaultValue}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
           required
@@ -96,9 +98,11 @@ function SuccessContent({
 export function EditSavedSearchModal({
   savedSearchId,
   editText,
+  queryName,
 }: {
   savedSearchId: string;
   editText: string;
+  queryName: string;
 }) {
   const modalId = useMemo(
     () => `edit-save-search-${savedSearchId}`,
@@ -220,6 +224,7 @@ export function EditSavedSearchModal({
                 validationError={validationError}
                 updateSavedSearchName={setSavedSearchName}
                 id={savedSearchId}
+                defaultValue={queryName}
               />
               <ModalFooter>
                 {loading ? (
