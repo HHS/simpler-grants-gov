@@ -18,7 +18,7 @@ export const AnyOptionCheckbox = ({
   const { setQueryParam } = useSearchParamUpdater();
   const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
   const t = useTranslations("Search.accordion");
-  const label = `${t("any")} ${title.toLowerCase()}`;
+  const label = `${t("any")} ${title}`;
 
   /*
     When checked: remove param for the filter from the query, which will unselect all checkboxes

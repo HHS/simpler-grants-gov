@@ -132,7 +132,7 @@ const AccordionContent = ({
         {includeAnyOption && (
           <li>
             <AnyOptionCheckbox
-              title={title}
+              title={title.toLowerCase()}
               checked={isNoneSelected}
               queryParamKey={queryParamKey}
               defaultEmptySelection={defaultEmptySelection}
