@@ -7,7 +7,10 @@ description: "Configure AWS Credentials for an AWS account so that |
   1. Authenticate by account_name |
   2. Authenticate by network_name |
   3. Authenticate by app_name and environment."
+
 inputs:
+  working-directory:
+    default: "."
   account_name:
     description: "Name of account, must match <ACCOUNT_NAME> in <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend file in /infra/accounts"
   network_name:
@@ -17,10 +20,12 @@ inputs:
     required: true
   environment:
     description: 'Name of environment (dev, staging, prod) that AWS resources live in, or "shared" for resources that are shared across environments'
+
 runs:
   using: "composite"
   steps:
     - name: Get network name from app and environment
+      working-directory: ${{ inputs.working-directory }}
       id: get-network-name
       if: ${{ inputs.app_name && inputs.environment }}
       run: |
@@ -40,6 +45,7 @@ runs:
       shell: bash
 
     - name: Get account name from network
+      working-directory: ${{ inputs.working-directory }}
       id: get-account-name
       if: ${{ inputs.network_name || steps.get-network-name.outputs.network_name }}
       run: |
@@ -55,6 +61,7 @@ runs:
       shell: bash
 
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
+      working-directory: ${{ inputs.working-directory }}
       env:
         TF_LOG: INFO
       run: |
@@ -90,6 +97,7 @@ runs:
         echo "AWS_ROLE_TO_ASSUME=${aws_role_to_assume}" >> "$GITHUB_ENV"
         echo "AWS_REGION=${aws_region}" >> "$GITHUB_ENV"
       shell: bash
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
