@@ -37,7 +37,7 @@ describe("OpportunityAwardGridRow", () => {
       "font-sans-sm text-bold margin-bottom-0",
     );
 
-    const titleElement = screen.getByText(mockTranslations.program_funding);
+    const titleElement = screen.getByText(mockTranslations.programFunding);
     expect(titleElement).toBeInTheDocument();
     expect(titleElement).toHaveClass("desktop-lg:font-sans-sm margin-top-0");
   });
