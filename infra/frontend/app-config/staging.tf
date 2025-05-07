@@ -5,8 +5,8 @@ module "staging_config" {
   default_region                  = module.project_config.default_region
   environment                     = "staging"
   network_name                    = "staging"
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "staging.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

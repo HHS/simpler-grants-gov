@@ -61,33 +61,15 @@ class SamGovClient(BaseSamGovClient):
 
     def __init__(
         self,
-        api_key: str | SamGovConfig | None = None,
-        api_url: str | None = None,
+        config: SamGovConfig,
     ):
         """Initialize the client.
 
         Args:
-            api_key: API key for SAM.gov API or a SamGovConfig object.
-            api_url: URL for the SAM.gov API. If not provided, the value from environment variable will be used.
+            config: Configuration object for the SAM.gov client.
         """
-        # Handle config object case
-        if isinstance(api_key, SamGovConfig):
-            config = api_key
-            self.api_key = config.api_key
-            self.api_url = config.base_url
-            self.extract_url = config.extract_url
-        else:
-            # Handle direct parameters or environment variables
-            config = SamGovConfig()
-            self.api_key = api_key or config.api_key
-            self.api_url = api_url or config.base_url
-            self.extract_url = config.extract_url
-
-        # Validate required parameters
-        if not self.api_url:
-            raise ValueError(
-                "API URL must be provided either directly, via config, or via environment variable."
-            )
+        self.api_key = config.api_key
+        self.api_url = config.base_url
 
     def _build_headers(self) -> dict[str, str]:
         """Build headers for API requests.
@@ -131,11 +113,7 @@ class SamGovClient(BaseSamGovClient):
             raise ValueError("API URL must be provided for SAM.gov API access")
 
         # Build URL and parameters for file download
-        # Use extract_url if available, otherwise use api_url/download
-        if self.extract_url:
-            url = self.extract_url
-        else:
-            url = urljoin(self.api_url, "download")
+        url = urljoin(self.api_url, "data-services/v1/extracts")
 
         params = {"fileName": extract_request.file_name, "api_key": self.api_key}
 
@@ -246,31 +224,53 @@ class SamGovClient(BaseSamGovClient):
             response = requests.request(
                 method, url, params=params, json=data, stream=stream, headers=headers, **kwargs
             )
-
-            # Raise an exception for HTTP errors
             response.raise_for_status()
             return response
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error when calling SAM.gov API: {e}")
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {str(e)}")
             raise
 
     def get_monthly_extract_info(self) -> SamExtractInfo | None:
-        """
-        Get information about the latest monthly extract
+        """Get information about the latest monthly extract.
 
-        Makes a real API call to SAM.gov
+        Returns:
+            Information about the latest monthly extract, or None if no extract is available.
         """
-        # In a real implementation, this would call the SAM.gov API
-        # For now, we'll raise an error as this should be implemented when we have API access
-        raise NotImplementedError("Real SAM.gov API client not yet implemented")
+        try:
+            response = self._request("GET", "data-services/v1/extracts/monthly")
+            data = response.json()
+            if not data:
+                return None
+
+            return SamExtractInfo(
+                url=data["url"],
+                filename=data["filename"],
+                updated_at=datetime.fromisoformat(data["updated_at"]),
+            )
+        except Exception as e:
+            logger.error(f"Failed to get monthly extract info: {str(e)}")
+            return None
 
     def get_daily_extract_info(self) -> list[SamExtractInfo]:
-        """
-        Get information about available daily extracts
+        """Get information about available daily extracts.
 
-        Makes a real API call to SAM.gov
+        Returns:
+            List of information about available daily extracts.
         """
-        # In a real implementation, this would call the SAM.gov API
-        # For now, we'll raise an error as this should be implemented when we have API access
-        raise NotImplementedError("Real SAM.gov API client not yet implemented")
+        try:
+            response = self._request("GET", "data-services/v1/extracts/daily")
+            data = response.json()
+            if not data:
+                return []
+
+            return [
+                SamExtractInfo(
+                    url=item["url"],
+                    filename=item["filename"],
+                    updated_at=datetime.fromisoformat(item["updated_at"]),
+                )
+                for item in data
+            ]
+        except Exception as e:
+            logger.error(f"Failed to get daily extract info: {str(e)}")
+            return []
