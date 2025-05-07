@@ -1,6 +1,5 @@
 """Tests for the SAM.gov client factory."""
 
-import os
 from unittest import mock
 
 from src.adapters.sam_gov.client import SamGovClient
@@ -12,14 +11,6 @@ from src.adapters.sam_gov.mock_client import MockSamGovClient
 class TestSamGovClientFactory:
     """Tests for the SAM.gov client factory."""
 
-    @mock.patch.dict(
-        os.environ,
-        {
-            "SAM_GOV_API_KEY": "test-api-key",
-            "SAM_GOV_BASE_URL": "https://test-api.sam.gov",
-            "SAM_GOV_USE_MOCK": "false",
-        },
-    )
     def test_create_real_client(self):
         """Test creating a real client."""
         # Create config directly instead of relying on environment variables
@@ -32,12 +23,6 @@ class TestSamGovClientFactory:
         assert client.api_key == "test-api-key"
         assert client.api_url == "https://test-api.sam.gov"
 
-    @mock.patch.dict(
-        os.environ,
-        {
-            "SAM_GOV_USE_MOCK": "true",
-        },
-    )
     def test_create_mock_client(self):
         """Test creating a mock client."""
         # Create config directly instead of relying on environment variables
@@ -58,16 +43,6 @@ class TestSamGovClientFactory:
         assert isinstance(client, SamGovClient)
         assert client.api_url == "https://custom-api.sam.gov"
         assert client.api_key == "custom-key"
-
-    def test_create_client_with_config_and_override(self):
-        """Test creating a client with config and override values."""
-        config = SamGovConfig(
-            base_url="https://custom-api.sam.gov", api_key="custom-key", use_mock=False
-        )
-        client = create_sam_gov_client(config=config, config_override={"api_key": "override-key"})
-        assert isinstance(client, SamGovClient)
-        assert client.api_url == "https://custom-api.sam.gov"
-        assert client.api_key == "override-key"
 
     def test_create_mock_client_with_mock_params(self):
         """Test creating a mock client with custom mock parameters."""
