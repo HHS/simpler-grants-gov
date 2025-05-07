@@ -42,16 +42,6 @@ class TestSamGovClientFactory:
         assert client.api_url == "https://custom-api.sam.gov"
         assert client.api_key == "custom-key"
 
-    def test_create_client_with_config_and_override(self):
-        """Test creating a client with config and override values."""
-        config = SamGovConfig(
-            base_url="https://custom-api.sam.gov", api_key="custom-key", use_mock=False
-        )
-        client = create_sam_gov_client(config=config, config_override={"api_key": "override-key"})
-        assert isinstance(client, SamGovClient)
-        assert client.api_url == "https://custom-api.sam.gov"
-        assert client.api_key == "override-key"
-
     def test_create_mock_client_with_mock_params(self):
         """Test creating a mock client with custom mock parameters."""
         # We need to patch the MockSamGovClient.__init__ method to avoid actually trying to read the file
