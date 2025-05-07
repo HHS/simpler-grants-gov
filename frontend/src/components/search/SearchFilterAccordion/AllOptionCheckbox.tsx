@@ -1,8 +1,10 @@
+import { isEqual, uniq } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { FilterOption } from "src/types/search/searchResponseTypes";
+import { isSubset } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Checkbox } from "@trussworks/react-uswds";
 
 /*
@@ -26,12 +28,6 @@ export const AllOptionCheckbox = ({
   childOptions: FilterOption[];
   queryParamKey: string;
 }) => {
-  const [checked, setChecked] = useState<boolean>();
-  const { setQueryParam } = useSearchParamUpdater();
-  const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
-  const t = useTranslations("Search.accordion");
-  const label = `${t("all")} ${title}`;
-
   const currentSelectionValues = useMemo(
     () => Array.from(currentSelections.values()),
     [currentSelections],
@@ -41,8 +37,19 @@ export const AllOptionCheckbox = ({
     [childOptions],
   );
 
+  const [checked, setChecked] = useState<boolean>(
+    isSubset<string>(childOptionValues, currentSelectionValues),
+  );
+  const { setQueryParam } = useSearchParamUpdater();
+  const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
+  const t = useTranslations("Search.accordion");
+  const label = `${t("all")} ${title}`;
+
+  useEffect(() => {
+    setChecked(isSubset<string>(childOptionValues, currentSelectionValues));
+  }, [childOptionValues, currentSelectionValues]);
+
   const uncheckOptions = () => {
-    setChecked(false);
     if (!currentSelections) {
       return;
     }
@@ -55,8 +62,9 @@ export const AllOptionCheckbox = ({
   };
 
   const checkOptions = () => {
-    setChecked(true);
-    const newSelectedOptions = childOptionValues.concat(currentSelectionValues);
+    const newSelectedOptions = uniq(
+      childOptionValues.concat(currentSelectionValues),
+    );
     setQueryParam(queryParamKey, newSelectedOptions.join(","));
   };
 

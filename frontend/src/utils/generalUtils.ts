@@ -5,6 +5,7 @@
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
 
+import { difference } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 // Refer to tests to see how this works in practice
@@ -128,3 +129,7 @@ export const isCurrentPath = (href: string, currentPath: string): boolean =>
 export function isExternalLink(href: string): boolean {
   return !!(href && href.includes("http"));
 }
+
+export const isSubset = <T>(subset: T[], superset: T[]) => {
+  return !difference(subset, superset).length;
+};

@@ -3,6 +3,7 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { ValidSearchQueryParamData } from "src/types/search/searchRequestTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
+import { paramsToFormattedQuery } from "src/utils/search/searchUtils";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -48,10 +49,7 @@ export function useSearchParamUpdater() {
     }
 
     sendGAEvent("event", "search_term", { key: finalQueryParamValue });
-    let newPath = `${pathname}?${params.toString()}`;
-    newPath = removeURLEncodedCommas(newPath);
-    newPath = removeQuestionMarkIfNoParams(params, newPath);
-    router.push(newPath, { scroll });
+    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const replaceQueryParams = (params: ValidSearchQueryParamData) => {
@@ -60,12 +58,12 @@ export function useSearchParamUpdater() {
 
   const setQueryParam = (key: string, value: string, scroll = false) => {
     params.set(key, value);
-    router.push(`${pathname}?${params.toString()}`, { scroll });
+    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
-    router.push(`${pathname}?${params.toString()}`, { scroll });
+    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   return {
@@ -75,17 +73,4 @@ export function useSearchParamUpdater() {
     removeQueryParam,
     setQueryParam,
   };
-}
-
-function removeURLEncodedCommas(newPath: string) {
-  return newPath.replaceAll("%2C", ",");
-}
-
-// When we remove all query params we also need to remove
-// the question mark from the URL
-function removeQuestionMarkIfNoParams(
-  params: URLSearchParams,
-  newPath: string,
-) {
-  return params.toString() === "" ? newPath.replaceAll("?", "") : newPath;
 }
