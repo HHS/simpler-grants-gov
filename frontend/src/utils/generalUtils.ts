@@ -97,10 +97,6 @@ export const findFirstWhitespace = (content: string, startAt: number): number =>
 export const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
-export const stringToBoolean = (
-  mightRepresentABoolean: string | undefined,
-): boolean => mightRepresentABoolean === "true";
-
 // a hack to get filenames to work on blob based downloads across all browsers
 // see https://stackoverflow.com/a/48968694
 export const saveBlobToFile = (blob: Blob, filename: string) => {

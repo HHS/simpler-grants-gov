@@ -141,18 +141,14 @@ const AccordionContent = ({
         )}
         {filterOptions.map((option) => (
           <li key={option.id}>
-            {/* If we have children, show a "section" dropdown, otherwise show just a checkbox */}
+            {/* If we have children, show a "section", otherwise show just a checkbox */}
             {option.children ? (
               // SearchFilterSection will map over all children of this option
               <SearchFilterSection
                 option={option as FilterOptionWithChildren}
-                value={option.value}
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
-                toggleSelectAll={toggleSelectAll}
                 accordionTitle={title}
-                isSectionAllSelected={areSetsEqual}
-                isSectionNoneSelected={() => query.size === 0}
                 facetCounts={facetCounts}
               />
             ) : (

@@ -1,4 +1,4 @@
-import { isEqual, uniq } from "lodash";
+import { uniq } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { FilterOption } from "src/types/search/searchResponseTypes";
 import { isSubset } from "src/utils/generalUtils";
