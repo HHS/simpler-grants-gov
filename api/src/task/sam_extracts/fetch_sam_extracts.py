@@ -118,7 +118,7 @@ class SamExtractsTask(Task):
             select(SamExtractFile.extract_date)
             .where(
                 SamExtractFile.extract_type == extract_type,
-                SamExtractFile.status == SamGovProcessingStatus.COMPLETED,
+                SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
             )
             .order_by(SamExtractFile.extract_date.desc())
             .limit(1)
@@ -146,7 +146,7 @@ class SamExtractsTask(Task):
         stmt = select(SamExtractFile).where(
             SamExtractFile.extract_type == SamGovExtractType.MONTHLY,
             SamExtractFile.extract_date == target_date,
-            SamExtractFile.status == SamGovProcessingStatus.COMPLETED,
+            SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
         )
         existing = self.db_session.execute(stmt).scalar_one_or_none()
 
@@ -167,7 +167,7 @@ class SamExtractsTask(Task):
             extract_date=target_date,
             filename=str(response.file_name),  # Convert to string in case it's a mock
             s3_path=s3_path,
-            status=SamGovProcessingStatus.PENDING,
+            processing_status=SamGovProcessingStatus.PENDING,
             sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
         )
         self.db_session.add(extract)
@@ -222,7 +222,7 @@ class SamExtractsTask(Task):
                 extract_date=extract_date,
                 filename=str(response.file_name),  # Convert to string in case it's a mock
                 s3_path=s3_path,
-                status=SamGovProcessingStatus.PENDING,
+                processing_status=SamGovProcessingStatus.PENDING,
                 sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
             )
             self.db_session.add(extract)

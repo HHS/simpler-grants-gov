@@ -211,7 +211,7 @@ class TestSamExtractsTask(BaseTestClass):
             extract_date=MONTHLY_EXTRACT_DATE,
             filename="SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
             s3_path="test-prefix/monthly/2025-04-06/SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
-            status=SamGovProcessingStatus.COMPLETED,
+            processing_status=SamGovProcessingStatus.COMPLETED,
             sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
         )
         db_session.add(existing_extract)
@@ -236,7 +236,7 @@ class TestSamExtractsTask(BaseTestClass):
             extract_date=MONTHLY_EXTRACT_DATE,
             filename="SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
             s3_path="test-prefix/monthly/2025-04-06/SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
-            status=SamGovProcessingStatus.COMPLETED,
+            processing_status=SamGovProcessingStatus.COMPLETED,
             sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
         )
         db_session.add(existing_monthly)
@@ -299,7 +299,8 @@ class TestSamExtractsTask(BaseTestClass):
             extract_date=MONTHLY_EXTRACT_DATE,
             filename="SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
             s3_path="test-prefix/monthly/2025-04-06/SAM_PUBLIC_MONTHLY_V2_20250406.ZIP",
-            status=SamGovProcessingStatus.COMPLETED,
+            processing_status=SamGovProcessingStatus.COMPLETED,
+            sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
         )
         db_session.add(existing_monthly)
         db_session.commit()
