@@ -31,4 +31,3 @@ class SamExtractFile(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkSamGovProcessingStatus.sam_gov_processing_status_id),
         index=True,
     )
-    description: Mapped[str]

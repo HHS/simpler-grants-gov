@@ -68,7 +68,6 @@ def upgrade():
         sa.Column("filename", sa.Text(), nullable=False),
         sa.Column("s3_path", sa.Text(), nullable=False),
         sa.Column("processing_status_id", sa.Integer(), nullable=False),
-        sa.Column("description", sa.Text(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
