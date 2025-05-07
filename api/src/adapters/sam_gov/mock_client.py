@@ -4,7 +4,6 @@ import json
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import List, Optional
 
 from src.adapters.sam_gov.client import BaseSamGovClient, SamExtractInfo
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
@@ -146,7 +145,7 @@ class MockSamGovClient(BaseSamGovClient):
             "content_type": content_type,
         }
 
-    def get_monthly_extract_info(self) -> Optional[SamExtractInfo]:
+    def get_monthly_extract_info(self) -> SamExtractInfo | None:
         """
         Get mock information about the latest monthly extract
 
@@ -164,7 +163,7 @@ class MockSamGovClient(BaseSamGovClient):
             updated_at=first_day_of_month,
         )
 
-    def get_daily_extract_info(self) -> List[SamExtractInfo]:
+    def get_daily_extract_info(self) -> list[SamExtractInfo]:
         """
         Get mock information about available daily extracts
 
