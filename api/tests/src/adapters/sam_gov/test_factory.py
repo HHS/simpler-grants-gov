@@ -1,6 +1,5 @@
 """Tests for the SAM.gov client factory."""
 
-import os
 from unittest import mock
 
 from src.adapters.sam_gov.client import SamGovClient

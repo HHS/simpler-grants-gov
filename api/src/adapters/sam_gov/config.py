@@ -9,9 +9,7 @@ from src.util.env_config import PydanticBaseEnvConfig
 class SamGovConfig(PydanticBaseEnvConfig):
     """Configuration for SAM.gov API client."""
 
-    model_config = SettingsConfigDict(
-        validate_by_name=True, validate_by_alias=True, extra="ignore"
-    )
+    model_config = SettingsConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
     base_url: str = Field(default="https://api.sam.gov/", alias="SAM_GOV_BASE_URL")
     api_key: str | None = Field(default=None, alias="SAM_GOV_API_KEY")
