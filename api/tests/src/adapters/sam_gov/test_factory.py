@@ -12,14 +12,6 @@ from src.adapters.sam_gov.mock_client import MockSamGovClient
 class TestSamGovClientFactory:
     """Tests for the SAM.gov client factory."""
 
-    @mock.patch.dict(
-        os.environ,
-        {
-            "SAM_GOV_API_KEY": "test-api-key",
-            "SAM_GOV_BASE_URL": "https://test-api.sam.gov",
-            "SAM_GOV_USE_MOCK": "false",
-        },
-    )
     def test_create_real_client(self):
         """Test creating a real client."""
         # Create config directly instead of relying on environment variables
@@ -30,12 +22,6 @@ class TestSamGovClientFactory:
         assert isinstance(client, SamGovClient)
         assert not isinstance(client, MockSamGovClient)
 
-    @mock.patch.dict(
-        os.environ,
-        {
-            "SAM_GOV_USE_MOCK": "true",
-        },
-    )
     def test_create_mock_client(self):
         """Test creating a mock client."""
         # Create config directly instead of relying on environment variables
