@@ -27,4 +27,4 @@ jobs:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}
 
-      - run: make test
+      - run: env USE_DOCKER=1 make test
