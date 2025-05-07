@@ -10,8 +10,6 @@ on:
       - ".github/workflows/deploy-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       environment:
