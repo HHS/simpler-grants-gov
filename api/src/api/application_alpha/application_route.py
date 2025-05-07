@@ -33,9 +33,9 @@ logger = logging.getLogger(__name__)
 @flask_db.with_db_session()
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
-    logger.info("POST /alpha/applications/start")
-
     competition_id = json_data["competition_id"]
+    add_extra_data_to_current_request_logs({"competition_id": competition_id})
+    logger.info("POST /alpha/applications/start")
 
     with db_session.begin():
         application = create_application(db_session, competition_id)
@@ -55,9 +55,7 @@ def application_form_update(
     db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Update an application form response"""
-    add_extra_data_to_current_request_logs(
-        {"application.application_id": application_id, "form.form_id": form_id}
-    )
+    add_extra_data_to_current_request_logs({"application_id": application_id, "form_id": form_id})
     logger.info("PUT /alpha/applications/:application_id/forms/:form_id")
 
     application_response = json_data["application_response"]
@@ -86,8 +84,8 @@ def application_form_get(
     """Get an application form by ID"""
     add_extra_data_to_current_request_logs(
         {
-            "application.application_id": application_id,
-            "application_form.application_form_id": app_form_id,
+            "application_id": application_id,
+            "application_form_id": app_form_id,
         }
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
@@ -112,11 +110,7 @@ def application_get(
     application_id: UUID,
 ) -> response.ApiResponse:
     """Get an application by ID"""
-    add_extra_data_to_current_request_logs(
-        {
-            "application.application_id": application_id,
-        }
-    )
+    add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("GET /alpha/applications/:application_id")
 
     with db_session.begin():
@@ -136,11 +130,7 @@ def application_get(
 @flask_db.with_db_session()
 def application_submit(db_session: db.Session, application_id: UUID) -> response.ApiResponse:
     """Submit an application"""
-    add_extra_data_to_current_request_logs(
-        {
-            "application_id": application_id,
-        }
-    )
+    add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/submit")
 
     with db_session.begin():
