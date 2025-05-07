@@ -61,7 +61,7 @@ def upgrade():
         schema="api",
     )
     op.create_table(
-        "sam_extract_files",
+        "sam_extract_file",
         sa.Column("file_id", sa.UUID(), nullable=False),
         sa.Column("extract_type_id", sa.Integer(), nullable=False),
         sa.Column("extract_date", sa.TIMESTAMP(timezone=True), nullable=False),
