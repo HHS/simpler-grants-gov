@@ -3,13 +3,13 @@ import uuid
 import pytest
 
 from src.db.models.user_models import UserSavedOpportunity
-from tests.src.db.models.factories import OpportunityFactory
+from tests.lib.db_testing import cascade_delete_from_db_table
+from tests.src.db.models.factories import OpportunityFactory, UserSavedOpportunityFactory
 
 
 @pytest.fixture(autouse=True)
 def clear_opportunities(db_session):
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
     yield
 
 
@@ -90,3 +90,28 @@ def test_user_save_opportunity_post(
     saved_opportunity = db_session.query(UserSavedOpportunity).one()
     assert saved_opportunity.user_id == user.user_id
     assert saved_opportunity.opportunity_id == opportunity.opportunity_id
+
+
+def test_user_save_opportunity_post_deleted(
+    client, user, user_auth_token, enable_factory_create, db_session
+):
+
+    # Create a saved opportunity that was soft deleted
+    opportunity = OpportunityFactory.create()
+    UserSavedOpportunityFactory.create(opportunity=opportunity, is_deleted=True, user=user)
+    # Make the request to save the same opportunity
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"opportunity_id": opportunity.opportunity_id},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify the saved opp is updated and a new saved opp is not created
+    saved_opps = db_session.query(UserSavedOpportunity).all()
+    assert len(saved_opps) == 1
+    assert saved_opps[0].user_id == user.user_id
+    assert saved_opps[0].opportunity_id == opportunity.opportunity_id
+    assert not saved_opps[0].is_deleted

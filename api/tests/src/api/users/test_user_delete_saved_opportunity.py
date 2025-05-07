@@ -2,6 +2,7 @@ import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     OpportunityFactory,
     UserFactory,
@@ -24,8 +25,7 @@ def user_auth_token(user, db_session):
 
 @pytest.fixture(autouse=True, scope="function")
 def clear_saved_opportunities(db_session):
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
     yield
 
 
@@ -45,18 +45,10 @@ def test_user_delete_saved_opportunity(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
-    # Verify it was deleted
-    saved_count = db_session.query(UserSavedOpportunity).count()
-    assert saved_count == 0
-
-    # Delete the saved opportunity
-    response = client.delete(
-        f"/v1/users/{user.user_id}/saved-opportunities/1234567890",
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert response.status_code == 404
-    assert response.json["message"] == "Saved opportunity not found"
+    # Verify it was soft deleted
+    saved_opp = db_session.query(UserSavedOpportunity).all()
+    assert len(saved_opp) == 1
+    assert saved_opp[0].is_deleted
 
 
 def test_user_delete_other_users_saved_opportunity(

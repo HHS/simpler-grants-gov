@@ -909,6 +909,7 @@ class UserSavedOpportunityFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+    is_deleted = False
 
 
 class UserSavedSearchFactory(BaseFactory):
