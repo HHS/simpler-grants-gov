@@ -18,7 +18,7 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
     the router responsible for handling all SOAP operations for both
     the applicants and grantors SOAP API requests.
     """
-    soap_request_message = SoapPayload(str(request.data))
+    soap_request_message = SoapPayload(request.data.decode())
     add_extra_data_to_current_request_logs(
         {
             "soap_service_name": service_name,
@@ -33,7 +33,7 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
         headers=dict(request.headers),
         body=request.data,
     )
-    soap_response_message = SoapPayload(str(proxy_response.data))
+    soap_response_message = SoapPayload(proxy_response.data.decode())
     add_extra_data_to_current_request_logs(
         {"soap_proxy_response_operation_name": soap_response_message.operation_name}
     )

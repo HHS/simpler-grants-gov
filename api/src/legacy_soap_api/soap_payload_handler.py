@@ -5,21 +5,17 @@ from defusedxml import ElementTree as DET
 
 from src.util.xml_utils import xml_to_dict
 
+ENVELOPE_REGEX = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
+
 
 class SoapPayload:
     def __init__(self, soap_payload_str: str) -> None:
         self.payload = soap_payload_str
 
-    @property
-    def envelope(self) -> str | None:
-        """SOAP envelope
-
-        Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags.
-        """
-        pattern = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
-        if match := re.search(pattern, self.payload, re.DOTALL):
-            return match.group(0)
-        return None
+        # Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags.
+        self.envelope = None
+        if match := re.search(ENVELOPE_REGEX, self.payload, re.DOTALL):
+            self.envelope = match.group(0)
 
     @property
     def operation_name(self) -> str | None:
