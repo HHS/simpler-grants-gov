@@ -207,31 +207,35 @@ class TestSamGovClient:
             # Verify headers don't include the API key
             assert "x-api-key" not in m.last_request.headers
 
-    def test_download_extract_missing_file_name(self, client):
+    def test_download_extract_missing_file_name(self, client, tmpdir):
         """Test downloading an extract with a missing file name."""
         request = SamExtractRequest(file_name="")
+        output_path = tmpdir.join("test.zip")
         with pytest.raises(ValueError, match="file_name must be provided for downloads"):
-            client.download_extract(request, "/tmp/test.zip")
+            client.download_extract(request, str(output_path))
 
-    def test_download_extract_missing_api_key(self, config):
+    def test_download_extract_missing_api_key(self, config, tmpdir):
         """Test downloading an extract with a missing API key."""
         config.api_key = None
         client = SamGovClient(config)
         request = SamExtractRequest(file_name="test.zip")
+        output_path = tmpdir.join("test.zip")
         with pytest.raises(ValueError, match="API key must be provided for SAM.gov API access"):
-            client.download_extract(request, "/tmp/test.zip")
+            client.download_extract(request, str(output_path))
 
-    def test_download_extract_missing_api_url(self, config):
+    def test_download_extract_missing_api_url(self, config, tmpdir):
         """Test downloading an extract with a missing API URL."""
         config.base_url = None
         client = SamGovClient(config)
         request = SamExtractRequest(file_name="test.zip")
+        output_path = tmpdir.join("test.zip")
         with pytest.raises(ValueError, match="API URL must be provided for SAM.gov API access"):
-            client.download_extract(request, "/tmp/test.zip")
+            client.download_extract(request, str(output_path))
 
-    def test_download_extract_api_error(self, client, config):
+    def test_download_extract_api_error(self, client, config, tmpdir):
         """Test downloading an extract with an API error."""
         request = SamExtractRequest(file_name="test.zip")
+        output_path = tmpdir.join("test.zip")
         with requests_mock.Mocker() as m:
             m.get(
                 f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
@@ -239,15 +243,16 @@ class TestSamGovClient:
                 json={"error": "Extract not found"},
             )
             with pytest.raises(Exception, match="Failed to download extract: 404"):
-                client.download_extract(request, "/tmp/test.zip")
+                client.download_extract(request, str(output_path))
 
-    def test_download_extract_network_error(self, client, config):
+    def test_download_extract_network_error(self, client, config, tmpdir):
         """Test downloading an extract with a network error."""
         request = SamExtractRequest(file_name="test.zip")
+        output_path = tmpdir.join("test.zip")
         with requests_mock.Mocker() as m:
             m.get(
                 f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
                 exc=requests.exceptions.ConnectionError,
             )
             with pytest.raises(Exception, match="Request failed"):
-                client.download_extract(request, "/tmp/test.zip")
+                client.download_extract(request, str(output_path))
