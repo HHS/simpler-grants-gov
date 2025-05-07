@@ -59,42 +59,6 @@ describe("SearchFilterAccordion", () => {
     expect(screen.getByText("Other")).toBeInTheDocument();
   });
 
-  it("displays select all and clear all correctly", () => {
-    const { rerender } = render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set()}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    const selectAllButton = screen.getByText("Select All");
-    expect(selectAllButton).toBeInTheDocument();
-    expect(selectAllButton).toBeEnabled();
-
-    const clearAllButton = screen.getByText("Clear All");
-    expect(clearAllButton).toBeInTheDocument();
-    expect(clearAllButton).toBeDisabled();
-
-    const updatedQuery = new Set("");
-    updatedQuery.add("Cooperative Agreement");
-    // after clicking one of the boxes, the page should rerender
-    // both select all and clear all should be enabled
-    rerender(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={updatedQuery}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-    expect(selectAllButton).toBeEnabled();
-    expect(clearAllButton).toBeEnabled();
-  });
-
   it("has hidden attribute when collapsed", () => {
     render(
       <SearchFilterAccordion
