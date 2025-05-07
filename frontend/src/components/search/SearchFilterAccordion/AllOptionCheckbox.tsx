@@ -41,7 +41,7 @@ export const AllOptionCheckbox = ({
     isSubset<string>(childOptionValues, currentSelectionValues),
   );
   const { setQueryParam } = useSearchParamUpdater();
-  const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
+  const id = `${title.replace(/\s/, "-").toLowerCase()}-all`;
   const t = useTranslations("Search.accordion");
   const label = `${t("all")} ${title}`;
 
