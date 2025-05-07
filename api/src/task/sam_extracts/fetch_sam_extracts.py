@@ -1,6 +1,10 @@
+"""Task to fetch SAM.gov extracts."""
+
 import logging
-from datetime import datetime
+import uuid
+from datetime import date, timedelta
 from enum import StrEnum
+from typing import Optional
 
 import boto3
 from botocore.client import BaseClient
@@ -17,6 +21,7 @@ from src.db.models.sam_extract_models import SamExtractFile
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
+from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -25,11 +30,9 @@ logger = logging.getLogger(__name__)
 class SamExtractsConfig(PydanticBaseEnvConfig):
     """Configuration for SAM extracts fetching task"""
 
-    sam_gov_api_url: str = Field(
-        alias="SAM_GOV_EXTRACTS_API_URL", default="https://api.sam.gov/data-services/v1/extracts"
-    )
+    sam_gov_api_url: str = Field(alias="SAM_GOV_BASE_URL", default="https://api.sam.gov")
     s3_bucket: str = Field(alias="SAM_GOV_EXTRACTS_S3_BUCKET")
-    s3_prefix: str = Field(alias="SAM_GOV_EXTRACTS_S3_PREFIX")
+    s3_prefix: str = Field(alias="SAM_GOV_EXTRACTS_S3_PREFIX", default="sam-extracts/")
 
 
 @task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
@@ -76,7 +79,7 @@ class SamExtractsTask(Task):
         latest_daily = self._get_latest_extract_date(SamGovExtractType.DAILY)
 
         # Get current date to check if we've run this month
-        current_date = datetime.now()
+        current_date = datetime_util.utcnow().date()
 
         # Check if we've processed any extracts this month
         processed_this_month = False
@@ -98,7 +101,7 @@ class SamExtractsTask(Task):
             # If we've processed extracts this month and fetched a new monthly extract,
             # only fetch daily extracts after the monthly extract date
             logger.info("Fetching daily extracts after the monthly extract date")
-            self._fetch_daily_extracts(after_date=monthly_fetched)
+            self._fetch_daily_extracts(after_date=latest_monthly)
         elif latest_monthly:
             # If we've processed extracts this month but didn't fetch a new monthly extract,
             # fetch daily extracts after the most recent monthly extract
@@ -109,7 +112,7 @@ class SamExtractsTask(Task):
             logger.info("No monthly extract exists, fetching all daily extracts")
             self._fetch_daily_extracts()
 
-    def _get_latest_extract_date(self, extract_type: SamGovExtractType) -> datetime | None:
+    def _get_latest_extract_date(self, extract_type: SamGovExtractType) -> date | None:
         """Get the date of the most recent extract of the specified type"""
         stmt = (
             select(SamExtractFile.extract_date)
@@ -123,199 +126,128 @@ class SamExtractsTask(Task):
         result = self.db_session.execute(stmt).scalar_one_or_none()
         return result
 
-    def _fetch_monthly_extract(self) -> datetime | None:
-        """
-        Fetch the latest monthly extract if it's new
+    def _fetch_monthly_extract(self) -> bool:
+        """Fetch the latest monthly extract if needed.
 
-        Returns the date of the extract if fetched, None otherwise
+        Returns:
+            True if a new extract was fetched, False otherwise
         """
-        try:
-            # Fetch the information about the latest monthly extract
-            monthly_info = self.sam_gov_client.get_monthly_extract_info()
-            if not monthly_info:
-                logger.info("No monthly extract info available from SAM.gov API")
-                return None
+        # Get info about the latest monthly extract
+        monthly_info = self.sam_gov_client.get_monthly_extract_info()
+        if not monthly_info:
+            logger.info("No monthly extract info available from SAM.gov API")
+            return False
+
+        # Get the first Sunday of the current month
+        current_date = datetime_util.utcnow().date()
+        target_date = get_first_sunday_of_month(current_date.year, current_date.month)
+
+        # Check if we already have this extract
+        stmt = select(SamExtractFile).where(
+            SamExtractFile.extract_type == SamGovExtractType.MONTHLY,
+            SamExtractFile.extract_date == target_date,
+            SamExtractFile.status == SamGovProcessingStatus.COMPLETED,
+        )
+        existing = self.db_session.execute(stmt).scalar_one_or_none()
+
+        if existing:
+            logger.info(f"Monthly extract for {target_date} already exists")
+            return False
+
+        # Download the extract
+        s3_key = f"{self.config.s3_prefix}monthly/{monthly_info.filename}"
+        s3_path = f"s3://{self.config.s3_bucket}/{s3_key}"
+
+        request = SamExtractRequest(file_name=monthly_info.filename)
+        response = self.sam_gov_client.download_extract(request, s3_path)
+
+        # Record the extract in the database
+        extract = SamExtractFile(
+            extract_type=SamGovExtractType.MONTHLY,
+            extract_date=target_date,
+            filename=str(response.file_name),  # Convert to string in case it's a mock
+            s3_path=s3_path,
+            status=SamGovProcessingStatus.PENDING,
+            sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
+        )
+        self.db_session.add(extract)
+
+        # Increment the metric
+        self.increment(self.Metrics.MONTHLY_EXTRACTS_FETCHED)
+
+        logger.info(f"Successfully downloaded monthly extract for {target_date}")
+        return True
+
+    def _fetch_daily_extracts(self, after_date: Optional[date] = None) -> None:
+        """Fetch all daily extracts after the given date.
+
+        Args:
+            after_date: Only fetch extracts after this date. If None, fetch all available daily extracts.
+        """
+        # Get info about available daily extracts
+        daily_info_list = self.sam_gov_client.get_daily_extract_info()
+        if not daily_info_list:
+            logger.info("No daily extract info available from SAM.gov API")
+            return
+
+        # Process each daily extract that's after our cutoff date
+        for daily_info in daily_info_list:
+            extract_date = daily_info.updated_at.date()
+
+            # Skip if before our cutoff
+            if after_date and extract_date <= after_date:
+                continue
 
             # Check if we already have this extract
-            extract_date = datetime.combine(monthly_info.updated_at.date(), datetime.min.time())
             stmt = select(SamExtractFile).where(
-                SamExtractFile.extract_type == SamGovExtractType.MONTHLY,
+                SamExtractFile.extract_type == SamGovExtractType.DAILY,
                 SamExtractFile.extract_date == extract_date,
-                SamExtractFile.status == SamGovProcessingStatus.COMPLETED,
             )
             existing = self.db_session.execute(stmt).scalar_one_or_none()
 
             if existing:
-                logger.info(
-                    "Monthly extract already exists",
-                    extra={"extract_date": extract_date.isoformat()},
-                )
-                return extract_date
+                logger.info(f"Daily extract for {extract_date} already exists")
+                continue
 
-            # Download and store the extract
-            s3_path = self._download_and_store_extract(
-                monthly_info.url, monthly_info.filename, SamGovExtractType.MONTHLY, extract_date
+            # Download the extract
+            s3_key = f"{self.config.s3_prefix}daily/{daily_info.filename}"
+            s3_path = f"s3://{self.config.s3_bucket}/{s3_key}"
+
+            request = SamExtractRequest(file_name=daily_info.filename)
+            response = self.sam_gov_client.download_extract(request, s3_path)
+
+            # Record the extract in the database
+            extract = SamExtractFile(
+                extract_type=SamGovExtractType.DAILY,
+                extract_date=extract_date,
+                filename=str(response.file_name),  # Convert to string in case it's a mock
+                s3_path=s3_path,
+                status=SamGovProcessingStatus.PENDING,
+                sam_extract_file_id=uuid.uuid4(),  # Set UUID explicitly to avoid flush
             )
+            self.db_session.add(extract)
 
-            if s3_path:
-                self.increment(self.Metrics.MONTHLY_EXTRACTS_FETCHED)
-                logger.info(
-                    "Successfully fetched monthly extract",
-                    extra={
-                        "extract_date": extract_date.isoformat(),
-                        "sam_extract_filename": monthly_info.filename,
-                        "s3_path": s3_path,
-                    },
-                )
-                return extract_date
+            # Increment the metric
+            self.increment(self.Metrics.DAILY_EXTRACTS_FETCHED)
 
-            return None
-        except Exception as e:
-            self.increment(self.Metrics.ERRORS_ENCOUNTERED)
-            logger.exception("Error fetching monthly extract", extra={"error": str(e)})
-            return None
+            logger.info(f"Successfully downloaded daily extract for {extract_date}")
 
-    def _fetch_daily_extracts(self, after_date: datetime | None = None) -> None:
-        """
-        Fetch all daily extracts that haven't been processed yet
 
-        If after_date is provided, only fetches extracts after that date.
-        Will never fetch extracts older than the first day of the current month.
-        """
-        try:
-            # Get the first day of the current month as the minimum date
-            current_date = datetime.now()
-            first_day_of_month = datetime(current_date.year, current_date.month, 1)
+def get_first_sunday_of_month(year: int, month: int) -> date:
+    """Get the first Sunday of the given month.
 
-            # Use the later of after_date and first_day_of_month as our cutoff
-            cutoff_date = first_day_of_month
-            if after_date and after_date > first_day_of_month:
-                cutoff_date = after_date
+    Args:
+        year: The year
+        month: The month (1-12)
 
-            # Fetch the information about available daily extracts
-            daily_info_list = self.sam_gov_client.get_daily_extract_info()
-            if not daily_info_list:
-                logger.info("No daily extract info available from SAM.gov API")
-                return
+    Returns:
+        The date of the first Sunday
+    """
+    # Start with the first of the month
+    d = date(year, month, 1)
 
-            # Get list of all daily extracts we've already processed
-            stmt = select(SamExtractFile.extract_date).where(
-                SamExtractFile.extract_type == SamGovExtractType.DAILY,
-                SamExtractFile.status == SamGovProcessingStatus.COMPLETED,
-            )
-            # Only consider extracts after the cutoff date
-            stmt = stmt.where(SamExtractFile.extract_date > cutoff_date)
+    # Add days until we hit a Sunday (where weekday() == 6)
+    while d.weekday() != 6:
+        d += timedelta(days=1)
 
-            processed_dates = {
-                date.date() for date in self.db_session.execute(stmt).scalars().all()
-            }
-
-            # Sort by date
-            daily_info_list.sort(key=lambda x: x.updated_at)
-
-            # Process each daily extract
-            for extract_info in daily_info_list:
-                extract_datetime = datetime.combine(
-                    extract_info.updated_at.date(), datetime.min.time()
-                )
-                extract_date = extract_info.updated_at.date()
-
-                # Skip if extract is before cutoff date
-                if extract_datetime < cutoff_date:
-                    logger.debug(
-                        f"Skipping extract {extract_info.filename} from {extract_date} - "
-                        f"before cutoff date {cutoff_date.date()}"
-                    )
-                    continue
-
-                # Skip if we've already processed this extract
-                if extract_date in processed_dates:
-                    logger.debug(
-                        f"Skipping extract {extract_info.filename} from {extract_date} - "
-                        f"already processed"
-                    )
-                    continue
-
-                # Download and store the extract
-                s3_path = self._download_and_store_extract(
-                    extract_info.url,
-                    extract_info.filename,
-                    SamGovExtractType.DAILY,
-                    extract_datetime,
-                )
-
-                if s3_path:
-                    self.increment(self.Metrics.DAILY_EXTRACTS_FETCHED)
-                    logger.info(
-                        "Successfully fetched daily extract",
-                        extra={
-                            "extract_date": extract_date.isoformat(),
-                            "sam_extract_filename": extract_info.filename,
-                            "s3_path": s3_path,
-                        },
-                    )
-        except Exception as e:
-            self.increment(self.Metrics.ERRORS_ENCOUNTERED)
-            logger.exception("Error fetching daily extracts", extra={"error": str(e)})
-
-    def _download_and_store_extract(
-        self, url: str, filename: str, extract_type: SamGovExtractType, extract_date: datetime
-    ) -> str | None:
-        """
-        Download extract from URL and store in S3
-
-        Returns the S3 path if successful, None otherwise
-        """
-        # Create a record to track this extract
-        extract_record = SamExtractFile(
-            extract_type=extract_type,
-            extract_date=extract_date,
-            filename=filename,
-            s3_path="",  # Will be updated later
-            status=SamGovProcessingStatus.PENDING,
-        )
-        self.db_session.add(extract_record)
-        self.db_session.flush()  # To get the id
-
-        try:
-            # Generate S3 path
-            date_str = extract_date.strftime("%Y-%m-%d")
-            file_type = extract_type.value
-            s3_key = f"{self.config.s3_prefix}{file_type}/{date_str}/{filename}"
-            s3_uri = f"s3://{self.config.s3_bucket}/{s3_key}"
-
-            # Use the SAM.gov client to download the file directly to S3
-            request = SamExtractRequest(file_name=filename)
-            response = self.sam_gov_client.download_extract(request, s3_uri)
-
-            logger.info(
-                "Downloaded extract file",
-                extra={
-                    "file_name": response.file_name,
-                    "file_size": response.file_size,
-                    "content_type": response.content_type,
-                    "s3_uri": s3_uri,
-                },
-            )
-
-            # Update the record
-            extract_record.s3_path = s3_key
-            extract_record.status = SamGovProcessingStatus.COMPLETED
-            self.db_session.commit()
-
-            return s3_key
-        except Exception as e:
-            # Update the record with the error
-            extract_record.status = SamGovProcessingStatus.FAILED
-            self.db_session.commit()
-
-            logger.exception(
-                "Failed to download and store extract",
-                extra={
-                    "extract_type": extract_type.value,
-                    "extract_date": extract_date.isoformat(),
-                    "url": url,
-                    "error": str(e),
-                },
-            )
-            return None
+    return d

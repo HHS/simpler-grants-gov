@@ -3,14 +3,13 @@
 import json
 import logging
 import os
-import shutil
 from datetime import datetime, timedelta
 from typing import List, Optional
 
 from src.adapters.sam_gov.client import BaseSamGovClient, SamExtractInfo
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
 from src.util import datetime_util
-from src.util.file_util import copy_file, is_s3_path, open_stream
+from src.util.file_util import copy_file, open_stream
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +41,11 @@ MOCK_EXTRACTS = {
 class MockSamGovClient(BaseSamGovClient):
     """Mock client for SAM.gov API for local development and testing."""
 
-    def __init__(self, mock_data_file: str | None = None, mock_extract_dir: str | None = None) -> None:
+    def __init__(
+        self, mock_data_file: str | None = None, mock_extract_dir: str | None = None
+    ) -> None:
         """Initialize the mock client.
-        
+
         Args:
             mock_data_file: Optional path to a JSON file containing mock data.
             mock_extract_dir: Optional path to a directory containing mock extract files.

@@ -5,6 +5,7 @@ import tempfile
 from unittest import mock
 
 import pytest
+import requests
 import requests_mock
 from requests.exceptions import Timeout
 
@@ -85,13 +86,10 @@ class TestSamGovClient:
 
                 # Verify the response
                 assert response is not None
-                assert response.file_name == output_path
-                # content_type was removed from the model
-                # assert response.content_type == "application/zip"
+                assert response.file_name == file_name
+                assert response.file_size == len(file_content)
+                assert response.content_type == "application/zip"
 
-                # Verify the file was downloaded
-                with open(output_path, "rb") as f:
-                    assert f.read() == file_content
         finally:
             # Clean up the temporary file
             if os.path.exists(output_path):
@@ -208,3 +206,48 @@ class TestSamGovClient:
 
             # Verify headers don't include the API key
             assert "x-api-key" not in m.last_request.headers
+
+    def test_download_extract_missing_file_name(self, client):
+        """Test downloading an extract with a missing file name."""
+        request = SamExtractRequest(file_name="")
+        with pytest.raises(ValueError, match="file_name must be provided for downloads"):
+            client.download_extract(request, "/tmp/test.zip")
+
+    def test_download_extract_missing_api_key(self, config):
+        """Test downloading an extract with a missing API key."""
+        config.api_key = None
+        client = SamGovClient(config)
+        request = SamExtractRequest(file_name="test.zip")
+        with pytest.raises(ValueError, match="API key must be provided for SAM.gov API access"):
+            client.download_extract(request, "/tmp/test.zip")
+
+    def test_download_extract_missing_api_url(self, config):
+        """Test downloading an extract with a missing API URL."""
+        config.base_url = None
+        client = SamGovClient(config)
+        request = SamExtractRequest(file_name="test.zip")
+        with pytest.raises(ValueError, match="API URL must be provided for SAM.gov API access"):
+            client.download_extract(request, "/tmp/test.zip")
+
+    def test_download_extract_api_error(self, client, config):
+        """Test downloading an extract with an API error."""
+        request = SamExtractRequest(file_name="test.zip")
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
+                status_code=404,
+                json={"error": "Extract not found"},
+            )
+            with pytest.raises(Exception, match="Failed to download extract: 404"):
+                client.download_extract(request, "/tmp/test.zip")
+
+    def test_download_extract_network_error(self, client, config):
+        """Test downloading an extract with a network error."""
+        request = SamExtractRequest(file_name="test.zip")
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
+                exc=requests.exceptions.ConnectionError,
+            )
+            with pytest.raises(Exception, match="Request failed"):
+                client.download_extract(request, "/tmp/test.zip")
