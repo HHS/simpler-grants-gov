@@ -10,7 +10,6 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     UserNotificationLog,
     UserOpportunityNotificationLog,
-    UserSavedOpportunity,
     UserSavedSearch,
 )
 from src.task.notifications.generate_notifications import (
@@ -44,11 +43,10 @@ def setup_search_data(opportunity_index, opportunity_index_alias, search_client)
 @pytest.fixture(autouse=True)
 def clear_notification_logs(db_session):
     """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
-    db_session.query(UserOpportunityNotificationLog).delete()
+    cascade_delete_from_db_table(db_session, UserNotificationLog)
+    cascade_delete_from_db_table(db_session, UserOpportunityNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.query(UserSavedSearch).delete()
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
 
 
 def test_search_notifications_cli(

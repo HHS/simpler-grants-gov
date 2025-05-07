@@ -20,7 +20,6 @@ describe("getNextRoutes", () => {
       "/maintenance",
       "/opportunity/1",
       "/",
-      "/research",
       "/roadmap",
       "/saved-grants",
       "/saved-search-queries",
