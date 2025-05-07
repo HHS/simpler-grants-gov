@@ -1,8 +1,8 @@
 """Create sam extract files
 
-Revision ID: 585d0e5aaddb
+Revision ID: 88fe2421df91
 Revises: 3b0705202c54
-Create Date: 2025-05-07 18:58:38.706849
+Create Date: 2025-05-07 19:13:21.359795
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "585d0e5aaddb"
+revision = "88fe2421df91"
 down_revision = "3b0705202c54"
 branch_labels = None
 depends_on = None
