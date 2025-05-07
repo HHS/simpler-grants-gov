@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: metabase
+          app_name: analytics
           environment: ${{ inputs.environment }}
 
       - name: Deploy metabase

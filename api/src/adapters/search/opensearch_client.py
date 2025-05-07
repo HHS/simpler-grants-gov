@@ -207,7 +207,6 @@ class SearchClient:
         )
 
         actions = [{"add": {"index": index_name, "alias": alias_name}}]
-
         for index in existing_indexes:
             actions.append({"remove": {"index": index, "alias": alias_name}})
 
