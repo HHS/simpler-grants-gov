@@ -1,6 +1,15 @@
 name: NOFOs Checks
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/ci-nofos.yml
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to run tests against"
+        default: "main"
+        type: string
   workflow_dispatch:
     inputs:
       version:
@@ -8,13 +17,9 @@ on:
         default: "main"
         type: string
 
-defaults:
-  run:
-    working-directory: ./bloom_nofos
-
 jobs:
   lint-test:
-    name: API Lint, Format & Tests
+    name: NOFOs Lint, Format & Tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -22,4 +27,5 @@ jobs:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}
 
-      - run: make test
+      - run: make build
+      - run: env USE_DOCKER=1 make test
