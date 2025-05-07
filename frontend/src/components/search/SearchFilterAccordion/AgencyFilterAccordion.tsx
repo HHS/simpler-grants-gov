@@ -30,7 +30,6 @@ export async function AgencyFilterAccordion({
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
-      includeAnyOption={false}
       // agency filters will not show facet counts
     />
   );
