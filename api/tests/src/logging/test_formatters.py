@@ -47,6 +47,7 @@ def test_json_formatter(capsys: pytest.CaptureFixture):
     expected = {
         "name": "test_json_formatter",
         "message": "hello interpolated_string",
+        "formatted_msg": "hello interpolated_string",
         "msg": "hello %s",
         "levelname": "WARNING",
         "levelno": 30,

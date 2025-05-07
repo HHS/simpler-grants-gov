@@ -195,8 +195,8 @@ def user_save_opportunity(
     logger.info(
         "Saved opportunity for user",
         extra={
-            "user.id": str(user_id),
-            "opportunity.id": json_data["opportunity_id"],
+            "user_id": user_id,
+            "opportunity_id": json_data["opportunity_id"],
         },
     )
 
@@ -277,8 +277,8 @@ def user_save_search(
     logger.info(
         "Saved search for user",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": str(saved_search.saved_search_id),
+            "user_id": user_id,
+            "saved_search_id": saved_search.saved_search_id,
         },
     )
 
@@ -307,8 +307,8 @@ def user_delete_saved_search(
     logger.info(
         "Deleted saved search",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": saved_search_id,
+            "user_id": user_id,
+            "saved_search_id": saved_search_id,
         },
     )
 
@@ -363,8 +363,8 @@ def user_update_saved_search(
     logger.info(
         "Updated saved search for user",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": str(updated_saved_search.saved_search_id),
+            "user_id": user_id,
+            "saved_search_id": updated_saved_search.saved_search_id,
         },
     )
 

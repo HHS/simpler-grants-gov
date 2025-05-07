@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @competition_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
 def competition_get(db_session: db.Session, competition_id: uuid.UUID) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"competition.competition_id": competition_id})
+    add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("GET /alpha/competitions/:competition_id")
 
     with db_session.begin():
