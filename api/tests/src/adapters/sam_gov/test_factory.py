@@ -11,8 +11,10 @@ from src.adapters.sam_gov.mock_client import MockSamGovClient
 class TestSamGovClientFactory:
     """Tests for the SAM.gov client factory."""
 
-    def test_create_real_client(self):
+    def test_create_real_client(self, monkeypatch):
         """Test creating a real client."""
+        monkeypatch.setenv("SAM_GOV_USE_MOCK", "false")
+
         # Create config directly instead of relying on environment variables
         config = SamGovConfig(
             api_key="test-api-key", base_url="https://test-api.sam.gov", use_mock=False
@@ -34,8 +36,10 @@ class TestSamGovClientFactory:
         client = create_sam_gov_client(config=config)
         assert isinstance(client, MockSamGovClient)
 
-    def test_create_client_with_config(self):
+    def test_create_client_with_config(self, monkeypatch):
         """Test creating a client with custom config."""
+        monkeypatch.setenv("SAM_GOV_USE_MOCK", "false")
+
         config = SamGovConfig(
             base_url="https://custom-api.sam.gov", api_key="custom-key", use_mock=False
         )
@@ -52,8 +56,8 @@ class TestSamGovClientFactory:
         ):
             config = SamGovConfig(
                 use_mock=True,
-                mock_data_file="/path/to/data.json",
-                mock_extract_dir="/path/to/extracts",
+                mock_data_file="/path/to/mock/data.json",
+                mock_extract_dir="/path/to/mock/extracts",
             )
             create_sam_gov_client(config=config)
 
@@ -62,5 +66,5 @@ class TestSamGovClientFactory:
             from src.adapters.sam_gov.mock_client import MockSamGovClient
 
             MockSamGovClient.__init__.assert_called_once_with(
-                mock_data_file="/path/to/data.json", mock_extract_dir="/path/to/extracts"
+                mock_data_file="/path/to/mock/data.json", mock_extract_dir="/path/to/mock/extracts"
             )
