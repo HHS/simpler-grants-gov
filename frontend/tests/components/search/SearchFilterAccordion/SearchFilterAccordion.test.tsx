@@ -174,4 +174,21 @@ describe("SearchFilterAccordion", () => {
     });
     expect(countSpan).toBeInTheDocument();
   });
+  it("adds an any option checkbox by default", () => {
+    render(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={fakeFacetCounts}
+      />,
+    );
+    const accordionToggleButton = screen.getByRole("button");
+    fireEvent.click(accordionToggleButton);
+    const anyCheckbox = screen.getByRole("checkbox", {
+      name: "Any test accordion",
+    });
+    expect(anyCheckbox).toBeInTheDocument();
+  });
 });
