@@ -65,9 +65,9 @@ describe("OpportunityHistory", () => {
 
     const secondHeading = screen.getByText("version:");
     expect(secondHeading.nextSibling).toHaveTextContent("--");
-    const thirdHeading = screen.getByText("poste_date:");
+    const thirdHeading = screen.getByText("postedDate:");
     expect(thirdHeading.nextSibling).toHaveTextContent("--");
-    const fifthHeading = screen.getByText("archive_date:");
+    const fifthHeading = screen.getByText("archiveDate:");
     expect(fifthHeading.nextSibling).toHaveTextContent("--");
   });
 });
