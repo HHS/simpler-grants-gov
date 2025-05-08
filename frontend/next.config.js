@@ -14,6 +14,22 @@ const nrExternals = require("@newrelic/next/load-externals");
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 const appSassOptions = sassOptions(basePath);
 
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data:;
+    font-src 'self' https://fonts.gstatic.com;
+    object-src 'none';
+    connect-src 'self' https://bam.nr-data.net https://www.google-analytics.com;
+    base-uri 'self';
+    media-src 'self';
+    style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com/;
+    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
+    form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+    `;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -28,6 +44,10 @@ const nextConfig = {
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader.replace(/\n/g, ""),
           },
         ],
       },
