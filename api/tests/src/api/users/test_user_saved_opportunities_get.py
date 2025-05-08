@@ -267,13 +267,17 @@ def test_user_get_only_own_saved_opportunities(
 
 
 def test_user_get_saved_opportunities_deleted(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
 ):
     """Test that users don't get soft deleted opportunities"""
     # Created a saved opportunity that is soft deleted
-    opp = OpportunityFactory.create(opportunity_title="Testing Opportunity")
-    UserSavedOpportunityFactory.create(user=user, opportunity=opp, is_deleted=True)
-
+    UserSavedOpportunityFactory.create(user=user, is_deleted=True)
+    # Create saved active opportunities
+    active_opp = UserSavedOpportunityFactory.create(user=user)
     # Make the request
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
@@ -287,4 +291,5 @@ def test_user_get_saved_opportunities_deleted(
     )
 
     assert response.status_code == 200
-    assert len(response.json["data"]) == 0
+    assert len(response.json["data"]) == 1
+    assert response.json["data"][0]["opportunity_id"] is active_opp.opportunity_id
