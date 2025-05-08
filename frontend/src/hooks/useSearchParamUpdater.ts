@@ -49,7 +49,7 @@ export function useSearchParamUpdater() {
     }
 
     sendGAEvent("event", "search_term", { key: finalQueryParamValue });
-    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const replaceQueryParams = (params: ValidSearchQueryParamData) => {
@@ -58,12 +58,12 @@ export function useSearchParamUpdater() {
 
   const setQueryParam = (key: string, value: string, scroll = false) => {
     params.set(key, value);
-    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
-    router.push(`${pathname}?${paramsToFormattedQuery(params)}`, { scroll });
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   return {
