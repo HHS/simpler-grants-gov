@@ -7,7 +7,7 @@ describe("RoadmapWhatWereWorkingOn Content", () => {
     render(<RoadmapWhatWereWorkingOn />);
     const RoadmapWhatWereWorkingOnH2 = screen.getByRole("heading", {
       level: 2,
-      name: /What we're working on right now?/i,
+      name: /What we’re working on?/i,
     });
 
     expect(RoadmapWhatWereWorkingOnH2).toBeInTheDocument();
