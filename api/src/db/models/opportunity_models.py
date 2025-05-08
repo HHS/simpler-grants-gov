@@ -35,7 +35,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True, unique=True)
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
