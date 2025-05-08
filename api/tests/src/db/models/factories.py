@@ -9,6 +9,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
 
 import random
+import uuid
 from datetime import datetime
 from typing import Optional
 
@@ -340,14 +341,15 @@ class OpportunityFactory(BaseFactory):
     def _setup_next_sequence(cls):
         if _db_session is not None:
             value = _db_session.query(
-                func.max(opportunity_models.Opportunity.opportunity_id)
+                func.max(opportunity_models.Opportunity.legacy_opportunity_id)
             ).scalar()
             if value is not None:
                 return value + 1
 
         return 1
 
-    opportunity_id = factory.Sequence(lambda n: n)
+    opportunity_id = Generators.UuidObj
+    legacy_opportunity_id = factory.Sequence(lambda n: n)
 
     opportunity_number = factory.Faker("opportunity_number")
     opportunity_title = factory.Faker("opportunity_title")
@@ -447,8 +449,12 @@ class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
 
+    opportunity_summary_id = Generators.UuidObj
+
     opportunity = factory.SubFactory(OpportunityFactory, current_opportunity_summary=None)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    legacy_opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.legacy_opportunity_id)
 
     summary_description = factory.Faker("summary_description")
     is_cost_sharing = factory.Faker("boolean")
@@ -710,7 +716,7 @@ class OpportunityAssistanceListingFactory(BaseFactory):
         if _db_session is not None:
             value = _db_session.query(
                 func.max(
-                    opportunity_models.OpportunityAssistanceListing.opportunity_assistance_listing_id
+                    opportunity_models.OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 )
             ).scalar()
             if value is not None:
@@ -718,7 +724,9 @@ class OpportunityAssistanceListingFactory(BaseFactory):
 
         return 1
 
-    opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
+    opportunity_assistance_listing_id = Generators.UuidObj
+
+    legacy_opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
@@ -778,6 +786,21 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(opportunity_models.OpportunityAttachment.legacy_attachment_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    attachment_id = Generators.UuidObj
+
+    legacy_attachment_id = factory.Sequence(lambda n: n)
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
@@ -924,7 +947,9 @@ class UserSavedSearchFactory(BaseFactory):
 
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
-    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+    searched_opportunity_ids = factory.LazyAttribute(
+        lambda _: [uuid.uuid4() for __ in random.randrange(1, 1000)]
+    )
 
 
 ###################
