@@ -136,6 +136,7 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
         server_default=sqlnow(),
     )
     searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger))
+    is_deleted: Mapped[bool] = mapped_column(default=False)
 
 
 class UserNotificationLog(ApiSchemaTable, TimestampMixin):

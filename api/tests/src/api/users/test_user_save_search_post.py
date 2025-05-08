@@ -11,6 +11,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.user_models import UserSavedSearch
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import UserFactory
@@ -55,8 +56,7 @@ MEDICAL_LABORATORY = build_opp(
 
 @pytest.fixture(autouse=True, scope="function")
 def clear_saved_searches(db_session):
-    db_session.query(UserSavedSearch).delete()
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
     yield
 
 
@@ -181,3 +181,22 @@ def test_user_save_search_post(
         MEDICAL_LABORATORY.opportunity_id,
         SPORTS.opportunity_id,
     ]
+
+    # Mark the saved search as soft deleted
+    saved_search.is_deleted = True
+    # Make the request to save the same opportunity
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"name": search_name, "search_query": search_query},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify the saved search is updated and a new saved opp is not created
+    db_session.expire_all()
+    saved_opps = db_session.query(UserSavedSearch).all()
+    assert len(saved_opps) == 1
+    assert saved_opps[0].saved_search_id == saved_search.saved_search_id
+    assert not saved_opps[0].is_deleted

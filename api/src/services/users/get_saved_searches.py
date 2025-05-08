@@ -22,7 +22,9 @@ def get_saved_searches(
 
     search_params = SavedSearchListParams.model_validate(raw_search_params)
 
-    stmt = select(UserSavedSearch).where(UserSavedSearch.user_id == user_id)
+    stmt = select(UserSavedSearch).where(
+        (UserSavedSearch.user_id == user_id) & (UserSavedSearch.is_deleted.isnot(True))
+    )
 
     stmt = apply_sorting(stmt, UserSavedSearch, search_params.pagination.sort_order)
 
