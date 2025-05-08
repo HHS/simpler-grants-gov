@@ -20,33 +20,33 @@ export const ForecastOpportunityItem = ({ detail }: Props) => {
     <div>
       <div className="padding-05">
         <OpportunityHistoryItem
-          title={t("forecasted_post_date")}
+          title={t("forecastedPostDate")}
           content={formatHistoryDate(detail.summary.forecasted_post_date)}
         />
         <OpportunityHistoryItem
-          title={t("forecasted_close_date")}
+          title={t("forecastedCloseDate")}
           content={formatHistoryDate(detail.summary.forecasted_close_date)}
         />
         <OpportunityHistoryItem
-          title={t("forecasted_close_date_description")}
+          title={t("forecastedCloseDateDescription")}
           content={
             detail.summary.close_date_description
               ? detail.summary.close_date_description
-              : t("forecasted_close_date_description_not_available")
+              : t("forecastedCloseDateDescriptionNotAvailable")
           }
         />
         <OpportunityHistoryItem
-          title={t("forecasted_award_date")}
+          title={t("forecastedAwardDate")}
           content={formatHistoryDate(detail.summary.forecasted_award_date)}
         />
         <OpportunityHistoryItem
-          title={t("forecasted_project_start_date")}
+          title={t("forecastedProjectStartDate")}
           content={formatHistoryDate(
             detail.summary.forecasted_project_start_date,
           )}
         />
         <OpportunityHistoryItem
-          title={t("fiscal_year")}
+          title={t("fiscalYear")}
           content={`${detail.summary.fiscal_year ? detail.summary.fiscal_year : ""}`}
         />
       </div>

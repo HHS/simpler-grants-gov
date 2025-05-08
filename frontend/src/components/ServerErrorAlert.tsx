@@ -8,7 +8,7 @@ const ServerErrorAlert = ({ callToAction }: { callToAction?: string }) => {
 
   return (
     <Alert type="error" heading={t("heading")} headingLevel="h4">
-      {t("generic_message")} {callToAction}
+      {t("genericMessage")} {callToAction}
     </Alert>
   );
 };

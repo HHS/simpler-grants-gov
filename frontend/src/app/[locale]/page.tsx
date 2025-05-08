@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Index.page_title"),
-    description: t("Index.meta_description"),
+    title: t("Index.pageTitle"),
+    description: t("Index.metaDescription"),
   };
   return meta;
 }

@@ -13,7 +13,7 @@ describe("ServerErrorAlert", () => {
     render(<ServerErrorAlert callToAction="Please try your search again." />);
     expect(screen.getByText("heading")).toBeInTheDocument();
     expect(
-      screen.getByText("generic_message Please try your search again."),
+      screen.getByText("genericMessage Please try your search again."),
     ).toBeInTheDocument();
   });
 

@@ -31,7 +31,7 @@ describe("PageNotFound", () => {
 
   it("links back to the home page", () => {
     render(<PageNotFound />);
-    const link = screen.getByRole("link", { name: "visit_homepage_button" });
+    const link = screen.getByRole("link", { name: "visitHomepageButton" });
 
     expect(link).toBeInTheDocument();
   });

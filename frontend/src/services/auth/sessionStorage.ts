@@ -5,8 +5,8 @@ class SessionStorage {
         typeof window !== "undefined" &&
         typeof window.sessionStorage !== "undefined"
       );
-    } catch (error) {
-      console.error(`sessionStorage is not available:`, error);
+    } catch (e) {
+      console.error(`sessionStorage is not available:`, e);
       return false;
     }
   }
@@ -15,8 +15,8 @@ class SessionStorage {
     if (!this.isSessionStorageAvailable()) return;
     try {
       sessionStorage.setItem(key, value);
-    } catch (error) {
-      console.error(`Error setting sessionStorage item:`, error);
+    } catch (e) {
+      console.error(`Error setting sessionStorage item:`, e);
     }
   }
 
@@ -24,8 +24,8 @@ class SessionStorage {
     if (!this.isSessionStorageAvailable()) return null;
     try {
       return sessionStorage.getItem(key);
-    } catch (error) {
-      console.error(`Error getting sessionStorage item:`, error);
+    } catch (e) {
+      console.error(`Error getting sessionStorage item:`, e);
       return null;
     }
   }
@@ -34,8 +34,8 @@ class SessionStorage {
     if (!this.isSessionStorageAvailable()) return;
     try {
       sessionStorage.removeItem(key);
-    } catch (error) {
-      console.error(`Error removing sessionStorage item:`, error);
+    } catch (e) {
+      console.error(`Error removing sessionStorage item:`, e);
     }
   }
 
@@ -43,8 +43,8 @@ class SessionStorage {
     if (!this.isSessionStorageAvailable()) return;
     try {
       sessionStorage.clear();
-    } catch (error) {
-      console.error(`Error clearing sessionStorage:`, error);
+    } catch (e) {
+      console.error(`Error clearing sessionStorage:`, e);
     }
   }
 }

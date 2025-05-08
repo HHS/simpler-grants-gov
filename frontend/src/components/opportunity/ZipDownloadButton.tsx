@@ -24,7 +24,7 @@ const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
       type="button"
       id={`opportunity-document-button-${opportunityId}`}
     >
-      <span>{t("zip_download")} </span>
+      <span>{t("zipDownload")} </span>
       <USWDSIcon name={"file_download"} className="usa-icon--size-4" />
     </Button>
   );

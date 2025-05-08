@@ -5,16 +5,16 @@ import OpportunityAwardGridRow from "src/components/opportunity/OpportunityAward
 const mockTranslations: { [key: string]: string } = {
   yes: "Yes",
   no: "No",
-  program_funding: "Program Funding",
-  expected_awards: "Expected awards",
-  award_ceiling: "Award Ceiling",
-  award_floor: "Award Floor",
-  cost_sharing: "Cost sharing or matching requirement",
-  funding_instrument: "Funding instrument type",
-  opportunity_category: "Opportunity Category",
-  opportunity_category_explanation: "Opportunity Category Explanation",
-  funding_activity: "Category of Funding Activity",
-  category_explanation: "Category Explanation",
+  programFunding: "Program Funding",
+  expectedAwards: "Expected awards",
+  awardCeiling: "Award Ceiling",
+  awardFloor: "Award Floor",
+  costSharing: "Cost sharing or matching requirement",
+  fundingInstrument: "Funding instrument type",
+  opportunityCategory: "Opportunity Category",
+  opportunityCategoryExplanation: "Opportunity Category Explanation",
+  fundingActivity: "Category of Funding Activity",
+  categoryExplanation: "Category Explanation",
 };
 
 // Mock `useTranslations`
@@ -26,7 +26,7 @@ jest.mock("next-intl", () => ({
 
 describe("OpportunityAwardGridRow", () => {
   it("renders the title and content as strings", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = "Award Content";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -37,13 +37,13 @@ describe("OpportunityAwardGridRow", () => {
       "font-sans-sm text-bold margin-bottom-0",
     );
 
-    const titleElement = screen.getByText(mockTranslations.program_funding);
+    const titleElement = screen.getByText(mockTranslations.programFunding);
     expect(titleElement).toBeInTheDocument();
     expect(titleElement).toHaveClass("desktop-lg:font-sans-sm margin-top-0");
   });
 
   it("accepts number value for content", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = 456;
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -56,7 +56,7 @@ describe("OpportunityAwardGridRow", () => {
   });
 
   it("renders defaults when data is not present (money)", () => {
-    const title = "program_funding";
+    const title = "programFunding";
     const content = "";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
@@ -66,7 +66,7 @@ describe("OpportunityAwardGridRow", () => {
   });
 
   it("renders defaults when data is not present (not money)", () => {
-    const title = "expected_awards";
+    const title = "expectedAwards";
     const content = "";
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
