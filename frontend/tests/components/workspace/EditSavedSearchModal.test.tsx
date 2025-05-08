@@ -43,7 +43,11 @@ describe("EditSavedSearchModal", () => {
 
   it("matches snapshot", async () => {
     const { container } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        savedSearchId="1"
+        editText="edit"
+        queryName="excellent query"
+      />,
     );
 
     const toggle = await screen.findByTestId(
