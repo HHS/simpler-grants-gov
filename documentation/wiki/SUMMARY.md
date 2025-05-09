@@ -92,6 +92,7 @@
     * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/2025-02-25-community-forum.md)
     * [Migrate Existing API Consumers](product/decisions/adr/2025-03-24-migrate-existing-api-consumers.md)
     * [Internal knowledge management](product/decisions/adr/2025-04-18-internal-knowledge-management.md)
+    * [Revisiting SOAP Proxy](product/decisions/adr/2025-05-09-revisiting-soap-proxy.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)
     * [CI/CD interface](product/decisions/infra/0001-ci-cd-interface.md)
