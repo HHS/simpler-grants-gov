@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/opportunities/[opportunityId]/attachments-download/route";
+import { getAttachmentsDownload } from "src/app/api/opportunities/[opportunityId]/attachments-download/handler";
 
 import { NextRequest } from "next/server";
 
@@ -49,7 +49,7 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 describe("attachments-download export GET request", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls opportunityDetails with expected arguments", async () => {
-    await GET(fakeRequestForOpportunity(), {
+    await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",
       }),
@@ -58,7 +58,7 @@ describe("attachments-download export GET request", () => {
   });
 
   it("returns a new response created from the returned value of downloadOpportunties", async () => {
-    const response = await GET(fakeRequestForOpportunity(), {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",
       }),

@@ -59,3 +59,13 @@ export const logRequest = (request: NextRequest) => {
     });
   }
 };
+
+export const logResponse = (response: Response) => {
+  // resonse url is undefined, work around with manually set header
+  const { status, headers } = response;
+  logger.info({
+    status,
+    url: headers.get("simpler-request-for"),
+    awsTraceId: headers.get("X-Amz-Cf-Id"),
+  });
+};
