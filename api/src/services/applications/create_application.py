@@ -25,7 +25,7 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
     ).scalar_one_or_none()
 
     if not competition:
-        raise_flask_error(404, f"Competition with ID {competition_id} not found")
+        raise_flask_error(404, "Competition not found")
 
     current_date = get_now_us_eastern_date()
 

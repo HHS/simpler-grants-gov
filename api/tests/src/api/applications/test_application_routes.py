@@ -137,7 +137,7 @@ def test_application_start_after_closing_date(
     past_closing_date = today - timedelta(days=5)
 
     competition = CompetitionFactory.create(
-        opening_date=past_opening_date, closing_date=past_closing_date
+        opening_date=past_opening_date, closing_date=past_closing_date, grace_period=0
     )
 
     competition_id = str(competition.competition_id)
@@ -280,9 +280,7 @@ def test_application_start_competition_not_found(
     )
 
     assert response.status_code == 404
-    assert (
-        f"Competition with ID {non_existent_competition_id} not found" in response.json["message"]
-    )
+    assert "Competition not found" in response.json["message"]
 
     # Verify no application was created
     applications_count = (
