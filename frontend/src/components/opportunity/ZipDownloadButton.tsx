@@ -7,7 +7,6 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 type ZipDownloadProps = {
   opportunityId: number;
-  testId?: string;
 };
 
 const downloadAttachmentsZip = (opportunityId: number) => {
@@ -15,7 +14,7 @@ const downloadAttachmentsZip = (opportunityId: number) => {
   window.open(path, "_blank");
 };
 
-const ZipDownloadButton = ({ opportunityId, testId }: ZipDownloadProps) => {
+const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
   const t = useTranslations("OpportunityListing.description");
 
   return (
@@ -24,7 +23,6 @@ const ZipDownloadButton = ({ opportunityId, testId }: ZipDownloadProps) => {
       outline
       type="button"
       id={`opportunity-document-button-${opportunityId}`}
-      data-testid={testId}
     >
       <span>{t("zip_download")} </span>
       <USWDSIcon name={"file_download"} className="usa-icon--size-4" />
