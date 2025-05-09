@@ -6,7 +6,7 @@ import {
   defaultFeatureFlags,
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
-import { featureFlags } from "src/constants/environments";
+import { environment, featureFlags } from "src/constants/environments";
 import {
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
@@ -133,11 +133,14 @@ export class FeatureFlagsManager {
     // beyond default values. Unfortunately, this breaks the implementation of the feature
     // flag admin view, which depends on reading all flags from cookies, so the logic has beeen removed
 
-    const featureFlags = {
-      ...this.featureFlags,
-      ...getFeatureFlagsFromCookie(request.cookies),
-      ...featureFlagsFromQuery,
-    };
+    const featureFlags =
+      environment.ENVIRONMENT === "prod"
+        ? { ...this.featureFlags }
+        : {
+            ...this.featureFlags,
+            ...getFeatureFlagsFromCookie(request.cookies),
+            ...featureFlagsFromQuery,
+          };
 
     setCookie(JSON.stringify(featureFlags), response.cookies);
 
