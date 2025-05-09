@@ -27,7 +27,7 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface SearchFilterAccordionProps {
+export interface SearchAccordionContentProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
@@ -35,6 +35,10 @@ export interface SearchFilterAccordionProps {
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
+}
+
+export interface SearchFilterAccordionProps
+  extends SearchAccordionContentProps {
   wrapForScroll?: boolean;
 }
 
@@ -65,7 +69,7 @@ const AccordionContent = ({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
-}: SearchFilterAccordionProps) => {
+}: SearchAccordionContentProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
@@ -181,7 +185,10 @@ export function SearchFilterAccordion({
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
       content: wrapForScroll ? (
-        <div>
+        <div
+          className="maxh-mobile-lg minh-mobile overflow-scroll"
+          data-testid={`${title}-accordion-scroll`}
+        >
           <AccordionContent
             filterOptions={filterOptions}
             title={title}

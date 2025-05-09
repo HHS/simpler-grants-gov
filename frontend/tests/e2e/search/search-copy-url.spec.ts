@@ -28,6 +28,7 @@ test("should copy search query URL to clipboard", async ({ page }) => {
   await copyButton.click();
 
   // Get the current URL to verify it contains the expected query
-  const currentUrl = page.url();
-  expect(currentUrl).toContain("/search?query=education+grants");
+  const clipboardText = await page.evaluate("navigator.clipboard.readText()");
+  // const currentUrl = page.url();
+  expect(clipboardText).toContain("/search?query=education+grants");
 });
