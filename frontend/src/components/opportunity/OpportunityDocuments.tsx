@@ -72,7 +72,7 @@ const OpportunityDocuments = ({
               opportunityId={opportunityId}
             ></ZipDownloadButton>
           </Grid>
-          <Table className="width-full">
+          <Table className="width-full overflow-wrap">
             <DocumentTable
               documents={documents}
               opportunityId={opportunityId}

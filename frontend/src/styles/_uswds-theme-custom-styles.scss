@@ -487,8 +487,9 @@ button.usa-pagination__button.usa-button {
 }
 
 // Tables
-.usa-table--borderless td,
-.usa-table--borderless th {
-  max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
-  word-wrap: break-word;
+.usa-table {
+  &.overflow-wrap {
+    max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
+    overflow-wrap: break-word;
+  }
 }
