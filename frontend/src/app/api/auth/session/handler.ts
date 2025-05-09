@@ -3,8 +3,6 @@ import { isExpiring } from "src/utils/dateUtil";
 
 import { NextResponse } from "next/server";
 
-im;
-
 export async function getUserSession(): Promise<NextResponse> {
   const currentSession = await getSession();
   if (currentSession) {
