@@ -29,28 +29,14 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
 
     current_date = get_now_us_eastern_date()
 
-    # Validate opening_date
-    if competition.opening_date is None:
-        raise_flask_error(
-            422,
-            "Cannot start application - competition is not open for applications",
-            validation_issues=[
-                ValidationErrorDetail(
-                    type=ValidationErrorType.INVALID,
-                    message="Competition is not open for applications",
-                    field="opening_date",
-                )
-            ],
-        )
-
     # Check if current date is before opening date
-    if current_date < competition.opening_date:
+    if competition.opening_date is not None and current_date < competition.opening_date:
         raise_flask_error(
             422,
             "Cannot start application - competition is not yet open for applications",
             validation_issues=[
                 ValidationErrorDetail(
-                    type=ValidationErrorType.INVALID,
+                    type=ValidationErrorType.COMPETITION_NOT_YET_OPEN,
                     message="Competition is not yet open for applications",
                     field="opening_date",
                 )
@@ -67,13 +53,13 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
                 days=competition.grace_period
             )
 
-        if current_date > actual_closing_date:
+        if current_date >= actual_closing_date:
             raise_flask_error(
                 422,
                 "Cannot start application - competition is already closed for applications",
                 validation_issues=[
                     ValidationErrorDetail(
-                        type=ValidationErrorType.INVALID,
+                        type=ValidationErrorType.COMPETITION_ALREADY_CLOSED,
                         message="Competition is already closed for applications",
                         field="closing_date",
                     )

@@ -49,7 +49,7 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     assert "application_id" in response.json["data"]
 
     # Verify application was created in the database
-    application_id = uuid.UUID(response.json["data"]["application_id"])
+    application_id = response.json["data"]["application_id"]
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
     ).scalar_one_or_none()
@@ -62,7 +62,7 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
 def test_application_start_null_opening_date(
     client, api_auth_token, enable_factory_create, db_session
 ):
-    """Test application creation fails when opening_date is null"""
+    """Test application creation succeeds when opening_date is null (matches legacy behavior)"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -75,21 +75,19 @@ def test_application_start_null_opening_date(
         "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
     )
 
-    assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is not open for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.INVALID
-    assert response.json["errors"][0]["field"] == "opening_date"
+    # Should succeed now (legacy behavior - null opening_date means immediately open)
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created in the database
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
 
 
 @freeze_time(TEST_DATE)
@@ -117,7 +115,7 @@ def test_application_start_before_opening_date(
         "Cannot start application - competition is not yet open for applications"
         in response.json["message"]
     )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.INVALID
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_YET_OPEN
     assert response.json["errors"][0]["field"] == "opening_date"
 
     # Verify no application was created
@@ -154,7 +152,7 @@ def test_application_start_after_closing_date(
         "Cannot start application - competition is already closed for applications"
         in response.json["message"]
     )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.INVALID
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
     assert response.json["errors"][0]["field"] == "closing_date"
 
     # Verify no application was created
@@ -192,7 +190,7 @@ def test_application_start_with_grace_period(
     assert "application_id" in response.json["data"]
 
     # Verify application was created in the database
-    application_id = uuid.UUID(response.json["data"]["application_id"])
+    application_id = response.json["data"]["application_id"]
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
     ).scalar_one_or_none()
@@ -227,7 +225,7 @@ def test_application_start_after_grace_period(
         "Cannot start application - competition is already closed for applications"
         in response.json["message"]
     )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.INVALID
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
     assert response.json["errors"][0]["field"] == "closing_date"
 
     # Verify no application was created
@@ -261,7 +259,7 @@ def test_application_start_null_closing_date(
     assert "application_id" in response.json["data"]
 
     # Verify application was created in the database
-    application_id = uuid.UUID(response.json["data"]["application_id"])
+    application_id = response.json["data"]["application_id"]
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
     ).scalar_one_or_none()
