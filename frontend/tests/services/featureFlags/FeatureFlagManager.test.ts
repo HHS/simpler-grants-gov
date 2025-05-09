@@ -22,6 +22,9 @@ jest.mock("src/constants/environments", () => ({
     fakeTwo: false,
     nonBool: "sure",
   },
+  environment: {
+    ENVIRONMENT: "not prod",
+  },
 }));
 
 jest.mock("src/services/featureFlags/featureFlagHelpers", () => ({
