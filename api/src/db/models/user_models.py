@@ -113,7 +113,7 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
-    is_deleted: Mapped[bool]
+    is_deleted: Mapped[bool] = mapped_column(nullable=True)
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
@@ -136,7 +136,7 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
         server_default=sqlnow(),
     )
     searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger))
-    is_deleted: Mapped[bool]
+    is_deleted: Mapped[bool] = mapped_column(nullable=True)
 
 
 class UserNotificationLog(ApiSchemaTable, TimestampMixin):

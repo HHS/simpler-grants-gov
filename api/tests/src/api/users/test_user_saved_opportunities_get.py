@@ -87,12 +87,6 @@ def user_auth_token(user, db_session):
     return token
 
 
-@pytest.fixture(autouse=True, scope="function")
-def clear_opportunities(db_session):
-    cascade_delete_from_db_table(db_session, UserSavedOpportunity)
-    yield
-
-
 def test_user_get_saved_opportunities(
     client, user, user_auth_token, enable_factory_create, db_session
 ):

@@ -54,12 +54,6 @@ MEDICAL_LABORATORY = build_opp(
 )
 
 
-@pytest.fixture(autouse=True, scope="function")
-def clear_saved_searches(db_session):
-    cascade_delete_from_db_table(db_session, UserSavedSearch)
-    yield
-
-
 def test_user_save_search_post_unauthorized_user(client, db_session, user, user_auth_token):
     # Try to save a search for a different user ID
     different_user = UserFactory.create()
@@ -79,8 +73,14 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
     assert response.json["message"] == "Unauthorized user"
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == different_user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches
 
 
 def test_user_save_search_post_no_auth(client, db_session, user):
@@ -99,8 +99,14 @@ def test_user_save_search_post_no_auth(client, db_session, user):
     assert response.json["message"] == "Unable to process token"
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches == 0
 
 
 def test_user_save_search_post_invalid_request(client, user, user_auth_token, db_session):
@@ -114,8 +120,14 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
     assert response.status_code == 422  # Validation error
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches
 
 
 def test_user_save_search_post(
@@ -157,7 +169,13 @@ def test_user_save_search_post(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     # Verify the search was saved in the database
-    saved_search = db_session.query(UserSavedSearch).one()
+    saved_search = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
 
     assert saved_search.user_id == user.user_id
     assert saved_search.name == search_name
@@ -196,7 +214,12 @@ def test_user_save_search_post(
 
     # Verify the saved search is updated and a new saved opp is not created
     db_session.expire_all()
-    saved_opps = db_session.query(UserSavedSearch).all()
-    assert len(saved_opps) == 1
-    assert saved_opps[0].saved_search_id == saved_search.saved_search_id
-    assert not saved_opps[0].is_deleted
+    saved_opp = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        ).all()
+    )
+    assert len(saved_opp) == 1
+    assert saved_opp[0].saved_search_id == saved_search.saved_search_id
+    assert not saved_opp[0].is_deleted

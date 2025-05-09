@@ -27,10 +27,7 @@ def test_user_delete_saved_opportunity(
 ):
     # Create and save an opportunity
     opportunity = OpportunityFactory.create()
-    saved_opp = UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
-    import pdb
-
-    pdb.set_trace()
+    saved_opp = UserSavedOpportunityFactory.create(user=user, opportunity=opportunity, is_deleted=False)
     # Delete the saved opportunity
     response = client.delete(
         f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
@@ -85,3 +82,4 @@ def test_user_delete_other_users_saved_opportunity(
     assert saved_opportunity is not None
     assert saved_opportunity.user_id == other_user.user_id
     assert saved_opportunity.opportunity_id == opportunity.opportunity_id
+    assert not saved_opportunity.is_deleted
