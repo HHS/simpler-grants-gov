@@ -27,7 +27,9 @@ def test_user_delete_saved_opportunity(
 ):
     # Create and save an opportunity
     opportunity = OpportunityFactory.create()
-    saved_opp = UserSavedOpportunityFactory.create(user=user, opportunity=opportunity, is_deleted=False)
+    saved_opp = UserSavedOpportunityFactory.create(
+        user=user, opportunity=opportunity, is_deleted=False
+    )
     # Delete the saved opportunity
     response = client.delete(
         f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",

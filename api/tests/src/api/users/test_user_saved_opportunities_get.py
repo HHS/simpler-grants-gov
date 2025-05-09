@@ -9,8 +9,6 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
-from src.db.models.user_models import UserSavedOpportunity
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import (
     OpportunityFactory,

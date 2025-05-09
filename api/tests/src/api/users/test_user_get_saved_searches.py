@@ -2,10 +2,9 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-from sqlalchemy import delete
 
 from src.constants.lookup_constants import FundingInstrument
-from src.db.models.user_models import UserSavedSearch, UserTokenSession
+from src.db.models.user_models import UserTokenSession
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
@@ -50,10 +49,12 @@ def saved_searches(user, db_session):
     db_session.commit()
     return searches
 
+
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
-    cascade_delete_from_db_table(db_session,UserTokenSession)
+    cascade_delete_from_db_table(db_session, UserTokenSession)
     yield
+
 
 def test_user_get_saved_searches_unauthorized_user(
     client, db_session, user, user_auth_token, saved_searches

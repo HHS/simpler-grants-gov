@@ -928,6 +928,7 @@ class UserSavedSearchFactory(BaseFactory):
 
     searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
 
+
 ###################
 # Competition & Form Factories
 ###################

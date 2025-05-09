@@ -1,8 +1,6 @@
 import uuid
 from datetime import date
 
-import pytest
-
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -11,7 +9,6 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.user_models import UserSavedSearch
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import UserFactory
@@ -218,7 +215,8 @@ def test_user_save_search_post(
         db_session.query(UserSavedSearch)
         .filter(
             UserSavedSearch.user_id == user.user_id,
-        ).all()
+        )
+        .all()
     )
     assert len(saved_opp) == 1
     assert saved_opp[0].saved_search_id == saved_search.saved_search_id

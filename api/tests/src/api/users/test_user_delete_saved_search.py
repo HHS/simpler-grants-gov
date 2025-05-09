@@ -39,9 +39,8 @@ def test_user_delete_saved_search_unauthorized_user(
     # Verify search was not deleted
     saved_searches = (
         db_session.query(UserSavedSearch)
-        .filter(
-            UserSavedSearch.saved_search_id == saved_search.saved_search_id
-        ).all()
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
     )
     assert len(saved_searches) == 1
 
@@ -60,9 +59,8 @@ def test_user_delete_saved_search_no_auth(
     # Verify search was not deleted
     saved_searches = (
         db_session.query(UserSavedSearch)
-        .filter(
-            UserSavedSearch.saved_search_id == saved_search.saved_search_id
-        ).all()
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
     )
     assert len(saved_searches) == 1
 
@@ -99,9 +97,8 @@ def test_user_delete_saved_search(
     db_session.expire_all()
     saved_searches = (
         db_session.query(UserSavedSearch)
-        .filter(
-            UserSavedSearch.saved_search_id == saved_search.saved_search_id
-        ).all()
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
     )
     assert len(saved_searches) == 1
     assert saved_searches[0].is_deleted

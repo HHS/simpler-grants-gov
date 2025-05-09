@@ -4,6 +4,7 @@ from src.db.models.user_models import UserSavedOpportunity
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import OpportunityFactory, UserSavedOpportunityFactory
 
+
 def test_user_save_opportunity_post_unauthorized_user(
     client, db_session, user, user_auth_token, enable_factory_create
 ):
@@ -124,7 +125,7 @@ def test_user_save_opportunity_post_deleted(
     assert response.json["message"] == "Success"
 
     # Verify the saved opp is updated and a new saved opp is not created
-    saved_opp= (
+    saved_opp = (
         db_session.query(UserSavedOpportunity)
         .filter(
             UserSavedOpportunity.user_id == user.user_id,
