@@ -9,11 +9,11 @@ import {
 test("should copy search query URL to clipboard", async ({ page }, {
   project,
 }) => {
-  // navigator.clipboard only works in secure contexts (https) except, apparently in webkit
-  // for now, we'll only run this test in webkit
-  if (!project.name.match(/[Ww]ebkit/)) {
+  // clipboard testing does not work in webkit
+  if (project.name.match(/[Ww]ebkit/)) {
     return;
   }
+
   await page.goto("/search");
 
   // this is dumb but webkit has an issue with trying to fill in the input too quickly
@@ -35,6 +35,14 @@ test("should copy search query URL to clipboard", async ({ page }, {
 
   await copyButton.click();
 
-  const clipboardText = await page.evaluate("navigator.clipboard.readText()");
-  expect(clipboardText).toContain("/search?query=education+grants");
+  // const clipboardText = await page.evaluate("navigator.clipboard.readText()");
+  // expect(clipboardText).toContain("/search?query=education+grants");
+
+  const searchInput = page.locator("#query");
+  await searchInput.fill("");
+  await searchInput.press("ControlOrMeta+V");
+
+  await expect(searchInput).toHaveValue(
+    "http://127.0.0.1:3000/search?query=education+grants",
+  );
 });
