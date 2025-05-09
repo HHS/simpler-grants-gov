@@ -35,6 +35,7 @@ export interface SearchFilterAccordionProps {
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
+  wrapForScroll?: boolean;
 }
 
 const AccordionTitle = ({
@@ -127,7 +128,6 @@ const AccordionContent = ({
         isAllSelected={areSetsEqual(allOptionValues, query)}
         isNoneSelected={isNoneSelected}
       />
-
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
           <li>
@@ -175,11 +175,26 @@ export function SearchFilterAccordion({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
+  wrapForScroll = false,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content: (
+      content: wrapForScroll ? (
+        <div>
+          (
+          <AccordionContent
+            filterOptions={filterOptions}
+            title={title}
+            queryParamKey={queryParamKey}
+            query={query}
+            facetCounts={facetCounts}
+            defaultEmptySelection={defaultEmptySelection}
+            includeAnyOption={includeAnyOption}
+          />
+          )
+        </div>
+      ) : (
         <AccordionContent
           filterOptions={filterOptions}
           title={title}
