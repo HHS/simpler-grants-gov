@@ -182,7 +182,6 @@ export function SearchFilterAccordion({
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
       content: wrapForScroll ? (
         <div>
-          (
           <AccordionContent
             filterOptions={filterOptions}
             title={title}
@@ -192,7 +191,6 @@ export function SearchFilterAccordion({
             defaultEmptySelection={defaultEmptySelection}
             includeAnyOption={includeAnyOption}
           />
-          )
         </div>
       ) : (
         <AccordionContent
