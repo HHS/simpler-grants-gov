@@ -73,6 +73,7 @@ export const OpportunitySaveUserControl = () => {
       .finally(() => {
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opportunityId, user?.token]);
 
   const messageText = saved

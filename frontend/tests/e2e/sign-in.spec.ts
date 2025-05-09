@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { test } from "@playwright/test";
 
 import { performSignIn } from "./playwrightUtils";
