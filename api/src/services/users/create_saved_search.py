@@ -22,21 +22,27 @@ def create_saved_search(
         )
     ).scalar_one_or_none()
 
-    if not record:
-        # Retrieve opportunity IDs
-        opportunity_ids = search_opportunities_id(search_client, json_data["search_query"])
-
-        saved_search = UserSavedSearch(
-            user_id=user_id,
-            name=json_data["name"],
-            search_query=json_data["search_query"],
-            searched_opportunity_ids=opportunity_ids,
+    if record:
+        logger.info(
+            "Reactivating previously deleted saved search.",
+            extra={"user_id": record.user_id, "saved_search_id": record.saved_search_id},
         )
+        record.is_deleted = False
+        return record
 
-        db_session.add(saved_search)
+    logger.info(
+        "Creating new saved search.",
+        extra={"user_id": user_id},
+    )
 
-        return saved_search
+    opportunity_ids = search_opportunities_id(search_client, json_data["search_query"])
 
-    record.is_deleted = False
+    saved_search = UserSavedSearch(
+        user_id=user_id,
+        name=json_data["name"],
+        search_query=json_data["search_query"],
+        searched_opportunity_ids=opportunity_ids,
+    )
 
-    return record
+    db_session.add(saved_search)
+    return saved_search
