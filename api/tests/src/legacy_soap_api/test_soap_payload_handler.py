@@ -5,9 +5,7 @@ from src.legacy_soap_api.soap_payload_handler import SoapPayload
 MOCK_SOAP_OPERATION_NAME = "GetOpportunityListResponse"
 MOCK_SOAP_ENVELOPE = f"""<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
-        <n:APIKey xmlns:n="http://auth.com/apikey">
-            apikeyinheaderexample
-        </n:APIKey>
+        <soap:APIKey>apikeyinheaderexample</soap:APIKey>
     </soap:Header>
     <soap:Body>
         <ns2:{MOCK_SOAP_OPERATION_NAME} xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
@@ -38,7 +36,7 @@ def test_invalid_soap_string():
 class TestSoapPayload:
     @pytest.fixture(scope="class")
     def soap_payload(self):
-        return SoapPayload(MOCK_SOAP_RESPONSE)
+        return SoapPayload(MOCK_SOAP_RESPONSE, force_list_attributes=["OpportunityDetails"])
 
     def test_payload_property(self, soap_payload):
         given = soap_payload.payload
@@ -55,19 +53,49 @@ class TestSoapPayload:
         expected = MOCK_SOAP_OPERATION_NAME
         assert given == expected
 
-    def test_to_dict(self, soap_payload):
+    def test_to_dict_only_non_attr_namespace_keys_modified(self, soap_payload):
         given = soap_payload.to_dict()
         expected = {
             "Envelope": {
+                "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
                 "Header": {"APIKey": "apikeyinheaderexample"},
                 "Body": {
                     "GetOpportunityListResponse": {
-                        "OpportunityDetails": {
-                            "OpeningDate": "2025-03-20-04:00",
-                            "ClosingDate": "2025-07-26-04:00",
-                        }
+                        "@xmlns:ns5": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
+                        "@xmlns:ns4": "http://schemas.xmlsoap.org/wsdl/soap/",
+                        "@xmlns:ns3": "http://schemas.xmlsoap.org/wsdl/",
+                        "@xmlns:ns2": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
+                        "@xmlns": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
+                        "OpportunityDetails": [
+                            {"OpeningDate": "2025-03-20-04:00", "ClosingDate": "2025-07-26-04:00"}
+                        ],
                     }
                 },
             }
         }
         assert given == expected
+
+    def test_update_envelope_from_dict(self, soap_payload):
+        original_dict = soap_payload.to_dict()
+        expected_updated_dict = {
+            "Envelope": {
+                "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
+                "Header": {"APIKey": "apikeyinheaderexample"},
+                "Body": {
+                    "GetOpportunityListResponse": {
+                        "@xmlns:ns5": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
+                        "@xmlns:ns4": "http://schemas.xmlsoap.org/wsdl/soap/",
+                        "@xmlns:ns3": "http://schemas.xmlsoap.org/wsdl/",
+                        "@xmlns:ns2": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
+                        "@xmlns": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
+                        "OpportunityDetails": [
+                            {"OpeningDate": "2025-03-20-04:00", "ClosingDate": "2025-07-26-04:00"},
+                            {"OpeningDate": "2026-03-20-04:00", "ClosingDate": "2027-07-26-04:00"},
+                        ],
+                    }
+                },
+            }
+        }
+        soap_payload.update_envelope_from_dict(expected_updated_dict)
+        assert original_dict != soap_payload.to_dict()
+        assert expected_updated_dict == soap_payload.to_dict()
