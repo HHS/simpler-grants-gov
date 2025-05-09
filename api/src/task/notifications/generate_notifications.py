@@ -224,8 +224,8 @@ class NotificationTask(Task):
                     f"<a href='{self.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity.opportunity_title}</a>\n"
                     f"Application due date: {close_date.strftime('%B %d, %Y')}\n\n"
                     "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                    "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
-                    "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
+                    f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                    "<b>Questions?</b>\n"
                     "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
                     "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
                     "{CONTACT_INFO}"
@@ -250,8 +250,10 @@ class NotificationTask(Task):
 
                 message += (
                     "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                    "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
-                    "If you have questions, please contact the Grants.gov Contact Center:\n"
+                    "<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                    "<b>Questions?</b>\n"
+                    "If you have questions about an opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+                    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
                     "{CONTACT_INFO}"
                 )
 
