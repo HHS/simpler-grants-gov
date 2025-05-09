@@ -18,17 +18,17 @@ api_key_auth = HTTPTokenAuth("ApiKey", header="X-Auth", security_scheme_name="Ap
 
 
 @dataclass
-class User:
+class ApiKeyUser:
     # A very basic "user" for the purposes of logging
     # which API key was used to call us.
     username: str
 
 
-API_AUTH_USERS: dict[str, User] | None = None
+API_AUTH_USERS: dict[str, ApiKeyUser] | None = None
 
 
 @api_key_auth.verify_token
-def verify_token(token: str) -> User:
+def verify_token(token: str) -> ApiKeyUser:
     logger.info("Authenticating provided token")
 
     user = process_token(token)
@@ -49,7 +49,7 @@ def verify_token(token: str) -> User:
     return user
 
 
-def _get_auth_users() -> dict[str, User] | None:
+def _get_auth_users() -> dict[str, ApiKeyUser] | None:
     # To avoid every request re-parsing the auth token
     # string, load it once and store in a global variable
     # This doesn't really account for threading, but worst case
@@ -77,12 +77,12 @@ def _get_auth_users() -> dict[str, User] | None:
     # barebones ability to do distinguish our users.
     auth_tokens = raw_auth_tokens.split(",")
     for i, token in enumerate(auth_tokens):
-        API_AUTH_USERS[token] = User(username=f"auth_token_{i}")
+        API_AUTH_USERS[token] = ApiKeyUser(username=f"auth_token_{i}")
 
     return API_AUTH_USERS
 
 
-def process_token(token: str) -> User:
+def process_token(token: str) -> ApiKeyUser:
     # WARNING: this isn't really a production ready
     # auth approach. In reality the user object returned
     # here should be pulled from a DB or auth service, but

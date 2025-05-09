@@ -38,7 +38,7 @@ def test_opportunity_notifications(
 ):
     """Test that notifications are sent for updated opportunities"""
     # Create a saved opportunity that needs notification
-    opportunity = factories.OpportunityFactory.create()
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
     saved_opportunity = factories.UserSavedOpportunityFactory.create(
         user=user,
         opportunity=opportunity,
@@ -78,7 +78,7 @@ def test_last_notified_at_updates(
 ):
     """Test that last_notified_at gets updated after sending notifications"""
     # Create an opportunity that was updated after the last notification
-    opportunity = factories.OpportunityFactory.create()
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
     saved_opp = factories.UserSavedOpportunityFactory.create(
         user=user,
         opportunity=opportunity,
