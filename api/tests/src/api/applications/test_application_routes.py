@@ -2,6 +2,7 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from freezegun import freeze_time
 from sqlalchemy import select
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
@@ -25,10 +26,12 @@ SIMPLE_JSON_SCHEMA = {
     "required": ["name"],
 }
 
+TEST_DATE = "2023-06-15 12:00:00"  # June 15, 2023 at noon UTC
 
+
+@freeze_time(TEST_DATE)
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
     """Test successful creation of an application"""
-    # Use today's date for competition opening_date to ensure it's open
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -55,13 +58,15 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     assert str(application.competition_id) == competition_id
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_null_opening_date(
     client, api_auth_token, enable_factory_create, db_session
 ):
     """Test application creation fails when opening_date is null"""
-    competition = CompetitionFactory.create(
-        opening_date=None, closing_date=date.today() + timedelta(days=10)
-    )
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=None, closing_date=future_date)
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
@@ -87,6 +92,7 @@ def test_application_start_null_opening_date(
     assert len(applications_count) == 0
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_before_opening_date(
     client, api_auth_token, enable_factory_create, db_session
 ):
@@ -123,6 +129,7 @@ def test_application_start_before_opening_date(
     assert len(applications_count) == 0
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_after_closing_date(
     client, api_auth_token, enable_factory_create, db_session
 ):
@@ -159,6 +166,7 @@ def test_application_start_after_closing_date(
     assert len(applications_count) == 0
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_with_grace_period(
     client, api_auth_token, enable_factory_create, db_session
 ):
@@ -193,6 +201,7 @@ def test_application_start_with_grace_period(
     assert str(application.competition_id) == competition_id
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_after_grace_period(
     client, api_auth_token, enable_factory_create, db_session
 ):
@@ -230,6 +239,7 @@ def test_application_start_after_grace_period(
     assert len(applications_count) == 0
 
 
+@freeze_time(TEST_DATE)
 def test_application_start_null_closing_date(
     client, api_auth_token, enable_factory_create, db_session
 ):
