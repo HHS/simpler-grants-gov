@@ -1,16 +1,8 @@
 import { RefObject } from "react";
-import {
-  Modal,
-  ModalFooter,
-  ModalHeading,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
-
-import { USWDSIcon } from "./USWDSIcon";
+import { Modal, ModalRef, ModalHeading } from "@trussworks/react-uswds";
 
 interface SimplerModalProps {
-  modalRef: RefObject<ModalRef | null>;
+  modalRef: RefObject<ModalRef>;
   modalId: string;
   title: string;
   children: React.ReactNode;
@@ -27,53 +19,18 @@ export const SimplerModal = ({
   children,
   onClose,
   closeText = "Close",
-  forceAction = true,
-  className = "text-wrap",
+  forceAction = false,
+  className,
 }: SimplerModalProps) => {
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
-
   return (
     <Modal
       ref={modalRef}
+      id={modalId}
       forceAction={forceAction}
       className={className}
-      aria-labelledby={`${modalId}-heading`}
-      aria-describedby={`${modalId}-description`}
-      id={modalId}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          handleClose();
-        }
-      }}
     >
-      <div className="position-relative">
-        <ModalToggleButton
-          modalRef={modalRef}
-          closer
-          unstyled
-          className="position-absolute right-0 top-0 padding-1"
-          onClick={handleClose}
-        >
-          <USWDSIcon name="close" />
-        </ModalToggleButton>
-        <ModalHeading id={`${modalId}-heading`}>{title}</ModalHeading>
-        {children}
-        <ModalFooter>
-          <ModalToggleButton
-            modalRef={modalRef}
-            closer
-            unstyled
-            className="padding-105 text-center"
-            onClick={handleClose}
-          >
-            {closeText}
-          </ModalToggleButton>
-        </ModalFooter>
-      </div>
+      <ModalHeading id={`${modalId}-heading`}>{title}</ModalHeading>
+      {children}
     </Modal>
   );
 }; 
