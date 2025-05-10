@@ -5,6 +5,7 @@
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
 
+import { difference } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 // Refer to tests to see how this works in practice
@@ -96,10 +97,6 @@ export const findFirstWhitespace = (content: string, startAt: number): number =>
 export const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
-export const stringToBoolean = (
-  mightRepresentABoolean: string | undefined,
-): boolean => mightRepresentABoolean === "true";
-
 // a hack to get filenames to work on blob based downloads across all browsers
 // see https://stackoverflow.com/a/48968694
 export const saveBlobToFile = (blob: Blob, filename: string) => {
@@ -128,3 +125,7 @@ export const isCurrentPath = (href: string, currentPath: string): boolean =>
 export function isExternalLink(href: string): boolean {
   return !!(href && href.includes("http"));
 }
+
+export const isSubset = <T>(subset: T[], superset: T[]) => {
+  return !difference(subset, superset).length;
+};

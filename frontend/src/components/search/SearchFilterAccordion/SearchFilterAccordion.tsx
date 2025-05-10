@@ -27,7 +27,7 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface SearchFilterAccordionProps {
+export interface SearchAccordionContentProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
@@ -35,6 +35,11 @@ export interface SearchFilterAccordionProps {
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
+}
+
+export interface SearchFilterAccordionProps
+  extends SearchAccordionContentProps {
+  wrapForScroll?: boolean;
 }
 
 const AccordionTitle = ({
@@ -64,7 +69,7 @@ const AccordionContent = ({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
-}: SearchFilterAccordionProps) => {
+}: SearchAccordionContentProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
 
@@ -127,12 +132,11 @@ const AccordionContent = ({
         isAllSelected={areSetsEqual(allOptionValues, query)}
         isNoneSelected={isNoneSelected}
       />
-
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
           <li>
             <AnyOptionCheckbox
-              title={title}
+              title={title.toLowerCase()}
               checked={isNoneSelected}
               queryParamKey={queryParamKey}
               defaultEmptySelection={defaultEmptySelection}
@@ -141,18 +145,14 @@ const AccordionContent = ({
         )}
         {filterOptions.map((option) => (
           <li key={option.id}>
-            {/* If we have children, show a "section" dropdown, otherwise show just a checkbox */}
+            {/* If we have children, show a "section", otherwise show just a checkbox */}
             {option.children ? (
               // SearchFilterSection will map over all children of this option
               <SearchFilterSection
                 option={option as FilterOptionWithChildren}
-                value={option.value}
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
-                toggleSelectAll={toggleSelectAll}
                 accordionTitle={title}
-                isSectionAllSelected={areSetsEqual}
-                isSectionNoneSelected={() => query.size === 0}
                 facetCounts={facetCounts}
               />
             ) : (
@@ -179,11 +179,27 @@ export function SearchFilterAccordion({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
+  wrapForScroll = false,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content: (
+      content: wrapForScroll ? (
+        <div
+          className="maxh-mobile-lg minh-mobile overflow-scroll"
+          data-testid={`${title}-accordion-scroll`}
+        >
+          <AccordionContent
+            filterOptions={filterOptions}
+            title={title}
+            queryParamKey={queryParamKey}
+            query={query}
+            facetCounts={facetCounts}
+            defaultEmptySelection={defaultEmptySelection}
+            includeAnyOption={includeAnyOption}
+          />
+        </div>
+      ) : (
         <AccordionContent
           filterOptions={filterOptions}
           title={title}

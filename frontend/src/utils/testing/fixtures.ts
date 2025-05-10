@@ -7,7 +7,10 @@ import {
   SearchFetcherActionType,
   ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import {
+  FilterOption,
+  SearchAPIResponse,
+} from "src/types/search/searchResponseTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,
@@ -118,3 +121,26 @@ export const fakeOpportunityDocument = {
   updated_at: Date.now().toString(),
   file_description: "a description for your file",
 };
+
+export const initialFilterOptions: FilterOption[] = [
+  {
+    id: "funding-instrument-cooperative_agreement",
+    label: "Cooperative Agreement",
+    value: "cooperative_agreement",
+  },
+  {
+    id: "funding-instrument-grant",
+    label: "Grant",
+    value: "grant",
+  },
+  {
+    id: "funding-instrument-procurement_contract",
+    label: "Procurement Contract ",
+    value: "procurement_contract",
+  },
+  {
+    id: "funding-instrument-other",
+    label: "Other",
+    value: "other",
+  },
+];

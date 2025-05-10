@@ -1,4 +1,4 @@
-import { stringToBoolean } from "src/utils/generalUtils";
+import { stringToBoolean } from "src/utils/middlewareSafeUtils";
 
 const {
   NEXT_PUBLIC_BASE_PATH,
