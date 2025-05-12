@@ -115,6 +115,7 @@ export default function SearchResults({
   query?: string | null;
   loadingMessage: string;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  suspenseKey: string;
 }) {
   const { page, sortby } = searchParams;
   // const suspenseKey = Object.entries(searchParams).join(",");

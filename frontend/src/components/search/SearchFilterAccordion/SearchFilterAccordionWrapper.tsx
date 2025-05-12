@@ -1,17 +1,17 @@
 import {
+  BackendFilterNames,
   FilterOption,
   SearchAPIResponse,
   ValidSearchQueryParam,
 } from "src/types/search/searchResponseTypes";
 
-import { SearchFilterAccordionUI } from "./SearchFilterAccordion";
+import { SearchFilterAccordion } from "./SearchFilterAccordion";
 
-export async function SearchFilterAccordion({
+export async function SearchFilterAccordionWrapper({
   filterOptions,
   title,
   queryParamKey,
   query,
-  // facetCounts,
   facetKey,
   searchResultsPromise,
   defaultEmptySelection,
@@ -21,10 +21,10 @@ export async function SearchFilterAccordion({
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
   filterOptions: FilterOption[];
-  facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  facetKey: BackendFilterNames;
 }) {
   let searchResults;
   try {
@@ -33,9 +33,9 @@ export async function SearchFilterAccordion({
     console.error("Search error, cannot set filter facets", e);
   }
 
-  const facetCounts = searchResults.facet_counts[facetKey];
+  const facetCounts = searchResults?.facet_counts[facetKey] || {};
   return (
-    <SearchFilterAccordionUI
+    <SearchFilterAccordion
       filterOptions={filterOptions}
       title={title}
       queryParamKey={queryParamKey}

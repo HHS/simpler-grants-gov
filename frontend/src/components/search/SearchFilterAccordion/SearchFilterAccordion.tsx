@@ -195,7 +195,7 @@ const AccordionContent = ({
 //   );
 // }
 
-export function SearchFilterAccordionUI({
+export function SearchFilterAccordion({
   filterOptions,
   title,
   queryParamKey,

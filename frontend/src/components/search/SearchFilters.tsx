@@ -1,11 +1,10 @@
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
-import { SearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordionAsync";
+import { SearchFilterAccordionWrapper } from "src/components/search/SearchFilterAccordion/SearchFilterAccordionWrapper";
 import {
   categoryOptions,
   eligibilityOptions,
@@ -13,32 +12,9 @@ import {
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
-import { SearchFilterAccordionUI } from "./SearchFilterAccordion/SearchFilterAccordion";
+import { SearchFilterAccordion } from "./SearchFilterAccordion/SearchFilterAccordion";
 
-const defaultFacetCounts = {
-  funding_instrument: {},
-  applicant_type: {},
-  agency: {},
-  funding_category: {},
-  opportunity_status: {},
-};
-
-const SearchAccordionFallback = ({
-  filterOptions,
-  title,
-  queryParamKey,
-  query,
-}) => (
-  <SearchFilterAccordionUI
-    filterOptions={filterOptions}
-    title={title}
-    queryParamKey={queryParamKey}
-    query={query}
-    facetCounts={{}}
-  />
-);
-
-export default async function SearchFilters({
+export default function SearchFilters({
   fundingInstrument,
   eligibility,
   agency,
@@ -53,18 +29,16 @@ export default async function SearchFilters({
   category: Set<string>;
   opportunityStatus: Set<string>;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  suspenseKey: string;
 }) {
   const t = useTranslations("Search");
-  // const agenciesPromise = getAgenciesForFilterOptions();
-
-  // const facetCounts = searchResults?.facet_counts || defaultFacetCounts;
 
   return (
     <>
       <Suspense
-        key={suspenseKey}
+        key={`${suspenseKey}-fundingInstrument`}
         fallback={
-          <SearchAccordionFallback
+          <SearchFilterAccordion
             filterOptions={fundingOptions}
             query={fundingInstrument}
             queryParamKey="fundingInstrument"
@@ -72,20 +46,19 @@ export default async function SearchFilters({
           />
         }
       >
-        <SearchFilterAccordion
+        <SearchFilterAccordionWrapper
           searchResultsPromise={searchResultsPromise}
           facetKey="funding_instrument"
           filterOptions={fundingOptions}
           query={fundingInstrument}
           queryParamKey="fundingInstrument"
           title={t("accordion.titles.funding")}
-          // facetCounts={facetCounts.funding_instrument || {}}
         />
       </Suspense>
       <Suspense
-        key={suspenseKey}
+        key={`${suspenseKey}-eligibility`}
         fallback={
-          <SearchAccordionFallback
+          <SearchFilterAccordion
             filterOptions={eligibilityOptions}
             query={eligibility}
             queryParamKey={"eligibility"}
@@ -93,20 +66,19 @@ export default async function SearchFilters({
           />
         }
       >
-        <SearchFilterAccordion
+        <SearchFilterAccordionWrapper
           searchResultsPromise={searchResultsPromise}
-          facetKey="eligibility"
+          facetKey="applicant_type"
           filterOptions={eligibilityOptions}
           query={eligibility}
           queryParamKey={"eligibility"}
           title={t("accordion.titles.eligibility")}
-          // facetCounts={facetCounts.applicant_type || {}}
         />
       </Suspense>
       <Suspense
-        key={suspenseKey}
+        key={`${suspenseKey}-category`}
         fallback={
-          <SearchAccordionFallback
+          <SearchFilterAccordion
             filterOptions={categoryOptions}
             query={category}
             queryParamKey={"category"}
@@ -114,14 +86,13 @@ export default async function SearchFilters({
           />
         }
       >
-        <SearchFilterAccordion
+        <SearchFilterAccordionWrapper
           searchResultsPromise={searchResultsPromise}
           facetKey="funding_category"
           filterOptions={categoryOptions}
           query={category}
           queryParamKey={"category"}
           title={t("accordion.titles.category")}
-          // facetCounts={facetCounts.funding_category || {}}
         />
       </Suspense>
     </>
