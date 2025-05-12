@@ -40,7 +40,7 @@ i.e.
 }
 
 // Button
-.usa-button {
+.usa-button:not(.usa-modal__close) {
   &,
   &:visited {
     background-color: color("mint-50");
