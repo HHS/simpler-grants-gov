@@ -27,5 +27,17 @@ jobs:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}
 
-      - run: make build
-      - run: env USE_DOCKER=1 make test
+      - name: Build docker image
+        run: make build
+
+      - name: Run tests
+        run: make test USE_DOCKER=1
+
+      - name: Save built image to cache
+        run: docker save nofos:${{ inputs.version }} > /tmp/docker-image.tar
+
+      - name: Cache Docker image
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: nofos-${{ inputs.version }}
