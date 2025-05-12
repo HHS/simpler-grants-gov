@@ -14,7 +14,7 @@ from src.api.application_alpha.application_schemas import (
     ApplicationStartResponseSchema,
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.auth.api_key_auth import api_key_auth
+from src.auth.api_jwt_auth import api_jwt_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.get_application import get_application
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 @application_blueprint.input(ApplicationStartRequestSchema, location="json")
 @application_blueprint.output(ApplicationStartResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_key_auth)
+@application_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
@@ -49,7 +49,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 @application_blueprint.input(ApplicationFormUpdateRequestSchema, location="json")
 @application_blueprint.output(ApplicationFormUpdateResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_key_auth)
+@application_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def application_form_update(
     db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
@@ -78,7 +78,7 @@ def application_form_update(
 )
 @application_blueprint.output(ApplicationFormGetResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_key_auth)
+@application_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def application_form_get(
     db_session: db.Session, application_id: UUID, app_form_id: UUID
@@ -105,7 +105,7 @@ def application_form_get(
 @application_blueprint.get("/applications/<uuid:application_id>")
 @application_blueprint.output(ApplicationGetResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_key_auth)
+@application_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def application_get(
     db_session: db.Session,
@@ -132,7 +132,7 @@ def application_get(
 @application_blueprint.post("/applications/<uuid:application_id>/submit")
 @application_blueprint.output(AbstractResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_key_auth)
+@application_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def application_submit(db_session: db.Session, application_id: UUID) -> response.ApiResponse:
     """Submit an application"""

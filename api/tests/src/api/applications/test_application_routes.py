@@ -5,6 +5,7 @@ import pytest
 from freezegun import freeze_time
 from sqlalchemy import select
 
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
@@ -14,6 +15,7 @@ from tests.src.db.models.factories import (
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
+    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -30,10 +32,15 @@ TEST_DATE = "2023-06-15 12:00:00"  # June 15, 2023 at noon UTC
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
+def test_application_start_success(client, enable_factory_create, db_session):
     """Test successful creation of an application"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
+
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -41,7 +48,7 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 200
@@ -59,20 +66,23 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_null_opening_date(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_null_opening_date(client, enable_factory_create, db_session):
     """Test application creation succeeds when opening_date is null (matches legacy behavior)"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
     competition = CompetitionFactory.create(opening_date=None, closing_date=future_date)
 
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     # Should succeed now (legacy behavior - null opening_date means immediately open)
@@ -91,13 +101,16 @@ def test_application_start_null_opening_date(
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_before_opening_date(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_before_opening_date(client, enable_factory_create, db_session):
     """Test application creation fails when current date is before opening_date"""
     today = get_now_us_eastern_date()
     future_opening_date = today + timedelta(days=5)
     future_closing_date = today + timedelta(days=15)
+
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=future_opening_date, closing_date=future_closing_date
@@ -107,7 +120,7 @@ def test_application_start_before_opening_date(
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 422
@@ -128,13 +141,16 @@ def test_application_start_before_opening_date(
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_after_closing_date(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_after_closing_date(client, enable_factory_create, db_session):
     """Test application creation fails when current date is after closing_date"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=15)
     past_closing_date = today - timedelta(days=5)
+
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=0
@@ -144,7 +160,7 @@ def test_application_start_after_closing_date(
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 422
@@ -165,14 +181,17 @@ def test_application_start_after_closing_date(
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_with_grace_period(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_with_grace_period(client, enable_factory_create, db_session):
     """Test application creation succeeds when within grace period"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=15)
     past_closing_date = today - timedelta(days=5)
     grace_period = 7  # 7 days grace period
+
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
@@ -182,7 +201,7 @@ def test_application_start_with_grace_period(
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 200
@@ -200,14 +219,17 @@ def test_application_start_with_grace_period(
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_after_grace_period(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_after_grace_period(client, enable_factory_create, db_session):
     """Test application creation fails when after grace period"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=20)
     past_closing_date = today - timedelta(days=10)
     grace_period = 5  # 5 days grace period
+
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
@@ -217,7 +239,7 @@ def test_application_start_after_grace_period(
     request_data = {"competition_id": competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 422
@@ -238,9 +260,7 @@ def test_application_start_after_grace_period(
 
 
 @freeze_time(TEST_DATE)
-def test_application_start_null_closing_date(
-    client, api_auth_token, enable_factory_create, db_session
-):
+def test_application_start_null_closing_date(client, enable_factory_create, db_session):
     """Test application creation succeeds when closing_date is null and opening_date is in the past"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=5)
@@ -250,8 +270,13 @@ def test_application_start_null_closing_date(
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
+    # Since time is frozen, we need to create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 200
@@ -269,14 +294,14 @@ def test_application_start_null_closing_date(
 
 
 def test_application_start_competition_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application creation fails when competition doesn't exist"""
     non_existent_competition_id = str(uuid.uuid4())
     request_data = {"competition_id": non_existent_competition_id}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 404
@@ -301,8 +326,9 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
 
+    # Use an invalid JWT token
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": "123"}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": "invalid.jwt.token"}
     )
 
     assert response.status_code == 401
@@ -317,7 +343,7 @@ def test_application_start_unauthorized(client, enable_factory_create, db_sessio
 
 
 def test_application_start_invalid_request(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application creation fails with invalid request data"""
     application_count_before = len(db_session.execute(select(Application)).scalars().all())
@@ -325,7 +351,7 @@ def test_application_start_invalid_request(
     request_data = {"my_field": {"a": 1, "b": [{"c": "hello"}]}}
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
     assert response.status_code == 422  # Validation error
@@ -336,7 +362,7 @@ def test_application_start_invalid_request(
 
 
 def test_application_form_update_success_create(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test successful creation of an application form response"""
     # Create application
@@ -351,7 +377,7 @@ def test_application_form_update_success_create(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert
@@ -373,7 +399,7 @@ def test_application_form_update_success_create(
 
 
 def test_application_form_update_success_update(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test successful update of an existing application form response"""
     # Create application
@@ -399,7 +425,7 @@ def test_application_form_update_success_update(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
@@ -435,7 +461,7 @@ def test_application_form_update_with_validation_warnings(
     client,
     enable_factory_create,
     db_session,
-    api_auth_token,
+    user_auth_token,
     application_response,
     expected_warnings,
 ):
@@ -459,7 +485,7 @@ def test_application_form_update_with_validation_warnings(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
@@ -475,7 +501,7 @@ def test_application_form_update_with_invalid_schema_500(
     client,
     enable_factory_create,
     db_session,
-    api_auth_token,
+    user_auth_token,
 ):
     """In this test we intentionally create a bad JSON schema"""
     application = ApplicationFactory.create()
@@ -498,7 +524,7 @@ def test_application_form_update_with_invalid_schema_500(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 500
@@ -509,7 +535,7 @@ def test_application_form_update_with_invalid_schema_500(
 
 
 def test_application_form_update_application_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application form update fails when application doesn't exist"""
     # Create form
@@ -522,7 +548,7 @@ def test_application_form_update_application_not_found(
     response = client.put(
         f"/alpha/applications/{non_existent_application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert
@@ -541,7 +567,7 @@ def test_application_form_update_application_not_found(
 
 
 def test_application_form_update_form_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application form update fails when form doesn't exist"""
 
@@ -555,7 +581,7 @@ def test_application_form_update_form_not_found(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{non_existent_form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert
@@ -584,7 +610,7 @@ def test_application_form_update_unauthorized(client, enable_factory_create, db_
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{uuid.uuid4()}",
         json=request_data,
-        headers={"X-Auth": "invalid-token"},
+        headers={"X-SGG-Token": "invalid-token"},
     )
 
     # Assert
@@ -604,7 +630,7 @@ def test_application_form_update_unauthorized(client, enable_factory_create, db_
 
 
 def test_application_form_update_invalid_request(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application form update fails with invalid request data"""
     request_data = {}  # Missing required application_response
@@ -615,7 +641,7 @@ def test_application_form_update_invalid_request(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{uuid.uuid4()}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert
@@ -635,7 +661,7 @@ def test_application_form_update_invalid_request(
 
 
 def test_application_form_update_complex_json(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     """Test application form update with complex JSON data"""
     # Create application
@@ -672,7 +698,7 @@ def test_application_form_update_complex_json(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert
@@ -692,7 +718,7 @@ def test_application_form_update_complex_json(
     assert application_form.application_response == complex_json
 
 
-def test_application_form_get_success(client, enable_factory_create, db_session, api_auth_token):
+def test_application_form_get_success(client, enable_factory_create, db_session, user_auth_token):
     application_form = ApplicationFormFactory.create(
         application_response={"name": "John Doe"},
     )
@@ -704,7 +730,7 @@ def test_application_form_get_success(client, enable_factory_create, db_session,
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
@@ -716,14 +742,14 @@ def test_application_form_get_success(client, enable_factory_create, db_session,
 
 
 def test_application_form_get_application_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     non_existent_application_id = str(uuid.uuid4())
     non_existent_app_form_id = str(uuid.uuid4())
 
     response = client.get(
         f"/alpha/applications/{non_existent_application_id}/application_form/{non_existent_app_form_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 404
@@ -733,7 +759,7 @@ def test_application_form_get_application_not_found(
 
 
 def test_application_form_get_form_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     application = ApplicationFactory.create()
 
@@ -741,7 +767,7 @@ def test_application_form_get_form_not_found(
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{non_existent_app_form_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 404
@@ -760,20 +786,20 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
     )
 
     response = client.get(
-        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
-        headers={"X-Auth": "invalid-token"},
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": "invalid-token"},
     )
 
     assert response.status_code == 401
 
 
-def test_application_get_success(client, enable_factory_create, db_session, api_auth_token):
+def test_application_get_success(client, enable_factory_create, db_session, user_auth_token):
     application = ApplicationFactory.create(with_forms=True)
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
@@ -796,13 +822,13 @@ def test_application_get_success(client, enable_factory_create, db_session, api_
 
 
 def test_application_get_application_not_found(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, user_auth_token
 ):
     non_existent_application_id = str(uuid.uuid4())
 
     response = client.get(
         f"/alpha/applications/{non_existent_application_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 404
@@ -816,7 +842,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-Auth": "invalid-token"},
+        headers={"X-SGG-Token": "invalid-token"},
     )
 
     assert response.status_code == 401
@@ -846,7 +872,7 @@ def test_application_form_get_with_validation_warnings(
     client,
     enable_factory_create,
     db_session,
-    api_auth_token,
+    user_auth_token,
     application_response,
     expected_warnings,
 ):
@@ -872,7 +898,7 @@ def test_application_form_get_with_validation_warnings(
     # Make the GET request
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Verify response
@@ -887,7 +913,7 @@ def test_application_form_get_with_invalid_schema(
     client,
     enable_factory_create,
     db_session,
-    api_auth_token,
+    user_auth_token,
 ):
     """Test behavior when form has an invalid JSON schema"""
     # Create a form with intentionally invalid schema
@@ -911,7 +937,7 @@ def test_application_form_get_with_invalid_schema(
     # Make the GET request
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Should error
@@ -919,7 +945,7 @@ def test_application_form_get_with_invalid_schema(
     assert "message" in response.json
 
 
-def test_application_submit_success(client, enable_factory_create, db_session, api_auth_token):
+def test_application_submit_success(client, enable_factory_create, db_session, user_auth_token):
     """Test successful submission of an application"""
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(application_status=ApplicationStatus.IN_PROGRESS)
@@ -927,7 +953,7 @@ def test_application_submit_success(client, enable_factory_create, db_session, a
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert response
@@ -943,7 +969,7 @@ def test_application_submit_success(client, enable_factory_create, db_session, a
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_submit_forbidden(
-    client, enable_factory_create, db_session, api_auth_token, initial_status
+    client, enable_factory_create, db_session, user_auth_token, initial_status
 ):
     """Test submission fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
@@ -952,7 +978,7 @@ def test_application_submit_forbidden(
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Assert forbidden response
