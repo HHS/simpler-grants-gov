@@ -77,12 +77,13 @@ class TestSoapPayload:
 
     def test_update_envelope_from_dict(self, soap_payload):
         original_dict = soap_payload.to_dict()
+        new_operation_name = "GetOpportunityListResponse1"
         expected_updated_dict = {
             "Envelope": {
                 "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
                 "Header": {"APIKey": "apikeyinheaderexample"},
                 "Body": {
-                    "GetOpportunityListResponse": {
+                    new_operation_name: {
                         "@xmlns:ns5": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
                         "@xmlns:ns4": "http://schemas.xmlsoap.org/wsdl/soap/",
                         "@xmlns:ns3": "http://schemas.xmlsoap.org/wsdl/",
@@ -99,3 +100,4 @@ class TestSoapPayload:
         soap_payload.update_envelope_from_dict(expected_updated_dict)
         assert original_dict != soap_payload.to_dict()
         assert expected_updated_dict == soap_payload.to_dict()
+        assert new_operation_name == soap_payload.operation_name

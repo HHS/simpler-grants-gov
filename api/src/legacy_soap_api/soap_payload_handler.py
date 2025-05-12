@@ -15,7 +15,9 @@ XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 class SoapPayload:
     def __init__(self, soap_payload_str: str, force_list_attributes: list | None = None) -> None:
         self.payload = soap_payload_str
-        self.keymap = defaultdict(lambda: {"original_keys": set(), "namespaces": set()})
+        self.keymap: dict[str, dict[str, set]] = defaultdict(
+            lambda: {"original_keys": set(), "namespaces": set()}
+        )
         self.force_list_attributes = force_list_attributes if force_list_attributes else []
 
         # Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags and preserve the content before and after the envelope.
@@ -46,32 +48,13 @@ class SoapPayload:
         except ElementTree.ParseError:
             return None
 
-    def keymap_handler(self, original_key: str, new_key: str, namespaces: Iterable) -> None:
-        self.keymap[new_key]["original_keys"].add(original_key)
-        self.keymap[new_key]["namespaces"].update(namespaces)
-
-    def value_modifier(self, soap_xml_dict_key: str, soap_xml_dict_value: Any) -> Any:
-        if (
-            soap_xml_dict_key.split(XML_DICT_KEY_NAMESPACE_DELIMITER)[-1]
-            in self.force_list_attributes
-        ):
-            if not isinstance(soap_xml_dict_value, list):
-                return [soap_xml_dict_value]
-        return soap_xml_dict_value
-
-    def assign_original_keys_modifier(self, key: str) -> str:
-        for k in self.keymap.get(key, set())["original_keys"]:
-            if key in k:
-                return k
-        return key
-
     def update_envelope_from_dict(self, envelope: dict) -> None:
         self.envelope = (
             xmltodict.unparse(
                 transform_soap_xml_dict(
                     envelope,
-                    key_modifier=self.assign_original_keys_modifier,
-                    value_modifier=self.value_modifier,
+                    key_modifier=self._assign_original_keys_modifier,
+                    value_modifier=self._value_modifier,
                 )
             )
             .replace('<?xml version="1.0" encoding="utf-8"?>', "")
@@ -86,10 +69,30 @@ class SoapPayload:
             xml_dict = transform_soap_xml_dict(
                 xml_dict,
                 key_modifier=non_namespace_or_attribute_key_modifier,
-                value_modifier=self.value_modifier,
-                keymap_handler=self.keymap_handler,
+                value_modifier=self._value_modifier,
+                keymap_handler=self._keymap_handler,
             )
         return xml_dict
+
+    def _value_modifier(self, soap_xml_dict_key: str, soap_xml_dict_value: Any) -> Any:
+        if (
+            soap_xml_dict_key.split(XML_DICT_KEY_NAMESPACE_DELIMITER)[-1]
+            in self.force_list_attributes
+        ):
+            if not isinstance(soap_xml_dict_value, list):
+                return [soap_xml_dict_value]
+        return soap_xml_dict_value
+
+    def _keymap_handler(self, original_key: str, new_key: str, namespaces: Iterable) -> None:
+        self.keymap[new_key]["original_keys"].add(original_key)
+        self.keymap[new_key]["namespaces"].update(namespaces)
+
+    def _assign_original_keys_modifier(self, key: str) -> str:
+        original_keys = self.keymap.get(key, {}).get("original_keys", set())
+        for k in original_keys:
+            if key in k:
+                return k
+        return key
 
 
 def non_namespace_or_attribute_key_modifier(key: str) -> str:
@@ -130,15 +133,17 @@ def _transform_soap_xml_dict(
     if isinstance(data, dict):
         result = {}
         namespaces = []
-        for k, v in data.items():
-            if is_namespace_key(k):
-                namespaces.append(k)
-            new_key = key_modifier(k)
+        for original_key, v in data.items():
+            if is_namespace_key(original_key):
+                namespaces.append(original_key)
+            new_key = original_key
+            if key_modifier:
+                new_key = key_modifier(original_key)
             if keymap_handler:
-                keymap_handler(k, new_key, namespaces)
+                keymap_handler(original_key, new_key, namespaces)
             if value_modifier:
                 v = value_modifier(new_key, v)
-            result[key_modifier(k)] = _transform_soap_xml_dict(
+            result[new_key] = _transform_soap_xml_dict(
                 v, key_modifier, value_modifier, keymap_handler
             )
         return result
