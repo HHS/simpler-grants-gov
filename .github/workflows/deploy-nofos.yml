@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "the name of the application environment (e.g. dev, staging, prod)"
+        required: true
+        type: string
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+
+concurrency: cd-nofos-${{ inputs.environment }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: simpler-grants-gov
+
+      - uses: actions/checkout@v4
+        with:
+          path: simpler-grants-pdf-builder
+          repository: HHS/simpler-grants-pdf-builder
+          ref: ${{ inputs.version }}
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          working-directory: simpler-grants-gov
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          working-directory: simpler-grants-gov
+          app_name: nofos
+          environment: ${{ inputs.environment }}
+
+      - name: Build Docker image
+        working-directory: simpler-grants-pdf-builder
+        run: make build
