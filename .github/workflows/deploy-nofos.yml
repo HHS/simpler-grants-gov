@@ -24,10 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: simpler-grants-gov
-
-      - uses: actions/checkout@v4
-        with:
           path: simpler-grants-pdf-builder
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version }}

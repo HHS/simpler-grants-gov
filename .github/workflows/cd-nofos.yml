@@ -34,9 +34,8 @@ jobs:
   deploy:
     name: Deploy
     needs: [checks]
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy-nofos.yml
     with:
-      app_name: "nofos"
       environment: ${{ inputs.environment }}
       version: ${{ inputs.version }}
 
