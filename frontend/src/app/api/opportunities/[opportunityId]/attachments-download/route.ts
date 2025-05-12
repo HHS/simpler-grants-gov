@@ -47,7 +47,7 @@ export async function GET(
     return new NextResponse(blobData, {
       status: 200,
       headers: new Headers({
-        "Content-Disposition": `attachment; filename="opportunity-${getOpportunity.data?.opportunity_number || opportunityId}-attachments.zip"`,
+        "Content-Disposition": `attachment; filename="opportunity-${getOpportunity.data?.opportunityNumber || opportunityId}-attachments.zip"`,
       }),
     });
   } catch (e) {
