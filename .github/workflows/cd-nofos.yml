@@ -41,7 +41,7 @@ jobs:
     needs: [checks]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      environment: ${{ inputs.environment }}
+      environment: ${{ inputs.environment || 'dev' }}
       version: ${{ inputs.version || 'main' }}
 
   send-slack-notification:

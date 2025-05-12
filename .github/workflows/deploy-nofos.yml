@@ -12,7 +12,7 @@ on:
         required: true
         type: string
 
-concurrency: cd-nofos-${{ inputs.environment }}
+concurrency: cd-nofos-${{ inputs.environment || 'dev' }}
 
 jobs:
   deploy:
@@ -46,10 +46,10 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: nofos
-          environment: ${{ inputs.environment }}
+          environment: ${{ inputs.environment || 'dev' }}
 
       - name: Publish release
         run: make release-publish APP_NAME=nofos IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
 
       - name: Deploy release
-        run: make release-deploy APP_NAME=nofos ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
+        run: make release-deploy APP_NAME=nofos ENVIRONMENT=${{ inputs.environment || 'dev' }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
