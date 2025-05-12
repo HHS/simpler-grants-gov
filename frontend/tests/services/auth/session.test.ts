@@ -1,4 +1,9 @@
-import { createSession, getSession } from "src/services/auth/session";
+import {
+  createAndReturnSession,
+  createSession,
+  getSession,
+  refreshSession,
+} from "src/services/auth/session";
 
 const getCookiesMock = jest.fn(() => ({
   value: "some cookie value",
@@ -11,6 +16,8 @@ const createPublicKeyMock = jest.fn((arg: string): string => arg);
 
 const decryptMock = jest.fn();
 const encryptMock = jest.fn();
+
+const mockPostTokenRefresh = jest.fn();
 
 const cookiesMock = () => {
   return {
@@ -45,6 +52,10 @@ jest.mock("src/utils/generalUtils", () => ({
 
 jest.mock("crypto", () => ({
   createPublicKey: (arg: string): string => createPublicKeyMock(arg),
+}));
+
+jest.mock("src/services/fetch/fetchers/fetchers", () => ({
+  postTokenRefresh: (arg: unknown): unknown => mockPostTokenRefresh(arg),
 }));
 
 describe("getSession", () => {
@@ -102,16 +113,16 @@ describe("createSession", () => {
   // to get this to work we'd need to manage resetting all modules before the test, which is a bit of a pain
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip("initializes session secrets if necessary", async () => {
-    await createSession("nothingSpecial");
+    await createSession("nothingSpecial", new Date(1));
     expect(encodeTextMock).toHaveBeenCalledWith("session secret");
     expect(createPublicKeyMock).toHaveBeenCalledWith("api secret");
   });
   it("calls cookie.set with expected values", async () => {
     encryptMock.mockReturnValue("encrypted session");
-    await createSession("nothingSpecial");
+    await createSession("nothingSpecial", new Date(1));
     expect(encryptMock).toHaveBeenCalledWith([
       "nothingSpecial",
-      new Date(0),
+      new Date(1),
       "session secret",
     ]);
     expect(setCookiesMock).toHaveBeenCalledTimes(1);
@@ -121,10 +132,106 @@ describe("createSession", () => {
       {
         httpOnly: true,
         secure: false, // true only in prod for now
-        expires: new Date(0),
+        expires: new Date(1),
         sameSite: "lax",
         path: "/",
       },
     );
+  });
+});
+
+describe("createAndReturnSession", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  it("calls cookie.set with expected values", async () => {
+    encryptMock.mockReturnValue("encrypted session");
+    await createAndReturnSession("nothingSpecial", new Date(1));
+    expect(encryptMock).toHaveBeenCalledWith([
+      "nothingSpecial",
+      new Date(1),
+      "session secret",
+    ]);
+    expect(setCookiesMock).toHaveBeenCalledTimes(1);
+    expect(setCookiesMock).toHaveBeenCalledWith(
+      "session",
+      "encrypted session",
+      {
+        httpOnly: true,
+        secure: false, // true only in prod for now
+        expires: new Date(1),
+        sameSite: "lax",
+        path: "/",
+      },
+    );
+  });
+
+  it("calls decrypt with the correct arguments and returns successfully", async () => {
+    decryptMock.mockReturnValueOnce({
+      arbitrary: "stuff",
+    });
+    const session = await createAndReturnSession("nothingSpecial", new Date(1));
+    expect(decryptMock).toHaveBeenCalledTimes(1);
+    expect(decryptMock).toHaveBeenCalledWith([
+      "nothingSpecial",
+      "api secret",
+      "algo two",
+    ]);
+    expect(session).toEqual({
+      token: "nothingSpecial",
+      arbitrary: "stuff",
+      expiresAt: new Date(1).getTime(),
+    });
+  });
+});
+
+describe("refreshSession", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  it("calls refresh fetch function correctly", async () => {
+    await refreshSession("a token");
+    expect(mockPostTokenRefresh).toHaveBeenCalledWith({
+      additionalHeaders: { "X-SGG-Token": "a token" },
+    });
+  });
+  it("calls cookie.set with expected values", async () => {
+    encryptMock.mockReturnValue("encrypted session");
+    await createAndReturnSession("nothingSpecial", new Date(1));
+    expect(encryptMock).toHaveBeenCalledWith([
+      "nothingSpecial",
+      new Date(1),
+      "session secret",
+    ]);
+    expect(setCookiesMock).toHaveBeenCalledTimes(1);
+    expect(setCookiesMock).toHaveBeenCalledWith(
+      "session",
+      "encrypted session",
+      {
+        httpOnly: true,
+        secure: false, // true only in prod for now
+        expires: new Date(1),
+        sameSite: "lax",
+        path: "/",
+      },
+    );
+  });
+
+  it("calls decrypt with the correct arguments and returns successfully", async () => {
+    decryptMock.mockReturnValueOnce({
+      arbitrary: "stuff",
+    });
+    const session = await createAndReturnSession("nothingSpecial", new Date(1));
+    expect(decryptMock).toHaveBeenCalledTimes(1);
+    expect(decryptMock).toHaveBeenCalledWith([
+      "nothingSpecial",
+      "api secret",
+      "algo two",
+    ]);
+    expect(session).toEqual({
+      token: "nothingSpecial",
+      arbitrary: "stuff",
+      expiresAt: new Date(1).getTime(),
+    });
   });
 });

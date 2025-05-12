@@ -1,9 +1,13 @@
 import uuid
+from datetime import timedelta
 
 import pytest
+from freezegun import freeze_time
 from sqlalchemy import select
 
-from src.db.models.competition_models import Application, ApplicationForm
+from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
+from src.util.datetime_util import get_now_us_eastern_date
+from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -22,10 +26,16 @@ SIMPLE_JSON_SCHEMA = {
     "required": ["name"],
 }
 
+TEST_DATE = "2023-06-15 12:00:00"  # June 15, 2023 at noon UTC
 
+
+@freeze_time(TEST_DATE)
 def test_application_start_success(client, api_auth_token, enable_factory_create, db_session):
     """Test successful creation of an application"""
-    competition = CompetitionFactory.create()
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
@@ -39,7 +49,217 @@ def test_application_start_success(client, api_auth_token, enable_factory_create
     assert "application_id" in response.json["data"]
 
     # Verify application was created in the database
-    application_id = uuid.UUID(response.json["data"]["application_id"])
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_null_opening_date(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation succeeds when opening_date is null (matches legacy behavior)"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=None, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    # Should succeed now (legacy behavior - null opening_date means immediately open)
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created in the database
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_before_opening_date(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation fails when current date is before opening_date"""
+    today = get_now_us_eastern_date()
+    future_opening_date = today + timedelta(days=5)
+    future_closing_date = today + timedelta(days=15)
+
+    competition = CompetitionFactory.create(
+        opening_date=future_opening_date, closing_date=future_closing_date
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert (
+        "Cannot start application - competition is not yet open for applications"
+        in response.json["message"]
+    )
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_YET_OPEN
+    assert response.json["errors"][0]["field"] == "opening_date"
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_after_closing_date(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation fails when current date is after closing_date"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=15)
+    past_closing_date = today - timedelta(days=5)
+
+    competition = CompetitionFactory.create(
+        opening_date=past_opening_date, closing_date=past_closing_date, grace_period=0
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert (
+        "Cannot start application - competition is already closed for applications"
+        in response.json["message"]
+    )
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
+    assert response.json["errors"][0]["field"] == "closing_date"
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_with_grace_period(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation succeeds when within grace period"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=15)
+    past_closing_date = today - timedelta(days=5)
+    grace_period = 7  # 7 days grace period
+
+    competition = CompetitionFactory.create(
+        opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created in the database
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_after_grace_period(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation fails when after grace period"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=20)
+    past_closing_date = today - timedelta(days=10)
+    grace_period = 5  # 5 days grace period
+
+    competition = CompetitionFactory.create(
+        opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert (
+        "Cannot start application - competition is already closed for applications"
+        in response.json["message"]
+    )
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
+    assert response.json["errors"][0]["field"] == "closing_date"
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_null_closing_date(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test application creation succeeds when closing_date is null and opening_date is in the past"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=5)
+
+    competition = CompetitionFactory.create(opening_date=past_opening_date, closing_date=None)
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-Auth": api_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created in the database
+    application_id = response.json["data"]["application_id"]
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
     ).scalar_one_or_none()
@@ -60,9 +280,7 @@ def test_application_start_competition_not_found(
     )
 
     assert response.status_code == 404
-    assert (
-        f"Competition with ID {non_existent_competition_id} not found" in response.json["message"]
-    )
+    assert "Competition not found" in response.json["message"]
 
     # Verify no application was created
     applications_count = (
@@ -698,3 +916,58 @@ def test_application_form_get_with_invalid_schema(
 
     # Should error
     assert response.status_code == 500
+    assert "message" in response.json
+
+
+def test_application_submit_success(client, enable_factory_create, db_session, api_auth_token):
+    """Test successful submission of an application"""
+    # Create an application in the IN_PROGRESS state
+    application = ApplicationFactory.create(application_status=ApplicationStatus.IN_PROGRESS)
+    application_id = str(application.application_id)
+
+    response = client.post(
+        f"/alpha/applications/{application_id}/submit",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify application status updated in the database
+    db_session.refresh(application)
+    assert application.application_status == ApplicationStatus.SUBMITTED
+
+
+@pytest.mark.parametrize(
+    "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+)
+def test_application_submit_forbidden(
+    client, enable_factory_create, db_session, api_auth_token, initial_status
+):
+    """Test submission fails if application is not in IN_PROGRESS status"""
+    # Create an application with a status other than IN_PROGRESS
+    application = ApplicationFactory.create(application_status=initial_status)
+    application_id = str(application.application_id)
+
+    response = client.post(
+        f"/alpha/applications/{application_id}/submit",
+        headers={"X-Auth": api_auth_token},
+    )
+
+    # Assert forbidden response
+    assert response.status_code == 403
+    assert (
+        f"Application cannot be submitted. It is currently in status: {initial_status.value}"
+        in response.json["message"]
+    )
+    assert len(response.json["errors"]) == 1
+    assert response.json["errors"][0]["type"] == ValidationErrorType.NOT_IN_PROGRESS.value
+    assert (
+        response.json["errors"][0]["message"]
+        == "Application cannot be submitted, not currently in progress"
+    )
+
+    # Verify application status remains unchanged
+    db_session.refresh(application)
+    assert application.application_status == initial_status

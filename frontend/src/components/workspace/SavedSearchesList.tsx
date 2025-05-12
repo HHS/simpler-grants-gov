@@ -47,12 +47,14 @@ export const SavedSearchesList = ({
                     <EditSavedSearchModal
                       savedSearchId={savedSearch.id}
                       editText={editText}
+                      queryName={savedSearch.name}
                     />
                   </div>
                   <div className="grid-col">
                     <DeleteSavedSearchModal
                       savedSearchId={savedSearch.id}
                       deleteText={deleteText}
+                      queryName={savedSearch.name}
                     />
                   </div>
                 </div>

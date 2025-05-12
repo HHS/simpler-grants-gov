@@ -79,9 +79,6 @@ export const fetchSavedOpportunities = async (): Promise<
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      console.warn(
-        "user fetching saved opportunities not logged in (should not happen)",
-      );
       return [];
     }
     const savedOpportunities = await getSavedOpportunities(

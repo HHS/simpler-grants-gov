@@ -15,7 +15,7 @@ export const useClientFetch = <T>(
   errorMessage: string,
   { jsonResponse = true, authGatedRequest = false } = {},
 ) => {
-  const { refreshIfExpired, refreshUser } = useUser();
+  const { refreshIfExpired, refreshUser, refreshIfExpiring } = useUser();
   const router = useRouter();
 
   const fetchWithAuthCheck = async (
@@ -27,6 +27,7 @@ export const useClientFetch = <T>(
       router.refresh();
       throw new Error("local token expired, logging out");
     }
+    await refreshIfExpiring();
     const response = await fetch(url, options);
     if (response.status === 401) {
       await refreshUser();
@@ -55,6 +56,7 @@ export const useClientFetch = <T>(
         throw new Error(`${errorMessage}: ${response.status}`);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
   return {

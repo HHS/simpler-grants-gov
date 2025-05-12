@@ -4,6 +4,7 @@
  */
 require("@testing-library/jest-dom");
 const { toHaveNoViolations } = require("jest-axe");
+const { expect } = require("@jest/globals");
 
 expect.extend(toHaveNoViolations);
 

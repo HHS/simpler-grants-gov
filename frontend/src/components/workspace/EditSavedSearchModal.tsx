@@ -20,7 +20,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -28,17 +28,25 @@ function SaveSearchInput({
   validationError,
   updateSavedSearchName,
   id,
+  defaultValue = "",
 }: {
   validationError?: string;
   updateSavedSearchName: (name: string) => void;
   id: string;
+  defaultValue?: string;
 }) {
   const t = useTranslations("Search.saveSearch.modal");
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <FormGroup error={!!validationError}>
-      <label htmlFor="saved-search-input">{t("inputLabel")}</label>
+      <label htmlFor="saved-search-input">
+        {t.rich("inputLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
+      </label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <TextInput
@@ -48,9 +56,11 @@ function SaveSearchInput({
           })}
           id={`edit-saved-search-input-${id}`}
           name={`edit-saved-search-${id}`}
-          defaultValue={""}
+          defaultValue={defaultValue}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
+          required
+          aria-required
         />
       </div>
     </FormGroup>
@@ -88,9 +98,11 @@ function SuccessContent({
 export function EditSavedSearchModal({
   savedSearchId,
   editText,
+  queryName,
 }: {
   savedSearchId: string;
   editText: string;
+  queryName: string;
 }) {
   const modalId = useMemo(
     () => `edit-save-search-${savedSearchId}`,
@@ -199,43 +211,49 @@ export function EditSavedSearchModal({
                 })}
               </p>
             </div>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId={`editSavedSearchApiError-${savedSearchId}`}
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
-                <SaveSearchInput
-                  validationError={validationError}
-                  updateSavedSearchName={setSavedSearchName}
-                  id={savedSearchId}
+            <>
+              {apiError && (
+                <SimplerAlert
+                  alertClick={() => setApiError(false)}
+                  buttonId={`editSavedSearchApiError-${savedSearchId}`}
+                  messageText={t("apiError")}
+                  type="error"
                 />
-                <ModalFooter>
-                  <Button
-                    type={"button"}
-                    onClick={handleSubmit}
-                    data-testid={`edit-saved-search-button-${savedSearchId}`}
-                  >
-                    {t("saveText")}
-                  </Button>
-                  <ModalToggleButton
-                    modalRef={modalRef}
-                    closer
-                    unstyled
-                    className="padding-105 text-center"
-                    onClick={onClose}
-                  >
-                    {t("cancelText")}
-                  </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+              )}
+              <SaveSearchInput
+                validationError={validationError}
+                updateSavedSearchName={setSavedSearchName}
+                id={savedSearchId}
+                defaultValue={queryName}
+              />
+              <ModalFooter>
+                {loading ? (
+                  <LoadingButton
+                    id={`edit-saved-search-button-${savedSearchId}`}
+                    message={t("loading")}
+                  />
+                ) : (
+                  <>
+                    <Button
+                      type={"button"}
+                      onClick={handleSubmit}
+                      data-testid={`edit-saved-search-button-${savedSearchId}`}
+                    >
+                      {t("saveText")}
+                    </Button>
+                    <ModalToggleButton
+                      modalRef={modalRef}
+                      closer
+                      unstyled
+                      className="padding-105 text-center"
+                      onClick={onClose}
+                    >
+                      {t("cancelText")}
+                    </ModalToggleButton>
+                  </>
+                )}
+              </ModalFooter>
+            </>
           </>
         )}
       </Modal>
