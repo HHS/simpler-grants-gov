@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - "main"
-      - "kai/deploy-nofos-2"
     paths:
       - ".github/workflows/cd-nofos.yml"
       - ".github/workflows/ci-nofos.yml"
