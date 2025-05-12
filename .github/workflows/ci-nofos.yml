@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: HHS/simpler-grants-pdf-builder
-          ref: ${{ inputs.version || github.ref }}
+          ref: ${{ inputs.version || 'main' }}
 
       - name: Build docker image
         run: make build
@@ -34,10 +34,10 @@ jobs:
         run: make test USE_DOCKER=1
 
       - name: Save built image to cache
-        run: docker save nofos:${{ inputs.version || github.ref }} > /tmp/docker-image.tar
+        run: docker save nofos:${{ inputs.version || 'main' }} > /tmp/docker-image.tar
 
       - name: Cache Docker image
         uses: actions/cache/save@v4
         with:
           path: /tmp/docker-image.tar
-          key: nofos-${{ inputs.version || github.ref }}
+          key: nofos-${{ inputs.version || 'main' }}
