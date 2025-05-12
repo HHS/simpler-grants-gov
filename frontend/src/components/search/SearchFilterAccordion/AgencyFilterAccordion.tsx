@@ -1,4 +1,5 @@
 import { FilterOption } from "src/types/search/searchFilterTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 
@@ -12,17 +13,19 @@ export async function AgencyFilterAccordion({
   agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agencyOptionsPromise: Promise<FilterOption[]>;
+  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
 }) {
   const t = useTranslations("Search");
 
-  let agencies: FilterOption[];
+  let agencies: FilterOption[] = [];
+  let facetCounts: { [key: string]: number } = {};
   try {
-    agencies = await agencyOptionsPromise;
+    let searchResults: SearchAPIResponse;
+    [agencies, searchResults] = await agencyOptionsPromise;
+    facetCounts = searchResults.facet_counts.agency;
   } catch (e) {
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
-    agencies = [];
   }
   return (
     <SearchFilterAccordion
@@ -31,6 +34,7 @@ export async function AgencyFilterAccordion({
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
       wrapForScroll={true}
+      facetCounts={facetCounts}
       // agency filters will not show facet counts
     />
   );
