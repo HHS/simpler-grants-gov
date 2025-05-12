@@ -518,16 +518,17 @@ export const messages = {
       },
       modal: {
         title: "Name this search query",
+        loading: "Saving",
         description:
           "Save these search terms and filters with a name for easy access later.",
-        inputLabel: "Name (Required)",
+        inputLabel: "Name <required>(required)</required>",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",
         emptyNameError: "Please name this query.",
-        successTitle: "Success!",
+        successTitle: "Query successfully saved",
         successDescription:
-          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
@@ -570,10 +571,11 @@ export const messages = {
       sortby: "Sort by",
     },
     editModal: {
+      loading: "Updating",
       title: "Edit name of search query",
       description:
         "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name (required)",
+      inputLabel: "Query name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
@@ -582,10 +584,12 @@ export const messages = {
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
+      loading: "Deleting",
       title: "Delete saved query?",
       deleteText: "Yes, delete",
       cancelText: "Cancel",
       apiError: "Error deleting saved query. Try again later.",
+      description: "Delete ",
     },
   },
   SavedGrants: {

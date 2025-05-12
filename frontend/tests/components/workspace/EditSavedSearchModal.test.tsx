@@ -43,7 +43,11 @@ describe("EditSavedSearchModal", () => {
 
   it("matches snapshot", async () => {
     const { container } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        savedSearchId="1"
+        editText="edit"
+        queryName="excellent query"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -55,7 +59,11 @@ describe("EditSavedSearchModal", () => {
   });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
     );
 
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
@@ -65,13 +73,23 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
   });
   it("modal can be closed as expected", async () => {
     const { rerender } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -79,18 +97,34 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const closeButton = await screen.findByText("cancelText");
     act(() => closeButton.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
   });
   it("displays validation error if submitted without a name", async () => {
     const { rerender } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -98,12 +132,24 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const saveButton = await screen.findByTestId("edit-saved-search-button-1");
     act(() => saveButton.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const validationError = await screen.findByText("emptyNameError");
 
@@ -112,7 +158,11 @@ describe("EditSavedSearchModal", () => {
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
     const { rerender } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -120,14 +170,26 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const saveButton = await screen.findByTestId("edit-saved-search-button-1");
     const input = await screen.findByTestId("textInput");
     fireEvent.change(input, { target: { value: "save search name" } });
     act(() => saveButton.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const error = await screen.findByText("apiError");
 
@@ -137,7 +199,11 @@ describe("EditSavedSearchModal", () => {
   it("displays a success message on successful save", async () => {
     clientFetchMock.mockResolvedValue({ id: "123" });
     const { rerender } = render(
-      <EditSavedSearchModal savedSearchId="1" editText="edit" />,
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -145,17 +211,39 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const saveButton = await screen.findByTestId("edit-saved-search-button-1");
     const input = await screen.findByTestId("textInput");
     fireEvent.change(input, { target: { value: "save search name" } });
     act(() => saveButton.click());
 
-    rerender(<EditSavedSearchModal savedSearchId="1" editText="edit" />);
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
 
     const success = await screen.findByText("successTitle");
 
     expect(success).toBeInTheDocument();
+  });
+  it("defaults input to current name of query", () => {
+    render(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
+    expect(screen.getByRole("textbox")).toHaveValue("excellent query");
   });
 });
