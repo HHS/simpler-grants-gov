@@ -11,10 +11,10 @@ jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
 }));
 
 const UseUserConsumer = () => {
-  const { e, isLoading, user } = useUser();
+  const { error, isLoading, user } = useUser();
   return (
     <>
-      <div data-testid="error">{e?.toString() || ""}</div>
+      <div data-testid="error">{error?.toString() || ""}</div>
       <div data-testid="isLoading">{isLoading.toString()}</div>
       <div data-testid="user">{user?.toString() || ""}</div>
     </>
