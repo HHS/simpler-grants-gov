@@ -1,0 +1,47 @@
+name: Deploy NOFOs
+run-name: Deploy ${{ inputs.version || 'main' }} to NOFOs ${{ inputs.environment }}
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/cd-nofos.yml"
+      - ".github/workflows/deploy-nofos.yml"
+      - "infra/nofos/**"
+      - "infra/modules/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      version:
+        default: "main"
+        description: Tag or branch or SHA to deploy
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci-nofos.yml
+    with:
+      version: ${{ inputs.version  }}
+
+  deploy:
+    name: Deploy
+    needs: [checks]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "nofos"
+      environment: ${{ inputs.environment }}
+      version: ${{ inputs.version }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [checks, deploy]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
