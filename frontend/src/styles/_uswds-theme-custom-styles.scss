@@ -40,7 +40,7 @@ i.e.
 }
 
 // Button
-.usa-button:not(.usa-modal__close) {
+.usa-button {
   &,
   &:visited {
     background-color: color("mint-50");
@@ -65,6 +65,19 @@ i.e.
     color: color("gray-60");
     background-color: color("gray-20");
     border-bottom: 5px solid color("gray-10");
+  }
+}
+
+// Override modal close button styles
+.usa-modal__close {
+  background-color: transparent !important;
+  border-bottom: none !important;
+  color: color("base") !important;
+  
+  &:hover {
+    background-color: transparent !important;
+    border-bottom: none !important;
+    color: color("base-dark") !important;
   }
 }
 
@@ -484,12 +497,4 @@ button.usa-pagination__button.usa-button {
   display: flex;
   align-items: baseline;
   gap: 5px;
-}
-
-// Tables
-.usa-table {
-  &.overflow-wrap {
-    max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
-    overflow-wrap: break-word;
-  }
 }
