@@ -11,9 +11,9 @@ import { Checkbox } from "@trussworks/react-uswds";
 
   AllOptionCheckbox
 
-  * Selecting AnyOptionCheckbox selects all child options
-  * Deselecting AnyOptionCheckbox deselects all child options
-  * Does not respond to child option selections
+  * Selecting AllOptionCheckbox selects all child options
+  * Deselecting AllOptionCheckbox deselects all child options
+  * Will become deselected if any child options are deselected
 
 */
 
