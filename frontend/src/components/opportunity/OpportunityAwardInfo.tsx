@@ -65,11 +65,11 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
 
   const awardGridInfo = {
     program_funding: formatCurrency(
-      opportunityData.summary.estimated_total_program_funding,
+      opportunityData.summary.estimatedTotalProgramFunding,
     ),
-    expected_awards: opportunityData.summary.expected_number_of_awards,
-    award_floor: formatCurrency(opportunityData.summary.award_floor),
-    award_ceiling: formatCurrency(opportunityData.summary.award_ceiling),
+    expected_awards: opportunityData.summary.expectedNumberOfAwards,
+    award_floor: formatCurrency(opportunityData.summary.awardFloor),
+    award_ceiling: formatCurrency(opportunityData.summary.awardCeiling),
   };
 
   const awardSubInfo = {

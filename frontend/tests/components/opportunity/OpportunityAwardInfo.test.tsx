@@ -29,10 +29,10 @@ jest.mock("next-intl", () => ({
 
 const mockOpportunityData: OpportunityDetail = {
   summary: {
-    estimated_total_program_funding: 5000000,
-    expected_number_of_awards: 10,
-    award_ceiling: 1000000,
-    award_floor: 50000,
+    estimatedTotalProgramFunding: 5000000,
+    expectedNumberOfAwards: 10,
+    awardCeiling: 1000000,
+    awardFloor: 50000,
     isCostSharing: true,
     fundingInstruments: ["Grant", "Cooperative Agreement"],
     fundingCategories: ["Education", "Health"],
