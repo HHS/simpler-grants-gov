@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { noop } from "lodash";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
@@ -124,7 +124,9 @@ describe("SaveSearchSelector", () => {
     );
     const options = await screen.findAllByRole("option");
     expect(options).toHaveLength(2);
-    expect((options[1] as HTMLOptionElement).selected).toEqual(true);
+    await waitFor(() =>
+      expect((options[1] as HTMLOptionElement).selected).toEqual(true),
+    );
   });
   it("selects correct saved search on select", async () => {
     clientFetchMock.mockResolvedValue([]);
@@ -193,7 +195,11 @@ describe("SaveSearchSelector", () => {
     );
     const options = await screen.findAllByRole("option");
     expect(options).toHaveLength(2);
-    const selectedOption = screen.getByRole("option", { selected: true });
-    expect(selectedOption).toHaveTextContent(fakeSavedSearchRecord.name);
+    await waitFor(() => {
+      const selectedOption = screen.getByRole("option", { selected: true });
+      return expect(selectedOption).toHaveTextContent(
+        fakeSavedSearchRecord.name,
+      );
+    });
   });
 });

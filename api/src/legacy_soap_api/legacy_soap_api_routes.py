@@ -4,6 +4,7 @@ from flask import request
 
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
+from src.legacy_soap_api.soap_payload_handler import SoapPayload
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,13 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
     the router responsible for handling all SOAP operations for both
     the applicants and grantors SOAP API requests.
     """
+    soap_request_message = SoapPayload(request.data.decode())
     add_extra_data_to_current_request_logs(
-        {"service_name": service_name, "service_port_name": service_port_name}
+        {
+            "soap_service_name": service_name,
+            "soap_service_port_name": service_port_name,
+            "soap_proxy_request_operation_name": soap_request_message.operation_name,
+        }
     )
     soap_api_client = LegacySOAPClient()
     proxy_response = soap_api_client.proxy_request(
@@ -27,5 +33,10 @@ def soap_api_operations_handler(service_name: str, service_port_name: str) -> tu
         headers=dict(request.headers),
         body=request.data,
     )
+    soap_response_message = SoapPayload(proxy_response.data.decode())
+    add_extra_data_to_current_request_logs(
+        {"soap_proxy_response_operation_name": soap_response_message.operation_name}
+    )
+
     # This format will preserve the response data from SOAP API.
     return proxy_response.to_flask_response()
