@@ -61,18 +61,22 @@ class SoapPayload:
             .strip()
         )
 
-    def to_dict(self, key_values_only: bool = True) -> dict:
+    def to_dict(self) -> dict:
+        """Get SOAP XML as dict
+
+        This method will return the XML payload as a dict. It transforms the dict
+        to key value pairs while preserving the namespaces in self.keymap and returns the
+        dict with keys that omit the namespace prefixes. The namespaces will be remapped
+        when/if the dict is updated in self.update_envelope_from_dict.
+        """
         if not self.envelope:
             return {}
-        xml_dict = xmltodict.parse(self.envelope)
-        if key_values_only:
-            xml_dict = transform_soap_xml_dict(
-                xml_dict,
-                key_modifier=non_namespace_or_attribute_key_modifier,
-                value_modifier=self._value_modifier,
-                keymap_handler=self._keymap_handler,
-            )
-        return xml_dict
+        return transform_soap_xml_dict(
+            xmltodict.parse(self.envelope),
+            key_modifier=non_namespace_or_attribute_key_modifier,
+            value_modifier=self._value_modifier,
+            keymap_handler=self._keymap_handler,
+        )
 
     def _value_modifier(self, soap_xml_dict_key: str, soap_xml_dict_value: Any) -> Any:
         if (
