@@ -46,7 +46,7 @@ describe("useUser", () => {
 
     renderWrappedConsumer();
 
-    const errorDisplay = await screen.findByTestId("e");
+    const errorDisplay = await screen.findByTestId("error");
     const userDisplay = await screen.findByTestId("user");
 
     await waitFor(() => {
@@ -61,7 +61,7 @@ describe("useUser", () => {
     debouncedUserFetcherMock.mockResolvedValue(null);
     renderWrappedConsumer();
 
-    const errorDisplay = await screen.findByTestId("e");
+    const errorDisplay = await screen.findByTestId("error");
     const userDisplay = await screen.findByTestId("user");
 
     await waitFor(() => {
