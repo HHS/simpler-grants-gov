@@ -22,6 +22,7 @@ output "service_config" {
     memory                          = var.instance_memory
     desired_instance_count          = var.instance_desired_instance_count
     enable_command_execution        = var.enable_command_execution
+    s3_cdn_domain_name              = null
 
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
