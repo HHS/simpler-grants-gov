@@ -116,8 +116,8 @@ export function getFeatureFlagsFromCookie(
   );
 }
 
-// doing a dumb implementation of lodash/assignWith since lodash is not allowed to be used in next middlware.
-// sets non-cookie based feature flags, overriding any undefined env var values with hardcoded defalts,
+// this in part a re-implementation of `lodash/assignWith` since lodash is not allowed to be used in next middleware.
+// Sets non-cookie based feature flags, overriding any undefined env var values with hardcoded defaults,
 // and coercing env var values from string to booleans where applicable
 export const assignBaseFlags = (
   defaultFlags: FeatureFlags,
