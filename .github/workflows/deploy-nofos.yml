@@ -34,8 +34,6 @@ jobs:
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
-        with:
-          working-directory: simpler-grants-gov
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
