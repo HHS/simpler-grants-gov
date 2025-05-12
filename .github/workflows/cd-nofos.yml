@@ -31,6 +31,7 @@ on:
 
 jobs:
   checks:
+    name: Checks
     uses: ./.github/workflows/ci-nofos.yml
     with:
       version: ${{ inputs.version || 'main' }}
