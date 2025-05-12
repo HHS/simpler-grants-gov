@@ -70,6 +70,25 @@ describe("LoginModal", () => {
     expect(screen.getByText("Close")).toBeInTheDocument();
   });
 
+  it("should render the login button with custom text", () => {
+    const modalRef = createModalRef();
+    const customButtonText = "Custom Login Text";
+
+    render(
+      <LoginModal
+        modalRef={modalRef}
+        helpText="Help text"
+        titleText="Login"
+        descriptionText="Please login"
+        buttonText={customButtonText}
+        closeText="Close"
+        modalId="login-modal"
+      />,
+    );
+
+    expect(screen.getByText(customButtonText)).toBeInTheDocument();
+  });
+
   it("should store the current URL in session storage when clicking sign in", () => {
     const modalRef = createModalRef();
     render(
@@ -91,5 +110,30 @@ describe("LoginModal", () => {
       "login-redirect",
       "/test-path?param=value",
     );
+  });
+
+  it("should not store URL in session storage if pathname and search are empty", () => {
+    Object.defineProperty(global, "location", {
+      value: { pathname: "", search: "" },
+    });
+
+    const modalRef = createModalRef();
+  
+    render(
+      <LoginModal
+        modalRef={modalRef}
+        helpText="Help text"
+        titleText="Login"
+        descriptionText="Please login"
+        buttonText="Sign In"
+        closeText="Close"
+        modalId="login-modal"
+      />,
+    );
+
+    const loginButton = screen.getByText("Sign In");
+    fireEvent.click(loginButton);
+
+    expect(mockSetItem).not.toHaveBeenCalled();
   });
 });
