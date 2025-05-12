@@ -123,4 +123,4 @@ export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
-export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
+export const fetchAgencies = cache(requesterForEndpoint(fetchAgenciesEndpoint));
