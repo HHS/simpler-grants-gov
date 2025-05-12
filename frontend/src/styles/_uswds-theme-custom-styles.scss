@@ -70,14 +70,14 @@ i.e.
 
 // Override modal close button styles
 .usa-modal__close {
-  background-color: transparent !important;
-  border-bottom: none !important;
-  color: color("base") !important;
+  background-color: transparent;
+  border-bottom: none;
+  color: color("base");
   
   &:hover {
-    background-color: transparent !important;
-    border-bottom: none !important;
-    color: color("base-dark") !important;
+    background-color: transparent;
+    border-bottom: none;
+    color: color("base-dark");
   }
 }
 
