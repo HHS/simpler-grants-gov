@@ -36,8 +36,7 @@ const mockOpportunityData: OpportunityDetail = {
     isCostSharing: true,
     fundingInstruments: ["Grant", "Cooperative Agreement"],
     fundingCategories: ["Education", "Health"],
-    fundingCategoryDescription:
-      "Support for education and health initiatives",
+    fundingCategoryDescription: "Support for education and health initiatives",
   } as Summary,
   category: "Discretionary",
   categoryExplanation: "Funds allocated by agency discretion",
