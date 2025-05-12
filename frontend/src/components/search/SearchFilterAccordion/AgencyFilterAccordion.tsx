@@ -1,8 +1,11 @@
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import {
+  FilterOption,
+  SearchAPIResponse,
+} from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
 
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { SearchFilterAccordionWrapper } from "./SearchFilterAccordionWrapper";
 
 // functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
 // with prefetched options we have a synchronous render
@@ -10,28 +13,31 @@ import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/S
 export async function AgencyFilterAccordion({
   query,
   agencyOptionsPromise,
+  searchResultsPromise,
 }: {
   query: Set<string>;
   agencyOptionsPromise: Promise<FilterOption[]>;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
 
-  let agencies: FilterOption[];
+  let agencies: FilterOption[] = [];
+
   try {
     agencies = await agencyOptionsPromise;
   } catch (e) {
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
-    agencies = [];
   }
   return (
-    <SearchFilterAccordion
+    <SearchFilterAccordionWrapper
       filterOptions={agencies}
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
       includeAnyOption={false}
-      // agency filters will not show facet counts
+      searchResultsPromise={searchResultsPromise}
+      facetKey="agency"
     />
   );
 }

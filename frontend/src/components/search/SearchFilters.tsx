@@ -1,9 +1,9 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
-import { Accordion } from "@trussworks/react-uswds";
 
 import { SearchFilterAccordionWrapper } from "src/components/search/SearchFilterAccordion/SearchFilterAccordionWrapper";
 import {
@@ -12,7 +12,6 @@ import {
   fundingOptions,
   statusOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import { SearchFilterAccordion } from "./SearchFilterAccordion/SearchFilterAccordion";
 
@@ -34,6 +33,7 @@ export default function SearchFilters({
   suspenseKey: string;
 }) {
   const t = useTranslations("Search");
+  const agenciesPromise = getAgenciesForFilterOptions();
 
   return (
     <>
@@ -96,6 +96,23 @@ export default function SearchFilters({
           query={eligibility}
           queryParamKey={"eligibility"}
           title={t("accordion.titles.eligibility")}
+        />
+      </Suspense>
+      <Suspense
+        key={`${suspenseKey}-agency`}
+        fallback={
+          <SearchFilterAccordion
+            filterOptions={[]}
+            query={agency}
+            queryParamKey="agency"
+            title={t("accordion.titles.agency")}
+          />
+        }
+      >
+        <AgencyFilterAccordion
+          query={agency}
+          agencyOptionsPromise={agenciesPromise}
+          searchResultsPromise={searchResultsPromise}
         />
       </Suspense>
       <Suspense
