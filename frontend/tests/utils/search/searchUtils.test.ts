@@ -138,14 +138,14 @@ describe("getAgencyDisplayName", () => {
       expected_number_of_awards: 10,
       award_ceiling: 1000000,
       award_floor: 50000,
-      is_cost_sharing: true,
-      funding_instruments: ["Grant", "Cooperative Agreement"],
-      funding_categories: ["Education", "Health"],
-      funding_category_description:
+      isCostSharing: true,
+      fundingInstruments: ["Grant", "Cooperative Agreement"],
+      fundingCategories: ["Education", "Health"],
+      fundingCategoryDescription:
         "Support for education and health initiatives",
     },
     category: "Discretionary",
-    category_explanation: "Funds allocated by agency discretion",
+    categoryExplanation: "Funds allocated by agency discretion",
   } as BaseOpportunity;
 
   it("returns `--` if agency lookup fails", () => {
