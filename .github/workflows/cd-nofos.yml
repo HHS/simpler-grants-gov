@@ -8,6 +8,7 @@ on:
       - "kai/deploy-nofos-2"
     paths:
       - ".github/workflows/cd-nofos.yml"
+      - ".github/workflows/ci-nofos.yml"
       - ".github/workflows/deploy-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
