@@ -62,7 +62,7 @@ export type UserFetcher = (url: string) => Promise<UserSession | undefined>;
  */
 export type UserProviderState = {
   user?: UserProfile;
-  e?: Error;
+  error?: Error;
   isLoading: boolean;
   refreshUser: () => Promise<void>;
   hasBeenLoggedOut: boolean;
