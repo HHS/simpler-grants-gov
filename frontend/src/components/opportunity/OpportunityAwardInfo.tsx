@@ -73,13 +73,13 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   };
 
   const awardSubInfo = {
-    opportunityNumber: opportunityData.opportunity_number,
-    costSharing: opportunityData.summary.is_cost_sharing,
-    fundingInstrument: opportunityData.summary.funding_instruments,
+    opportunityNumber: opportunityData.opportunityNumber,
+    costSharing: opportunityData.summary.isCostSharing,
+    fundingInstrument: opportunityData.summary.fundingInstruments,
     opportunityCategory: opportunityData.category,
-    opportunityCategory_explanation: opportunityData.category_explanation,
-    fundingActivity: opportunityData.summary.funding_categories,
-    categoryExplanation: opportunityData.summary.funding_category_description,
+    opportunityCategoryExplanation: opportunityData.categoryExplanation,
+    fundingActivity: opportunityData.summary.fundingCategories,
+    categoryExplanation: opportunityData.summary.fundingCategoryDescription,
   };
 
   return (

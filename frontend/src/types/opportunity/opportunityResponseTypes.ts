@@ -43,10 +43,10 @@ export interface Summary extends MinimalSummary {
   forecasted_close_date_description: string | null;
   forecasted_post_date: string | null;
   forecasted_project_start_date: string | null;
-  funding_categories: string[] | null;
-  funding_category_description: string | null;
-  funding_instruments: string[] | null;
-  is_cost_sharing: boolean | null;
+  fundingCategories: string[] | null;
+  fundingCategoryDescription: string | null;
+  fundingInstruments: string[] | null;
+  isCostSharing: boolean | null;
   summary_description: string | null;
   version_number: number | null;
 }
@@ -62,10 +62,10 @@ export interface BaseOpportunity extends MinimalOpportunity {
   agency_code: string | null;
   agency_name: string | null;
   category: string | null;
-  category_explanation: string | null;
+  categoryExplanation: string | null;
   created_at: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[]; // need to true up vs OpportunityAssistanceListing
-  opportunity_number: string;
+  opportunityNumber: string;
   summary: Summary;
   top_level_agency_name: string | null;
   updated_at: string;
