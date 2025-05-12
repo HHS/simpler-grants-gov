@@ -101,7 +101,7 @@ One of the initial drivers of the SOAP Proxy/Router work was to allow us to not 
 
 ### Allow SOAP callers to supply us with their private keys
 
-Since TLS Client Authentication does make the Client Certificate available to the server, all we really need to make the TLS connection to the Grants.gov SOAP API server is the Private Key. If the caller provided the Simpler Proxy/Router with the certificate serial number and private key, we could use that stored private key to connect to the existing SOAP API whenever we saw that certificate being used.
+Since TLS Client Authentication does make the Client Certificate available to the server, all we really need to make the TLS connection to the Grants.gov SOAP API server is the Private Key. In this scenario, the caller provides the Simpler Proxy/Router with the certificate serial number and private key, by uploading that data to Simpler. The SOAP Router/Proxy would use that stored private key to connect to the existing SOAP API whenever we saw that certificate being used by the original caller. This means the proxy will only work for existing SOAP API consumers after they've provided their private key to Simpler.
 
 - **Pros**
   - Allows us to still provide the SOAP Proxy functionality
