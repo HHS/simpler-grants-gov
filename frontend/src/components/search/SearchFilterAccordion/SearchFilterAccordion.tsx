@@ -171,30 +171,6 @@ const AccordionContent = ({
   );
 };
 
-// export function SearchFilterAccordion({
-//   filterOptions,
-//   title,
-//   queryParamKey,
-//   query,
-//   // facetCounts,
-//   facetKey,
-//   searchPromise,
-//   defaultEmptySelection,
-//   includeAnyOption,
-// }: SearchFilterAccordionProps) {
-//   return (
-//     <SearchFilterAccordionUI
-//       filterOptions={filterOptions}
-//       title={title}
-//       queryParamKey={queryParamKey}
-//       query={query}
-//       facetCounts={facetCounts}
-//       defaultEmptySelection={defaultEmptySelection}
-//       includeAnyOption={includeAnyOption}
-//     />
-//   );
-// }
-
 export function SearchFilterAccordion({
   filterOptions,
   title,

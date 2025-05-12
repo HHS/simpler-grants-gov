@@ -6,6 +6,29 @@ export const eligibilityOptions: FilterOption[] = eligibilityTypes.map((type) =>
   omit(type, "group"),
 );
 
+export const statusOptions: FilterOption[] = [
+  {
+    id: "status-forecasted",
+    label: "Forecasted",
+    value: "forecasted",
+  },
+  {
+    id: "status-posted",
+    label: "Posted",
+    value: "posted",
+  },
+  {
+    id: "status-closed",
+    label: "Closed",
+    value: "closed",
+  },
+  {
+    id: "status-archived",
+    label: "Archived",
+    value: "archived",
+  },
+];
+
 export const fundingOptions: FilterOption[] = [
   {
     id: "funding-instrument-cooperative_agreement",

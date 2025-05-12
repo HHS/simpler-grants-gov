@@ -1,3 +1,4 @@
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -9,6 +10,7 @@ import {
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
+  statusOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
@@ -35,6 +37,27 @@ export default function SearchFilters({
 
   return (
     <>
+      <Suspense
+        key={`${suspenseKey}-status`}
+        fallback={
+          <SearchFilterAccordion
+            filterOptions={statusOptions}
+            query={opportunityStatus}
+            queryParamKey="status"
+            title={t("accordion.titles.status")}
+          />
+        }
+      >
+        <SearchFilterAccordionWrapper
+          searchResultsPromise={searchResultsPromise}
+          facetKey="opportunity_status"
+          filterOptions={statusOptions}
+          query={opportunityStatus}
+          queryParamKey="status"
+          title={t("accordion.titles.status")}
+          defaultEmptySelection={new Set([SEARCH_NO_STATUS_VALUE])}
+        />
+      </Suspense>
       <Suspense
         key={`${suspenseKey}-fundingInstrument`}
         fallback={
