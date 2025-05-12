@@ -710,10 +710,8 @@ export const messages = {
       sortby: "Sort by",
     },
     editModal: {
-      title: "Edit name of search query",
-      description:
-        "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name (required)",
+      title: "Edit",
+      inputLabel: "New name",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
