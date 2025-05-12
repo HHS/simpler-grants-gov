@@ -9,6 +9,7 @@ from sqlalchemy.sql.functions import now as sqlnow
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.competition_models import Application
 from src.db.models.lookup_models import LkExternalUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
@@ -38,6 +39,10 @@ class User(ApiSchemaTable, TimestampMixin):
         ),
         uselist=False,
         viewonly=True,
+    )
+
+    application_users: Mapped[list["ApplicationUser"]] = relationship(
+        "ApplicationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
     @property
@@ -162,3 +167,21 @@ class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="all_opportunity_notification_logs"
     )
+
+
+class ApplicationUser(ApiSchemaTable, TimestampMixin):
+    """Link table between User and Application"""
+
+    __tablename__ = "application_user"
+
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey("api.application.application_id"),
+        primary_key=True,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), primary_key=True
+    )
+
+    application: Mapped[Application] = relationship(Application, back_populates="application_users")
+    user: Mapped[User] = relationship(User, back_populates="application_users")

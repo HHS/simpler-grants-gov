@@ -29,7 +29,7 @@ This stands up the following services:
 
 Run `make db-seed-local && make populate-search-opportunities` to create local data in the database and make it available in the API.
 
-### API Authenticaion
+### API Authentication
 
 This API uses a very simple [ApiKey authentication approach](https://apiflask.com/authentication/#use-external-authentication-library) which requires the caller to provide a static key. This is specified with the `API_AUTH_TOKEN` environment variable.
 

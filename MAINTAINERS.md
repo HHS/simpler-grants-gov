@@ -15,6 +15,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Matt Dragon
 * Michael Chouinard
 * Mike Huneke
+* My Duong
 
 ## Content and Design
 

@@ -30,3 +30,5 @@ class ValidationErrorType(StrEnum):
     MIN_VALUE = "min_value"
     MAX_VALUE = "max_value"
     MIN_OR_MAX_VALUE = "min_or_max_value"
+
+    NOT_IN_PROGRESS = "not_in_progress"

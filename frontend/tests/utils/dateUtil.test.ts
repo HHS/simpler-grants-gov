@@ -1,5 +1,9 @@
 import { identity } from "lodash";
-import { formatDate } from "src/utils/dateUtil";
+import { formatDate, isExpired, isExpiring } from "src/utils/dateUtil";
+
+jest.mock("src/constants/auth", () => ({
+  clientTokenRefreshInterval: 1000,
+}));
 
 describe("formatDate", () => {
   beforeEach(() => {
@@ -24,5 +28,32 @@ describe("formatDate", () => {
     expect(logSpy).toHaveBeenCalledWith(
       "invalid date string provided for parse",
     );
+  });
+});
+
+describe("isExpiring", () => {
+  it("returns false if no expiration", () => {
+    expect(isExpiring()).toEqual(false);
+  });
+  it("returns false if expiration is more than the refresh interval in the future", () => {
+    expect(isExpiring(Date.now() + 1001)).toEqual(false);
+  });
+  it("returns false if expiration is in the past", () => {
+    expect(isExpiring(Date.now() - 1)).toEqual(false);
+  });
+  it("returns true if expiration falls within the refresh interval", () => {
+    expect(isExpiring(Date.now() + 500)).toEqual(true);
+  });
+});
+
+describe("isExpired", () => {
+  it("returns false if no expiration", () => {
+    expect(isExpired()).toEqual(false);
+  });
+  it("returns true if expiration is in the past", () => {
+    expect(isExpired(Date.now() - 1)).toEqual(true);
+  });
+  it("returns false if expiration is in the future", () => {
+    expect(isExpired(Date.now() + 1)).toEqual(false);
   });
 });
