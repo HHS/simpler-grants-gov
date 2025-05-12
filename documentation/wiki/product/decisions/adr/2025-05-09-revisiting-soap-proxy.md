@@ -26,6 +26,7 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 - Don't support SOAP
 - Simpler SOAP facade where all data is returned from Simpler REST calls
 - Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database
+- Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying
 - Allow SOAP callers to supply us with their private keys
 - Create parallel certificates for the Proxy/Router to use to represent every SOAP caller
 
@@ -66,22 +67,24 @@ to perform the parallel REST/SOAP calls because it can have access to both the c
 
 ### Don't support SOAP
 
-{example | description | pointer to more information | ...}
+Just focus on building out REST. Migrate specific data to Simpler when it's needed for the ongoing Simpler operation, but leave data and thereby SOAP consumers stranded on the existing API until that system is shut down. In the short term, this would mean that agencies would miss Simpler Applications until they implement the Simpler API.
 
 - **Pros**
-  - Good
+  - No extra work for Simpler, we don't have to move additional data, and we don't have to implement any SOAP translation.
 - **Cons**
-  - Bad, because {argument c}
+  - Creates two isolated islands of data, Agencies would miss Simpler Applications until they implement the Simpler API or manually pulled in those applications.
+    - This could spin out to Agencies needing to be able to opt-out of Simpler Applications until they've implemented the REST API, which would severely impact the timeline for real Users using Simpler in Prod.
 
 ### Simpler SOAP facade where all data is returned from Simpler REST calls
 
-{example | description | pointer to more information | ...}
-move all existing data to Simpler for data completeness
+Rather than being able to mix and route API traffic between two live APIs, the existing SOAP API and the new REST API, we instead provide a simpler SOAP translation facade on top of the REST API. This allows existing SOAP callers to continue to use their established SOAP implementation, but we back those requests entirely via the REST API. This would require, moving all existing data the SOAP API must continue to Simpler for data completeness from the single source. This would have the nice side effect that the data returned by the SOAP facade and REST calls would be identical.
 
 - **Pros**
-  - Good
+  - Responses from both APIs contain the same data, potentially making it easier to validate we're maintaining parity.
+  - Less effort from the Simpler team to implement the SOAP piece.
 - **Cons**
-  - Bad, because {argument c}
+  - The SOAP facade only becomes useful when we've moved most if not all of the existing data into Simpler.
+  - THe Proxy/Router approach allows us to dead end certain data in the existing system, but still allow it to be returned to consumers because we're tying together both APIs.
 
 ### Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database
 
