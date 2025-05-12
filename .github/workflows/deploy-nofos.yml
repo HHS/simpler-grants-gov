@@ -38,7 +38,6 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          working-directory: simpler-grants-gov
           app_name: nofos
           environment: ${{ inputs.environment }}
 
