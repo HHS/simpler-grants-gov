@@ -9,7 +9,8 @@ import { Button, Table } from "@trussworks/react-uswds";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { setFeatureFlag, featureFlags } = useFeatureFlags();
+  const { setFeatureFlag, featureFlags, setFeatureFlagsToDefault } =
+    useFeatureFlags();
 
   return (
     <>
@@ -53,6 +54,13 @@ export default function FeatureFlagsTable() {
           ))}
         </tbody>
       </Table>
+      <Button
+        data-testid={"reset-defaults"}
+        onClick={setFeatureFlagsToDefault}
+        type="button"
+      >
+        Reset to Defaults
+      </Button>
     </>
   );
 }

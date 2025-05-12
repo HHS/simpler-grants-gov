@@ -23,6 +23,7 @@ export function useFeatureFlags(): {
   setFeatureFlag: (flagName: string, value: boolean) => void;
   checkFeatureFlag: (flagName: string) => boolean;
   featureFlags: FeatureFlags;
+  setFeatureFlagsToDefault: () => void;
 } {
   const [featureFlags, setFeatureFlags] =
     useState<FeatureFlags>(defaultFeatureFlags);
@@ -50,6 +51,10 @@ export function useFeatureFlags(): {
     [featureFlags, setFeatureFlags],
   );
 
+  const setFeatureFlagsToDefault = () => {
+    setFeatureFlags(defaultFeatureFlags);
+  };
+
   const checkFeatureFlag = useCallback(
     (flagName: string): boolean => {
       const value = featureFlags[flagName];
@@ -66,5 +71,6 @@ export function useFeatureFlags(): {
     setFeatureFlag,
     checkFeatureFlag,
     featureFlags,
+    setFeatureFlagsToDefault,
   };
 }
