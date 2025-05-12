@@ -42,7 +42,11 @@ describe("DeleteSavedSearchModal", () => {
   });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
-      <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
     );
 
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
@@ -52,13 +56,23 @@ describe("DeleteSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
   });
   it("modal can be closed as expected", async () => {
     const { rerender } = render(
-      <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -66,12 +80,24 @@ describe("DeleteSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     const closeButton = await screen.findByText("cancelText");
     act(() => closeButton.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
   });
@@ -79,7 +105,11 @@ describe("DeleteSavedSearchModal", () => {
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
     const { rerender } = render(
-      <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -87,14 +117,26 @@ describe("DeleteSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     const saveButton = await screen.findByTestId(
       "delete-saved-search-button-1",
     );
     act(() => saveButton.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     const e = await screen.findByText("apiError");
 
@@ -104,7 +146,11 @@ describe("DeleteSavedSearchModal", () => {
   it("displays a success message on successful save", async () => {
     clientFetchMock.mockResolvedValue({ id: "123" });
     const { rerender } = render(
-      <DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />,
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
     );
 
     const toggle = await screen.findByTestId(
@@ -112,14 +158,26 @@ describe("DeleteSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     const saveButton = await screen.findByTestId(
       "delete-saved-search-button-1",
     );
     act(() => saveButton.click());
 
-    rerender(<DeleteSavedSearchModal savedSearchId="1" deleteText="delete" />);
+    rerender(
+      <DeleteSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        deleteText="delete"
+      />,
+    );
 
     const success = await screen.findByText("successTitle");
 
