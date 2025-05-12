@@ -28,13 +28,13 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: /tmp/commit-hash.txt
-          key: nofos-docker-image-${{ github.sha }}
+          key: nofos-commit-${{ github.sha }}
 
       - name: Restore cached Docker image
         uses: actions/cache/restore@v4
         with:
           path: /tmp/docker-image.tar
-          key: nofos-docker-image-${{ github.sha }}
+          key: nofos-image-${{ github.sha }}
 
       - name: Load cached Docker image
         run: docker load < /tmp/docker-image.tar
@@ -49,7 +49,7 @@ jobs:
           environment: ${{ inputs.environment }}
 
       - name: Publish release
-        run: make release-publish APP_NAME=nofos IMAGE_TAG=$(cat /tmp/commit-hash.txt)
+        run: make release-publish APP_NAME=nofos IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
 
       - name: Deploy release
-        run: make release-deploy APP_NAME=nofos ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=$(cat /tmp/commit-hash.txt)
+        run: make release-deploy APP_NAME=nofos ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
