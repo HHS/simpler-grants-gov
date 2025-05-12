@@ -32,3 +32,7 @@ class ValidationErrorType(StrEnum):
     MIN_OR_MAX_VALUE = "min_or_max_value"
 
     NOT_IN_PROGRESS = "not_in_progress"
+
+    # Competition window validation error types
+    COMPETITION_NOT_YET_OPEN = "competition_not_yet_open"
+    COMPETITION_ALREADY_CLOSED = "competition_already_closed"

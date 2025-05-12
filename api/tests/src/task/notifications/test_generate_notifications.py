@@ -6,10 +6,10 @@ from sqlalchemy import select
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     UserNotificationLog,
     UserOpportunityNotificationLog,
-    UserSavedOpportunity,
     UserSavedSearch,
 )
 from src.task.notifications.generate_notifications import (
@@ -18,6 +18,7 @@ from src.task.notifications.generate_notifications import (
     _strip_pagination_params,
 )
 from src.util import datetime_util
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
 
@@ -39,13 +40,13 @@ def setup_search_data(opportunity_index, opportunity_index_alias, search_client)
     search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def clear_notification_logs(db_session):
     """Clear all notification logs"""
-    db_session.query(UserNotificationLog).delete()
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.query(UserSavedSearch).delete()
-    db_session.query(UserOpportunityNotificationLog).delete()
+    cascade_delete_from_db_table(db_session, UserNotificationLog)
+    cascade_delete_from_db_table(db_session, UserOpportunityNotificationLog)
+    cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, UserSavedSearch)
 
 
 def test_search_notifications_cli(
@@ -55,7 +56,6 @@ def test_search_notifications_cli(
     user,
     user_with_email,
     caplog,
-    clear_notification_logs,
     setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
@@ -256,7 +256,6 @@ def test_combined_notifications_cli(
     user,
     user_with_email,
     caplog,
-    clear_notification_logs,
 ):
     """Test that verifies we can handle both opportunity and search notifications together"""
     # Create a saved opportunity that needs notification
@@ -322,7 +321,6 @@ def test_grouped_search_queries_cli(
     cli_runner,
     db_session,
     enable_factory_create,
-    clear_notification_logs,
     user,
     user_with_email,
 ):
@@ -385,7 +383,6 @@ def test_search_notifications_on_index_change(
     user_with_email,
     opportunity_index,
     search_client,
-    clear_notification_logs,
 ):
     """Test that verifies notifications are generated when search results change due to index updates"""
     # Create a saved search with initial results
