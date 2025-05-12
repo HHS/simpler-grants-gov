@@ -56,6 +56,7 @@ export const useClientFetch = <T>(
         throw new Error(`${eMessage}: ${response.status}`);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
   return {
