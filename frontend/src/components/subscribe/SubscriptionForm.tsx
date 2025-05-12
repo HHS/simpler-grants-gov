@@ -39,7 +39,7 @@ export default function SubscriptionForm() {
       <FormGroup error={showError("name")}>
         <Label htmlFor="name">
           {t("form.name") + " "}
-          <span title="required" className="usa-hint usa-hint--required ">
+          <span title="required" className="usa-hint usa-hint--required">
             ({t("form.req")})
           </span>
         </Label>
