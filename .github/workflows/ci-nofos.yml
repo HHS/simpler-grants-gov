@@ -10,7 +10,7 @@ on:
 
 defaults:
   run:
-    working-directory: ./bloom_nofos
+    working-directory: ./nofos
 
 jobs:
   lint-test:
