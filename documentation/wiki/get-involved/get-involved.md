@@ -1,6 +1,6 @@
 # Why open source?
 
-At Simpler Grants.gov, we are committed to transparency and collaboration. We embrace open-source practices to ensure all our software tools are accessible for public observation, input, and reuse.
+At Simpler.Grants.gov, we are committed to transparency and collaboration. We embrace open-source practices to ensure all our software tools are accessible for public observation, input, and reuse.
 
 We firmly believe that the most effective solutions are crafted through open collaboration. We are eager to engage with a community of grant-making professionals, applicants, and technology enthusiasts. Your feedback and contributions are not only welcome but integral to our mission. Together, we can simplify the grant-making process and make it more accessible to everyone.
 
