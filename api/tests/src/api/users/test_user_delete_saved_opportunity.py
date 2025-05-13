@@ -22,20 +22,14 @@ def user_auth_token(user, db_session):
     return token
 
 
-@pytest.fixture(autouse=True, scope="function")
-def clear_saved_opportunities(db_session):
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.commit()
-    yield
-
-
 def test_user_delete_saved_opportunity(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     # Create and save an opportunity
     opportunity = OpportunityFactory.create()
-    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
-
+    saved_opp = UserSavedOpportunityFactory.create(
+        user=user, opportunity=opportunity, is_deleted=False
+    )
     # Delete the saved opportunity
     response = client.delete(
         f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
@@ -45,18 +39,19 @@ def test_user_delete_saved_opportunity(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
-    # Verify it was deleted
-    saved_count = db_session.query(UserSavedOpportunity).count()
-    assert saved_count == 0
-
-    # Delete the saved opportunity
-    response = client.delete(
-        f"/v1/users/{user.user_id}/saved-opportunities/1234567890",
-        headers={"X-SGG-Token": user_auth_token},
+    # Verify it was soft deleted
+    db_session.expire_all()
+    result = (
+        db_session.query(UserSavedOpportunity)
+        .filter(
+            UserSavedOpportunity.user_id == saved_opp.user_id,
+            UserSavedOpportunity.opportunity_id == saved_opp.opportunity_id,
+        )
+        .first()
     )
 
-    assert response.status_code == 404
-    assert response.json["message"] == "Saved opportunity not found"
+    assert result is not None
+    assert result.is_deleted
 
 
 def test_user_delete_other_users_saved_opportunity(
@@ -66,7 +61,7 @@ def test_user_delete_other_users_saved_opportunity(
     # Create another user and save an opportunity for them
     other_user = UserFactory.create()
     opportunity = OpportunityFactory.create()
-    UserSavedOpportunityFactory.create(user=other_user, opportunity=opportunity)
+    saved_opp = UserSavedOpportunityFactory.create(user=other_user, opportunity=opportunity)
 
     # Try to delete the other user's saved opportunity
     response = client.delete(
@@ -78,7 +73,15 @@ def test_user_delete_other_users_saved_opportunity(
     assert response.json["message"] == "Saved opportunity not found"
 
     # Verify the saved opportunity still exists
-    saved_opportunity = db_session.query(UserSavedOpportunity).first()
+    saved_opportunity = (
+        db_session.query(UserSavedOpportunity)
+        .filter(
+            UserSavedOpportunity.user_id == saved_opp.user_id,
+            UserSavedOpportunity.opportunity_id == saved_opp.opportunity_id,
+        )
+        .first()
+    )
     assert saved_opportunity is not None
     assert saved_opportunity.user_id == other_user.user_id
     assert saved_opportunity.opportunity_id == opportunity.opportunity_id
+    assert not saved_opportunity.is_deleted
