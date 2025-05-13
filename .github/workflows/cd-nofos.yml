@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - ".github/workflows/cd-nofos.yml"
+      - ".github/workflows/ci-nofos.yml"
       - ".github/workflows/deploy-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
@@ -22,23 +23,25 @@ on:
           - staging
           - prod
       version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
         default: "main"
-        description: Tag or branch or SHA to deploy
+        type: string
 
 jobs:
   checks:
+    name: Checks
     uses: ./.github/workflows/ci-nofos.yml
     with:
-      version: ${{ inputs.version  }}
+      version: ${{ inputs.version || 'main' }}
 
   deploy:
     name: Deploy
     needs: [checks]
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy-nofos.yml
     with:
-      app_name: "nofos"
-      environment: ${{ inputs.environment }}
-      version: ${{ inputs.version }}
+      environment: ${{ inputs.environment || 'dev' }}
+      version: ${{ inputs.version || 'main' }}
 
   send-slack-notification:
     if: failure()
