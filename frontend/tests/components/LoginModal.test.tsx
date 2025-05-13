@@ -118,7 +118,7 @@ describe("LoginModal", () => {
     });
 
     const modalRef = createModalRef();
-  
+
     render(
       <LoginModal
         modalRef={modalRef}
