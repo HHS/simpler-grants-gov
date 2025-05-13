@@ -21,14 +21,14 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 
 ## Options Considered
 
-- Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request
-- Move the deployment target for proxy/router Client side exe/container
-- Don't support SOAP
-- Simpler SOAP facade where all data is returned from Simpler REST calls
-- Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database
-- Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying
-- Allow SOAP callers to supply us with their private keys
-- Create parallel certificates for the Proxy/Router to use to represent every SOAP caller
+- [Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request](#implement-an-existing-soap-api-skeleton-key-and-an-alternative-way-to-pass-the-real-user-for-each-api-request)
+- [Move the deployment target for proxy/router Client side exe/container](#move-the-deployment-target-for-proxyrouter-client-side-execontainer)
+- [Don't support SOAP](#dont-support-soap)
+- [Simpler SOAP facade where all data is returned from Simpler REST calls](#simpler-soap-facade-where-all-data-is-returned-from-simpler-rest-calls)
+- [Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database](#make-the-existing-soap-api-the-compatibility-layer-by-writing-simpler-data-back-to-the-existing-database)
+- [Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying](#move-the-proxy-to-a-lower-level-so-we-can-inject-ourselves-in-the-tls-negotiation-and-set-up-a-co-negotiated-channel-that-lets-us-proceed-with-proxying)
+- [Allow SOAP callers to supply us with their private keys](#allow-soap-callers-to-supply-us-with-their-private-keys)
+- [Create parallel certificates for the Proxy/Router to use to represent every SOAP caller](#create-parallel-certificates-for-the-proxyrouter-to-use-to-represent-every-soap-caller)
 
 ## Decision Outcome
 
@@ -48,22 +48,24 @@ Chosen option: "{option X}", because {justification. e.g., only option which mee
 
 ### Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request
 
-{example | description | pointer to more information | ...}
+Since we have access to the client certificate (but not the private key) and the data in Grants.gov that maps the certificate to the permissions that apply to that caller, we can verify and pass through the identity of the calling API Consumer. However we can't pass through the client certificate authentication that the SOAP API was built to utilize. If the SOAP API was modified to allow a specific key (a skeleton key) to utilize a new header or other request argument that identified the original certificate presented and that certificate was used for permission decisions on that request, that would allow us to work around the issue we've encountered making SOAP requests on behalf of the original user. In this scenario, the Proxy/Router still has validated that the caller has the certificate and key that match, otherwise the TLS negotiation fails and we never get their incoming SOAP request. The Proxy/Router then negotiates a connection with the existing SOAP API using our skelton key and we pass the SOAP request through to the existing SOAP API along with a new header or request data point that indicates the actual certificate that was presented. The modified SOAP API validates the skeleton key and therefore checks the new data point to look up permissions based on that certificate the client had provided.
 
 - **Pros**
-  - Good
+  - Maintains the drop in replacement, no client change priority
+  - Least change from what we were originally planning to build on the Simpler side
 - **Cons**
-  - Bad, because {argument c}
+  - Requires a potentially sizable change to the legacy API to support the alternate way of looking up permissions associated with the request
 
 ### Move the deployment target for proxy/router Client side exe/container
 
-{example | description | pointer to more information | ...}
-to perform the parallel REST/SOAP calls because it can have access to both the client certificate and private key locally to the API consumer
+Instead of running our Proxy/Router on AWS Infrastructure we shift that code to execute in the client environment. The code to perform the parallel REST/SOAP calls can impersonate the client fully because it can have access to both the client certificate and private key when running more locally to the API consumer. We could package our proxy as an executable (for multiple platforms) and a Docker container (for ease of cloud or other virtual deployment). Because this codebase is now running in the API Consumer's environment, they can follow instructions to give it access to their existing Grants.gov certificate and private key, without introducing any new security concerns by Simpler possessing those private keys. However, building software to be run in another team's environment is a very different process than building for cloud deploys on your own infrastructure, particularly around support, releasing updates, and maintaining compatibility. We also anticipate this approach would involve a local IT/Engineering lift that some existing SOAP Consumers would struggle with. This solution suffers from the same opt-in issues as only callers who have set up the local proxy can benefit from the solution. It might also be complicated for multi-tenant environments who would need to support on instance of the software for each tenant in their SaaS solution.
 
 - **Pros**
-  - Good
+  - Keeps the security boundaries unaltered, we don't need access to caller's private key
 - **Cons**
-  - Bad, because {argument c}
+  - While we rapidly iterate and release new updates, the running copies of the software drift further out of date and we can't fix bugs or address issues easily without ongoing engagement and effort with API consumers.
+  - Another opt-in solution, until an agency is running the local proxy they don't benefit from the solution.
+  - Likely multi-tenancy issues for SaaS vendors.
 
 ### Don't support SOAP
 
@@ -98,6 +100,17 @@ One of the initial drivers of the SOAP Proxy/Router work was to allow us to not 
   - Simpler cannot make any data model changes that are not somehow backward compatible with the existing data storage schemas. (With the Proxy/Router layer in place we could address any incompatibilities at that layer, here we must keep 1:1 backward compatibility with the existing tables.)
   - Adds potentially significant work to feed data back into the existing System from Simpler.
   - Having additional systems writing data to the same database often leads to data inconsistencies that are hard to prevent, troubleshoot, and fix.
+
+### Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying
+
+Our plan was to proxy requests at the Application layer, (Layer 7 in the [OSI Model](https://en.wikipedia.org/wiki/OSI_model)). However the mutual client authentication happens lower in the stack as part of [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security) (TLS). TLS doesn't fit cleanly into the OSI Model despite its name, but it's generally classified as a Transport (Layer 4) or Session (Layer 5) concern. This means there's theoretically a shift in the proxy where if we ran more at the Transport/Session layer we could intercept the TLS negotiation process and facilitate secure connections from client to proxy and proxy to SOAP API without the private key for the certificate. If we wanted to seriously consider this approach we'd want to do more research to confirm if this setup is even feasible within TLS, as it's very close to an attack vector which may mean TLS contains active defenses against how this approach would work.
+
+- **Pros**
+  - Gets around the issues of needing the private key, allowing for proxying for all consumers and without modification to the underlying SOAP API
+- **Cons**
+  - Working deeper in the networking stack means we're responsible for a lot more state and security pieces that at the higher level we can take for granted.
+  - Bugs and incompatibilities between network stacks would be much harder to code for and troubleshoot.
+  - Likely requires implementing in a language we don't already use on the project.
 
 ### Allow SOAP callers to supply us with their private keys
 
