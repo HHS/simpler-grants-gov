@@ -115,7 +115,9 @@ def upgrade():
     op.create_table(
         "opportunity_assistance_listing",
         sa.Column("opportunity_assistance_listing_id", sa.UUID(), nullable=False),
-        sa.Column("legacy_opportunity_assistance_listing_id", sa.BigInteger(), nullable=False),
+        sa.Column(
+            "legacy_opportunity_assistance_listing_id", sa.BigInteger(), nullable=False, unique=True
+        ),
         sa.Column("opportunity_id", sa.UUID(), nullable=False),
         sa.Column("assistance_listing_number", sa.Text(), nullable=True),
         sa.Column("program_title", sa.Text(), nullable=True),
