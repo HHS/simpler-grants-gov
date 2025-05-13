@@ -9,13 +9,16 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, Competition
+from src.db.models.user_models import ApplicationUser, User
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
 
 
-def create_application(db_session: db.Session, competition_id: UUID) -> Application:
+def create_application(
+    db_session: db.Session, competition_id: UUID, user_id: UUID = None
+) -> Application:
     """
     Create a new application for a competition.
     """
@@ -68,8 +71,41 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
 
     # Create a new application
     application = Application(application_id=uuid.uuid4(), competition_id=competition_id)
-
     db_session.add(application)
+
+    # Associate user with application if provided
+    if user_id:
+        # Check if the user-application association already exists
+        existing_association = db_session.execute(
+            select(ApplicationUser).where(
+                ApplicationUser.application_id == application.application_id,
+                ApplicationUser.user_id == user_id
+            )
+        ).scalar_one_or_none()
+        
+        # Only create the association if it doesn't already exist
+        if not existing_association:
+            application_user = ApplicationUser(
+                application_id=application.application_id,
+                user_id=user_id
+            )
+            db_session.add(application_user)
+            
+            logger.info(
+                "Associated user with application",
+                extra={
+                    "application_id": application.application_id,
+                    "user_id": user_id,
+                },
+            )
+        else:
+            logger.info(
+                "User already associated with application",
+                extra={
+                    "application_id": application.application_id,
+                    "user_id": user_id,
+                },
+            )
 
     logger.info(
         "Created new application",

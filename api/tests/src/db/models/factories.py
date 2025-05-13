@@ -1152,6 +1152,17 @@ class ApplicationFormFactory(BaseFactory):
     )
 
 
+class ApplicationUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.ApplicationUser
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
 ###################
 # Agency Factories
 ###################
