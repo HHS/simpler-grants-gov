@@ -674,8 +674,8 @@ export const messages = {
               "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
           },
         ],
-        contentTitle2: "Late 2024",
-        contentItems2: [
+        archivedRoadmapTitle: "Late 2024",
+        archivedRoadmapItems: [
           {
             title: "RESTful API launch",
             content:
