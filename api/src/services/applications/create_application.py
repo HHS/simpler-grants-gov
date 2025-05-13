@@ -71,23 +71,8 @@ def create_application(db_session: db.Session, competition_id: UUID, user_id: UU
     application = Application(application_id=uuid.uuid4(), competition_id=competition_id)
     db_session.add(application)
 
-    # Associate user with application if provided
-    if user_id:
-        # Check if the user-application association already exists
-        existing_association = db_session.execute(
-            select(ApplicationUser).where(
-                ApplicationUser.application_id == application.application_id,
-                ApplicationUser.user_id == user_id,
-            )
-        ).scalar_one_or_none()
-
-        # Only create the association if it doesn't already exist
-        if not existing_association:
-            application_user = ApplicationUser(
-                application_id=application.application_id, user_id=user_id
-            )
-            db_session.add(application_user)
-
+    application_user = ApplicationUser(application=application,user=user)
+    db_session.add(application_user)
             logger.info(
                 "Associated user with application",
                 extra={
