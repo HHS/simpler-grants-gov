@@ -39,10 +39,10 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 
     # Get user from token session
     token_session = api_jwt_auth.get_user_token_session()
-    user_id = token_session.user_id
+    user = token_session.user
 
     with db_session.begin():
-        application = create_application(db_session, competition_id, user_id)
+        application = create_application(db_session, competition_id, user)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
