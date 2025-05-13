@@ -209,7 +209,7 @@ def test_user_save_search_post(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
-    # Verify the saved search is updated and a new saved opp is not created
+    # Verify a new saved search is created
     db_session.expire_all()
     saved_opp = (
         db_session.query(UserSavedSearch)
@@ -218,6 +218,6 @@ def test_user_save_search_post(
         )
         .all()
     )
-    assert len(saved_opp) == 1
-    assert saved_opp[0].saved_search_id == saved_search.saved_search_id
+    assert len(saved_opp) == 2
+    assert saved_opp[1].saved_search_id != saved_search.saved_search_id
     assert not saved_opp[0].is_deleted
