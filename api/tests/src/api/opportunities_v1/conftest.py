@@ -13,8 +13,8 @@ from src.db.models.opportunity_models import (
     OpportunityAttachment,
     OpportunitySummary,
 )
-from tests.lib.db_testing import cascade_delete_from_db_table
 from src.db.models.user_models import ApplicationUser
+from tests.lib.db_testing import cascade_delete_from_db_table
 
 
 @pytest.fixture
