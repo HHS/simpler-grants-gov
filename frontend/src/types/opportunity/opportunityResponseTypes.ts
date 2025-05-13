@@ -32,10 +32,10 @@ export interface Summary extends MinimalSummary {
   applicant_eligibility_description: string | null;
   applicant_types: string[] | null;
   archive_date: string | null;
-  awardCeiling: number | null;
-  awardFloor: number | null;
+  award_ceiling: number | null;
+  award_floor: number | null;
   close_date_description: string | null;
-  estimatedTotalProgramFunding: number | null;
+  estimated_total_program_funding: number | null;
   expectedNumberOfAwards: number | null;
   fiscal_year: number | null;
   forecasted_award_date: string | null;

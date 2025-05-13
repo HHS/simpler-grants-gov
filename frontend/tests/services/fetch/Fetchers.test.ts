@@ -11,7 +11,7 @@ const createRequestUrlMock = jest.fn(
 );
 const fakeJsonBody = {
   data: [],
-  e: [],
+  errors: [],
   warnings: [],
 };
 

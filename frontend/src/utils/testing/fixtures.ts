@@ -19,8 +19,8 @@ export const mockOpportunity: BaseOpportunity = {
     close_date: "2023-02-01",
     post_date: "2023-01-15",
     agency_name: "Test Agency",
-    awardCeiling: 50000,
-    awardFloor: 10000,
+    award_ceiling: 50000,
+    award_floor: 10000,
   },
   opportunityNumber: "OPP-12345",
 } as BaseOpportunity;

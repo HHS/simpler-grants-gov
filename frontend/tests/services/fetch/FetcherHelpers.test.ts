@@ -60,7 +60,7 @@ describe("throwError", () => {
           data: {},
           message: "response message",
           status_code: 401,
-          e: [
+          errors: [
             {
               field: "fieldName",
               type: "a subtype",
