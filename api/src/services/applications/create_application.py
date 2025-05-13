@@ -79,18 +79,17 @@ def create_application(
         existing_association = db_session.execute(
             select(ApplicationUser).where(
                 ApplicationUser.application_id == application.application_id,
-                ApplicationUser.user_id == user_id
+                ApplicationUser.user_id == user_id,
             )
         ).scalar_one_or_none()
-        
+
         # Only create the association if it doesn't already exist
         if not existing_association:
             application_user = ApplicationUser(
-                application_id=application.application_id,
-                user_id=user_id
+                application_id=application.application_id, user_id=user_id
             )
             db_session.add(application_user)
-            
+
             logger.info(
                 "Associated user with application",
                 extra={
