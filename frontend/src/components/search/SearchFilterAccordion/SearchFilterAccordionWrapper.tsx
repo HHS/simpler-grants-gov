@@ -33,7 +33,7 @@ export async function SearchFilterAccordionWrapper({
     console.error("Search error, cannot set filter facets", e);
   }
 
-  const facetCounts = searchResults?.facet_counts[facetKey] || {};
+  const facetCounts = searchResults?.facet_counts?.[facetKey] || {};
   return (
     <SearchFilterAccordion
       filterOptions={filterOptions}

@@ -80,7 +80,8 @@ function Search({ searchParams, params }: SearchPageProps) {
                   fundingInstrument={fundingInstrument}
                   agency={agency}
                   searchResultsPromise={searchResultsPromise}
-                  suspenseKey={suspenseKey}
+                  // suspenseKey={suspenseKey}
+                  searchParams={resolvedSearchParams}
                 />
               </ContentDisplayToggle>
             </div>

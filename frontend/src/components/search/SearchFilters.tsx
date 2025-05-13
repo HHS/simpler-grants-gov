@@ -1,5 +1,6 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -22,6 +23,61 @@ export default function SearchFilters({
   category,
   opportunityStatus,
   searchResultsPromise,
+  searchParams,
+}: {
+  fundingInstrument: Set<string>;
+  eligibility: Set<string>;
+  agency: Set<string>;
+  category: Set<string>;
+  opportunityStatus: Set<string>;
+  searchResultsPromise: Promise<SearchAPIResponse>;
+  searchParams: OptionalStringDict;
+}) {
+  const t = useTranslations("Search");
+  const agenciesPromise = getAgenciesForFilterOptions();
+
+  const searchSuspenseKey = JSON.stringify(searchParams);
+  return (
+    <>
+      <SearchFilterList
+        opportunityStatus={opportunityStatus}
+        eligibility={eligibility}
+        category={category}
+        fundingInstrument={fundingInstrument}
+        agency={agency}
+        searchResultsPromise={searchResultsPromise}
+        suspenseKey={searchSuspenseKey}
+      />
+      <Suspense
+        key={`${JSON.stringify(searchParams.status)}-agency`}
+        fallback={
+          <SearchFilterAccordion
+            filterOptions={[]}
+            query={agency}
+            queryParamKey="agency"
+            title={t("accordion.titles.agency")}
+          />
+        }
+      >
+        <AgencyFilterAccordion
+          query={agency}
+          agencyOptionsPromise={agenciesPromise}
+          // searchResultsPromise={searchResultsPromise}
+          // searchResultsPromise={Promise.resolve({})}
+          // searchSuspenseKey={`${suspenseKey}-agency-facets`}
+        />
+      </Suspense>
+    </>
+  );
+}
+
+export function SearchFilterList({
+  fundingInstrument,
+  eligibility,
+  agency,
+  category,
+  opportunityStatus,
+  searchResultsPromise,
   suspenseKey,
 }: {
   fundingInstrument: Set<string>;
@@ -33,7 +89,6 @@ export default function SearchFilters({
   suspenseKey: string;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = getAgenciesForFilterOptions();
 
   return (
     <>
@@ -96,31 +151,6 @@ export default function SearchFilters({
           query={eligibility}
           queryParamKey={"eligibility"}
           title={t("accordion.titles.eligibility")}
-        />
-      </Suspense>
-      {/* this type of nesting doesn't work, we need to figure out a way to encapsulate the agency fetch suspense away from the search result suspsense
-        do we try to encapsulte the facet count component?
-        that won't work because it's server side
-        can we suspend the fallback? i don't think that makes any sense
-        we need to suspend just once, on every search, but maybe the fallback can somehow used a cached version of the agencies list if it has been previously fetched?
-        lets go with that tomorrow
-      */}
-      <Suspense
-        key={"agencies-list"}
-        fallback={
-          <SearchFilterAccordion
-            filterOptions={[]}
-            query={agency}
-            queryParamKey="agency"
-            title={t("accordion.titles.agency")}
-          />
-        }
-      >
-        <AgencyFilterAccordion
-          query={agency}
-          agencyOptionsPromise={agenciesPromise}
-          searchResultsPromise={searchResultsPromise}
-          searchSuspenseKey={`${suspenseKey}-agency`}
         />
       </Suspense>
       <Suspense

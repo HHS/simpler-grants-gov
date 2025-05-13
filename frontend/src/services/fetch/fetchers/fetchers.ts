@@ -23,6 +23,7 @@ import {
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
 
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 // returns a function which can be used to make a request to an endpoint defined in the passed config
@@ -123,4 +124,5 @@ export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
-export const fetchAgencies = cache(requesterForEndpoint(fetchAgenciesEndpoint));
+// TODO: put a next JS 'unstable_cache' on here
+export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
