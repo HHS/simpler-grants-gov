@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
 
 // import { waitForURLChange } from "./playwrightUtils";
@@ -111,5 +110,7 @@ test("can navigate to grants.gov", async ({ page, context }) => {
 
   const newPage = await newTabPromise;
   // await waitForURLChange(page, (url) => !!url.match(/grants\.gov/));
-  await expect(newPage).toHaveTitle("Search Results Detail | Grants.gov");
+  await expect(newPage).toHaveURL(
+    "https://test.grants.gov/search-results-detail/32",
+  );
 });
