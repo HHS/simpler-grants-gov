@@ -43,14 +43,17 @@ class MultiHttpTokenAuth(MultiAuth):
 # relevant one will be used
 jwt_or_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_key_auth)
 
-# List of security scheme names
-jwt_or_key_security_schemes = [api_jwt_auth.security_scheme_name, api_key_auth.security_scheme_name]
-
 
 # Helper function to format security schemes for OpenAPI
-def get_security_requirement(schemes: Sequence[str | None]) -> list[str | dict[str, list[Any]]]:
+def _get_security_requirement(schemes: Sequence[str | None]) -> list[str | dict[str, list[Any]]]:
     # Only include scheme names that are not None and cast to the expected type
     # for APIScaffold.doc's security parameter
     return cast(
         list[str | dict[str, list[Any]]], [{scheme: []} for scheme in schemes if scheme is not None]
     )
+
+
+# List of security scheme names
+jwt_or_key_security_schemes = _get_security_requirement(
+    [api_jwt_auth.security_scheme_name, api_key_auth.security_scheme_name]
+)
