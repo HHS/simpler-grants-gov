@@ -3,7 +3,7 @@ import {
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { stringToBoolean } from "src/utils/generalUtils";
+import { stringToBoolean } from "src/utils/middlewareSafeUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
