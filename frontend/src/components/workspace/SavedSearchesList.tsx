@@ -28,6 +28,51 @@ export const SavedSearchesList = ({
     <ul className="usa-prose usa-list--unstyled grid-container">
       {savedSearches.map((savedSearch) => (
         <li key={savedSearch.id}>
+          <div className="grid-col grid-gap-1 border-1px border-base-lighter margin-bottom-2 padding-2 text-base-darker desktop:grid-col-fill">
+            <div className="grid-row">
+              <USWDSIcon
+                name="search"
+                className="usa-icon--size-3 text-mint-50 flex-align-self-center margin-right-1"
+              />
+              <Link
+                href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
+                className="font-sans-lg text-bold grid-col-fill flex-align-self-start"
+              >
+                {savedSearch.name}
+              </Link>
+              <div className="grid-col-auto">
+                <EditSavedSearchModal
+                  savedSearchId={savedSearch.id}
+                  editText={editText}
+                  queryName={savedSearch.name}
+                />
+                <DeleteSavedSearchModal
+                  savedSearchId={savedSearch.id}
+                  deleteText={deleteText}
+                  queryName={savedSearch.name}
+                />
+              </div>
+            </div>
+            <div className="grid-row">
+              <div
+                className="grid-row flex-column"
+                data-testid="saved-search-definition"
+              >
+                {Object.entries(omit(paramDisplayMapping, "page")).map(
+                  ([key, paramDisplay]) => {
+                    const value =
+                      savedSearch.searchParams[key as ValidSearchQueryParam];
+                    return value ? (
+                      <div key={key}>
+                        <span className="text-bold">{paramDisplay}: </span>
+                        <span>{value.replaceAll(",", ", ")}</span>
+                      </div>
+                    ) : null;
+                  },
+                )}
+              </div>
+            </div>
+          </div>
           <div className="border-1px border-base-lighter padding-x-2 padding-y-105 margin-bottom-2 text-base-darker desktop:grid-col-fill">
             <div className="grid-row padding-right-2">
               <div className="tablet:grid-col-8 grid-col-6">
