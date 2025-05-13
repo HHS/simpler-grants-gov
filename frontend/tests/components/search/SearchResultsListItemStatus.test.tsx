@@ -25,7 +25,7 @@ describe("SearchResultListItemStatus", () => {
   it("renders opportunity title and status", () => {
     render(<SearchResultListItemStatus {...defaultProps} />);
     expect(screen.getByText("posted")).toBeInTheDocument();
-    expect(screen.getByText("2025-02-01")).toBeInTheDocument();
+    expect(screen.getByText("February 1, 2025")).toBeInTheDocument();
     expect(screen.queryByText("forecasted")).not.toBeInTheDocument();
   });
   it("renders -- if date not included", () => {

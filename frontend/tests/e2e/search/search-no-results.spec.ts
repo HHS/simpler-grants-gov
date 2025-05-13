@@ -34,7 +34,6 @@ test.describe("Search page tests", () => {
 
     await page.waitForURL("/search?query=" + searchTerm);
 
-    // eslint-disable-next-line testing-library/prefer-screen-queries
     const resultsHeading = page.getByRole("heading", {
       name: /0 Opportunities/i,
     });
