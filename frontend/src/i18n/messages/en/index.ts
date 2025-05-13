@@ -573,7 +573,7 @@ export const messages = {
     editModal: {
       loading: "Updating",
       title: "Edit",
-      inputLabel: "New name",
+      inputLabel: "New name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
