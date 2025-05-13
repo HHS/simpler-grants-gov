@@ -16,9 +16,7 @@ from src.validation.validation_constants import ValidationErrorType
 logger = logging.getLogger(__name__)
 
 
-def create_application(
-    db_session: db.Session, competition_id: UUID, user_id: UUID = None
-) -> Application:
+def create_application(db_session: db.Session, competition_id: UUID, user_id: UUID) -> Application:
     """
     Create a new application for a competition.
     """
