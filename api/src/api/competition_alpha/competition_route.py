@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @jwt_or_key_multi_auth.login_required
 @flask_db.with_db_session()
 def competition_get(db_session: db.Session, competition_id: uuid.UUID) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"competition.competition_id": competition_id})
+    add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("GET /alpha/competitions/:competition_id")
 
     with db_session.begin():
