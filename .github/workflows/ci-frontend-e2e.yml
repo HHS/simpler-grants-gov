@@ -61,7 +61,7 @@ jobs:
           cat .env.development >> .env.local
           # Use the localhost url for tests
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local
-          IS_CI=true npm run build -- --no-lint
+          npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
         env:
