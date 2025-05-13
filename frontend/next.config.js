@@ -130,7 +130,7 @@ const headers = [
   },
 ];
 
-const isCi = Boolean(process.env.IS_CI);
+const isCi = Boolean(process.env.CI);
 
 if (!isCi)
   headers.push({
