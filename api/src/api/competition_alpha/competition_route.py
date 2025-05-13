@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 @competition_blueprint.get("/competitions/<uuid:competition_id>")
 @competition_blueprint.output(competition_schema.CompetitionResponseAlphaSchema())
-@competition_blueprint.auth_required(jwt_or_key_multi_auth)
 @competition_blueprint.doc(security=get_security_requirement(jwt_or_key_security_schemes))
 @jwt_or_key_multi_auth.login_required
 @flask_db.with_db_session()
