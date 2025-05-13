@@ -9,7 +9,7 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, Competition
-from src.db.models.user_models import ApplicationUser, User
+from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
