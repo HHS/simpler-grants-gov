@@ -77,13 +77,16 @@ export const SavedSearchesList = ({
             <div className="grid-row padding-right-2">
               <div className="tablet:grid-col-8 grid-col-6">
                 <h2 className="margin-y-105 line-height-sans-2">
+                  <USWDSIcon
+                    name="search"
+                    className="margin-right-1 text-no-underline"
+                  />
                   <Link
                     href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
                     className="margin-right-05"
                   >
                     {savedSearch.name}
                   </Link>
-                  <USWDSIcon name="search" />
                 </h2>
               </div>
               <div className="grid-col margin-top-2 text-right">
