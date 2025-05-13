@@ -674,6 +674,39 @@ export const messages = {
               "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
           },
         ],
+        contentTitle2: "Late 2024",
+        contentItems2: [
+          {
+            title: "RESTful API launch",
+            content:
+              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+          },
+          {
+            title: "Coding Challenge pilot",
+            content:
+              "We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+          },
+          {
+            title: "Search UI usability test",
+            content:
+              "We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+          },
+          {
+            title: "Opportunity page launch",
+            content:
+              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+          },
+          {
+            title: "First Co-Design Group recruitment",
+            content:
+              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
+          },
+          {
+            title: "Search interface launch",
+            content:
+              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+          },
+        ],
       },
       process: {
         title: "How we work",
