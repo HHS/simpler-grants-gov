@@ -2,6 +2,7 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
 
@@ -9,8 +10,10 @@ import { Button, Table } from "@trussworks/react-uswds";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { setFeatureFlag, featureFlags, setFeatureFlagsToDefault } =
-    useFeatureFlags();
+  const { setFeatureFlag, featureFlags, createQueryString } = useFeatureFlags();
+
+  const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <>
@@ -36,7 +39,12 @@ export default function FeatureFlagsTable() {
                 <Button
                   data-testid={`enable-${featureName}`}
                   disabled={!!enabled}
-                  onClick={() => setFeatureFlag(featureName, true)}
+                  onClick={() => {
+                    setFeatureFlag(featureName, true);
+                    router.replace(
+                      pathname + "?" + createQueryString("_ff", ""),
+                    );
+                  }}
                   type="button"
                 >
                   Enable
@@ -44,7 +52,12 @@ export default function FeatureFlagsTable() {
                 <Button
                   data-testid={`disable-${featureName}`}
                   disabled={!enabled}
-                  onClick={() => setFeatureFlag(featureName, false)}
+                  onClick={() => {
+                    setFeatureFlag(featureName, false);
+                    router.replace(
+                      pathname + "?" + createQueryString("_ff", ""),
+                    );
+                  }}
                   type="button"
                 >
                   Disable
@@ -56,7 +69,9 @@ export default function FeatureFlagsTable() {
       </Table>
       <Button
         data-testid={"reset-defaults"}
-        onClick={setFeatureFlagsToDefault}
+        onClick={() => {
+          router.replace(pathname + "?" + createQueryString("_ff", "reset"));
+        }}
         type="button"
       >
         Reset to Defaults

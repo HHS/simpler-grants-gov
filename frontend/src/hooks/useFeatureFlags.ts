@@ -11,6 +11,7 @@ import {
   getCookieExpiration,
 } from "src/services/featureFlags/featureFlagHelpers";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 /**
@@ -22,9 +23,10 @@ import { useCallback, useEffect, useState } from "react";
 export function useFeatureFlags(): {
   setFeatureFlag: (flagName: string, value: boolean) => void;
   checkFeatureFlag: (flagName: string) => boolean;
+  createQueryString: (name: string, value: string) => string;
   featureFlags: FeatureFlags;
-  setFeatureFlagsToDefault: () => void;
 } {
+  const searchParams = useSearchParams();
   const [featureFlags, setFeatureFlags] =
     useState<FeatureFlags>(defaultFeatureFlags);
 
@@ -51,9 +53,14 @@ export function useFeatureFlags(): {
     [featureFlags, setFeatureFlags],
   );
 
-  const setFeatureFlagsToDefault = () => {
-    setFeatureFlags(defaultFeatureFlags);
-  };
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+      return params.toString();
+    },
+    [searchParams],
+  );
 
   const checkFeatureFlag = useCallback(
     (flagName: string): boolean => {
@@ -70,7 +77,7 @@ export function useFeatureFlags(): {
   return {
     setFeatureFlag,
     checkFeatureFlag,
+    createQueryString,
     featureFlags,
-    setFeatureFlagsToDefault,
   };
 }
