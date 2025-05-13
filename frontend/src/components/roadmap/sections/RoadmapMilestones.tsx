@@ -1,14 +1,16 @@
 "use client";
+
 import { useMessages, useTranslations } from "next-intl";
-import { useState } from "react";
-import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 import { Accordion } from "@trussworks/react-uswds";
 import type { AccordionItemProps } from "@trussworks/react-uswds/lib/components/Accordion/Accordion";
+
+import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 export default function RoadmapMilestones() {
   const t = useTranslations("Roadmap.sections.milestones");
   const messages = useMessages() as unknown as IntlMessages;
-  const { contentItems, archivedRoadmapItems, archivedRoadmapTitle } = messages.Roadmap.sections.milestones;
+  const { contentItems, archivedRoadmapItems, archivedRoadmapTitle } =
+    messages.Roadmap.sections.milestones;
 
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
@@ -16,7 +18,7 @@ export default function RoadmapMilestones() {
       <h2 className="font-sans-md margin-0 margin-top-1 tablet:font-sans-lg">
         {t("contentTitle")}
       </h2>
-      
+
       {/* Render Early 2025 content items */}
       {Object.keys(contentItems).map((key) => {
         const title = t(`contentItems.${key}.title`);
@@ -58,8 +60,8 @@ export default function RoadmapMilestones() {
                     );
                   })}
                 </div>
-              )
-            }
+              ),
+            },
           ]}
         />
       </div>
