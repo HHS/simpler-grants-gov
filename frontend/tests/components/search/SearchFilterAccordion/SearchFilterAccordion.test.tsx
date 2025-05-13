@@ -2,35 +2,12 @@ import "@testing-library/jest-dom/extend-expect";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { initialFilterOptions } from "src/utils/testing/fixtures";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-
-const initialFilterOptions: FilterOption[] = [
-  {
-    id: "funding-instrument-cooperative_agreement",
-    label: "Cooperative Agreement",
-    value: "cooperative_agreement",
-  },
-  {
-    id: "funding-instrument-grant",
-    label: "Grant",
-    value: "grant",
-  },
-  {
-    id: "funding-instrument-procurement_contract",
-    label: "Procurement Contract ",
-    value: "procurement_contract",
-  },
-  {
-    id: "funding-instrument-other",
-    label: "Other",
-    value: "other",
-  },
-];
 
 const fakeFacetCounts = {
   grant: 1,
@@ -173,5 +150,47 @@ describe("SearchFilterAccordion", () => {
       selector: ".usa-tag.usa-tag--big.radius-pill.margin-left-1",
     });
     expect(countSpan).toBeInTheDocument();
+  });
+  it("adds an any option checkbox by default", () => {
+    render(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={fakeFacetCounts}
+      />,
+    );
+    const accordionToggleButton = screen.getByRole("button");
+    fireEvent.click(accordionToggleButton);
+    const anyCheckbox = screen.getByRole("checkbox", {
+      name: "Any test accordion",
+    });
+    expect(anyCheckbox).toBeInTheDocument();
+  });
+  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+    render(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={fakeFacetCounts}
+        wrapForScroll={true}
+      />,
+    );
+
+    const scrollableContainer = screen.getByTestId(`${title}-accordion-scroll`);
+
+    expect(scrollableContainer).toHaveClass("overflow-scroll");
+
+    const initialScrollTop = scrollableContainer.scrollTop;
+
+    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
+
+    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
+
+    // Assert that the document body has not scrolled
+    expect(window.scrollY).toBe(0);
   });
 });

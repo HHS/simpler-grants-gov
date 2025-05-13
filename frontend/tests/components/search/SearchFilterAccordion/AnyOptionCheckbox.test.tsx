@@ -84,7 +84,7 @@ describe("AnyOptionCheckbox", () => {
         queryParamKey={"any"}
       />,
     );
-    const label = screen.getByText("Any for the title");
+    const label = screen.getByText("Any For the title");
     expect(label).toBeInTheDocument();
   });
 });
