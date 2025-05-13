@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 from uuid import UUID
 
 import src.adapters.db as db
@@ -7,6 +8,7 @@ from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.services.applications.get_application import get_application
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,45 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
                 )
             ],
         )
+
+    # Check if competition is closed
+    competition = application.competition
+    current_date = get_now_us_eastern_date()
+
+    if competition.closing_date is not None:
+        actual_closing_date = competition.closing_date
+
+        # If grace_period is not null, add that many days to the closing date
+        if competition.grace_period is not None and competition.grace_period > 0:
+            actual_closing_date = competition.closing_date + timedelta(
+                days=competition.grace_period
+            )
+
+        # Ensure we're comparing dates, not mixing date and datetime
+        if isinstance(actual_closing_date, datetime):
+            actual_closing_date = actual_closing_date.date()
+
+        if current_date > actual_closing_date:
+            message = "Cannot submit application - competition is closed"
+            logger.info(
+                message,
+                extra={
+                    "application_id": application_id,
+                    "closing_date": competition.closing_date,
+                    "grace_period": competition.grace_period,
+                },
+            )
+            raise_flask_error(
+                422,
+                message,
+                validation_issues=[
+                    ValidationErrorDetail(
+                        type=ValidationErrorType.COMPETITION_ALREADY_CLOSED,
+                        message="Competition is closed for submissions",
+                        field="closing_date",
+                    )
+                ],
+            )
 
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info("Application successfully submitted")
