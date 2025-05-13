@@ -12,7 +12,7 @@ import { useCallback } from "react";
     * throwing errors on unsuccessful requests
  */
 export const useClientFetch = <T>(
-  eMessage: string,
+  errorMessage: string,
   { jsonResponse = true, authGatedRequest = false } = {},
 ) => {
   const { refreshIfExpired, refreshUser, refreshIfExpiring } = useUser();
@@ -53,7 +53,7 @@ export const useClientFetch = <T>(
         }
         return response as T;
       } else {
-        throw new Error(`${eMessage}: ${response.status}`);
+        throw new Error(`${errorMessage}: ${response.status}`);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

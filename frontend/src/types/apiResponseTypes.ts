@@ -15,7 +15,7 @@ export interface APIResponse {
   status_code: number;
   pagination_info?: PaginationInfo;
   warnings?: unknown[] | null | undefined;
-  e?: unknown[] | null | undefined;
+  errors?: unknown[] | null | undefined;
 }
 
 export interface FrontendErrorDetails {
