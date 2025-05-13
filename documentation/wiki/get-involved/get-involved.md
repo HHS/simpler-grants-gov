@@ -1,12 +1,12 @@
 # Why open source?
 
-At Simpler Grants.gov, we are committed to transparency and collaboration. We embrace open-source practices to ensure all our software tools are accessible for public observation, input, and reuse.
+At Simpler.Grants.gov, we are committed to transparency and collaboration. We embrace open-source practices to ensure all our software tools are accessible for public observation, input, and reuse.
 
 We firmly believe that the most effective solutions are crafted through open collaboration. We are eager to engage with a community of grant-making professionals, applicants, and technology enthusiasts. Your feedback and contributions are not only welcome but integral to our mission. Together, we can simplify the grant-making process and make it more accessible to everyone.
 
 ### Contribute
 
-Your contribution will help make the Simpler Grants.gov experience better for everyone.
+Your contribution will help make the Simpler.Grants.gov experience better for everyone.
 
 ### Who we're looking for
 
@@ -19,7 +19,7 @@ Your contribution will help make the Simpler Grants.gov experience better for ev
 | Interested in...                        | How to Get Involved                                                                                                                                                |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Providing coding or development support | <p>Contribute code to GitHub - Contributing Guidelines</p><p>Open "Help Wanted" Issues: GitHub Issues</p>                                                          |
-| Participating in discussions            | Join our Slack to have access to real time discussions on Simpler Grants.gov information. Provide your perspective as we grow and develop this community together. |
+| Participating in discussions            | Join our Slack to have access to real-time discussions on Simpler.Grants.gov information. Provide your perspective as we grow and develop this community together. |
 
 ### Change log
 
