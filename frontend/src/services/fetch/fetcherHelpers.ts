@@ -95,7 +95,9 @@ export function fetchErrorToNetworkError(
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
   console.error(error);
-  return searchInputs ? new NetworkError(error, searchInputs) : new NetworkError(error);
+  return searchInputs
+    ? new NetworkError(error, searchInputs)
+    : new NetworkError(error);
 }
 
 export const throwError = (responseBody: APIResponse, url: string) => {
