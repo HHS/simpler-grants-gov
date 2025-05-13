@@ -1,7 +1,12 @@
+/**
+ * @jest-environment node
+ */
+
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   areSetsEqual,
   getAgencyDisplayName,
+  paramsToFormattedQuery,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
 
@@ -188,5 +193,33 @@ describe("areSetsEqual", () => {
     expect(areSetsEqual(new Set(["2", "1"]), new Set(["1", "2"]))).toEqual(
       true,
     );
+  });
+});
+
+describe("paramsToFormattedQuery", () => {
+  it("returns empty string if no params are passed", () => {
+    expect(paramsToFormattedQuery(new URLSearchParams())).toEqual("");
+  });
+  it("stringifies URLSearchParams and prepends a question mark", () => {
+    expect(
+      paramsToFormattedQuery(
+        new URLSearchParams([
+          ["key", "value"],
+          ["big", "small"],
+          ["simpler", "grants"],
+        ]),
+      ),
+    ).toEqual("?key=value&big=small&simpler=grants");
+  });
+  it("unencrypts commas", () => {
+    expect(
+      paramsToFormattedQuery(
+        new URLSearchParams([
+          ["key", "value,anotherValue"],
+          ["big", "small"],
+          ["simpler", "grants"],
+        ]),
+      ),
+    ).toEqual("?key=value,anotherValue&big=small&simpler=grants");
   });
 });

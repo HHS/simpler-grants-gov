@@ -414,6 +414,7 @@ export const messages = {
     description: "Try out our experimental search page.",
     accordion: {
       any: "Any",
+      all: "All",
       titles: {
         funding: "Funding instrument",
         eligibility: "Eligibility",
