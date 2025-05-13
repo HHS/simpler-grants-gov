@@ -2,14 +2,13 @@
 
 import { useMessages, useTranslations } from "next-intl";
 import { Accordion } from "@trussworks/react-uswds";
-import type { AccordionItemProps } from "@trussworks/react-uswds/lib/components/Accordion/Accordion";
 
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 export default function RoadmapMilestones() {
   const t = useTranslations("Roadmap.sections.milestones");
   const messages = useMessages() as unknown as IntlMessages;
-  const { contentItems, archivedRoadmapItems, archivedRoadmapTitle } =
+  const { contentItems, archivedRoadmapItems } =
     messages.Roadmap.sections.milestones;
 
   return (
