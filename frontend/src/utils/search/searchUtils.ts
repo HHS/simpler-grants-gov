@@ -93,3 +93,12 @@ function paramToSet(param: QuerySetParam, type?: string): Set<string> {
 function getSafePage(page: string | undefined) {
   return Math.max(1, parseInt(page || "1"));
 }
+
+// stringifies query params, unencrypts any encrypted commas, and prepends a ?
+export const paramsToFormattedQuery = (params: URLSearchParams): string => {
+  if (!params.size) {
+    return "";
+  }
+  // return `?${params.toString().replaceAll("%2C", ",")}`;
+  return `?${decodeURIComponent(params.toString())}`;
+};

@@ -50,12 +50,11 @@ locals {
   # Include project name in bucket name since buckets need to be globally unique across AWS
   bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
-  build_repository_config                        = module.app_config.build_repository_config
-  environment_config                             = module.app_config.environment_configs[var.environment_name]
-  service_config                                 = local.environment_config.service_config
-  storage_config                                 = local.environment_config.storage_config
-  incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  notifications_config                           = local.environment_config.notifications_config
+  build_repository_config = module.app_config.build_repository_config
+  environment_config      = module.app_config.environment_configs[var.environment_name]
+  service_config          = local.environment_config.service_config
+  storage_config          = local.environment_config.storage_config
+  notifications_config    = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
 }
@@ -117,13 +116,6 @@ data "aws_iam_policy" "migrator_db_access_policy" {
   name  = local.database_config.migrator_access_policy_name
 }
 
-# Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
-
-data "aws_ssm_parameter" "incident_management_service_integration_url" {
-  count = module.app_config.has_incident_management_service ? 1 : 0
-  name  = local.incident_management_service_integration_config.integration_url_param_name
-}
-
 data "aws_security_groups" "aws_services" {
   filter {
     name   = "group-name"
@@ -167,11 +159,10 @@ module "service" {
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   file_upload_jobs     = local.service_config.file_upload_jobs
-  enable_s3_cdn        = true
-  s3_cdn_bucket_name   = "public-files"
+  enable_s3_cdn        = false
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
-  enable_drafts_bucket = true
+  enable_drafts_bucket = false
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
