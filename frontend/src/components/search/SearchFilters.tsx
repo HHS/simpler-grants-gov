@@ -16,6 +16,14 @@ import {
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import { SearchFilterAccordion } from "./SearchFilterAccordion/SearchFilterAccordion";
 
+/*
+- atm the two best experiences I can produce are:
+- - with agency filter keyed off of only status: no suspense anywhere in the status filter but at least the agency filter doesn't flicker
+- - with agency filter keyed off of full query params: everything but agencies work fine, agency filter options flicker whenever selection changes. With proper caching this may not be an issue? Let's revisit in a bit and test with caching
+
+  No clue why the suspense key of a unrelated components are having such a strong effect on other suspense boundaries
+*/
+
 export default function SearchFilters({
   fundingInstrument,
   eligibility,
@@ -49,7 +57,8 @@ export default function SearchFilters({
         suspenseKey={searchSuspenseKey}
       />
       <Suspense
-        key={`${JSON.stringify(searchParams.status)}-agency`}
+        // key={`${JSON.stringify(searchParams.status)}-agency`}
+        key={`${searchSuspenseKey}-agency`}
         fallback={
           <SearchFilterAccordion
             filterOptions={[]}
@@ -62,9 +71,8 @@ export default function SearchFilters({
         <AgencyFilterAccordion
           query={agency}
           agencyOptionsPromise={agenciesPromise}
-          // searchResultsPromise={searchResultsPromise}
-          // searchResultsPromise={Promise.resolve({})}
-          // searchSuspenseKey={`${suspenseKey}-agency-facets`}
+          searchResultsPromise={searchResultsPromise}
+          searchSuspenseKey={`${searchSuspenseKey}-agency-facets`}
         />
       </Suspense>
     </>

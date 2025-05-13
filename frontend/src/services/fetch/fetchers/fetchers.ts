@@ -57,12 +57,9 @@ export function requesterForEndpoint({
       ...additionalHeaders,
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
     let response;
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.floor(Math.random() * 1000)),
-    );
     try {
       response = await fetch(url, {
         body: method === "GET" || !body ? null : createRequestBody(body),

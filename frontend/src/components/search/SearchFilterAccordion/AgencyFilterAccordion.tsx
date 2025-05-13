@@ -11,14 +11,14 @@ import { SearchFilterAccordionWrapper } from "./SearchFilterAccordionWrapper";
 
 export async function AgencyFilterAccordion({
   query,
-  // searchSuspenseKey,
+  searchSuspenseKey,
   agencyOptionsPromise,
-  // searchResultsPromise,
+  searchResultsPromise,
 }: {
   query: Set<string>;
-  // searchSuspenseKey: string;
+  searchSuspenseKey: string;
   agencyOptionsPromise: Promise<FilterOption[]>;
-  // searchResultsPromise: Promise<SearchAPIResponse>;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
 
@@ -31,11 +31,25 @@ export async function AgencyFilterAccordion({
     console.error("Unable to fetch agencies for filter list", e);
   }
   return (
-    <SearchFilterAccordion
-      filterOptions={agencies}
-      title={t("accordion.titles.agency")}
-      queryParamKey={"agency"}
-      query={query}
-    />
+    <Suspense
+      key={searchSuspenseKey}
+      fallback={
+        <SearchFilterAccordion
+          filterOptions={agencies}
+          title={t("accordion.titles.agency")}
+          queryParamKey={"agency"}
+          query={query}
+        />
+      }
+    >
+      <SearchFilterAccordionWrapper
+        filterOptions={agencies}
+        title={t("accordion.titles.agency")}
+        queryParamKey={"agency"}
+        query={query}
+        facetKey="agency"
+        searchResultsPromise={searchResultsPromise}
+      />
+    </Suspense>
   );
 }
