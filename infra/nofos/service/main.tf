@@ -164,6 +164,8 @@ module "service" {
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = false
 
+  readonly_root_filesystem = false
+
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
     app_access_policy_arn      = module.database[0].app_access_policy_arn
