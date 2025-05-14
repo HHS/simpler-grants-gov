@@ -93,7 +93,6 @@ def test_validate_competition_open_failure(enable_factory_create, db_session):
         grace_period=3,
     )
     application = ApplicationFactory.create(competition=competition)
-    db_session.commit()
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         validate_competition_open(application)
