@@ -82,6 +82,15 @@ class JsonFormatter(logging.Formatter):
         # see https://github.com/python/cpython/blob/main/Lib/logging/__init__.py#L690-L720
         super().format(record)
 
+        # New Relic automatically maps log messages of certain names over
+        # the "message" field in their system. This includes mapping "msg"
+        # which is the unformatted version of a log message. This means the
+        # formatted message doesn't make it into New Relic
+        # https://docs.newrelic.com/docs/logs/log-api/introduction-log-api/#json-logs
+        #
+        # To work around this, we copy the message field to a new field name
+        record.formatted_msg = getattr(record, "message", None)
+
         return json.dumps(record.__dict__, separators=(",", ":"), default=json_encoder)
 
 

@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 def create_saved_search(
     search_client: search.SearchClient, db_session: db.Session, user_id: UUID, json_data: dict
 ) -> UserSavedSearch:
-
     # Retrieve opportunity IDs
     opportunity_ids = search_opportunities_id(search_client, json_data["search_query"])
 
@@ -23,5 +22,4 @@ def create_saved_search(
     )
 
     db_session.add(saved_search)
-
     return saved_search

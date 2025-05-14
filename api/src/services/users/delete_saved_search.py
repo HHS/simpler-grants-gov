@@ -17,4 +17,4 @@ def delete_saved_search(db_session: db.Session, user_id: UUID, saved_search_id: 
     if not saved_search:
         raise_flask_error(404, "Saved search not found")
 
-    db_session.delete(saved_search)
+    saved_search.is_deleted = True
