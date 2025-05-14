@@ -111,6 +111,30 @@ class AgencyV1Schema(Schema):
             "example": False,
         },
     )
+    has_open_opportunity = fields.String(
+        metadata={
+            "description": "Indicates if the agency is linked to an opportunity that is currently open",
+            "example": False,
+        },
+    )
+    has_forecasted_opportunity = fields.String(
+        metadata={
+            "description": "Indicates if the agency is linked to an opportunity that is currently forecasted",
+            "example": False,
+        },
+    )
+    has_closed_opportunity = fields.String(
+        metadata={
+            "description": "Indicates if the agency is linked to an opportunity that is currently closed",
+            "example": False,
+        },
+    )
+    has_archived_opportunity = fields.String(
+        metadata={
+            "description": "Indicates if the agency is linked to an opportunity that is currently archived",
+            "example": False,
+        },
+    )
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

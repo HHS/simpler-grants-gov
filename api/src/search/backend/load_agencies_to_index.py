@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from src.adapters import db, search
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.services.agencies_v1.get_agencies import _construct_active_inner_query
 from src.task.task import Task, logger
@@ -72,16 +73,25 @@ class LoadAgenciesToIndex(Task):
         """
         return self.db_session.execute(select(Agency).options(selectinload("*"))).scalars().all()
 
-    def load_agencies(self, agencies: Sequence[Agency]) -> None:
-        logger.info("Loading agencies...")
-        active_agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id))
+    def _get_agencies_by_status(self, status: OpportunityStatus) -> set[Agency]:
+        """Fetch agencies based on the status."""
+        agencies_subquery = (
+            _construct_active_inner_query(Agency.agency_id, status)
+            .union(_construct_active_inner_query(Agency.top_level_agency_id, status))
             .subquery()
         )
 
-        agency_id_stmt = select(active_agency_subquery).distinct()
-        active_agencies = set(self.db_session.execute(agency_id_stmt).scalars())
+        agency_id_stmt = select(agencies_subquery).distinct()
+        return set(self.db_session.execute(agency_id_stmt).scalars())
+
+    def load_agencies(self, agencies: Sequence[Agency]) -> None:
+        logger.info("Loading agencies...")
+
+        # Get agencies by opportunity status
+        posted_agencies = self._get_agencies_by_status(OpportunityStatus.POSTED)
+        forecasted_agencies = self._get_agencies_by_status(OpportunityStatus.FORECASTED)
+        closed_agencies = self._get_agencies_by_status(OpportunityStatus.CLOSED)
+        archived_agencies = self._get_agencies_by_status(OpportunityStatus.ARCHIVED)
 
         agencies_json = []
         for agency in agencies:
@@ -89,8 +99,13 @@ class LoadAgenciesToIndex(Task):
                 "Preparing agency for upload to search index",
                 extra={"agency_id": agency.agency_id, "agency_code": agency.agency_code},
             )
+
             agency_json = SCHEMA.dump(agency)
-            agency_json["has_active_opportunity"] = agency.agency_id in active_agencies
+
+            agency_json["has_open_opportunity"] = agency.agency_id in posted_agencies
+            agency_json["has_forecasted_opportunity"] = agency.agency_id in forecasted_agencies
+            agency_json["has_closed_opportunity"] = agency.agency_id in closed_agencies
+            agency_json["has_archived_opportunity"] = agency.agency_id in archived_agencies
 
             agencies_json.append(agency_json)
 

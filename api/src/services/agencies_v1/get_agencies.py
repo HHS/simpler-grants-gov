@@ -29,7 +29,9 @@ class AgencyListParams(BaseModel):
     query: str | None = None
 
 
-def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
+def _construct_active_inner_query(
+    field: InstrumentedAttribute[Any], opportunity_status: OpportunityStatus
+) -> Select:
     return (
         select(field)
         .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
@@ -37,7 +39,7 @@ def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
         .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
         .where(
             CurrentOpportunitySummary.opportunity_status.in_(
-                [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
+                [opportunity_status],
             )
         )
     )
@@ -54,13 +56,22 @@ def get_agencies(
     )
 
     if list_params.filters and list_params.filters.active:
-        active_agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id))
+        posted_agency_subquery = (
+            _construct_active_inner_query(Agency.agency_id, OpportunityStatus.POSTED)
+            .union(_construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.POSTED))
+            .subquery()
+        )
+        forecasted_agency_subquery = (
+            _construct_active_inner_query(Agency.agency_id, OpportunityStatus.FORECASTED)
+            .union(_construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.FORECASTED))
             .subquery()
         )
 
-        agency_id_stmt = select(active_agency_subquery).distinct()
+        combined_union = select(posted_agency_subquery.c.agency_id).union(
+            select(forecasted_agency_subquery.c.agency_id)
+        ).subquery()
+
+        agency_id_stmt = select(combined_union).distinct()
 
         stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
 
