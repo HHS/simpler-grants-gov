@@ -66,7 +66,6 @@ def test_validate_competition_open_success(enable_factory_create, db_session):
         grace_period=0,
     )
     application1 = ApplicationFactory.create(competition=competition1)
-    db_session.commit()
 
     # Should not raise any exception
     validate_competition_open(application1)
@@ -77,7 +76,6 @@ def test_validate_competition_open_success(enable_factory_create, db_session):
         grace_period=3,
     )
     application2 = ApplicationFactory.create(competition=competition2)
-    db_session.commit()
 
     # Should not raise any exception
     validate_competition_open(application2)
