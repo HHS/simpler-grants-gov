@@ -45,6 +45,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .join(
                 OpportunitySummary, OpportunitySummary.opportunity_id == Opportunity.opportunity_id
             )
+            .where(UserSavedOpportunity.is_deleted.isnot(True))
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(

@@ -30,7 +30,8 @@ from src.api.users.user_schemas import (
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
-from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
+from src.db.models.user_models import UserTokenSession
+from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
@@ -184,19 +185,14 @@ def user_save_opportunity(
     if user_token_session.user_id != user_id:
         raise_flask_error(401, "Unauthorized user")
 
-    # Create the saved opportunity record
-    saved_opportunity = UserSavedOpportunity(
-        user_id=user_id, opportunity_id=json_data["opportunity_id"]
-    )
-
     with db_session.begin():
-        db_session.add(saved_opportunity)
+        create_saved_opportunity(db_session, user_id, json_data)
 
     logger.info(
         "Saved opportunity for user",
         extra={
-            "user.id": str(user_id),
-            "opportunity.id": json_data["opportunity_id"],
+            "user_id": user_id,
+            "opportunity_id": json_data["opportunity_id"],
         },
     )
 
@@ -277,8 +273,8 @@ def user_save_search(
     logger.info(
         "Saved search for user",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": str(saved_search.saved_search_id),
+            "user_id": user_id,
+            "saved_search_id": saved_search.saved_search_id,
         },
     )
 
@@ -307,8 +303,8 @@ def user_delete_saved_search(
     logger.info(
         "Deleted saved search",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": saved_search_id,
+            "user_id": user_id,
+            "saved_search_id": saved_search_id,
         },
     )
 
@@ -363,8 +359,8 @@ def user_update_saved_search(
     logger.info(
         "Updated saved search for user",
         extra={
-            "user.id": str(user_id),
-            "saved_search.id": str(updated_saved_search.saved_search_id),
+            "user_id": user_id,
+            "saved_search_id": updated_saved_search.saved_search_id,
         },
     )
 
