@@ -58,18 +58,26 @@ def get_agencies(
     if list_params.filters and list_params.filters.active:
         posted_agency_subquery = (
             _construct_active_inner_query(Agency.agency_id, OpportunityStatus.POSTED)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.POSTED))
+            .union(
+                _construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.POSTED)
+            )
             .subquery()
         )
         forecasted_agency_subquery = (
             _construct_active_inner_query(Agency.agency_id, OpportunityStatus.FORECASTED)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.FORECASTED))
+            .union(
+                _construct_active_inner_query(
+                    Agency.top_level_agency_id, OpportunityStatus.FORECASTED
+                )
+            )
             .subquery()
         )
 
-        combined_union = select(posted_agency_subquery.c.agency_id).union(
-            select(forecasted_agency_subquery.c.agency_id)
-        ).subquery()
+        combined_union = (
+            select(posted_agency_subquery.c.agency_id)
+            .union(select(forecasted_agency_subquery.c.agency_id))
+            .subquery()
+        )
 
         agency_id_stmt = select(combined_union).distinct()
 
