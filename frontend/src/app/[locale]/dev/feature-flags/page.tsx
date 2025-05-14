@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import Head from "next/head";
-import React from "react";
+import React, { Suspense } from "react";
 
 import FeatureFlagsTable from "src/components/dev/FeatureFlagsTable";
 
@@ -24,7 +24,9 @@ export default function FeatureFlags() {
       </Head>
       <div>
         <h1>Manage Feature Flags</h1>
-        <FeatureFlagsTable />
+        <Suspense>
+          <FeatureFlagsTable />
+        </Suspense>
       </div>
     </>
   );
