@@ -229,7 +229,7 @@ def opportunity_search(
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"opportunity.opportunity_id": opportunity_id})
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
     logger.info("GET /v1/opportunities/:opportunity_id")
     with db_session.begin():
         opportunity = get_opportunity(db_session, opportunity_id)

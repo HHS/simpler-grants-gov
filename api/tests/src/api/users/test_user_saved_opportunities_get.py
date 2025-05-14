@@ -9,7 +9,6 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
-from src.db.models.user_models import UserSavedOpportunity
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import (
     OpportunityFactory,
@@ -84,13 +83,6 @@ def user(enable_factory_create, db_session):
 def user_auth_token(user, db_session):
     token, _ = create_jwt_for_user(user, db_session)
     return token
-
-
-@pytest.fixture(autouse=True, scope="function")
-def clear_opportunities(db_session):
-    db_session.query(UserSavedOpportunity).delete()
-    db_session.commit()
-    yield
 
 
 def test_user_get_saved_opportunities(
@@ -264,3 +256,32 @@ def test_user_get_only_own_saved_opportunities(
     assert "User's Opportunity" in opportunity_titles
     assert "Shared Opportunity" in opportunity_titles
     assert "Other User's Opportunity" not in opportunity_titles
+
+
+def test_user_get_saved_opportunities_deleted(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    """Test that users don't get soft deleted opportunities"""
+    # Created a saved opportunity that is soft deleted
+    UserSavedOpportunityFactory.create(user=user, is_deleted=True)
+    # Create saved active opportunities
+    active_opp = UserSavedOpportunityFactory.create(user=user)
+    # Make the request
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    assert len(response.json["data"]) == 1
+    assert response.json["data"][0]["opportunity_id"] is active_opp.opportunity_id
