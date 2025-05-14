@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
+from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -997,3 +998,49 @@ def test_application_submit_forbidden(
     # Verify application status remains unchanged
     db_session.refresh(application)
     assert application.application_status == initial_status
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_associates_user(client, enable_factory_create, db_session):
+    """Test that application creation associates the user from the token session with the application"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create a user and get a token for them
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created in the database
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+
+    # Verify user is associated with the application
+    application_user = db_session.execute(
+        select(ApplicationUser).where(
+            ApplicationUser.application_id == application_id,
+            ApplicationUser.user_id == user.user_id,
+        )
+    ).scalar_one_or_none()
+
+    assert application_user is not None
+    assert application_user.user_id == user.user_id
+    assert application_user.application_id == application.application_id
