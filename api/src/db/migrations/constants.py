@@ -2,7 +2,7 @@ opportunity_search_index_queue_trigger_function = """
 CREATE OR REPLACE FUNCTION update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
-    opp_id bigint;
+    opp_id uuid;
 BEGIN
     -- Determine the opportunity_id based on the table
     CASE TG_TABLE_NAME
