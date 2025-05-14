@@ -9,13 +9,14 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, Competition
+from src.db.models.user_models import ApplicationUser, User
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
 
 
-def create_application(db_session: db.Session, competition_id: UUID) -> Application:
+def create_application(db_session: db.Session, competition_id: UUID, user: User) -> Application:
     """
     Create a new application for a competition.
     """
@@ -68,8 +69,10 @@ def create_application(db_session: db.Session, competition_id: UUID) -> Applicat
 
     # Create a new application
     application = Application(application_id=uuid.uuid4(), competition_id=competition_id)
-
     db_session.add(application)
+
+    application_user = ApplicationUser(application=application, user=user)
+    db_session.add(application_user)
 
     logger.info(
         "Created new application",

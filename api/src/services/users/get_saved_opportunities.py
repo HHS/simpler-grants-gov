@@ -61,6 +61,7 @@ def get_saved_opportunities(
             and_(
                 UserSavedOpportunity.opportunity_id == Opportunity.opportunity_id,
                 UserSavedOpportunity.user_id == user_id,
+                UserSavedOpportunity.is_deleted.isnot(True),
             ),
         )
         .join(
