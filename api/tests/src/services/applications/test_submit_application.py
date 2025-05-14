@@ -110,7 +110,6 @@ def test_validate_competition_with_no_closing_date(enable_factory_create, db_ses
     """Test that validating a competition with no closing date succeeds."""
     competition = CompetitionFactory.create(closing_date=None)
     application = ApplicationFactory.create(competition=competition)
-    db_session.commit()
 
     # Should not raise any exception
     validate_competition_open(application)
