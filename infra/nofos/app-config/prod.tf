@@ -8,13 +8,13 @@ module "prod_config" {
   domain_name    = null
   enable_https   = false
 
-  instance_desired_instance_count = 2
-  instance_scaling_min_capacity   = 2
-  instance_scaling_max_capacity   = 2
+  instance_desired_instance_count = 1
+  instance_scaling_min_capacity   = 1
+  instance_scaling_max_capacity   = 1
 
-  database_min_capacity   = 2
-  database_max_capacity   = 2
-  database_instance_count = 2
+  database_min_capacity   = 1
+  database_max_capacity   = 1
+  database_instance_count = 1
 
   service_override_extra_environment_variables = {}
 }
