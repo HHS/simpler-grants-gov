@@ -5,6 +5,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
 
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useSearchParams } from "next/navigation";
+
 const MOCK_DEFAULT_FEATURE_FLAGS = {
   someFakeFeature1: true,
   someFakeFeature2: true,
@@ -32,13 +35,43 @@ jest.mock("react", () => ({
   })),
 }));
 
+const mockSearchParams = new URLSearchParams();
+
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(() => "/dev/feature-flags") as jest.Mock<string>,
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+  useSearchParams: jest.fn(
+    () => mockSearchParams,
+  ) as jest.Mock<URLSearchParams>,
+}));
+
+const createMockRouter = (props = {}) => ({
+  back: jest.fn(),
+  forward: jest.fn(),
+  push: jest.fn(),
+  replace: jest.fn(),
+  refresh: jest.fn(),
+  prefetch: jest.fn(),
+  ...props,
+});
+
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => mockUseFeatureFlags(),
 }));
 
 describe("Feature flags page", () => {
+  const renderWithRouter = (ui: React.ReactElement) => {
+    return render(
+      <AppRouterContext.Provider value={createMockRouter()}>
+        {ui}
+      </AppRouterContext.Provider>,
+    );
+  };
+
   it("should render all feature flags", () => {
-    render(<FeatureFlags />);
+    renderWithRouter(<FeatureFlags />);
     expect(mockUseFeatureFlags).toHaveBeenCalled();
     Object.keys(MOCK_DEFAULT_FEATURE_FLAGS).forEach((name) => {
       expect(screen.getByText(name)).toBeInTheDocument();
@@ -47,7 +80,8 @@ describe("Feature flags page", () => {
   });
 
   it("clicking on a feature flag enable and disable buttons should update state", () => {
-    const { rerender } = render(<FeatureFlags />);
+    debugger;
+    const { rerender } = renderWithRouter(<FeatureFlags />);
     Object.keys(MOCK_DEFAULT_FEATURE_FLAGS).forEach((name) => {
       const enableButton = screen.getByTestId(`enable-${name}`);
       const disableButton = screen.getByTestId(`disable-${name}`);
@@ -58,6 +92,7 @@ describe("Feature flags page", () => {
       rerender(<FeatureFlags />);
       expect(statusElement).toHaveTextContent("Enabled");
 
+      rerender(<FeatureFlags />);
       fireEvent.click(disableButton);
       rerender(<FeatureFlags />);
       expect(statusElement).toHaveTextContent("Disabled");
@@ -73,7 +108,7 @@ describe("Feature flags page", () => {
   });
 
   it("should set feature flags to their default state when clicking reset to default button", () => {
-    const { rerender } = render(<FeatureFlags />);
+    const { rerender } = renderWithRouter(<FeatureFlags />);
     Object.keys(MOCK_DEFAULT_FEATURE_FLAGS).forEach((name) => {
       const enableButton = screen.getByTestId(`enable-${name}`);
       const disableButton = screen.getByTestId(`disable-${name}`);

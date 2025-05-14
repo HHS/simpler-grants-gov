@@ -1,6 +1,7 @@
 "use client";
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -10,10 +11,8 @@ import { Button, Table } from "@trussworks/react-uswds";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { setFeatureFlag, featureFlags, createQueryString } = useFeatureFlags();
-
-  const pathname = usePathname();
-  const router = useRouter();
+  const { setFeatureFlag, featureFlags } = useFeatureFlags();
+  const { setQueryParam } = useSearchParamUpdater();
 
   return (
     <>
@@ -41,9 +40,7 @@ export default function FeatureFlagsTable() {
                   disabled={!!enabled}
                   onClick={() => {
                     setFeatureFlag(featureName, true);
-                    router.replace(
-                      pathname + "?" + createQueryString("_ff", ""),
-                    );
+                    setQueryParam("_ff", "");
                   }}
                   type="button"
                 >
@@ -54,9 +51,7 @@ export default function FeatureFlagsTable() {
                   disabled={!enabled}
                   onClick={() => {
                     setFeatureFlag(featureName, false);
-                    router.replace(
-                      pathname + "?" + createQueryString("_ff", ""),
-                    );
+                    setQueryParam("_ff", "");
                   }}
                   type="button"
                 >
@@ -70,7 +65,7 @@ export default function FeatureFlagsTable() {
       <Button
         data-testid={"reset-defaults"}
         onClick={() => {
-          router.replace(pathname + "?" + createQueryString("_ff", "reset"));
+          setQueryParam("_ff", "reset");
         }}
         type="button"
       >
