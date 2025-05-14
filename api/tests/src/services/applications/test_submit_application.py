@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 import apiflask.exceptions
 import pytest
@@ -16,9 +16,9 @@ TEST_DATE = "2023-03-10"
 
 def test_submit_application_success(enable_factory_create, db_session):
     """Test successful submission of an application in IN_PROGRESS state."""
-    now = datetime.now()
+    today = date.today()
     competition = CompetitionFactory.create(
-        closing_date=now + timedelta(days=1),
+        closing_date=today + timedelta(days=1),
         grace_period=3,
     )
     application = ApplicationFactory.create(
@@ -41,9 +41,9 @@ def test_submit_application_success(enable_factory_create, db_session):
 )
 def test_submit_application_forbidden(enable_factory_create, db_session, initial_status):
     """Test that submitting an application not in IN_PROGRESS state raises ForbiddenError."""
-    now = datetime.now()
+    today = date.today()
     competition = CompetitionFactory.create(
-        closing_date=now + timedelta(days=1),
+        closing_date=today + timedelta(days=1),
         grace_period=3,
     )
     application = ApplicationFactory.create(

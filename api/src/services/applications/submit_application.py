@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
 import src.adapters.db as db
@@ -49,10 +49,6 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
             actual_closing_date = competition.closing_date + timedelta(
                 days=competition.grace_period
             )
-
-        # Ensure we're comparing dates, not mixing date and datetime
-        if isinstance(actual_closing_date, datetime):
-            actual_closing_date = actual_closing_date.date()
 
         if current_date > actual_closing_date:
             message = "Cannot submit application - competition is closed"
