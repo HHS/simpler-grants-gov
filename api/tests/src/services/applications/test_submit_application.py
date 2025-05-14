@@ -127,12 +127,8 @@ def test_submit_application_success(enable_factory_create, db_session):
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
-    db_session.commit()  # Commit initial state
 
     updated_application = submit_application(db_session, application.application_id)
-    db_session.commit()  # Commit the change made by the service
-
-    db_session.refresh(updated_application)  # Refresh to get the latest state from DB
 
     assert updated_application.application_id == application.application_id
     assert updated_application.application_status == ApplicationStatus.SUBMITTED
