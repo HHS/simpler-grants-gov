@@ -17,12 +17,6 @@ logger = logging.getLogger(__name__)
 def validate_application_in_progress(application: Application) -> None:
     """
     Validate that the application is in the IN_PROGRESS state.
-
-    Args:
-        application: The application to validate
-
-    Raises:
-        HTTPError: If the application is not in the IN_PROGRESS state
     """
     if application.application_status != ApplicationStatus.IN_PROGRESS:
         message = f"Application cannot be submitted. It is currently in status: {application.application_status}"
