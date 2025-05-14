@@ -39,7 +39,6 @@ export default function FeatureFlagsTable() {
                   disabled={!!enabled}
                   onClick={() => {
                     setFeatureFlag(featureName, true);
-                    setQueryParam("_ff", "");
                   }}
                   type="button"
                 >
@@ -50,7 +49,6 @@ export default function FeatureFlagsTable() {
                   disabled={!enabled}
                   onClick={() => {
                     setFeatureFlag(featureName, false);
-                    setQueryParam("_ff", "");
                   }}
                   type="button"
                 >
