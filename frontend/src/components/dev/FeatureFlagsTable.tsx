@@ -3,7 +3,6 @@
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
-import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
 

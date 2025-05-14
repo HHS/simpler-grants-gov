@@ -5,8 +5,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
 
-import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
 const MOCK_DEFAULT_FEATURE_FLAGS = {
   someFakeFeature1: true,
   someFakeFeature2: true,
