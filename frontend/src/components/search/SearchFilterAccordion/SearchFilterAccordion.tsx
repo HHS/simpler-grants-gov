@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 import {
@@ -24,7 +25,7 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface SearchAccordionContentProps {
+export interface SearchFilterAccordionProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
@@ -32,10 +33,6 @@ export interface SearchAccordionContentProps {
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
-}
-
-export interface SearchFilterAccordionProps
-  extends SearchAccordionContentProps {
   wrapForScroll?: boolean;
 }
 
@@ -65,8 +62,9 @@ const AccordionContent = ({
   query,
   facetCounts,
   defaultEmptySelection,
+  wrapForScroll = false,
   includeAnyOption = true,
-}: SearchAccordionContentProps) => {
+}: SearchFilterAccordionProps) => {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
 
@@ -86,7 +84,11 @@ const AccordionContent = ({
 
   return (
     <>
-      <ul className="usa-list usa-list--unstyled">
+      <ul
+        className={clsx("usa-list usa-list--unstyled", {
+          "maxh-mobile-lg": wrapForScroll,
+        })}
+      >
         {includeAnyOption && (
           <li>
             <AnyOptionCheckbox
