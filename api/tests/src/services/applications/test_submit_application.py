@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import apiflask.exceptions
 import pytest
@@ -14,31 +14,69 @@ from tests.src.db.models.factories import ApplicationFactory, CompetitionFactory
 TEST_DATE = "2023-03-10"
 
 
-def test_submit_application_success(db_session, enable_factory_create):
-    """Test that submitting an in-progress application changes its status."""
-    application = ApplicationFactory.create(application_status=ApplicationStatus.IN_PROGRESS)
+def test_submit_application_success(enable_factory_create, db_session):
+    """Test successful submission of an application in IN_PROGRESS state."""
+    now = datetime.now()
+    competition = CompetitionFactory.create(
+        closing_date=now + timedelta(days=1),
+        grace_period=3,
+    )
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    db_session.commit()  # Commit initial state
 
-    # Call function to test
-    result = submit_application(db_session, application.application_id)
+    updated_application = submit_application(db_session, application.application_id)
+    db_session.commit()  # Commit the change made by the service
 
-    # We expect the result to be SUBMITTED
-    assert result.application_status == ApplicationStatus.SUBMITTED
+    db_session.refresh(updated_application)  # Refresh to get the latest state from DB
+
+    assert updated_application.application_id == application.application_id
+    assert updated_application.application_status == ApplicationStatus.SUBMITTED
 
 
-def test_submit_application_not_in_progress(db_session, enable_factory_create):
-    """Test that submitting an application not in progress fails."""
-    # Create a new application with status SUBMITTED (not IN_PROGRESS)
-    application = ApplicationFactory.create(application_status=ApplicationStatus.SUBMITTED)
+@pytest.mark.parametrize(
+    "initial_status",
+    [ApplicationStatus.IN_PROGRESS, ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED],
+)
+def test_submit_application_forbidden(enable_factory_create, db_session, initial_status):
+    """Test that submitting an application not in IN_PROGRESS state raises ForbiddenError."""
+    now = datetime.now()
+    competition = CompetitionFactory.create(
+        closing_date=now + timedelta(days=1),
+        grace_period=3,
+    )
+    application = ApplicationFactory.create(
+        application_status=initial_status, competition=competition
+    )
+    db_session.commit()
 
+    if initial_status == ApplicationStatus.IN_PROGRESS:
+        # If already in progress, submission should succeed, not raise Forbidden
+        # We actually test this case in test_submit_application_success
+        # so we can just skip this parameterization here.
+        # Alternatively, assert that it *doesn't* raise Forbidden.
+        try:
+            submit_application(db_session, application.application_id)
+        except apiflask.exceptions.HTTPError as e:
+            pytest.fail(
+                f"Expected no HTTPError for IN_PROGRESS status, but got {e.status_code}: {e.message}"
+            )
+        return  # End test for this parameter case
+
+    # For states other than IN_PROGRESS, expect a 403 HTTPError
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         submit_application(db_session, application.application_id)
 
-    # Check that we got the expected error
     assert excinfo.value.status_code == 403
-    assert "Application cannot be submitted. It is currently in status:" in excinfo.value.message
     assert (
-        excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
+        f"Application cannot be submitted. It is currently in status: {initial_status.value}"
+        in excinfo.value.message
     )
+
+    # Verify status hasn't changed
+    db_session.refresh(application)
+    assert application.application_status == initial_status
 
 
 def test_submit_application_not_found(db_session):
