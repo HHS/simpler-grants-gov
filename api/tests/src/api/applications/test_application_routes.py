@@ -921,8 +921,15 @@ def test_application_form_get_with_invalid_schema(
 
 def test_application_submit_success(client, enable_factory_create, db_session, api_auth_token):
     """Test successful submission of an application"""
+    # Create a competition with a future closing date
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    competition = CompetitionFactory.create(closing_date=future_date)
+
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(application_status=ApplicationStatus.IN_PROGRESS)
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
     application_id = str(application.application_id)
 
     response = client.post(
