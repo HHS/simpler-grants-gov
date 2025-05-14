@@ -14,12 +14,16 @@ from src.validation.validation_constants import ValidationErrorType
 logger = logging.getLogger(__name__)
 
 
-def submit_application(db_session: db.Session, application_id: UUID) -> Application:
-    logger.info("Processing application submit")
+def validate_application_in_progress(application: Application) -> None:
+    """
+    Validate that the application is in the IN_PROGRESS state.
 
-    application = get_application(db_session, application_id)
+    Args:
+        application: The application to validate
 
-    # Check if the application is in the correct state
+    Raises:
+        HTTPError: If the application is not in the IN_PROGRESS state
+    """
     if application.application_status != ApplicationStatus.IN_PROGRESS:
         message = f"Application cannot be submitted. It is currently in status: {application.application_status}"
         logger.info(
@@ -37,7 +41,12 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
             ],
         )
 
-    # Check if competition is closed
+
+def validate_competition_open(application: Application) -> None:
+    """
+    Validate that the competition is still open for submissions.
+    Takes into account the competition closing date and grace period.
+    """
     competition = application.competition
     current_date = get_now_us_eastern_date()
 
@@ -55,7 +64,7 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
             logger.info(
                 message,
                 extra={
-                    "application_id": application_id,
+                    "application_id": application.application_id,
                     "closing_date": competition.closing_date,
                     "grace_period": competition.grace_period,
                 },
@@ -72,6 +81,21 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
                 ],
             )
 
+
+def submit_application(db_session: db.Session, application_id: UUID) -> Application:
+    """
+    Submit an application for a competition.
+    """
+
+    logger.info("Processing application submit")
+
+    application = get_application(db_session, application_id)
+
+    # Run validations
+    validate_application_in_progress(application)
+    validate_competition_open(application)
+
+    # Update application status
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info("Application successfully submitted")
 
