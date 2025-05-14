@@ -30,6 +30,12 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 - [Allow SOAP callers to supply us with their private keys](#allow-soap-callers-to-supply-us-with-their-private-keys)
 - [Create parallel certificates for the Proxy/Router to use to represent every SOAP caller](#create-parallel-certificates-for-the-proxyrouter-to-use-to-represent-every-soap-caller)
 
+## Detailed Plans for Leading Options
+
+- [Plan - Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request](#plan---implement-an-existing-soap-api-skeleton-key-and-an-alternative-way-to-pass-the-real-user-for-each-api-request)
+- [Plan - Simpler SOAP facade where all data is returned from Simpler REST calls](#plan---simpler-soap-facade-where-all-data-is-returned-from-simpler-rest-calls)
+- [Plan - Allow SOAP callers to supply us with their private keys](#plan---allow-soap-callers-to-supply-us-with-their-private-keys)
+
 ## Decision Outcome
 
 Chosen option: "{option X}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
@@ -86,7 +92,8 @@ Rather than being able to mix and route API traffic between two live APIs, the e
   - Less effort from the Simpler team to implement the SOAP piece.
 - **Cons**
   - The SOAP facade only becomes useful when we've moved most if not all of the existing data into Simpler.
-  - THe Proxy/Router approach allows us to dead end certain data in the existing system, but still allow it to be returned to consumers because we're tying together both APIs.
+  - The REST representations of this data will need to change as Simpler features are built to replace the existing concepts.
+  - THe Proxy/Router approach allows us to dead end certain data in the existing system, but still allow it to be returned to consumers because we're tying together both APIs, this would eliminate that option and require moving all data to Simpler.
 
 ### Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database
 
@@ -133,6 +140,36 @@ For every existing S2S Certificate registered with the system, obtain and regist
 - **Cons**
   - Significant management overhead dealing with certificate acquisition, configuration, permissions, renewals, etc.
   - Any mis-linking of certificates or permissions causes Agencies or Applicants to get someone else's data from the API
+
+## Detailed Plans
+
+### Plan - Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request
+
+- **Consumer changes**
+  - None
+- **SOAP API changes**
+  - a
+- **Simpler changes**
+  - Minor change to always utilize the Simpler certificate and private key for the SOAP requests
+  - Minor change to pass through the caller's certificate serial number or other identifier for the SOAP API permissions to use instead of the Simpler certificate
+
+### Plan - Simpler SOAP facade where all data is returned from Simpler REST calls
+
+- **Consumer changes**
+  - None
+- **SOAP API changes**
+  - None
+- **Simpler changes**
+  - a
+
+### Plan - Allow SOAP callers to supply us with their private keys
+
+- **Consumer changes**
+  - Before first use and when ever an existing certificate is expiring the consumer must upload the private key for their certificate to Simpler
+- **SOAP API changes**
+  - None
+- **Simpler changes**
+  - UI to allow for authenticated users to upload the client certificate and private key that will be used on their behalf when making proxy calls to the existing SOAP API
 
 ## Links
 
