@@ -21,14 +21,14 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 
 ## Options Considered
 
-- [Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request](#implement-an-existing-soap-api-skeleton-key-and-an-alternative-way-to-pass-the-real-user-for-each-api-request)
-- [Move the deployment target for proxy/router Client side exe/container](#move-the-deployment-target-for-proxyrouter-client-side-execontainer)
-- [Don't support SOAP](#dont-support-soap)
-- [Simpler SOAP facade where all data is returned from Simpler REST calls](#simpler-soap-facade-where-all-data-is-returned-from-simpler-rest-calls)
-- [Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database](#make-the-existing-soap-api-the-compatibility-layer-by-writing-simpler-data-back-to-the-existing-database)
-- [Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying](#move-the-proxy-to-a-lower-level-so-we-can-inject-ourselves-in-the-tls-negotiation-and-set-up-a-co-negotiated-channel-that-lets-us-proceed-with-proxying)
-- [Allow SOAP callers to supply us with their private keys](#allow-soap-callers-to-supply-us-with-their-private-keys)
-- [Create parallel certificates for the Proxy/Router to use to represent every SOAP caller](#create-parallel-certificates-for-the-proxyrouter-to-use-to-represent-every-soap-caller)
+1. [Implement an existing SOAP API skeleton key and an alternative way to pass the “real user” for each API request](#implement-an-existing-soap-api-skeleton-key-and-an-alternative-way-to-pass-the-real-user-for-each-api-request)
+2. [Move the deployment target for proxy/router Client side exe/container](#move-the-deployment-target-for-proxyrouter-client-side-execontainer)
+3. [Don't support SOAP](#dont-support-soap)
+4. [Simpler SOAP facade where all data is returned from Simpler REST calls](#simpler-soap-facade-where-all-data-is-returned-from-simpler-rest-calls)
+5. [Make the existing SOAP API the compatibility layer by writing Simpler data back to the existing database](#make-the-existing-soap-api-the-compatibility-layer-by-writing-simpler-data-back-to-the-existing-database)
+6. [Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying](#move-the-proxy-to-a-lower-level-so-we-can-inject-ourselves-in-the-tls-negotiation-and-set-up-a-co-negotiated-channel-that-lets-us-proceed-with-proxying)
+7. [Allow SOAP callers to supply us with their private keys](#allow-soap-callers-to-supply-us-with-their-private-keys)
+8. [Create parallel certificates for the Proxy/Router to use to represent every SOAP caller](#create-parallel-certificates-for-the-proxyrouter-to-use-to-represent-every-soap-caller)
 
 ## Detailed Plans for Leading Options
 
@@ -38,7 +38,7 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 
 ## Decision Outcome
 
-Chosen option: "{option X}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+Given the [detailed plans](#detailed-plans-for-leading-options), the recommendation would be to unblock ongoing work but making a single [private key accessible to the Proxy/Router](#allow-soap-callers-to-supply-us-with-their-private-keys). This could be the Simpler Team's key until a partner agency is found that would be willing to provide their private key in exchange for early access to the Proxy/Router. This allows both the Proxy and Router aspects of the work to continue without interruption or delay. This would also prove out the next stage of that approach in case it becomes necessary in the future. This would limit the Proxy functionality to usage by a single caller, whoever's private key we have access to. But this would just be a short term way to allow for testing/integration to continue, while the work to establish a [skeleton key implementation in the SOAP API](#implement-an-existing-soap-api-skeleton-key-and-an-alternative-way-to-pass-the-real-user-for-each-api-request) is being completed. This hybrid approach differs some of the decision points between the two options to a later point when the cost/timeline of modifying the existing SOAP API are better understood. It could also let us launch a limited beta of the Proxy/Router with Agencies willing to provide their private keys, and then migrate to the skeleton key option for all Agencies once that's ready.
 
 ### Positive Consequences
 
@@ -148,7 +148,7 @@ For every existing S2S Certificate registered with the system, obtain and regist
 - **Consumer changes**
   - None
 - **SOAP API changes**
-  - a
+  - Major change to establish a second parallel authentication/permissions model.
 - **Simpler changes**
   - Minor change to always utilize the Simpler certificate and private key for the SOAP requests
   - Minor change to pass through the caller's certificate serial number or other identifier for the SOAP API permissions to use instead of the Simpler certificate
@@ -160,7 +160,9 @@ For every existing S2S Certificate registered with the system, obtain and regist
 - **SOAP API changes**
   - None
 - **Simpler changes**
-  - a
+  - Places data migration completeness on the critical path of requirements to start offering the Proxy/Router, this is likely not a major change in the level of work, but a major change to the timeline and urgency of that work.
+  - Data migrations that would have happened on a feature by feature basis over the duration of the project will need to be front loaded
+  - As those features are then supported directly in Simpler later, we'll likely need to revisit/rework the data migrations and SOAP translations.
 
 ### Plan - Allow SOAP callers to supply us with their private keys
 
@@ -169,7 +171,8 @@ For every existing S2S Certificate registered with the system, obtain and regist
 - **SOAP API changes**
   - None
 - **Simpler changes**
-  - UI to allow for authenticated users to upload the client certificate and private key that will be used on their behalf when making proxy calls to the existing SOAP API
+  - Moderate change for UI/BE to allow for authenticated users to upload the client certificate and private key that will be used on their behalf when making proxy calls to the existing SOAP API
+  - Minor change to lookup and utilize the private key that's associated with the caller's client certificate
 
 ## Links
 
