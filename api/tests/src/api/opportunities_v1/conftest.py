@@ -13,12 +13,14 @@ from src.db.models.opportunity_models import (
     OpportunityAttachment,
     OpportunitySummary,
 )
+from src.db.models.user_models import ApplicationUser
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
 @pytest.fixture
 def truncate_opportunities(db_session):
     cascade_delete_from_db_table(db_session, ApplicationForm)
+    cascade_delete_from_db_table(db_session, ApplicationUser)
     cascade_delete_from_db_table(db_session, Opportunity)
 
 

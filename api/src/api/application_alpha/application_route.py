@@ -37,8 +37,12 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("POST /alpha/applications/start")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application = create_application(db_session, competition_id)
+        application = create_application(db_session, competition_id, user)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
