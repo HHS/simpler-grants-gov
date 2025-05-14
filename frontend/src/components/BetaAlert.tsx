@@ -13,7 +13,7 @@ const BetaAlert = ({
   heading,
   alertMessage,
 }: BetaAlertProps) => {
-  const t = useTranslations("Beta_alert");
+  const t = useTranslations("BetaAlert");
   const defaultAlertMessage = t.rich("alert", {
     LinkToGrants: (content) => <a href="https://www.grants.gov">{content}</a>,
   });
@@ -24,7 +24,7 @@ const BetaAlert = ({
         <USWDSAlert
           type="warning"
           headingLevel="h2"
-          heading={heading || t("alert_title")}
+          heading={heading || t("alertTitle")}
           noIcon
         >
           {alertMessage || defaultAlertMessage}

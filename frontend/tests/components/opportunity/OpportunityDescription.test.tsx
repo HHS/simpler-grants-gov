@@ -108,7 +108,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
-    const additionalInfoHeading = screen.getByText("additional_info");
+    const additionalInfoHeading = screen.getByText("additionalInfo");
     expect(additionalInfoHeading).toBeInTheDocument();
 
     const sanitizedEligibilityDescription = DOMPurify.sanitize(
@@ -127,7 +127,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
     );
 
-    const contactInfoHeading = screen.getByText("contact_info");
+    const contactInfoHeading = screen.getByText("contactInfo");
     expect(contactInfoHeading).toBeInTheDocument();
 
     expect(screen.getByText("contact@example.com")).toBeInTheDocument();
@@ -156,11 +156,11 @@ describe("OpportunityDescription", () => {
       />,
     );
 
-    const contactInfoHeading = screen.getByText("contact_description");
+    const contactInfoHeading = screen.getByText("contactDescription");
     expect(contactInfoHeading).toBeInTheDocument();
     expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
 
-    const applicantsHeading = screen.getByText("eligible_applicants");
+    const applicantsHeading = screen.getByText("eligibleApplicants");
     expect(applicantsHeading).toBeInTheDocument();
     expect(applicantsHeading.nextSibling).toHaveTextContent("--");
 

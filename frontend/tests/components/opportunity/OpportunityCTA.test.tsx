@@ -13,8 +13,8 @@ describe("OpportunityCTA", () => {
   it("renders the expected content and title", () => {
     render(<OpportunityCTA id={1} />);
 
-    expect(screen.getByText("apply_title")).toBeInTheDocument();
-    expect(screen.getByText("apply_content")).toBeInTheDocument();
+    expect(screen.getByText("applyTitle")).toBeInTheDocument();
+    expect(screen.getByText("applyContent")).toBeInTheDocument();
   });
 
   it("renders a link that links out to the opportunity detail on grants.gov", () => {

@@ -42,11 +42,11 @@ const OpportunityHistory = ({ summary }: Props) => {
         }
       />
       <OpportunityHistoryItem
-        title={t("posted_date")}
+        title={t("postedDate")}
         content={formatHistoryDate(summary.post_date)}
       />
       <OpportunityHistoryItem
-        title={t("archive_date")}
+        title={t("archiveDate")}
         content={formatHistoryDate(summary.archive_date)}
       />
     </div>

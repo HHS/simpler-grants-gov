@@ -41,8 +41,8 @@ const SearchQueryCopyButton = ({
             .then(() => {
               showSnackbar();
             })
-            .catch((error) => {
-              console.error(error);
+            .catch((e) => {
+              console.error(e);
             });
         }}
       >

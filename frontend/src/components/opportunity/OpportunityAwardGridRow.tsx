@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 
 export type AwardDataKeys =
-  | "program_funding"
-  | "expected_awards"
-  | "award_ceiling"
-  | "award_floor";
+  | "programFunding"
+  | "expectedAwards"
+  | "awardCeiling"
+  | "awardFloor";
 
 type Props = {
   title: AwardDataKeys;
@@ -12,10 +12,10 @@ type Props = {
 };
 
 const defaultContentByType = (type: AwardDataKeys) =>
-  type === "expected_awards" ? "--" : "$--";
+  type === "expectedAwards" ? "--" : "$--";
 
 const OpportunityAwardGridRow = ({ title, content }: Props) => {
-  const t = useTranslations("OpportunityListing.award_info");
+  const t = useTranslations("OpportunityListing.awardInfo");
 
   return (
     <div className="border radius-md border-base-lighter padding-x-2">

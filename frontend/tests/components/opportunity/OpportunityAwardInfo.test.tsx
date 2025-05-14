@@ -12,16 +12,16 @@ jest.mock("next-intl", () => ({
     const translations: { [key: string]: string } = {
       yes: "Yes",
       no: "No",
-      program_funding: "Program Funding",
-      expected_awards: "Expected awards",
+      programFunding: "Program Funding",
+      expectedAwards: "Expected awards",
       award_ceiling: "Award Ceiling",
       award_floor: "Award Floor",
-      cost_sharing: "Cost sharing or matching requirement",
-      funding_instrument: "Funding instrument type",
-      opportunity_category: "Opportunity Category",
-      opportunity_category_explanation: "Opportunity Category Explanation",
-      funding_activity: "Category of Funding Activity",
-      category_explanation: "Category Explanation",
+      costSharing: "Cost sharing or matching requirement",
+      fundingInstrument: "Funding instrument type",
+      opportunityCategory: "Opportunity Category",
+      opportunityCategoryExplanation: "Opportunity Category Explanation",
+      fundingActivity: "Category of Funding Activity",
+      categoryExplanation: "Category Explanation",
     };
     return translations[key] || key;
   }),
@@ -30,17 +30,16 @@ jest.mock("next-intl", () => ({
 const mockOpportunityData: OpportunityDetail = {
   summary: {
     estimated_total_program_funding: 5000000,
-    expected_number_of_awards: 10,
+    expectedNumberOfAwards: 10,
     award_ceiling: 1000000,
     award_floor: 50000,
-    is_cost_sharing: true,
-    funding_instruments: ["Grant", "Cooperative Agreement"],
-    funding_categories: ["Education", "Health"],
-    funding_category_description:
-      "Support for education and health initiatives",
+    isCostSharing: true,
+    fundingInstruments: ["Grant", "Cooperative Agreement"],
+    fundingCategories: ["Education", "Health"],
+    fundingCategoryDescription: "Support for education and health initiatives",
   } as Summary,
   category: "Discretionary",
-  category_explanation: "Funds allocated by agency discretion",
+  categoryExplanation: "Funds allocated by agency discretion",
 } as OpportunityDetail;
 
 describe("OpportunityAwardInfo", () => {

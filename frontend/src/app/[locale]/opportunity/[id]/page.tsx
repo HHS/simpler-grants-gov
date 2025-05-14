@@ -37,10 +37,10 @@ export async function generateMetadata({
 }) {
   const { id, locale } = await params;
   const t = await getTranslations({ locale });
-  let title = `${t("OpportunityListing.page_title")}`;
+  let title = `${t("OpportunityListing.pageTitle")}`;
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
-    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title || ""}`;
+    title = `${t("OpportunityListing.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
@@ -49,7 +49,7 @@ export async function generateMetadata({
   }
   const meta: Metadata = {
     title,
-    description: t("OpportunityListing.meta_description"),
+    description: t("OpportunityListing.metaDescription"),
   };
   return meta;
 }
@@ -76,17 +76,17 @@ function emptySummary() {
     close_date: null,
     close_date_description: null,
     estimated_total_program_funding: null,
-    expected_number_of_awards: null,
+    expectedNumberOfAwards: null,
     fiscal_year: null,
     forecasted_award_date: null,
     forecasted_close_date: null,
     forecasted_close_date_description: null,
     forecasted_post_date: null,
     forecasted_project_start_date: null,
-    funding_categories: [],
-    funding_category_description: null,
-    funding_instruments: [],
-    is_cost_sharing: false,
+    fundingCategories: [],
+    fundingCategoryDescription: null,
+    fundingInstruments: [],
+    isCostSharing: false,
     is_forecast: false,
     post_date: null,
     summary_description: null,
@@ -118,7 +118,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   breadcrumbs.push({
-    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
+    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunityNumber}`,
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 

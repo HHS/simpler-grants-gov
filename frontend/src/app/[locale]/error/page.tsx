@@ -9,8 +9,8 @@ import ServerErrorAlert from "src/components/ServerErrorAlert";
 export async function generateMetadata() {
   const t = await getTranslations();
   const meta: Metadata = {
-    title: t("ErrorPages.generic_error.page_title"),
-    description: t("Index.meta_description"),
+    title: t("ErrorPages.genericError.pageTitle"),
+    description: t("Index.metaDescription"),
   };
   return meta;
 }
@@ -21,7 +21,7 @@ const TopLevelError = () => {
   const t = useTranslations("Errors");
   return (
     <GridContainer>
-      <ServerErrorAlert callToAction={t("try_again")} />
+      <ServerErrorAlert callToAction={t("tryAgain")} />
     </GridContainer>
   );
 };
