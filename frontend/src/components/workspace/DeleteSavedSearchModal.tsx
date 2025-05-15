@@ -16,7 +16,7 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -51,9 +51,11 @@ function SuccessContent({
 export function DeleteSavedSearchModal({
   savedSearchId,
   deleteText,
+  queryName,
 }: {
   savedSearchId: string;
   deleteText: string;
+  queryName: string;
 }) {
   const modalId = useMemo(
     () => `delete-save-search-${savedSearchId}`,
@@ -136,39 +138,49 @@ export function DeleteSavedSearchModal({
         ) : (
           <>
             <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId={`deleteSavedSearchApiError-${savedSearchId}`}
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
+            <div className="usa-prose">
+              <p className="font-sans-2xs margin-y-4">
+                {t("description")} &quot;{queryName}&quot;?
+              </p>
+            </div>
+            <>
+              {apiError && (
+                <SimplerAlert
+                  alertClick={() => setApiError(false)}
+                  buttonId={`deleteSavedSearchApiError-${savedSearchId}`}
+                  messageText={t("apiError")}
+                  type="error"
+                />
+              )}
 
-                <ModalFooter>
-                  <Button
-                    type={"button"}
-                    onClick={handleSubmit}
-                    data-testid={`delete-saved-search-button-${savedSearchId}`}
-                  >
-                    {t("deleteText")}
-                  </Button>
-                  <ModalToggleButton
-                    modalRef={modalRef}
-                    closer
-                    unstyled
-                    className="padding-105 text-center"
-                    onClick={onClose}
-                  >
-                    {t("cancelText")}
-                  </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+              <ModalFooter>
+                {loading ? (
+                  <LoadingButton
+                    id={`delete-saved-search-button-${savedSearchId}`}
+                    message={t("loading")}
+                  />
+                ) : (
+                  <>
+                    <Button
+                      type={"button"}
+                      onClick={handleSubmit}
+                      data-testid={`delete-saved-search-button-${savedSearchId}`}
+                    >
+                      {t("deleteText")}
+                    </Button>
+                    <ModalToggleButton
+                      modalRef={modalRef}
+                      closer
+                      unstyled
+                      className="padding-105 text-center"
+                      onClick={onClose}
+                    >
+                      {t("cancelText")}
+                    </ModalToggleButton>
+                  </>
+                )}
+              </ModalFooter>
+            </>
           </>
         )}
       </Modal>

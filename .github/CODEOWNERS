@@ -1,8 +1,9 @@
 # Keep this document in sync with MAINTAINERS.md.
+# More generic / higher level paths should be listed first.
 
 * @mdragon # project lead
 
-/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @freddieyebra @mdragon @widal001 @capriiis @joshtonava # everyone
+/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @freddieyebra @joshtonava @mdragon @myduong-navapbc @widal001 # everyone
 
 /analytics/               @acouch @coilysiren @freddieyebra @widal001
 /documentation/analytics/ @acouch @coilysiren @freddieyebra @widal001
@@ -10,10 +11,12 @@
 /api/               @chouinar @freddieyebra @mdragon @joshtonava
 /documentation/api/ @chouinar @freddieyebra @mdragon @joshtonava
 
-/frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra
-/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra
+/frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
+/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
 
-/infra/               @acouch @coilysiren @mdragon
-/documentation/infra/ @acouch @coilysiren @mdragon
-/.github/             @acouch @coilysiren @mdragon
-/bin/                 @acouch @coilysiren @mdragon
+/infra/                    @acouch @coilysiren @mdragon
+/infra/nofos/              @acouch @coilysiren @mdragon @pcraig3
+/documentation/infra/      @acouch @coilysiren @mdragon
+/.github/                  @acouch @coilysiren @mdragon
+/.github/workflows/*nofos* @acouch @coilysiren @mdragon @pcraig3
+/bin/                      @acouch @coilysiren @mdragon

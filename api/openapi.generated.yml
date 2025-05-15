@@ -499,7 +499,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ApplicationStartRequest'
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
   /alpha/forms/{form_id}:
     get:
       parameters:
@@ -654,7 +654,7 @@ paths:
       - Application Alpha
       summary: Get an application by ID
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
   /alpha/competitions/{competition_id}:
     get:
       parameters:
@@ -686,6 +686,7 @@ paths:
       - Competition Alpha
       summary: Competition Get
       security:
+      - ApiJwtAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
@@ -773,20 +774,20 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
-  /v1/opportunities/{legacy_opportunity_id}:
-    get:
+  /alpha/applications/{application_id}/submit:
+    post:
       parameters:
       - in: path
-        name: legacy_opportunity_id
+        name: application_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OpportunityGetResponseV1'
+                $ref: '#/components/schemas/AbstractResponse'
           description: Successful response
         '401':
           content:
@@ -801,26 +802,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - Opportunity v1
-      summary: Opportunity Get Legacy
-      description: '
-
-        __ALPHA VERSION__
-
-
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
-
-        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
-        for further details.
-
-        '
+      - Application Alpha
+      summary: Submit an application
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/list:
     post:
       parameters:
@@ -995,7 +980,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ApplicationFormUpdateRequest'
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -1069,7 +1054,7 @@ paths:
       - Application Alpha
       summary: Get an application form by ID
       security:
-      - ApiKeyAuth: []
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -2963,6 +2948,19 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AbstractResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
         status_code:
           type: integer
           description: The HTTP status code

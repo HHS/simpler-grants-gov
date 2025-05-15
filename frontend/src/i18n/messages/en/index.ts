@@ -1,4 +1,60 @@
 export const messages = {
+  Homepage: {
+    pageTitle: "Let's build a simpler Grants.gov together",
+    pageDescription:
+      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+    github_link: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "Test out our experimental features",
+        canDoHeader: "Tell us what's working (and what's not)",
+        canDoSubHeader: "What you can do now",
+        canDoParagraph:
+          "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
+        tryLink: "Try the new simpler search",
+        cantDoHeader: "What you can't do quite yet",
+        cantDoParagraph:
+          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+        iconSections: [
+          {
+            description:
+              "We're excited to hear from you to learn how we can improve.",
+            http: "mailto:simpler@grants.gov",
+            iconName: "build",
+            link: "Contact us at simpler@grants.gov",
+            title: "Send us your feedback and suggestions.",
+          },
+          {
+            description:
+              "Our newsletter delivers the latest news straight to your inbox.",
+            http: "/subscribe",
+            iconName: "mail",
+            link: "Subscribe to our newsletter",
+            title: "Be the first to hear about new features.",
+          },
+        ],
+      },
+      building: {
+        title: "Building <span>with</span> you, not <span>for</span> you",
+        paragraphs: [
+          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+        ],
+      },
+      involved: {
+        title: "More ways to get involved",
+        technicalTitle: "Contribute your technical expertise",
+        technicalDescription:
+          "We're always excited to welcome new open source developers to our community.",
+        technicalLink: "Learn how to contribute code",
+        participateTitle: "Participate in user research",
+        participateDescription:
+          "Be a part of the design process by taking part in usability tests and interviews.",
+        participateLink: "Sign up to participate in future studies",
+        discourseLink: "Chat on the Discourse forum",
+      },
+    },
+  },
   Events: {
     pageTitle: "Events | Simpler.Grants.gov",
     pageDescription:
@@ -63,18 +119,15 @@ export const messages = {
       last_updated: "Last Updated: ",
     },
     description: {
-      title: "Funding opportunity",
-      summary: "Summary",
+      title: "Description",
       eligibility: "Eligibility",
       eligible_applicants: "Eligible applicants",
       additional_info: "Additional information",
       contact_info: "Grantor contact information",
-      description: "Description",
+      contact_description: "Description",
       email: "Email",
-      show_summary: "Show full summary",
       show_description: "Show full description",
       hide_summary_description: "Hide full description",
-      nofo_download: "Download Full Announcement (NOFO)",
       jump_to_documents: "Jump to all documents",
       zip_download: "Download all",
     },
@@ -87,6 +140,7 @@ export const messages = {
         funding_details: "Funding Details",
         other: "Other",
       },
+      noDocuments: "No documents are currently available here",
     },
     award_info: {
       yes: "Yes",
@@ -140,49 +194,6 @@ export const messages = {
     page_title: "Simpler.Grants.gov",
     meta_description:
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
-    goal: {
-      paragraph_1:
-        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
-      title_2: "Grant seekers & applicants",
-      paragraph_2:
-        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
-      title_3: "Federal grantmaking agencies",
-      paragraph_3:
-        "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
-      cta: "Subscribe for project updates",
-    },
-    process_and_research: {
-      title_1: "The process",
-      title_2: "The research",
-      paragraph_1:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source, and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works, what can be improved, and what should happen next.",
-      paragraph_2:
-        "We conduct extensive research to gather insights from applicants, potential applicants, and grantmakers. You can sign up to participate and help inform and inspire new features as we build a simpler Grants.gov together.",
-      cta_1: "Learn about our progress",
-      cta_2: "Learn more about our research",
-    },
-    fo_title: "Improvements to funding opportunity announcements",
-    fo_paragraph_1:
-      "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
-    fo_paragraph_2:
-      "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
-    fo_title_2: "View our grant announcement prototypes",
-    fo_paragraph_3:
-      "We recently simplified the language of four grant announcements and applied visual and user‑centered design principles to increase their readability and usability.",
-    acl_prototype: "Link to ACL Notice of Funding Opportunity example pdf",
-    acf_prototype: "Link to ACF Notice of Funding Opportunity example pdf",
-    cdc_prototype: "Link to CDC Notice of Funding Opportunity example pdf",
-    samhsa_prototype:
-      "Link to SAMHSA Notice of Funding Opportunity example pdf",
-    fo_title_3: "We want to hear from you!",
-    fo_paragraph_4:
-      "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
-    fo_title_4:
-      "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
-    fo_paragraph_5:
-      "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
-    wtgi_paragraph_2:
-      "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
   },
   Vision: {
     pageTitle: "Vision | Simpler.Grants.gov",
@@ -257,146 +268,6 @@ export const messages = {
         link_text_1: "Read more about the research on our public wiki",
         link_text_2: "Sign up to participate in future user studies",
       },
-    },
-  },
-  Research: {
-    page_title: "Research | Simpler.Grants.gov",
-    intro: {
-      title: "Our existing research",
-      content:
-        "We conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
-    },
-    methodology: {
-      title: "The methodology",
-      paragraph_1:
-        "<p>Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. We recruited equitably to ensure a diverse pool of participants.</p><p>The quantity of participants was well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants.</p><p>With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.</p>",
-      title_2: "Research objectives:",
-      paragraph_2:
-        "<ul><li>Examine existing user journeys and behaviors, identifying how Grants.gov fits into their overall approach</li><li>Learn from user experiences, roles, challenges</li><li>Identify barriers and how a simpler Grants.gov can create a more intuitive user experience, especially for new users</li></ul>",
-      title_3: "Want to participate in user research?",
-      cta: "Sign up to join a usability study",
-    },
-    archetypes: {
-      title: "Applicant archetypes",
-      paragraph_1:
-        "Archetypes are compelling summaries that highlight the types of applicants that Grants.gov serves. They’re informed by and summarize user research data, and represent user behaviors, attitudes, motivations, pain points, and goals. We’ll use these archetypes to influence our design decisions, guide the product’s direction, and keep our work human-centered. ",
-      novice: {
-        title: "The Novice",
-        paragraph_1:
-          "Applicants lacking familiarity with the grant application process, including first-time or infrequent applicants and those who never apply",
-        paragraph_2:
-          "Novices are often new to the grants application process. They face a steep learning curve to find and apply for funding opportunities. Solving their needs will generate a more inclusive Grants.gov experience.",
-      },
-      collaborator: {
-        title: "The Collaborator",
-        paragraph_1:
-          "Applicants who've applied before, working with colleagues or partner organizations to increase their chances of success",
-        paragraph_2:
-          "Collaborators have more familiarity with Grants.gov. But they face challenges with coordinating application materials, and often resorting to tools and resources outside of Grants.gov.",
-      },
-      maestro: {
-        title: "The Maestro",
-        paragraph_1:
-          "Frequent applicants familiar with Grants.gov, who are often directly responsible for managing multiple applications at once",
-        paragraph_2:
-          "Maestros have an established approach to applying, which may include software and tools outside of Grants.gov. Their primary concerns are rooted in determining grant feasibility and staying ahead of deadlines.",
-      },
-      supervisor: {
-        title: "The Supervisor",
-        paragraph_1:
-          "Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros.",
-        paragraph_2:
-          "Supervisors are responsible for oversight, approvals, final submissions, and keeping registrations up to date. Their time is limited, as they're often busy with the organization's other needs.",
-      },
-    },
-    themes: {
-      title: "General themes",
-      paragraph_1:
-        "The existing Grants.gov website works best for those who use it regularly. Larger organizations and teams of Collaborators and Maestros are typically more familiar with the ins and outs of the system. To create a simpler Grants.gov with an intuitive user experience that addresses the needs of all archetypes, four themes were defined:",
-      title_2: "Frictionless functionality ",
-      paragraph_2:
-        "Reduce the burden on applicants and grantmakers, from both a process and systems perspective, by addressing the pain points that negatively affect their experience",
-      title_3: "Sophisticated self-direction",
-      paragraph_3:
-        "Meet users where they are during crucial moments, by providing a guided journey through opt-in contextual support that reduces their need to find help outside the system",
-      title_4: "Demystify the grants process",
-      paragraph_4:
-        "Ensure that all users have the same easy access to instructional and educational information that empowers them to have a smoother, informed, and confident user experience",
-      title_5: "Create an ownable identity",
-      paragraph_5:
-        "Create a presence that reflections our mission and supports our users through visual brand, content strategy, and user interface design systems",
-    },
-    impact: {
-      title: "Where can we have the most impact?",
-      paragraph_1:
-        "The most burden is on the Novice to become an expert on the grants process and system. In order to execute our mission, there is a need to improve awareness, access, and choice. This requires reaching out to those who are unfamiliar with the grant application process.",
-      paragraph_2: "There are many common barriers that users face:",
-      title_2:
-        "Are there challenges you’ve experienced that aren’t captured here?",
-      paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates</subscribe></strong> to be notified of upcoming user research efforts.",
-      boxes: [
-        {
-          title: "Digital connectivity",
-          content:
-            "Depending on availability and geography, a stable internet connection is not a guarantee to support a digital-only experience.",
-        },
-        {
-          title: "Organization size",
-          content:
-            "Not all organizations have dedicated resources for seeking grant funding. Many are 1-person shops who are trying to do it all.",
-        },
-        {
-          title: "Overworked",
-          content:
-            "New organizations are often too burdened with internal paperwork and infrastructure to support external funding and reporting.",
-        },
-        {
-          title: "Expertise",
-          content:
-            "Small organizations face higher turnover, and alumni often take their institutional knowledge and expertise with them when they leave.",
-        },
-        {
-          title: "Cognitive load",
-          content:
-            "Applicants often apply for funding through several agencies, requiring they learn multiple processes and satisfy varying requirements.",
-        },
-        {
-          title: "Language",
-          content:
-            "Applicants are faced with a lot of jargon without context or definitions, which is especially difficult when English is not their native language.",
-        },
-        {
-          title: "Education",
-          content:
-            "It often requires a high level of education to comprehend the complexity and language of funding opportunity announcements.",
-        },
-        {
-          title: "Lost at the start",
-          content:
-            "Novices don’t see a clear call-to-action for getting started, and they have trouble finding the one-on-one help at the beginning of the process.",
-        },
-        {
-          title: "Overwhelmed by search",
-          content:
-            "New applicants misuse the keyword search function and have trouble understanding the acronyms and terminology.",
-        },
-        {
-          title: "Confused by announcements",
-          content:
-            "Novices have difficulty determining their eligibility and understanding the details of the funding opportunity announcement.",
-        },
-        {
-          title: "Time",
-          content:
-            'Most individuals wear a lot of hats (community advocate, program lead, etc.) and "grants applicant" is only part of their responsibilities and requires efficiency.',
-        },
-        {
-          title: "Blindsided by requirements",
-          content:
-            "New applicants are caught off guard by SAM.gov registration and often miss the format and file name requirements.",
-        },
-      ],
     },
   },
   Subscribe: {
@@ -475,7 +346,6 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
-      wiki: "Public wiki",
       research: "Research",
       roadmap: "Product roadmap",
       savedGrants: "Saved opportunities",
@@ -483,6 +353,7 @@ export const messages = {
       search: "Search",
       subscribe: "Subscribe",
       vision: "Our vision",
+      wiki: "Public wiki",
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",
@@ -495,13 +366,6 @@ export const messages = {
       "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
-  },
-  Hero: {
-    title: "We're building a simpler Grants.gov!",
-    content:
-      "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
-    search_link: "Search for grants",
-    github_link: "Follow on GitHub",
   },
   Footer: {
     agency_name: "Grants.gov",
@@ -550,6 +414,7 @@ export const messages = {
     description: "Try out our experimental search page.",
     accordion: {
       any: "Any",
+      all: "All",
       titles: {
         funding: "Funding instrument",
         eligibility: "Eligibility",
@@ -653,17 +518,18 @@ export const messages = {
         general: "About saved searches",
       },
       modal: {
-        title: "Save search query",
+        title: "Name this search query",
+        loading: "Saving",
         description:
-          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
-        inputLabel: "Query name",
+          "Save these search terms and filters with a name for easy access later.",
+        inputLabel: "Name <required>(required)</required>",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",
         emptyNameError: "Please name this query.",
-        successTitle: "Success!",
+        successTitle: "Query successfully saved",
         successDescription:
-          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
@@ -706,10 +572,11 @@ export const messages = {
       sortby: "Sort by",
     },
     editModal: {
+      loading: "Updating",
       title: "Edit name of search query",
       description:
         "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name (required)",
+      inputLabel: "Query name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
@@ -718,10 +585,12 @@ export const messages = {
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
+      loading: "Deleting",
       title: "Delete saved query?",
       deleteText: "Yes, delete",
       cancelText: "Cancel",
       apiError: "Error deleting saved query. Try again later.",
+      description: "Delete ",
     },
   },
   SavedGrants: {

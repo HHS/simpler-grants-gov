@@ -2,6 +2,8 @@ import {
   defaultFeatureFlags,
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
+import { OptionalStringDict } from "src/types/generalTypes";
+import { stringToBoolean } from "src/utils/middlewareSafeUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -113,3 +115,23 @@ export function getFeatureFlagsFromCookie(
     }),
   );
 }
+
+// this in part a re-implementation of `lodash/assignWith` since lodash is not allowed to be used in next middleware.
+// Sets non-cookie based feature flags, overriding any undefined env var values with hardcoded defaults,
+// and coercing env var values from string to booleans where applicable
+export const assignBaseFlags = (
+  defaultFlags: FeatureFlags,
+  envVarFlags: OptionalStringDict,
+) => {
+  const allFeatureFlagKeys = [
+    ...Object.keys(defaultFlags),
+    ...Object.keys(envVarFlags),
+  ];
+  return allFeatureFlagKeys.reduce((baseFlags, key) => {
+    baseFlags[key] =
+      envVarFlags[key] === undefined
+        ? defaultFlags[key]
+        : stringToBoolean(envVarFlags[key]);
+    return baseFlags;
+  }, {} as FeatureFlags);
+};

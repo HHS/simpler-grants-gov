@@ -1,6 +1,8 @@
 import { omit } from "lodash";
-import { ValidSearchQueryParamData } from "src/types/search/searchRequestTypes";
-import { ValidSearchQueryParam } from "src/types/search/searchResponseTypes";
+import {
+  ValidSearchQueryParam,
+  ValidSearchQueryParamData,
+} from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
 
 import Link from "next/link";
@@ -47,12 +49,14 @@ export const SavedSearchesList = ({
                     <EditSavedSearchModal
                       savedSearchId={savedSearch.id}
                       editText={editText}
+                      queryName={savedSearch.name}
                     />
                   </div>
                   <div className="grid-col">
                     <DeleteSavedSearchModal
                       savedSearchId={savedSearch.id}
                       deleteText={deleteText}
+                      queryName={savedSearch.name}
                     />
                   </div>
                 </div>

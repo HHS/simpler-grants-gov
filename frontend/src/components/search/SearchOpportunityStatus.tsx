@@ -1,12 +1,11 @@
 "use client";
 
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { useTranslations } from "next-intl";
 
-import SearchFilterAccordion, {
-  FilterOption,
-} from "./SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterAccordion from "./SearchFilterAccordion/SearchFilterAccordion";
 
 interface SearchOpportunityStatusProps {
   query: Set<string>;

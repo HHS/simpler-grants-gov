@@ -21,6 +21,15 @@ jest.mock("src/utils/generalUtils", () => ({
     mockQueryParamsToQueryString(...args) as unknown,
 }));
 
+// this is dumb - the original function only works in jest node envs
+// and there is a reference to `document` somewhere in the import tree here so
+// switching over doesn't work - reimplemented without `size` reference,
+// since that's the only part that's broken in JSdom
+jest.mock("src/utils/search/searchUtils", () => ({
+  paramsToFormattedQuery: (params: URLSearchParams) =>
+    `?${decodeURIComponent(params.toString())}`,
+}));
+
 describe("useSearchParamUpdater", () => {
   afterEach(() => {
     mockSearchParams = new URLSearchParams();

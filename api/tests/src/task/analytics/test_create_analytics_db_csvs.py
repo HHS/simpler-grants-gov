@@ -8,7 +8,11 @@ from src.task.analytics.create_analytics_db_csvs import (
     CreateAnalyticsDbCsvsTask,
 )
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory
+from tests.src.db.models.factories import (
+    OpportunityFactory,
+    UserSavedOpportunityFactory,
+    UserSavedSearchFactory,
+)
 
 
 def validate_file(file_path: str, expected_record_count: int) -> dict:
@@ -83,3 +87,65 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
             [int(record["opportunity_summary_id"]) for record in csv_summaries]
         )
         assert opportunity_summary_ids == csv_opportunity_summary_ids
+
+    def test_user_saved_opportunities(self, db_session, task, opportunities):
+        user_saved_opps = []
+        user_saved_opps.extend(
+            UserSavedOpportunityFactory.create_batch(size=5, opportunity=opportunities[0])
+        )
+
+        for oso in user_saved_opps[:3]:
+            user_id = oso.user_id
+            user_saved_opps.append(
+                UserSavedOpportunityFactory.create(user_id=user_id, opportunity=opportunities[2])
+            )
+        task.run()
+        csv_saved_opps = validate_file(
+            task.config.file_path + "/user_saved_opportunity.csv", len(user_saved_opps)
+        )
+        saved_opps_ids = set([(str(o.opportunity_id), str(o.user_id)) for o in user_saved_opps])
+        csv_saved_opps_ids = set(
+            [(record["opportunity_id"], record["user_id"]) for record in csv_saved_opps]
+        )
+        assert saved_opps_ids == csv_saved_opps_ids
+
+    def test_user_saved_searches(self, db_session, task, opportunities):
+        user_saved_searches = []
+        user_saved_searches.extend(
+            UserSavedSearchFactory.create_batch(
+                size=2,
+                search_query={"keywords": "test"},
+                searched_opportunity_ids=[o.opportunity_id for o in opportunities[:5]],
+            )
+        )
+        user_saved_searches.extend(
+            UserSavedSearchFactory.create_batch(
+                size=2,
+                search_query={"keywords": "code"},
+                searched_opportunity_ids=[o.opportunity_id for o in opportunities[5:]],
+            )
+        )
+
+        task.run()
+
+        csv_saved_searches = validate_file(
+            task.config.file_path + "/user_saved_search.csv", len(user_saved_searches)
+        )
+        saved_search_ids = {
+            (",".join(map(str, sorted(o.searched_opportunity_ids))), str(o.user_id))
+            for o in user_saved_searches
+        }
+
+        csv_saved_search_ids = {
+            (
+                ",".join(
+                    map(
+                        str,
+                        sorted(map(int, record["searched_opportunity_ids"].strip("{}").split(","))),
+                    )
+                ),
+                record["user_id"],
+            )
+            for record in csv_saved_searches
+        }
+        assert saved_search_ids == csv_saved_search_ids
