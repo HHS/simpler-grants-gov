@@ -5,9 +5,6 @@ import { useTranslations } from "next-intl";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
-// functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
-// with prefetched options we have a synchronous render
-// with a Promise we have an async render with Suspense
 export async function AgencyFilterAccordion({
   query,
   agencyOptionsPromise,
@@ -35,7 +32,6 @@ export async function AgencyFilterAccordion({
       title={t("accordion.titles.agency")}
       wrapForScroll={true}
       facetCounts={facetCounts}
-      // agency filters will not show facet counts
     />
   );
 }
