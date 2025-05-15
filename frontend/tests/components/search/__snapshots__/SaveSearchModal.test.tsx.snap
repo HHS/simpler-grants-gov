@@ -6,6 +6,7 @@ exports[`SaveSearchModal matches snapshot 1`] = `
     class="flex-1"
   >
     <button
+      aria-controls="save-search"
       class="usa-button usa-button--unstyled padding-1 hover:bg-base-lightest"
       data-open-modal="true"
       data-testid="open-save-search-modal-button"

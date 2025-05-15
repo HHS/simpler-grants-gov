@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
@@ -108,6 +109,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const searchParams = useSearchParams();
+  const isSSR = useIsSSR();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -197,6 +199,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
         aria-labelledby={`${modalId}-heading`}
         aria-describedby={`${modalId}-description`}
         id={modalId}
+        renderToPortal={!isSSR}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
