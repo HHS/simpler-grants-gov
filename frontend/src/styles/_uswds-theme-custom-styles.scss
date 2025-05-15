@@ -509,3 +509,14 @@ button.usa-pagination__button.usa-button {
 .usa-accordion__heading {
   border-bottom: 2px solid color(gray-warm-30);
 }
+
+#search-filter-drawer {
+  text-align: right;
+  .usa-modal-overlay {
+    padding: 0;
+    overflow: hidden;
+  }
+  .usa-modal__main {
+    width: 100%;
+  }
+}

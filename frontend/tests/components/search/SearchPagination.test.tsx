@@ -1,6 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-import "@testing-library/jest-dom/extend-expect";
-
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { QueryContext } from "src/services/search/QueryProvider";
