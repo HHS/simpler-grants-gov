@@ -202,10 +202,13 @@ paths:
                     page_offset: 1
                     page_size: 25
               example2:
-                summary: Filter by active agency
+                summary: Filter by open/forecasted agency
                 value:
                   filters:
-                    has_active_opportunity:
+                    has_open_opportunity:
+                      one_of:
+                      - 'False'
+                    has_forecasted_opportunity:
                       one_of:
                       - 'False'
                   pagination:
@@ -1452,6 +1455,36 @@ components:
           items:
             type: boolean
             example: true
+    HasClosedOpportunityFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    HasForecastedOpportunityFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    HasArchivedOpportunityFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
     IsTestAgencyFilterV1:
       type: object
       properties:
@@ -1465,10 +1498,22 @@ components:
     AgencySearchFilterV1:
       type: object
       properties:
-        has_active_opportunity:
+        has_open_opportunity:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
+        has_closed_opportunity:
+          type:
+          - object
+          $ref: '#/components/schemas/HasClosedOpportunityFilterV1'
+        has_forecasted_opportunity:
+          type:
+          - object
+          $ref: '#/components/schemas/HasForecastedOpportunityFilterV1'
+        has_archived_opportunity:
+          type:
+          - object
+          $ref: '#/components/schemas/HasArchivedOpportunityFilterV1'
         is_test_agency:
           type:
           - object
@@ -1573,14 +1618,29 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyV1'
           - type: 'null'
-        has_active_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently active.
-          example: false
         is_test_agency:
           type: boolean
           description: Indicates if the agency is a test agency.
+          example: false
+        has_open_opportunity:
+          type: boolean
+          description: Indicates if the agency is linked to an opportunity that is
+            currently open
+          example: false
+        has_forecasted_opportunity:
+          type: boolean
+          description: Indicates if the agency is linked to an opportunity that is
+            currently forecasted
+          example: false
+        has_closed_opportunity:
+          type: boolean
+          description: Indicates if the agency is linked to an opportunity that is
+            currently closed
+          example: false
+        has_archived_opportunity:
+          type: boolean
+          description: Indicates if the agency is linked to an opportunity that is
+            currently archived
           example: false
         created_at:
           type: string
