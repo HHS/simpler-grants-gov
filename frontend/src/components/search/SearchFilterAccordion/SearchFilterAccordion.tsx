@@ -138,19 +138,7 @@ export function SearchFilterAccordion({
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content: wrapForScroll ? (
-        <div data-testid={`${title}-accordion-scroll`}>
-          <AccordionContent
-            filterOptions={filterOptions}
-            title={title}
-            queryParamKey={queryParamKey}
-            query={query}
-            facetCounts={facetCounts}
-            defaultEmptySelection={defaultEmptySelection}
-            includeAnyOption={includeAnyOption}
-          />
-        </div>
-      ) : (
+      content: (
         <AccordionContent
           filterOptions={filterOptions}
           title={title}
