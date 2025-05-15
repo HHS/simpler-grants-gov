@@ -23,8 +23,23 @@ class AgencyListRequestSchema(Schema):
 
 
 class AgencySearchFilterV1Schema(Schema):
-    has_active_opportunity = fields.Nested(
+    has_open_opportunity = fields.Nested(
         BoolSearchSchemaBuilder("HasActiveOpportunityFilterV1Schema")
+        .with_one_of(example=True)
+        .build()
+    )
+    has_closed_opportunity = fields.Nested(
+        BoolSearchSchemaBuilder("HasClosedOpportunityFilterV1Schema")
+        .with_one_of(example=True)
+        .build()
+    )
+    has_forecasted_opportunity = fields.Nested(
+        BoolSearchSchemaBuilder("HasForecastedOpportunityFilterV1Schema")
+        .with_one_of(example=True)
+        .build()
+    )
+    has_archived_opportunity = fields.Nested(
+        BoolSearchSchemaBuilder("HasArchivedOpportunityFilterV1Schema")
         .with_one_of(example=True)
         .build()
     )
@@ -97,39 +112,31 @@ class AgencyV1Schema(Schema):
     top_level_agency = fields.Nested(
         lambda: AgencyV1Schema(exclude=("top_level_agency",)), allow_none=True
     )
-
-    has_active_opportunity = fields.Boolean(
-        dump_default=False,
-        metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently active.",
-            "example": False,
-        },
-    )
     is_test_agency = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is a test agency.",
             "example": False,
         },
     )
-    has_open_opportunity = fields.String(
+    has_open_opportunity = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently open",
             "example": False,
         },
     )
-    has_forecasted_opportunity = fields.String(
+    has_forecasted_opportunity = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently forecasted",
             "example": False,
         },
     )
-    has_closed_opportunity = fields.String(
+    has_closed_opportunity = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently closed",
             "example": False,
         },
     )
-    has_archived_opportunity = fields.String(
+    has_archived_opportunity = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is linked to an opportunity that is currently archived",
             "example": False,
