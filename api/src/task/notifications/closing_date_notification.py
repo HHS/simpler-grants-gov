@@ -15,10 +15,15 @@ from src.util import datetime_util
 logger = logging.getLogger(__name__)
 
 CONTACT_INFO = (
+    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
     "mailto:support@grants.gov\n"
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
+)
+
+PLEASE_CAREFULLY_REVIEW_MSG = (
+    ", please contact the grantor using the contact information on the listing page.\n\n"
 )
 
 
@@ -157,20 +162,17 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
                 f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
-                "If you have questions about an opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+                "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
                 f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
-                "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
+                "If you have questions about the opportunity"
             )
-
-        message += (
-            "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-            f"{CONTACT_INFO}"
-        )
+        message += PLEASE_CAREFULLY_REVIEW_MSG
+        message += CONTACT_INFO
 
         return message
 
