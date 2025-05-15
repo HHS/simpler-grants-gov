@@ -6,6 +6,11 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 import src.adapters.search as search
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySummary,
+)
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
@@ -74,12 +79,14 @@ class SearchNotificationTask(BaseNotificationTask):
                 "Created changed search email notification",
                 extra={"user_id": user_id, "changed_search_count": len(saved_items)},
             )
+            message = self._build_notification_message(saved_items)
+
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
                     user_email=user_email,
                     subject="Updates to Your Saved Opportunities",
-                    content="",
+                    content=message,
                     notification_reason=NotificationReason.SEARCH_UPDATES,
                     notified_object_ids=[
                         saved_search.saved_search_id for saved_search in saved_items
@@ -100,6 +107,101 @@ class SearchNotificationTask(BaseNotificationTask):
         )
 
         return users_email_notifications
+
+    def _build_notification_message(self, user_notifications: list[UserSavedSearch]) -> str:
+        # Get the unique opportunity IDs across all saved searches
+        all_opportunity_ids = set()
+        for saved_search in user_notifications:
+            all_opportunity_ids.update(saved_search.searched_opportunity_ids)
+
+        stmt = (
+            select(Opportunity)
+            .join(
+                CurrentOpportunitySummary,
+                CurrentOpportunitySummary.opportunity_id == Opportunity.opportunity_id,
+            )
+            .join(
+                OpportunitySummary,
+                OpportunitySummary.opportunity_summary_id
+                == CurrentOpportunitySummary.opportunity_summary_id,
+            )
+            .where(Opportunity.opportunity_id.in_(all_opportunity_ids))
+            .options(
+                selectinload(Opportunity.current_opportunity_summary).selectinload(
+                    CurrentOpportunitySummary.opportunity_summary
+                )
+            )
+        )
+
+        opportunities = self.db_session.execute(stmt).scalars().all()
+
+        # Build message intro based on number of opportunities
+        if len(opportunities) == 1:
+            message = (
+                "A funding opportunity matching your saved search query was recently published.\n\n"
+            )
+        else:
+            message = "The following funding opportunities matching your saved search queries were recently published.\n\n"
+
+        # Add details for each opportunity
+        for opportunity in opportunities:
+            summary = (
+                opportunity.current_opportunity_summary.opportunity_summary
+                if opportunity.current_opportunity_summary
+                else None
+            )
+
+            if not summary:
+                continue
+
+            # Add opportunity title (empty line before title)
+            message += f"{opportunity.opportunity_title}\n\n"
+
+            # Add status
+            status = (
+                str(opportunity.opportunity_status).capitalize()
+                if opportunity.opportunity_status
+                else "Unknown"
+            )
+            message += f"Status: {status}\n"
+
+            # Add submission period
+            if summary.is_forecast:
+                message += "Submission period: To be announced.\n"
+            else:
+                if summary.post_date and summary.close_date:
+                    formatted_post = summary.post_date.strftime("%-m/%-d/%Y")
+                    formatted_close = summary.close_date.strftime("%-m/%-d/%Y")
+                    message += f"Submission period: {formatted_post}–{formatted_close}\n"
+                else:
+                    message += "Submission period: To be announced.\n"
+
+            # Add award range
+            if summary.award_floor is not None and summary.award_ceiling is not None:
+                award_floor_formatted = f"${summary.award_floor:,}"
+                award_ceiling_formatted = f"${summary.award_ceiling:,}"
+                message += f"Award range: {award_floor_formatted}-{award_ceiling_formatted}\n"
+
+            # Add expected awards
+            if summary.expected_number_of_awards is not None:
+                message += f"Expected awards: {summary.expected_number_of_awards}\n"
+            else:
+                message += "Expected awards: --\n"
+
+            # Add cost sharing
+            cost_sharing = "Yes" if summary.is_cost_sharing else "No"
+            message += f"Cost sharing: {cost_sharing}"
+
+            # Add a blank line between opportunities
+            message += "\n\n"
+
+        # Add footer
+        if len(opportunities) == 1:
+            message += "To unsubscribe from email notifications for this query, delete it from your saved search queries."
+        else:
+            message += "To unsubscribe from email notifications for a query, delete it from your saved search queries."
+
+        return message
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

@@ -1,9 +1,10 @@
 import uuid
-from datetime import timedelta
+from datetime import timedelta, date
 
 import pytest
 from sqlalchemy import select
 
+from src.constants.lookup_constants import OpportunityStatus
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
@@ -270,3 +271,169 @@ def test_pagination_params_are_stripped_from_search_query(
 
     params = _strip_pagination_params(saved_search.search_query)
     assert params.keys() == {"query"}
+
+
+def test_search_notification_email_format_single_opportunity(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails"""
+    # Create test opportunities with known data
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=1,
+        opportunity_title="2025 Port Infrastructure Development Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-01-31"),
+        close_date=date.fromisoformat("2025-04-30"),
+        award_floor=1_000_000,
+        award_ceiling=112_500_000,
+        expected_number_of_awards=40,
+        is_cost_sharing=True,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1],  # Test single opportunity
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test single opportunity format
+    expected_single = """A funding opportunity matching your saved search query was recently published.
+
+2025 Port Infrastructure Development Program
+
+Status: Posted
+Submission period: 1/31/2025–4/30/2025
+Award range: $1,000,000-$112,500,000
+Expected awards: 40
+Cost sharing: Yes
+
+To unsubscribe from email notifications for this query, delete it from your saved search queries."""
+
+    assert email_content.strip() == expected_single.strip()
+
+
+def test_search_notification_email_format_multiple_opportunities(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails"""
+    # Create test opportunities with known data
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=1,
+        opportunity_title="2025 Port Infrastructure Development Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-01-31"),
+        close_date=date.fromisoformat("2025-04-30"),
+        award_floor=1_000_000,
+        award_ceiling=112_500_000,
+        expected_number_of_awards=40,
+        is_cost_sharing=True,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create a forecasted opportunity
+    opportunity2 = factories.OpportunityFactory.create(
+        opportunity_id=2,
+        opportunity_title="Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)",
+        no_current_summary=True,
+    )
+    summary2 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity2,
+        award_floor=1,
+        award_ceiling=30_000,
+        expected_number_of_awards=None,
+        is_cost_sharing=False,
+        is_forecast=True,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity2,
+        opportunity_summary=summary2,
+        opportunity_status=OpportunityStatus.FORECASTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1],  # Test single opportunity
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test single opportunity format
+    expected_single = """The following funding opportunities matching your saved search queries were recently published.
+
+2025 Port Infrastructure Development Program
+
+Status: Posted
+Submission period: 1/31/2025–4/30/2025
+Award range: $1,000,000-$112,500,000
+Expected awards: 40
+Cost sharing: Yes
+
+Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)
+
+Status: Forecasted
+Submission period: To be announced.
+Award range: $1-$30,000
+Expected awards: --
+Cost sharing: No
+
+To unsubscribe from email notifications for a query, delete it from your saved search queries."""
+
+    assert email_content.strip() == expected_single.strip()
