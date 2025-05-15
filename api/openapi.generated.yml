@@ -547,6 +547,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OpportunityGetResponseV1'
           description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -572,6 +578,8 @@ paths:
         for further details.
 
         '
+      security:
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -781,6 +789,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OpportunityGetResponseV1'
           description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -806,6 +820,40 @@ paths:
         for further details.
 
         '
+      security:
+      - ApiKeyAuth: []
+  /alpha/applications/{application_id}/submit:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbstractResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Submit an application
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/list:
     post:
       parameters:
@@ -2283,9 +2331,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2604,9 +2653,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
