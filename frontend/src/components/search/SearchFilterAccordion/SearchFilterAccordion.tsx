@@ -139,10 +139,7 @@ export function SearchFilterAccordion({
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
       content: wrapForScroll ? (
-        <div
-          className="maxh-mobile-lg minh-mobile overflow-scroll"
-          data-testid={`${title}-accordion-scroll`}
-        >
+        <div data-testid={`${title}-accordion-scroll`}>
           <AccordionContent
             filterOptions={filterOptions}
             title={title}
@@ -167,6 +164,9 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
+      className: wrapForScroll
+        ? "maxh-mobile-lg overflow-auto position-relative"
+        : "",
     },
   ];
 
