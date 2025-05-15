@@ -1,6 +1,6 @@
 import { uniq } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import { isSubset } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
