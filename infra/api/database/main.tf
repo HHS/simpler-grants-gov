@@ -26,6 +26,8 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
+    owner       = "navapbc"
+    app         = module.app_config.app_name
     environment = var.environment_name
     description = "Database resources for the ${var.environment_name} environment"
   })

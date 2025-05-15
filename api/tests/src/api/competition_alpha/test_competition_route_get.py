@@ -3,11 +3,26 @@ import uuid
 from tests.src.db.models.factories import CompetitionFactory
 
 
-def test_competition_get_200(client, api_auth_token, enable_factory_create):
+def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory_create):
     competition = CompetitionFactory.create()
 
     resp = client.get(
         f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+
+    assert response_competition["competition_id"] == str(competition.competition_id)
+    assert response_competition["opportunity_id"] == competition.opportunity_id
+
+
+def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_create):
+    competition = CompetitionFactory.create()
+
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert resp.status_code == 200

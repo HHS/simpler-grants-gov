@@ -29,6 +29,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 OpportunityChangeAudit,
                 OpportunityChangeAudit.opportunity_id == UserSavedOpportunity.opportunity_id,
             )
+            .where(UserSavedOpportunity.is_deleted.isnot(True))
             .where(OpportunityChangeAudit.updated_at > UserSavedOpportunity.last_notified_at)
             .distinct()
         )

@@ -45,6 +45,8 @@ data "aws_security_groups" "aws_services" {
 locals {
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
+    owner       = "navapbc"
+    app         = module.app_config.app_name
     environment = var.environment_name
     description = "Application resources created in ${var.environment_name} environment"
   })

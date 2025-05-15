@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @form_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
 def form_get(db_session: db.Session, form_id: uuid.UUID) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"form.form_id": form_id})
+    add_extra_data_to_current_request_logs({"form_id": form_id})
     logger.info("GET /alpha/forms/:form_id")
 
     with db_session.begin():

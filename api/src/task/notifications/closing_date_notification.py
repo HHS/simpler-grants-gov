@@ -15,10 +15,15 @@ from src.util import datetime_util
 logger = logging.getLogger(__name__)
 
 CONTACT_INFO = (
+    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
     "mailto:support@grants.gov\n"
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
+)
+
+PLEASE_CAREFULLY_REVIEW_MSG = (
+    ", please contact the grantor using the contact information on the listing page.\n\n"
 )
 
 
@@ -45,6 +50,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .join(
                 OpportunitySummary, OpportunitySummary.opportunity_id == Opportunity.opportunity_id
             )
+            .where(UserSavedOpportunity.is_deleted.isnot(True))
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
@@ -107,11 +113,16 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     "Created closing date email notification",
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
+                subject = (
+                    "Applications for your bookmarked funding opportunity are due soon"
+                    if len(closing_opportunities) == 1
+                    else "Applications for your bookmarked funding opportunities are due soon"
+                )
                 users_email_notifications.append(
                     UserEmailNotification(
                         user_id=user_id,
                         user_email=user_email,
-                        subject="Applications for your bookmarked funding opportunities are due soon",
+                        subject=subject,
                         content=message,
                         notification_reason=NotificationReason.CLOSING_DATE_REMINDER,
                         notified_object_ids=[
@@ -133,29 +144,35 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         return users_email_notifications
 
     def _build_notification_message(self, closing_opportunities: list) -> str:
-        message = "Applications for the following funding opportunity are due in two weeks:\n\n"
-        if len(closing_opportunities) == 1:
+        has_multiple_grants = len(closing_opportunities) > 1
+
+        message = (
+            "Applications for the following funding opportunities are due in two weeks:\n\n"
+            if has_multiple_grants
+            else "Applications for your bookmarked funding opportunity are due soon\n\n"
+        )
+
+        for closing_opp in closing_opportunities:
             message += (
-                f"<a href='{self.frontend_base_url}/opportunity/{closing_opportunities[0]["opportunity_id"]}' target='_blank'>{closing_opportunities[0]["opportunity_title"]}</a>\n"
-                f"Application due date: {closing_opportunities[0]["close_date"].strftime('%B %d, %Y')}\n\n"
-                "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                "Sign in to Simpler.Grants.gov to manage or unsubscribe from this bookmarked opportunity.\n\n"
-                "To manage notifications about this opportunity, sign in to Simpler.Grants.gov.\n\n"
-                "If you have questions about the opportunity, please contact the grantor using the contact information on the listing page.\n\n"
-                "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-            )
-        else:
-            for closing_opp in closing_opportunities:
-                message += (
-                    f"[{closing_opp["opportunity_title"]}]\n"
-                    f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
-                )
-            message += (
-                "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                "Sign in to Simpler.Grants.gov to manage your bookmarked opportunities.\n\n"
-                "If you have questions, please contact the Grants.gov Contact Center:\n"
+                f"<a href='{self.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
+                f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
             )
 
+        if has_multiple_grants:
+            message += (
+                "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
+                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                "<b>Questions?</b>\n"
+                "If you have questions about an opportunity"
+            )
+        else:
+            message += (
+                "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
+                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                "<b>Questions?</b>\n"
+                "If you have questions about the opportunity"
+            )
+        message += PLEASE_CAREFULLY_REVIEW_MSG
         message += CONTACT_INFO
 
         return message
