@@ -513,30 +513,6 @@ exports[`Header About renders About submenu 1`] = `
       </nav>
     </div>
   </header>
-  <div
-    aria-hidden="true"
-    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
-    data-testid="snackbar"
-    role="status"
-  >
-    You've been logged out. Please sign in again.
-    <button
-      aria-label="close"
-      class="usa-button usa-button--unstyled padding-left-2 text-white"
-      data-testid="snackbar-close"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="usa-icon"
-        role="img"
-      >
-        <use
-          href="/img.jpg#close"
-        />
-      </svg>
-    </button>
-  </div>
 </div>
 `;
 
@@ -1053,30 +1029,6 @@ exports[`Header About renders Community submenu 1`] = `
       </nav>
     </div>
   </header>
-  <div
-    aria-hidden="true"
-    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
-    data-testid="snackbar"
-    role="status"
-  >
-    You've been logged out. Please sign in again.
-    <button
-      aria-label="close"
-      class="usa-button usa-button--unstyled padding-left-2 text-white"
-      data-testid="snackbar-close"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="usa-icon"
-        role="img"
-      >
-        <use
-          href="/img.jpg#close"
-        />
-      </svg>
-    </button>
-  </div>
 </div>
 `;
 
@@ -1594,29 +1546,5 @@ exports[`Header renders Header navbar menu 1`] = `
       </nav>
     </div>
   </header>
-  <div
-    aria-hidden="true"
-    class="bg-base-darkest display-flex flex-justify flex-align-start font-sans-2xs text-left text-white width-full usa-modal-wrapper radius-md position-fixed padding-2 right-0 bottom-0 tablet:maxw-mobile-lg tablet:margin-bottom-2 tablet:right-2 z-100 is-hidden"
-    data-testid="snackbar"
-    role="status"
-  >
-    You've been logged out. Please sign in again.
-    <button
-      aria-label="close"
-      class="usa-button usa-button--unstyled padding-left-2 text-white"
-      data-testid="snackbar-close"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="usa-icon"
-        role="img"
-      >
-        <use
-          href="/img.jpg#close"
-        />
-      </svg>
-    </button>
-  </div>
 </div>
 `;

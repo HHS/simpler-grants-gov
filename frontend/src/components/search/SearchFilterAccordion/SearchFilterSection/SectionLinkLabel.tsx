@@ -1,6 +1,6 @@
-import { Icon } from "@trussworks/react-uswds";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
-import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { Icon } from "@trussworks/react-uswds";
 
 export default function SectionLinkLabel({
   childrenVisible,

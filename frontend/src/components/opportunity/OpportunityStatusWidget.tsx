@@ -114,7 +114,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
   };
 
   return (
-    <div className={"usa-prose"}>
+    <div className="usa-prose" data-testid="opportunity-status-widget">
       {statusTagFormatter(
         opportunityStatus,
         opportunityCloseDate,

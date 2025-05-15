@@ -128,12 +128,6 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
-variable "domain" {
-  description = "The domain name for the service"
-  type        = string
-  default     = null
-}
-
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
@@ -227,11 +221,13 @@ variable "hosted_zone_id" {
 variable "image_repository_arn" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_repository_url" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "image_tag" {

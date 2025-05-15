@@ -3,7 +3,7 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, Textarea } from "@trussworks/react-uswds";
+import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { FieldLabel } from "./FieldLabel";
@@ -12,37 +12,38 @@ import { FieldLabel } from "./FieldLabel";
  *
  * @param props - The `WidgetProps` for this component
  */
-function TextareaWidget<
+function TextAreaWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
 >({
   id,
-  options = {},
-  value,
-  required,
   disabled,
+  required,
   readonly,
-  autofocus = false,
   schema,
-  updateOnInput = false,
+  value,
+  autofocus = false,
+  options = {},
   rawErrors = [],
+  updateOnInput = false,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, maxLength, minLength } = schema as S;
-  const handleChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLTextAreaElement>) =>
-      onChange(value === "" ? options.emptyValue : value),
-    [onChange, options.emptyValue],
-  );
+  const { title, maxLength, minLength } = schema;
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLTextAreaElement>) =>
       onBlur(id, target && target.value),
     [onBlur, id],
+  );
+
+  const handleChange = useCallback(
+    ({ target: { value } }: ChangeEvent<HTMLTextAreaElement>) =>
+      onChange(value === "" ? options.emptyValue : value),
+    [onChange, options.emptyValue],
   );
 
   const handleFocus = useCallback(
@@ -59,7 +60,7 @@ function TextareaWidget<
   const inputValue = value !== undefined ? String(value) : "";
 
   return (
-    <div key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel idFor={id} title={title} required={required} />
 
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
@@ -82,8 +83,8 @@ function TextareaWidget<
         value={updateOnInput ? inputValue : undefined}
         rows={options.rows}
       />
-    </div>
+    </FormGroup>
   );
 }
 
-export default TextareaWidget;
+export default TextAreaWidget;

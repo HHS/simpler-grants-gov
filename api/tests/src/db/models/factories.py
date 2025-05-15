@@ -22,6 +22,7 @@ from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.competition_models as competition_models
+import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
@@ -44,6 +45,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovImportType,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -1044,7 +1046,7 @@ class FormFactory(BaseFactory):
         model = competition_models.Form
 
     form_id = Generators.UuidObj
-    form_name = factory.Faker("bs")
+    form_name = "Test form"
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
@@ -1052,10 +1054,9 @@ class FormFactory(BaseFactory):
     form_json_schema = {
         "type": "object",
         "title": "Test form for testing",
-        "required": ["Title", "Email"],
+        "required": ["Title", "Email", "Agreement"],
         "properties": {
             "Date": {"type": "string", "title": "Date of application ", "format": "date"},
-            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
             "Email": {
                 "type": "string",
                 "title": "Email",
@@ -1063,10 +1064,11 @@ class FormFactory(BaseFactory):
                 "maxLength": 60,
                 "minLength": 1,
             },
+            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
             "Description": {
                 "type": "string",
                 "title": "Description for application",
-                "maxLength": 15,
+                "maxLength": 500,
                 "minLength": 0,
             },
             "ApplicationNumber": {
@@ -1075,14 +1077,46 @@ class FormFactory(BaseFactory):
                 "maxLength": 120,
                 "minLength": 1,
             },
+            "Location": {
+                "type": "string",
+                "title": "Location",
+                "description": "This should be overwritten",
+                "enum": ["Earth", "Moon", "Ort Cloud"],
+            },
+            "Vibe": {
+                "type": "string",
+                "title": "Vibe",
+                "description": "This describes the current state",
+                "enum": ["Vibing", "Not vibing"],
+            },
+            "Agreement": {
+                "type": "boolean",
+                "title": "I agree",
+                "description": "Agree to agree that the thing is the thing",
+            },
         },
     }
     form_ui_schema = [
         {"type": "field", "definition": "/properties/Title"},
-        {"type": "field", "definition": "/properties/Email"},
-        {"type": "field", "definition": "/properties/Description"},
-        {"type": "field", "definition": "/properties/ApplicationNumber"},
         {"type": "field", "definition": "/properties/Date"},
+        {"type": "field", "definition": "/properties/Description"},
+        {"type": "field", "definition": "/properties/Email"},
+        {
+            "type": "field",
+            "definition": "/properties/Location",
+            "schema": {"description": "Let us know where you are"},
+        },
+        {"type": "field", "definition": "/properties/ApplicationNumber"},
+        {"type": "field", "definition": "/properties/Vibe", "widget": "Radio"},
+        {"type": "field", "definition": "/properties/Agreement"},
+        {
+            "type": "field",
+            "schema": {
+                "type": "null",
+                "title": "Post populated",
+                "description": "Completed by Grants.gov upon submission.",
+            },
+        },
     ]
 
 
@@ -2236,3 +2270,45 @@ class StagingTcompetitionFactory(AbstractStagingFactory):
             sendmail=None,
             # is_wrkspc_compatible and dialect must NEVER be None
         )
+
+
+###################
+# Extract Factories
+###################
+
+
+class SamGovEntityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntity
+
+    sam_gov_entity_id = Generators.UuidObj
+    uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
+    legal_business_name = factory.Faker("company")
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+    ebiz_poc_email = factory.Faker("email")
+    ebiz_poc_first_name = factory.Faker("first_name")
+    ebiz_poc_last_name = factory.Faker("last_name")
+    has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
+    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+
+
+class SamGovEntityImportTypeFactory(BaseFactory):
+    class Meta:
+        model = entity_models.SamGovEntityImportType
+
+    sam_gov_entity_import_id = Generators.UuidObj
+    sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
+    sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
+    sam_gov_import_type = factory.fuzzy.FuzzyChoice(SamGovImportType)
+
+
+class OrganizationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.Organization
+
+    organization_id = Generators.UuidObj
+    sam_gov_entity = sometimes_none(factory.SubFactory(SamGovEntityFactory), none_chance=0.2)
+    sam_gov_entity_id = factory.LazyAttribute(
+        lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
+    )

@@ -16,11 +16,6 @@ export const localeParams = new Promise<{ locale: string }>((resolve) => {
 
 // mocking all types of messages, could split by message type in the future
 export const mockMessages = {
-  Research: {
-    impact: {
-      boxes: ["firstKey"],
-    },
-  },
   Roadmap: {
     pageHeaderTitle: "Product roadmap",
     sections: {
@@ -39,6 +34,45 @@ export const mockMessages = {
         title: "process test title",
         sectionSummary: "process test summary",
         contentItems: [{ title: "test title 4", content: "test content 4" }],
+      },
+    },
+  },
+  Homepage: {
+    pageTitle: "Test Title",
+    pageDescription: "Test page description",
+    github_link: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "experimental test title",
+        canDoHeader: "test can do header",
+        canDoSubHeader: "test can do subheader",
+        canDoParagraph: "test can do paragraph",
+        tryLink: "test try link",
+        cantDoHeader: "test cant do header",
+        cantDoParagraph: "test cant do paragraph",
+        iconSections: [
+          {
+            description: "test icon section description",
+            http: "test iconSections http",
+            iconName: "test iconSections iconName",
+            link: "test iconSections link",
+            title: "test iconSections title",
+          },
+        ],
+      },
+      building: {
+        title: "test building title",
+        paragraphs: ["test building paragraph"],
+      },
+      involved: {
+        title: "test title",
+        technicalTitle: "test technical title",
+        technicalDescription: "test technical description",
+        technicalLink: "test technical link",
+        participateTitle: "test participate title",
+        participateDescription: "test participate description",
+        participateLink: "test participate link",
+        discourseLink: "test discourse link",
       },
     },
   },

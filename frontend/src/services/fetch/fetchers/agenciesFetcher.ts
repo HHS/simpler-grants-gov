@@ -1,9 +1,8 @@
 "server only";
 
 import { fetchAgencies } from "src/services/fetch/fetchers/fetchers";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import { sortFilterOptions } from "src/utils/search/searchUtils";
-
-import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export interface RelevantAgencyRecord {
   agency_code: string;

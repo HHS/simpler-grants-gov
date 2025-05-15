@@ -1,14 +1,13 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
+import { QuerySetParam } from "src/types/search/searchQueryTypes";
 import {
   QueryParamData,
-  QuerySetParam,
   SearchFetcherActionType,
-  SortOptions,
 } from "src/types/search/searchRequestTypes";
-
-import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { SortOptions } from "src/types/search/searchSortTypes";
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,
@@ -94,3 +93,12 @@ function paramToSet(param: QuerySetParam, type?: string): Set<string> {
 function getSafePage(page: string | undefined) {
   return Math.max(1, parseInt(page || "1"));
 }
+
+// stringifies query params, unencrypts any encrypted commas, and prepends a ?
+export const paramsToFormattedQuery = (params: URLSearchParams): string => {
+  if (!params.size) {
+    return "";
+  }
+  // return `?${params.toString().replaceAll("%2C", ",")}`;
+  return `?${decodeURIComponent(params.toString())}`;
+};

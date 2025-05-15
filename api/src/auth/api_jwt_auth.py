@@ -197,8 +197,8 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
 
         add_extra_data_to_current_request_logs(
             {
-                "auth.user_id": str(user_token_session.user_id),
-                "auth.token_id": str(user_token_session.token_id),
+                "auth.user_id": user_token_session.user_id,
+                "auth.token_id": user_token_session.token_id,
             }
         )
         logger.info("JWT Authentication Successful")

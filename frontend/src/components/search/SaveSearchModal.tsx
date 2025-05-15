@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
@@ -18,7 +19,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -34,7 +35,13 @@ function SaveSearchInput({
 
   return (
     <FormGroup error={!!validationError}>
-      <label htmlFor="saved-search-input">{t("inputLabel")}</label>
+      <label htmlFor="saved-search-input">
+        {t.rich("inputLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
+      </label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <TextInput
@@ -47,6 +54,8 @@ function SaveSearchInput({
           defaultValue={""}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
+          required
+          aria-required
         />
       </div>
     </FormGroup>
@@ -67,7 +76,13 @@ function SuccessContent({
     <>
       <ModalHeading id={`${modalId}-heading`}>{t("successTitle")}</ModalHeading>
       <div className="usa-prose">
-        <p className="font-sans-2xs margin-y-4">{t("successDescription")}</p>
+        <p className="font-sans-2xs margin-y-4">
+          {t.rich("successDescription", {
+            workspaceLink: (chunks) => (
+              <a href="/saved-search-queries">{chunks}</a>
+            ),
+          })}
+        </p>
       </div>
       <ModalFooter>
         <ModalToggleButton
@@ -94,6 +109,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const searchParams = useSearchParams();
+  const isSSR = useIsSSR();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -183,6 +199,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
         aria-labelledby={`${modalId}-heading`}
         aria-describedby={`${modalId}-description`}
         id={modalId}
+        renderToPortal={!isSSR}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
@@ -199,25 +216,25 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
             <div className="usa-prose">
               <p className="font-sans-2xs margin-y-4">{t("description")}</p>
             </div>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId="saveSearchApiError"
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
-                <SaveSearchInput
-                  validationError={validationError}
-                  updateSavedSearchName={setSavedSearchName}
-                />
-                <ModalFooter>
+            {apiError && (
+              <SimplerAlert
+                alertClick={() => setApiError(false)}
+                buttonId="saveSearchApiError"
+                messageText={t("apiError")}
+                type="error"
+              />
+            )}
+            <SaveSearchInput
+              validationError={validationError}
+              updateSavedSearchName={setSavedSearchName}
+            />
+            <ModalFooter>
+              {loading ? (
+                <LoadingButton id="save-search-button" message={t("loading")} />
+              ) : (
+                <>
                   <Button
-                    type={"button"}
+                    type="button"
                     onClick={handleSubmit}
                     data-testid="save-search-button"
                   >
@@ -232,9 +249,9 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
                   >
                     {t("cancelText")}
                   </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+                </>
+              )}
+            </ModalFooter>
           </>
         )}
       </Modal>

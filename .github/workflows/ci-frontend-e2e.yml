@@ -26,8 +26,8 @@ jobs:
 
     strategy:
       matrix:
-        shard: [1, 2, 3]
-        total_shards: [3]
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
 
     steps:
       - uses: actions/checkout@v4
