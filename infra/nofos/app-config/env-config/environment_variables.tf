@@ -2,7 +2,10 @@ locals {
   # Map from environment variable name to environment variable value
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
-  default_extra_environment_variables = {}
+  default_extra_environment_variables = {
+    DEBUG                = "false"
+    DJANGO_ALLOWED_HOSTS = "*"
+  }
 
   # Configuration for secrets
   # List of configurations for defining environment variables that pull from SSM parameter
