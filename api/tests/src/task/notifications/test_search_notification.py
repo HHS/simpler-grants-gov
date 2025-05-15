@@ -1,13 +1,13 @@
 import uuid
-from datetime import timedelta, date
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
 
-from src.constants.lookup_constants import OpportunityStatus
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.constants import NotificationReason

@@ -1,4 +1,5 @@
 import logging
+from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -83,7 +84,7 @@ class SearchNotificationTask(BaseNotificationTask):
             all_opportunity_ids = set()
             for saved_search in saved_items:
                 all_opportunity_ids.update(saved_search.searched_opportunity_ids)
-            stmt = (
+            opportunities_stmt = (
                 select(Opportunity)
                 .join(
                     CurrentOpportunitySummary,
@@ -102,7 +103,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 )
             )
 
-            opportunities = self.db_session.execute(stmt).scalars().all()
+            opportunities = self.db_session.execute(opportunities_stmt).scalars().all()
 
             message = self._build_notification_message(opportunities)
 
@@ -139,7 +140,7 @@ class SearchNotificationTask(BaseNotificationTask):
 
         return users_email_notifications
 
-    def _build_notification_message(self, opportunities: list[Opportunity]) -> str:
+    def _build_notification_message(self, opportunities: Sequence[Opportunity]) -> str:
 
         # Build message intro based on number of opportunities
         if len(opportunities) == 1:
