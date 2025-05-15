@@ -1,7 +1,7 @@
 "use server";
 
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { getTranslations } from "next-intl/server";
 
