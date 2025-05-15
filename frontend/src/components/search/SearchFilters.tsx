@@ -38,7 +38,10 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = getAgenciesForFilterOptions();
+  const agenciesPromise = Promise.all([
+    getAgenciesForFilterOptions(),
+    searchResultsPromise,
+  ]);
 
   let searchResults;
   try {
