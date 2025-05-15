@@ -36,7 +36,7 @@ export const SavedSearchesList = ({
               />
               <Link
                 href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
-                className="font-sans-lg text-bold grid-col-fill flex-align-self-start"
+                className="font-sans-lg text-bold grid-col-fill margin-right-10"
               >
                 {savedSearch.name}
               </Link>
@@ -71,59 +71,6 @@ export const SavedSearchesList = ({
                   },
                 )}
               </div>
-            </div>
-          </div>
-          <div className="border-1px border-base-lighter padding-x-2 padding-y-105 margin-bottom-2 text-base-darker desktop:grid-col-fill">
-            <div className="grid-row padding-right-2">
-              <div className="tablet:grid-col-8 grid-col-6">
-                <h2 className="margin-y-105 line-height-sans-2">
-                  <USWDSIcon
-                    name="search"
-                    className="margin-right-1 text-no-underline"
-                  />
-                  <Link
-                    href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
-                    className="margin-right-05"
-                  >
-                    {savedSearch.name}
-                  </Link>
-                </h2>
-              </div>
-              <div className="grid-col margin-top-2 text-right">
-                <div className="grid-row">
-                  <div className="grid-col">
-                    <EditSavedSearchModal
-                      savedSearchId={savedSearch.id}
-                      editText={editText}
-                      queryName={savedSearch.name}
-                    />
-                  </div>
-                  <div className="grid-col">
-                    <DeleteSavedSearchModal
-                      savedSearchId={savedSearch.id}
-                      deleteText={deleteText}
-                      queryName={savedSearch.name}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="grid-row flex-column"
-              data-testid="saved-search-definition"
-            >
-              {Object.entries(omit(paramDisplayMapping, "page")).map(
-                ([key, paramDisplay]) => {
-                  const value =
-                    savedSearch.searchParams[key as ValidSearchQueryParam];
-                  return value ? (
-                    <div key={key}>
-                      <span className="text-bold">{paramDisplay}: </span>
-                      <span>{value.replaceAll(",", ", ")}</span>
-                    </div>
-                  ) : null;
-                },
-              )}
             </div>
           </div>
         </li>
