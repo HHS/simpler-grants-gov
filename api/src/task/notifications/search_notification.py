@@ -79,13 +79,44 @@ class SearchNotificationTask(BaseNotificationTask):
                 "Created changed search email notification",
                 extra={"user_id": user_id, "changed_search_count": len(saved_items)},
             )
-            message = self._build_notification_message(saved_items)
 
+            all_opportunity_ids = set()
+            for saved_search in saved_items:
+                all_opportunity_ids.update(saved_search.searched_opportunity_ids)
+            stmt = (
+                select(Opportunity)
+                .join(
+                    CurrentOpportunitySummary,
+                    CurrentOpportunitySummary.opportunity_id == Opportunity.opportunity_id,
+                )
+                .join(
+                    OpportunitySummary,
+                    OpportunitySummary.opportunity_summary_id
+                    == CurrentOpportunitySummary.opportunity_summary_id,
+                )
+                .where(Opportunity.opportunity_id.in_(all_opportunity_ids))
+                .options(
+                    selectinload(Opportunity.current_opportunity_summary).selectinload(
+                        CurrentOpportunitySummary.opportunity_summary
+                    )
+                )
+            )
+
+            opportunities = self.db_session.execute(stmt).scalars().all()
+
+            message = self._build_notification_message(opportunities)
+
+            formated_date = datetime_util.utcnow().strftime("%-m/%-d/%Y")
+            subject = (
+                f"New Grant Published on {formated_date}"
+                if len(opportunities) == 1
+                else f"{len(opportunities)} New Grants Published on {formated_date}"
+            )
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
                     user_email=user_email,
-                    subject="Updates to Your Saved Opportunities",
+                    subject=subject,
                     content=message,
                     notification_reason=NotificationReason.SEARCH_UPDATES,
                     notified_object_ids=[
@@ -108,32 +139,7 @@ class SearchNotificationTask(BaseNotificationTask):
 
         return users_email_notifications
 
-    def _build_notification_message(self, user_notifications: list[UserSavedSearch]) -> str:
-        # Get the unique opportunity IDs across all saved searches
-        all_opportunity_ids = set()
-        for saved_search in user_notifications:
-            all_opportunity_ids.update(saved_search.searched_opportunity_ids)
-
-        stmt = (
-            select(Opportunity)
-            .join(
-                CurrentOpportunitySummary,
-                CurrentOpportunitySummary.opportunity_id == Opportunity.opportunity_id,
-            )
-            .join(
-                OpportunitySummary,
-                OpportunitySummary.opportunity_summary_id
-                == CurrentOpportunitySummary.opportunity_summary_id,
-            )
-            .where(Opportunity.opportunity_id.in_(all_opportunity_ids))
-            .options(
-                selectinload(Opportunity.current_opportunity_summary).selectinload(
-                    CurrentOpportunitySummary.opportunity_summary
-                )
-            )
-        )
-
-        opportunities = self.db_session.execute(stmt).scalars().all()
+    def _build_notification_message(self, opportunities: list[Opportunity]) -> str:
 
         # Build message intro based on number of opportunities
         if len(opportunities) == 1:
