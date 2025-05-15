@@ -37,10 +37,11 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
+    owner        = "bloomworks"
     app          = module.app_config.app_name
     environment  = var.environment_name
-    service_name = local.service_name
     description  = "Application resources created in ${var.environment_name} environment"
+    service_name = local.service_name
   })
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
@@ -163,6 +164,8 @@ module "service" {
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = false
+
+  readonly_root_filesystem = false
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
