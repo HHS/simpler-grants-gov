@@ -25,6 +25,13 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
 }));
 
 describe("Saved Opportunities page", () => {
+  it("to match snapshot", async () => {
+    const component = await SavedOpportunities({ params: localeParams });
+    render(component);
+
+    expect(component).toMatchSnapshot();
+  });
+
   it("renders intro text for user with no saved opportunities", async () => {
     const component = await SavedOpportunities({ params: localeParams });
     render(component);
