@@ -100,7 +100,7 @@ export const messages = {
       loading: "Updating",
     },
     save_message: {
-      save: "This opportunity was saved to <linkSavedGrants>Saved opportunities</linkSavedGrants>.",
+      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
       unsave: "This opportunity was unsaved.",
       error_save: "Error saving. Please try again.",
       error_unsave: "Error undoing save. Please try again.",
@@ -348,7 +348,7 @@ export const messages = {
       menuToggle: "Menu",
       research: "Research",
       roadmap: "Product roadmap",
-      savedGrants: "Saved opportunities",
+      savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
       subscribe: "Subscribe",
@@ -593,7 +593,7 @@ export const messages = {
       description: "Delete ",
     },
   },
-  SavedGrants: {
+  SavedOpportunities: {
     heading: "Saved opportunities",
     noSavedCTA:
       "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",

@@ -21,7 +21,7 @@ describe("getNextRoutes", () => {
       "/opportunity/1",
       "/",
       "/roadmap",
-      "/saved-grants",
+      "/saved-opportunities",
       "/saved-search-queries",
       "/search",
       "/subscribe/confirmation",
