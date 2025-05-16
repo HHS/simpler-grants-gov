@@ -32,7 +32,7 @@ export async function SearchDrawerFilters({
   const facetCounts = searchResults?.facet_counts;
 
   return (
-    <div className="overflow-auto border-top-1px maxh-mobile-lg">
+    <>
       <CheckboxFilter
         filterOptions={fundingOptions}
         query={fundingInstrument}
@@ -57,6 +57,6 @@ export async function SearchDrawerFilters({
         facetCounts={facetCounts?.funding_category || {}}
         wrapForScroll={true}
       />
-    </div>
+    </>
   );
 }

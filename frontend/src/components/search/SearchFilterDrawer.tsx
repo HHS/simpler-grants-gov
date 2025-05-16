@@ -1,3 +1,5 @@
+// delete me
+
 import {
   QueryParamData,
   SearchAPIResponse,
@@ -19,30 +21,20 @@ export function SearchFilterDrawer({
   drawerId,
   searchParams,
   searchResultsPromise,
-  drawerRef,
+  // drawerRef,
 }: {
   drawerId: string;
   searchParams: QueryParamData;
   searchResultsPromise: Promise<SearchAPIResponse>;
-  drawerRef: RefObject<ModalRef | null>;
+  // drawerRef: RefObject<ModalRef | null>;
 }) {
   const t = useTranslations("Search.drawer");
   return (
-    <div className="width-full">
-      <ModalHeading id={`${drawerId}-heading`}>{t("title")}</ModalHeading>
+    <>
       <SearchDrawerFilters
         searchParams={searchParams}
         searchResultsPromise={searchResultsPromise}
       />
-      <ModalFooter className="position-fixed bottom-2">
-        <ModalToggleButton
-          modalRef={drawerRef}
-          secondary
-          className="width-mobile"
-        >
-          {t("submit")}
-        </ModalToggleButton>
-      </ModalFooter>
-    </div>
+    </>
   );
 }
