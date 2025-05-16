@@ -13,8 +13,6 @@ export const LoginButtonModal = ({
   const t = useTranslations("HeaderLoginModal");
   const modalRef = useRef<ModalRef>(null);
 
-  console.log("%%% login ref", modalRef);
-
   return (
     <>
       <div className="usa-nav__primary margin-top-0 padding-top-2px text-no-wrap desktop:order-last margin-left-auto">

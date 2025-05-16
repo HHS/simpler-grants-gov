@@ -10,7 +10,7 @@ import { ErrorMessage, Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   queryTermFromParent: string | null | undefined;
-  tableView: boolean;
+  tableView?: boolean;
 }
 
 export default function SearchBar({

@@ -2,14 +2,12 @@ import { environment } from "src/constants/environments";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";

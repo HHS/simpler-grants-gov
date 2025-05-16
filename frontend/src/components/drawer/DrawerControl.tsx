@@ -1,6 +1,5 @@
 import { UswdsIconNames } from "src/types/generalTypes";
 
-import { useTranslations } from "next-intl";
 import { RefObject } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
@@ -15,7 +14,6 @@ export const DrawerControl = ({
   buttonText: string;
   iconName?: UswdsIconNames;
 }) => {
-  const t = useTranslations("Search");
   return (
     <ModalToggleButton
       modalRef={drawerRef}
