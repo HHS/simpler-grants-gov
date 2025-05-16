@@ -60,7 +60,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
             agencies
         )
 
-    def test_load_agencies_is_active(
+    def test_load_agencies_with_status(
         self,
         db_session,
         search_client,
@@ -71,9 +71,17 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         # Setup data
         hhs = AgencyFactory.create(agency_name="HHS")
         usda = AgencyFactory.create(agency_name="USDA")
+        dod = AgencyFactory.create(agency_name="DOD")
+        nih = AgencyFactory.create(agency_name="NIH")
 
         OpportunityFactory.create(agency_code=hhs.agency_code)  # POSTED
         OpportunityFactory.create(agency_code=usda.agency_code, is_closed_summary=True)  # CLOSED
+        OpportunityFactory.create(
+            agency_code=dod.agency_code, is_forecasted_summary=True
+        )  # FORECASTED
+        OpportunityFactory.create(
+            agency_code=nih.agency_code, is_archived_non_forecast_summary=True
+        )  # ARCHIVED
 
         load_agencies_to_index.index_name = (
             load_agencies_to_index.index_name + "-active-status-data"
@@ -83,10 +91,14 @@ class TestLoadAgenciesToIndex(BaseTestClass):
 
         resp = search_client.search(agency_index_alias, {"size": 50})
 
-        assert resp.total_records == 2
+        assert resp.total_records == 4
 
         hhs_agency = next(agency for agency in resp.records if agency["agency_name"] == "HHS")
         usda_agency = next(agency for agency in resp.records if agency["agency_name"] == "USDA")
+        dod_agency = next(agency for agency in resp.records if agency["agency_name"] == "DOD")
+        nih_agency = next(agency for agency in resp.records if agency["agency_name"] == "NIH")
 
-        assert hhs_agency["has_active_opportunity"]
-        assert not usda_agency["has_active_opportunity"]
+        assert hhs_agency["has_open_opportunity"]
+        assert usda_agency["has_closed_opportunity"]
+        assert dod_agency["has_forecasted_opportunity"]
+        assert nih_agency["has_archived_opportunity"]

@@ -98,6 +98,7 @@ class SearchQueryBuilder:
 
         self.must: list[dict] = []
         self.filters: list[dict] = []
+        self.should: list[dict] = []
 
         self.aggregations: dict[str, dict] = {}
 
@@ -168,12 +169,22 @@ class SearchQueryBuilder:
 
     def filter_terms(self, field: str, terms: list) -> typing.Self:
         """
-        For a given field, filter to a set of values.
+        For a given field, apply an AND-based filter to a set of values.
 
         These filters do not affect the relevancy score, they are purely
         a binary filter on the overall results.
         """
         self.filters.append({"terms": {field: terms}})
+        return self
+
+    def filter_should_terms(self, field: str, terms: list) -> typing.Self:
+        """
+        For a given field, apply an OR-based filter to a set of values.
+
+        These filters do not affect the relevancy score, but at least one
+        should match for the document to be included.
+        """
+        self.should.append({"terms": {field: terms}})
         return self
 
     def filter_int_range(
@@ -297,12 +308,16 @@ class SearchQueryBuilder:
         #       as just binary filters
         #
         # See: https://opensearch.org/docs/latest/query-dsl/compound/bool/
-        bool_query = {}
+        bool_query: dict[str, list[dict] | int] = {}
         if len(self.must) > 0:
             bool_query["must"] = self.must
 
         if len(self.filters) > 0:
             bool_query["filter"] = self.filters
+
+        if len(self.should) > 0:
+            bool_query["should"] = self.should
+            bool_query["minimum_should_match"] = 1  # Ensures at least one should clause must match.
 
         # Add the query object which wraps the bool query
         query_obj = {}

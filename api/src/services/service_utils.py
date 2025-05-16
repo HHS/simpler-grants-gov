@@ -13,6 +13,13 @@ from src.search.search_models import (
     StrSearchFilter,
 )
 
+OPPORTUNITY_FLAGS = [
+    "has_open_opportunity",
+    "has_forecasted_opportunity",
+    "has_closed_opportunity",
+    "has_archived_opportunity",
+]
+
 
 def apply_sorting(stmt: Select, model: Type, sort_order: list) -> Select:
     """
@@ -57,8 +64,10 @@ def _add_search_filters(
             builder.filter_terms(field_name, field_filters.one_of)
 
         elif isinstance(field_filters, BoolSearchFilter) and field_filters.one_of:
-            builder.filter_terms(field_name, field_filters.one_of)
-
+            if field_name in OPPORTUNITY_FLAGS:
+                builder.filter_should_terms(field_name, field_filters.one_of)
+            else:
+                builder.filter_terms(field_name, field_filters.one_of)
         elif isinstance(field_filters, IntSearchFilter):
             builder.filter_int_range(field_name, field_filters.min, field_filters.max)
 
