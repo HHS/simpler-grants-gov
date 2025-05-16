@@ -31,8 +31,6 @@ export function SearchVersionTwo({
 
   const convertedSearchParams =
     convertSearchParamsToProperTypes(resolvedSearchParams);
-  const { agency, category, eligibility, fundingInstrument, query, status } =
-    convertedSearchParams;
 
   if (!("page" in resolvedSearchParams)) {
     resolvedSearchParams.page = "1";
@@ -49,9 +47,13 @@ export function SearchVersionTwo({
       <QueryProvider>
         <div className="grid-container">
           <div className="search-bar">
-            <SearchBar queryTermFromParent={query} />
+            <SearchBar queryTermFromParent={convertedSearchParams.query} />
             <DrawerUnit drawerId="search-filter-drawer">
-              <SearchFilterDrawer drawerId="search-filter-drawer" />
+              <SearchFilterDrawer
+                drawerId="search-filter-drawer"
+                searchParams={convertedSearchParams}
+                searchResultsPromise={searchResultsPromise}
+              />
             </DrawerUnit>
           </div>
           <div className="grid-row grid-gap">
@@ -68,7 +70,6 @@ export function SearchVersionTwo({
             <div className="tablet:grid-col-8">
               <SearchResults
                 searchParams={convertedSearchParams}
-                query={query}
                 loadingMessage={t("loading")}
                 searchResultsPromise={searchResultsPromise}
               ></SearchResults>

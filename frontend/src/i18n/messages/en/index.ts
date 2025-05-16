@@ -436,6 +436,10 @@ export const messages = {
         "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
       button: "Search",
     },
+    drawer: {
+      title: "Filters",
+      submit: "View results",
+    },
     callToAction: {
       title: "Search funding opportunities",
     },
