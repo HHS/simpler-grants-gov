@@ -538,7 +538,7 @@ paths:
       - in: path
         name: opportunity_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
@@ -774,6 +774,54 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
+  /v1/opportunities/{legacy_opportunity_id}:
+    get:
+      parameters:
+      - in: path
+        name: legacy_opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityGetResponseV1'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Opportunity v1
+      summary: Opportunity Get Legacy
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      security:
+      - ApiKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -2283,9 +2331,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2604,9 +2653,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
-          example: 12345
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_number:
           type:
           - string
@@ -2829,8 +2879,10 @@ components:
           description: The competition ID
           example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The opportunity ID that the competition is associated with
+          example: 123e4567-e89b-12d3-a456-426614174000
         competition_forms:
           type: array
           items:
