@@ -31,7 +31,7 @@ export default function RoadmapHeader() {
             <Grid className="display-flex flex-justify-center flex-align-center">
               <Image
                 src="/img/roadmap-header-image.png"
-                className="minh-full width-full desktop:padding-right-2"
+                className="minh-full width-full desktop:padding-right-2 object-fit-cover"
                 alt="Picture of person on a journey"
                 width={360}
                 height={350}
