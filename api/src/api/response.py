@@ -17,6 +17,7 @@ class ValidationErrorDetail:
     type: str
     message: str = ""
     field: str | None = None
+    value: Any | None = None
 
 
 class ValidationException(apiflask.exceptions.HTTPError):

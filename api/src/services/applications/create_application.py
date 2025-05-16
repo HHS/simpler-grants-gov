@@ -8,6 +8,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, Competition
 from src.db.models.user_models import ApplicationUser, User
 from src.util.datetime_util import get_now_us_eastern_date
@@ -77,6 +78,7 @@ def create_application(
         application_id=uuid.uuid4(),
         competition_id=competition_id,
         application_name=application_name,
+        application_status=ApplicationStatus.IN_PROGRESS,
     )
     db_session.add(application)
 
