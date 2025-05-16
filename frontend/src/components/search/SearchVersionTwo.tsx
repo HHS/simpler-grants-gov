@@ -10,10 +10,10 @@ import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
-import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
 
 export function SearchVersionTwo({
@@ -49,6 +49,9 @@ export function SearchVersionTwo({
         <div className="grid-container">
           <div className="search-bar">
             <SearchBar queryTermFromParent={query} />
+            <DrawerUnit drawerId="filter-drawer">
+              <p>hi</p>
+            </DrawerUnit>
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">

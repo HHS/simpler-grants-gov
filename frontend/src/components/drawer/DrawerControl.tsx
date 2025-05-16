@@ -1,26 +1,21 @@
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { RefObject } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { LoginModal } from "./LoginModal";
 
-export const LoginButtonModal = ({
-  navLoginLinkText,
+export const DrawerControl = ({
+  drawerRef,
 }: {
-  navLoginLinkText: string;
+  drawerRef: RefObject<ModalRef | null>;
 }) => {
   const t = useTranslations("HeaderLoginModal");
-  const modalRef = useRef<ModalRef>(null);
-
-  console.log("%%% login ref", modalRef);
-
   return (
     <>
       <div className="usa-nav__primary margin-top-0 padding-top-2px text-no-wrap desktop:order-last margin-left-auto">
         <div className="usa-nav__primary-item border-0">
           <ModalToggleButton
-            modalRef={modalRef}
+            modalRef={drawerRef}
             opener
             className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
             data-testid="sign-in-button"
@@ -30,19 +25,10 @@ export const LoginButtonModal = ({
               name="login"
               key="login-link-icon"
             />
-            {navLoginLinkText}
+            open drawer
           </ModalToggleButton>
         </div>
       </div>
-      <LoginModal
-        modalRef={modalRef as React.RefObject<ModalRef>}
-        helpText={t("help")}
-        buttonText={t("button")}
-        closeText={t("close")}
-        descriptionText={t("description")}
-        titleText={t("title")}
-        modalId="login-modal"
-      />
     </>
   );
 };
