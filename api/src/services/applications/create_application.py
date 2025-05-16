@@ -70,13 +70,8 @@ def create_application(
             )
 
     # Get default application name if not provided
-    if (
-        application_name is None
-        and competition.opportunity
-        and competition.opportunity.opportunity_number
-    ):
+    if application_name is None:
         application_name = competition.opportunity.opportunity_number
-
     # Create a new application
     application = Application(
         application_id=uuid.uuid4(),
