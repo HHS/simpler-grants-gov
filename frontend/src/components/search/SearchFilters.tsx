@@ -1,5 +1,5 @@
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
@@ -38,7 +38,10 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = getAgenciesForFilterOptions();
+  const agenciesPromise = Promise.all([
+    getAgenciesForFilterOptions(),
+    searchResultsPromise,
+  ]);
 
   let searchResults;
   try {

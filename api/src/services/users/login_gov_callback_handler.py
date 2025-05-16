@@ -141,7 +141,7 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
         # We only support login.gov right now, so this does nothing, but let's
         # be explicit just in case.
         .where(LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV)
-        .options(selectinload("*"))
+        .options(selectinload(LinkExternalUser.user))
     ).scalar()
 
     is_user_new = external_user is None

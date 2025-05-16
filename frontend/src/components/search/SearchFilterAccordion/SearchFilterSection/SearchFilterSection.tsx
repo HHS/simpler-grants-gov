@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterOptionWithChildren } from "src/types/search/searchResponseTypes";
+import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
 
 import { AllOptionCheckbox } from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";

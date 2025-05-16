@@ -5,8 +5,8 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import {
   FilterOption,
   FilterOptionWithChildren,
-  ValidSearchQueryParam,
-} from "src/types/search/searchResponseTypes";
+} from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 import { useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";
@@ -138,22 +138,7 @@ export function SearchFilterAccordion({
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content: wrapForScroll ? (
-        <div
-          className="maxh-mobile-lg minh-mobile overflow-scroll"
-          data-testid={`${title}-accordion-scroll`}
-        >
-          <AccordionContent
-            filterOptions={filterOptions}
-            title={title}
-            queryParamKey={queryParamKey}
-            query={query}
-            facetCounts={facetCounts}
-            defaultEmptySelection={defaultEmptySelection}
-            includeAnyOption={includeAnyOption}
-          />
-        </div>
-      ) : (
+      content: (
         <AccordionContent
           filterOptions={filterOptions}
           title={title}
@@ -167,6 +152,9 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
+      className: wrapForScroll
+        ? "maxh-mobile-lg overflow-auto position-relative"
+        : "",
     },
   ];
 
