@@ -84,9 +84,13 @@ def validate_forms(application: Application) -> None:
     form_errors, form_error_map = get_application_form_errors(application)
 
     if len(form_errors) > 0:
+        detail = {}
+        if form_error_map:
+            detail["form_validation_errors"] = form_error_map
+
         raise_flask_error(
             422,
             "The application has issues in its form responses.",
-            detail={"form_validation_errors": form_error_map},
+            detail=detail,
             validation_issues=form_errors,
         )

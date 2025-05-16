@@ -951,9 +951,7 @@ class CompetitionFactory(BaseFactory):
     competition_title = sometimes_none(factory.Faker("sentence"))
 
     opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.opening_date)
-    )
+    closing_date = factory.Faker("date_between", start_date="+1d", end_date="+3w")
 
     grace_period = factory.Faker("random_int", min=1, max=10)
     contact_info = sometimes_none(factory.Faker("agency_contact_description"))

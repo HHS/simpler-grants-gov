@@ -65,6 +65,7 @@ def test_application_start_success(client, enable_factory_create, db_session):
 
     assert application is not None
     assert str(application.competition_id) == competition_id
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
 
 
 @freeze_time(TEST_DATE)
