@@ -6,7 +6,11 @@ import {
 import { useTranslations } from "next-intl";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
-import { eligibilityOptions } from "./SearchFilterAccordion/SearchFilterOptions";
+import {
+  categoryOptions,
+  eligibilityOptions,
+  fundingOptions,
+} from "./SearchFilterAccordion/SearchFilterOptions";
 
 export async function SearchDrawerFilters({
   searchParams,
@@ -16,7 +20,7 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility } = searchParams;
+  const { eligibility, fundingInstrument, category, status } = searchParams;
 
   let searchResults;
   try {
@@ -28,13 +32,29 @@ export async function SearchDrawerFilters({
   const facetCounts = searchResults?.facet_counts;
 
   return (
-    <div className="overflow-auto border-top-1px maxh-tablet">
+    <div className="overflow-auto border-top-1px maxh-mobile-lg">
+      <CheckboxFilter
+        filterOptions={fundingOptions}
+        query={fundingInstrument}
+        queryParamKey="fundingInstrument"
+        title={t("accordion.titles.funding")}
+        facetCounts={facetCounts?.funding_instrument || {}}
+        wrapForScroll={true}
+      />
       <CheckboxFilter
         query={eligibility}
         queryParamKey={"eligibility"}
         title={t("accordion.titles.eligibility")}
         filterOptions={eligibilityOptions}
         facetCounts={facetCounts?.applicant_type || {}}
+        wrapForScroll={true}
+      />
+      <CheckboxFilter
+        filterOptions={categoryOptions}
+        query={category}
+        queryParamKey={"category"}
+        title={t("accordion.titles.category")}
+        facetCounts={facetCounts?.funding_category || {}}
         wrapForScroll={true}
       />
     </div>
