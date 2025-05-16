@@ -19,7 +19,7 @@ const SavedOpportunitiesList = ({
 }: {
   opportunities: SearchResponseData;
 }) => {
-  const savedGrantsListItems = opportunities.map(
+  const savedOpportunitiesListItems = opportunities.map(
     (opportunity, index) =>
       opportunity && (
         <li key={opportunity.opportunity_id}>
@@ -32,7 +32,9 @@ const SavedOpportunitiesList = ({
       ),
   );
   return (
-    <ul className="usa-prose usa-list--unstyled">{savedGrantsListItems}</ul>
+    <ul className="usa-prose usa-list--unstyled">
+      {savedOpportunitiesListItems}
+    </ul>
   );
 };
 
@@ -59,7 +61,9 @@ const NoSavedOpportunities = ({
   );
 };
 
-export default async function SavedGrants({ params }: LocalizedPageProps) {
+export default async function SavedOpportunities({
+  params,
+}: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const savedOpportunities = await fetchSavedOpportunities();
@@ -77,7 +81,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
     <>
       <GridContainer>
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-          {t("SavedGrants.heading")}
+          {t("SavedOpportunities.heading")}
         </h1>
       </GridContainer>
       <div
@@ -90,7 +94,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
             <SavedOpportunitiesList opportunities={resolvedOpportunities} />
           ) : (
             <NoSavedOpportunities
-              noSavedCTA={t.rich("SavedGrants.noSavedCTA", {
+              noSavedCTA={t.rich("SavedOpportunities.noSavedCTA", {
                 br: () => (
                   <>
                     <br />
@@ -98,7 +102,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
                   </>
                 ),
               })}
-              searchButtonText={t("SavedGrants.searchButton")}
+              searchButtonText={t("SavedOpportunities.searchButton")}
             />
           )}
         </div>

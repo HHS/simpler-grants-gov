@@ -122,8 +122,8 @@ const NavLinks = ({
     const workspaceSubNavs = [];
     if (showSavedOpportunities) {
       workspaceSubNavs.push({
-        text: t("savedGrants"),
-        href: "/saved-grants",
+        text: t("savedOpportunities"),
+        href: "/saved-opportunities",
       });
     }
     if (showSavedSearch) {

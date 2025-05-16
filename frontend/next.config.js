@@ -107,7 +107,7 @@ const headers = [
       },
     ],
   },
-  // don't cache user specific pages: saved-grants, saved-search-queries
+  // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
     source: "/saved:path*",
     headers: [
