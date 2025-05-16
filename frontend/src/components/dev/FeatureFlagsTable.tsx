@@ -1,6 +1,7 @@
 "use client";
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
@@ -10,6 +11,7 @@ import { Button, Table } from "@trussworks/react-uswds";
  */
 export default function FeatureFlagsTable() {
   const { setFeatureFlag, featureFlags } = useFeatureFlags();
+  const { setQueryParam } = useSearchParamUpdater();
 
   return (
     <>
@@ -35,7 +37,9 @@ export default function FeatureFlagsTable() {
                 <Button
                   data-testid={`enable-${featureName}`}
                   disabled={!!enabled}
-                  onClick={() => setFeatureFlag(featureName, true)}
+                  onClick={() => {
+                    setFeatureFlag(featureName, true);
+                  }}
                   type="button"
                 >
                   Enable
@@ -43,7 +47,9 @@ export default function FeatureFlagsTable() {
                 <Button
                   data-testid={`disable-${featureName}`}
                   disabled={!enabled}
-                  onClick={() => setFeatureFlag(featureName, false)}
+                  onClick={() => {
+                    setFeatureFlag(featureName, false);
+                  }}
                   type="button"
                 >
                   Disable
@@ -53,6 +59,15 @@ export default function FeatureFlagsTable() {
           ))}
         </tbody>
       </Table>
+      <Button
+        data-testid={"reset-defaults"}
+        onClick={() => {
+          setQueryParam("_ff", "reset");
+        }}
+        type="button"
+      >
+        Reset to Defaults
+      </Button>
     </>
   );
 }
