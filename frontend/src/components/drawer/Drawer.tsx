@@ -26,13 +26,20 @@ export function Drawer({
   return (
     <Modal
       ref={drawerRef}
-      forceAction
+      forceAction={false}
       className="text-wrap"
       aria-labelledby={`${drawerId}-heading`}
       aria-describedby={`${drawerId}-description`}
       id={drawerId}
       renderToPortal={!isSSR}
     >
+      {children}
+    </Modal>
+  );
+}
+
+/*
+
       <ModalHeading id={`${drawerId}-heading`}>titleText</ModalHeading>
       <div id={`${drawerId}-description`} className="usa-prose">
         {children}
@@ -47,6 +54,5 @@ export function Drawer({
           close
         </ModalToggleButton>
       </ModalFooter>
-    </Modal>
-  );
-}
+
+*/

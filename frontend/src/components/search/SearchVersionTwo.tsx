@@ -15,6 +15,7 @@ import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
+import { SearchFilterDrawer } from "./SearchFilterDrawer";
 
 export function SearchVersionTwo({
   searchParams,
@@ -49,8 +50,8 @@ export function SearchVersionTwo({
         <div className="grid-container">
           <div className="search-bar">
             <SearchBar queryTermFromParent={query} />
-            <DrawerUnit drawerId="filter-drawer">
-              <p>hi</p>
+            <DrawerUnit drawerId="search-filter-drawer">
+              <SearchFilterDrawer drawerId="search-filter-drawer" />
             </DrawerUnit>
           </div>
           <div className="grid-row grid-gap">
