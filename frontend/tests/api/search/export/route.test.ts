@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/search/export/route";
+import { exportSearchResult } from "src/app/api/search/export/handler";
 
 import { NextRequest } from "next/server";
 
@@ -43,12 +43,14 @@ jest.mock("next/server", () => ({
 describe("search export GET request", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls downloadOpportunities with expected arguments", async () => {
-    await GET(fakeRequestForSearchParams("status=closed&agency=EPA"));
+    await exportSearchResult(
+      fakeRequestForSearchParams("status=closed&agency=EPA"),
+    );
     expect(mockDownloadOpportunities).toHaveBeenCalledWith(fakeConvertedParams);
   });
 
   it("returns a new response created from the returned value of downloadOpportunties", async () => {
-    const response = await GET(
+    const response = await exportSearchResult(
       fakeRequestForSearchParams("status=closed&agency=EPA"),
     );
     expect(response).toEqual({

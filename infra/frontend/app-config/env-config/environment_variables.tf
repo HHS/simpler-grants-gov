@@ -18,8 +18,9 @@ locals {
     NEW_RELIC_CLOUD_AWS_ACCOUNT_ID = "315341936575"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#browser-variables
     NEW_RELIC_BROWSER_MONITORING_ATTRIBUTES_ENABLED = "true"
-    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#app-logging
-    NEW_RELIC_APPLICATION_LOGGING_FORWARDING_LABELS_ENABLED = "true"
+    # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#application-logging-enabled
+    # Turned off to avoid duplicate logging, and use logging from fluent bit instead
+    NEW_RELIC_APPLICATION_LOGGING_ENABLED = "false"
   }
 
   # Configuration for secrets
