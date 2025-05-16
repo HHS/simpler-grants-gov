@@ -1141,6 +1141,8 @@ class ApplicationFormFactory(BaseFactory):
     class Meta:
         model = competition_models.ApplicationForm
 
+    application_form_id = Generators.UuidObj
+
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
 

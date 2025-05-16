@@ -37,4 +37,5 @@ class ValidationErrorType(StrEnum):
     COMPETITION_NOT_YET_OPEN = "competition_not_yet_open"
     COMPETITION_ALREADY_CLOSED = "competition_already_closed"
 
+    MISSING_REQUIRED_FORM = "missing_required_form"
     APPLICATION_FORM_VALIDATION = "application_form_validation"
