@@ -1,16 +1,12 @@
-import { Metadata } from "next";
 import { environment } from "src/constants/environments";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { LocalizedPageProps } from "src/types/intl";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
@@ -19,23 +15,14 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
-import { SearchVersionTwo } from "src/components/search/SearchVersionTwo";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale });
-  const meta: Metadata = {
-    title: t("Search.title"),
-    description: t("Search.metaDescription"),
-  };
-  return meta;
-}
-type SearchPageProps = {
+export function SearchVersionTwo({
+  searchParams,
+  params,
+}: {
   searchParams: Promise<OptionalStringDict>;
   params: Promise<{ locale: string }>;
-};
-
-function Search({ searchParams, params }: SearchPageProps) {
+}) {
   const { locale } = use(params);
   const resolvedSearchParams = use(searchParams);
   setRequestLocale(locale);
@@ -72,14 +59,6 @@ function Search({ searchParams, params }: SearchPageProps) {
                 type="centered"
               >
                 <SaveSearchPanel />
-                <SearchFilters
-                  opportunityStatus={status}
-                  eligibility={eligibility}
-                  category={category}
-                  fundingInstrument={fundingInstrument}
-                  agency={agency}
-                  searchResultsPromise={searchResultsPromise}
-                />
               </ContentDisplayToggle>
             </div>
             <div className="tablet:grid-col-8">
@@ -96,12 +75,3 @@ function Search({ searchParams, params }: SearchPageProps) {
     </>
   );
 }
-
-// Exports page behind both feature flags
-export default withFeatureFlag<SearchPageProps, React.ReactNode>(
-  withFeatureFlag<SearchPageProps, never>(Search, "searchOff", () =>
-    redirect("/maintenance"),
-  ),
-  "searchV2On",
-  (props) => <SearchVersionTwo {...props} />,
-);
