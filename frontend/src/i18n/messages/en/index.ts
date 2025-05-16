@@ -495,6 +495,7 @@ export const messages = {
     filterDisplayToggle: {
       showFilters: "Show Filters",
       hideFilters: "Hide Filters",
+      drawer: "Filters",
     },
     generic_error_cta: "Please try your search again.",
     validationError: "Search Validation Error",

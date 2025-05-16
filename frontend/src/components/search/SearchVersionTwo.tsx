@@ -46,38 +46,36 @@ export function SearchVersionTwo({
       />
       <QueryProvider>
         <div className="grid-container">
-          <div className="search-bar">
-            <SearchBar queryTermFromParent={convertedSearchParams.query} />
-            <DrawerUnit
-              drawerId="search-filter-drawer"
-              buttonText={t("drawer.submit")}
-              headingText={t("drawer.title")}
-            >
-              <SearchDrawerFilters
-                searchParams={convertedSearchParams}
-                searchResultsPromise={searchResultsPromise}
+          <div className="display-flex margin-bottom-2">
+            <div className="flex-6">
+              <SearchBar
+                tableView={true}
+                queryTermFromParent={convertedSearchParams.query}
               />
-            </DrawerUnit>
-          </div>
-          <div className="grid-row grid-gap">
-            <div className="tablet:grid-col-4">
-              <ContentDisplayToggle
-                showCallToAction={t("filterDisplayToggle.showFilters")}
-                hideCallToAction={t("filterDisplayToggle.hideFilters")}
-                breakpoint={Breakpoints.TABLET}
-                type="centered"
+            </div>
+            <div className="flex-2 flex-align-self-end">
+              <DrawerUnit
+                drawerId="search-filter-drawer"
+                closeText={t("drawer.submit")}
+                openText={t("filterDisplayToggle.drawer")}
+                headingText={t("drawer.title")}
+                iconName="filter_list"
               >
-                <SaveSearchPanel />
-              </ContentDisplayToggle>
+                <SearchDrawerFilters
+                  searchParams={convertedSearchParams}
+                  searchResultsPromise={searchResultsPromise}
+                />
+              </DrawerUnit>
             </div>
-            <div className="tablet:grid-col-8">
-              <SearchResults
-                searchParams={convertedSearchParams}
-                loadingMessage={t("loading")}
-                searchResultsPromise={searchResultsPromise}
-              ></SearchResults>
+            <div className="flex-3 flex-align-self-end">
+              <SaveSearchPanel />
             </div>
           </div>
+          <SearchResults
+            searchParams={convertedSearchParams}
+            loadingMessage={t("loading")}
+            searchResultsPromise={searchResultsPromise}
+          ></SearchResults>
         </div>
       </QueryProvider>
     </>
