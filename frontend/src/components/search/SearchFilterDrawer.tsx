@@ -34,11 +34,11 @@ export function SearchFilterDrawer({
         searchParams={searchParams}
         searchResultsPromise={searchResultsPromise}
       />
-      <ModalFooter>
+      <ModalFooter className="position-fixed bottom-2">
         <ModalToggleButton
           modalRef={drawerRef}
           secondary
-          className="width-full"
+          className="width-mobile"
         >
           {t("submit")}
         </ModalToggleButton>
