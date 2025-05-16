@@ -43,10 +43,10 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: /tmp/commit-hash.txt
-          key: nofos-commit-${{ github.sha }}
+          key: nofos-commit-${{ github.sha }}-${{ github.run_id }}
 
       - name: Cache Docker image
         uses: actions/cache/save@v4
         with:
           path: /tmp/docker-image.tar
-          key: nofos-image-${{ github.sha }}
+          key: nofos-image-${{ github.sha }}-${{ github.run_id }}
