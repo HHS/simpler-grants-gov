@@ -87,7 +87,7 @@ export function CheckboxFilter({
       queryParamKey={queryParamKey}
       title={title}
       wrapForScroll={wrapForScroll}
-      className="width-100"
+      className="width-100 padding-right-5"
     />
   );
 }
