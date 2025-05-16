@@ -1,6 +1,6 @@
-import SaveButton from "src/components/SaveButton";
-
 import { Meta } from "@storybook/react";
+
+import SaveButton from "src/components/SaveButton";
 
 const meta: Meta<typeof SaveButton> = {
   title: "Components/SaveButton",

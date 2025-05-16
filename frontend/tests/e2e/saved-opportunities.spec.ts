@@ -1,7 +1,4 @@
-import {
-  expect,
-  test,
-} from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
   openMobileNav,

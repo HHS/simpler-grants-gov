@@ -1,21 +1,15 @@
 import clsx from "clsx";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
-import { USWDSIcon } from "src/components/USWDSIcon";
-import {
-  getOpportunityDetails,
-} from "src/services/fetch/fetchers/opportunityFetcher";
-import {
-  fetchSavedOpportunities,
-} from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
-import {
-  Button,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Button, GridContainer } from "@trussworks/react-uswds";
+
+import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -38,7 +32,9 @@ const SavedOpportunitiesList = ({
       ),
   );
   return (
-    <ul className="usa-prose usa-list--unstyled">{savedOpportunitiesListItems}</ul>
+    <ul className="usa-prose usa-list--unstyled">
+      {savedOpportunitiesListItems}
+    </ul>
   );
 };
 
@@ -65,7 +61,9 @@ const NoSavedOpportunities = ({
   );
 };
 
-export default async function SavedOpportunities({ params }: LocalizedPageProps) {
+export default async function SavedOpportunities({
+  params,
+}: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const savedOpportunities = await fetchSavedOpportunities();

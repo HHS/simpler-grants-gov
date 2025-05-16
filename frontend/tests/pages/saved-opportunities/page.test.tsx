@@ -5,15 +5,8 @@ import {
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import {
-  localeParams,
-  mockUseTranslations,
-} from "src/utils/testing/intlMocks";
-import {
-  render,
-  screen,
-  waitFor,
-} from "tests/react-utils";
+import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
+import { render, screen, waitFor } from "tests/react-utils";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => Promise.resolve(mockUseTranslations),
