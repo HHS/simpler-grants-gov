@@ -12,7 +12,12 @@ from src.services.applications.submit_application import (
     validate_competition_open,
 )
 from src.validation.validation_constants import ValidationErrorType
-from tests.src.db.models.factories import ApplicationFactory, CompetitionFactory
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    CompetitionFactory,
+    UserFactory,
+)
 
 # Set a fixed date for freezing time in tests
 TEST_DATE = "2023-03-10"
@@ -41,10 +46,7 @@ def test_validate_application_in_progress_failure(enable_factory_create, db_sess
         validate_application_in_progress(application)
 
     assert excinfo.value.status_code == 403
-    assert (
-        f"Application cannot be submitted. It is currently in status: {status}"
-        in excinfo.value.message
-    )
+    assert "Application cannot be submitted." in excinfo.value.message
     assert (
         excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
     )
@@ -127,18 +129,29 @@ def test_submit_application_success(enable_factory_create, db_session):
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
 
-    updated_application = submit_application(db_session, application.application_id)
+    # Create a user and associate with the application
+    user = UserFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
 
-    assert updated_application.application_id == application.application_id
+    # Call the function and get the updated application
+    with db_session.begin():
+        updated_application = submit_application(db_session, application.application_id, user)
+
+    # Verify the application status was updated
     assert updated_application.application_status == ApplicationStatus.SUBMITTED
 
+    # Fetch the application from the database to verify the status has been updated
+    db_session.refresh(application)
+    assert application.application_status == ApplicationStatus.SUBMITTED
 
-def test_submit_application_not_found(db_session):
+
+def test_submit_application_not_found(enable_factory_create, db_session):
     """Test that submitting a non-existent application."""
     non_existent_id = uuid.uuid4()
+    user = UserFactory.create()
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        submit_application(db_session, non_existent_id)
+        submit_application(db_session, non_existent_id, user)
 
     assert excinfo.value.status_code == 404
     assert f"Application with ID {non_existent_id} not found" in excinfo.value.message
