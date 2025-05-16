@@ -1,16 +1,7 @@
 import { useIsSSR } from "src/hooks/useIsSSR";
 
-// import { DrawerWrapper } from "./DrawerWrapper"
-// import { DrawerWindow } from "./DrawerWindow"
-
 import { ReactNode, RefObject } from "react";
-import {
-  Modal,
-  ModalFooter,
-  ModalHeading,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
+import { Modal, ModalRef } from "@trussworks/react-uswds";
 
 export function Drawer({
   drawerRef,
@@ -37,22 +28,3 @@ export function Drawer({
     </Modal>
   );
 }
-
-/*
-
-      <ModalHeading id={`${drawerId}-heading`}>titleText</ModalHeading>
-      <div id={`${drawerId}-description`} className="usa-prose">
-        {children}
-      </div>
-      <ModalFooter>
-        <ModalToggleButton
-          modalRef={drawerRef}
-          closer
-          unstyled
-          className="padding-105 text-center"
-        >
-          close
-        </ModalToggleButton>
-      </ModalFooter>
-
-*/

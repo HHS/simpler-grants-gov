@@ -20,7 +20,7 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility, fundingInstrument, category, status } = searchParams;
+  const { eligibility, fundingInstrument, category } = searchParams;
 
   let searchResults;
   try {

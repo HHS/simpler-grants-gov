@@ -6,13 +6,13 @@ import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
 
 import { useContext, useMemo } from "react";
 
-import { AnyOptionCheckbox } from "../SearchFilterAccordion/AnyOptionCheckbox";
+import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import {
   BasicSearchFilterAccordion,
   SearchFilterAccordionProps,
-} from "../SearchFilterAccordion/SearchFilterAccordion";
-import SearchFilterCheckbox from "../SearchFilterAccordion/SearchFilterCheckbox";
-import SearchFilterSection from "../SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
+} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
+import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 
 export function CheckboxFilter({
   query,
