@@ -42,7 +42,7 @@ describe("EditSavedSearchModal", () => {
   });
 
   it("matches snapshot", async () => {
-    const { container } = render(
+    const { rerender } = render(
       <EditSavedSearchModal
         savedSearchId="1"
         editText="edit"
@@ -55,7 +55,15 @@ describe("EditSavedSearchModal", () => {
     );
     act(() => toggle.click());
 
-    expect(container).toMatchSnapshot();
+    rerender(
+      <EditSavedSearchModal
+        queryName="excellent query"
+        savedSearchId="1"
+        editText="edit"
+      />,
+    );
+
+    expect(rerender).toMatchSnapshot();
   });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
