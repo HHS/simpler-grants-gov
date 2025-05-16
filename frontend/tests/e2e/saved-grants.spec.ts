@@ -1,4 +1,7 @@
-import { expect, test } from "@playwright/test";
+import {
+  expect,
+  test,
+} from "@playwright/test";
 
 import {
   openMobileNav,
@@ -27,9 +30,9 @@ test.skip("shows save / search cta if logged in", async ({ page }, {
     await openMobileNav(page);
   }
   const savedGrantsNavItem = page.locator(".usa-nav li:nth-child(3)");
-  await expect(savedGrantsNavItem).toHaveText("Saved grants");
+  await expect(savedGrantsNavItem).toHaveText("Saved opportunities");
   await savedGrantsNavItem.click();
 
   await waitForURLChange(page, (url) => !!url.match(/saved-grants/));
-  await expect(page).toHaveTitle("Saved Grants | Simpler.Grants.gov");
+  await expect(page).toHaveTitle("Saved Opportunities | Simpler.Grants.gov");
 });

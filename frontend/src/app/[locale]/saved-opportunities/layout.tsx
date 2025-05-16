@@ -1,12 +1,10 @@
 import { Metadata } from "next";
-import { SAVED_GRANTS_CRUMBS } from "src/constants/breadcrumbs";
-import { LayoutProps } from "src/types/generalTypes";
-import { LocalizedPageProps } from "src/types/intl";
-
 import { getTranslations } from "next-intl/server";
-
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
+import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
+import { LayoutProps } from "src/types/generalTypes";
+import { LocalizedPageProps } from "src/types/intl";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -18,10 +16,10 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export default function SavedGrantsLayout({ children }: LayoutProps) {
+export default function SavedOpportunitiesLayout({ children }: LayoutProps) {
   return (
     <>
-      <Breadcrumbs breadcrumbList={SAVED_GRANTS_CRUMBS} />
+      <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
       <AuthenticationGate>{children}</AuthenticationGate>
     </>
   );
