@@ -1,5 +1,7 @@
 "use client";
 
+import { UswdsIconNames } from "src/types/generalTypes";
+
 import { ReactNode, useRef } from "react";
 import {
   ModalFooter,
@@ -14,13 +16,17 @@ import { DrawerControl } from "./DrawerControl";
 export function DrawerUnit({
   drawerId,
   children,
-  buttonText,
+  closeText,
+  openText,
   headingText,
+  iconName,
 }: {
   drawerId: string;
   children: ReactNode;
-  buttonText: string;
+  closeText: string;
+  openText: string;
   headingText: string;
+  iconName?: UswdsIconNames;
 }) {
   const drawerRef = useRef<ModalRef>(null);
   return (
@@ -42,13 +48,17 @@ export function DrawerUnit({
                 secondary
                 className="width-full"
               >
-                {buttonText}
+                {closeText}
               </ModalToggleButton>
             </ModalFooter>
           </div>
         </div>
       </Drawer>
-      <DrawerControl drawerRef={drawerRef} />
+      <DrawerControl
+        drawerRef={drawerRef}
+        buttonText={openText}
+        iconName={iconName}
+      />
     </>
   );
 }
