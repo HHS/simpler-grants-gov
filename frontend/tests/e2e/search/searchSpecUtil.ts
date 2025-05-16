@@ -108,12 +108,13 @@ export async function clickPaginationPageNumber(
 }
 
 export async function clickLastPaginationPage(page: Page) {
-  const paginationButtons = page.locator("li > button");
+  const paginationButtons = page.locator("li.usa-pagination__page-no > button");
   const count = await paginationButtons.count();
 
   // must be more than 1 page
   if (count > 2) {
-    await paginationButtons.nth(count - 2).click();
+    const button = paginationButtons.nth(count - 1);
+    await button.click();
   }
   // Delay for pagination debounce
   await page.waitForTimeout(400);

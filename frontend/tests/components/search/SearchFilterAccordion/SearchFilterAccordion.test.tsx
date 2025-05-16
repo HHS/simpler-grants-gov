@@ -144,9 +144,11 @@ describe("SearchFilterAccordion", () => {
       />,
     );
 
-    const scrollableContainer = screen.getByTestId(`${title}-accordion-scroll`);
+    const scrollableContainer = screen.getByTestId(
+      `accordionItem_opportunity-filter-${queryParamKey}`,
+    );
 
-    expect(scrollableContainer).toHaveClass("overflow-scroll");
+    expect(scrollableContainer).toHaveClass("overflow-auto");
 
     const initialScrollTop = scrollableContainer.scrollTop;
 
