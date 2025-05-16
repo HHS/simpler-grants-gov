@@ -493,3 +493,13 @@ button.usa-pagination__button.usa-button {
     overflow-wrap: break-word;
   }
 }
+
+#search-filter-drawer {
+  text-align: right;
+  .usa-modal-overlay {
+    padding: 0;
+  }
+  .usa-modal__main {
+    width: 100%;
+  }
+}

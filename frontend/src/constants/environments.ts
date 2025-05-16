@@ -16,6 +16,7 @@ const {
   FEATURE_SAVED_OPPORTUNITIES_ON,
   FEATURE_SAVED_SEARCHES_ON,
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  FEATURE_SEARCH_V2_ON,
   AUTH_LOGIN_URL,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
@@ -29,6 +30,7 @@ export const featureFlags = {
   savedOpportunitiesOn: FEATURE_SAVED_OPPORTUNITIES_ON,
   savedSearchesOn: FEATURE_SAVED_SEARCHES_ON,
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  searchDrawerOn: FEATURE_SEARCH_V2_ON,
 };
 
 // home for all interpreted server side environment variables

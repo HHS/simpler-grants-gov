@@ -59,7 +59,6 @@ describe("SearchResults", () => {
           agency: new Set(),
           eligibility: new Set(),
         }}
-        query={""}
         loadingMessage={""}
         searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}
       />,
