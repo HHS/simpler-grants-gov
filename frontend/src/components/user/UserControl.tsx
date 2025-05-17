@@ -132,7 +132,7 @@ export const UserControl = () => {
     });
 
     logoutLocalUser();
-    router.refresh();
+    router.push("/")
   }, [logoutLocalUser, router]);
 
   return (
