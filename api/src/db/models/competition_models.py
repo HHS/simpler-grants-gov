@@ -150,6 +150,8 @@ class Application(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkApplicationStatus.application_status_id),
     )
 
+    application_name: Mapped[str | None]
+
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
     )

@@ -8,6 +8,7 @@ import {
 } from "src/constants/defaultFeatureFlags";
 import { environment, featureFlags } from "src/constants/environments";
 import {
+  assignBaseFlags,
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
@@ -38,7 +39,7 @@ export class FeatureFlagsManager {
   // this supports easier integration of the class on the client side, as server side flags can be passed down
   private _envVarFlags;
 
-  constructor(envVarFlags: FeatureFlags) {
+  constructor(envVarFlags: OptionalStringDict) {
     this._envVarFlags = envVarFlags;
   }
 
@@ -46,7 +47,7 @@ export class FeatureFlagsManager {
     return { ...this._defaultFeatureFlags };
   }
 
-  private get featureFlagsFromEnvironment(): FeatureFlags {
+  private get featureFlagsFromEnvironment(): OptionalStringDict {
     return { ...this._envVarFlags };
   }
 
@@ -60,10 +61,10 @@ export class FeatureFlagsManager {
 
   */
   get featureFlags(): FeatureFlags {
-    return {
-      ...this.defaultFeatureFlags,
-      ...this.featureFlagsFromEnvironment,
-    };
+    return assignBaseFlags(
+      this.defaultFeatureFlags,
+      this.featureFlagsFromEnvironment,
+    );
   }
 
   /**

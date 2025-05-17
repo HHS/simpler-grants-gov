@@ -4,6 +4,7 @@ from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixin
 
 class ApplicationStartRequestSchema(Schema):
     competition_id = fields.UUID(required=True)
+    application_name = fields.String(required=False, allow_none=True)
 
 
 class ApplicationStartResponseDataSchema(Schema):
