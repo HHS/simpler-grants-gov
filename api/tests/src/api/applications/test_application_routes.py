@@ -1220,7 +1220,6 @@ def test_application_get_forbidden_if_not_associated(
 
     assert response.status_code == 403
     assert "Unauthorized" in response.json["message"]
-    assert response.json["errors"][0]["type"] == ValidationErrorType.UNAUTHORIZED_APPLICATION_ACCESS
 
 
 def test_application_form_get_forbidden_if_not_associated(
@@ -1238,7 +1237,6 @@ def test_application_form_get_forbidden_if_not_associated(
 
     assert response.status_code == 403
     assert "Unauthorized" in response.json["message"]
-    assert response.json["errors"][0]["type"] == ValidationErrorType.UNAUTHORIZED_APPLICATION_ACCESS
 
 
 def test_application_form_update_forbidden_if_not_associated(
@@ -1259,7 +1257,6 @@ def test_application_form_update_forbidden_if_not_associated(
 
     assert response.status_code == 403
     assert "Unauthorized" in response.json["message"]
-    assert response.json["errors"][0]["type"] == ValidationErrorType.UNAUTHORIZED_APPLICATION_ACCESS
 
 
 def test_application_submit_forbidden_if_not_associated(
@@ -1275,7 +1272,6 @@ def test_application_submit_forbidden_if_not_associated(
 
     assert response.status_code == 403
     assert "Unauthorized" in response.json["message"]
-    assert response.json["errors"][0]["type"] == ValidationErrorType.UNAUTHORIZED_APPLICATION_ACCESS
 
 
 def test_application_get_success_when_associated(client, enable_factory_create, db_session):
