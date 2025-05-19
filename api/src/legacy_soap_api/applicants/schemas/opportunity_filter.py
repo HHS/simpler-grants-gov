@@ -8,7 +8,7 @@ class OpportunityFilter(BaseModel):
     competition_id: str | None = Field(default=None, alias="CompetitionID")
 
     @model_validator(mode="after")
-    def validate(self) -> Self:
+    def validate_opportunity_filter(self) -> Self:
         if not any([self.cfda_number, self.competition_id, self.funding_opportunity_number]):
             raise ValueError("Error")
         if self.competition_id and not (self.cfda_number or self.funding_opportunity_number):
