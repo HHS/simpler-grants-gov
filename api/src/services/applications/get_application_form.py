@@ -23,9 +23,6 @@ def get_application_form(
     # Get the application
     application = get_application(db_session, application_id, user)
 
-    if not application:
-        raise_flask_error(404, f"Application with ID {application_id} not found")
-
     # Get the application form
     application_form = db_session.execute(
         select(ApplicationForm).where(

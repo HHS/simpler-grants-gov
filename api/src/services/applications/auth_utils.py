@@ -1,6 +1,5 @@
 import logging
 
-from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
@@ -24,14 +23,4 @@ def check_user_application_access(application: Application, user: User) -> None:
                 "application_id": application.application_id,
             },
         )
-        raise_flask_error(
-            403,
-            "Unauthorized",
-            validation_issues=[
-                ValidationErrorDetail(
-                    type="unauthorized_application_access",
-                    message="Unauthorized",
-                    field="application_id",
-                )
-            ],
-        )
+        raise_flask_error(403, "Unauthorized")
