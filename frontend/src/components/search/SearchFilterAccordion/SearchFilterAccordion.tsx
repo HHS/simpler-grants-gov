@@ -138,6 +138,7 @@ const AccordionContent = ({
   );
 };
 
+// current prod implementation, assumes all filters will be checkbox based
 export function SearchFilterAccordion({
   filterOptions,
   title,
@@ -181,6 +182,7 @@ export function SearchFilterAccordion({
   );
 }
 
+// new implementation, flexible to take whatever content it gets fed, not just checkboxes
 export function BasicSearchFilterAccordion({
   content,
   title,
