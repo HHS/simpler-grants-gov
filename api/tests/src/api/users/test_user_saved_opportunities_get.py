@@ -134,7 +134,10 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Forbidden: You do not have permission to view this content."
+    assert (
+        response.json["message"]
+        == "Forbidden: You do not have permission to perform this operation."
+    )
 
     # Try with a non-existent user ID
     different_user_id = "123e4567-e89b-12d3-a456-426614174000"
@@ -150,7 +153,10 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Forbidden: You do not have permission to view this content."
+    assert (
+        response.json["message"]
+        == "Forbidden: You do not have permission to perform this operation."
+    )
 
 
 @pytest.mark.parametrize(

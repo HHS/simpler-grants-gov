@@ -183,7 +183,7 @@ def user_save_opportunity(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     with db_session.begin():
         create_saved_opportunity(db_session, user_id, json_data)
@@ -212,7 +212,7 @@ def user_delete_saved_opportunity(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     with db_session.begin():
         # Delete the saved opportunity
@@ -236,7 +236,7 @@ def user_get_saved_opportunities(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     # Get all saved opportunities for the user with their related opportunity data
     saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
@@ -264,7 +264,7 @@ def user_save_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     with db_session.begin():
         saved_search = create_saved_search(search_client, db_session, user_id, json_data)
@@ -294,7 +294,7 @@ def user_delete_saved_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     with db_session.begin():
         delete_saved_search(db_session, user_id, saved_search_id)
@@ -324,7 +324,7 @@ def user_get_saved_searches(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     saved_searches, pagination_info = get_saved_searches(db_session, user_id, json_data)
 
@@ -350,7 +350,7 @@ def user_update_saved_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(403, "Forbidden: You do not have permission to view this content.")
+        raise_flask_error(403, "Forbidden: You do not have permission to perform this operation.")
 
     with db_session.begin():
         updated_saved_search = update_saved_search(db_session, user_id, saved_search_id, json_data)

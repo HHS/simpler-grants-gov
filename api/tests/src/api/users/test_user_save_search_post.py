@@ -67,7 +67,10 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Forbidden: You do not have permission to view this content."
+    assert (
+        response.json["message"]
+        == "Forbidden: You do not have permission to perform this operation."
+    )
 
     # Verify no search was saved
     saved_searches = (

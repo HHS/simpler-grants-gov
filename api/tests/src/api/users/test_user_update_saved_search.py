@@ -73,7 +73,10 @@ def test_user_update_saved_search_unauthorized(
     db_session.refresh(saved_search)
 
     assert response.status_code == 403
-    assert response.json["message"] == "Forbidden: You do not have permission to view this content."
+    assert (
+        response.json["message"]
+        == "Forbidden: You do not have permission to perform this operation."
+    )
 
     # Verify search was not updated
     saved_searches = db_session.query(UserSavedSearch).first()
