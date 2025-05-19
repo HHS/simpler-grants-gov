@@ -19,8 +19,8 @@ def test_user_save_opportunity_post_unauthorized_user(
         json={"opportunity_id": opportunity.opportunity_id},
     )
 
-    assert response.status_code == 401
-    assert response.json["message"] == "Unauthorized user"
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden: You do not have permission to view this content."
 
     # Verify no opportunity was saved
     saved_opportunities = (
