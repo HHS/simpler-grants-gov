@@ -1,7 +1,14 @@
 from pydantic import BaseModel
 
 
-class LegacySOAPResponse(BaseModel):
+class SOAPRequest(BaseModel):
+    data: bytes
+    full_path: str
+    headers: dict
+    method: str
+
+
+class SOAPProxyResponse(BaseModel):
     data: bytes
     status_code: int
     headers: dict
