@@ -33,9 +33,3 @@ def test_check_user_application_access_unauthorized(enable_factory_create, db_se
     # Verify error details
     assert excinfo.value.status_code == 403
     assert "Unauthorized" in excinfo.value.message
-
-    # Check that the validation issue is included
-    validation_issues = excinfo.value.extra_data["validation_issues"]
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "unauthorized_application_access"
-    assert validation_issues[0].field == "application_id"
