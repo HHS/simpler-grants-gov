@@ -101,6 +101,6 @@ export default withFeatureFlag<SearchPageProps, React.ReactNode>(
   withFeatureFlag<SearchPageProps, never>(Search, "searchOff", () =>
     redirect("/maintenance"),
   ),
-  "searchV2On",
+  "filterDrawerOn",
   (props) => <SearchVersionTwo {...props} />,
 );
