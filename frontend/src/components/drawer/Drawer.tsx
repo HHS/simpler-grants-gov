@@ -24,6 +24,7 @@ export function Drawer({
 }) {
   const isSSR = useIsSSR();
 
+  // console.log("$$$ drawer ref", drawerRef.current);
   return (
     <Modal
       ref={drawerRef}
