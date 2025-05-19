@@ -9,7 +9,7 @@ from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
-from src.search.search_models import BoolSearchFilter
+from src.search.search_models import BoolSearchFilter, StrSearchFilter
 from src.services.agencies_v1.experimental_constant import DEFAULT
 from src.services.opportunities_v1.search_opportunities import _adjust_field_name
 from src.services.service_utils import _add_search_filters
@@ -25,10 +25,7 @@ AGENCY_REQUEST_FIELD_NAME_MAPPING = {
 
 
 class AgencySearchFilters(BaseModel):
-    has_open_opportunity: BoolSearchFilter | None = None
-    has_closed_opportunity: BoolSearchFilter | None = None
-    has_forecasted_opportunity: BoolSearchFilter | None = None
-    has_archived_opportunity: BoolSearchFilter | None = None
+    opportunity_statuses: StrSearchFilter | None = None
     is_test_agency: BoolSearchFilter | None = None
 
 

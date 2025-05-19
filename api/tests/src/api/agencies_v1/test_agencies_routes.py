@@ -180,10 +180,9 @@ class TestAgenciesRoutes(BaseTestClass):
 
         # only agency associated with opportunity of closed/archived status is returned and the respective top_level_agencies
         assert len(data_inactive) == 4
-        import pdb; pdb.set_trace()
 
         assert set([agency["agency_code"] for agency in data_inactive]) == set(
-            [opp.agency_code for opp in [dod_darpa,usda_crees, darpa, usda]]
+            [opp.agency_code for opp in [dod_darpa, usda_crees, darpa, usda]]
         )
 
     def test_agencies_active_no_duplicate(

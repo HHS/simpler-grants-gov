@@ -1,7 +1,8 @@
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -23,24 +24,9 @@ class AgencyListRequestSchema(Schema):
 
 
 class AgencySearchFilterV1Schema(Schema):
-    has_open_opportunity = fields.Nested(
-        BoolSearchSchemaBuilder("HasActiveOpportunityFilterV1Schema")
-        .with_one_of(example=True)
-        .build()
-    )
-    has_closed_opportunity = fields.Nested(
-        BoolSearchSchemaBuilder("HasClosedOpportunityFilterV1Schema")
-        .with_one_of(example=True)
-        .build()
-    )
-    has_forecasted_opportunity = fields.Nested(
-        BoolSearchSchemaBuilder("HasForecastedOpportunityFilterV1Schema")
-        .with_one_of(example=True)
-        .build()
-    )
-    has_archived_opportunity = fields.Nested(
-        BoolSearchSchemaBuilder("HasArchivedOpportunityFilterV1Schema")
-        .with_one_of(example=True)
+    opportunity_statuses = fields.Nested(
+        StrSearchSchemaBuilder("OpportunityStatusesFilterV1Schema")
+        .with_one_of(example="archived")
         .build()
     )
     is_test_agency = fields.Nested(
@@ -118,31 +104,13 @@ class AgencyV1Schema(Schema):
             "example": False,
         },
     )
-    has_open_opportunity = fields.Boolean(
+    opportunity_statuses = fields.List(
+        fields.Enum(OpportunityStatus),
         metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently open",
-            "example": False,
+            "description": "List of opportunity statuses the agency is linked with.",
+            "example": ["posted"],
         },
     )
-    has_forecasted_opportunity = fields.Boolean(
-        metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently forecasted",
-            "example": False,
-        },
-    )
-    has_closed_opportunity = fields.Boolean(
-        metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently closed",
-            "example": False,
-        },
-    )
-    has_archived_opportunity = fields.Boolean(
-        metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently archived",
-            "example": False,
-        },
-    )
-
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 

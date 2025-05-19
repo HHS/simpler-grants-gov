@@ -1,5 +1,6 @@
 import pytest
 
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
@@ -98,7 +99,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         dod_agency = next(agency for agency in resp.records if agency["agency_name"] == "DOD")
         nih_agency = next(agency for agency in resp.records if agency["agency_name"] == "NIH")
 
-        assert hhs_agency["has_open_opportunity"]
-        assert usda_agency["has_closed_opportunity"]
-        assert dod_agency["has_forecasted_opportunity"]
-        assert nih_agency["has_archived_opportunity"]
+        assert hhs_agency["opportunity_statuses"] == [OpportunityStatus.POSTED.value]
+        assert usda_agency["opportunity_statuses"] == [OpportunityStatus.CLOSED.value]
+        assert dod_agency["opportunity_statuses"] == [OpportunityStatus.FORECASTED.value]
+        assert nih_agency["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]

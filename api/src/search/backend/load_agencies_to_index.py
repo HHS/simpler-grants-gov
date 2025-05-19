@@ -49,10 +49,14 @@ class LoadAgenciesToIndex(Task):
     def run_task(self) -> None:
         logger.info("Creating search index")
         # create the index
+        # Here, we explicitly map `opportunity_statuses` as a`keyword` field
+        # so that it supports exact match filtering, aggregations, and sorting
+        # See: https://docs.opensearch.org/docs/latest/field-types/supported-field-types/keyword/
         self.search_client.create_index(
             self.index_name,
             shard_count=self.config.shard_count,
             replica_count=self.config.replica_count,
+            mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}},
         )
         # load the records
         agencies = self.fetch_agencies()
@@ -76,8 +80,8 @@ class LoadAgenciesToIndex(Task):
     def _get_agencies_by_status(self, status: OpportunityStatus) -> set[Agency]:
         """Fetch agencies based on the status."""
         agencies_subquery = (
-            _construct_active_inner_query(Agency.agency_id, status)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id, status))
+            _construct_active_inner_query(Agency.agency_id, [status])
+            .union(_construct_active_inner_query(Agency.top_level_agency_id, [status]))
             .subquery()
         )
 
@@ -102,10 +106,26 @@ class LoadAgenciesToIndex(Task):
 
             agency_json = SCHEMA.dump(agency)
 
-            agency_json["has_open_opportunity"] = agency.agency_id in posted_agencies
-            agency_json["has_forecasted_opportunity"] = agency.agency_id in forecasted_agencies
-            agency_json["has_closed_opportunity"] = agency.agency_id in closed_agencies
-            agency_json["has_archived_opportunity"] = agency.agency_id in archived_agencies
+            opportunity_statuses = []
+
+            if agency.agency_id in posted_agencies:
+                opportunity_statuses.append(OpportunityStatus.POSTED.value)
+
+            if agency.agency_id in forecasted_agencies:
+                opportunity_statuses.append(OpportunityStatus.FORECASTED.value)
+
+            if agency.agency_id in closed_agencies:
+                opportunity_statuses.append(OpportunityStatus.CLOSED.value)
+
+            if agency.agency_id in archived_agencies:
+                opportunity_statuses.append(OpportunityStatus.ARCHIVED.value)
+
+            agency_json["opportunity_statuses"] = opportunity_statuses
+
+            logger.info(
+                "Assigned linked opportunity statuses to agency",
+                extra={"agency_id": agency.agency_id, "opportunity_statuses": opportunity_statuses},
+            )
 
             agencies_json.append(agency_json)
 

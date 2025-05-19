@@ -59,27 +59,35 @@ def get_agencies(
         agency_subquery = None
         if list_params.filters.active:
             agency_subquery = (
-                _construct_active_inner_query(Agency.agency_id, [OpportunityStatus.POSTED,OpportunityStatus.FORECASTED])
+                _construct_active_inner_query(
+                    Agency.agency_id, [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+                )
                 .union(
-                    _construct_active_inner_query(Agency.top_level_agency_id, [OpportunityStatus.POSTED,OpportunityStatus.FORECASTED])
+                    _construct_active_inner_query(
+                        Agency.top_level_agency_id,
+                        [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED],
+                    )
                 )
                 .subquery()
             )
 
         elif list_params.filters.active is False:
             agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id, [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED])
-            .union(
-                _construct_active_inner_query(Agency.top_level_agency_id,
-                                              [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED])
+                _construct_active_inner_query(
+                    Agency.agency_id, [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED]
+                )
+                .union(
+                    _construct_active_inner_query(
+                        Agency.top_level_agency_id,
+                        [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED],
+                    )
+                )
+                .subquery()
             )
-            .subquery()
-        )
 
         if agency_subquery is not None:
             agency_id_stmt = select(agency_subquery).distinct()
             stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
-
 
     # Sort
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)

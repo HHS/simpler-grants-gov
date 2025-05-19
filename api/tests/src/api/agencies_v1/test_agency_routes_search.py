@@ -1,8 +1,8 @@
 import pytest
 
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
+from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_models import SortDirection
-from src.services.service_utils import OPPORTUNITY_FLAGS
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import AgencyFactory
 
@@ -28,11 +28,16 @@ class TestAgencyRoutesSearch(BaseTestClass):
         schema = AgencyV1Schema()
         json_records = [schema.dump(agency) for agency in AGENCIES]
 
+        statuses = [
+            OpportunityStatus.POSTED.value,
+            OpportunityStatus.FORECASTED.value,
+            OpportunityStatus.CLOSED.value,
+            OpportunityStatus.ARCHIVED.value,
+        ]
         # Assign a status flag
         for i, record in enumerate(json_records):
-            active_status = OPPORTUNITY_FLAGS[i // 2]
-            for status in OPPORTUNITY_FLAGS:
-                record[status] = status == active_status
+            status_index = (i // 2) % len(statuses)
+            record["opportunity_statuses"] = [statuses[status_index]]
 
         search_client.bulk_upsert(
             agency_index,
@@ -86,10 +91,14 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         ],
                     },
                     "filters": {
-                        "has_open_opportunity": {"one_of": [True]},
-                        "has_forecasted_opportunity": {"one_of": [True]},
-                        "has_closed_opportunity": {"one_of": [True]},
-                        "has_archived_opportunity": {"one_of": [True]},
+                        "opportunity_statuses": {
+                            "one_of": [
+                                OpportunityStatus.POSTED,
+                                OpportunityStatus.FORECASTED,
+                                OpportunityStatus.ARCHIVED,
+                                OpportunityStatus.CLOSED,
+                            ]
+                        },
                     },
                 },
                 AGENCIES,
@@ -105,8 +114,9 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         ],
                     },
                     "filters": {
-                        "has_open_opportunity": {"one_of": [True]},
-                        "has_forecasted_opportunity": {"one_of": [True]},
+                        "opportunity_statuses": {
+                            "one_of": [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+                        },
                     },
                 },
                 [DOA, DOD, DOD_HRE, DOD_MCO],
@@ -121,7 +131,13 @@ class TestAgencyRoutesSearch(BaseTestClass):
                         ],
                     },
                     "filters": {
-                        "has_archived_opportunity": {"one_of": [0]},
+                        "opportunity_statuses": {
+                            "one_of": [
+                                OpportunityStatus.POSTED,
+                                OpportunityStatus.CLOSED,
+                                OpportunityStatus.FORECASTED,
+                            ]
+                        },
                     },
                 },
                 [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC],
@@ -138,7 +154,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                     },
                     "filters": {
                         "is_test_agency": {"one_of": [False]},
-                        "has_archived_opportunity": {"one_of": [True]},
+                        "opportunity_statuses": {"one_of": [OpportunityStatus.ARCHIVED]},
                     },
                 },
                 [HHS_NIH],
@@ -155,7 +171,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
                     },
                     "filters": {
                         "is_test_agency": {"one_of": [True]},
-                        "has_open_opportunity": {"one_of": [True]},
+                        "opportunity_statuses": {"one_of": [OpportunityStatus.POSTED]},
                     },
                 },
                 [],
@@ -167,7 +183,6 @@ class TestAgencyRoutesSearch(BaseTestClass):
             "/v1/agencies/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         data = resp.json["data"]
-        # import pdb; pdb.set_trace()
         assert resp.status_code == 200
         assert len(data) == len(expected_result)
         assert [d["agency_id"] for d in data] == [str(exp.agency_id) for exp in expected_result]
