@@ -9,9 +9,14 @@ import { fetchApplicationWithMethod } from "./fetchers";
 
 export const handleStartApplication = async (
   competitionID: string,
+  token: string,
 ): Promise<ApplicationStartApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
+    additionalHeaders: ssgToken,
     body: { competition_id: competitionID },
   });
 
@@ -20,9 +25,14 @@ export const handleStartApplication = async (
 
 export const getApplicationDetails = async (
   applicationId: string,
+  token: string,
 ): Promise<ApplicationDetailApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
   const response = await fetchApplicationWithMethod("GET")({
     subPath: applicationId,
+    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;

@@ -6,6 +6,7 @@ import {
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
 
+import { useTranslation } from "next-intl";
 import { JSX } from "react";
 
 import {
