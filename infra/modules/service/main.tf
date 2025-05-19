@@ -52,6 +52,11 @@ locals {
     { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value },
     { name : "IMAGE_TAG", value : var.image_tag },
   ], local.hostname)
+
+  alb_environment_variables = var.enable_load_balancer ? [
+    { name : "LOAD_BALANCER_DNS_NAME", value : aws_lb.alb[0].dns_name },
+  ] : []
+
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
@@ -64,6 +69,7 @@ locals {
   ] : []
   environment_variables = concat(
     local.base_environment_variables,
+    local.alb_environment_variables,
     local.db_environment_variables,
     local.cdn_environment_variables,
     [
