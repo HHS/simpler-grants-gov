@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
 
+from .opportunity_filter import OpportunityFilter
+
 
 class GetOpportunityListRequest(BaseModel):
     package_id: str | None = Field(default=None, alias="PackageID")

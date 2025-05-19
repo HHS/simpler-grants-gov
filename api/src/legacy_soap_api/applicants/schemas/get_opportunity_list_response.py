@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.legacy_soap_api.applicants.schemas import OpportunityDetails
+from .opportunity_details import OpportunityDetails
 
 
 class GetOpportunityListResponse(BaseModel):
