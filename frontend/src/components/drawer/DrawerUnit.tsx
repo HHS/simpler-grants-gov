@@ -3,16 +3,12 @@
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { ReactNode, useRef } from "react";
-import {
-  ModalFooter,
-  ModalHeading,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { Drawer } from "./Drawer";
 import { DrawerControl } from "./DrawerControl";
 
+// largely state / ref management for a modal / drawer setup defined in child components and passed children
 export function DrawerUnit({
   drawerId,
   children,
@@ -31,28 +27,13 @@ export function DrawerUnit({
   const drawerRef = useRef<ModalRef>(null);
   return (
     <>
-      <Drawer drawerRef={drawerRef} drawerId={drawerId}>
-        <div className="width-full display-flex flex-column maxh-tablet">
-          <div className="flex-1">
-            <ModalHeading id={`${drawerId}-heading`}>
-              {headingText}
-            </ModalHeading>
-          </div>
-          <div className="overflow-auto border-top-05 flex-8 border-bottom-05 border-base-lightest padding-bottom-1">
-            {children}
-          </div>
-          <div className="flex-1">
-            <ModalFooter>
-              <ModalToggleButton
-                modalRef={drawerRef}
-                secondary
-                className="width-full"
-              >
-                {closeText}
-              </ModalToggleButton>
-            </ModalFooter>
-          </div>
-        </div>
+      <Drawer
+        drawerRef={drawerRef}
+        drawerId={drawerId}
+        headingText={headingText}
+        closeText={closeText}
+      >
+        {children}
       </Drawer>
       <DrawerControl
         drawerRef={drawerRef}
