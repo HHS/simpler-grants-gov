@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
     competition_id = json_data["competition_id"]
+    # application_name is optional, so we use get to avoid a KeyError
+    application_name = json_data.get("application_name", None)
     add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("POST /alpha/applications/start")
 
@@ -42,7 +44,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     user = token_session.user
 
     with db_session.begin():
-        application = create_application(db_session, competition_id, user)
+        application = create_application(db_session, competition_id, user, application_name)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
