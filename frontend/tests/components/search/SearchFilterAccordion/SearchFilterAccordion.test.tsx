@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom/extend-expect";
-
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
@@ -236,35 +234,6 @@ describe("BasicSearchFilterAccordion", () => {
       />,
     );
     expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
-  });
-  // dug into the code on this one - it works in the wild, but in the code it depends on an internal state update that doesn't seem to happen in this test for some reason
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("collapses based on expanded param", () => {
-    const { rerender } = render(
-      <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
-        title={title}
-        queryParamKey={"status"}
-        query={new Set()}
-        expanded={false}
-      />,
-    );
-    let contentDiv = screen.getByTestId(
-      "accordionItem_opportunity-filter-status",
-    );
-    expect(contentDiv).toHaveAttribute("hidden");
-
-    rerender(
-      <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
-        title={title}
-        queryParamKey={"status"}
-        query={new Set()}
-        expanded={true}
-      />,
-    );
-    contentDiv = screen.getByTestId("accordionItem_opportunity-filter-status");
-    expect(contentDiv).not.toHaveAttribute("hidden");
   });
   it("displays content", () => {
     render(

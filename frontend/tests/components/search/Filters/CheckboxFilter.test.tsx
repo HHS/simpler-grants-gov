@@ -108,5 +108,38 @@ describe("CheckboxFilter", () => {
     });
     expect(anyCheckbox).toBeInTheDocument();
   });
-  it("collapses if there are no selected options", () => {});
+
+  it("should be expanded by default if there are selected options", () => {
+    render(
+      <CheckboxFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("Cooperative Agreement")}
+        facetCounts={fakeFacetCounts}
+        includeAnyOption={false}
+      />,
+    );
+
+    const checkbox = screen.getByText("Cooperative Agreement");
+
+    expect(checkbox).toBeVisible();
+  });
+
+  it("should not be expanded by default if there no are selected options", () => {
+    render(
+      <CheckboxFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set()}
+        facetCounts={fakeFacetCounts}
+        includeAnyOption={false}
+      />,
+    );
+
+    const checkbox = screen.queryByText("Cooperative Agreement");
+
+    expect(checkbox).not.toBeVisible();
+  });
 });
