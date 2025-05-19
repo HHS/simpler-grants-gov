@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { SearchResponseData } from "src/types/search/searchResponseTypes";
+import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";

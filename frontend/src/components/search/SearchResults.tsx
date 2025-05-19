@@ -1,5 +1,7 @@
-import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import {
+  QueryParamData,
+  SearchAPIResponse,
+} from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
 

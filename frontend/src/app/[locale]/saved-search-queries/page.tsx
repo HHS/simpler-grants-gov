@@ -4,7 +4,7 @@ import { LocalizedPageProps } from "src/types/intl";
 import {
   ValidSearchQueryParam,
   validSearchQueryParamKeys,
-} from "src/types/search/searchResponseTypes";
+} from "src/types/search/searchQueryTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { getTranslations } from "next-intl/server";

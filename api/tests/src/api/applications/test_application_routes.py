@@ -16,6 +16,7 @@ from tests.src.db.models.factories import (
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
+    OpportunityFactory,
     UserFactory,
 )
 
@@ -1051,3 +1052,78 @@ def test_application_start_associates_user(client, enable_factory_create, db_ses
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_with_custom_name(client, enable_factory_create, db_session):
+    """Test application creation succeeds with custom application name"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=5)
+
+    competition = CompetitionFactory.create(opening_date=past_opening_date, closing_date=None)
+
+    custom_name = "My Test Application"
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id, "application_name": custom_name}
+
+    # Create a user and get a token
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with custom name
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.application_name == custom_name
+
+
+@freeze_time(TEST_DATE)
+def test_application_start_with_default_name(client, enable_factory_create, db_session):
+    """Test application creation uses opportunity number as default application name"""
+    today = get_now_us_eastern_date()
+    past_opening_date = today - timedelta(days=5)
+
+    # Create opportunity with a specific opportunity_number
+    opportunity = OpportunityFactory.create(opportunity_number="TEST-OPP-123")
+    competition = CompetitionFactory.create(
+        opening_date=past_opening_date, closing_date=None, opportunity=opportunity
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}  # No application_name provided
+
+    # Create a user and get a token
+    user = UserFactory.create()
+    user_auth_token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with opportunity number as name
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.application_name == "TEST-OPP-123"
