@@ -30,7 +30,7 @@ class AgencyListParams(BaseModel):
 
 
 def _construct_active_inner_query(
-    field: InstrumentedAttribute[Any], opportunity_status: OpportunityStatus
+    field: InstrumentedAttribute[Any], opportunity_status: list[OpportunityStatus]
 ) -> Select:
     return (
         select(field)
@@ -39,7 +39,7 @@ def _construct_active_inner_query(
         .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
         .where(
             CurrentOpportunitySummary.opportunity_status.in_(
-                [opportunity_status],
+                opportunity_status,
             )
         )
     )
@@ -55,33 +55,31 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    if list_params.filters and list_params.filters.active:
-        posted_agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id, OpportunityStatus.POSTED)
-            .union(
-                _construct_active_inner_query(Agency.top_level_agency_id, OpportunityStatus.POSTED)
-            )
-            .subquery()
-        )
-        forecasted_agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id, OpportunityStatus.FORECASTED)
-            .union(
-                _construct_active_inner_query(
-                    Agency.top_level_agency_id, OpportunityStatus.FORECASTED
+    if list_params.filters:
+        agency_subquery = None
+        if list_params.filters.active:
+            agency_subquery = (
+                _construct_active_inner_query(Agency.agency_id, [OpportunityStatus.POSTED,OpportunityStatus.FORECASTED])
+                .union(
+                    _construct_active_inner_query(Agency.top_level_agency_id, [OpportunityStatus.POSTED,OpportunityStatus.FORECASTED])
                 )
+                .subquery()
+            )
+
+        elif list_params.filters.active is False:
+            agency_subquery = (
+            _construct_active_inner_query(Agency.agency_id, [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED])
+            .union(
+                _construct_active_inner_query(Agency.top_level_agency_id,
+                                              [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED])
             )
             .subquery()
         )
 
-        combined_union = (
-            select(posted_agency_subquery.c.agency_id)
-            .union(select(forecasted_agency_subquery.c.agency_id))
-            .subquery()
-        )
+        if agency_subquery is not None:
+            agency_id_stmt = select(agency_subquery).distinct()
+            stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
 
-        agency_id_stmt = select(combined_union).distinct()
-
-        stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
 
     # Sort
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
