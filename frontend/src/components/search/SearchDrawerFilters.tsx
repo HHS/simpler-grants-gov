@@ -39,7 +39,6 @@ export async function SearchDrawerFilters({
         queryParamKey="fundingInstrument"
         title={t("accordion.titles.funding")}
         facetCounts={facetCounts?.funding_instrument || {}}
-        wrapForScroll={true}
       />
       <CheckboxFilter
         query={eligibility}
@@ -47,7 +46,6 @@ export async function SearchDrawerFilters({
         title={t("accordion.titles.eligibility")}
         filterOptions={eligibilityOptions}
         facetCounts={facetCounts?.applicant_type || {}}
-        wrapForScroll={true}
       />
       <CheckboxFilter
         filterOptions={categoryOptions}
@@ -55,7 +53,6 @@ export async function SearchDrawerFilters({
         queryParamKey={"category"}
         title={t("accordion.titles.category")}
         facetCounts={facetCounts?.funding_category || {}}
-        wrapForScroll={true}
       />
     </>
   );

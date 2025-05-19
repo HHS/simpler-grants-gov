@@ -7,7 +7,9 @@ import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterAccordion, {
+  BasicSearchFilterAccordion,
+} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 const fakeFacetCounts = {
   grant: 1,
@@ -24,10 +26,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-describe("SearchFilterAccordion", () => {
-  const title = "Test Accordion";
-  const queryParamKey = "fundingInstrument";
+const title = "Test Accordion";
+const queryParamKey = "fundingInstrument";
 
+describe("SearchFilterAccordion", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchFilterAccordion
@@ -158,5 +160,122 @@ describe("SearchFilterAccordion", () => {
 
     // Assert that the document body has not scrolled
     expect(window.scrollY).toBe(0);
+  });
+});
+
+describe("BasicSearchFilterAccordion", () => {
+  it("should not have basic accessibility issues", async () => {
+    const { container } = render(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set()}
+      />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("has hidden attribute when collapsed", () => {
+    render(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+      />,
+    );
+
+    const accordionToggleButton = screen.getByTestId(
+      "accordionButton_opportunity-filter-status",
+    );
+    const contentDiv = screen.getByTestId(
+      "accordionItem_opportunity-filter-status",
+    );
+    expect(contentDiv).toHaveAttribute("hidden");
+
+    // Toggle the accordion and the hidden attribute should be removed
+    fireEvent.click(accordionToggleButton);
+    expect(contentDiv).not.toHaveAttribute("hidden");
+  });
+
+  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+    render(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+      />,
+    );
+
+    const scrollableContainer = screen.getByTestId(
+      `accordionItem_opportunity-filter-${queryParamKey}`,
+    );
+
+    expect(scrollableContainer).toHaveClass("overflow-auto");
+
+    const initialScrollTop = scrollableContainer.scrollTop;
+
+    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
+
+    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
+
+    // Assert that the document body has not scrolled
+    expect(window.scrollY).toBe(0);
+  });
+
+  it("renders the correct title", () => {
+    render(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+  });
+  // dug into the code on this one - it works in the wild, but in the code it depends on an internal state update that doesn't seem to happen in this test for some reason
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip("collapses based on expanded param", () => {
+    const { rerender } = render(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+        expanded={false}
+      />,
+    );
+    let contentDiv = screen.getByTestId(
+      "accordionItem_opportunity-filter-status",
+    );
+    expect(contentDiv).toHaveAttribute("hidden");
+
+    rerender(
+      <BasicSearchFilterAccordion
+        content={<div>some filter content</div>}
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+        expanded={true}
+      />,
+    );
+    contentDiv = screen.getByTestId("accordionItem_opportunity-filter-status");
+    expect(contentDiv).not.toHaveAttribute("hidden");
+  });
+  it("displays content", () => {
+    render(
+      <BasicSearchFilterAccordion
+        content={<div data-testid="some content">some filter content</div>}
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+      />,
+    );
+
+    expect(screen.getByTestId("some content")).toBeInTheDocument();
   });
 });

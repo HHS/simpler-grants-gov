@@ -35,6 +35,7 @@ export interface BasicSearchFilterAccordionProps
   extends CommonSearchFilterAccordionProps {
   className?: string;
   wrapForScroll?: boolean;
+  expanded?: boolean;
   content: React.ReactNode;
 }
 
@@ -186,13 +187,14 @@ export function BasicSearchFilterAccordion({
   queryParamKey,
   query,
   className,
-  wrapForScroll = false,
+  expanded = false,
+  wrapForScroll = true,
 }: BasicSearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content: content,
-      expanded: !!query.size,
+      content,
+      expanded,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
       className: wrapForScroll

@@ -18,9 +18,9 @@ export function CheckboxFilter({
   query,
   queryParamKey,
   title,
-  wrapForScroll,
+  wrapForScroll = true,
   defaultEmptySelection,
-  includeAnyOption,
+  includeAnyOption = true,
   filterOptions,
   facetCounts,
 }: SearchFilterAccordionProps) {
@@ -87,6 +87,7 @@ export function CheckboxFilter({
       queryParamKey={queryParamKey}
       title={title}
       wrapForScroll={wrapForScroll}
+      expanded={!!query.size}
       className="width-100 padding-right-5"
     />
   );
