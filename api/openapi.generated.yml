@@ -1445,46 +1445,15 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    HasActiveOpportunityFilterV1:
+    OpportunityStatusesFilterV1:
       type: object
       properties:
         one_of:
-          type:
-          - array
-          - 'null'
+          type: array
+          minItems: 1
           items:
-            type: boolean
-            example: true
-    HasClosedOpportunityFilterV1:
-      type: object
-      properties:
-        one_of:
-          type:
-          - array
-          - 'null'
-          items:
-            type: boolean
-            example: true
-    HasForecastedOpportunityFilterV1:
-      type: object
-      properties:
-        one_of:
-          type:
-          - array
-          - 'null'
-          items:
-            type: boolean
-            example: true
-    HasArchivedOpportunityFilterV1:
-      type: object
-      properties:
-        one_of:
-          type:
-          - array
-          - 'null'
-          items:
-            type: boolean
-            example: true
+            type: string
+            example: archived
     IsTestAgencyFilterV1:
       type: object
       properties:
@@ -1498,22 +1467,10 @@ components:
     AgencySearchFilterV1:
       type: object
       properties:
-        has_open_opportunity:
+        opportunity_statuses:
           type:
           - object
-          $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
-        has_closed_opportunity:
-          type:
-          - object
-          $ref: '#/components/schemas/HasClosedOpportunityFilterV1'
-        has_forecasted_opportunity:
-          type:
-          - object
-          $ref: '#/components/schemas/HasForecastedOpportunityFilterV1'
-        has_archived_opportunity:
-          type:
-          - object
-          $ref: '#/components/schemas/HasArchivedOpportunityFilterV1'
+          $ref: '#/components/schemas/OpportunityStatusesFilterV1'
         is_test_agency:
           type:
           - object
@@ -1622,26 +1579,19 @@ components:
           type: boolean
           description: Indicates if the agency is a test agency.
           example: false
-        has_open_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently open
-          example: false
-        has_forecasted_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently forecasted
-          example: false
-        has_closed_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently closed
-          example: false
-        has_archived_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently archived
-          example: false
+        opportunity_statuses:
+          type: array
+          description: List of opportunity statuses the agency is linked with.
+          example:
+          - posted
+          items:
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
         created_at:
           type: string
           format: date-time
