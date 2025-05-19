@@ -44,29 +44,31 @@ export function SearchVersionTwo({
       />
       <QueryProvider>
         <div className="grid-container">
-          <div className="display-flex margin-bottom-2">
+          <div className="desktop:display-flex desktop:margin-bottom-2">
             <div className="flex-6">
               <SearchBar
                 tableView={true}
                 queryTermFromParent={convertedSearchParams.query}
               />
             </div>
-            <div className="flex-2 flex-align-self-end">
-              <DrawerUnit
-                drawerId="search-filter-drawer"
-                closeText={t("drawer.submit")}
-                openText={t("filterDisplayToggle.drawer")}
-                headingText={t("drawer.title")}
-                iconName="filter_list"
-              >
-                <SearchDrawerFilters
-                  searchParams={convertedSearchParams}
-                  searchResultsPromise={searchResultsPromise}
-                />
-              </DrawerUnit>
-            </div>
-            <div className="flex-3 flex-align-self-end">
-              <SaveSearchPanel />
+            <div className="display-flex desktop:flex-5 dsektop:margin-top-0">
+              <div className="flex-2 flex-align-self-end">
+                <DrawerUnit
+                  drawerId="search-filter-drawer"
+                  closeText={t("drawer.submit")}
+                  openText={t("filterDisplayToggle.drawer")}
+                  headingText={t("drawer.title")}
+                  iconName="filter_list"
+                >
+                  <SearchDrawerFilters
+                    searchParams={convertedSearchParams}
+                    searchResultsPromise={searchResultsPromise}
+                  />
+                </DrawerUnit>
+              </div>
+              <div className="flex-3 flex-align-self-end">
+                <SaveSearchPanel />
+              </div>
             </div>
           </div>
           <SearchResults

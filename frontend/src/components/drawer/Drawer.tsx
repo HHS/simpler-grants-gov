@@ -18,7 +18,7 @@ export function Drawer({
     <Modal
       ref={drawerRef}
       forceAction={false}
-      className="text-wrap height-full overflow-auto margin-0 radius-0"
+      className="text-wrap height-full margin-0 radius-0"
       aria-labelledby={`${drawerId}-heading`}
       aria-describedby={`${drawerId}-description`}
       id={drawerId}
