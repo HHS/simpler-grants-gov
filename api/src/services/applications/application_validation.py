@@ -1,9 +1,18 @@
+from enum import StrEnum
+
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, Form
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
+import logging
 
+logger = logging.getLogger(__name__)
+
+class ApplicationAction(StrEnum):
+    SUBMIT = "submit"
+    MODIFY = "modify"
 
 def get_required_forms_for_application(application: Application) -> list[Form]:
     competition_forms = application.competition.competition_forms
@@ -93,4 +102,31 @@ def validate_forms(application: Application) -> None:
             "The application has issues in its form responses.",
             detail=detail,
             validation_issues=form_errors,
+        )
+
+
+def validate_application_in_progress(application: Application, action: ApplicationAction) -> None:
+    """
+    Validate that the application is in the IN_PROGRESS state.
+
+    An application cannot be modified if it is not currently in progress.
+    """
+    if application.application_status != ApplicationStatus.IN_PROGRESS:
+        message = f"Cannot {action} application. It is currently in status: {application.application_status}"
+        logger.info(
+            f"Cannot {action} application, not currently in progress",
+            extra={
+                "action": action,
+                "application_status": application.application_status
+            },
+        )
+        raise_flask_error(
+            403,
+            message,
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.NOT_IN_PROGRESS,
+                    message=f"Cannot {action} application, not currently in progress",
+                )
+            ],
         )

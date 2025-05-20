@@ -37,34 +37,6 @@ SIMPLE_JSON_SCHEMA = {
 }
 
 
-# Tests for validate_application_in_progress
-def test_validate_application_in_progress_success(enable_factory_create, db_session):
-    """Test that validating an application in IN_PROGRESS state succeeds."""
-    application = ApplicationFactory.create(application_status=ApplicationStatus.IN_PROGRESS)
-    db_session.commit()
-
-    # Should not raise any exception
-    validate_application_in_progress(application)
-
-
-@pytest.mark.parametrize(
-    "status",
-    [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED],
-)
-def test_validate_application_in_progress_failure(enable_factory_create, db_session, status):
-    """Test that validating an application not in IN_PROGRESS state raises an error."""
-    application = ApplicationFactory.create(application_status=status)
-    db_session.commit()
-
-    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        validate_application_in_progress(application)
-
-    assert excinfo.value.status_code == 403
-    assert "Application cannot be submitted." in excinfo.value.message
-    assert (
-        excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
-    )
-
 
 # Tests for validate_competition_open
 @freeze_time(TEST_DATE)

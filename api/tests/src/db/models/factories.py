@@ -44,7 +44,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
-    SamGovImportType,
+    SamGovImportType, ApplicationStatus,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -1150,6 +1150,8 @@ class ApplicationFormFactory(BaseFactory):
     application_response = factory.LazyFunction(
         lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
     )
+
+    application_status = ApplicationStatus.IN_PROGRESS
 
 
 ###################
