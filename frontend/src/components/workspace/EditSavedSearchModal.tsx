@@ -204,56 +204,52 @@ export function EditSavedSearchModal({
         ) : (
           <>
             <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            <div className="usa-prose">
-              <p className="font-sans-2xs margin-y-4">
-                {t.rich("description", {
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </p>
-            </div>
-            <>
-              {apiError && (
-                <SimplerAlert
-                  alertClick={() => setApiError(false)}
-                  buttonId={`editSavedSearchApiError-${savedSearchId}`}
-                  messageText={t("apiError")}
-                  type="error"
-                />
-              )}
-              <SaveSearchInput
-                validationError={validationError}
-                updateSavedSearchName={setSavedSearchName}
-                id={savedSearchId}
-                defaultValue={queryName}
+            <p className="font-sans-2xs margin-y-4">
+              {t.rich("description", {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </p>
+            {apiError && (
+              <SimplerAlert
+                alertClick={() => setApiError(false)}
+                buttonId={`editSavedSearchApiError-${savedSearchId}`}
+                messageText={t("apiError")}
+                type="error"
               />
-              <ModalFooter>
-                {loading ? (
-                  <LoadingButton
-                    id={`edit-saved-search-button-${savedSearchId}`}
-                    message={t("loading")}
-                  />
-                ) : (
-                  <>
-                    <Button
-                      type={"button"}
-                      onClick={handleSubmit}
-                      data-testid={`edit-saved-search-button-${savedSearchId}`}
-                    >
-                      {t("saveText")}
-                    </Button>
-                    <ModalToggleButton
-                      modalRef={modalRef}
-                      closer
-                      unstyled
-                      className="padding-105 text-center"
-                      onClick={onClose}
-                    >
-                      {t("cancelText")}
-                    </ModalToggleButton>
-                  </>
-                )}
-              </ModalFooter>
-            </>
+            )}
+            <SaveSearchInput
+              validationError={validationError}
+              updateSavedSearchName={setSavedSearchName}
+              id={savedSearchId}
+              defaultValue={queryName}
+            />
+            <ModalFooter>
+              {loading ? (
+                <LoadingButton
+                  id={`edit-saved-search-button-${savedSearchId}`}
+                  message={t("loading")}
+                />
+              ) : (
+                <>
+                  <Button
+                    type={"button"}
+                    onClick={handleSubmit}
+                    data-testid={`edit-saved-search-button-${savedSearchId}`}
+                  >
+                    {t("saveText")}
+                  </Button>
+                  <ModalToggleButton
+                    modalRef={modalRef}
+                    closer
+                    unstyled
+                    className="padding-105 text-center"
+                    onClick={onClose}
+                  >
+                    {t("cancelText")}
+                  </ModalToggleButton>
+                </>
+              )}
+            </ModalFooter>
           </>
         )}
       </Modal>

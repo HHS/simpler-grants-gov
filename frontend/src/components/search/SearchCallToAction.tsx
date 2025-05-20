@@ -8,7 +8,7 @@ const SearchCallToAction: React.FC = () => {
   return (
     <>
       <GridContainer>
-        <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+        <h1>
           {t("callToAction.title")}
         </h1>
       </GridContainer>

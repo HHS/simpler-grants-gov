@@ -32,7 +32,7 @@ const SavedOpportunitiesList = ({
       ),
   );
   return (
-    <ul className="usa-prose usa-list--unstyled">{savedGrantsListItems}</ul>
+    <ul className="usa-list--unstyled">{savedGrantsListItems}</ul>
   );
 };
 

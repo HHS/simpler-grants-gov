@@ -7,17 +7,17 @@ export default function VisionGetThere() {
 
   return (
     <VisionPageSection className="bg-white" title={t("title")}>
-      <h3 className="margin-top-3 margin-bottom-1 tablet:font-sans-md">
+      <h3>
         {t("contentTitle")}
       </h3>
       <div>
-        <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
+        <p>
           {t("paragraph_1")}
         </p>
-        <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
+        <p>
           {t("paragraph_2")}
         </p>
-        <div>
+        <p>
           <a
             className="font-sans-xs line-height-sans-4 "
             target="_blank"
@@ -26,8 +26,8 @@ export default function VisionGetThere() {
           >
             {t("link_text_1")}
           </a>
-        </div>
-        <div className={"margin-top-2"}>
+        </p>
+        <p>
           <a
             className="font-sans-xs line-height-sans-4"
             target="_blank"
@@ -36,7 +36,7 @@ export default function VisionGetThere() {
           >
             {t("link_text_2")}
           </a>
-        </div>
+        </p>
       </div>
     </VisionPageSection>
   );

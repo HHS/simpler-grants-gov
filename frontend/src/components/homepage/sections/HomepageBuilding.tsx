@@ -10,35 +10,34 @@ const BuildingContent = () => {
   const { paragraphs } = messages.Homepage.sections.building;
 
   return (
-    <GridContainer data-testid="homepage-building">
-      <Grid row gap="md" className="padding-6">
+    <GridContainer data-testid="homepage-building" className="padding-y-4 tablet-lg:padding-y-6">
+      <Grid row gap>
         <Grid
-          tablet={{
+          tabletLg={{
             col: true,
           }}
+          className="tablet-lg:padding-right-6"
         >
           <Image
             alt="events-img"
-            className="height-auto position-relative padding-right-6 padding-top-3"
+            className="height-auto position-relative margin-bottom-2 tablet-lg:margin-bottom-0"
             src={BuildingImage}
           />
         </Grid>
         <Grid
-          tablet={{
+          tabletLg={{
             col: true,
           }}
         >
           <Grid>
-            <h1>
+            <h2>
               {t.rich("title", {
                 span: (chunks) => <span className="text-italic">{chunks}</span>,
               })}
-            </h1>
-          </Grid>
-          <Grid>
+            </h2>
             {paragraphs.map((paragraph: string, paragraphIdx: number) => (
               <p
-                className="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+                className="font-sans-md tablet-lg:font-sans-lg"
                 key={paragraphIdx}
               >
                 {paragraph}

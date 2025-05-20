@@ -63,7 +63,7 @@ export default function SearchBar({ queryTermFromParent }: SearchBarProps) {
         {t.rich("bar.label", {
           strong: (chunks) => <span className="text-bold">{chunks}</span>,
           small: (chunks) => (
-            <small className="display-inline-block">{chunks}</small>
+            <small className="font-sans-sm display-inline-block">{chunks}</small>
           ),
         })}
       </label>

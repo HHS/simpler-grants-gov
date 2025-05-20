@@ -27,13 +27,11 @@ const SearchResultsSkeleton = ({
   return (
     <>
       <SearchResultsHeader sortby={sortby} />
-      <div className="usa-prose">
-        <div className="tablet-lg:display-flex">
-          <SearchPagination loading={true} page={page} query={query} />
-        </div>
-        <Loading message={loadingMessage} />
+      <div className="tablet-lg:display-flex">
         <SearchPagination loading={true} page={page} query={query} />
       </div>
+      <Loading message={loadingMessage} />
+      <SearchPagination loading={true} page={page} query={query} />
     </>
   );
 };
@@ -83,25 +81,23 @@ const ResolvedSearchResults = async ({
         sortby={sortby}
         totalFetchedResults={totalResults}
       />
-      <div className="usa-prose">
-        <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton />
-          <SearchPagination
-            totalPages={totalPages}
-            page={page}
-            query={query}
-            totalResults={totalResults}
-          />
-        </div>
-        <SearchResultsList searchResults={searchResults} page={page} />
+      <div className="tablet-lg:display-flex">
+        <ExportSearchResultsButton />
         <SearchPagination
           totalPages={totalPages}
           page={page}
           query={query}
           totalResults={totalResults}
-          scroll={true}
         />
       </div>
+      <SearchResultsList searchResults={searchResults} page={page} />
+      <SearchPagination
+        totalPages={totalPages}
+        page={page}
+        query={query}
+        totalResults={totalResults}
+        scroll={true}
+      />
     </>
   );
 };

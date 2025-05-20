@@ -131,7 +131,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
-        <div className="usa-prose padding-y-3">
+        <div className="padding-y-3">
           <OpportunitySaveUserControl />
         </div>
         <div className="grid-row grid-gap margin-top-2">

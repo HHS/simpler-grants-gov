@@ -43,7 +43,7 @@ const OpportunityCTA = ({ id }: { id: number }) => {
   );
 
   return (
-    <div className="usa-prose margin-top-2">
+    <div className="margin-top-2">
       <OpportunityContentBox title={t("apply_title")} content={content} />
     </div>
   );

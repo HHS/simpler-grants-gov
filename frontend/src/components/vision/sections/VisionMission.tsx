@@ -13,34 +13,35 @@ export default function VisionMission() {
 
   return (
     <VisionPageSection className={"bg-white"} title={t("title")}>
-      <div className="margin-top-1" />
-      <p className="margin-0 tablet-lg:margin-bottom-3 line-height-sans-4 tablet:font-sans-md">
+      <p>
         {t("paragraph")}
       </p>
-      {contentItems.map((contentRows, contentRowsIdx) => (
-        <div className="grid-row" key={`vision-mission-${contentRowsIdx}`}>
-          {contentRows.map((contentRowItem, contentRowItemIdx) => (
-            <div
-              className="margin-bottom-3 grid-row tablet-lg:padding-right-5"
-              key={`vision-mission-${contentRowsIdx}-${contentRowItemIdx}`}
-            >
-              <USWDSIcon
-                name={uswdsIcons[contentRowsIdx]}
-                height="50px"
-                className="grid-col-1 usa-icon--size-3"
-              />
-              <h3 className="font-sans-sm margin-0 tablet:font-sans-md grid-col-3">
-                {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
-              </h3>
-              <div className="font-sans-xs line-height-sans-4 grid-col">
-                {t(
-                  `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
-                )}
+      <div className="grid-row grid-gap">
+        {contentItems.map((contentRows, contentRowsIdx) => (
+          <div className="tablet:grid-col-4" key={`vision-mission-${contentRowsIdx}`}>
+            {contentRows.map((contentRowItem, contentRowItemIdx) => (
+              <div
+                className="margin-top-4"
+                key={`vision-mission-${contentRowsIdx}-${contentRowItemIdx}`}
+              >
+                <USWDSIcon
+                  name={uswdsIcons[contentRowsIdx]}
+                  className="usa-icon--size-4 text-middle"
+                  aria-label={`${uswdsIcons[contentRowsIdx]}-icon`}
+                />
+                <h3 className="margin-top-2">
+                  {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
+                </h3>
+                <p>
+                  {t(
+                    `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
+                  )}
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-      ))}
+            ))}
+          </div>
+        ))}
+      </div>
     </VisionPageSection>
   );
 }

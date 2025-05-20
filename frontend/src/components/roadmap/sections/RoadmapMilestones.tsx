@@ -9,17 +9,20 @@ export default function RoadmapMilestones() {
 
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
-      <h2 className="font-sans-md margin-0 margin-top-1 tablet:font-sans-lg">
+      <h3 className="margin-bottom-4">
         {t("contentTitle")}
-      </h2>
+      </h3>
       {Object.keys(contentItems).map((key) => {
         const title = t(`contentItems.${key}.title`);
         return (
-          <div key={`roadmap-milestones-${title}-key`}>
-            <h3 className="font-sans-sm margin-top-3 margin-bottom-1 tablet:font-sans-md">
+          <div 
+            className="margin-bottom-4"
+            key={`roadmap-milestones-${title}-key`}
+          >
+            <h4>
               {title}
-            </h3>
-            <p className="font-sans-xs margin-0 margin-bottom-0 line-height-sans-4">
+            </h4>
+            <p>
               {t(`contentItems.${key}.content`)}
             </p>
           </div>

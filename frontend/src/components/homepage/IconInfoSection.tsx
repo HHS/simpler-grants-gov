@@ -27,11 +27,13 @@ export default function IconInfo({
         className="usa-icon--size-4 text-middle"
         aria-label={`${iconName}-icon`}
       />
-      <h3>{title}</h3>
-      <p className="font-sans-md line-height-sans-4">{description}</p>
-      <Link href={link} className="font-sans-md line-height-sans-4">
-        {linkText}
-      </Link>
+      <h3 className="margin-top-2">{title}</h3>
+      <p>{description}</p>
+      <p>
+        <Link href={link}>
+          {linkText}
+        </Link>
+      </p>
     </>
   );
 }
