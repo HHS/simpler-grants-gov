@@ -156,6 +156,7 @@ def test_grouped_search_queries_cli(
     factories.LinkExternalUserFactory.create(user=user1, email="user1@example.com")
     factories.LinkExternalUserFactory.create(user=user2, email="user2@example.com")
 
+    # Update the search index with new data that will change the results
     for i in range(7, 9):
         opportunity = factories.OpportunityFactory.create(
             opportunity_id=i,
