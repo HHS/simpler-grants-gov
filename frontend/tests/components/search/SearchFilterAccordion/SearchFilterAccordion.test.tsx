@@ -165,11 +165,12 @@ describe("BasicSearchFilterAccordion", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
         title={title}
         queryParamKey={queryParamKey}
         query={new Set()}
-      />,
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -178,11 +179,12 @@ describe("BasicSearchFilterAccordion", () => {
   it("has hidden attribute when collapsed", () => {
     render(
       <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
         title={title}
         queryParamKey={"status"}
         query={new Set()}
-      />,
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
     );
 
     const accordionToggleButton = screen.getByTestId(
@@ -201,11 +203,12 @@ describe("BasicSearchFilterAccordion", () => {
   it("ensures only the component contents scroll when wrapForScroll is true", () => {
     render(
       <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
         title={title}
         queryParamKey={queryParamKey}
         query={new Set("")}
-      />,
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
     );
 
     const scrollableContainer = screen.getByTestId(
@@ -227,22 +230,24 @@ describe("BasicSearchFilterAccordion", () => {
   it("renders the correct title", () => {
     render(
       <BasicSearchFilterAccordion
-        content={<div>some filter content</div>}
         title={title}
         queryParamKey={queryParamKey}
         query={new Set("")}
-      />,
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
     );
     expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
   });
   it("displays content", () => {
     render(
       <BasicSearchFilterAccordion
-        content={<div data-testid="some content">some filter content</div>}
         title={title}
         queryParamKey={"status"}
         query={new Set()}
-      />,
+      >
+        <div data-testid="some content">some filter content</div>
+      </BasicSearchFilterAccordion>,
     );
 
     expect(screen.getByTestId("some content")).toBeInTheDocument();

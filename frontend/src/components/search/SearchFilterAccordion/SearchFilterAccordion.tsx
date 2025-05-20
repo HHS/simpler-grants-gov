@@ -36,7 +36,7 @@ export interface BasicSearchFilterAccordionProps
   className?: string;
   wrapForScroll?: boolean;
   expanded?: boolean;
-  content: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export interface SearchAccordionContentProps
@@ -184,7 +184,7 @@ export function SearchFilterAccordion({
 
 // new implementation, flexible to take whatever content it gets fed, not just checkboxes
 export function BasicSearchFilterAccordion({
-  content,
+  children,
   title,
   queryParamKey,
   query,
@@ -195,7 +195,7 @@ export function BasicSearchFilterAccordion({
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
-      content,
+      content: children,
       expanded,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
