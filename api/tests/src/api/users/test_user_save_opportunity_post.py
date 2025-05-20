@@ -22,7 +22,7 @@ def test_user_save_opportunity_post_unauthorized_user(
     assert response.status_code == 403
     assert (
         response.json["message"]
-        == "Forbidden: You do not have permission to perform this operation."
+        == "Forbidden"
     )
 
     # Verify no opportunity was saved

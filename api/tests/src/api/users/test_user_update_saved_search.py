@@ -75,7 +75,7 @@ def test_user_update_saved_search_unauthorized(
     assert response.status_code == 403
     assert (
         response.json["message"]
-        == "Forbidden: You do not have permission to perform this operation."
+        == "Forbidden"
     )
 
     # Verify search was not updated

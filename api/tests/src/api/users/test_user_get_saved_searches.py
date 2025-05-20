@@ -77,7 +77,7 @@ def test_user_get_saved_searches_unauthorized_user(
     assert response.status_code == 403
     assert (
         response.json["message"]
-        == "Forbidden: You do not have permission to perform this operation."
+        == "Forbidden"
     )
 
 

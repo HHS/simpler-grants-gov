@@ -136,7 +136,7 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     assert response.status_code == 403
     assert (
         response.json["message"]
-        == "Forbidden: You do not have permission to perform this operation."
+        == "Forbidden"
     )
 
     # Try with a non-existent user ID
@@ -155,7 +155,7 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     assert response.status_code == 403
     assert (
         response.json["message"]
-        == "Forbidden: You do not have permission to perform this operation."
+        == "Forbidden"
     )
 
 
