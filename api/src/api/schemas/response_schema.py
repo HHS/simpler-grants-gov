@@ -10,6 +10,9 @@ class ValidationIssueSchema(Schema):
     field = fields.String(
         metadata={"description": "The field that failed", "example": "summary.summary_description"}
     )
+    value = fields.String(
+        metadata={"description": "The value that failed", "example": "invalid string"}
+    )
 
 
 class AbstractResponseSchema(Schema):

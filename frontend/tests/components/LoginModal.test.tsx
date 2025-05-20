@@ -1,21 +1,20 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
 
 import { LoginModal } from "src/components/LoginModal";
 
-jest.mock("src/services/auth/sessionStorage", () => ({
-  __esModule: true,
-  default: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn(),
-    isSessionStorageAvailable: jest.fn().mockReturnValue(true),
-  },
-}));
+const mockSetItem = jest.fn<void, [string, string]>();
+
+jest.mock("src/services/auth/sessionStorage", () => {
+  return {
+    __esModule: true,
+    default: {
+      setItem: (key: string, value: string): void => mockSetItem(key, value),
+    },
+  };
+});
 
 const mockLocation = {
   pathname: "/test-path",
@@ -53,12 +52,8 @@ describe("LoginModal", () => {
     });
   });
 
-  it("should store current URL in session storage when login button is clicked", () => {
+  it("should render the login modal", () => {
     const modalRef = createModalRef();
-    const setItemSpy = jest
-      .spyOn(SessionStorage, "setItem")
-      .mockImplementation((_key: string, _value: string): void => undefined);
-
     render(
       <LoginModal
         modalRef={modalRef}
@@ -71,46 +66,11 @@ describe("LoginModal", () => {
       />,
     );
 
-    const loginButton = screen.getByText("Sign In");
-    fireEvent.click(loginButton);
-
-    expect(setItemSpy).toHaveBeenCalledWith(
-      "login-redirect",
-      "/test-path?param=value",
-    );
+    expect(screen.getByText("Sign In")).toBeInTheDocument();
+    expect(screen.getByText("Close")).toBeInTheDocument();
   });
 
-  it("should not store URL in session storage if pathname and search are empty", () => {
-    const modalRef = createModalRef();
-    const setItemSpy = jest
-      .spyOn(SessionStorage, "setItem")
-      .mockImplementation((_key: string, _value: string): void => undefined);
-
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: { pathname: "", search: "" },
-      writable: true,
-    });
-
-    render(
-      <LoginModal
-        modalRef={modalRef}
-        helpText="Help text"
-        titleText="Login"
-        descriptionText="Please login"
-        buttonText="Sign In"
-        closeText="Close"
-        modalId="login-modal"
-      />,
-    );
-
-    const loginButton = screen.getByText("Sign In");
-    fireEvent.click(loginButton);
-
-    expect(setItemSpy).not.toHaveBeenCalled();
-  });
-
-  it("should render the login button with correct text", () => {
+  it("should render the login button with custom text", () => {
     const modalRef = createModalRef();
     const customButtonText = "Custom Login Text";
 
@@ -127,5 +87,53 @@ describe("LoginModal", () => {
     );
 
     expect(screen.getByText(customButtonText)).toBeInTheDocument();
+  });
+
+  it("should store the current URL in session storage when clicking sign in", () => {
+    const modalRef = createModalRef();
+    render(
+      <LoginModal
+        modalRef={modalRef}
+        helpText="Help text"
+        titleText="Login"
+        descriptionText="Please login"
+        buttonText="Sign In"
+        closeText="Close"
+        modalId="login-modal"
+      />,
+    );
+
+    const signInButton = screen.getByText("Sign In");
+    fireEvent.click(signInButton);
+
+    expect(mockSetItem).toHaveBeenCalledWith(
+      "login-redirect",
+      "/test-path?param=value",
+    );
+  });
+
+  it("should not store URL in session storage if pathname and search are empty", () => {
+    Object.defineProperty(global, "location", {
+      value: { pathname: "", search: "" },
+    });
+
+    const modalRef = createModalRef();
+
+    render(
+      <LoginModal
+        modalRef={modalRef}
+        helpText="Help text"
+        titleText="Login"
+        descriptionText="Please login"
+        buttonText="Sign In"
+        closeText="Close"
+        modalId="login-modal"
+      />,
+    );
+
+    const loginButton = screen.getByText("Sign In");
+    fireEvent.click(loginButton);
+
+    expect(mockSetItem).not.toHaveBeenCalled();
   });
 });
