@@ -5,10 +5,9 @@ on:
   push:
     branches:
       - "main"
+      - "kai/nofos-vulns"
     paths:
-      - ".github/workflows/cd-nofos.yml"
-      - ".github/workflows/ci-nofos.yml"
-      - ".github/workflows/deploy-nofos.yml"
+      - ".github/workflows/*-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
   workflow_dispatch:
@@ -35,9 +34,14 @@ jobs:
     with:
       version: ${{ inputs.version || 'main' }}
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans-nofos.yml
+
   deploy:
     name: Deploy
     needs: [checks]
+    # needs: [checks, vulnerability-scans] <= enable when vulnerability scans have started passing
     uses: ./.github/workflows/deploy-nofos.yml
     with:
       environment: ${{ inputs.environment || 'dev' }}
