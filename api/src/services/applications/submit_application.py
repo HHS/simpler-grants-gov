@@ -7,6 +7,7 @@ from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
+from src.services.applications.application_validation import validate_forms
 from src.services.applications.get_application import get_application
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
@@ -88,6 +89,7 @@ def submit_application(db_session: db.Session, application_id: UUID) -> Applicat
     # Run validations
     validate_application_in_progress(application)
     validate_competition_open(application)
+    validate_forms(application)
 
     # Update application status
     application.application_status = ApplicationStatus.SUBMITTED

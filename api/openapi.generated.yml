@@ -1112,6 +1112,10 @@ components:
           type: string
           description: The field that failed
           example: summary.summary_description
+        value:
+          type: string
+          description: The value that failed
+          example: invalid string
     ErrorResponse:
       type: object
       properties:
