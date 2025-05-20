@@ -24,13 +24,13 @@ def test_application_update_success(client, enable_factory_create, db_session):
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token}
+        headers={"X-SGG-Token": user_auth_token},
     )
     # Check response
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
-    
+
     # Refresh the application from the database before checking
     db_session.refresh(application)
     assert application.application_name == new_name
@@ -44,7 +44,7 @@ def test_application_update_unauthorized(client, enable_factory_create, db_sessi
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
-        headers={"X-SGG-Token": "invalid.jwt.token"}
+        headers={"X-SGG-Token": "invalid.jwt.token"},
     )
     assert response.status_code == 401
     # Verify application was not updated
@@ -69,7 +69,7 @@ def test_application_update_empty_name(client, enable_factory_create, db_session
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token}
+        headers={"X-SGG-Token": user_auth_token},
     )
     assert response.status_code == 422
     assert "Application name cannot be empty" in response.json["message"]
@@ -97,7 +97,7 @@ def test_application_update_missing_field(client, enable_factory_create, db_sess
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token}
+        headers={"X-SGG-Token": user_auth_token},
     )
     assert response.status_code == 422
     # Verify application was not updated
