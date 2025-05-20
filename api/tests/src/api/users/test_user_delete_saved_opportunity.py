@@ -102,7 +102,4 @@ def test_user_delete_saved_opportunity_unauthorized(
     )
 
     assert response.status_code == 403
-    assert (
-        response.json["message"]
-        == "Forbidden"
-    )
+    assert response.json["message"] == "Forbidden"

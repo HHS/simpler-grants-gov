@@ -75,10 +75,7 @@ def test_user_get_saved_searches_unauthorized_user(
     )
 
     assert response.status_code == 403
-    assert (
-        response.json["message"]
-        == "Forbidden"
-    )
+    assert response.json["message"] == "Forbidden"
 
 
 def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searches):

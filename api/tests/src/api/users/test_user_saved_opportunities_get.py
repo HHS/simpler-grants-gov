@@ -134,10 +134,7 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     )
 
     assert response.status_code == 403
-    assert (
-        response.json["message"]
-        == "Forbidden"
-    )
+    assert response.json["message"] == "Forbidden"
 
     # Try with a non-existent user ID
     different_user_id = "123e4567-e89b-12d3-a456-426614174000"
@@ -153,10 +150,7 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     )
 
     assert response.status_code == 403
-    assert (
-        response.json["message"]
-        == "Forbidden"
-    )
+    assert response.json["message"] == "Forbidden"
 
 
 @pytest.mark.parametrize(
