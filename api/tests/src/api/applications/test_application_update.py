@@ -1,7 +1,6 @@
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.db.models.user_models import ApplicationUser
 from src.validation.validation_constants import ValidationErrorType
-from tests.src.db.models.factories import ApplicationFactory, UserFactory
+from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory, UserFactory
 
 
 def test_application_update_success(client, enable_factory_create, db_session):
@@ -9,13 +8,14 @@ def test_application_update_success(client, enable_factory_create, db_session):
     # Create a user and application
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
-    # Associate the user with the application
-    application_user = ApplicationUser(user=user, application=application)
-    db_session.add(application_user)
-    db_session.commit()
+
+    # Associate the user with the application using factory
+    ApplicationUserFactory.create(user=user, application=application)
+
     # Get user auth token
     user_auth_token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()
+
     # Update the application name
     new_name = "Updated Application Name"
     request_data = {"application_name": new_name}
@@ -55,13 +55,14 @@ def test_application_update_empty_name(client, enable_factory_create, db_session
     # Create a user and application
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
-    # Associate the user with the application
-    application_user = ApplicationUser(user=user, application=application)
-    db_session.add(application_user)
-    db_session.commit()
+
+    # Associate the user with the application using factory
+    ApplicationUserFactory.create(user=user, application=application)
+
     # Get user auth token
     user_auth_token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()
+
     # Try to update with empty name
     request_data = {"application_name": ""}
     response = client.put(
@@ -83,13 +84,14 @@ def test_application_update_missing_field(client, enable_factory_create, db_sess
     # Create a user and application
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
-    # Associate the user with the application
-    application_user = ApplicationUser(user=user, application=application)
-    db_session.add(application_user)
-    db_session.commit()
+
+    # Associate the user with the application using factory
+    ApplicationUserFactory.create(user=user, application=application)
+
     # Get user auth token
     user_auth_token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()
+
     # Try to update with missing required field
     request_data = {}
     response = client.put(
