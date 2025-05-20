@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - "main"
-      - "kai/nofos-vulns"
     paths:
       - ".github/workflows/*-nofos.yml"
       - "infra/nofos/**"
@@ -50,6 +49,6 @@ jobs:
 
   send-slack-notification:
     if: failure()
-    needs: [checks, deploy]
+    needs: [checks, deploy, vulnerability-scans]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
