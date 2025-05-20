@@ -18,14 +18,12 @@ def test_update_application_success(enable_factory_create, db_session):
 
     # Call the function and get the updated application
     with db_session.begin():
-        updated_application, warnings = update_application(
+        updated_application = update_application(
             db_session, application.application_id, updates, user
         )
 
     # Verify the application name was updated
     assert updated_application.application_name == "Updated Name"
-    # Verify no warnings were returned
-    assert len(warnings) == 0
 
     # Fetch the application from the database to verify the name has been updated
     db_session.refresh(application)
@@ -33,7 +31,7 @@ def test_update_application_success(enable_factory_create, db_session):
 
 
 def test_update_application_empty_name(enable_factory_create, db_session):
-    """Test update fails with empty application name."""
+    """Test update allows empty application name."""
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
     # Associate user with application
@@ -41,15 +39,18 @@ def test_update_application_empty_name(enable_factory_create, db_session):
 
     updates = {"application_name": ""}
 
-    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        update_application(db_session, application.application_id, updates, user)
+    # Call the function and get the updated application
+    with db_session.begin():
+        updated_application = update_application(
+            db_session, application.application_id, updates, user
+        )
 
-    assert excinfo.value.status_code == 422
-    assert "Application name cannot be empty" in excinfo.value.message
+    # Verify the application name was updated to empty string
+    assert updated_application.application_name == ""
 
-    # Verify application name was not updated
+    # Fetch the application from the database to verify the name has been updated
     db_session.refresh(application)
-    assert application.application_name == "Original Name"
+    assert application.application_name == ""
 
 
 def test_update_application_not_found(enable_factory_create, db_session):
@@ -103,11 +104,9 @@ def test_update_application_multiple_fields_future(enable_factory_create, db_ses
 
     # Call the function and get the updated application
     with db_session.begin():
-        updated_application, warnings = update_application(
+        updated_application = update_application(
             db_session, application.application_id, updates, user
         )
 
     # Verify the application name was updated
     assert updated_application.application_name == "Updated Name"
-    # Verify no warnings were returned
-    assert len(warnings) == 0

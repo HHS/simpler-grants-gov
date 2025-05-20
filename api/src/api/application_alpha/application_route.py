@@ -76,10 +76,10 @@ def application_update(
 
     with db_session.begin():
         # Call the service to update the application
-        application, warnings = update_application(db_session, application_id, updates, user)
+        application = update_application(db_session, application_id, updates, user)
 
     return response.ApiResponse(
-        message="Success", data={"application_id": application.application_id}, warnings=warnings
+        message="Success", data={"application_id": application.application_id}
     )
 
 

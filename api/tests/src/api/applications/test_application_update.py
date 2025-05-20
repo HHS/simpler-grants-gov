@@ -1,5 +1,4 @@
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory, UserFactory
 
 
@@ -51,7 +50,7 @@ def test_application_update_unauthorized(client, enable_factory_create, db_sessi
 
 
 def test_application_update_empty_name(client, enable_factory_create, db_session):
-    """Test application update fails when name is empty"""
+    """Test application update allows empty name at service level"""
     # Create a user and application
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
@@ -70,13 +69,14 @@ def test_application_update_empty_name(client, enable_factory_create, db_session
         json=request_data,
         headers={"X-SGG-Token": user_auth_token},
     )
-    assert response.status_code == 422
-    assert "Application name cannot be empty" in response.json["message"]
-    assert response.json["errors"][0]["type"] == ValidationErrorType.REQUIRED
-    assert response.json["errors"][0]["field"] == "application_name"
-    # Verify application was not updated
+
+    # We expect success now that the service layer doesn't validate empty strings
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify application was updated with empty name
     db_session.refresh(application)
-    assert application.application_name == "Original Name"
+    assert application.application_name == ""
 
 
 def test_application_update_missing_field(client, enable_factory_create, db_session):
