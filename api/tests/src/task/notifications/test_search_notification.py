@@ -59,6 +59,22 @@ def test_search_notifications_cli(
     caplog,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
+
+    # Update the search index with new data that will change the results
+    for i in range(4, 6):
+        opportunity = factories.OpportunityFactory.create(
+            opportunity_id=i,
+            no_current_summary=True,
+        )
+        summary = factories.OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=date.fromisoformat("2025-01-31"),
+            close_date=date.fromisoformat("2025-04-30"),
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            opportunity_summary=summary,
+        )
     # Create a saved search that needs notification
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
@@ -139,6 +155,21 @@ def test_grouped_search_queries_cli(
     user2 = factories.UserFactory.create()
     factories.LinkExternalUserFactory.create(user=user1, email="user1@example.com")
     factories.LinkExternalUserFactory.create(user=user2, email="user2@example.com")
+
+    for i in range(7, 9):
+        opportunity = factories.OpportunityFactory.create(
+            opportunity_id=i,
+            no_current_summary=True,
+        )
+        summary = factories.OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=date.fromisoformat("2025-01-31"),
+            close_date=date.fromisoformat("2025-04-30"),
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            opportunity_summary=summary,
+        )
 
     same_search_query = {"keywords": "shared search"}
 
@@ -283,7 +314,7 @@ def test_search_notification_email_format_single_opportunity(
     """Test that verifies the format of search notification emails"""
     # Create test opportunities with known data
     opportunity1 = factories.OpportunityFactory.create(
-        opportunity_id=1,
+        opportunity_id=2,
         opportunity_title="2025 Port Infrastructure Development Program",
         no_current_summary=True,
     )
@@ -405,7 +436,7 @@ def test_search_notification_email_format_multiple_opportunities(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1],  # Test single opportunity
+        searched_opportunity_ids=[3],  # Test single opportunity
     )
 
     _clear_mock_responses()

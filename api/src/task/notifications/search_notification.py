@@ -56,16 +56,29 @@ class SearchNotificationTask(BaseNotificationTask):
                 query_map[query_key] = []
             query_map[query_key].append(saved_search)
 
+        # Track new opportunities per user
+        user_new_opportunities: dict[UUID, set[UUID]] = {}
+        # Track which saved searches have updates
         updated_saved_searches: dict[UUID, list[UserSavedSearch]] = {}
 
         for searches in query_map.values():
             current_results = search_opportunities_id(self.search_client, searches[0].search_query)
             for saved_search in searches:
-                previous_results = set(saved_search.searched_opportunity_ids)
-                if set(current_results) != previous_results:
+                previous_results = set(saved_search.searched_opportunity_ids or [])
+                current_results_set = set(current_results)
+
+                # Find NEW opportunities (in current but not in previous)
+                new_opportunities = current_results_set - previous_results
+
+                # Only add searches that have new opportunities
+                if new_opportunities:
                     user_id = saved_search.user_id
                     updated_saved_searches.setdefault(user_id, []).append(saved_search)
-                    saved_search.searched_opportunity_ids = list(current_results)
+                    # Add new opportunities for this user
+                    user_new_opportunities.setdefault(user_id, set()).update(new_opportunities)
+
+                # Always update the saved search with current results
+                saved_search.searched_opportunity_ids = list(current_results_set)
 
         users_email_notifications: list[UserEmailNotification] = []
 
@@ -76,14 +89,23 @@ class SearchNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
+            # Get all NEW opportunity IDs for this user
+            new_opportunity_ids = user_new_opportunities[user_id]
+
             logger.info(
                 "Created changed search email notification",
-                extra={"user_id": user_id, "changed_search_count": len(saved_items)},
+                extra={
+                    "user_id": user_id,
+                    "changed_search_count": len(saved_items),
+                    "new_opportunities_count": len(new_opportunity_ids),
+                },
             )
 
-            all_opportunity_ids = set()
-            for saved_search in saved_items:
-                all_opportunity_ids.update(saved_search.searched_opportunity_ids)
+            if not new_opportunity_ids:
+                logger.info("No new opportunities to notify for user", extra={"user_id": user_id})
+                continue
+
+            # Fetch only the new opportunities that need to be included in the notification
             opportunities_stmt = (
                 select(Opportunity)
                 .join(
@@ -95,7 +117,7 @@ class SearchNotificationTask(BaseNotificationTask):
                     OpportunitySummary.opportunity_summary_id
                     == CurrentOpportunitySummary.opportunity_summary_id,
                 )
-                .where(Opportunity.opportunity_id.in_(all_opportunity_ids))
+                .where(Opportunity.opportunity_id.in_(new_opportunity_ids))
                 .options(
                     selectinload(Opportunity.current_opportunity_summary).selectinload(
                         CurrentOpportunitySummary.opportunity_summary
@@ -104,6 +126,10 @@ class SearchNotificationTask(BaseNotificationTask):
             )
 
             opportunities = self.db_session.execute(opportunities_stmt).scalars().all()
+
+            if not opportunities:
+                logger.info("No opportunities found to notify about", extra={"user_id": user_id})
+                continue
 
             message = self._build_notification_message(opportunities)
 
