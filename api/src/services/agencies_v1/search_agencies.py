@@ -7,6 +7,7 @@ from src.adapters import search
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
+from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import BoolSearchFilter, StrSearchFilter
@@ -25,6 +26,7 @@ AGENCY_REQUEST_FIELD_NAME_MAPPING = {
 
 
 class AgencySearchFilters(BaseModel):
+    has_active_opportunity: BoolSearchFilter | None = None
     opportunity_statuses: StrSearchFilter | None = None
     is_test_agency: BoolSearchFilter | None = None
 
@@ -67,7 +69,22 @@ def get_search_request(params: AgencySearchParams) -> dict:
         builder.simple_query(params.query, filter_rule, SearchQueryOperator.OR)
 
     # Filters
+
     if params.filters:
+        if (
+            params.filters.has_active_opportunity
+            and params.filters.has_active_opportunity.one_of is not None
+        ):
+            value = params.filters.has_active_opportunity.one_of
+            if True in value:
+                params.filters.opportunity_statuses = StrSearchFilter(
+                    one_of=[OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+                )
+            elif False in value:
+                params.filters.opportunity_statuses = StrSearchFilter(
+                    one_of=[OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED]
+                )
+            params.filters.has_active_opportunity = None
         _add_search_filters(builder, AGENCY_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
     return builder.build()
@@ -91,7 +108,6 @@ def _search_agencies(
 def search_agencies(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> Tuple[Sequence[dict], PaginationInfo]:
-
     params = AgencySearchParams.model_validate(raw_search_params)
     response = _search_agencies(search_client, params)
     pagination_info = PaginationInfo.from_search_response(params.pagination, response)

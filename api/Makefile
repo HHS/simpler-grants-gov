@@ -113,7 +113,7 @@ volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones -
 stop:
 	docker compose down
 
-check: format-check lint db-check-migratons test
+check: format-check lint db-check-migrations test
 
 remake-backend: volume-recreate db-seed-local populate-search-opportunities populate-search-agencies ## Completely recreate API services, load data into the DB and search index
 ##################################################

@@ -24,6 +24,12 @@ class AgencyListRequestSchema(Schema):
 
 
 class AgencySearchFilterV1Schema(Schema):
+    has_active_opportunity = fields.Nested(
+        BoolSearchSchemaBuilder("HasActiveOpportunityFilterV1Schema")
+        .with_one_of(example=True)
+        .build()
+    )
+
     opportunity_statuses = fields.Nested(
         StrSearchSchemaBuilder("OpportunityStatusesFilterV1Schema")
         .with_one_of(example="archived")
