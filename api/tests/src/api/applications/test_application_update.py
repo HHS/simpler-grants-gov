@@ -1,5 +1,3 @@
-import uuid
-
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import ApplicationUser
 from src.validation.validation_constants import ValidationErrorType
