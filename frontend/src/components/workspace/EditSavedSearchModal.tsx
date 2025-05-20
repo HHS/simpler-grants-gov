@@ -203,14 +203,9 @@ export function EditSavedSearchModal({
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            <div className="usa-prose">
-              <p className="font-sans-2xs margin-y-4">
-                {t.rich("description", {
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </p>
-            </div>
+            <ModalHeading id={`${modalId}-heading`}>
+              {t("title")} {queryName}
+            </ModalHeading>
             <>
               {apiError && (
                 <SimplerAlert
