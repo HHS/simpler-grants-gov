@@ -1,18 +1,41 @@
 "use client";
 
+import { debouncedAgencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
+import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
 import { CheckboxFilterBody } from "../Filters/CheckboxFilter";
 
-const searchForAgencies = (searchTerm: string) => {
-  console.log("!!!", searchTerm);
-  return Promise.resolve([]);
-};
+export function AgencyFilterContent({
+  query,
+  title,
+  agencies,
+  facetCounts,
+}: {
+  query: Set<string>;
+  title: string;
+  agencies: FilterOption[];
+  facetCounts: { [key: string]: number };
+}) {
+  const [agencySearchResults, setAgencySearchResults] =
+    useState<FilterOption[]>();
+  const searchForAgencies = (searchTerm: string) => {
+    console.log("!!!", searchTerm);
+    debouncedAgencySearch(searchTerm)
+      .then((searchResults) => {
+        console.log("fetched agency option search", searchResults);
+        setAgencySearchResults(searchResults);
+      })
+      .catch((e) => {
+        console.error("Error fetching agency search results", e);
+        setAgencySearchResults(undefined);
+      });
+  };
 
-export function AgencyFilterContent({ query, title, agencies, facetCounts }) {
+  console.log("render", agencySearchResults, agencies);
   return (
     <>
       <TextInput
@@ -26,7 +49,7 @@ export function AgencyFilterContent({ query, title, agencies, facetCounts }) {
         queryParamKey={"agency"}
         title={title}
         includeAnyOption={true}
-        filterOptions={agencies}
+        filterOptions={agencySearchResults || agencies}
         facetCounts={facetCounts}
       />
     </>

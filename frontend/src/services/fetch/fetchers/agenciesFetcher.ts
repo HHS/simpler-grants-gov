@@ -1,5 +1,6 @@
 "server only";
 
+import { ApiRequestError } from "src/errors";
 import { fetchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { sortFilterOptions } from "src/utils/search/searchUtils";
@@ -18,7 +19,9 @@ const isTopLevelAgency = (agency: RelevantAgencyRecord) => {
 };
 
 // would have called this getAgencies, but technically it's a POST
-export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
+export const obtainAgencies = async (
+  keyword?: string,
+): Promise<RelevantAgencyRecord[]> => {
   const response = await fetchAgencies({
     body: {
       pagination: {
@@ -32,12 +35,23 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
         ],
       },
       filters: { active: true },
+      query: keyword || "",
     },
     nextOptions: {
       revalidate: 604800,
     },
   });
-  const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
+  if (!response || response.status !== 200) {
+    throw new ApiRequestError(
+      "Error fetching agency options",
+      "APIRequestError",
+      response.status,
+    );
+  }
+
+  const { data } = (await response.json()) as {
+    data: RelevantAgencyRecord[];
+  };
   return data;
 };
 
@@ -86,17 +100,20 @@ export const agenciesToFilterOptions = (
 };
 
 export const getAgenciesForFilterOptions = async (
-  prefetchedOptions?: FilterOption[],
+  keyword?: string,
 ): Promise<FilterOption[]> => {
+  let agencies = [];
   try {
-    if (prefetchedOptions) {
-      return Promise.resolve(prefetchedOptions);
-    }
-    const agencies = await obtainAgencies();
+    agencies = await obtainAgencies(keyword);
+  } catch (e) {
+    console.error("Error obtaining agency options");
+    throw e;
+  }
+  try {
     const filterOptions = agenciesToFilterOptions(agencies);
     return sortFilterOptions(filterOptions);
   } catch (e) {
-    console.error("Error fetching agencies", e);
-    return [];
+    console.error("Error sorting agenciy options");
+    throw e;
   }
 };
