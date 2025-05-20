@@ -1491,6 +1491,16 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    HasActiveOpportunityFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
     OpportunityStatusesFilterV1:
       type: object
       properties:
@@ -1513,6 +1523,10 @@ components:
     AgencySearchFilterV1:
       type: object
       properties:
+        has_active_opportunity:
+          type:
+          - object
+          $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
         opportunity_statuses:
           type:
           - object
