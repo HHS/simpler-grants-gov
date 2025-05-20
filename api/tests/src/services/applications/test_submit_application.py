@@ -174,9 +174,13 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
+    
+    # Create a user and associate with the application
+    user = UserFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        submit_application(db_session, application.application_id)
+        submit_application(db_session, application.application_id, user)
 
     assert excinfo.value.status_code == 422
     assert excinfo.value.message == "The application has issues in its form responses."
@@ -200,9 +204,13 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
     ApplicationFormFactory.create(
         application=application, form=form, application_response={"name": 5}
     )
+    
+    # Create a user and associate with the application
+    user = UserFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        submit_application(db_session, application.application_id)
+        submit_application(db_session, application.application_id, user)
 
     assert excinfo.value.status_code == 422
     assert excinfo.value.message == "The application has issues in its form responses."
@@ -212,7 +220,7 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
     )
 
 
-def test_submit_application_not_found(db_session):
+def test_submit_application_not_found(db_session, enable_factory_create):
     """Test that submitting a non-existent application."""
     non_existent_id = uuid.uuid4()
     user = UserFactory.create()

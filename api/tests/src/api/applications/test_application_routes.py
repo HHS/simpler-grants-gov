@@ -1101,6 +1101,10 @@ def test_application_submit_validation_issues(
         application=application, form=form, application_response={"name": 5}
     )
 
+    # Get the user from the auth token and associate with application
+    user = parse_jwt_for_user(user_auth_token, db_session).user
+    ApplicationUserFactory.create(application=application, user=user)
+
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
         headers={"X-SGG-Token": user_auth_token},
@@ -1148,6 +1152,10 @@ def test_application_submit_missing_required_form(
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
+
+    # Get the user from the auth token and associate with application
+    user = parse_jwt_for_user(user_auth_token, db_session).user
+    ApplicationUserFactory.create(application=application, user=user)
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
@@ -1482,11 +1490,22 @@ def test_application_submit_success_when_associated(client, enable_factory_creat
     # Create a competition with a future closing date
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
-    competition = CompetitionFactory.create(closing_date=future_date)
+    competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
+
+    # Create a form and make it required for the competition
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
 
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+
+    # Create an application form with valid data to ensure validation passes
+    ApplicationFormFactory.create(
+        application=application, 
+        form=form, 
+        application_response={"name": "Valid Name"}
     )
 
     # Create ApplicationUser association
