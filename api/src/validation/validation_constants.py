@@ -39,3 +39,5 @@ class ValidationErrorType(StrEnum):
 
     # Application access validation error type
     UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
+    MISSING_REQUIRED_FORM = "missing_required_form"
+    APPLICATION_FORM_VALIDATION = "application_form_validation"

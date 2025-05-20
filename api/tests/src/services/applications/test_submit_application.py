@@ -11,16 +11,30 @@ from src.services.applications.submit_application import (
     validate_application_in_progress,
     validate_competition_open,
 )
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
+    ApplicationFormFactory,
     ApplicationUserFactory,
     CompetitionFactory,
+    CompetitionFormFactory,
+    FormFactory,
     UserFactory,
 )
 
 # Set a fixed date for freezing time in tests
 TEST_DATE = "2023-03-10"
+
+# Simple JSON schema used for tests below
+SIMPLE_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer", "maximum": 200},
+    },
+    "required": ["name"],
+}
 
 
 # Tests for validate_application_in_progress
@@ -120,13 +134,18 @@ def test_validate_competition_with_no_closing_date(enable_factory_create, db_ses
 # Tests for the main submit_application function
 def test_submit_application_success(enable_factory_create, db_session):
     """Test successful submission of an application in IN_PROGRESS state."""
-    today = date.today()
+    today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
-        closing_date=today + timedelta(days=1),
-        grace_period=3,
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    CompetitionFormFactory.create(competition=competition, form=form)
+
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application, form=form, application_response={"name": "Test Name"}
     )
 
     # Create a user and associate with the application
@@ -144,8 +163,56 @@ def test_submit_application_success(enable_factory_create, db_session):
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
 
+def test_submit_application_with_missing_required_form(enable_factory_create, db_session):
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    CompetitionFormFactory.create(competition=competition, form=form)
 
-def test_submit_application_not_found(enable_factory_create, db_session):
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        submit_application(db_session, application.application_id)
+
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.message == "The application has issues in its form responses."
+    assert (
+        excinfo.value.extra_data["validation_issues"][0].type
+        == ValidationErrorType.MISSING_REQUIRED_FORM
+    )
+
+
+def test_submit_application_with_invalid_field(enable_factory_create, db_session):
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    CompetitionFormFactory.create(competition=competition, form=form)
+
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application, form=form, application_response={"name": 5}
+    )
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        submit_application(db_session, application.application_id)
+
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.message == "The application has issues in its form responses."
+    assert (
+        excinfo.value.extra_data["validation_issues"][0].type
+        == ValidationErrorType.APPLICATION_FORM_VALIDATION
+    )
+
+
+def test_submit_application_not_found(db_session):
     """Test that submitting a non-existent application."""
     non_existent_id = uuid.uuid4()
     user = UserFactory.create()

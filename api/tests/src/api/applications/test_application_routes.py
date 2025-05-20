@@ -66,6 +66,7 @@ def test_application_start_success(client, enable_factory_create, db_session):
 
     assert application is not None
     assert str(application.competition_id) == competition_id
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
 
 
 @freeze_time(TEST_DATE)
@@ -454,7 +455,17 @@ def test_application_form_update_success_update(
     "application_response,expected_warnings",
     [
         # Missing required field
-        ({}, [{"field": "$", "message": "'name' is a required property", "type": "required"}]),
+        (
+            {},
+            [
+                {
+                    "field": "$",
+                    "message": "'name' is a required property",
+                    "type": "required",
+                    "value": None,
+                }
+            ],
+        ),
         # Validation on age field
         (
             {"name": "bob", "age": 500},
@@ -463,6 +474,7 @@ def test_application_form_update_success_update(
                     "field": "$.age",
                     "message": "500 is greater than the maximum of 200",
                     "type": "maximum",
+                    "value": None,
                 }
             ],
         ),
@@ -909,7 +921,17 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
         # Valid data - no warnings
         ({"name": "John Doe", "age": 30}, []),
         # Missing required field
-        ({}, [{"field": "$", "message": "'name' is a required property", "type": "required"}]),
+        (
+            {},
+            [
+                {
+                    "field": "$",
+                    "message": "'name' is a required property",
+                    "type": "required",
+                    "value": None,
+                }
+            ],
+        ),
         # Validation on age field
         (
             {"name": "bob", "age": 500},
@@ -918,6 +940,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
                     "field": "$.age",
                     "message": "500 is greater than the maximum of 200",
                     "type": "maximum",
+                    "value": None,
                 }
             ],
         ),
@@ -1017,12 +1040,23 @@ def test_application_submit_success(client, enable_factory_create, db_session, u
     # Create a competition with a future closing date
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
-    competition = CompetitionFactory.create(closing_date=future_date)
+    competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
+    )
 
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
+    ApplicationFormFactory.create(
+        application=application, form=form, application_response={"name": "Test Name"}
+    )
+
     application_id = str(application.application_id)
 
     # Get the user from the auth token and associate with application
@@ -1043,6 +1077,94 @@ def test_application_submit_success(client, enable_factory_create, db_session, u
     # Verify application status was updated
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
+
+
+def test_application_submit_validation_issues(
+    client, enable_factory_create, db_session, user_auth_token
+):
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
+    )
+
+    # Create an application in the IN_PROGRESS state
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    application_form = ApplicationFormFactory.create(
+        application=application, form=form, application_response={"name": 5}
+    )
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 422
+    assert response.json["message"] == "The application has issues in its form responses."
+
+    assert response.json["data"] == {
+        "form_validation_errors": {
+            str(application_form.application_form_id): [
+                {
+                    "field": "$.name",
+                    "message": "5 is not of type 'string'",
+                    "type": "type",
+                    "value": None,
+                }
+            ]
+        }
+    }
+
+    assert response.json["errors"] == [
+        {
+            "field": "application_form_id",
+            "message": "The application form has outstanding errors.",
+            "type": "application_form_validation",
+            "value": str(application_form.application_form_id),
+        }
+    ]
+
+
+def test_application_submit_missing_required_form(
+    client, enable_factory_create, db_session, user_auth_token
+):
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
+
+    form = FormFactory.create(form_name="ExampleForm-ABC", form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
+
+    # Create an application in the IN_PROGRESS state
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 422
+    assert response.json["message"] == "The application has issues in its form responses."
+    assert response.json["errors"] == [
+        {
+            "field": "form_id",
+            "message": "Form ExampleForm-ABC is required",
+            "type": "missing_required_form",
+            "value": str(form.form_id),
+        }
+    ]
 
 
 @pytest.mark.parametrize(
