@@ -31,10 +31,10 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = Promise.all([
-    getAgenciesForFilterOptions(),
-    searchResultsPromise,
-  ]);
+  // const agenciesPromise = Promise.all([
+  //   getAgenciesForFilterOptions(),
+  //   searchResultsPromise,
+  // ]);
 
   let searchResults;
   try {
@@ -69,7 +69,10 @@ export default async function SearchFilters({
         title={t("accordion.titles.eligibility")}
         facetCounts={facetCounts?.applicant_type || {}}
       />
-      <AgencyFilterAccordion query={agency} />
+      <AgencyFilterAccordion
+        query={agency}
+        searchResultsPromise={searchResultsPromise}
+      />
       <SearchFilterAccordion
         filterOptions={categoryOptions}
         query={category}
