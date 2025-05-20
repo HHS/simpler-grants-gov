@@ -39,6 +39,9 @@ jobs:
       - name: Save built image to file
         run: docker save nofos:"$(git rev-parse HEAD)" > /tmp/docker-image.tar
 
+      - name: Save built image to file
+        run: docker save nofos:latest > /tmp/docker-image-latest.tar
+
       - name: Cache commit hash
         uses: actions/cache/save@v4
         with:
@@ -50,3 +53,9 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           key: nofos-image-${{ github.sha }}-${{ github.run_id }}
+
+      - name: Cache Docker image With Latest Tag
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/docker-image-latest.tar
+          key: nofos-image-${{ github.sha }}-${{ github.run_id }}-latest
