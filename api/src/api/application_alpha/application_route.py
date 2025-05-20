@@ -67,7 +67,8 @@ def application_update(
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("PUT /alpha/applications/:application_id")
 
-    application_name = json_data["application_name"]
+    # Create updates dictionary from the request data
+    updates = {"application_name": json_data["application_name"]}
 
     # Get user from token session
     token_session = api_jwt_auth.get_user_token_session()
@@ -75,10 +76,10 @@ def application_update(
 
     with db_session.begin():
         # Call the service to update the application
-        application = update_application(db_session, application_id, application_name, user)
+        application, warnings = update_application(db_session, application_id, updates, user)
 
     return response.ApiResponse(
-        message="Success", data={"application_id": application.application_id}
+        message="Success", data={"application_id": application.application_id}, warnings=warnings
     )
 
 
