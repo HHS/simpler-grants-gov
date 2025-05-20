@@ -109,16 +109,16 @@ class LoadAgenciesToIndex(Task):
             opportunity_statuses = []
 
             if agency.agency_id in posted_agencies:
-                opportunity_statuses.append(OpportunityStatus.POSTED.value)
+                opportunity_statuses.append(OpportunityStatus.POSTED)
 
             if agency.agency_id in forecasted_agencies:
-                opportunity_statuses.append(OpportunityStatus.FORECASTED.value)
+                opportunity_statuses.append(OpportunityStatus.FORECASTED)
 
             if agency.agency_id in closed_agencies:
-                opportunity_statuses.append(OpportunityStatus.CLOSED.value)
+                opportunity_statuses.append(OpportunityStatus.CLOSED)
 
             if agency.agency_id in archived_agencies:
-                opportunity_statuses.append(OpportunityStatus.ARCHIVED.value)
+                opportunity_statuses.append(OpportunityStatus.ARCHIVED)
 
             agency_json["opportunity_statuses"] = opportunity_statuses
 
