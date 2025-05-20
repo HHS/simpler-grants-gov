@@ -66,10 +66,14 @@ def application_form_update(
 
     application_response = json_data["application_response"]
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
         # Call the service to update the application form
         _, warnings = update_application_form(
-            db_session, application_id, form_id, application_response
+            db_session, application_id, form_id, application_response, user
         )
 
     return response.ApiResponse(
@@ -96,8 +100,14 @@ def application_form_get(
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application_form, warnings = get_application_form(db_session, application_id, app_form_id)
+        application_form, warnings = get_application_form(
+            db_session, application_id, app_form_id, user
+        )
 
     return response.ApiResponse(
         message="Success",
@@ -119,8 +129,12 @@ def application_get(
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("GET /alpha/applications/:application_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application = get_application(db_session, application_id)
+        application = get_application(db_session, application_id, user)
 
     # Return the application form data
     return response.ApiResponse(
@@ -139,8 +153,12 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/submit")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        submit_application(db_session, application_id)
+        submit_application(db_session, application_id, user)
 
     # Return success response
     return response.ApiResponse(message="Success")

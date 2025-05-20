@@ -951,9 +951,7 @@ class CompetitionFactory(BaseFactory):
     competition_title = sometimes_none(factory.Faker("sentence"))
 
     opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.opening_date)
-    )
+    closing_date = factory.Faker("date_between", start_date="+1d", end_date="+3w")
 
     grace_period = factory.Faker("random_int", min=1, max=10)
     contact_info = sometimes_none(factory.Faker("agency_contact_description"))
@@ -1140,6 +1138,8 @@ class ApplicationFactory(BaseFactory):
 class ApplicationFormFactory(BaseFactory):
     class Meta:
         model = competition_models.ApplicationForm
+
+    application_form_id = Generators.UuidObj
 
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
@@ -2287,3 +2287,14 @@ class OrganizationFactory(BaseFactory):
     sam_gov_entity_id = factory.LazyAttribute(
         lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
     )
+
+
+class ApplicationUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.ApplicationUser
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
