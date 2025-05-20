@@ -613,6 +613,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Save Search
@@ -721,6 +727,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Save Opportunity
@@ -764,6 +776,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Get Saved Searches
@@ -839,6 +857,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Get Saved Opportunities
@@ -887,6 +911,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Update Saved Search
@@ -928,6 +958,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Delete Saved Search
@@ -1013,6 +1049,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Delete Saved Opportunity
