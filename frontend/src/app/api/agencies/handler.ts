@@ -4,7 +4,7 @@ import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { NextRequest } from "next/server";
 
-export async function searchAgencies(request: NextRequest) {
+export async function searchForAgencies(request: NextRequest) {
   const { keyword } = await request.json();
 
   let agencySearchResults: FilterOption[] = [];

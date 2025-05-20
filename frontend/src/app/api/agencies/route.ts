@@ -1,5 +1,5 @@
 import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { searchAgencies } from "./handler";
+import { searchForAgencies } from "./handler";
 
-export const POST = respondWithTraceAndLogs(searchAgencies);
+export const POST = respondWithTraceAndLogs(searchForAgencies);
