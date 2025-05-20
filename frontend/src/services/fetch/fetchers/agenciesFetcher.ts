@@ -1,7 +1,10 @@
 "server only";
 
 import { ApiRequestError } from "src/errors";
-import { fetchAgencies } from "src/services/fetch/fetchers/fetchers";
+import {
+  fetchAgencies,
+  searchAgencies,
+} from "src/services/fetch/fetchers/fetchers";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { sortFilterOptions } from "src/utils/search/searchUtils";
 
@@ -22,23 +25,20 @@ const isTopLevelAgency = (agency: RelevantAgencyRecord) => {
 export const obtainAgencies = async (
   keyword?: string,
 ): Promise<RelevantAgencyRecord[]> => {
-  const response = await fetchAgencies({
+  const response = await searchAgencies({
     body: {
       pagination: {
         page_offset: 1,
         page_size: 1500, // 969 agencies in prod as of 3/7/25
         sort_order: [
           {
-            order_by: "created_at",
+            order_by: "agency_code",
             sort_direction: "ascending",
           },
         ],
       },
       filters: { active: true },
       query: keyword || "",
-    },
-    nextOptions: {
-      revalidate: 604800,
     },
   });
   if (!response || response.status !== 200) {
@@ -52,6 +52,8 @@ export const obtainAgencies = async (
   const { data } = (await response.json()) as {
     data: RelevantAgencyRecord[];
   };
+
+  // need to pull out top level agencies from each search result and flatten
   return data;
 };
 
