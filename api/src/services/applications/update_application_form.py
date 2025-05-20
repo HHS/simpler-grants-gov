@@ -6,14 +6,20 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import Application, ApplicationForm, CompetitionForm, Form
+from src.db.models.competition_models import ApplicationForm, CompetitionForm, Form
+from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
 
 
 def update_application_form(
-    db_session: db.Session, application_id: UUID, form_id: UUID, application_response: dict
+    db_session: db.Session,
+    application_id: UUID,
+    form_id: UUID,
+    application_response: dict,
+    user: User,
 ) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
     """
     Update an application form response.
@@ -23,20 +29,17 @@ def update_application_form(
         application_id: UUID of the application
         form_id: UUID of the form
         application_response: The form response data
+        user: User attempting to update the application form
 
     Returns:
         Tuple of (ApplicationForm, warnings list)
 
     Raises:
         Flask error with 404 status if application or form doesn't exist
+        Flask error with 403 status if user is not authorized to access the application
     """
     # Check if application exists
-    application = db_session.execute(
-        select(Application).where(Application.application_id == application_id)
-    ).scalar_one_or_none()
-
-    if not application:
-        raise_flask_error(404, f"Application with ID {application_id} not found")
+    application = get_application(db_session, application_id, user)
 
     # Check if form exists and is attached to the competition
     form = db_session.execute(
