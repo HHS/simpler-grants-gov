@@ -36,6 +36,7 @@ jobs:
 
   vulnerability-scans:
     name: Vulnerability Scans
+    needs: [checks]
     uses: ./.github/workflows/vulnerability-scans-nofos.yml
 
   deploy:
