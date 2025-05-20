@@ -5,6 +5,7 @@ import { QueryContext } from "src/services/search/QueryProvider";
 import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
 
 import { useContext, useMemo } from "react";
+import { TextInput } from "@trussworks/react-uswds";
 
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import {

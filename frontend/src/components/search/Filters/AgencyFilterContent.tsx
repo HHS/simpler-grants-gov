@@ -1,35 +1,34 @@
+"use client";
+
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
+import { TextInput } from "@trussworks/react-uswds";
+
 import { CheckboxFilterBody } from "../Filters/CheckboxFilter";
 
-export async function AgencyFilterContent({
-  query,
-  title,
-  searchResultsPromise,
-  agencySearchPromise,
-}) {
-  let agencies: FilterOption[] = [];
-  let facetCounts: { [key: string]: number } = {};
-  try {
-    let searchResults: SearchAPIResponse;
-    [agencies, searchResults] = await Promise.all([
-      agencySearchPromise,
-      searchResultsPromise,
-    ]);
-    facetCounts = searchResults.facet_counts.agency;
-  } catch (e) {
-    // Come back to this to show the user an error
-    console.error("Unable to fetch agencies for filter list", e);
-  }
+const searchForAgencies = (searchTerm: string) => {
+  console.log("!!!", searchTerm);
+  return Promise.resolve([]);
+};
+
+export function AgencyFilterContent({ query, title, agencies, facetCounts }) {
   return (
-    <CheckboxFilterBody
-      query={query}
-      queryParamKey={"agency"}
-      title={title}
-      includeAnyOption={true}
-      filterOptions={agencies}
-      facetCounts={facetCounts}
-    />
+    <>
+      <TextInput
+        type="text"
+        name="LastName"
+        id="LastName"
+        onChange={(e) => searchForAgencies(e.target.value)}
+      />
+      <CheckboxFilterBody
+        query={query}
+        queryParamKey={"agency"}
+        title={title}
+        includeAnyOption={true}
+        filterOptions={agencies}
+        facetCounts={facetCounts}
+      />
+    </>
   );
 }

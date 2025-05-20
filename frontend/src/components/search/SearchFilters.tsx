@@ -1,4 +1,3 @@
-import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
@@ -11,9 +10,17 @@ import {
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
-  statusOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
+import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
+
+const defaultFacetCounts = {
+  funding_instrument: {},
+  applicant_type: {},
+  agency: {},
+  funding_category: {},
+  opportunity_status: {},
+};
 
 export default async function SearchFilters({
   fundingInstrument,
@@ -31,10 +38,11 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  // const agenciesPromise = Promise.all([
-  //   getAgenciesForFilterOptions(),
-  //   searchResultsPromise,
-  // ]);
+  const agenciesPromise = Promise.all([
+    // update this to use the search endpoint, this will also be consumed by the new route
+    getAgenciesForFilterOptions(),
+    searchResultsPromise,
+  ]);
 
   let searchResults;
   try {
@@ -43,42 +51,47 @@ export default async function SearchFilters({
     console.error("Search error, cannot set filter facets", e);
   }
 
-  const facetCounts = searchResults?.facet_counts;
+  const facetCounts = searchResults?.facet_counts || defaultFacetCounts;
 
   return (
     <>
-      <SearchFilterAccordion
-        filterOptions={statusOptions}
-        query={opportunityStatus}
-        queryParamKey="status"
-        title={t("accordion.titles.status")}
-        defaultEmptySelection={new Set([SEARCH_NO_STATUS_VALUE])}
-        facetCounts={facetCounts?.opportunity_status || {}}
-      />
       <SearchFilterAccordion
         filterOptions={fundingOptions}
         query={fundingInstrument}
         queryParamKey="fundingInstrument"
         title={t("accordion.titles.funding")}
-        facetCounts={facetCounts?.funding_instrument || {}}
+        facetCounts={facetCounts.funding_instrument || {}}
       />
       <SearchFilterAccordion
         filterOptions={eligibilityOptions}
         query={eligibility}
         queryParamKey={"eligibility"}
         title={t("accordion.titles.eligibility")}
-        facetCounts={facetCounts?.applicant_type || {}}
+        facetCounts={facetCounts.applicant_type || {}}
       />
-      <AgencyFilterAccordion
-        query={agency}
-        searchResultsPromise={searchResultsPromise}
-      />
+      <Suspense
+        fallback={
+          <CheckboxFilter
+            filterOptions={[]}
+            query={agency}
+            queryParamKey={"agency"}
+            title={t("accordion.titles.agency")}
+            wrapForScroll={true}
+            facetCounts={{}}
+          />
+        }
+      >
+        <AgencyFilterAccordion
+          query={agency}
+          agenciesPromise={agenciesPromise}
+        />
+      </Suspense>
       <SearchFilterAccordion
         filterOptions={categoryOptions}
         query={category}
         queryParamKey={"category"}
         title={t("accordion.titles.category")}
-        facetCounts={facetCounts?.funding_category || {}}
+        facetCounts={facetCounts.funding_category || {}}
       />
     </>
   );
