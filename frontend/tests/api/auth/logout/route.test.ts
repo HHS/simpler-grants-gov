@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { POST } from "src/app/api/auth/logout/route";
+import { logoutUser } from "src/app/api/auth/logout/handler";
 import { UnauthorizedError } from "src/errors";
 
 const getSessionMock = jest.fn();
@@ -29,7 +29,7 @@ describe("/api/auth/logout POST handler", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await POST();
+    const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(0);
     expect(response.status).toEqual(401);
@@ -42,7 +42,7 @@ describe("/api/auth/logout POST handler", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    await POST();
+    await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
@@ -54,7 +54,7 @@ describe("/api/auth/logout POST handler", () => {
     postLogoutMock.mockImplementation(() => {
       throw new Error("the API threw this error");
     });
-    const response = await POST();
+    const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
@@ -67,7 +67,7 @@ describe("/api/auth/logout POST handler", () => {
       token: "fakeToken",
     }));
     postLogoutMock.mockImplementation(() => null);
-    const response = await POST();
+    const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
@@ -83,7 +83,7 @@ describe("/api/auth/logout POST handler", () => {
       token: "fakeToken",
     }));
     postLogoutMock.mockImplementation(() => "success");
-    await POST();
+    await logoutUser();
 
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
   });
@@ -94,7 +94,7 @@ describe("/api/auth/logout POST handler", () => {
     postLogoutMock.mockImplementation(() => {
       throw new UnauthorizedError("Token expired");
     });
-    const response = await POST();
+    const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
@@ -108,7 +108,7 @@ describe("/api/auth/logout POST handler", () => {
       token: "fakeToken",
     }));
     postLogoutMock.mockImplementation(() => "success");
-    const response = await POST();
+    const response = await logoutUser();
 
     expect(response.status).toEqual(200);
     const json = (await response.json()) as { message: string };
