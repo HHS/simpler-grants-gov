@@ -1503,9 +1503,7 @@ def test_application_submit_success_when_associated(client, enable_factory_creat
 
     # Create an application form with valid data to ensure validation passes
     ApplicationFormFactory.create(
-        application=application, 
-        form=form, 
-        application_response={"name": "Valid Name"}
+        application=application, form=form, application_response={"name": "Valid Name"}
     )
 
     # Create ApplicationUser association

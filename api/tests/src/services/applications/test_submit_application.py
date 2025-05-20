@@ -163,6 +163,7 @@ def test_submit_application_success(enable_factory_create, db_session):
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
 
+
 def test_submit_application_with_missing_required_form(enable_factory_create, db_session):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -174,7 +175,7 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
-    
+
     # Create a user and associate with the application
     user = UserFactory.create()
     ApplicationUserFactory.create(user=user, application=application)
@@ -204,7 +205,7 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
     ApplicationFormFactory.create(
         application=application, form=form, application_response={"name": 5}
     )
-    
+
     # Create a user and associate with the application
     user = UserFactory.create()
     ApplicationUserFactory.create(user=user, application=application)
