@@ -655,6 +655,54 @@ paths:
       summary: Get an application by ID
       security:
       - ApiJwtAuth: []
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Application Alpha
+      summary: Update an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationUpdateRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/competitions/{competition_id}:
     get:
       parameters:
@@ -2814,6 +2862,35 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationUpdateRequest:
+      type: object
+      properties:
+        application_name:
+          type: string
+      required:
+      - application_name
+    ApplicationUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
