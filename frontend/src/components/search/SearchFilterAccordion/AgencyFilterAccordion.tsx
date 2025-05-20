@@ -26,14 +26,33 @@ export async function AgencyFilterAccordion({
     console.error("Unable to fetch agencies for filter list", e);
   }
   return (
-    <SearchFilterAccordion
-      filterOptions={agencies}
-      query={query}
-      queryParamKey={"agency"}
-      title={t("accordion.titles.agency")}
-      wrapForScroll={true}
-      facetCounts={facetCounts}
-    />
+    <Suspense
+      fallback={
+        <Accordion
+          bordered={true}
+          items={[
+            {
+              title: t("accordion.titles.agency"),
+              content: [],
+              expanded: false,
+              id: "opportunity-filter-agency-disabled",
+              headingLevel: "h2",
+            },
+          ]}
+          multiselectable={true}
+          className="margin-top-4"
+        />
+      }
+    >
+      <SearchFilterAccordion
+        filterOptions={agencies}
+        query={query}
+        queryParamKey={"agency"}
+        title={t("accordion.titles.agency")}
+        wrapForScroll={true}
+        facetCounts={facetCounts}
+      />
+    </Suspense>
   );
 }
 

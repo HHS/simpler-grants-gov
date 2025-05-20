@@ -69,29 +69,7 @@ export default async function SearchFilters({
         title={t("accordion.titles.eligibility")}
         facetCounts={facetCounts?.applicant_type || {}}
       />
-      <Suspense
-        fallback={
-          <Accordion
-            bordered={true}
-            items={[
-              {
-                title: t("accordion.titles.agency"),
-                content: [],
-                expanded: false,
-                id: "opportunity-filter-agency-disabled",
-                headingLevel: "h2",
-              },
-            ]}
-            multiselectable={true}
-            className="margin-top-4"
-          />
-        }
-      >
-        <AgencyFilterAccordion
-          query={agency}
-          agencyOptionsPromise={agenciesPromise}
-        />
-      </Suspense>
+      <AgencyFilterAccordion query={agency} />
       <SearchFilterAccordion
         filterOptions={categoryOptions}
         query={category}
