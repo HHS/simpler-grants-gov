@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import FilterCheckbox from "src/components/FilterCheckbox";
 

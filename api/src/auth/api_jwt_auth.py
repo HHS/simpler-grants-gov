@@ -153,7 +153,7 @@ def parse_jwt_for_user(
     token_session: UserTokenSession | None = db_session.execute(
         select(UserTokenSession)
         .where(UserTokenSession.token_id == sub_id)
-        .options(selectinload("*"))
+        .options(selectinload(UserTokenSession.user))
     ).scalar()
 
     # We check both the token expires_at timestamp as well as an

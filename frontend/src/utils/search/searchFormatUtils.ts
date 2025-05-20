@@ -1,6 +1,14 @@
 import { pickBy } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import {
+  BackendFilterNames,
+  FrontendFilterNames,
+} from "src/types/search/searchFilterTypes";
+import {
+  ValidSearchQueryParamData,
+  validSearchQueryParamKeys,
+} from "src/types/search/searchQueryTypes";
+import {
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortOrder,
@@ -9,13 +17,7 @@ import {
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
-  ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
-import {
-  BackendFilterNames,
-  FrontendFilterNames,
-  validSearchQueryParamKeys,
-} from "src/types/search/searchResponseTypes";
 
 const orderByFieldLookup = {
   relevancy: ["relevancy"],

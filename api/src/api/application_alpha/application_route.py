@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
     competition_id = json_data["competition_id"]
+    # application_name is optional, so we use get to avoid a KeyError
+    application_name = json_data.get("application_name", None)
     add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("POST /alpha/applications/start")
 
@@ -42,7 +44,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     user = token_session.user
 
     with db_session.begin():
-        application = create_application(db_session, competition_id, user)
+        application = create_application(db_session, competition_id, user, application_name)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
@@ -64,10 +66,14 @@ def application_form_update(
 
     application_response = json_data["application_response"]
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
         # Call the service to update the application form
         _, warnings = update_application_form(
-            db_session, application_id, form_id, application_response
+            db_session, application_id, form_id, application_response, user
         )
 
     return response.ApiResponse(
@@ -94,8 +100,14 @@ def application_form_get(
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application_form, warnings = get_application_form(db_session, application_id, app_form_id)
+        application_form, warnings = get_application_form(
+            db_session, application_id, app_form_id, user
+        )
 
     return response.ApiResponse(
         message="Success",
@@ -117,8 +129,12 @@ def application_get(
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("GET /alpha/applications/:application_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application = get_application(db_session, application_id)
+        application = get_application(db_session, application_id, user)
 
     # Return the application form data
     return response.ApiResponse(
@@ -137,8 +153,12 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/submit")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        submit_application(db_session, application_id)
+        submit_application(db_session, application_id, user)
 
     # Return success response
     return response.ApiResponse(message="Success")
