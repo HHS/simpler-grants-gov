@@ -284,4 +284,4 @@ def test_user_get_saved_opportunities_deleted(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 1
-    assert response.json["data"][0]["opportunity_id"] is active_opp.opportunity_id
+    assert response.json["data"][0]["opportunity_id"] == str(active_opp.opportunity_id)
