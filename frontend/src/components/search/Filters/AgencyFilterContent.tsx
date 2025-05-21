@@ -8,6 +8,7 @@ import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
 import { CheckboxFilterBody } from "../Filters/CheckboxFilter";
+import { FilterSearchNoResults } from "./FilterSearchNoResults";
 
 export function AgencyFilterContent({
   query,
@@ -48,14 +49,18 @@ export function AgencyFilterContent({
         id="LastName"
         onChange={(e) => searchForAgencies(e.target.value)}
       />
-      <CheckboxFilterBody
-        query={query}
-        queryParamKey={"agency"}
-        title={title}
-        includeAnyOption={!searchTerm}
-        filterOptions={agencySearchResults || agencies}
-        facetCounts={facetCounts}
-      />
+      {agencySearchResults && !agencySearchResults.length ? (
+        <FilterSearchNoResults />
+      ) : (
+        <CheckboxFilterBody
+          query={query}
+          queryParamKey={"agency"}
+          title={title}
+          includeAnyOption={!searchTerm}
+          filterOptions={agencySearchResults || agencies}
+          facetCounts={facetCounts}
+        />
+      )}
     </>
   );
 }
