@@ -46,8 +46,8 @@ export const LoginModal = ({
       renderToPortal={!isSSR}
     >
       <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
-        <p>{helpText}</p>
-        <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+      <p>{helpText}</p>
+      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
           <a

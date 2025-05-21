@@ -33,15 +33,15 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
       <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
-        <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+        <h1>
           {t("title")}
         </h1>
-        <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl margin-bottom-0">
+        <p className="usa-intro">
           {t("intro")}
         </p>
         <Grid row gap className="flex-align-start">
           <Grid>
-            <p className="usa-intro">{t("paragraph_1")}</p>
+            <p>{t("paragraph_1")}</p>
             <Link className="usa-button margin-bottom-4" href="/subscribe">
               {t("button_resub")}
             </Link>

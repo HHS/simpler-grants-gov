@@ -11,37 +11,28 @@ export default function EventsCoding() {
   const t = useTranslations("Events.codingChallenge");
 
   return (
-    <GridContainer
-      data-testid="events-coding-content"
-      className="padding-x-4 bg-base-lightest"
-    >
-      <Grid row gap={6} className="padding-6">
-        <Grid
-          tablet={{
-            col: true,
-          }}
-        >
+    <GridContainer data-testid="events-coding-content" className="padding-y-4 tablet-lg:padding-y-6">
+      <Grid row gap>
+        <Grid tablet={{ col: 7 }}>
           <h2>{t("title")}</h2>
-          <p className="font-sans-md line-height-sans-4">
+          <p>
             {t("descriptionP1")}
           </p>
-          <p className="font-sans-md line-height-sans-4">
+          <p>
             {t("descriptionP2")}
           </p>
-          <a
-            href={codingChallengeLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans-md line-height-sans-4"
-          >
-            {t("link")}
-          </a>
+          <p>
+            <a
+              href={codingChallengeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-sans-md line-height-sans-4"
+            >
+              {t("link")}
+            </a>
+          </p>
         </Grid>
-        <Grid
-          tablet={{
-            col: true,
-          }}
-        >
+        <Grid tablet={{ col: 5 }}>
           <Image
             alt="events-img"
             className="height-auto position-relative padding-y-3 padding-left-6"

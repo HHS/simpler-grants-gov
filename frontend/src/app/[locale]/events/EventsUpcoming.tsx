@@ -8,32 +8,25 @@ export default function EventsUpcoming() {
   const t = useTranslations("Events.upcoming");
 
   return (
-    <GridContainer data-testid="events-upcoming-content" className="padding-4">
-      <Grid row gap="md">
-        <Grid
-          tablet={{
-            col: 3,
-          }}
-        >
-          <h1 className="margin-left-6">{t("title")}</h1>
+    <GridContainer data-testid="events-upcoming-content" className="padding-y-4 tablet-lg:padding-y-6">
+      <Grid row gap>
+        <Grid tablet={{ col: 4 }}>
+          <h2>{t("title")}</h2>
         </Grid>
-        <Grid
-          tablet={{
-            col: 9,
-          }}
-          className="padding-x-6"
-        >
-          <span className="font-sans-md">{t("startDate")}</span>
-          <h2>{t("header")}</h2>
-          <p className="font-sans-md line-height-sans-4">{t("description")}</p>
-          <a
-            href={signUpLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans-md"
-          >
-            {t("link")}
-          </a>
+        <Grid tablet={{ col: 8 }}>
+          <h3>{t("header")}</h3>
+          <p className="font-sans-md">{t("startDate")}</p>
+          <p>{t("description")}</p>
+          <p>
+            <a
+              href={signUpLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-sans-md"
+            >
+              {t("link")}
+            </a>
+          </p>
         </Grid>
       </Grid>
     </GridContainer>
