@@ -114,7 +114,7 @@ export function DeleteSavedSearchModal({
         className="padding-1 hover:bg-base-lightest"
         unstyled
       >
-        <USWDSIcon name="edit" key="delete-saved-search" />
+        <USWDSIcon name="delete" key="delete-saved-search" />
         {deleteText}
       </ModalToggleButton>
       <Modal
