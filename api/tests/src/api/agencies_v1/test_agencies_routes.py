@@ -178,11 +178,11 @@ class TestAgenciesRoutes(BaseTestClass):
         assert response.status_code == 200
         data_inactive = response.json["data"]
 
-        # only agency associated with opportunity of closed/archived status is returned and the respective top_level_agencies
-        assert len(data_inactive) == 4
+        # ensure all agencies returned
+        assert len(data_inactive) == 6
 
         assert set([agency["agency_code"] for agency in data_inactive]) == set(
-            [opp.agency_code for opp in [dod_darpa, usda_crees, darpa, usda]]
+            [opp.agency_code for opp in [dod_darpa, usda_crees, darpa, usda, hhs, doi_hhs]]
         )
 
     def test_agencies_active_no_duplicate(

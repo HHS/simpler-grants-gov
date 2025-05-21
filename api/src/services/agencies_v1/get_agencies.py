@@ -56,7 +56,6 @@ def get_agencies(
     )
 
     if list_params.filters:
-        agency_subquery = None
         if list_params.filters.active:
             agency_subquery = (
                 _construct_active_inner_query(
@@ -71,21 +70,6 @@ def get_agencies(
                 .subquery()
             )
 
-        elif list_params.filters.active is False:
-            agency_subquery = (
-                _construct_active_inner_query(
-                    Agency.agency_id, [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED]
-                )
-                .union(
-                    _construct_active_inner_query(
-                        Agency.top_level_agency_id,
-                        [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED],
-                    )
-                )
-                .subquery()
-            )
-
-        if agency_subquery is not None:
             agency_id_stmt = select(agency_subquery).distinct()
             stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
 

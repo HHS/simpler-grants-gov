@@ -69,22 +69,12 @@ def get_search_request(params: AgencySearchParams) -> dict:
         builder.simple_query(params.query, filter_rule, SearchQueryOperator.OR)
 
     # Filters
-
     if params.filters:
-        if (
-            params.filters.has_active_opportunity
-            and params.filters.has_active_opportunity.one_of is not None
-        ):
-            value = params.filters.has_active_opportunity.one_of
-            if True in value:
-                params.filters.opportunity_statuses = StrSearchFilter(
-                    one_of=[OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
-                )
-            elif False in value:
-                params.filters.opportunity_statuses = StrSearchFilter(
-                    one_of=[OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED]
-                )
-            params.filters.has_active_opportunity = None
+        value = params.filters.has_active_opportunity
+        if value and value.one_of and True in value.one_of:
+            params.filters.opportunity_statuses = StrSearchFilter(
+                one_of=[OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+            )
         _add_search_filters(builder, AGENCY_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
     return builder.build()

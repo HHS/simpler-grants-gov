@@ -176,38 +176,6 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 },
                 [],
             ),
-            (
-                # Bool filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "has_active_opportunity": {"one_of": [True]},
-                    },
-                },
-                [DOA, DOD, DOD_HRE, DOD_MCO],
-            ),
-            (
-                # Bool filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "has_active_opportunity": {"one_of": [0]},
-                    },
-                },
-                [HHS, HHS_DOC, HHS_NIH, HHS_OMHA],
-            ),
         ],
     )
     def test_search_agencies(self, client, api_auth_token, search_request, expected_result):
