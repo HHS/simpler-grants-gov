@@ -201,11 +201,11 @@ def _fetch_sub_agencies(db_session: db.Session, top_level_agency: str) -> Sequen
         select(Agency.agency_id).where(Agency.agency_code == top_level_agency).scalar_subquery()
     )
 
-    combined_query = select(Agency.agency_code).where(
+    seb_agency_query = select(Agency.agency_code).where(
         Agency.top_level_agency_id == top_level_agency_id_subquery
     )
 
-    return db_session.execute(combined_query).scalars().all()
+    return db_session.execute(seb_agency_query).scalars().all()
 
 
 def _build_agency_filter(
