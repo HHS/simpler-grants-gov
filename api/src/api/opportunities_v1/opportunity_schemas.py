@@ -238,6 +238,10 @@ class OpportunityV1Schema(Schema):
         metadata={"description": "The internal ID of the opportunity"},
     )
 
+    legacy_opportunity_id = fields.Integer(
+        metadata={"description": "The internal legacy ID of the opportunity", "example": 12345},
+    )
+
     opportunity_number = fields.String(
         allow_none=True,
         metadata={"description": "The funding opportunity number", "example": "ABC-123-XYZ-001"},

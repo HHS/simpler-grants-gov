@@ -31,6 +31,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
         "agency_code": opp.agency_code,
         "agency_name": agency.agency_name,
         "opportunity_id": str(opp.opportunity_id),
+        "legacy_opportunity_id": opp.legacy_opportunity_id,
         "opportunity_title": opp.opportunity_title,
         "opportunity_number": opp.opportunity_number,
         "opportunity_status": None,
