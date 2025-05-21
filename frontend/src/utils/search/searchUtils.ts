@@ -108,11 +108,16 @@ export const paramsToFormattedQuery = (params: URLSearchParams): string => {
 
 export const flattenAgencies = (agencies: RelevantAgencyRecord[]) => {
   return agencies.reduce((allAgencies, agency) => {
-    const agenciesToAdd = allAgencies.find(
-      ({ agency_code }) => agency.top_level_agency?.agency_code === agency_code,
-    )
-      ? [agency]
-      : [agency, agency.top_level_agency!];
+    const agenciesToAdd = [agency];
+    if (
+      agency.top_level_agency &&
+      !allAgencies.find(
+        ({ agency_code }) =>
+          agency.top_level_agency?.agency_code === agency_code,
+      )
+    ) {
+      agenciesToAdd.push(agency.top_level_agency);
+    }
     return allAgencies.concat(agenciesToAdd);
   }, [] as RelevantAgencyRecord[]);
 };

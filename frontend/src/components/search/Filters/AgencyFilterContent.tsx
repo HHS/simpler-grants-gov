@@ -7,7 +7,7 @@ import { FilterOption } from "src/types/search/searchFilterTypes";
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
-import { CheckboxFilterBody } from "../Filters/CheckboxFilter";
+import { CheckboxFilterBody } from "src/components/search/Filters/CheckboxFilter";
 import { FilterSearchNoResults } from "./FilterSearchNoResults";
 
 export function AgencyFilterContent({
@@ -27,9 +27,12 @@ export function AgencyFilterContent({
   const searchForAgencies = debounce(
     (agencySearchTerm: string) => {
       setSearchTerm(agencySearchTerm);
+      if (!agencySearchTerm) {
+        setAgencySearchResults(agencies);
+        return;
+      }
       agencySearch(agencySearchTerm)
         .then((searchResults) => {
-          console.log("fetched agency option search", searchResults);
           setAgencySearchResults(searchResults);
         })
         .catch((e) => {
