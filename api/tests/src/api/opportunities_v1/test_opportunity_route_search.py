@@ -11,12 +11,10 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
-from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -1599,7 +1597,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         self, client, db_session, enable_factory_create, api_auth_token
     ):
         # setup-data
-        cascade_delete_from_db_table(db_session, Agency)
         doc = AgencyFactory.create(agency_code="DOC")
         AgencyFactory.create(
             agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
@@ -1622,15 +1619,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         self, client, db_session, enable_factory_create, api_auth_token
     ):
         # setup-data
-        cascade_delete_from_db_table(db_session, Agency)
-        doc = AgencyFactory.create(agency_code="DOC")
+        dos = AgencyFactory.create(agency_code="DOS")
         AgencyFactory.create(
-            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
-        )
-
-        AgencyFactory.create(agency_code="DOS")
-        AgencyFactory.create(
-            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=doc.agency_id
+            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=dos.agency_id
         )
 
         resp = client.post(
