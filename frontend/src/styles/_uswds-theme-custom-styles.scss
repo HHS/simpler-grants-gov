@@ -497,3 +497,9 @@ button.usa-pagination__button.usa-button {
     overflow-wrap: break-word;
   }
 }
+
+// Accordions
+// .usa-accordion {}
+.usa-accordion__heading {
+  border-bottom: 2px solid color(gray-warm-30);
+}
