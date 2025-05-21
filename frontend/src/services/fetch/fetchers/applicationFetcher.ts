@@ -17,7 +17,7 @@ export const handleStartApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
     additionalHeaders: ssgToken,
-    body: { competition_id: competitionID },
+    body: { competition_id: competitionID, name: "test" },
   });
 
   return (await response.json()) as ApplicationStartApiResponse;

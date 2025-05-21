@@ -1,12 +1,12 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get } from "lodash";
+import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
 
-import { useTranslation } from "next-intl";
 import { JSX } from "react";
 
 import {
@@ -189,7 +189,10 @@ export const buildField = ({
     options = {
       enumOptions: enums.map((label) => ({
         value: String(label),
-        label: String(label),
+        label: getSimpleTranslationsSync({
+          nameSpace: "Form",
+          translateAbleString: String(label),
+        }),
       })),
       emptyValue: "- Select -",
     };
