@@ -100,7 +100,7 @@ export const messages = {
       loading: "Updating",
     },
     save_message: {
-      save: "This opportunity was saved to <linkSavedGrants>Saved grants</linkSavedGrants>.",
+      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
       unsave: "This opportunity was unsaved.",
       error_save: "Error saving. Please try again.",
       error_unsave: "Error undoing save. Please try again.",
@@ -348,7 +348,7 @@ export const messages = {
       menuToggle: "Menu",
       research: "Research",
       roadmap: "Product roadmap",
-      savedGrants: "Saved opportunities",
+      savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
       subscribe: "Subscribe",
@@ -573,10 +573,8 @@ export const messages = {
     },
     editModal: {
       loading: "Updating",
-      title: "Edit name of search query",
-      description:
-        "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name <required>(required)</required>",
+      title: "Edit",
+      inputLabel: "New name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
@@ -593,12 +591,12 @@ export const messages = {
       description: "Delete ",
     },
   },
-  SavedGrants: {
-    heading: "Saved grants",
+  SavedOpportunities: {
+    heading: "Saved opportunities",
     noSavedCTA:
       "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
-    title: "Saved Grants | Simpler.Grants.gov",
+    title: "Saved Opportunities | Simpler.Grants.gov",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -607,40 +605,75 @@ export const messages = {
       "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
     sections: {
       progress: {
-        title: "What we're working on right now",
+        title: "What we're working on",
         contentItems: [
           [
             {
-              title: "Simpler application workflow prototype",
+              title: "Beta launch of Simpler Search on Grants.gov",
               content:
-                "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+                " We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.<p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
             },
             {
-              title:
-                "Full support for opportunity page attachments (NOFOs/downloads)",
+              title: "New opportunities for open-source collaboration",
               content:
-                "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+                "We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.<p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
             },
           ],
           [
             {
-              title: "Authentication via Login.gov",
+              title: "An 'Apply' workflow pilot",
               content:
-                "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+                "We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.<p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
             },
             {
-              title: "Search & opportunity page improvements",
+              title: "SOAP Proxy for the 'Apply' workflow",
               content:
-                "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+                "We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.<p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
+            },
+          ],
+          [
+            {
+              title: "User research on permissions",
+              content:
+                "We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.<p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
+            },
+            {
+              title: "Automated API key management",
+              content:
+                "We're building tools so authorized users can securely generate and manage their API keys independently without admin support.<p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
             },
           ],
         ],
         link: "View all deliverables on GitHub",
       },
       milestones: {
-        title: "Recent milestones reached",
-        contentTitle: "Late 2024",
+        title: "What we've delivered",
+        contentTitle: "Early 2025",
         contentItems: [
+          {
+            title: "Simpler application workflow prototype",
+            content:
+              "We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.",
+          },
+          {
+            title:
+              "Full support for opportunity page attachments (NOFOs/downloads)",
+            content:
+              "The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.",
+          },
+          {
+            title: "Authentication via Login.gov",
+            content:
+              "Finalizing authentication enabled grant seekers to create an account using Login.gov’s single sign-on platform. This move reduced the steps and friction users experience when signing up.",
+          },
+          {
+            title: "Search & opportunity page improvements",
+            content:
+              "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
+          },
+        ],
+        archivedRoadmapTitle: "Late 2024",
+        archivedRoadmapItems: [
           {
             title: "RESTful API launch",
             content:
@@ -649,12 +682,12 @@ export const messages = {
           {
             title: "Coding Challenge pilot",
             content:
-              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+              "We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
           },
           {
             title: "Search UI usability test",
             content:
-              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+              "We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
           },
           {
             title: "Opportunity page launch",

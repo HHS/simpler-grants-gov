@@ -12,6 +12,8 @@ from src.api.application_alpha.application_schemas import (
     ApplicationGetResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
+    ApplicationUpdateRequestSchema,
+    ApplicationUpdateResponseSchema,
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
@@ -20,6 +22,7 @@ from src.services.applications.create_application import create_application
 from src.services.applications.get_application import get_application
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
+from src.services.applications.update_application import update_application
 from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,8 @@ logger = logging.getLogger(__name__)
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
     competition_id = json_data["competition_id"]
+    # application_name is optional, so we use get to avoid a KeyError
+    application_name = json_data.get("application_name", None)
     add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("POST /alpha/applications/start")
 
@@ -42,7 +47,36 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     user = token_session.user
 
     with db_session.begin():
-        application = create_application(db_session, competition_id, user)
+        application = create_application(db_session, competition_id, user, application_name)
+
+    return response.ApiResponse(
+        message="Success", data={"application_id": application.application_id}
+    )
+
+
+@application_blueprint.put("/applications/<uuid:application_id>")
+@application_blueprint.input(ApplicationUpdateRequestSchema, location="json")
+@application_blueprint.output(ApplicationUpdateResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_update(
+    db_session: db.Session, application_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update an application"""
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("PUT /alpha/applications/:application_id")
+
+    # Create updates dictionary from the request data
+    updates = {"application_name": json_data["application_name"]}
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        # Call the service to update the application
+        application = update_application(db_session, application_id, updates, user)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
@@ -64,10 +98,14 @@ def application_form_update(
 
     application_response = json_data["application_response"]
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
         # Call the service to update the application form
         _, warnings = update_application_form(
-            db_session, application_id, form_id, application_response
+            db_session, application_id, form_id, application_response, user
         )
 
     return response.ApiResponse(
@@ -94,8 +132,14 @@ def application_form_get(
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application_form, warnings = get_application_form(db_session, application_id, app_form_id)
+        application_form, warnings = get_application_form(
+            db_session, application_id, app_form_id, user
+        )
 
     return response.ApiResponse(
         message="Success",
@@ -117,8 +161,12 @@ def application_get(
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("GET /alpha/applications/:application_id")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        application = get_application(db_session, application_id)
+        application = get_application(db_session, application_id, user)
 
     # Return the application form data
     return response.ApiResponse(
@@ -137,8 +185,12 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/submit")
 
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
     with db_session.begin():
-        submit_application(db_session, application_id)
+        submit_application(db_session, application_id, user)
 
     # Return success response
     return response.ApiResponse(message="Success")

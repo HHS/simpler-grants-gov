@@ -171,7 +171,7 @@ def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities")
 @user_blueprint.input(UserSaveOpportunityRequestSchema, location="json")
 @user_blueprint.output(UserSaveOpportunityResponseSchema)
-@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.doc(responses=[200, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_save_opportunity(
@@ -183,7 +183,7 @@ def user_save_opportunity(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
         create_saved_opportunity(db_session, user_id, json_data)
@@ -201,19 +201,18 @@ def user_save_opportunity(
 
 @user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<int:opportunity_id>")
 @user_blueprint.output(UserDeleteSavedOpportunityResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.doc(responses=[200, 401, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_delete_saved_opportunity(
     db_session: db.Session, user_id: UUID, opportunity_id: int
 ) -> response.ApiResponse:
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
-
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
         # Delete the saved opportunity
@@ -225,7 +224,7 @@ def user_delete_saved_opportunity(
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/list")
 @user_blueprint.input(UserSavedOpportunitiesRequestSchema, location="json")
 @user_blueprint.output(UserSavedOpportunitiesResponseSchema)
-@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.doc(responses=[200, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_saved_opportunities(
@@ -237,7 +236,7 @@ def user_get_saved_opportunities(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     # Get all saved opportunities for the user with their related opportunity data
     saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
@@ -252,7 +251,7 @@ def user_get_saved_opportunities(
 @user_blueprint.post("/<uuid:user_id>/saved-searches")
 @user_blueprint.input(UserSaveSearchRequestSchema, location="json")
 @user_blueprint.output(UserSaveSearchResponseSchema)
-@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.doc(responses=[200, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
@@ -265,7 +264,7 @@ def user_save_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
         saved_search = create_saved_search(search_client, db_session, user_id, json_data)
@@ -283,7 +282,7 @@ def user_save_search(
 
 @user_blueprint.delete("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
 @user_blueprint.output(UserDeleteSavedSearchResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_delete_saved_search(
@@ -295,7 +294,7 @@ def user_delete_saved_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
         delete_saved_search(db_session, user_id, saved_search_id)
@@ -314,7 +313,7 @@ def user_delete_saved_search(
 @user_blueprint.post("/<uuid:user_id>/saved-searches/list")
 @user_blueprint.input(UserSavedSearchesRequestSchema, location="json")
 @user_blueprint.output(UserSavedSearchesResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_saved_searches(
@@ -325,7 +324,7 @@ def user_get_saved_searches(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     saved_searches, pagination_info = get_saved_searches(db_session, user_id, json_data)
 
@@ -339,7 +338,7 @@ def user_get_saved_searches(
 @user_blueprint.put("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
 @user_blueprint.input(UserUpdateSavedSearchRequestSchema, location="json")
 @user_blueprint.output(UserUpdateSavedSearchResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_update_saved_search(
@@ -351,7 +350,7 @@ def user_update_saved_search(
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
-        raise_flask_error(401, "Unauthorized user")
+        raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
         updated_saved_search = update_saved_search(db_session, user_id, saved_search_id, json_data)
