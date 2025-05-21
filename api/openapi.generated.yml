@@ -1066,6 +1066,43 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/saved-opportunities/{legacy_opportunity_id}:
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: legacy_opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSavedOpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1 - Internal Only
+      summary: User Delete Saved Opportunity Legacy
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
