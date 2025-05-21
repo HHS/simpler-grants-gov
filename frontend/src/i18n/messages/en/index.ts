@@ -414,7 +414,7 @@ export const messages = {
     description: "Try out our experimental search page.",
     filters: {
       searchNoResults: {
-        title: "Your search did not return any results.",
+        title: "Your search didn't return any results.",
         heading: "Suggestions:",
         suggestions: [
           "Check any terms you've entered for typos",

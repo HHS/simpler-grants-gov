@@ -120,7 +120,6 @@ export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
 
-// currently unused in favor of search endpoint
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
