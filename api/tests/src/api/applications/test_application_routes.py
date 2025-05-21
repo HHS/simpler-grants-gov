@@ -1529,3 +1529,38 @@ def get_user_from_token(db_session, user_auth_token):
 
     # Return the user associated with the token session
     return user_token_session.user
+
+
+def test_application_get_includes_application_name_and_users(
+    client, enable_factory_create, db_session, user_auth_token
+):
+    """Test that application GET response includes the new fields: application_status, application_name, and users"""
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
+    )
+
+    # Get the user from the auth token and associate with application
+    user = parse_jwt_for_user(user_auth_token, db_session)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user.user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that the new fields are included in the response
+    assert (
+        response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS.value
+    )  # Using .value to get the string
+    assert response.json["data"]["application_name"] == "Test Application Name"
+
+    # Check that users are included
+    assert "users" in response.json["data"]
+    assert len(response.json["data"]["users"]) == 1
+    assert response.json["data"]["users"][0]["user_id"] == str(user.user.user_id)
+    assert response.json["data"]["users"][0]["email"] == user.user.email

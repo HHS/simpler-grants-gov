@@ -35,6 +35,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -1119,6 +1120,9 @@ class ApplicationFactory(BaseFactory):
 
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
+
+    application_status = factory.LazyFunction(lambda: ApplicationStatus.IN_PROGRESS)
+    application_name = factory.Faker("sentence", nb_words=3)
 
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(

@@ -38,10 +38,20 @@ class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchem
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
 
 
+class UserSchema(Schema):
+    """Schema for users associated with an application"""
+
+    user_id = fields.UUID()
+    email = fields.String()
+
+
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition_id = fields.UUID()
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
+    application_status = fields.String()
+    application_name = fields.String()
+    users = fields.List(fields.Nested(UserSchema()))
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
