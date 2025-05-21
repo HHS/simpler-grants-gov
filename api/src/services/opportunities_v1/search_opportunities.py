@@ -2,10 +2,13 @@ import logging
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
+import src.adapters.db as db
 import src.adapters.search as search
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
+from src.db.models.agency_models import Agency
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -105,6 +108,7 @@ class SearchOpportunityParams(BaseModel):
     query_operator: str = Field(default=SearchQueryOperator.AND)
     filters: OpportunityFilters | None = Field(default=None)
     experimental: Experimental = Field(default=Experimental())
+    top_level_agency: str | None = Field(default=None)
 
 
 def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]]:
@@ -191,11 +195,47 @@ def _search_opportunities(
     return response
 
 
+def _fetch_sub_agencies(db_session: db.Session, top_level_agency: str) -> Sequence[str]:
+    # Get the sub agencies for the top level agency provided
+    top_level_agency_id_subquery = (
+        select(Agency.agency_id).where(Agency.agency_code == top_level_agency).scalar_subquery()
+    )
+
+    combined_query = select(Agency.agency_code).where(
+        Agency.top_level_agency_id == top_level_agency_id_subquery
+    )
+
+    return db_session.execute(combined_query).scalars().all()
+
+
+def _build_agency_filter(
+    db_session: db.Session, top_level_agency: str, agency_filter: StrSearchFilter | None
+) -> StrSearchFilter:
+    agency_codes: set[str] = set()
+
+    # Fetch sub-agencies
+    agency_codes.update(_fetch_sub_agencies(db_session, top_level_agency))
+
+    if agency_filter:
+        # Add explicitly provided sub-agency codes
+        agency_codes.update(agency_filter.one_of or [])
+
+    return StrSearchFilter(one_of=list(agency_codes))
+
+
 def search_opportunities(
-    search_client: search.SearchClient, raw_search_params: dict
+    db_session: db.Session, search_client: search.SearchClient, raw_search_params: dict
 ) -> Tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
+    if search_params.top_level_agency:
+        if not search_params.filters:
+            search_params.filters = OpportunityFilters()
+
+        search_params.filters.agency = _build_agency_filter(
+            db_session, search_params.top_level_agency, search_params.filters.agency
+        )
+
     response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)

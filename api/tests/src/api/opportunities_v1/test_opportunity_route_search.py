@@ -11,12 +11,15 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
+from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
+    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -1591,3 +1594,54 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert len(data) == 1
 
         assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
+
+    def test_search_top_level_agency_200(
+        self, client, db_session, enable_factory_create, api_auth_token
+    ):
+        # setup-data
+        cascade_delete_from_db_table(db_session, Agency)
+        doc = AgencyFactory.create(agency_code="DOC")
+        AgencyFactory.create(
+            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
+        )
+
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(top_level_agency="DOC"),
+            headers={"X-Auth": api_auth_token},
+        )
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert len(data) == 2
+        assert [opp["opportunity_id"] for opp in data] == [
+            opp.opportunity_id for opp in [DOC_SPACE_COAST, DOC_MANUFACTURING]
+        ]
+
+    def test_search_top_level_agency_and_sub_agencies_200(
+        self, client, db_session, enable_factory_create, api_auth_token
+    ):
+        # setup-data
+        cascade_delete_from_db_table(db_session, Agency)
+        doc = AgencyFactory.create(agency_code="DOC")
+        AgencyFactory.create(
+            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
+        )
+
+        AgencyFactory.create(agency_code="DOS")
+        AgencyFactory.create(
+            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=doc.agency_id
+        )
+
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(top_level_agency="DOS", agency_one_of=["DOC-EDA"]),
+            headers={"X-Auth": api_auth_token},
+        )
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert len(data) == 3
+        assert [opp["opportunity_id"] for opp in data] == [
+            opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
+        ]

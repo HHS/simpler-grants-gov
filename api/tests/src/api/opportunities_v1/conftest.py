@@ -44,6 +44,7 @@ def get_search_request(
     post_date: dict | None = None,
     close_date: dict | None = None,
     format: str | None = None,
+    top_level_agency: str | None = None,
 ):
     if sort_order is None:
         sort_order = [{"order_by": "opportunity_id", "sort_direction": "ascending"}]
@@ -108,6 +109,8 @@ def get_search_request(
 
     if experimental is not None:
         req["experimental"] = experimental
+    if top_level_agency is not None:
+        req["top_level_agency"] = top_level_agency
 
     return req
 
