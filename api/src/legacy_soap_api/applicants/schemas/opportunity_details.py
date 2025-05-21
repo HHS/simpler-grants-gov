@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 
 
-class OpportunityDetails(BaseModel):
+class OpportunityDetails(BaseSOAPSchema):
     agency_contact_info: str | None = Field(default=None, alias="AgencyContactInfo")
     competition_title: str | None = Field(default=None, alias="CompetitionTitle")
     competition_id: str | None = Field(default=None, alias="CompetitionID")

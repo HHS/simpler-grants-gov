@@ -1,10 +1,12 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 from typing_extensions import Self
+
+from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 
 from .opportunity_filter import OpportunityFilter
 
 
-class GetOpportunityListRequest(BaseModel):
+class GetOpportunityListRequest(BaseSOAPSchema):
     package_id: str | None = Field(default=None, alias="PackageID")
     opportunity_filter: OpportunityFilter | None = Field(default=None, alias="OpportunityFilter")
 
