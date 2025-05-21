@@ -1,8 +1,11 @@
 "use client";
 
-import { debouncedAgencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
+import { debounce, noop } from "lodash";
+import {
+  agencySearch,
+  debouncedAgencySearch,
+} from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
-import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
@@ -22,20 +25,22 @@ export function AgencyFilterContent({
 }) {
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
-  const searchForAgencies = (searchTerm: string) => {
-    console.log("!!!", searchTerm);
-    debouncedAgencySearch(searchTerm)
-      .then((searchResults) => {
-        console.log("fetched agency option search", searchResults);
-        setAgencySearchResults(searchResults);
-      })
-      .catch((e) => {
-        console.error("Error fetching agency search results", e);
-        setAgencySearchResults(undefined);
-      });
-  };
+  const searchForAgencies = debounce(
+    (searchTerm: string) => {
+      agencySearch(searchTerm)
+        .then((searchResults) => {
+          console.log("fetched agency option search", searchResults);
+          setAgencySearchResults(searchResults);
+        })
+        .catch((e) => {
+          console.error("Error fetching agency search results", e);
+          setAgencySearchResults(undefined);
+        });
+    },
+    500,
+    { leading: false, trailing: true },
+  );
 
-  console.log("render", agencySearchResults, agencies);
   return (
     <>
       <TextInput

@@ -1,6 +1,6 @@
 import {
   agenciesToFilterOptions,
-  getAgenciesForFilterOptions,
+  getAllAgenciesForFilterOptions,
   obtainAgencies,
   RelevantAgencyRecord,
 } from "src/services/fetch/fetchers/agenciesFetcher";
@@ -189,35 +189,10 @@ describe("agenciesToFilterOptions", () => {
   });
 });
 
-describe("getAgenciesForFilterOptions", () => {
-  it("immediately returns prefetched agencies if supplied", async () => {
-    const prefetchedOptions = [
-      {
-        id: "DOCNIST",
-        label: "National Institute of Standards and Technology",
-        value: "DOCNIST",
-      },
-      {
-        id: "MOCKNIST",
-        label: "Mational Institute",
-        value: "MOCKNIST",
-      },
-      {
-        id: "MOCKTRASH",
-        label: "Mational TRASH",
-        value: "MOCKTRASH",
-      },
-      {
-        id: "FAKEORG",
-        label: "Completely fake",
-        value: "FAKEORG",
-      },
-    ];
-    const result = await getAgenciesForFilterOptions(prefetchedOptions);
-    expect(result).toEqual(prefetchedOptions);
-  });
+// TODO more tests
+describe("getAllAgenciesForFilterOptions", () => {
   it("sorts", async () => {
-    await getAgenciesForFilterOptions();
+    await getAllAgenciesForFilterOptions();
     expect(mockSortFilterOptions).toHaveBeenCalledWith([
       {
         id: "DOCNIST",

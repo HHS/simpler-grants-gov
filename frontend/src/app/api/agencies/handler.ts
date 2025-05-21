@@ -1,5 +1,5 @@
 import { readError } from "src/errors";
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import { searchAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { NextRequest } from "next/server";
@@ -9,7 +9,7 @@ export async function searchForAgencies(request: NextRequest) {
 
   let agencySearchResults: FilterOption[] = [];
   try {
-    agencySearchResults = await getAgenciesForFilterOptions(keyword);
+    agencySearchResults = await searchAgenciesForFilterOptions(keyword);
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
     console.error(e);
