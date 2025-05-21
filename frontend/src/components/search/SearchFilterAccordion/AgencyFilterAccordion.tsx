@@ -25,7 +25,6 @@ export async function AgencyFilterAccordion({
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
   }
-
   return (
     <BasicSearchFilterAccordion
       query={query}

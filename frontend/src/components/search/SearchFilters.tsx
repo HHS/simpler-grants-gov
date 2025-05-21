@@ -1,4 +1,7 @@
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import {
+  getAllAgenciesForFilterOptions,
+  searchAgenciesForFilterOptions,
+} from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
@@ -39,8 +42,8 @@ export default async function SearchFilters({
 }) {
   const t = useTranslations("Search");
   const agenciesPromise = Promise.all([
-    // update this to use the search endpoint, this will also be consumed by the new route
-    getAgenciesForFilterOptions(),
+    // update to call w keyword query param once added
+    searchAgenciesForFilterOptions(),
     searchResultsPromise,
   ]);
 

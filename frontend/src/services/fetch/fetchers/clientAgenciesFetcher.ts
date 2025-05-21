@@ -1,10 +1,8 @@
 import { debounce } from "lodash";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
-// if we don't debounce this call we get multiple requests going out on page load
-// not using clientFetch since we don't need to check the expiration here
-// and also that'd create a circular dependency chain in the cilentFetch hook
 export const debouncedAgencySearch = debounce(
-  async (searchKeyword) => {
+  async (searchKeyword: string) => {
     const response = await fetch("/api/agencies", {
       method: "POST",
       body: JSON.stringify({
@@ -12,14 +10,28 @@ export const debouncedAgencySearch = debounce(
       }),
     });
     if (response.ok && response.status === 200) {
-      const data = await response.json();
+      const data = (await response.json()) as FilterOption[];
       return data;
     }
     throw new Error(`Unable to fetch agencies search: ${response.status}`);
   },
-  250,
+  500,
   {
-    leading: true,
-    trailing: false,
+    leading: false,
+    trailing: true,
   },
 );
+
+export const agencySearch = async (searchKeyword: string) => {
+  const response = await fetch("/api/agencies", {
+    method: "POST",
+    body: JSON.stringify({
+      keyword: searchKeyword,
+    }),
+  });
+  if (response.ok && response.status === 200) {
+    const data = (await response.json()) as FilterOption[];
+    return data;
+  }
+  throw new Error(`Unable to fetch agencies search: ${response.status}`);
+};
