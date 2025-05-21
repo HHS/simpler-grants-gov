@@ -35,6 +35,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -44,7 +45,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
-    SamGovImportType, ApplicationStatus,
+    SamGovImportType,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -1125,6 +1126,8 @@ class ApplicationFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
 
+    application_status = ApplicationStatus.IN_PROGRESS
+
     class Params:
         with_forms = factory.Trait(
             application_forms=factory.RelatedFactoryList(
@@ -1150,8 +1153,6 @@ class ApplicationFormFactory(BaseFactory):
     application_response = factory.LazyFunction(
         lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
     )
-
-    application_status = ApplicationStatus.IN_PROGRESS
 
 
 ###################

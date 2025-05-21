@@ -8,7 +8,11 @@ from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
-from src.services.applications.application_validation import validate_forms, validate_application_in_progress, ApplicationAction
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_in_progress,
+    validate_forms,
+)
 from src.services.applications.get_application import get_application
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType

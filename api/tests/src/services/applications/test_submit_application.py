@@ -8,7 +8,6 @@ from freezegun import freeze_time
 from src.constants.lookup_constants import ApplicationStatus
 from src.services.applications.submit_application import (
     submit_application,
-    validate_application_in_progress,
     validate_competition_open,
 )
 from src.util.datetime_util import get_now_us_eastern_date
@@ -35,7 +34,6 @@ SIMPLE_JSON_SCHEMA = {
     },
     "required": ["name"],
 }
-
 
 
 # Tests for validate_competition_open

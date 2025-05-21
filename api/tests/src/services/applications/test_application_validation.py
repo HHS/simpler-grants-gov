@@ -1,8 +1,13 @@
+import apiflask
 import pytest
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus
-from src.services.applications.application_validation import get_application_form_errors, validate_application_in_progress, ApplicationAction
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    get_application_form_errors,
+    validate_application_in_progress,
+)
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
@@ -181,6 +186,7 @@ def test_validate_forms_invalid_responses(competition, form_a, form_b, form_c):
         ValidationErrorDetail(type="required", message="'str_c' is a required property", field="$")
     }
 
+
 # Tests for validate_application_in_progress
 def test_validate_application_in_progress_success(enable_factory_create, db_session):
     """Test that validating an application in IN_PROGRESS state succeeds."""
@@ -199,10 +205,12 @@ def test_validate_application_in_progress_failure(enable_factory_create, db_sess
     application = ApplicationFactory.create(application_status=status)
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        validate_application_in_progress(application)
+        validate_application_in_progress(application, ApplicationAction.SUBMIT)
 
     assert excinfo.value.status_code == 403
-    assert "Application cannot be submitted." in excinfo.value.message
+    assert (
+        excinfo.value.message == f"Cannot submit application. It is currently in status: {status}"
+    )
     assert (
         excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
     )

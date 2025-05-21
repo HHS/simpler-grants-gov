@@ -9,8 +9,11 @@ from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import ApplicationForm, CompetitionForm, Form
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_in_progress,
+)
 from src.services.applications.get_application import get_application
-from src.services.applications.application_validation import validate_application_in_progress, ApplicationAction
 
 logger = logging.getLogger(__name__)
 
