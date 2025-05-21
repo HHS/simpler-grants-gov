@@ -78,7 +78,7 @@ class SearchNotificationTask(BaseNotificationTask):
                     user_new_opportunities.setdefault(user_id, set()).update(new_opportunities)
 
                 # Always update the saved search with current results
-                saved_search.searched_opportunity_ids = list(current_results_set)
+                saved_search.searched_opportunity_ids = current_results
 
         users_email_notifications: list[UserEmailNotification] = []
 
@@ -123,6 +123,7 @@ class SearchNotificationTask(BaseNotificationTask):
                         CurrentOpportunitySummary.opportunity_summary
                     )
                 )
+                .limit(10)
             )
 
             opportunities = self.db_session.execute(opportunities_stmt).scalars().all()
