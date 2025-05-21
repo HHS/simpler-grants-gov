@@ -1,11 +1,15 @@
+import logging
 import os
 
 import requests
 
+from src.legacy_soap_api.applicants import schemas
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPProxyResponse, SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import format_local_soap_response
 from src.legacy_soap_api.soap_payload_handler import SoapPayload
+
+logger = logging.getLogger(__name__)
 
 
 class BaseSOAPClient:
@@ -13,7 +17,9 @@ class BaseSOAPClient:
         self.config = LegacySoapAPIConfig()
         self.soap_request = soap_request
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
+        self.soap_request_operation_name = self.soap_request_message.operation_name
         self.proxy_response = self._proxy_soap_request()
+        self.proxy_response_message = SoapPayload(self.proxy_response.data.decode())
 
     def _proxy_soap_request(self) -> SOAPProxyResponse:
         """Proxy incoming SOAP requests to grants.gov
@@ -32,6 +38,14 @@ class BaseSOAPClient:
             headers=dict(response.headers),
         )
 
+    def get_request_soap_dict_body(self) -> dict:
+        return (
+            self.soap_request_message.to_dict()
+            .get("Envelope", {})
+            .get("Body", {})
+            .get(self.soap_request_operation_name, {})
+        )
+
     def _process_response_response_content(self, soap_content: bytes) -> bytes:
         if not self.config.inject_uuid_data:
             return soap_content
@@ -39,10 +53,29 @@ class BaseSOAPClient:
 
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
-    def get_response(self) -> SOAPProxyResponse:
-        return self.proxy_response
+    def GetOpportunityListRequest(self) -> None:
+        try:
+            get_opportunity_list_request = schemas.GetOpportunityListRequest(
+                **self.get_request_soap_dict_body()
+            )
+        except ValueError:
+            return None
+        # This will currently just log the validated schema until issue #4972 is implemented.
+        logger.info(
+            "soap get_opportunity_list_request validated",
+            extra={"get_opportunity_request": get_opportunity_list_request.model_dump()},
+        )
+        return None
+
+    def get_response(self) -> tuple:
+        # This method returns the raw response we get from the proxy request as well as
+        # the new simpler soap response data.
+        simpler_response = None
+        if operation_method := self.__getattribute__(self.soap_request_operation_name):
+            simpler_response = operation_method()
+        return self.proxy_response, simpler_response
 
 
 class SimplerGrantorsS2SClient(BaseSOAPClient):
-    def get_response(self) -> SOAPProxyResponse:
-        return self.proxy_response
+    def get_response(self) -> tuple:
+        return self.proxy_response, None

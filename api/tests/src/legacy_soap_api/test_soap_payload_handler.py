@@ -29,8 +29,24 @@ Content-ID:
 def test_invalid_soap_string():
     soap_payload = SoapPayload("randomdata939023")
     assert soap_payload.envelope is None
-    assert soap_payload.operation_name is None
+    assert soap_payload.operation_name == ""
     assert soap_payload.to_dict() == {}
+
+
+def test_soap_payload_from_dict():
+    soap_dict = {"Envelope": {"Body": {"Tag": "10"}}}
+    soap_str = "<Envelope><Body><Tag>10</Tag></Body></Envelope>"
+    payload_from_dict = SoapPayload(soap_payload=soap_dict)
+    assert payload_from_dict.envelope == soap_str
+    assert payload_from_dict.to_dict() == soap_dict
+
+
+def test_soap_payload_from_string():
+    soap_dict = {"Envelope": {"Body": {"Tag": "10"}}}
+    soap_str = "<soap:Envelope><Body><Tag>10</Tag></Body></soap:Envelope>"
+    payload_from_string = SoapPayload(soap_payload=soap_str)
+    assert payload_from_string.envelope == soap_str
+    assert payload_from_string.to_dict() == soap_dict
 
 
 class TestSoapPayload:

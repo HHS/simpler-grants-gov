@@ -27,11 +27,11 @@ def simpler_soap_applicants_api() -> tuple:
     add_extra_data_to_current_request_logs(
         {
             "soap_api": "applicants",
-            "soap_proxy_request_operation_name": client.soap_request_message.operation_name,
+            "soap_proxy_request_operation_name": client.soap_request_operation_name,
         }
     )
-    response = client.get_response()
-    return response.to_flask_response()
+    proxy_response, simpler_response = client.get_response()
+    return proxy_response.to_flask_response()
 
 
 @legacy_soap_api_blueprint.post("/grantsws-agency/services/v2/AgencyWebServicesSoapPort")
@@ -48,8 +48,8 @@ def simpler_soap_grantors_api() -> tuple:
     add_extra_data_to_current_request_logs(
         {
             "soap_api": "grantors",
-            "soap_proxy_request_operation_name": client.soap_request_message.operation_name,
+            "soap_proxy_request_operation_name": client.soap_request_operation_name,
         }
     )
-    response = client.get_response()
-    return response.to_flask_response()
+    proxy_response, simpler_response = client.get_response()
+    return proxy_response.to_flask_response()

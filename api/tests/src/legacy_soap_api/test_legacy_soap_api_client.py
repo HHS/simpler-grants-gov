@@ -1,12 +1,12 @@
 import pytest
 
-from src.legacy_soap_api.legacy_soap_api_client import LegacySOAPClient
+from src.legacy_soap_api.legacy_soap_api_client import BaseSOAPClient
 
 
 class TestSOAPClient:
     @pytest.fixture(scope="class")
-    def legacy_soap_client(self):
-        return LegacySOAPClient()
+    def base_soap_client(self):
+        return BaseSOAPClient()
 
-    def test_can_instantiate(self, legacy_soap_client) -> None:
-        assert isinstance(legacy_soap_client, LegacySOAPClient)
+    def test_can_instantiate(self, base_soap_client) -> None:
+        assert isinstance(base_soap_client, BaseSOAPClient)
