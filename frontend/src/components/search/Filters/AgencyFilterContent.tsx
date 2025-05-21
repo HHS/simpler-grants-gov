@@ -1,10 +1,7 @@
 "use client";
 
-import { debounce, noop } from "lodash";
-import {
-  agencySearch,
-  debouncedAgencySearch,
-} from "src/services/fetch/fetchers/clientAgenciesFetcher";
+import { debounce } from "lodash";
+import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import { useState } from "react";
@@ -25,9 +22,11 @@ export function AgencyFilterContent({
 }) {
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
+  const [searchTerm, setSearchTerm] = useState<string>();
   const searchForAgencies = debounce(
-    (searchTerm: string) => {
-      agencySearch(searchTerm)
+    (agencySearchTerm: string) => {
+      setSearchTerm(agencySearchTerm);
+      agencySearch(agencySearchTerm)
         .then((searchResults) => {
           console.log("fetched agency option search", searchResults);
           setAgencySearchResults(searchResults);
@@ -53,7 +52,7 @@ export function AgencyFilterContent({
         query={query}
         queryParamKey={"agency"}
         title={title}
-        includeAnyOption={true}
+        includeAnyOption={!searchTerm}
         filterOptions={agencySearchResults || agencies}
         facetCounts={facetCounts}
       />
