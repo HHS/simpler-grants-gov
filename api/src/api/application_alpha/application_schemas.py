@@ -15,6 +15,18 @@ class ApplicationStartResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationStartResponseDataSchema())
 
 
+class ApplicationUpdateRequestSchema(Schema):
+    application_name = fields.String(required=True, allow_none=False)
+
+
+class ApplicationUpdateResponseDataSchema(Schema):
+    application_id = fields.UUID()
+
+
+class ApplicationUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationUpdateResponseDataSchema())
+
+
 class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
 
