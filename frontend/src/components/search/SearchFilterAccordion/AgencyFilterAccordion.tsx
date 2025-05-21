@@ -3,15 +3,15 @@ import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 
+import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
 import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import { AgencyFilterContent } from "../Filters/AgencyFilterContent";
 
 export async function AgencyFilterAccordion({
   query,
-  agenciesPromise,
+  agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agenciesPromise: Promise<[FilterOption[], SearchAPIResponse]>;
+  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
 }) {
   const t = useTranslations("Search");
 
@@ -19,7 +19,7 @@ export async function AgencyFilterAccordion({
   let facetCounts: { [key: string]: number } = {};
   try {
     let searchResults: SearchAPIResponse;
-    [agencies, searchResults] = await agenciesPromise;
+    [agencies, searchResults] = await agencyOptionsPromise;
     facetCounts = searchResults.facet_counts.agency;
   } catch (e) {
     // Come back to this to show the user an error

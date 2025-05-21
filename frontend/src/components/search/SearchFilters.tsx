@@ -1,5 +1,5 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { searchAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
@@ -32,7 +32,7 @@ export default async function SearchFilters({
 }) {
   const t = useTranslations("Search");
   const agenciesPromise = Promise.all([
-    searchAgenciesForFilterOptions(),
+    getAgenciesForFilterOptions(),
     searchResultsPromise,
   ]);
 
@@ -82,7 +82,7 @@ export default async function SearchFilters({
       >
         <AgencyFilterAccordion
           query={agency}
-          agenciesPromise={agenciesPromise}
+          agencyOptionsPromise={agenciesPromise}
         />
       </Suspense>
       <SearchFilterAccordion

@@ -74,24 +74,42 @@ export const performAgencySearch = async (
   return data;
 };
 
+// two functions below are more or less identical except
 // behavior differs depending on whether a keyword is present
 // if there is a keyword we hit the search endpoint and then must flatten top level agencies
 // if not we just fetch the full list
 export const searchAgenciesForFilterOptions = async (
-  keyword?: string,
+  keyword: string,
 ): Promise<FilterOption[]> => {
   let agencies = [];
   try {
-    agencies = keyword
-      ? await performAgencySearch(keyword)
-      : await obtainAgencies();
+    agencies = await performAgencySearch(keyword);
   } catch (e) {
     console.error("Error searching agency options");
     throw e;
   }
   try {
-    const flattenedAgencies = keyword ? flattenAgencies(agencies) : agencies;
+    const flattenedAgencies = flattenAgencies(agencies);
     const filterOptions = agenciesToFilterOptions(flattenedAgencies);
+    return sortFilterOptions(filterOptions);
+  } catch (e) {
+    console.error("Error sorting agency search results");
+    throw e;
+  }
+};
+
+export const getAgenciesForFilterOptions = async (): Promise<
+  FilterOption[]
+> => {
+  let agencies = [];
+  try {
+    agencies = await obtainAgencies();
+  } catch (e) {
+    console.error("Error fetching agency options");
+    throw e;
+  }
+  try {
+    const filterOptions = agenciesToFilterOptions(agencies);
     return sortFilterOptions(filterOptions);
   } catch (e) {
     console.error("Error sorting agency search results");

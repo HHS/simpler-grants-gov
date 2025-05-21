@@ -13,8 +13,8 @@ export function FilterSearchNoResults() {
       <div>
         {t("heading")}
         <ul>
-          {suggestions.map((suggestion) => (
-            <li>{suggestion}</li>
+          {suggestions.map((suggestion, i) => (
+            <li key={i}>{suggestion}</li>
           ))}
         </ul>
       </div>

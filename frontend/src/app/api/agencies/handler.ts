@@ -5,7 +5,11 @@ import { FilterOption } from "src/types/search/searchFilterTypes";
 import { NextRequest } from "next/server";
 
 export async function searchForAgencies(request: NextRequest) {
-  const { keyword } = await request.json();
+  const { keyword } = (await request.json()) as { keyword: string | undefined };
+
+  if (!keyword) {
+    throw new Error("No agency search keyword provided");
+  }
 
   let agencySearchResults: FilterOption[] = [];
   try {
