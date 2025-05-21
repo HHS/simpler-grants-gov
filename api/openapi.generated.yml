@@ -2820,6 +2820,15 @@ components:
         application_response:
           type: object
           additionalProperties: {}
+    User1:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
     ApplicationGetResponseData:
       type: object
       properties:
@@ -2837,6 +2846,16 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        application_status:
+          type: string
+        application_name:
+          type: string
+        users:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/User1'
     ApplicationGetResponse:
       type: object
       properties:
