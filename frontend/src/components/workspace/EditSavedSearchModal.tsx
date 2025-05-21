@@ -203,18 +203,23 @@ export function EditSavedSearchModal({
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            <p className="font-sans-2xs margin-y-4">
-              {t.rich("description", {
-                strong: (chunks) => <strong>{chunks}</strong>,
-              })}
-            </p>
-            {apiError && (
-              <SimplerAlert
-                alertClick={() => setApiError(false)}
-                buttonId={`editSavedSearchApiError-${savedSearchId}`}
-                messageText={t("apiError")}
-                type="error"
+            <ModalHeading id={`${modalId}-heading`}>
+              {t("title")} {queryName}
+            </ModalHeading>
+            <>
+              {apiError && (
+                <SimplerAlert
+                  alertClick={() => setApiError(false)}
+                  buttonId={`editSavedSearchApiError-${savedSearchId}`}
+                  messageText={t("apiError")}
+                  type="error"
+                />
+              )}
+              <SaveSearchInput
+                validationError={validationError}
+                updateSavedSearchName={setSavedSearchName}
+                id={savedSearchId}
+                defaultValue={queryName}
               />
             )}
             <SaveSearchInput

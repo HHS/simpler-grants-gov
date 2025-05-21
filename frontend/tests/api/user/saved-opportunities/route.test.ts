@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { DELETE, POST } from "src/app/api/user/saved-opportunities/route";
+import { handleSavedOpportunityRequest } from "src/app/api/user/saved-opportunities/handler";
 
 import { NextRequest } from "next/server";
 
@@ -45,7 +45,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedOpps(true, "POST"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "POST"),
+    );
     const json = (await response.json()) as { message: string };
 
     expect(response.status).toBe(200);
@@ -58,7 +60,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await POST(fakeRequestForSavedOpps(true, "POST"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "POST"),
+    );
     expect(response.status).toBe(401);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
@@ -67,7 +71,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedOpps(false, "POST"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(false, "POST"),
+    );
     expect(response.status).toBe(500);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
   });
@@ -76,7 +82,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await POST(fakeRequestForSavedOpps(true, "POST"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "POST"),
+    );
     expect(response.status).toBe(401);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
@@ -86,7 +94,9 @@ describe("POST and DELETE request", () => {
       token: "fakeToken",
     }));
 
-    const response = await DELETE(fakeRequestForSavedOpps(true, "DELETE"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "DELETE"),
+    );
     const json = (await response.json()) as { message: string };
 
     expect(response.status).toBe(200);
@@ -99,7 +109,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await DELETE(fakeRequestForSavedOpps(false, "DELETE"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(false, "DELETE"),
+    );
     expect(response.status).toBe(500);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
   });
@@ -108,7 +120,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "",
     }));
-    const response = await POST(fakeRequestForSavedOpps(true, "DELETE"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "DELETE"),
+    );
     expect(response.status).toBe(401);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
@@ -117,7 +131,9 @@ describe("POST and DELETE request", () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST(fakeRequestForSavedOpps(true, "HELP"));
+    const response = await handleSavedOpportunityRequest(
+      fakeRequestForSavedOpps(true, "HELP"),
+    );
 
     expect(response.status).toBe(405);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);

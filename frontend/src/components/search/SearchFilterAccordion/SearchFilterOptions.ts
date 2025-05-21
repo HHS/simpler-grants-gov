@@ -2,9 +2,36 @@ import { omit } from "lodash";
 import { eligibilityTypes } from "src/constants/opportunity";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
+// Note that these labels are not translated currently
+// To translate them we would want to list the translation key in the label
+// And have the translation system consume that key wherever the value is needed
+
 export const eligibilityOptions: FilterOption[] = eligibilityTypes.map((type) =>
   omit(type, "group"),
 );
+
+export const statusOptions: FilterOption[] = [
+  {
+    id: "status-forecasted",
+    label: "Forecasted",
+    value: "forecasted",
+  },
+  {
+    id: "status-posted",
+    label: "Posted",
+    value: "posted",
+  },
+  {
+    id: "status-closed",
+    label: "Closed",
+    value: "closed",
+  },
+  {
+    id: "status-archived",
+    label: "Archived",
+    value: "archived",
+  },
+];
 
 export const fundingOptions: FilterOption[] = [
   {

@@ -30,10 +30,12 @@ export default function RoadmapWhatWereWorkingOn() {
                   p: (chunks) => (
                     <p className="font-sans-2xs">{chunks}</p>
                   ),
-                  linkGithub3045: gitHubLinkForIssue(3045),
-                  linkGithub2875: gitHubLinkForIssue(2875),
-                  linkGithub2640: gitHubLinkForIssue(2640),
-                  linkGithub3348: gitHubLinkForIssue(3348),
+                  linkGithub4571: gitHubLinkForIssue(4571),
+                  linkGithub4577: gitHubLinkForIssue(4577),
+                  linkGithub4572: gitHubLinkForIssue(4572),
+                  linkGithub4575: gitHubLinkForIssue(4575),
+                  linkGithub4576: gitHubLinkForIssue(4576),
+                  linkGithub4579: gitHubLinkForIssue(4579),
                 },
               )}
             </div>
