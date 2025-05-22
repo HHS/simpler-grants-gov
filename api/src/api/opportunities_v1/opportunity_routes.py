@@ -184,15 +184,14 @@ examples = {
     responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
 )
 @flask_opensearch.with_search_client()
-@flask_db.with_db_session()
 def opportunity_search(
-    db_session: db.Session, search_client: search.SearchClient, search_params: dict
+    search_client: search.SearchClient, search_params: dict
 ) -> response.ApiResponse | Response:
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search")
 
     opportunities, aggregations, pagination_info = search_opportunities(
-        db_session, search_client, search_params
+        search_client, search_params
     )
 
     add_extra_data_to_current_request_logs(
