@@ -27,6 +27,8 @@ export default function RoadmapProcess() {
         content: t(`contentItems.${1}.content`),
         iconName: "insights",
       },
+    ],
+    [
       {
         title: t(`contentItems.${2}.title`),
         content: t(`contentItems.${2}.content`),
