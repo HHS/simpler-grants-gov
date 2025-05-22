@@ -12,7 +12,8 @@ const AllOptionCheckboxMock = jest.fn();
 jest.mock(
   "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
   () => ({
-    AllOptionCheckbox: (props) => AllOptionCheckboxMock(props),
+    AllOptionCheckbox: (props: unknown) =>
+      AllOptionCheckboxMock(props) as unknown,
   }),
 );
 
@@ -56,6 +57,7 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 describe("SearchFilterSection", () => {
   beforeEach(() => {
     AllOptionCheckboxMock.mockImplementation((props) =>
+      // eslint-disable-next-line
       jest
         .requireActual(
           "src/components/search/SearchFilterAccordion/AllOptionCheckbox",

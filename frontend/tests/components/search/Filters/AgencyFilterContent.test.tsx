@@ -9,11 +9,11 @@ const mockAgencySearch = jest.fn();
 const mockUpdateQueryParams = jest.fn();
 
 jest.mock("lodash", () => ({
-  debounce: (fn: any) => fn,
+  debounce: (fn: unknown) => fn,
 }));
 
 jest.mock("src/services/fetch/fetchers/clientAgenciesFetcher", () => ({
-  agencySearch: (...args: unknown[]) => mockAgencySearch(...args),
+  agencySearch: (...args: unknown[]) => mockAgencySearch(...args) as unknown,
 }));
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -111,6 +111,8 @@ describe("AgencyFilterContent", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Agency 1")).toBeInTheDocument();
+    });
+    await waitFor(() => {
       expect(screen.queryByText("Agency 2")).not.toBeInTheDocument();
     });
   });
@@ -153,6 +155,8 @@ describe("AgencyFilterContent", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Agency 1")).toBeInTheDocument();
+    });
+    await waitFor(() => {
       expect(screen.getByText("Agency 2")).toBeInTheDocument();
     });
   });
@@ -181,8 +185,10 @@ describe("AgencyFilterContent", () => {
 
     // Should not throw, and fall back to show all agencies
     await waitFor(() => {
-      expect(screen.queryByText("Agency 1")).toBeInTheDocument();
-      expect(screen.queryByText("Agency 2")).toBeInTheDocument();
+      expect(screen.getByText("Agency 1")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Agency 2")).toBeInTheDocument();
     });
   });
 });

@@ -3,6 +3,7 @@
  */
 
 import { searchForAgencies } from "src/app/api/agencies/handler";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
@@ -10,8 +11,8 @@ import { NextRequest } from "next/server";
 const mockSearchAgenciesForFilterOptions = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
-  searchAgenciesForFilterOptions: (...args) =>
-    mockSearchAgenciesForFilterOptions(...args),
+  searchAgenciesForFilterOptions: (...args: unknown[]) =>
+    mockSearchAgenciesForFilterOptions(...args) as unknown,
 }));
 
 describe("POST request", () => {
@@ -44,7 +45,7 @@ describe("POST request", () => {
         body: JSON.stringify({ keyword: "anything" }),
       }),
     );
-    const data = await response.json();
+    const data = (await response.json()) as FilterOption[];
     expect(data).toEqual(initialFilterOptions);
   });
 });
