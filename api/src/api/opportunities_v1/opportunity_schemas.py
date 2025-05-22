@@ -12,6 +12,7 @@ from src.api.schemas.search_schema import (
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
+from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -213,23 +214,6 @@ class OpportunitySummaryV1Schema(Schema):
     )
     updated_at = fields.DateTime(
         metadata={"description": "When the opportunity summary was last updated"}
-    )
-
-
-class OpportunityAssistanceListingV1Schema(Schema):
-    program_title = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "Space Technology",
-        },
-    )
-    assistance_listing_number = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The assistance listing number, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "43.012",
-        },
     )
 
 

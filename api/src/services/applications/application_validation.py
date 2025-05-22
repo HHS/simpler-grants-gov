@@ -4,7 +4,7 @@ from enum import StrEnum
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Form
+from src.db.models.competition_models import Application, Competition, Form
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ApplicationAction(StrEnum):
+    START = "start"
     SUBMIT = "submit"
     MODIFY = "modify"
 
@@ -117,7 +118,11 @@ def validate_application_in_progress(application: Application, action: Applicati
         message = f"Cannot {action} application. It is currently in status: {application.application_status}"
         logger.info(
             f"Cannot {action} application, not currently in progress",
-            extra={"action": action, "application_status": application.application_status},
+            extra={
+                "action": action,
+                "application_status": application.application_status,
+                "application_action": action,
+            },
         )
         raise_flask_error(
             403,
@@ -126,6 +131,35 @@ def validate_application_in_progress(application: Application, action: Applicati
                 ValidationErrorDetail(
                     type=ValidationErrorType.NOT_IN_PROGRESS,
                     message=f"Cannot {action} application, not currently in progress",
+                )
+            ],
+        )
+
+
+def validate_competition_open(competition: Competition, action: ApplicationAction) -> None:
+    """
+    Validate that the competition is still open for applications.
+    Takes into account the competition closing date and grace period.
+    """
+
+    if not competition.is_open:
+        message = f"Cannot {action} application - competition is not open"
+        logger.info(
+            message,
+            extra={
+                "opening_date": competition.opening_date,
+                "closing_date": competition.closing_date,
+                "grace_period": competition.grace_period,
+                "application_action": action,
+            },
+        )
+        raise_flask_error(
+            422,
+            message,
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.COMPETITION_NOT_OPEN,
+                    message="Competition is not open for application",
                 )
             ],
         )
