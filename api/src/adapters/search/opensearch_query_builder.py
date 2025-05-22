@@ -177,12 +177,23 @@ class SearchQueryBuilder:
         self.filters.append({"terms": {field: terms}})
         return self
 
+    def filter_should_prefix(self, field: str, value: str) -> typing.Self:
+        """
+        Adds a prefix filter under a should clause for the specified field.
+
+        This is used to match documents where the field value starts with the given prefix.
+        The filter is added to a `bool.should` context, allowing OR-style matching when combined
+        with other should clauses.
+        """
+        self.should.append({"prefix": {field: value}})
+        return self
+
     def filter_should_terms(self, field: str, terms: list) -> typing.Self:
         """
-        For a given field, apply an OR-based filter to a set of values.
+        Adds a terms filter under a should clause for the specified field.
 
-        These filters do not affect the relevancy score, but at least one
-        should match for the document to be included.
+        This filter matches documents where the field value equals any of the provided terms.
+        It is added to a `bool.should` context, allowing OR-style matching.
         """
         self.should.append({"terms": {field: terms}})
         return self
