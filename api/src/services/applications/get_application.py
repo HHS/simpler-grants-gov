@@ -18,15 +18,15 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
         select(Application)
         .options(
             selectinload(Application.application_forms),
-            joinedload(Application.application_users)
-            .joinedload(ApplicationUser.user)
-            .joinedload(User.linked_login_gov_external_user),
+            selectinload(Application.application_users)
+            .selectinload(ApplicationUser.user)
+            .selectinload(User.linked_login_gov_external_user),
         )
         .where(Application.application_id == application_id)
     )
 
-    # Need to call unique() when using joinedload with collections
-    application = result.unique().scalar_one_or_none()
+    # Get the single application
+    application = result.scalar_one_or_none()
 
     if not application:
         raise_flask_error(404, f"Application with ID {application_id} not found")

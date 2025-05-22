@@ -38,7 +38,7 @@ class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchem
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
 
 
-class UserSchema(Schema):
+class ApplicationUserSchema(Schema):
     """Schema for users associated with an application"""
 
     user_id = fields.UUID()
@@ -51,7 +51,7 @@ class ApplicationGetResponseDataSchema(Schema):
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
     application_status = fields.String()
     application_name = fields.String()
-    users = fields.List(fields.Nested(UserSchema()))
+    users = fields.List(fields.Nested(ApplicationUserSchema()))
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

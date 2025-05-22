@@ -2820,7 +2820,7 @@ components:
         application_response:
           type: object
           additionalProperties: {}
-    User1:
+    ApplicationUser:
       type: object
       properties:
         user_id:
@@ -2855,7 +2855,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/User1'
+            $ref: '#/components/schemas/ApplicationUser'
     ApplicationGetResponse:
       type: object
       properties:
