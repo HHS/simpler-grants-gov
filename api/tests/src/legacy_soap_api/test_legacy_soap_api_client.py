@@ -120,7 +120,7 @@ class TestSimplerApplicantsClient:
         mock_logger.assert_called_once_with(
             "soap_applicants_api_fault",
             extra={
-                "message": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
+                "err": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
                 "fault": OpportunityListRequestInvalidParams.model_dump(),
             },
         )

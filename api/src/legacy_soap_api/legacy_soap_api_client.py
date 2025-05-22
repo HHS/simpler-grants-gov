@@ -81,7 +81,7 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
         except SOAPFaultException as e:
             logger.info(
                 "soap_applicants_api_fault",
-                extra={"message": e.message, "fault": e.fault.model_dump()},
+                extra={"err": e.message, "fault": e.fault.model_dump()},
             )
             simpler_response = get_soap_response(
                 data=e.fault.to_xml(),
