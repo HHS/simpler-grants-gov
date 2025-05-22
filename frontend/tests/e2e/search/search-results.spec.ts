@@ -37,7 +37,7 @@ test.describe("Search page results tests", () => {
   });
 
   test("search list should have at least 1 item", async ({ page }) => {
-    const searchList = page.locator("div.usa-prose > ul.usa-list--unstyled");
+    const searchList = page.locator("ul.usa-list--unstyled");
     await expect(searchList.locator("li >> nth=1")).toBeAttached();
   });
 });

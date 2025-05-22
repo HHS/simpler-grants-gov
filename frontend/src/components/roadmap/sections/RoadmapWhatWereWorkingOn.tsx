@@ -11,36 +11,31 @@ export default function RoadmapWhatWereWorkingOn() {
 
   return (
     <RoadmapPageSection className={"bg-white"} title={t("title")}>
-      <div className="margin-top-1" />
       {contentItems.map((contentRows, contentRowsIdx) => (
         <div
-          className="grid-row"
+          className="grid-row grid-gap"
           key={`roadmap-what-were-working-on-${contentRowsIdx}`}
         >
           {contentRows.map((contentRowItem, contentRowItemIdx) => (
             <div
-              className="margin-bottom-3 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
+              className="margin-bottom-4 tablet:grid-col-6"
               key={`roadmap-what-were-working-on-${contentRowsIdx}-${contentRowItemIdx}`}
             >
-              <h3 className="font-sans-sm margin-0 tablet:font-sans-md">
+              <h3>
                 {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
               </h3>
-              <div className="font-sans-xs margin-top-1 line-height-sans-4">
-                {t.rich(
-                  `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
-                  {
-                    p: (chunks) => (
-                      <p className=" font-sans-xs margin-y-05">{chunks}</p>
-                    ),
-                    linkGithub4571: gitHubLinkForIssue(4571),
-                    linkGithub4577: gitHubLinkForIssue(4577),
-                    linkGithub4572: gitHubLinkForIssue(4572),
-                    linkGithub4575: gitHubLinkForIssue(4575),
-                    linkGithub4576: gitHubLinkForIssue(4576),
-                    linkGithub4579: gitHubLinkForIssue(4579),
-                  },
-                )}
-              </div>
+              {t.rich(
+                `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
+                {
+                  p: (chunks) => <p className="font-sans-2xs">{chunks}</p>,
+                  linkGithub4571: gitHubLinkForIssue(4571),
+                  linkGithub4577: gitHubLinkForIssue(4577),
+                  linkGithub4572: gitHubLinkForIssue(4572),
+                  linkGithub4575: gitHubLinkForIssue(4575),
+                  linkGithub4576: gitHubLinkForIssue(4576),
+                  linkGithub4579: gitHubLinkForIssue(4579),
+                },
+              )}
             </div>
           ))}
         </div>

@@ -31,11 +31,7 @@ const SavedOpportunitiesList = ({
         </li>
       ),
   );
-  return (
-    <ul className="usa-prose usa-list--unstyled">
-      {savedOpportunitiesListItems}
-    </ul>
-  );
+  return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
 };
 
 const NoSavedOpportunities = ({
