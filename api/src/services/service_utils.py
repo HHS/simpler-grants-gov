@@ -84,22 +84,21 @@ def _add_top_level_agency_prefix(
     top_level_agency: str,
     filters: BaseModel | None = None,
 ) -> None:
-        """
-        Adds an OR-based agency filter using a `should` clause:
-          - Matches agencies whose code starts with the given top-level prefix.
-          - Also includes specific agency codes from filters agency (if provided).
+    """
+    Adds an OR-based agency filter using a `should` clause:
+      - Matches agencies whose code starts with the given top-level prefix.
+      - Also includes specific agency codes from filters agency (if provided).
 
-        Clears filters agency to prevent duplication in other filters.
+    Clears filters agency to prevent duplication in other filters.
 
-        """
-        # Add a prefix match on the top-level agency code (e.g. "DOS-")
-        builder.filter_should_prefix("agency_code.keyword", top_level_agency)
+    """
+    # Add a prefix match on the top-level agency code (e.g. "DOS-")
+    builder.filter_should_prefix("agency_code.keyword", top_level_agency)
 
-        # If specific sub-agency codes are also provided, add them to the should clause
-        if filters and hasattr(filters, "agency") and filters.agency:
-            if filters.agency.one_of:
-                builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
+    # If specific sub-agency codes are also provided, add them to the should clause
+    if filters and hasattr(filters, "agency") and filters.agency:
+        if filters.agency.one_of:
+            builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
 
-            # Clear it so this field isn't added again as a hard filter
-            filters.agency = None
-
+        # Clear it so this field isn't added again as a hard filter
+        filters.agency = None
