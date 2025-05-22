@@ -69,16 +69,22 @@ function SaveSearchInput({
 function SuccessContent({
   modalRef,
   modalId,
+  originalName,
+  updatedName,
   onClose,
 }: {
   modalRef: RefObject<ModalRef | null>;
   modalId: string;
+  originalName: string;
+  updatedName: string;
   onClose: () => void;
 }) {
   const t = useTranslations("SavedSearches.editModal");
   return (
     <>
-      <ModalHeading id={`${modalId}-heading`}>{t("successTitle")}</ModalHeading>
+      <ModalHeading
+        id={`${modalId}-heading`}
+      >{`"${originalName}" ${t("updatedNotification")} "${updatedName}"`}</ModalHeading>
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}
@@ -117,6 +123,7 @@ export function EditSavedSearchModal({
   const router = useRouter();
 
   const [validationError, setValidationError] = useState<string>();
+  const [originalName] = useState<string>(queryName);
   const [savedSearchName, setSavedSearchName] = useState<string>();
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -194,6 +201,8 @@ export function EditSavedSearchModal({
           <SuccessContent
             modalRef={modalRef}
             modalId={modalId}
+            originalName={originalName}
+            updatedName={savedSearchName || ""} // setValidationError results in savedSearchName to always be savedSearchName
             onClose={onClose}
           />
         ) : (
