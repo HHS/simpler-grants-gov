@@ -16,8 +16,8 @@ const Hero = () => {
     >
       <GridContainer className="hero--container padding-y-1 tablet:padding-y-3 tablet-lg:padding-y-10 desktop-lg:padding-top-15 desktop-lg:padding-bottom-10 position-relative">
         <div className="hero--text position-relative z-100">
-          <h1 className="text-balance text-ls-neg-2 line-height-sans-2 font-sans-xl margin-top-3 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 desktop-lg:margin-bottom-5">
-            <span>{t("pageTitle")}</span>
+          <h1 className="text-ls-neg-2 line-height-sans-2 font-sans-xl margin-top-3 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 desktop-lg:margin-bottom-5">
+            {t("pageTitle")}
           </h1>
           <p className="text-balance font-sans-md margin-y-2 tablet:font-sans-lg tablet:margin-y-3">
             {t("pageDescription")}
