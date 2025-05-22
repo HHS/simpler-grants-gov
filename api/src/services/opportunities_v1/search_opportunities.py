@@ -21,11 +21,7 @@ from src.services.opportunities_v1.experimental_constant import (
     EXPANDED,
     ScoringRule,
 )
-from src.services.service_utils import (
-    _add_search_filters,
-    _add_top_level_agency_prefix,
-    _adjust_field_name,
-)
+from src.services.service_utils import _add_search_filters, _adjust_field_name
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +142,31 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms(
         "agency", _adjust_field_name("agency_code", OPP_REQUEST_FIELD_NAME_MAPPING), size=1000
     )
+
+
+def _add_top_level_agency_prefix(
+    builder: search.SearchQueryBuilder,
+    top_level_agency: str,
+    filters: OpportunityFilters | None = None,
+) -> None:
+    """
+    Adds an OR-based agency filter using a `should` clause:
+      - Matches agencies whose code starts with the given top-level prefix.
+      - Also includes specific agency codes from filters agency (if provided).
+
+    Clears filters agency to prevent duplication in other filters.
+
+    """
+    # Add a prefix match on the top-level agency code (e.g. "DOS-")
+    builder.filter_should_prefix("agency_code.keyword", f"{top_level_agency}-")
+
+    # If specific sub-agency codes are also provided, add them to the should clause
+    if filters and filters.agency:
+        if filters.agency.one_of:
+            builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
+
+        # Clear it so this field isn't added again as a hard filter
+        filters.agency = None
 
 
 def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:

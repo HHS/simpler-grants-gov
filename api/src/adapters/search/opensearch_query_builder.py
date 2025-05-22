@@ -185,7 +185,7 @@ class SearchQueryBuilder:
         The filter is added to a `bool.should` context, allowing OR-style matching when combined
         with other should clauses.
         """
-        self.should.append({"prefix": {field: f"{value}-"}})
+        self.should.append({"prefix": {field: value}})
         return self
 
     def filter_should_terms(self, field: str, terms: list) -> typing.Self:
