@@ -3,9 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
-from src.legacy_soap_api.applicants.schemas.opportunity_filter import (
-    OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
-)
+from src.legacy_soap_api.applicants.schemas import OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,

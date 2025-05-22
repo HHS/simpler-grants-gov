@@ -1,3 +1,9 @@
+"""
+Fault messages in this file are defined to mirror fault messages from the
+existing GG SOAP API. These schemas should only contain fault messages that exist in the
+existing system.
+"""
+
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
 
 OpportunityListRequestInvalidParams = FaultMessage(

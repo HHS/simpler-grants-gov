@@ -71,7 +71,7 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     def get_response(self) -> tuple:
         # This method returns the raw response we get from the proxy request as well as
         # the new simpler soap response data.
-        operation_method = self.__getattribute__(self.soap_request_operation_name)
+        operation_method = getattr(self, self.soap_request_operation_name, None)
         if not operation_method:
             logger.info(f"soap_operation_not_supported: {self.soap_request_operation_name}")
             return self.proxy_response, None

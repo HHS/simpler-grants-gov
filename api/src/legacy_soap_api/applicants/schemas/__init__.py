@@ -1,12 +1,13 @@
-from src.legacy_soap_api.applicants.schemas.cfda_details import CFDADetails
-from src.legacy_soap_api.applicants.schemas.get_opportunity_list_request import (
+from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import (
+    GET_OPPORTUNITY_LIST_REQUEST_ERR,
+    OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
+    OPPORTUNITY_LIST_NO_DATA_PROVIDED_ERR,
+    CFDADetails,
     GetOpportunityListRequest,
-)
-from src.legacy_soap_api.applicants.schemas.get_opportunity_list_response import (
     GetOpportunityListResponse,
+    OpportunityDetails,
+    OpportunityFilter,
 )
-from src.legacy_soap_api.applicants.schemas.opportunity_details import OpportunityDetails
-from src.legacy_soap_api.applicants.schemas.opportunity_filter import OpportunityFilter
 
 __all__ = [
     "CFDADetails",
@@ -14,4 +15,7 @@ __all__ = [
     "GetOpportunityListResponse",
     "OpportunityDetails",
     "OpportunityFilter",
+    "GET_OPPORTUNITY_LIST_REQUEST_ERR",
+    "OPPORTUNITY_LIST_NO_DATA_PROVIDED_ERR",
+    "OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR",
 ]
