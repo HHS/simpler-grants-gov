@@ -169,6 +169,12 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
+    # Filter Prefix
+    if params.top_level_agency:
+        builder.filter_prefix(
+            OPP_REQUEST_FIELD_NAME_MAPPING.get("agency", "agency.keyword"), params.top_level_agency
+        )
+
     if aggregation:
         # Aggregations / Facet / Filter Counts
         _add_aggregations(builder)
@@ -228,14 +234,6 @@ def search_opportunities(
 ) -> Tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
-    if search_params.top_level_agency:
-        if not search_params.filters:
-            search_params.filters = OpportunityFilters()
-
-        search_params.filters.agency = _build_agency_filter(
-            db_session, search_params.top_level_agency, search_params.filters.agency
-        )
-
     response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)

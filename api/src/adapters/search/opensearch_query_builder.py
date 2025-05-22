@@ -177,6 +177,16 @@ class SearchQueryBuilder:
         self.filters.append({"terms": {field: terms}})
         return self
 
+    def filter_prefix(self, field: str, value: str) -> typing.Self:
+        """
+        Adds a prefix filter to the query.
+
+        This filter matches documents where the specified field value starts with the given prefix string.
+        It uses `prefix` query under the `filter` context, which is non-scoring.
+        """
+        self.filters.append({"prefix": {field: f"{value}-"}})
+        return self
+
     def filter_should_terms(self, field: str, terms: list) -> typing.Self:
         """
         For a given field, apply an OR-based filter to a set of values.
