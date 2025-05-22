@@ -27,7 +27,7 @@ const SearchResultsSkeleton = ({
   return (
     <>
       <SearchResultsHeader sortby={sortby} />
-      <div className="usa-prose">
+      <div className="search-results-content">
         <div className="tablet-lg:display-flex">
           <SearchPagination loading={true} page={page} query={query} />
         </div>
@@ -83,7 +83,7 @@ const ResolvedSearchResults = async ({
         sortby={sortby}
         totalFetchedResults={totalResults}
       />
-      <div className="usa-prose">
+      <div className="search-results-content">
         <div className="tablet-lg:display-flex">
           <ExportSearchResultsButton />
           <SearchPagination

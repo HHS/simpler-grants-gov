@@ -30,15 +30,11 @@ const InvolvedContent = () => {
             linkText={t("technicalLink")}
             title={t("technicalTitle")}
           />
-          <br />
-          <a
-            href={discourseLink}
-            className="font-sans-md line-height-sans-4"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("discourseLink")}
-          </a>
+          <p>
+            <a href={discourseLink} target="_blank" rel="noopener noreferrer">
+              {t("discourseLink")}
+            </a>
+          </p>
         </Grid>
         <Grid col={6}>
           <IconInfo

@@ -1471,3 +1471,35 @@ def test_application_submit_success_when_associated(
     # Verify application status was updated
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
+
+
+def test_application_get_includes_application_name_and_users(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes the new fields: application_status, application_name, and users"""
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that the new fields are included in the response
+    assert (
+        response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS.value
+    )  # Using .value to get the string
+    assert response.json["data"]["application_name"] == "Test Application Name"
+
+    # Check that users are included
+    assert "users" in response.json["data"]
+    assert len(response.json["data"]["users"]) == 1
+    assert response.json["data"]["users"][0]["user_id"] == str(user.user_id)
+    assert response.json["data"]["users"][0]["email"] == user.email

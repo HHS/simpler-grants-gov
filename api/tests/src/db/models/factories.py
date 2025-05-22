@@ -1121,6 +1121,9 @@ class ApplicationFactory(BaseFactory):
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
+    application_status = factory.LazyFunction(lambda: ApplicationStatus.IN_PROGRESS)
+    application_name = factory.Faker("sentence", nb_words=3)
+
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")

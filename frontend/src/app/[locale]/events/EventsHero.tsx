@@ -10,32 +10,28 @@ export default function EventsHero() {
   return (
     <div
       data-testid="events-hero"
-      className="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
+      className="text-white bg-primary-darkest padding-top-4 tablet:padding-y-6"
     >
       <GridContainer>
-        <Grid row gap={3} className="margin-top-6">
-          <Grid
-            tablet={{
-              col: true,
-            }}
-          >
-            <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance">
-              {t("header")}
-            </h1>
-            <p className="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance">
+        <Grid row gap>
+          <Grid tablet={{ col: "fill" }}>
+            <h1 className="desktop-lg:font-sans-3xl">{t("header")}</h1>
+            <p className="text-balance font-sans-md tablet:font-sans-lg margin-bottom-4 tablet:margin-bottom-0">
               {t("pageDescription")}
             </p>
           </Grid>
-          <Grid
-            tablet={{
-              col: true,
-            }}
-          >
-            <Image
-              alt="events-img"
-              className="height-auto position-relative padding-top-2 padding-bottom-4"
-              src={EventsHeroImg}
-            />
+          <Grid tablet={{ col: 6 }} tabletLg={{ col: "auto" }}>
+            <Grid className="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0">
+              <Image
+                src={EventsHeroImg}
+                alt="events-img"
+                priority={false}
+                width={450}
+                height={320}
+                style={{ objectFit: "cover" }}
+                className="minh-full width-full"
+              />
+            </Grid>
           </Grid>
         </Grid>
       </GridContainer>

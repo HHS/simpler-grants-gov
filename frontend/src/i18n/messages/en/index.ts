@@ -611,36 +611,36 @@ export const messages = {
             {
               title: "Beta launch of Simpler Search on Grants.gov",
               content:
-                " We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.<p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
+                "<p>We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.</p><p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
             },
             {
               title: "New opportunities for open-source collaboration",
               content:
-                "We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.<p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
+                "<p>We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p><p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
             },
           ],
           [
             {
               title: "An 'Apply' workflow pilot",
               content:
-                "We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.<p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
+                "<p>We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p><p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
             },
             {
               title: "SOAP Proxy for the 'Apply' workflow",
               content:
-                "We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.<p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
+                "<p>We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p><p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
             },
           ],
           [
             {
               title: "User research on permissions",
               content:
-                "We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.<p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
+                "<p>We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p><p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
             },
             {
               title: "Automated API key management",
               content:
-                "We're building tools so authorized users can securely generate and manage their API keys independently without admin support.<p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
+                "<p>We're building tools so authorized users can securely generate and manage their API keys independently without admin support.</p><p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
             },
           ],
         ],

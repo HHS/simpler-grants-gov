@@ -75,15 +75,13 @@ function SuccessContent({
   return (
     <>
       <ModalHeading id={`${modalId}-heading`}>{t("successTitle")}</ModalHeading>
-      <div className="usa-prose">
-        <p className="font-sans-2xs margin-y-4">
-          {t.rich("successDescription", {
-            workspaceLink: (chunks) => (
-              <a href="/saved-search-queries">{chunks}</a>
-            ),
-          })}
-        </p>
-      </div>
+      <p>
+        {t.rich("successDescription", {
+          workspaceLink: (chunks) => (
+            <a href="/saved-search-queries">{chunks}</a>
+          ),
+        })}
+      </p>
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}
@@ -213,9 +211,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
         ) : (
           <>
             <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            <div className="usa-prose">
-              <p className="font-sans-2xs margin-y-4">{t("description")}</p>
-            </div>
+            <p>{t("description")}</p>
             {apiError && (
               <SimplerAlert
                 alertClick={() => setApiError(false)}

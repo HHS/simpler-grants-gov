@@ -62,7 +62,7 @@ const OpportunityDocuments = ({
 
   return (
     <Grid row className="margin-top-6">
-      <Grid col={8} className="usa-prose">
+      <Grid col={8}>
         <h2 id="opportunity_documents">{t("title")}</h2>
       </Grid>
       {documents.length > 0 ? (

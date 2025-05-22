@@ -35,8 +35,18 @@ i.e.
 
 // Typography
 // prevent orphaned words in short blocks of text
-.text-balance {
+.text-balance,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   text-wrap: balance;
+}
+// no USWDS setting; can't pass `.measure-none` to Truss component
+.usa-alert__text {
+  max-width: none;
 }
 
 // Button
@@ -492,4 +502,10 @@ button.usa-pagination__button.usa-button {
     max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
     overflow-wrap: break-word;
   }
+}
+
+// Accordions
+// .usa-accordion {}
+.usa-accordion__heading {
+  border-bottom: 2px solid color(gray-warm-30);
 }
