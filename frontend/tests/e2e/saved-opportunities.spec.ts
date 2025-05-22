@@ -11,7 +11,7 @@ test.afterEach(async ({ context }) => {
 });
 
 test("shows unauthenticated state if not logged in", async ({ page }) => {
-  await page.goto("/saved-grants");
+  await page.goto("/saved-opportunities");
   const h4 = page.locator(".usa-alert__body .usa-alert__heading");
   await expect(h4).toHaveText("Not signed in");
 });
@@ -26,10 +26,10 @@ test.skip("shows save / search cta if logged in", async ({ page }, {
   if (project.name.match(/[Mm]obile/)) {
     await openMobileNav(page);
   }
-  const savedGrantsNavItem = page.locator(".usa-nav li:nth-child(3)");
-  await expect(savedGrantsNavItem).toHaveText("Saved grants");
-  await savedGrantsNavItem.click();
+  const savedOpportunitiesNavItem = page.locator(".usa-nav li:nth-child(3)");
+  await expect(savedOpportunitiesNavItem).toHaveText("Saved opportunities");
+  await savedOpportunitiesNavItem.click();
 
-  await waitForURLChange(page, (url) => !!url.match(/saved-grants/));
-  await expect(page).toHaveTitle("Saved Grants | Simpler.Grants.gov");
+  await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
+  await expect(page).toHaveTitle("Saved Opportunities | Simpler.Grants.gov");
 });

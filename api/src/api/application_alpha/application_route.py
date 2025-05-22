@@ -12,6 +12,8 @@ from src.api.application_alpha.application_schemas import (
     ApplicationGetResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
+    ApplicationUpdateRequestSchema,
+    ApplicationUpdateResponseSchema,
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
@@ -20,6 +22,7 @@ from src.services.applications.create_application import create_application
 from src.services.applications.get_application import get_application
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
+from src.services.applications.update_application import update_application
 from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
@@ -45,6 +48,35 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 
     with db_session.begin():
         application = create_application(db_session, competition_id, user, application_name)
+
+    return response.ApiResponse(
+        message="Success", data={"application_id": application.application_id}
+    )
+
+
+@application_blueprint.put("/applications/<uuid:application_id>")
+@application_blueprint.input(ApplicationUpdateRequestSchema, location="json")
+@application_blueprint.output(ApplicationUpdateResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_update(
+    db_session: db.Session, application_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update an application"""
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("PUT /alpha/applications/:application_id")
+
+    # Create updates dictionary from the request data
+    updates = {"application_name": json_data["application_name"]}
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        # Call the service to update the application
+        application = update_application(db_session, application_id, updates, user)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}

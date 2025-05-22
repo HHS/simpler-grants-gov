@@ -1,7 +1,8 @@
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -26,6 +27,12 @@ class AgencySearchFilterV1Schema(Schema):
     has_active_opportunity = fields.Nested(
         BoolSearchSchemaBuilder("HasActiveOpportunityFilterV1Schema")
         .with_one_of(example=True)
+        .build()
+    )
+
+    opportunity_statuses = fields.Nested(
+        StrSearchSchemaBuilder("OpportunityStatusesFilterV1Schema")
+        .with_one_of(example="archived")
         .build()
     )
     is_test_agency = fields.Nested(
@@ -97,21 +104,19 @@ class AgencyV1Schema(Schema):
     top_level_agency = fields.Nested(
         lambda: AgencyV1Schema(exclude=("top_level_agency",)), allow_none=True
     )
-
-    has_active_opportunity = fields.Boolean(
-        dump_default=False,
-        metadata={
-            "description": "Indicates if the agency is linked to an opportunity that is currently active.",
-            "example": False,
-        },
-    )
     is_test_agency = fields.Boolean(
         metadata={
             "description": "Indicates if the agency is a test agency.",
             "example": False,
         },
     )
-
+    opportunity_statuses = fields.List(
+        fields.Enum(OpportunityStatus),
+        metadata={
+            "description": "List of opportunity statuses the agency is linked with.",
+            "example": ["posted"],
+        },
+    )
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
