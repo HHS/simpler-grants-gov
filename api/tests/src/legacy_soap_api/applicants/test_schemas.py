@@ -1,5 +1,3 @@
-import pytest
-
 from src.legacy_soap_api.applicants import schemas
 
 
