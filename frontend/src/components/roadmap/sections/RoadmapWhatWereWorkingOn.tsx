@@ -27,9 +27,7 @@ export default function RoadmapWhatWereWorkingOn() {
               {t.rich(
                 `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
                 {
-                  p: (chunks) => (
-                    <p className="font-sans-2xs">{chunks}</p>
-                  ),
+                  p: (chunks) => <p className="font-sans-2xs">{chunks}</p>,
                   linkGithub4571: gitHubLinkForIssue(4571),
                   linkGithub4577: gitHubLinkForIssue(4577),
                   linkGithub4572: gitHubLinkForIssue(4572),

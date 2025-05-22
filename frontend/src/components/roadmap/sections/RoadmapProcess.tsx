@@ -37,11 +37,12 @@ export default function RoadmapProcess() {
 
   return (
     <RoadmapPageSection className={"bg-white"} title={t("title")}>
-      <p>
-        {t("sectionSummary")}
-      </p>
+      <p>{t("sectionSummary")}</p>
       {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
-        <div className="grid-row grid-gap" key={`roadmap-process-row-${sectionRoadIdx}`}>
+        <div
+          className="grid-row grid-gap"
+          key={`roadmap-process-row-${sectionRoadIdx}`}
+        >
           {sectionRow.map((sectionRowItem) => (
             <div
               className="tablet:grid-col-6"
@@ -63,13 +64,11 @@ const RoadmapProcessSectionContent = ({
 }: RoadmapProcessSectionContentProps) => {
   return (
     <div className="margin-top-4">
-      {iconName && <USWDSIcon className="usa-icon--size-4 text-middle" name={iconName} />}
-      <h3 className="margin-top-2">
-        {title}
-      </h3>
-      <p>
-        {content}
-      </p>
+      {iconName && (
+        <USWDSIcon className="usa-icon--size-4 text-middle" name={iconName} />
+      )}
+      <h3 className="margin-top-2">{title}</h3>
+      <p>{content}</p>
     </div>
   );
 };

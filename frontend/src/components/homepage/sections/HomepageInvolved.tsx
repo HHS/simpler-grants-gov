@@ -31,11 +31,7 @@ const InvolvedContent = () => {
             title={t("technicalTitle")}
           />
           <p>
-            <a
-              href={discourseLink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={discourseLink} target="_blank" rel="noopener noreferrer">
               {t("discourseLink")}
             </a>
           </p>

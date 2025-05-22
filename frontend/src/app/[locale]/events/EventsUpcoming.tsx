@@ -8,7 +8,10 @@ export default function EventsUpcoming() {
   const t = useTranslations("Events.upcoming");
 
   return (
-    <GridContainer data-testid="events-upcoming-content" className="padding-y-4 tablet-lg:padding-y-6">
+    <GridContainer
+      data-testid="events-upcoming-content"
+      className="padding-y-4 tablet-lg:padding-y-6"
+    >
       <Grid row gap>
         <Grid tablet={{ col: 4 }}>
           <h2>{t("title")}</h2>

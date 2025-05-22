@@ -11,16 +11,15 @@ export default function EventsCoding() {
   const t = useTranslations("Events.codingChallenge");
 
   return (
-    <GridContainer data-testid="events-coding-content" className="padding-y-4 tablet-lg:padding-y-6">
+    <GridContainer
+      data-testid="events-coding-content"
+      className="padding-y-4 tablet-lg:padding-y-6"
+    >
       <Grid row gap>
         <Grid tablet={{ col: 7 }}>
           <h2>{t("title")}</h2>
-          <p>
-            {t("descriptionP1")}
-          </p>
-          <p>
-            {t("descriptionP2")}
-          </p>
+          <p>{t("descriptionP1")}</p>
+          <p>{t("descriptionP2")}</p>
           <p>
             <a
               href={codingChallengeLink}

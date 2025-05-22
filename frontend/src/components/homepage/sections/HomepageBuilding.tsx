@@ -10,7 +10,10 @@ const BuildingContent = () => {
   const { paragraphs } = messages.Homepage.sections.building;
 
   return (
-    <GridContainer data-testid="homepage-building" className="padding-y-4 tablet-lg:padding-y-6">
+    <GridContainer
+      data-testid="homepage-building"
+      className="padding-y-4 tablet-lg:padding-y-6"
+    >
       <Grid row gap>
         <Grid
           tabletLg={{

@@ -30,9 +30,7 @@ export default function IconInfo({
       <h3 className="margin-top-2">{title}</h3>
       <p>{description}</p>
       <p>
-        <Link href={link}>
-          {linkText}
-        </Link>
+        <Link href={link}>{linkText}</Link>
       </p>
     </>
   );

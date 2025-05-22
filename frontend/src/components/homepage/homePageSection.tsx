@@ -17,9 +17,7 @@ export default function homePageSection({
       <GridContainer className="display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6">
         <Grid row>
           <Grid tabletLg={{ col: 4 }}>
-            <h2 className="tablet-lg:maxw-card-lg">
-              {title}
-            </h2>
+            <h2 className="tablet-lg:maxw-card-lg">{title}</h2>
           </Grid>
           <Grid
             tabletLg={{ col: 8 }}

@@ -8,9 +8,7 @@ const SearchCallToAction: React.FC = () => {
   return (
     <>
       <GridContainer>
-        <h1>
-          {t("callToAction.title")}
-        </h1>
+        <h1>{t("callToAction.title")}</h1>
       </GridContainer>
     </>
   );

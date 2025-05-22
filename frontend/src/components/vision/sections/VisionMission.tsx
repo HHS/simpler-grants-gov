@@ -13,12 +13,13 @@ export default function VisionMission() {
 
   return (
     <VisionPageSection className={"bg-white"} title={t("title")}>
-      <p>
-        {t("paragraph")}
-      </p>
+      <p>{t("paragraph")}</p>
       <div className="grid-row grid-gap">
         {contentItems.map((contentRows, contentRowsIdx) => (
-          <div className="tablet:grid-col-4" key={`vision-mission-${contentRowsIdx}`}>
+          <div
+            className="tablet:grid-col-4"
+            key={`vision-mission-${contentRowsIdx}`}
+          >
             {contentRows.map((contentRowItem, contentRowItemIdx) => (
               <div
                 className="margin-top-4"
@@ -30,7 +31,9 @@ export default function VisionMission() {
                   aria-label={`${uswdsIcons[contentRowsIdx]}-icon`}
                 />
                 <h3 className="margin-top-2">
-                  {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
+                  {t(
+                    `contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`,
+                  )}
                 </h3>
                 <p>
                   {t(

@@ -12,25 +12,19 @@ export default function RoadmapMilestones() {
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
       {/* Early 2025 Section - Always visible */}
-      <h3 className="margin-bottom-4">
-        {t("contentTitle")}
-      </h3>
+      <h3 className="margin-bottom-4">{t("contentTitle")}</h3>
       {/* Render Early 2025 content items */}
 
       {contentItems &&
         Object.keys(contentItems).map((key) => {
           const title = t(`contentItems.${key}.title`);
           return (
-            <div 
+            <div
               className="margin-bottom-4"
               key={`roadmap-milestones-${title}-key`}
             >
-              <h4>
-                {title}
-              </h4>
-              <p>
-                {t(`contentItems.${key}.content`)}
-              </p>
+              <h4>{title}</h4>
+              <p>{t(`contentItems.${key}.content`)}</p>
             </div>
           );
         })}
@@ -54,9 +48,7 @@ export default function RoadmapMilestones() {
                           <h4 key={`roadmap-milestones-late2024-${key}`}>
                             {title}
                           </h4>
-                          <p>
-                            {t(`archivedRoadmapItems.${key}.content`)}
-                          </p>
+                          <p>{t(`archivedRoadmapItems.${key}.content`)}</p>
                         </>
                       );
                     })}

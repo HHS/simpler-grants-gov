@@ -10,9 +10,7 @@ export default function RoadmapHeader() {
       <GridContainer>
         <Grid row gap>
           <Grid tablet={{ col: "fill" }}>
-            <h1 className="desktop-lg:font-sans-3xl">
-              {t("pageHeaderTitle")}
-            </h1>
+            <h1 className="desktop-lg:font-sans-3xl">{t("pageHeaderTitle")}</h1>
             <p className="text-balance font-sans-md tablet:font-sans-lg margin-bottom-4 tablet:margin-bottom-0">
               {t("pageHeaderParagraph")}
             </p>

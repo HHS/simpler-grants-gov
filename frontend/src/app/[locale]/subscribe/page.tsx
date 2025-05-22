@@ -33,21 +33,13 @@ export default function Subscribe({ params }: LocalizedPageProps) {
       <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
-        <h1>
-          {t("title")}
-        </h1>
-        <p className="usa-intro">
-          {t("intro")}
-        </p>
+        <h1>{t("title")}</h1>
+        <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p>{t("paragraph_1")}</p>
             {t.rich("list", {
-              ul: (chunks) => (
-                <ul className="usa-list">
-                  {chunks}
-                </ul>
-              ),
+              ul: (chunks) => <ul className="usa-list">{chunks}</ul>,
               li: (chunks) => <li>{chunks}</li>,
             })}
           </Grid>

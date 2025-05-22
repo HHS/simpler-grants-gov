@@ -7,16 +7,10 @@ export default function VisionGetThere() {
 
   return (
     <VisionPageSection className="bg-white" title={t("title")}>
-      <h3>
-        {t("contentTitle")}
-      </h3>
+      <h3>{t("contentTitle")}</h3>
       <div>
-        <p>
-          {t("paragraph_1")}
-        </p>
-        <p>
-          {t("paragraph_2")}
-        </p>
+        <p>{t("paragraph_1")}</p>
+        <p>{t("paragraph_2")}</p>
         <p>
           <a
             className="font-sans-xs line-height-sans-4 "

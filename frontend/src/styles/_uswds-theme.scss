@@ -62,7 +62,6 @@ in the form $setting: value,
   ),
   $top-settings: (responsive: true),
   $z-index-settings: (responsive: true),
-
   // Typography settings
   $theme-style-body-element: true,
   $theme-global-paragraph-styles: true,
@@ -78,15 +77,15 @@ in the form $setting: value,
   ),
   $theme-font-type-serif: "newsreader",
   // Type scale
-  $theme-type-scale-3xs: 1, // 12px
-  $theme-type-scale-2xs: 3, // 14px
-  $theme-type-scale-xs: 4, // 15px (h6)
-  $theme-type-scale-sm: 5, // 16px (body / h5)
-  $theme-type-scale-md: 7, // 18px (h4)
-  $theme-type-scale-lg: 9, // 22px (h3)
-  $theme-type-scale-xl: 12, // 32px (h2)
-  $theme-type-scale-2xl: 15, // 48px (h1)
-  $theme-type-scale-3xl: 17, // 64px (hero)
+  $theme-type-scale-3xs: 1,
+  $theme-type-scale-2xs: 3,
+  $theme-type-scale-xs: 4,
+  $theme-type-scale-sm: 5,
+  $theme-type-scale-md: 7,
+  $theme-type-scale-lg: 9,
+  $theme-type-scale-xl: 12,
+  $theme-type-scale-2xl: 15,
+  $theme-type-scale-3xl: 17,
   $theme-font-role-heading: "sans",
   $theme-lead-font-family: "body",
   // Headings
@@ -101,12 +100,12 @@ in the form $setting: value,
   $theme-text-measure-narrow: 4,
   $theme-text-measure: 6,
   $theme-text-measure-wide: none,
-  
+
   // Breadcrumbs
   $theme-breadcrumb-font-size: 3xs,
   $theme-breadcrumb-padding-bottom: 3,
   $theme-breadcrumb-padding-top: 3,
-  
+
   // Color settings
   $background-color-palettes: (
       "palette-color-system-cyan-light",

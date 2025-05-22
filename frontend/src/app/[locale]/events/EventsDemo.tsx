@@ -10,7 +10,10 @@ export default function EventsDemo() {
   const t = useTranslations("Events.demo");
 
   return (
-    <GridContainer data-testid="events-demo-content" className="padding-y-4 tablet-lg:padding-y-6">
+    <GridContainer
+      data-testid="events-demo-content"
+      className="padding-y-4 tablet-lg:padding-y-6"
+    >
       <Grid row gap>
         <Grid tablet={{ col: 5 }}>
           <Image
