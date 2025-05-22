@@ -5,6 +5,10 @@ from uuid import UUID
 import src.adapters.db as db
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_in_progress,
+)
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
@@ -30,6 +34,9 @@ def update_application(
     """
     # Get application (this will check if it exists and if user has access)
     application = get_application(db_session, application_id, user)
+
+    # Don't let a user update an existing application
+    validate_application_in_progress(application, ApplicationAction.MODIFY)
 
     # Apply updates
     if "application_name" in updates:
