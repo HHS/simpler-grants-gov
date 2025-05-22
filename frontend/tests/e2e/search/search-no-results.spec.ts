@@ -39,7 +39,7 @@ test.describe("Search page tests", () => {
     });
     await expect(resultsHeading).toBeVisible();
 
-    await expect(page.locator("div.tablet-lg:display-flex h2")).toHaveText(
+    await expect(page.locator("div.search-results-content h2")).toHaveText(
       "Your search did not return any results.",
     );
   });
