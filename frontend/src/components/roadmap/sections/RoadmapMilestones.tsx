@@ -50,14 +50,14 @@ export default function RoadmapMilestones() {
                     Object.keys(archivedRoadmapItems).map((key) => {
                       const title = t(`archivedRoadmapItems.${key}.title`);
                       return (
-                        <div key={`roadmap-milestones-late2024-${key}`}>
-                          <h4>
+                        <>
+                          <h4 key={`roadmap-milestones-late2024-${key}`}>
                             {title}
                           </h4>
                           <p>
                             {t(`archivedRoadmapItems.${key}.content`)}
                           </p>
-                        </div>
+                        </>
                       );
                     })}
                 </div>

@@ -19,7 +19,7 @@ const Hero = () => {
           <h1 className="text-balance text-ls-neg-2 line-height-sans-2 font-sans-xl margin-top-3 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 desktop-lg:margin-bottom-5">
             <span>{t("pageTitle")}</span>
           </h1>
-          <p className="text-balance font-sans-md margin-y-2 tablet:font-sans-lg tablet:line-height-sans-4 tablet:margin-y-3">
+          <p className="text-balance font-sans-md margin-y-2 tablet:font-sans-lg tablet:margin-y-3">
             {t("pageDescription")}
           </p>
         </div>
