@@ -15,7 +15,7 @@ export default function VisionPageSection({
   return (
     <div className={className}>
       <GridContainer className="display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6">
-        <Grid row gap="lg">
+        <Grid row gap>
           <Grid tabletLg={{ col: 4 }}>
             <h2>{title}</h2>
           </Grid>
