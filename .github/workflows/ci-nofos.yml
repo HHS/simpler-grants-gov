@@ -37,7 +37,7 @@ jobs:
         run: git rev-parse HEAD > /tmp/commit-hash.txt
 
       - name: Save built image to file
-        run: docker save nofos:"$(git rev-parse HEAD)" > /tmp/docker-image.tar
+        run: docker save nofos:latest > /tmp/docker-image.tar
 
       - name: Cache commit hash
         uses: actions/cache/save@v4
