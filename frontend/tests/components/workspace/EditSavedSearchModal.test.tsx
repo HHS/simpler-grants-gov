@@ -2,7 +2,6 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
-import { useTranslations } from "next-intl";
 
 const mockUseUser = jest.fn(() => ({
   user: {
