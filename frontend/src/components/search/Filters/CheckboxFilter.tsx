@@ -22,6 +22,7 @@ export function CheckboxFilterBody({
   filterOptions,
   query,
   facetCounts,
+  referenceOptions = [],
 }: SearchFilterAccordionProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
@@ -38,6 +39,7 @@ export function CheckboxFilterBody({
   };
 
   const isNoneSelected = useMemo(() => query.size === 0, [query]);
+
   return (
     <div data-testid={`${title}-filter`}>
       <ul className="usa-list usa-list--unstyled">
@@ -58,6 +60,12 @@ export function CheckboxFilterBody({
               // SearchFilterSection will map over all children of this option
               <SearchFilterSection
                 option={option as FilterOptionWithChildren}
+                referenceOption={
+                  referenceOptions &&
+                  (referenceOptions.find(
+                    (referenceOption) => referenceOption.id === option.id,
+                  ) as FilterOptionWithChildren)
+                }
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}

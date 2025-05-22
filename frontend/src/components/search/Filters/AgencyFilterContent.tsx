@@ -8,17 +8,18 @@ import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
 import { CheckboxFilterBody } from "src/components/search/Filters/CheckboxFilter";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { FilterSearchNoResults } from "./FilterSearchNoResults";
 
 export function AgencyFilterContent({
   query,
   title,
-  agencies,
+  allAgencies,
   facetCounts,
 }: {
   query: Set<string>;
   title: string;
-  agencies: FilterOption[];
+  allAgencies: FilterOption[];
   facetCounts: { [key: string]: number };
 }) {
   const [agencySearchResults, setAgencySearchResults] =
@@ -28,7 +29,7 @@ export function AgencyFilterContent({
     (agencySearchTerm: string) => {
       setSearchTerm(agencySearchTerm);
       if (!agencySearchTerm) {
-        setAgencySearchResults(agencies);
+        setAgencySearchResults(allAgencies);
         return;
       }
       agencySearch(agencySearchTerm)
@@ -52,6 +53,9 @@ export function AgencyFilterContent({
         id="LastName"
         onChange={(e) => searchForAgencies(e.target.value)}
       />
+      <div className="usa-input position-absolute top-0 border-0">
+        <USWDSIcon name="search" className="usa-icon--size-3" />
+      </div>
       {agencySearchResults && !agencySearchResults.length ? (
         <FilterSearchNoResults />
       ) : (
@@ -60,8 +64,9 @@ export function AgencyFilterContent({
           queryParamKey={"agency"}
           title={title}
           includeAnyOption={!searchTerm}
-          filterOptions={agencySearchResults || agencies}
+          filterOptions={agencySearchResults || allAgencies}
           facetCounts={facetCounts}
+          referenceOptions={allAgencies}
         />
       )}
     </>
