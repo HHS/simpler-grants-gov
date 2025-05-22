@@ -60,7 +60,7 @@ function TextAreaWidget<
   const inputValue = value !== undefined ? String(value) : "";
 
   return (
-    <FormGroup error={e} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel idFor={id} title={title} required={required} />
 
       {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}

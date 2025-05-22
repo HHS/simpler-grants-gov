@@ -118,7 +118,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   breadcrumbs.push({
-    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunityNumber}`,
+    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 

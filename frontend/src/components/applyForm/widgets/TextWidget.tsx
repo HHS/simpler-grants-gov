@@ -89,7 +89,7 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={e} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel
         idFor={id}
         title={title}

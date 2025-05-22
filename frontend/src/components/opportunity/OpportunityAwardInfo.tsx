@@ -73,8 +73,8 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   };
 
   const awardSubInfo = {
-    opportunityNumber: opportunityData.opportunityNumber,
-    costSharing: opportunityData.summary.isCostSharing,
+    opportunityNumber: opportunityData.opportunity_number,
+    costSharing: opportunityData.summary.is_cost_sharing,
     fundingInstrument: opportunityData.summary.funding_instruments,
     opportunityCategory: opportunityData.category,
     opportunityCategoryExplanation: opportunityData.category_explanation,
