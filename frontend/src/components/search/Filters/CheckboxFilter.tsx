@@ -2,7 +2,10 @@
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
-import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
+import {
+  FilterOption,
+  FilterOptionWithChildren,
+} from "src/types/search/searchFilterTypes";
 
 import { useContext, useMemo } from "react";
 
@@ -14,6 +17,10 @@ import {
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 
+interface CheckboxFilterBodyProps extends SearchFilterAccordionProps {
+  referenceOptions?: FilterOption[];
+}
+
 export function CheckboxFilterBody({
   includeAnyOption,
   title,
@@ -22,8 +29,8 @@ export function CheckboxFilterBody({
   filterOptions,
   query,
   facetCounts,
-  referenceOptions = [],
-}: SearchFilterAccordionProps) {
+  referenceOptions,
+}: CheckboxFilterBodyProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
 
