@@ -477,6 +477,12 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
+    top_level_agency = fields.String(
+        metadata={
+            "description": "Top level agency for querying against database for it's sub_agencies",
+        },
+        validate=[validators.Length(min=2)],
+    )
     experimental = fields.Nested(ExperimentalV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(

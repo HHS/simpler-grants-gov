@@ -109,7 +109,7 @@ class UserSaveSearchRequestSchema(Schema):
         required=True,
         metadata={"description": "Name of the saved search", "example": "Example search"},
     )
-    search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
+    search_query = fields.Nested(OpportunitySearchRequestV1Schema)
 
 
 class SavedSearchResponseSchema(Schema):

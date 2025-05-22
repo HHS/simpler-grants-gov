@@ -142,3 +142,26 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
+export const fakeAttachments = [
+  {
+    created_at: "2007-11-02T15:23:09+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25293/YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_description: "Announcement",
+    file_name: "YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_size_bytes: 111616,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:09+00:00",
+  },
+  {
+    created_at: "2007-11-02T15:23:10+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25294/YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_description: "Mandatory POGI",
+    file_name: "YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_size_bytes: 122880,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:10+00:00",
+  },
+];
