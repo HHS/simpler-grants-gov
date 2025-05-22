@@ -106,13 +106,17 @@ function SelectWidget<
     [onChange, multiple, enumOptions, optEmptyVal],
   );
 
-  const e = rawErrors.length ? true : undefined;
-  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
+  const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   const Widget = useCombo ? ComboBox : Select;
 
   return (
-    <FormGroup error={e} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel
         idFor={id}
         title={title}
@@ -120,7 +124,7 @@ function SelectWidget<
         description={description}
       />
 
-      {e && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
 
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580

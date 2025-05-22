@@ -22,7 +22,7 @@ export const mockOpportunity: BaseOpportunity = {
     award_ceiling: 50000,
     award_floor: 10000,
   },
-  opportunityNumber: "OPP-12345",
+  opportunity_number: "OPP-12345",
 } as BaseOpportunity;
 
 export const searchFetcherParams: QueryParamData = {

@@ -37,9 +37,9 @@ describe("validateFormData", () => {
       required: ["name"],
     };
 
-    const e = validateJsonBySchema(formData, schema);
-    expect(Array.isArray(e)).toBe(true);
-    expect(e && e.length).toBeGreaterThan(0);
+    const errors = validateJsonBySchema(formData, schema);
+    expect(Array.isArray(errors)).toBe(true);
+    expect(errors && errors.length).toBeGreaterThan(0);
   });
 
   describe("validateUiSchema", () => {

@@ -81,8 +81,12 @@ function TextWidget<
       onFocus(id, target && target.value),
     [onFocus, id],
   );
-  const e = rawErrors.length ? true : undefined;
-  const describedby = e ? `e-for-${id}` : title ? `label-for-${id}` : undefined;
+  const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   return (
     <FormGroup error={e} key={`wrapper-for-${id}`}>
@@ -92,7 +96,9 @@ function TextWidget<
         required={required}
         description={description}
       />
-      {e && <ErrorMessage id={`e-for-${id}`}>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+      )}
       <TextInput
         data-testid={id}
         minLength={(minLength as number) ?? undefined}
@@ -112,7 +118,7 @@ function TextWidget<
         onFocus={updateOnInput ? _onFocus : undefined}
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
-        validationStatus={e ? "error" : undefined}
+        validationStatus={error ? "error" : undefined}
       />
       {Array.isArray(examples) && (
         <datalist

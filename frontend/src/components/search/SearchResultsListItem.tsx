@@ -97,7 +97,7 @@ export default function SearchResultsListItem({
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
               <strong>{t("resultsListItem.opportunityNumber")}</strong>
-              {opportunity?.opportunityNumber}
+              {opportunity?.opportunity_number}
             </div>
           </div>
         </div>

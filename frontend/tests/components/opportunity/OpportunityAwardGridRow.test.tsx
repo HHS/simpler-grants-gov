@@ -5,16 +5,16 @@ import OpportunityAwardGridRow from "src/components/opportunity/OpportunityAward
 const mockTranslations: { [key: string]: string } = {
   yes: "Yes",
   no: "No",
-  programFunding: "Program Funding",
-  expectedAwards: "Expected awards",
+  program_funding: "Program Funding",
+  expected_awards: "Expected awards",
   award_ceiling: "Award Ceiling",
   award_floor: "Award Floor",
-  costSharing: "Cost sharing or matching requirement",
-  fundingInstrument: "Funding instrument type",
-  opportunityCategory: "Opportunity Category",
-  opportunityCategoryExplanation: "Opportunity Category Explanation",
-  fundingActivity: "Category of Funding Activity",
-  categoryExplanation: "Category Explanation",
+  cost_sharing: "Cost sharing or matching requirement",
+  funding_instrument: "Funding instrument type",
+  opportunity_category: "Opportunity Category",
+  opportunity_category_explanation: "Opportunity Category Explanation",
+  funding_activity: "Category of Funding Activity",
+  category_explanation: "Category Explanation",
 };
 
 // Mock `useTranslations`

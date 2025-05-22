@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import VisionPageSection from "src/components/vision/visionPageSection";
 
 export default function VisionGetThere() {
-  const t = useTranslations("Vision.sections.geThere");
+  const t = useTranslations("Vision.sections.getThere");
 
   return (
     <VisionPageSection className="bg-white" title={t("title")}>

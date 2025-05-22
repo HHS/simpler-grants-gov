@@ -19,6 +19,6 @@ export type WithFeatureFlagProps = {
 export interface ErrorProps {
   // Next's error boundary also includes a reset function as a prop for retries,
   // but it was not needed as users can retry with new inputs in the normal page flow.
-  e: Error & { digest?: string };
+  error: Error & { digest?: string };
   reset?: () => unknown;
 }

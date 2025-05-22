@@ -135,17 +135,17 @@ describe("getAgencyDisplayName", () => {
     top_level_agency_name: "The Parent",
     summary: {
       estimated_total_program_funding: 5000000,
-      expectedNumberOfAwards: 10,
+      expected_number_of_awards: 10,
       award_ceiling: 1000000,
       award_floor: 50000,
-      isCostSharing: true,
-      fundingInstruments: ["Grant", "Cooperative Agreement"],
-      fundingCategories: ["Education", "Health"],
-      fundingCategoryDescription:
+      is_cost_sharing: true,
+      funding_instruments: ["Grant", "Cooperative Agreement"],
+      funding_categories: ["Education", "Health"],
+      funding_category_description:
         "Support for education and health initiatives",
     },
     category: "Discretionary",
-    categoryExplanation: "Funds allocated by agency discretion",
+    category_explanation: "Funds allocated by agency discretion",
   } as BaseOpportunity;
 
   it("returns `--` if agency lookup fails", () => {

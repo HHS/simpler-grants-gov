@@ -14,8 +14,8 @@ jest.mock("next-intl", () => ({
       no: "No",
       programFunding: "Program Funding",
       expectedAwards: "Expected awards",
-      award_ceiling: "Award Ceiling",
-      award_floor: "Award Floor",
+      awardCeiling: "Award Ceiling",
+      awardFloor: "Award Floor",
       costSharing: "Cost sharing or matching requirement",
       fundingInstrument: "Funding instrument type",
       opportunityCategory: "Opportunity Category",
@@ -30,16 +30,17 @@ jest.mock("next-intl", () => ({
 const mockOpportunityData: OpportunityDetail = {
   summary: {
     estimated_total_program_funding: 5000000,
-    expectedNumberOfAwards: 10,
+    expected_number_of_awards: 10,
     award_ceiling: 1000000,
     award_floor: 50000,
-    isCostSharing: true,
-    fundingInstruments: ["Grant", "Cooperative Agreement"],
-    fundingCategories: ["Education", "Health"],
-    fundingCategoryDescription: "Support for education and health initiatives",
+    is_cost_sharing: true,
+    funding_instruments: ["Grant", "Cooperative Agreement"],
+    funding_categories: ["Education", "Health"],
+    funding_category_description:
+      "Support for education and health initiatives",
   } as Summary,
   category: "Discretionary",
-  categoryExplanation: "Funds allocated by agency discretion",
+  category_explanation: "Funds allocated by agency discretion",
 } as OpportunityDetail;
 
 describe("OpportunityAwardInfo", () => {

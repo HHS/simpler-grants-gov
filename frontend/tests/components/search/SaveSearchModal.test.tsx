@@ -114,9 +114,9 @@ describe("SaveSearchModal", () => {
 
     rerender(<SaveSearchModal onSave={noop} />);
 
-    const e = await screen.findByText("apiError");
+    const error = await screen.findByText("apiError");
 
-    expect(e).toBeInTheDocument();
+    expect(error).toBeInTheDocument();
   });
 
   it("displays a success message on successful save", async () => {

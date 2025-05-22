@@ -67,19 +67,19 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
     programFunding: formatCurrency(
       opportunityData.summary.estimated_total_program_funding,
     ),
-    expectedAwards: opportunityData.summary.expectedNumberOfAwards,
-    award_floor: formatCurrency(opportunityData.summary.award_floor),
-    award_ceiling: formatCurrency(opportunityData.summary.award_ceiling),
+    expectedAwards: opportunityData.summary.expected_number_of_awards,
+    awardFloor: formatCurrency(opportunityData.summary.award_floor),
+    awardCeiling: formatCurrency(opportunityData.summary.award_ceiling),
   };
 
   const awardSubInfo = {
     opportunityNumber: opportunityData.opportunityNumber,
     costSharing: opportunityData.summary.isCostSharing,
-    fundingInstrument: opportunityData.summary.fundingInstruments,
+    fundingInstrument: opportunityData.summary.funding_instruments,
     opportunityCategory: opportunityData.category,
-    opportunityCategoryExplanation: opportunityData.categoryExplanation,
-    fundingActivity: opportunityData.summary.fundingCategories,
-    categoryExplanation: opportunityData.summary.fundingCategoryDescription,
+    opportunityCategoryExplanation: opportunityData.category_explanation,
+    fundingActivity: opportunityData.summary.funding_categories,
+    categoryExplanation: opportunityData.summary.funding_category_description,
   };
 
   return (

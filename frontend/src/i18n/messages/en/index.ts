@@ -258,7 +258,7 @@ export const messages = {
           ],
         ],
       },
-      geThere: {
+      getThere: {
         title: "How we get there",
         contentTitle: "Guided by research, shaped by your experience",
         paragraph1:
