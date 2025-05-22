@@ -1501,5 +1501,5 @@ def test_application_get_includes_application_name_and_users(
     # Check that users are included
     assert "users" in response.json["data"]
     assert len(response.json["data"]["users"]) == 1
-    assert response.json["data"]["users"][0]["user_id"] == str(user.user.user_id)
-    assert response.json["data"]["users"][0]["email"] == user.user.email
+    assert response.json["data"]["users"][0]["user_id"] == str(user.user_id)
+    assert response.json["data"]["users"][0]["email"] == user.email
