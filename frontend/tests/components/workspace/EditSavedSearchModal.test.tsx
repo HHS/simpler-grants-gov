@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
+import { useTranslations } from "next-intl";
 
 const mockUseUser = jest.fn(() => ({
   user: {
@@ -240,9 +241,12 @@ describe("EditSavedSearchModal", () => {
       />,
     );
 
-    const success = await screen.findByText("successTitle");
 
-    expect(success).toBeInTheDocument();
+    const success = await screen.findByLabelText("success")
+
+    expect(success).toHaveTextContent("updatedNotification")
+
+
   });
   it("defaults input to current name of query", () => {
     render(

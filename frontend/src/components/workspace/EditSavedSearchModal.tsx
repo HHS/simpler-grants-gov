@@ -84,6 +84,7 @@ function SuccessContent({
     <>
       <ModalHeading
         id={`${modalId}-heading`}
+        aria-label="success"
       >{`"${originalName}" ${t("updatedNotification")} "${updatedName}"`}</ModalHeading>
       <ModalFooter>
         <ModalToggleButton
