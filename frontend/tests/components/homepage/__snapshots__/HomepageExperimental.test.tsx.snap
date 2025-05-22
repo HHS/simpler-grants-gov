@@ -18,7 +18,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
           data-testid="grid"
         >
           <h2
-            class="margin-0 font-sans-lg tablet:font-sans-xl tablet-lg:maxw-card-lg"
+            class="tablet-lg:maxw-card-lg"
           >
             Test out our experimental features
           </h2>
@@ -27,17 +27,15 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
           class="tablet-lg:grid-col-8 margin-top-2 margin-bottom-0 tablet-lg:margin-0"
           data-testid="grid"
         >
-          <h2
+          <h3
             data-testid="homepage-experimental"
           >
             Tell us what's working (and what's not)
-          </h2>
-          <h3>
-            What you can do now
           </h3>
-          <p
-            class="font-sans-md line-height-sans-4"
-          >
+          <h4>
+            What you can do now
+          </h4>
+          <p>
             Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.
           </p>
           <a
@@ -51,12 +49,10 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               Try the new simpler search
             </button>
           </a>
-          <h3>
+          <h4>
             What you can't do quite yet
-          </h3>
-          <p
-            class="font-sans-md line-height-sans-4"
-          >
+          </h4>
+          <p>
             For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.
           </p>
           <div
@@ -76,20 +72,21 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
                   href="/img.jpg#build"
                 />
               </svg>
-              <h3>
+              <h3
+                class="margin-top-2"
+              >
                 Send us your feedback and suggestions.
               </h3>
-              <p
-                class="font-sans-md line-height-sans-4"
-              >
+              <p>
                 We're excited to hear from you to learn how we can improve.
               </p>
-              <a
-                class="font-sans-md line-height-sans-4"
-                href="mailto:simpler@grants.gov"
-              >
-                Contact us at simpler@grants.gov
-              </a>
+              <p>
+                <a
+                  href="mailto:simpler@grants.gov"
+                >
+                  Contact us at simpler@grants.gov
+                </a>
+              </p>
             </div>
             <div
               class="grid-col-6"
@@ -104,20 +101,21 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
                   href="/img.jpg#mail"
                 />
               </svg>
-              <h3>
+              <h3
+                class="margin-top-2"
+              >
                 Be the first to hear about new features.
               </h3>
-              <p
-                class="font-sans-md line-height-sans-4"
-              >
+              <p>
                 Our newsletter delivers the latest news straight to your inbox.
               </p>
-              <a
-                class="font-sans-md line-height-sans-4"
-                href="/subscribe"
-              >
-                Subscribe to our newsletter
-              </a>
+              <p>
+                <a
+                  href="/subscribe"
+                >
+                  Subscribe to our newsletter
+                </a>
+              </p>
             </div>
           </div>
         </div>
