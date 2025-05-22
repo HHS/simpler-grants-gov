@@ -1,27 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EditSavedSearchModal matches snapshot 1`] = `
-<div
-  aria-hidden="true"
-  data-modal-hidden=""
->
-  <button
-    aria-controls="edit-save-search-1"
-    class="usa-button usa-button--unstyled padding-1 hover:bg-base-lightest"
-    data-open-modal="true"
-    data-testid="open-edit-saved-search-modal-button-1"
-    type="button"
-  >
-    <svg
-      aria-hidden="true"
-      class="usa-icon"
-      role="img"
-    >
-      <use
-        href="/img.jpg#edit"
-      />
-    </svg>
-    edit
-  </button>
-</div>
-`;
+exports[`EditSavedSearchModal matches snapshot 1`] = `[Function]`;

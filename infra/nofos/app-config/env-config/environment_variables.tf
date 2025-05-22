@@ -7,14 +7,10 @@ locals {
     DJANGO_ALLOWED_HOSTS = "*"
   }
 
-  # Configuration for secrets
-  # List of configurations for defining environment variables that pull from SSM parameter
-  # store. Configurations are of the format
-  # {
-  #   ENV_VAR_NAME = {
-  #     manage_method     = "generated" # or "manual" for a secret that was created and stored in SSM manually
-  #     secret_store_name = "/ssm/param/name"
-  #   }
-  # }
-  secrets = {}
+  secrets = {
+    DOCRAPTOR_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/nofos/${var.environment}/docraptor-api-key"
+    }
+  }
 }

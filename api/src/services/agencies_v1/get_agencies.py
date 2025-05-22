@@ -29,7 +29,9 @@ class AgencyListParams(BaseModel):
     query: str | None = None
 
 
-def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
+def _construct_active_inner_query(
+    field: InstrumentedAttribute[Any], opportunity_status: list[OpportunityStatus]
+) -> Select:
     return (
         select(field)
         .join(Opportunity, onclause=Agency.agency_code == Opportunity.agency_code)
@@ -37,7 +39,7 @@ def _construct_active_inner_query(field: InstrumentedAttribute[Any]) -> Select:
         .where(Agency.is_test_agency.isnot(True))  # Exclude test agencies
         .where(
             CurrentOpportunitySummary.opportunity_status.in_(
-                [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED]
+                opportunity_status,
             )
         )
     )
@@ -53,16 +55,23 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    if list_params.filters and list_params.filters.active:
-        active_agency_subquery = (
-            _construct_active_inner_query(Agency.agency_id)
-            .union(_construct_active_inner_query(Agency.top_level_agency_id))
-            .subquery()
-        )
+    if list_params.filters:
+        if list_params.filters.active:
+            agency_subquery = (
+                _construct_active_inner_query(
+                    Agency.agency_id, [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+                )
+                .union(
+                    _construct_active_inner_query(
+                        Agency.top_level_agency_id,
+                        [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED],
+                    )
+                )
+                .subquery()
+            )
 
-        agency_id_stmt = select(active_agency_subquery).distinct()
-
-        stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
+            agency_id_stmt = select(agency_subquery).distinct()
+            stmt = stmt.where(Agency.agency_id.in_(agency_id_stmt))
 
     # Sort
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)

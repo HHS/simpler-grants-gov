@@ -1,5 +1,7 @@
 "use client";
 
+import { downloadAttachmentsZip } from "src/utils/opportunity/zipDownloadUtils";
+
 import { useTranslations } from "next-intl";
 import { Button } from "@trussworks/react-uswds";
 
@@ -7,11 +9,6 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 type ZipDownloadProps = {
   opportunityId: number;
-};
-
-const downloadAttachmentsZip = (opportunityId: number) => {
-  const path = `/api/opportunities/${opportunityId}/attachments-download`;
-  window.open(path, "_blank");
 };
 
 const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {

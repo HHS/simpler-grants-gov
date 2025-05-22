@@ -40,7 +40,7 @@ jobs:
         run: docker load < /tmp/docker-image.tar
 
       - name: Expand docker image tag
-        run: docker image tag nofos:"$(cat /tmp/commit-hash.txt)" simpler-grants-gov-nofos:"$(cat /tmp/commit-hash.txt)"
+        run: docker image tag nofos:latest simpler-grants-gov-nofos:"$(cat /tmp/commit-hash.txt)"
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
@@ -53,6 +53,10 @@ jobs:
 
       - name: Publish release
         run: make release-publish APP_NAME=nofos IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
+
+      - name: Run migrations
+        run: |
+          make release-run-database-migrations APP_NAME=nofos ENVIRONMENT=${{ inputs.environment || 'dev'  }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
 
       - name: Deploy release
         run: make release-deploy APP_NAME=nofos ENVIRONMENT=${{ inputs.environment || 'dev' }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"

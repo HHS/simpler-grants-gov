@@ -19,7 +19,7 @@ from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceL
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
-    from src.db.models.user_models import ApplicationUser
+    from src.db.models.user_models import ApplicationUser, User
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -157,10 +157,13 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
 
     application_users: Mapped[list["ApplicationUser"]] = relationship(
-        "ApplicationUser",
-        back_populates="application",
-        uselist=True,
+        "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
     )
+
+    @property
+    def users(self) -> list["User"]:
+        """Return the list of User objects associated with this application"""
+        return [app_user.user for app_user in self.application_users]
 
 
 class ApplicationForm(ApiSchemaTable, TimestampMixin):

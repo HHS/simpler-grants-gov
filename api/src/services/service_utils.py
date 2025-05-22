@@ -58,7 +58,6 @@ def _add_search_filters(
 
         elif isinstance(field_filters, BoolSearchFilter) and field_filters.one_of:
             builder.filter_terms(field_name, field_filters.one_of)
-
         elif isinstance(field_filters, IntSearchFilter):
             builder.filter_int_range(field_name, field_filters.min, field_filters.max)
 

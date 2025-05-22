@@ -6,9 +6,7 @@ on:
     branches:
       - "main"
     paths:
-      - ".github/workflows/cd-nofos.yml"
-      - ".github/workflows/ci-nofos.yml"
-      - ".github/workflows/deploy-nofos.yml"
+      - ".github/workflows/*-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
   workflow_dispatch:
@@ -35,9 +33,15 @@ jobs:
     with:
       version: ${{ inputs.version || 'main' }}
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    needs: [checks]
+    uses: ./.github/workflows/vulnerability-scans-nofos.yml
+
   deploy:
     name: Deploy
     needs: [checks]
+    # needs: [checks, vulnerability-scans] <= enable when vulnerability scans have started passing
     uses: ./.github/workflows/deploy-nofos.yml
     with:
       environment: ${{ inputs.environment || 'dev' }}
@@ -45,6 +49,6 @@ jobs:
 
   send-slack-notification:
     if: failure()
-    needs: [checks, deploy]
+    needs: [checks, deploy, vulnerability-scans]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

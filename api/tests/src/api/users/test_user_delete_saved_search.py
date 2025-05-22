@@ -33,8 +33,8 @@ def test_user_delete_saved_search_unauthorized_user(
         headers={"X-SGG-Token": user_auth_token},
     )
 
-    assert response.status_code == 401
-    assert response.json["message"] == "Unauthorized user"
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
 
     # Verify search was not deleted
     saved_searches = (

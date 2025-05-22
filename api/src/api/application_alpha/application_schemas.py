@@ -15,6 +15,18 @@ class ApplicationStartResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationStartResponseDataSchema())
 
 
+class ApplicationUpdateRequestSchema(Schema):
+    application_name = fields.String(required=True, allow_none=False)
+
+
+class ApplicationUpdateResponseDataSchema(Schema):
+    application_id = fields.UUID()
+
+
+class ApplicationUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationUpdateResponseDataSchema())
+
+
 class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
 
@@ -38,10 +50,20 @@ class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchem
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
 
 
+class ApplicationUserSchema(Schema):
+    """Schema for users associated with an application"""
+
+    user_id = fields.UUID()
+    email = fields.String()
+
+
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition_id = fields.UUID()
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
+    application_status = fields.String()
+    application_name = fields.String()
+    users = fields.List(fields.Nested(ApplicationUserSchema()))
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

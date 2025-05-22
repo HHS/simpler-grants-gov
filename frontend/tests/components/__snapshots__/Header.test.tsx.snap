@@ -489,7 +489,7 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/saved-grants"
+                  href="/saved-opportunities"
                 >
                   <div>
                     Saved opportunities
@@ -1005,7 +1005,7 @@ exports[`Header About renders Community submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/saved-grants"
+                  href="/saved-opportunities"
                 >
                   <div>
                     Saved opportunities
@@ -1522,7 +1522,7 @@ exports[`Header renders Header navbar menu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/saved-grants"
+                  href="/saved-opportunities"
                 >
                   <div>
                     Saved opportunities

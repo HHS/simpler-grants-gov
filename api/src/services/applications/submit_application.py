@@ -7,33 +7,17 @@ from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
+from src.db.models.user_models import User
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_in_progress,
+    validate_forms,
+)
 from src.services.applications.get_application import get_application
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
-
-
-def validate_application_in_progress(application: Application) -> None:
-    """
-    Validate that the application is in the IN_PROGRESS state.
-    """
-    if application.application_status != ApplicationStatus.IN_PROGRESS:
-        message = f"Application cannot be submitted. It is currently in status: {application.application_status}"
-        logger.info(
-            "Application cannot be submitted, not currently in progress",
-            extra={"application_status": application.application_status},
-        )
-        raise_flask_error(
-            403,
-            message,
-            validation_issues=[
-                ValidationErrorDetail(
-                    type=ValidationErrorType.NOT_IN_PROGRESS,
-                    message="Application cannot be submitted, not currently in progress",
-                )
-            ],
-        )
 
 
 def validate_competition_open(application: Application) -> None:
@@ -76,18 +60,19 @@ def validate_competition_open(application: Application) -> None:
             )
 
 
-def submit_application(db_session: db.Session, application_id: UUID) -> Application:
+def submit_application(db_session: db.Session, application_id: UUID, user: User) -> Application:
     """
     Submit an application for a competition.
     """
 
     logger.info("Processing application submit")
 
-    application = get_application(db_session, application_id)
+    application = get_application(db_session, application_id, user)
 
     # Run validations
-    validate_application_in_progress(application)
+    validate_application_in_progress(application, ApplicationAction.SUBMIT)
     validate_competition_open(application)
+    validate_forms(application)
 
     # Update application status
     application.application_status = ApplicationStatus.SUBMITTED
