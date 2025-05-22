@@ -49,6 +49,7 @@ export interface SearchAccordionContentProps
 
 export interface SearchFilterAccordionProps
   extends SearchAccordionContentProps {
+  referenceOptions?: FilterOption[]; // used to allow "all" buttons to work even when not all options are displayed
   wrapForScroll?: boolean;
 }
 

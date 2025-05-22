@@ -91,7 +91,7 @@ export default function SearchBar({
           }}
         />
         <button className="usa-button" type="submit" onClick={handleSubmit}>
-          <span className="usa-search__submit-text">{t("bar.button")} </span>
+          <span className="usa-search__submit-text">{t("bar.button")}</span>
           <Icon.Search
             className="usa-search__submit-icon"
             size={4}

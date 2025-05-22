@@ -15,11 +15,11 @@ export async function AgencyFilterAccordion({
 }) {
   const t = useTranslations("Search");
 
-  let agencies: FilterOption[] = [];
+  let allAgencies: FilterOption[] = [];
   let facetCounts: { [key: string]: number } = {};
   try {
     let searchResults: SearchAPIResponse;
-    [agencies, searchResults] = await agencyOptionsPromise;
+    [allAgencies, searchResults] = await agencyOptionsPromise;
     facetCounts = searchResults.facet_counts.agency;
   } catch (e) {
     // Come back to this to show the user an error
@@ -34,7 +34,7 @@ export async function AgencyFilterAccordion({
       <AgencyFilterContent
         query={query}
         title={t("accordion.titles.agency")}
-        agencies={agencies}
+        allAgencies={allAgencies}
         facetCounts={facetCounts}
       />
     </BasicSearchFilterAccordion>

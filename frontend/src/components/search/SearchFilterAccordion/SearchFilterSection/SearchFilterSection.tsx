@@ -11,6 +11,7 @@ interface SearchFilterSectionProps {
   accordionTitle: string;
   query: Set<string>;
   facetCounts?: { [key: string]: number };
+  referenceOption?: FilterOptionWithChildren;
 }
 
 const SearchFilterSection = ({
@@ -19,6 +20,7 @@ const SearchFilterSection = ({
   accordionTitle,
   query,
   facetCounts,
+  referenceOption,
 }: SearchFilterSectionProps) => {
   return (
     <div>
@@ -27,7 +29,9 @@ const SearchFilterSection = ({
         <AllOptionCheckbox
           title={option.label}
           queryParamKey="agency"
-          childOptions={option.children}
+          childOptions={
+            referenceOption ? referenceOption.children : option.children
+          }
           currentSelections={query}
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
