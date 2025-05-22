@@ -45,6 +45,7 @@ class SearchClient:
         shard_count: int = 1,
         replica_count: int = 1,
         analysis: dict | None = None,
+        mappings: dict | None = None,
     ) -> None:
         """
         Create an empty search index
@@ -61,6 +62,11 @@ class SearchClient:
                 "analysis": analysis,
             },
         }
+
+        # The `mappings` parameter allows you to define the data types and indexing behavior
+        # for fields in the index.
+        if mappings:
+            body["mappings"] = mappings
 
         logger.info("Creating search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.create(index_name, body=body)

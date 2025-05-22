@@ -80,9 +80,12 @@ examples = {
         },
     },
     "example2": {
-        "summary": "Filter by active agency",
+        "summary": "Filter by open/forecasted agency",
         "value": {
-            "filters": {"has_active_opportunity": {"one_of": ["False"]}},
+            "filters": {
+                "has_open_opportunity": {"one_of": ["False"]},
+                "has_forecasted_opportunity": {"one_of": ["False"]},
+            },
             "pagination": {
                 "sort_order": [
                     {

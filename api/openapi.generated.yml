@@ -202,10 +202,13 @@ paths:
                     page_offset: 1
                     page_size: 25
               example2:
-                summary: Filter by active agency
+                summary: Filter by open/forecasted agency
                 value:
                   filters:
-                    has_active_opportunity:
+                    has_open_opportunity:
+                      one_of:
+                      - 'False'
+                    has_forecasted_opportunity:
                       one_of:
                       - 'False'
                   pagination:
@@ -1546,6 +1549,15 @@ components:
           items:
             type: boolean
             example: true
+    OpportunityStatusesFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            example: archived
     IsTestAgencyFilterV1:
       type: object
       properties:
@@ -1563,6 +1575,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
+        opportunity_statuses:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityStatusesFilterV1'
         is_test_agency:
           type:
           - object
@@ -1667,15 +1683,23 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyV1'
           - type: 'null'
-        has_active_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently active.
-          example: false
         is_test_agency:
           type: boolean
           description: Indicates if the agency is a test agency.
           example: false
+        opportunity_statuses:
+          type: array
+          description: List of opportunity statuses the agency is linked with.
+          example:
+          - posted
+          items:
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
         created_at:
           type: string
           format: date-time
