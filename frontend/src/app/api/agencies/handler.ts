@@ -7,12 +7,11 @@ import { NextRequest } from "next/server";
 export async function searchForAgencies(request: NextRequest) {
   const { keyword } = (await request.json()) as { keyword: string | undefined };
 
-  if (!keyword) {
-    throw new Error("No agency search keyword provided");
-  }
-
   let agencySearchResults: FilterOption[] = [];
   try {
+    if (!keyword) {
+      throw new Error("No agency search keyword provided");
+    }
     agencySearchResults = await searchAgenciesForFilterOptions(keyword);
   } catch (e) {
     const { status, message } = readError(e as Error, 500);

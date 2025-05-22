@@ -49,8 +49,10 @@ export function AgencyFilterContent({
     <>
       <TextInput
         type="text"
-        name="LastName"
-        id="LastName"
+        name="AgencySearch"
+        id="AgencySearch"
+        title="Agency Search"
+        aria-label="Agency Search"
         onChange={(e) => searchForAgencies(e.target.value)}
       />
       <div className="usa-input position-absolute top-0 border-0">
