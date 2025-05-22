@@ -1,13 +1,44 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
+from src.legacy_soap_api.applicants.schemas.opportunity_filter import (
+    OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
+)
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_utils import BASE_SOAP_API_RESPONSE_HEADERS
+
+MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER = b"""
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <app:GetOpportunityListRequest>
+         <app1:OpportunityFilter>
+            <gran:CompetitionID>HDTRA1-25-S-0001</gran:CompetitionID>
+         </app1:OpportunityFilter>
+      </app:GetOpportunityListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
+"""
+
+MOCK_REQUEST_WITH_VALID_OPPORTUNITY_FILTER = b"""
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <app:GetOpportunityListRequest>
+         <app1:OpportunityFilter>
+            <gran:FundingOpportunityNumber>HDTRA1-25-S-0001</gran:FundingOpportunityNumber>
+         </app1:OpportunityFilter>
+      </app:GetOpportunityListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
+"""
 
 
 class TestSOAPClientSmokeTest:
@@ -30,61 +61,17 @@ class TestSimplerApplicantsClient:
     @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
     def test_get_opportunity_list(self, mock_proxy_request, mock_logger):
-        mock_proxy_response = SOAPResponse(
-            data=b"""
---uuid:1558f8c1-296f-48fb-8993-ecb44df382a5
-Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"
-Content-Transfer-Encoding: binary
-Content-ID:
-<root.message@cxf.apache.org>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <ns2:GetOpportunityListResponse xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
-            <ns5:OpportunityDetails>
-                <FundingOpportunityNumber>O-BJA-2025-202930-STG</FundingOpportunityNumber>
-                <FundingOpportunityTitle>DY SAM PI26  user session</FundingOpportunityTitle>
-                <PackageID>PKG00112670</PackageID>
-                <ns5:CFDADetails>
-                    <ns5:Number>16.030</ns5:Number>
-                    <ns5:Title>National Center on Restorative Justice</ns5:Title>
-                </ns5:CFDADetails>
-                <ns5:OpeningDate>2025-03-20-04:00</ns5:OpeningDate>
-                <ns5:ClosingDate>2025-07-26-04:00</ns5:ClosingDate>
-                <OfferingAgency>Bureau of Justice Assistance</OfferingAgency>
-                <AgencyContactInfo>dy</AgencyContactInfo>
-                <SchemaURL>https://trainingapply.grants.gov/apply/opportunities/schemas/applicant/PKG00112670.xsd</SchemaURL>
-                <InstructionsURL>https://trainingapply.grants.gov/apply/opportunities/instructions/PKG00112670-instructions.pdf</InstructionsURL>
-                <ns5:IsMultiProject>false</ns5:IsMultiProject>
-            </ns5:OpportunityDetails>
-        </ns2:GetOpportunityListResponse>
-    </soap:Body>
-</soap:Envelope>
---uuid:1558f8c1-296f-48fb-8993-ecb44df382a5--
-""",
-            status_code=200,
-            headers={},
-        )
-        mock_proxy_request.return_value = mock_proxy_response
+        mock_proxy_request_response = MagicMock()
+        mock_proxy_request.return_value = mock_proxy_request_response
         mock_soap_request = SOAPRequest(
             method="POST",
             headers={},
-            data=b"""
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <app:GetOpportunityListRequest>
-         <app1:OpportunityFilter>
-            <gran:FundingOpportunityNumber>HDTRA1-25-S-0001</gran:FundingOpportunityNumber>
-         </app1:OpportunityFilter>
-      </app:GetOpportunityListRequest>
-   </soapenv:Body>
-</soapenv:Envelope>
-""",
+            data=MOCK_REQUEST_WITH_VALID_OPPORTUNITY_FILTER,
             full_path="/",
         )
         client = SimplerApplicantsS2SClient(mock_soap_request)
         result, simpler_response = client.get_response()
-        assert result == mock_proxy_response
+        assert result == mock_proxy_request_response
         assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
 
         # What we expect until we query sgg db for results.
@@ -102,5 +89,38 @@ Content-ID:
                         "competition_id": None,
                     },
                 }
+            },
+        )
+
+    @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
+    @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
+    def test_get_opportunity_list_invalid_opportunity_filter(self, mock_proxy_request, mock_logger):
+        mock_proxy_request_response = MagicMock()
+        mock_proxy_request.return_value = mock_proxy_request_response
+        mock_soap_request = SOAPRequest(
+            method="POST",
+            headers={},
+            data=MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER,
+            full_path="/",
+        )
+        client = SimplerApplicantsS2SClient(mock_soap_request)
+        result, simpler_response = client.get_response()
+        assert result == mock_proxy_request_response
+        assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
+
+        expected_fault_xml = OpportunityListRequestInvalidParams.to_xml()
+        expected_simpler_response = SOAPResponse(
+            data=expected_fault_xml,
+            status_code=500,
+            headers={"Content-Length": len(expected_fault_xml), **BASE_SOAP_API_RESPONSE_HEADERS},
+        )
+        assert expected_simpler_response == simpler_response
+
+        # Assert that the GetOpportunityListRequest failed validation.
+        mock_logger.assert_called_once_with(
+            "soap_applicants_api_fault",
+            extra={
+                "message": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
+                "fault": OpportunityListRequestInvalidParams.model_dump(),
             },
         )

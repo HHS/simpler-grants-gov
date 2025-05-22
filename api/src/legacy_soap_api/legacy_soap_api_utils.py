@@ -3,6 +3,11 @@ from typing import Any
 
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 
+BASE_SOAP_API_RESPONSE_HEADERS = {
+    "Strict-Transport-Security": "max-age=31536000",
+    "Content-Type": 'multipart/related; type="application/xop+xml"',
+}
+
 
 def format_local_soap_response(response_data: bytes) -> bytes:
     # This is a format string for formatting local responses from the mock
@@ -34,16 +39,13 @@ def get_soap_response(
 
     Note: The base headers can be overriden by caller if needed.
     """
-    base_headers = {
-        "Strict-Transport-Security": "max-age=31536000",
-        "Content-Type": 'multipart/related; type="application/xop+xml"',
+    extra_headers = headers if headers else {}
+    all_headers = {
+        **BASE_SOAP_API_RESPONSE_HEADERS,
+        **extra_headers,
         "Content-Length": len(data),
     }
-    return SOAPResponse(
-        data=data,
-        status_code=status_code,
-        headers={**base_headers, **headers} if headers else base_headers,
-    )
+    return SOAPResponse(data=data, status_code=status_code, headers=all_headers)
 
 
 class SOAPFaultException(Exception):

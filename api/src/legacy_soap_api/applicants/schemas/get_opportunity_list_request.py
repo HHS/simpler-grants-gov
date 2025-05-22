@@ -7,6 +7,8 @@ from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 from .opportunity_filter import OpportunityFilter
 
+GET_OPPORTUNITY_LIST_REQUEST_ERR = "No package_id or opportunity_filter provided."
+
 
 class GetOpportunityListRequest(BaseSOAPSchema):
     package_id: str | None = Field(default=None, alias="PackageID")
@@ -16,7 +18,7 @@ class GetOpportunityListRequest(BaseSOAPSchema):
     def validate_required_properties(self) -> Self:
         if not any([self.package_id, self.opportunity_filter]):
             raise SOAPFaultException(
-                "No package_id or opportunity_filter provided.",
+                GET_OPPORTUNITY_LIST_REQUEST_ERR,
                 fault=OpportunityListRequestInvalidParams,
             )
         return self
