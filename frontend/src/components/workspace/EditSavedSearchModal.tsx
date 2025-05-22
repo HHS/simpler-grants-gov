@@ -221,40 +221,34 @@ export function EditSavedSearchModal({
                 id={savedSearchId}
                 defaultValue={queryName}
               />
-            )}
-            <SaveSearchInput
-              validationError={validationError}
-              updateSavedSearchName={setSavedSearchName}
-              id={savedSearchId}
-              defaultValue={queryName}
-            />
-            <ModalFooter>
-              {loading ? (
-                <LoadingButton
-                  id={`edit-saved-search-button-${savedSearchId}`}
-                  message={t("loading")}
-                />
-              ) : (
-                <>
-                  <Button
-                    type={"button"}
-                    onClick={handleSubmit}
-                    data-testid={`edit-saved-search-button-${savedSearchId}`}
-                  >
-                    {t("saveText")}
-                  </Button>
-                  <ModalToggleButton
-                    modalRef={modalRef}
-                    closer
-                    unstyled
-                    className="padding-105 text-center"
-                    onClick={onClose}
-                  >
-                    {t("cancelText")}
-                  </ModalToggleButton>
-                </>
-              )}
-            </ModalFooter>
+              <ModalFooter>
+                {loading ? (
+                  <LoadingButton
+                    id={`edit-saved-search-button-${savedSearchId}`}
+                    message={t("loading")}
+                  />
+                ) : (
+                  <>
+                    <Button
+                      type={"button"}
+                      onClick={handleSubmit}
+                      data-testid={`edit-saved-search-button-${savedSearchId}`}
+                    >
+                      {t("saveText")}
+                    </Button>
+                    <ModalToggleButton
+                      modalRef={modalRef}
+                      closer
+                      unstyled
+                      className="padding-105 text-center"
+                      onClick={onClose}
+                    >
+                      {t("cancelText")}
+                    </ModalToggleButton>
+                  </>
+                )}
+              </ModalFooter>
+            </>
           </>
         )}
       </Modal>
