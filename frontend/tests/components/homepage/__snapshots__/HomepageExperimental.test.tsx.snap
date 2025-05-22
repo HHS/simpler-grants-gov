@@ -10,16 +10,14 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
       data-testid="gridContainer"
     >
       <div
-        class="grid-row"
+        class="grid-row grid-gap"
         data-testid="grid"
       >
         <div
           class="tablet-lg:grid-col-4"
           data-testid="grid"
         >
-          <h2
-            class="tablet-lg:maxw-card-lg"
-          >
+          <h2>
             Test out our experimental features
           </h2>
         </div>

@@ -14,11 +14,9 @@ exports[`Homepage Hero Content matches snapshot 1`] = `
         class="hero--text position-relative z-100"
       >
         <h1
-          class="text-balance text-ls-neg-2 line-height-sans-2 font-sans-xl margin-top-3 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 desktop-lg:margin-bottom-5"
+          class="text-ls-neg-2 line-height-sans-2 font-sans-xl margin-top-3 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 desktop-lg:margin-bottom-5"
         >
-          <span>
-            Let's build a simpler Grants.gov together
-          </span>
+          Let's build a simpler Grants.gov together
         </h1>
         <p
           class="text-balance font-sans-md margin-y-2 tablet:font-sans-lg tablet:margin-y-3"
