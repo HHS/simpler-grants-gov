@@ -23,7 +23,7 @@ const SearchFilterSection = ({
   referenceOption,
 }: SearchFilterSectionProps) => {
   return (
-    <div>
+    <>
       <div className="text-bold margin-top-1">{option.label}</div>
       <div className="padding-y-1">
         <AllOptionCheckbox
@@ -48,7 +48,7 @@ const SearchFilterSection = ({
           ))}
         </ul>
       </div>
-    </div>
+    </>
   );
 };
 
