@@ -2131,6 +2131,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunitySearchFilterV1'
+        top_level_agency:
+          type: string
+          minLength: 2
+          description: Top level agency for querying against database for it's sub_agencies
         experimental:
           type:
           - object
