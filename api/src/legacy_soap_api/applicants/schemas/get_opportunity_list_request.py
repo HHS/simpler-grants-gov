@@ -1,7 +1,9 @@
 from pydantic import Field, model_validator
 from typing_extensions import Self
 
+from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 from .opportunity_filter import OpportunityFilter
 
@@ -13,5 +15,8 @@ class GetOpportunityListRequest(BaseSOAPSchema):
     @model_validator(mode="after")
     def validate_required_properties(self) -> Self:
         if not any([self.package_id, self.opportunity_filter]):
-            raise ValueError("Error")
+            raise SOAPFaultException(
+                "No package_id or opportunity_filter provided.",
+                fault=OpportunityListRequestInvalidParams,
+            )
         return self

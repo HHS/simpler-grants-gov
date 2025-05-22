@@ -7,7 +7,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPProxyResponse, SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 
 
 class TestSOAPClientSmokeTest:
@@ -30,7 +30,7 @@ class TestSimplerApplicantsClient:
     @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
     def test_get_opportunity_list(self, mock_proxy_request, mock_logger):
-        mock_proxy_response = SOAPProxyResponse(
+        mock_proxy_response = SOAPResponse(
             data=b"""
 --uuid:1558f8c1-296f-48fb-8993-ecb44df382a5
 Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"

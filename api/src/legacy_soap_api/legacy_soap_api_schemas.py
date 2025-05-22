@@ -8,7 +8,7 @@ class SOAPRequest(BaseModel):
     method: str
 
 
-class SOAPProxyResponse(BaseModel):
+class SOAPResponse(BaseModel):
     data: bytes
     status_code: int
     headers: dict
@@ -34,7 +34,7 @@ class FaultMessage(BaseModel):
     faultcode: str
     faultstring: str
 
-    def to_xml(self) -> str:
+    def to_xml(self) -> bytes:
         return f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
@@ -44,4 +44,4 @@ class FaultMessage(BaseModel):
         </soap:Fault>
     </soap:Body>
 </soap:Envelope>
-    """.strip()
+    """.strip().encode()
