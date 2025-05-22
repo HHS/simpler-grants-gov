@@ -27,6 +27,7 @@ i.e.
 .pdf-card {
   transition: transform 0.2s;
   @include u-shadow(2);
+
   &:hover {
     transform: scale(1.1) rotate(1deg);
     @include u-shadow(4);
@@ -65,6 +66,19 @@ i.e.
     color: color("gray-60");
     background-color: color("gray-20");
     border-bottom: 5px solid color("gray-10");
+  }
+}
+
+// Override modal close button styles
+.usa-modal__close {
+  background-color: transparent;
+  border-bottom: none;
+  color: color("base");
+
+  &:hover {
+    background-color: transparent;
+    border-bottom: none;
+    color: color("base-dark");
   }
 }
 
@@ -298,6 +312,7 @@ i.e.
     @include at-media("tablet-lg") {
       max-width: 34rem;
     }
+
     @include at-media("desktop") {
       max-width: 42rem;
     }
@@ -411,44 +426,55 @@ button.usa-pagination__button.usa-button {
       button:hover {
         background-color: white;
       }
+
       .usa-nav__submenu {
         right: 0;
       }
     }
+
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
     }
+
     button[aria-expanded="true"] {
       background-color: color("mint-60");
+
       a {
         color: white;
       }
+
       a:hover {
         background-color: color("mint-40");
         color: white;
       }
+
       span:after {
         mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
           linear-gradient(transparent, transparent);
         background-color: white;
       }
     }
+
     button[aria-expanded="false"] {
       span:after {
         mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
           linear-gradient(transparent, transparent);
       }
     }
+
     button[aria-expanded] {
       span:after {
         right: 0.75rem;
       }
     }
+
     .usa-nav__submenu-item {
       background-color: color("mint-60");
+
       &:hover {
         background-color: color("mint-40");
       }
+
       a {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -458,6 +484,7 @@ button.usa-pagination__button.usa-button {
       }
     }
   }
+
   .usa-accordion__button[aria-expanded="true"]::after {
     background-color: color("mint-60");
     border-radius: 0;
