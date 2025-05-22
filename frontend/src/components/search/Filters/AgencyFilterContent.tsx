@@ -47,16 +47,19 @@ export function AgencyFilterContent({
 
   return (
     <>
-      <TextInput
-        type="text"
-        name="AgencySearch"
-        id="AgencySearch"
-        title="Agency Search"
-        aria-label="Agency Search"
-        onChange={(e) => searchForAgencies(e.target.value)}
-      />
-      <div className="usa-input position-absolute top-0 border-0">
-        <USWDSIcon name="search" className="usa-icon--size-3" />
+      <div className="position-relative">
+        <TextInput
+          type="text"
+          name="AgencySearch"
+          id="AgencySearch"
+          title="Agency Search"
+          aria-label="Agency Search"
+          onChange={(e) => searchForAgencies(e.target.value)}
+        />
+        <USWDSIcon
+          name="search"
+          className="usa-icon--size-3 position-absolute top-05 right-05"
+        />
       </div>
       {agencySearchResults && !agencySearchResults.length ? (
         <FilterSearchNoResults />

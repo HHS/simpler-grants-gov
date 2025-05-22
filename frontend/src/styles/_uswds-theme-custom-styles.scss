@@ -533,11 +533,3 @@ button.usa-pagination__button.usa-button {
     color: color("gray-60");
   }
 }
-
-#opportunity-filter-agency {
-  // this is acting as a container to position the search icon within the input
-  div.usa-input {
-    width: calc(100% - 2.5rem);
-    text-align: right;
-  }
-}
