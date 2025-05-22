@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/opportunities/[opportunityId]/attachments-download/route";
+import { getAttachmentsDownload } from "src/app/api/opportunities/[opportunityId]/attachments-download/handler";
 import { fakeAttachments } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
@@ -56,7 +56,7 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 describe("attachments-download export GET requests", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls opportunityDetails with expected arguments", async () => {
-    await GET(fakeRequestForOpportunity(), {
+    await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",
       }),
@@ -65,12 +65,13 @@ describe("attachments-download export GET requests", () => {
   });
 
   it("returns a new response with zip data", async () => {
-    const response = await GET(fakeRequestForOpportunity(), {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",
       }),
     });
     expect(response.status).toEqual(200);
+
     expect(response.headers.get("Content-Disposition")).toEqual(
       `attachment; filename="opportunity-${paramForAttachment}-attachments.zip"`,
     );
@@ -78,7 +79,7 @@ describe("attachments-download export GET requests", () => {
   });
 
   it("returns a new response when no attachments", async () => {
-    const response = await GET(fakeRequestForOpportunity(), {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: paramForNoAttachments,
       }),
@@ -90,7 +91,7 @@ describe("attachments-download export GET requests", () => {
   });
 
   it("returns a new response with with error if error on data fetch", async () => {
-    const response = await GET(fakeRequestForOpportunity(), {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "-500",
       }),
@@ -99,7 +100,7 @@ describe("attachments-download export GET requests", () => {
   });
 
   it("returns a new response with with error if data is missing", async () => {
-    const response = await GET(fakeRequestForOpportunity(), {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "-404",
       }),
