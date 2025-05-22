@@ -3,6 +3,7 @@
  */
 
 import { getAttachmentsDownload } from "src/app/api/opportunities/[opportunityId]/attachments-download/handler";
+import { fakeAttachments } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
 
@@ -10,43 +11,49 @@ const fakeRequestForOpportunity = () => {
   return {} as NextRequest;
 };
 
-const fakeConvertedParams = "43";
+const paramForAttachment = "43";
+const paramForNoAttachments = "87";
 
-const mockGetOpportunityDetails = jest.fn((params: unknown): unknown => ({
-  data: {
-    attachments: [
-      {
-        created_at: "2007-11-02T15:23:09+00:00",
-        download_path:
-          "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25293/YLP_Algeria_RFGP_09-28-07_EDITED.doc",
-        file_description: "Announcement",
-        file_name: "YLP_Algeria_RFGP_09-28-07_EDITED.doc",
-        file_size_bytes: 111616,
-        mime_type: "application/msword",
-        updated_at: "2007-11-02T15:23:09+00:00",
+const mockGetOpportunityDetails = jest.fn((params: string): unknown => {
+  let returnVal;
+  if (params === paramForAttachment) {
+    returnVal = {
+      data: {
+        attachments: fakeAttachments,
       },
-      {
-        created_at: "2007-11-02T15:23:10+00:00",
-        download_path:
-          "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25294/YLP_Algeria_POGI_09-26-07_EDITED.doc",
-        file_description: "Mandatory POGI",
-        file_name: "YLP_Algeria_POGI_09-26-07_EDITED.doc",
-        file_size_bytes: 122880,
-        mime_type: "application/msword",
-        updated_at: "2007-11-02T15:23:10+00:00",
+      status_code: 200,
+      message: "Success",
+      params,
+    };
+  }
+  if (params === paramForNoAttachments) {
+    returnVal = {
+      data: {
+        attachments: [],
       },
-    ],
-  },
-  status_code: 200,
-  message: "Success",
-  params,
-}));
+      status_code: 200,
+      message: "Success",
+      params,
+    };
+  }
+
+  const intParam = parseInt(params);
+  if (intParam < 0) {
+    returnVal = {
+      data: null,
+      status_code: -intParam,
+      message: "Failure",
+      params,
+    };
+  }
+  return returnVal;
+});
 
 jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
-  getOpportunityDetails: (params: unknown) => mockGetOpportunityDetails(params),
+  getOpportunityDetails: (params: string) => mockGetOpportunityDetails(params),
 }));
 
-describe("attachments-download export GET request", () => {
+describe("attachments-download export GET requests", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls opportunityDetails with expected arguments", async () => {
     await getAttachmentsDownload(fakeRequestForOpportunity(), {
@@ -54,19 +61,50 @@ describe("attachments-download export GET request", () => {
         opportunityId: "43",
       }),
     });
-    expect(mockGetOpportunityDetails).toHaveBeenCalledWith(fakeConvertedParams);
+    expect(mockGetOpportunityDetails).toHaveBeenCalledWith(paramForAttachment);
   });
 
-  it("returns a new response created from the returned value of downloadOpportunties", async () => {
+  it("returns a new response with zip data", async () => {
     const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",
       }),
     });
     expect(response.status).toEqual(200);
+
     expect(response.headers.get("Content-Disposition")).toEqual(
-      `attachment; filename="opportunity-43-attachments.zip"`,
+      `attachment; filename="opportunity-${paramForAttachment}-attachments.zip"`,
     );
     expect(response.body?.locked).toEqual(false);
+  });
+
+  it("returns a new response when no attachments", async () => {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+      params: Promise.resolve({
+        opportunityId: paramForNoAttachments,
+      }),
+    });
+    expect(response.status).toEqual(404);
+    expect(response.headers.get("Content-Disposition")).toBeNull();
+
+    expect(response.body?.locked).toEqual(false);
+  });
+
+  it("returns a new response with with error if error on data fetch", async () => {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+      params: Promise.resolve({
+        opportunityId: "-500",
+      }),
+    });
+    expect(response.status).toEqual(500);
+  });
+
+  it("returns a new response with with error if data is missing", async () => {
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+      params: Promise.resolve({
+        opportunityId: "-404",
+      }),
+    });
+    expect(response.status).toEqual(404);
   });
 });
