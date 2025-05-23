@@ -301,7 +301,7 @@ export const messages = {
   },
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
-    title: "You’re subscribed",
+    title: "You're subscribed",
     intro:
       "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:

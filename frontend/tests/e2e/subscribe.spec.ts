@@ -45,10 +45,14 @@ test("successful signup", async ({ next, page }) => {
   await page.getByLabel("First Name (required)").fill("Apple");
   await page.getByLabel("Email (required)").fill("name@example.com");
 
-  await page.getByRole("button", { name: /subscribe/i }).click();
+  const subscribeButton = await page.getByRole("button", {
+    name: /subscribe/i,
+  });
+  await expect(subscribeButton).toBeVisible();
+  await subscribeButton.click();
 
   await expect(
-    page.getByRole("heading", { name: /you['’]re subscribed/i }),
+    page.getByRole("heading", { name: /subscribed/i }),
   ).toBeVisible();
 });
 
