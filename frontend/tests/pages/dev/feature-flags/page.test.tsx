@@ -32,6 +32,14 @@ jest.mock("react", () => ({
   })),
 }));
 
+const mockSetQueryParam = jest.fn();
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    setQueryParam: mockSetQueryParam,
+  }),
+}));
+
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => mockUseFeatureFlags(),
 }));
@@ -58,6 +66,7 @@ describe("Feature flags page", () => {
       rerender(<FeatureFlags />);
       expect(statusElement).toHaveTextContent("Enabled");
 
+      rerender(<FeatureFlags />);
       fireEvent.click(disableButton);
       rerender(<FeatureFlags />);
       expect(statusElement).toHaveTextContent("Disabled");
@@ -70,5 +79,33 @@ describe("Feature flags page", () => {
       rerender(<FeatureFlags />);
       expect(statusElement).toHaveTextContent("Enabled");
     });
+  });
+
+  it("should set feature flags to their default state when clicking reset to default button", () => {
+    const { rerender } = render(<FeatureFlags />);
+    Object.keys(MOCK_DEFAULT_FEATURE_FLAGS).forEach((name) => {
+      const enableButton = screen.getByTestId(`enable-${name}`);
+      const disableButton = screen.getByTestId(`disable-${name}`);
+
+      if (!MOCK_DEFAULT_FEATURE_FLAGS[name as MockFeatureFlagKeys]) {
+        fireEvent.click(enableButton);
+      } else {
+        fireEvent.click(disableButton);
+      }
+      rerender(<FeatureFlags />);
+    });
+
+    const defaultButton = screen.getByTestId(`reset-defaults`);
+    fireEvent.click(defaultButton);
+
+    rerender(<FeatureFlags />);
+    for (const [name, defaultValue] of Object.entries(
+      MOCK_DEFAULT_FEATURE_FLAGS,
+    ) as [MockFeatureFlagKeys, boolean][]) {
+      const statusEl = screen.getByTestId(`${name}-status`);
+
+      const expectedText = defaultValue ? "Enabled" : "Disabled";
+      expect(statusEl).toHaveTextContent(expectedText);
+    }
   });
 });
