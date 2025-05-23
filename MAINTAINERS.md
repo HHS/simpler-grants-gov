@@ -40,5 +40,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 
 * Margaret Spring
 * Max Kramer
+* Chris Weekley
+* Chris Kuryak
+* Eric Serrato
 
 
