@@ -2,7 +2,17 @@
 # SQLAlchemy models for foreign tables.
 #
 
-from . import attachment, competition, forecast, foreignbase, opportunity, synopsis, tgroups, user
+from . import (
+    attachment,
+    competition,
+    forecast,
+    foreignbase,
+    instructions,
+    opportunity,
+    synopsis,
+    tgroups,
+    user,
+)
 
 metadata = foreignbase.metadata
 
@@ -15,4 +25,5 @@ __all__ = [
     "attachment",
     "user",
     "competition",
+    "instructions",
 ]
