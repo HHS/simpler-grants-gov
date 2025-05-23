@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Subscribe.page_title"),
-    description: t("Index.meta_description"),
+    title: t("Subscribe.pageTitle"),
+    description: t("Index.metaDescription"),
   };
 
   return meta;
@@ -26,7 +26,7 @@ export default function SubscriptionConfirmation({
 }: LocalizedPageProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
-  const t = useTranslations("Subscription_confirmation");
+  const t = useTranslations("SubscriptionConfirmation");
 
   return (
     <>
@@ -38,7 +38,7 @@ export default function SubscriptionConfirmation({
         <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid>
-            <p>{t("paragraph_1")}</p>
+            <p>{t("paragraph1")}</p>
           </Grid>
         </Grid>
       </GridContainer>
