@@ -9,10 +9,11 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { NextRequest, NextResponse } from "next/server";
 
 export const FEATURE_FLAGS_KEY = "_ff";
+export const FEATURE_FLAGS_DEFAULTS_KEY = `${FEATURE_FLAGS_KEY}-defaults`;
 
-// 3 months
+// 7 days
 export const getCookieExpiration = () =>
-  new Date(Date.now() + 1000 * 60 * 60 * 24 * 90);
+  new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 
 /**
  * Check whether it is a valid feature flag.
@@ -64,13 +65,41 @@ export function parseFeatureFlagsFromString(
 /**
  * Set a cookie using the NextResponse['cookies'] interface
  */
-export function setCookie(value: string, cookies: NextResponse["cookies"]) {
+export function setCookie(
+  value: string,
+  cookies: NextResponse["cookies"],
+  name: string = FEATURE_FLAGS_KEY,
+) {
   const expires = getCookieExpiration();
   cookies?.set({
-    name: FEATURE_FLAGS_KEY,
+    name,
     value,
     expires,
   });
+}
+
+/**
+ * Deletes a cookie using the NextResponse['cookies'] interface, such as when resetting User Flags
+ */
+export function deleteCookie(
+  cookies: NextResponse["cookies"],
+  name: string = FEATURE_FLAGS_KEY,
+) {
+  cookies?.delete({
+    name,
+  });
+}
+
+/**
+ * Return the value of the parsed default feature flag cookie.
+ *
+ * This returns {} if the cookie value is not parsable.
+ * Invalid flag names and flag values are removed.
+ */
+export function getDefaultFlagsFromCookie(
+  cookies: NextRequest["cookies"] | ReadonlyRequestCookies,
+): FeatureFlags {
+  return getFeatureFlagsFromCookie(cookies, FEATURE_FLAGS_DEFAULTS_KEY);
 }
 
 /**
@@ -81,6 +110,7 @@ export function setCookie(value: string, cookies: NextResponse["cookies"]) {
  */
 export function getFeatureFlagsFromCookie(
   cookies: NextRequest["cookies"] | ReadonlyRequestCookies,
+  cookieName: string = FEATURE_FLAGS_KEY,
 ): FeatureFlags {
   if (!cookies) {
     return {};
@@ -88,7 +118,7 @@ export function getFeatureFlagsFromCookie(
   let cookieValue;
   let parsedCookie: FeatureFlags;
 
-  cookieValue = cookies.get(FEATURE_FLAGS_KEY);
+  cookieValue = cookies.get(cookieName);
 
   if (typeof cookieValue === "object") {
     cookieValue = cookieValue.value;
@@ -109,11 +139,13 @@ export function getFeatureFlagsFromCookie(
     parsedCookie = {};
   }
 
-  return Object.fromEntries(
+  const setKeys = Object.fromEntries(
     Object.entries(parsedCookie).filter(([name, enabled]) => {
       return isValidFeatureFlag(name) && typeof enabled === "boolean";
     }),
   );
+
+  return setKeys;
 }
 
 // this in part a re-implementation of `lodash/assignWith` since lodash is not allowed to be used in next middleware.
