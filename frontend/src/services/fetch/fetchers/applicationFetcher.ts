@@ -53,10 +53,15 @@ export const handleUpdateApplicationForm = async (
   values: ApplicationResponseDetail,
   applicationId: string,
   applicationFormId: string,
+  token: string,
 ): Promise<ApplicationStartApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${applicationFormId}`,
     body: { application_response: values },
+    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationStartApiResponse;
