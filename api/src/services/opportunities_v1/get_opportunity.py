@@ -21,7 +21,7 @@ def _fetch_opportunity(
     db_session: db.Session,
     where_clause: ColumnExpressionArgument[bool],
     load_all_opportunity_summaries: bool,
-) -> Opportunity:
+) -> Opportunity | None:
     stmt = (
         select(Opportunity)
         .where(where_clause)
