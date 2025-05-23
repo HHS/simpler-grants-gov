@@ -1,4 +1,14 @@
-from . import attachment, competition, forecast, instructions, opportunity, staging_base, synopsis, tgroups, user
+from . import (
+    attachment,
+    competition,
+    forecast,
+    instructions,
+    opportunity,
+    staging_base,
+    synopsis,
+    tgroups,
+    user,
+)
 
 metadata = staging_base.metadata
 

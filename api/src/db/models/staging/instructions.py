@@ -12,4 +12,4 @@ class Tinstructions(StagingBase, instructions_mixin.TinstructionsMixin, StagingP
         Tcompetition,
         primaryjoin=lambda: Tinstructions.comp_id == foreign(Tcompetition.comp_id),
         uselist=False,
-    ) 
+    )

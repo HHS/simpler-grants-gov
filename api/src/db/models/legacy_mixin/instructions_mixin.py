@@ -20,4 +20,4 @@ class TinstructionsMixin:
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
-    last_upd_id: Mapped[str | None] 
+    last_upd_id: Mapped[str | None]

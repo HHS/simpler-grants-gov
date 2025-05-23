@@ -11,4 +11,4 @@ from . import foreignbase
 
 
 class Tinstructions(foreignbase.ForeignBase, instructions_mixin.TinstructionsMixin):
-    __tablename__ = "tinstructions" 
+    __tablename__ = "tinstructions"
