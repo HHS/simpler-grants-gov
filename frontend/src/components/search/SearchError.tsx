@@ -32,7 +32,7 @@ export function SearchError({ error }: ErrorProps) {
         {`Error in ${parsedErrorData.details.field || "a search field"}: ${parsedErrorData.details.message || "adjust your search and try again"}`}
       </Alert>
     ) : (
-      <ServerErrorAlert callToAction={t("generic_error_cta")} />
+      <ServerErrorAlert callToAction={t("genericErrorCta")} />
     );
 
   return <div className="tablet:grid-col-8">{ErrorAlert}</div>;

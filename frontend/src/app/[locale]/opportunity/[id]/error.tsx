@@ -18,7 +18,7 @@ export default function OpportunityError({
   return (
     <>
       <BetaAlert />
-      <ServerErrorAlert callToAction={t("generic_error_cta")} />
+      <ServerErrorAlert callToAction={t("genericErrorCta")} />
     </>
   );
 }

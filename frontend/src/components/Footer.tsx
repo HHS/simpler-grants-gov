@@ -39,32 +39,32 @@ const Footer = () => {
   const links = [
     {
       href: ExternalRoutes.GRANTS_X_TWITTER,
-      name: t("link_x_twitter"),
+      name: t("linkXTwitter"),
       icon: "x",
     },
     {
       href: ExternalRoutes.GRANTS_YOUTUBE,
-      name: t("link_youtube"),
+      name: t("linkYoutube"),
       icon: "youtube",
     },
     {
       href: ExternalRoutes.GRANTS_BLOG,
-      name: t("link_blog"),
+      name: t("linkBlog"),
       icon: "local_library",
     },
     {
       href: ExternalRoutes.GRANTS_NEWSLETTER,
-      name: t("link_newsletter"),
+      name: t("linkNewsletter"),
       icon: "mail",
     },
     {
       href: ExternalRoutes.GRANTS_RSS,
-      name: t("link_rss"),
+      name: t("linkRss"),
       icon: "rss_feed",
     },
     {
       href: ExternalRoutes.GITHUB_REPO,
-      name: t("link_github"),
+      name: t("linkGithub"),
       icon: "github",
     },
   ].map(({ href, name, icon }) => (
@@ -77,7 +77,7 @@ const Footer = () => {
       size="medium"
       returnToTop={
         <GridContainer className="usa-footer__return-to-top margin-top-5">
-          <a href="#">{t("return_to_top")}</a>
+          <a href="#">{t("returnToTop")}</a>
         </GridContainer>
       }
       primary={
@@ -87,7 +87,7 @@ const Footer = () => {
               <div className="footer-logo-container position-relative dekstop:height-5">
                 <Image
                   className="height-auto position-relative"
-                  alt={t("logo_alt")}
+                  alt={t("logoAlt")}
                   src={GrantsLogo as string}
                   unoptimized
                   fill
@@ -97,7 +97,7 @@ const Footer = () => {
             <Grid className="usa-footer__contact-links" tablet={{ col: 8 }}>
               <SocialLinks links={links} />
               <h2 className="usa-footer__contact-heading text-balance">
-                {t("agency_contact_center")}
+                {t("agencyContactCenter")}
               </h2>
               <Address
                 size="medium"

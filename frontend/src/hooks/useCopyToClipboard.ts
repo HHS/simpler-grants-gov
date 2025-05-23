@@ -26,8 +26,8 @@ export const useCopyToClipboard = () => {
         // though no standard has replaced it and the "copy" command is supported
         // in all browsers.
         document.execCommand("copy");
-      } catch (error) {
-        console.error(error);
+      } catch (e) {
+        console.error(e);
       } finally {
         textArea.remove();
       }
@@ -43,10 +43,10 @@ export const useCopyToClipboard = () => {
       await copyWithFallback(content);
       setCopied(true);
       setCopying(false);
-    } catch (error) {
+    } catch (e) {
       setCopied(false);
       setCopying(false);
-      throw new Error(`Error copying to clipboard: ${error as string}`);
+      throw new Error(`Error copying to clipboard: ${e as string}`);
     } finally {
       setTimeout(() => {
         setCopied(false);
