@@ -4,7 +4,7 @@ from enum import StrEnum
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Competition, Form, CompetitionForm
+from src.db.models.competition_models import Application, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -20,12 +20,17 @@ class ApplicationAction(StrEnum):
 def get_required_form_errors(application: Application) -> list[ValidationErrorDetail]:
     """Get validation errors for an application missing required forms"""
 
-    existing_competition_form_ids = [app_form.competition_form_id for app_form in application.application_forms]
+    existing_competition_form_ids = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
 
     required_form_errors: list[ValidationErrorDetail] = []
 
     for competition_form in application.competition.competition_forms:
-        if competition_form.is_required and competition_form.competition_form_id not in existing_competition_form_ids:
+        if (
+            competition_form.is_required
+            and competition_form.competition_form_id not in existing_competition_form_ids
+        ):
             required_form_errors.append(
                 ValidationErrorDetail(
                     message=f"Form {competition_form.form.form_name} is required",
