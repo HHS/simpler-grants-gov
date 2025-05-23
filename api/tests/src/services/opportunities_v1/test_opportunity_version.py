@@ -25,7 +25,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
     expected = {
         "agency": agency.agency_code,
         "summary": None,
-        "category": str(OpportunityCategory.MANDATORY),
+        "category": OpportunityCategory.MANDATORY,
         "created_at": opp.created_at.isoformat(),
         "updated_at": opp.updated_at.isoformat(),
         "agency_code": opp.agency_code,
