@@ -580,6 +580,7 @@ export const messages = {
       closeText: "Close",
       emptyNameError: "Please name this query.",
       successTitle: "Query successfully updated",
+      updatedNotification: "has been successfully updated to",
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
