@@ -3011,6 +3011,41 @@ components:
             type:
             - object
             $ref: '#/components/schemas/CompetitionFormAlpha'
+        competition_title:
+          type: string
+          description: The title of the competition
+          example: Proposal for Advanced Research
+        opening_date:
+          type: string
+          format: date
+          description: The opening date of the competition, the first day applications
+            are accepted
+        closing_date:
+          type: string
+          format: date
+          description: The closing date of the competition, the last day applications
+            are accepted
+        contact_info:
+          type: string
+          description: Contact info getting assistance with the competition
+          example: 'Bob Smith
+
+            FakeMail@fake.com'
+        opportunity_assistance_listing:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        open_to_applicants:
+          type: array
+          items:
+            enum:
+            - individual
+            - organization
+            type:
+            - string
+        is_open:
+          type: boolean
+          description: Whether the competition is open and accepting applications
     CompetitionResponseAlpha:
       type: object
       properties:
