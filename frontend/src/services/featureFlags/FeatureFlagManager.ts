@@ -6,10 +6,13 @@ import {
   defaultFeatureFlags,
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
-import { environment, featureFlags } from "src/constants/environments";
+import { featureFlags } from "src/constants/environments";
 import {
   assignBaseFlags,
+  deleteCookie,
+  FEATURE_FLAGS_DEFAULTS_KEY,
   FEATURE_FLAGS_KEY,
+  getDefaultFlagsFromCookie,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
   parseFeatureFlagsFromString,
@@ -93,6 +96,7 @@ export class FeatureFlagsManager {
 
     // Start with the default feature flag setting
     const currentFeatureFlags = {
+      ...getDefaultFlagsFromCookie(cookies),
       ...this.featureFlags,
       ...getFeatureFlagsFromCookie(cookies),
     };
@@ -125,26 +129,32 @@ export class FeatureFlagsManager {
   middleware(request: NextRequest, response: NextResponse): NextResponse {
     const paramValue = request.nextUrl.searchParams.get(FEATURE_FLAGS_KEY);
 
-    const featureFlagsFromQuery =
-      paramValue === "reset"
-        ? this.featureFlags
-        : parseFeatureFlagsFromString(paramValue);
+    // this needs to set early, before the return if we're resetting
+    setCookie(
+      JSON.stringify(this.featureFlags),
+      response.cookies,
+      FEATURE_FLAGS_DEFAULTS_KEY,
+    );
+
+    if (paramValue === "reset") {
+      deleteCookie(response.cookies);
+      return response;
+    }
+
+    const featureFlagsFromQuery = parseFeatureFlagsFromString(paramValue);
 
     // previously there was logic here to return early if there were no feature flags active
     // beyond default values. Unfortunately, this breaks the implementation of the feature
-    // flag admin view, which depends on reading all flags from cookies, so the logic has beeen removed
+    // flag admin view, which depends on reading all flags from cookies, so the logic has been removed
 
-    const featureFlags =
-      environment.ENVIRONMENT === "prod"
-        ? { ...this.featureFlags }
-        : {
-            ...this.featureFlags,
-            ...getFeatureFlagsFromCookie(request.cookies),
-            ...featureFlagsFromQuery,
-          };
+    const featureFlags = {
+      ...getFeatureFlagsFromCookie(request.cookies),
+      ...featureFlagsFromQuery,
+    };
 
-    setCookie(JSON.stringify(featureFlags), response.cookies);
-
+    if (Object.keys(featureFlags).length > 0) {
+      setCookie(JSON.stringify(featureFlags), response.cookies);
+    }
     return response;
   }
 }
