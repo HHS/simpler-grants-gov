@@ -4,7 +4,7 @@ from enum import StrEnum
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Competition, Form
+from src.db.models.competition_models import Application, Competition, Form, CompetitionForm
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -17,38 +17,21 @@ class ApplicationAction(StrEnum):
     MODIFY = "modify"
 
 
-def get_required_forms_for_application(application: Application) -> list[Form]:
-    competition_forms = application.competition.competition_forms
-    required_competition_forms: list[Form] = []
-
-    for competition_form in competition_forms:
-        if competition_form.is_required:
-            required_competition_forms.append(competition_form.form)
-
-        # In the future some forms may be considered required based
-        # on a users answers (you said yes to X, form ABC is now required)
-        # but for now we'll only consider the always-required forms.
-
-    return required_competition_forms
-
-
 def get_required_form_errors(application: Application) -> list[ValidationErrorDetail]:
     """Get validation errors for an application missing required forms"""
 
-    required_forms: list[Form] = get_required_forms_for_application(application)
-
-    existing_application_form_ids = [app_form.form_id for app_form in application.application_forms]
+    existing_competition_form_ids = [app_form.competition_form_id for app_form in application.application_forms]
 
     required_form_errors: list[ValidationErrorDetail] = []
 
-    for required_form in required_forms:
-        if required_form.form_id not in existing_application_form_ids:
+    for competition_form in application.competition.competition_forms:
+        if competition_form.is_required and competition_form.competition_form_id not in existing_competition_form_ids:
             required_form_errors.append(
                 ValidationErrorDetail(
-                    message=f"Form {required_form.form_name} is required",
+                    message=f"Form {competition_form.form.form_name} is required",
                     type=ValidationErrorType.MISSING_REQUIRED_FORM,
                     field="form_id",
-                    value=required_form.form_id,
+                    value=competition_form.form_id,
                 )
             )
 
