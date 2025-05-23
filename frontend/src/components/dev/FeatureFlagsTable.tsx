@@ -9,14 +9,14 @@ import { Button, Table } from "@trussworks/react-uswds";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { setFeatureFlag, featureFlags } = useFeatureFlags();
-
+  const { setFeatureFlag, featureFlags, defaultFlags } = useFeatureFlags();
   return (
     <>
       <Table>
         <thead>
           <tr>
-            <th scope="col">Status</th>
+            <th scope="col">Current </th>
+            <th scope="col">Default</th>
             <th scope="col">Feature Flag</th>
             <th scope="col">Actions</th>
           </tr>
@@ -29,6 +29,14 @@ export default function FeatureFlagsTable() {
                 style={{ background: enabled ? "#81cc81" : "#fc6a6a" }}
               >
                 {enabled ? "Enabled" : "Disabled"}
+              </td>
+              <td
+                data-testid={`${featureName}-default`}
+                style={{
+                  background: defaultFlags[featureName] ? "#81cc81" : "#fc6a6a",
+                }}
+              >
+                {defaultFlags[featureName] ? "Enable" : "Disable"}
               </td>
               <th scope="row">{featureName}</th>
               <td>
