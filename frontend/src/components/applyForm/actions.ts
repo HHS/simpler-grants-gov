@@ -2,6 +2,7 @@
 
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
+import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
@@ -29,6 +30,17 @@ export async function handleFormAction(
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
+  const session = await getSession();
+  if (!session || !session.token) {
+    return {
+      applicationId,
+      errorMessage: "Error submitting form. User not authenticated.",
+      formData,
+      formId,
+      successMessage: "",
+      validationErrors: [],
+    };
+  }
   const sumbitType = formData.get("apply-form-button");
 
   const formSchema = await getFormSchema(formId);
@@ -51,7 +63,7 @@ export async function handleFormAction(
     formSchema,
   });
   if (validationErrors.length) {
-    await handleSave(applicationFormData, applicationId, formId);
+    await handleSave(applicationFormData, applicationId, formId, session.token);
     return {
       applicationId,
       errorMessage:
@@ -68,6 +80,7 @@ export async function handleFormAction(
       applicationFormData,
       applicationId,
       formId,
+      session.token,
     );
     if (saveSuccess) {
       if (sumbitType === "submit") {
@@ -98,12 +111,14 @@ const handleSave = async (
   applicationFormData: ApplicationResponseDetail,
   applicationId: string,
   formId: string,
+  sessionToken: string,
 ) => {
   try {
     const resp = await handleUpdateApplicationForm(
       applicationFormData,
       applicationId,
       formId,
+      sessionToken,
     );
     if (resp.status_code === 200) {
       return true;

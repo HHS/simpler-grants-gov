@@ -66,7 +66,7 @@ function SelectWidget<
   const enums = useMemo(() => (opts && opts.length > 0 ? opts : []), [opts]);
   const selectValue = value ? String(value) : "";
   // uswds recommends a combo box for lists larger than 15
-  const useCombo = enums && enums.length > 15;
+  const useCombo = false // nums && enums.length > 15;
   const enumOptions = useMemo(() => {
     if (!enums) return [];
     return !useCombo && optEmptyVal

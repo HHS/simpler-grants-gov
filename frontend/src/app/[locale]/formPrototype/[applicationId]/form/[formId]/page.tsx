@@ -2,7 +2,12 @@ import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
+import {
+  ApiRequestError,
+  parseErrorStatus,
+  UnauthorizedError,
+} from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
@@ -35,6 +40,10 @@ async function FormPage({ params }: formPageProps) {
   const { applicationId, formId } = await params;
   let formData = {} as FormDetail;
   let applicationData = {} as ApplicationDetail;
+  const session = await getSession();
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session to access form");
+  }
 
   try {
     const response = await getFormDetails(formId);
@@ -58,7 +67,7 @@ async function FormPage({ params }: formPageProps) {
   }
 
   try {
-    const response = await getApplicationDetails(applicationId);
+    const response = await getApplicationDetails(applicationId, session.token);
     if (response.status_code !== 200) {
       console.error(
         `Error retrieving form details for applicationID (${applicationId}), formID (${formId})`,
