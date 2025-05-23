@@ -23,6 +23,7 @@ import {
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { usePrevious } from "src/hooks/usePrevious";
 
 function SaveSearchInput({
   validationError,
@@ -129,7 +130,7 @@ export function EditSavedSearchModal({
   const router = useRouter();
 
   const [validationError, setValidationError] = useState<string>();
-  const [originalName] = useState<string>(queryName);
+  const originalName = usePrevious(queryName);
   const [savedSearchName, setSavedSearchName] = useState<string>();
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -207,7 +208,7 @@ export function EditSavedSearchModal({
           <SuccessContent
             modalRef={modalRef}
             modalId={modalId}
-            originalName={originalName}
+            originalName={originalName || ""}
             updatedName={savedSearchName || ""} // setValidationError results in savedSearchName to always be savedSearchName
             onClose={onClose}
           />
