@@ -2,10 +2,8 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from freezegun import freeze_time
 from sqlalchemy import select
 
-from src.auth.api_jwt_auth import create_jwt_for_user, parse_jwt_for_user
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
@@ -18,7 +16,6 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
-    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -31,19 +28,13 @@ SIMPLE_JSON_SCHEMA = {
     "required": ["name"],
 }
 
-TEST_DATE = "2023-06-15 12:00:00"  # June 15, 2023 at noon UTC
 
-
-@freeze_time(TEST_DATE)
-def test_application_start_success(client, enable_factory_create, db_session):
+def test_application_start_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test successful creation of an application"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -69,18 +60,14 @@ def test_application_start_success(client, enable_factory_create, db_session):
     assert application.application_status == ApplicationStatus.IN_PROGRESS
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_null_opening_date(client, enable_factory_create, db_session):
+def test_application_start_null_opening_date(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation succeeds when opening_date is null (matches legacy behavior)"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
     competition = CompetitionFactory.create(opening_date=None, closing_date=future_date)
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
@@ -104,17 +91,13 @@ def test_application_start_null_opening_date(client, enable_factory_create, db_s
     assert str(application.competition_id) == competition_id
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_before_opening_date(client, enable_factory_create, db_session):
+def test_application_start_before_opening_date(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation fails when current date is before opening_date"""
     today = get_now_us_eastern_date()
     future_opening_date = today + timedelta(days=5)
     future_closing_date = today + timedelta(days=15)
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=future_opening_date, closing_date=future_closing_date
@@ -144,17 +127,13 @@ def test_application_start_before_opening_date(client, enable_factory_create, db
     assert len(applications_count) == 0
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_after_closing_date(client, enable_factory_create, db_session):
+def test_application_start_after_closing_date(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation fails when current date is after closing_date"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=15)
     past_closing_date = today - timedelta(days=5)
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=0
@@ -184,18 +163,14 @@ def test_application_start_after_closing_date(client, enable_factory_create, db_
     assert len(applications_count) == 0
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_with_grace_period(client, enable_factory_create, db_session):
+def test_application_start_with_grace_period(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation succeeds when within grace period"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=15)
     past_closing_date = today - timedelta(days=5)
     grace_period = 7  # 7 days grace period
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
@@ -222,18 +197,14 @@ def test_application_start_with_grace_period(client, enable_factory_create, db_s
     assert str(application.competition_id) == competition_id
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_after_grace_period(client, enable_factory_create, db_session):
+def test_application_start_after_grace_period(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation fails when after grace period"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=20)
     past_closing_date = today - timedelta(days=10)
     grace_period = 5  # 5 days grace period
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(
         opening_date=past_opening_date, closing_date=past_closing_date, grace_period=grace_period
@@ -263,8 +234,9 @@ def test_application_start_after_grace_period(client, enable_factory_create, db_
     assert len(applications_count) == 0
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_null_closing_date(client, enable_factory_create, db_session):
+def test_application_start_null_closing_date(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation succeeds when closing_date is null and opening_date is in the past"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=5)
@@ -273,11 +245,6 @@ def test_application_start_null_closing_date(client, enable_factory_create, db_s
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}
-
-    # Since time is frozen, we need to create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
@@ -366,7 +333,7 @@ def test_application_start_invalid_request(
 
 
 def test_application_form_update_success_create(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test successful creation of an application form response"""
     # Create application
@@ -374,11 +341,8 @@ def test_application_form_update_success_create(
 
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
@@ -407,7 +371,7 @@ def test_application_form_update_success_create(
 
 
 def test_application_form_update_success_update(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test successful update of an existing application form response"""
     # Create application
@@ -426,11 +390,8 @@ def test_application_form_update_success_update(
         application_response={"name": "Original Name"},
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(existing_form.form_id)
@@ -486,6 +447,7 @@ def test_application_form_update_with_validation_warnings(
     client,
     enable_factory_create,
     db_session,
+    user,
     user_auth_token,
     application_response,
     expected_warnings,
@@ -505,11 +467,8 @@ def test_application_form_update_with_validation_warnings(
         application_response={"name": "Original Name"},
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     request_data = {"application_response": application_response}
 
@@ -532,6 +491,7 @@ def test_application_form_update_with_invalid_schema_500(
     client,
     enable_factory_create,
     db_session,
+    user,
     user_auth_token,
 ):
     """In this test we intentionally create a bad JSON schema"""
@@ -550,11 +510,8 @@ def test_application_form_update_with_invalid_schema_500(
         application_response={"name": "Original Name"},
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     request_data = {"application_response": {"name": "Changed Name"}}
 
@@ -604,18 +561,15 @@ def test_application_form_update_application_not_found(
 
 
 def test_application_form_update_form_not_found(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test application form update fails when form doesn't exist"""
 
     # Create application
     application = ApplicationFactory.create()
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     non_existent_form_id = str(uuid.uuid4())
@@ -704,7 +658,7 @@ def test_application_form_update_invalid_request(
 
 
 def test_application_form_update_complex_json(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test application form update with complex JSON data"""
     # Create application
@@ -719,11 +673,8 @@ def test_application_form_update_complex_json(
         form=application_form.form,
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(application_form.form_id)
@@ -767,7 +718,9 @@ def test_application_form_update_complex_json(
     assert application_form.application_response == complex_json
 
 
-def test_application_form_get_success(client, enable_factory_create, db_session, user_auth_token):
+def test_application_form_get_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     application_form = ApplicationFormFactory.create(
         application_response={"name": "John Doe"},
     )
@@ -777,11 +730,8 @@ def test_application_form_get_success(client, enable_factory_create, db_session,
         form=application_form.form,
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application_form.application)
+    ApplicationUserFactory.create(user=user, application=application_form.application)
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -814,15 +764,12 @@ def test_application_form_get_application_not_found(
 
 
 def test_application_form_get_form_not_found(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     application = ApplicationFactory.create()
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     non_existent_app_form_id = str(uuid.uuid4())
 
@@ -854,15 +801,12 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
     assert response.status_code == 401
 
 
-def test_application_get_success(client, enable_factory_create, db_session, user_auth_token):
+def test_application_get_success(client, enable_factory_create, db_session, user, user_auth_token):
     application = ApplicationFactory.create(with_forms=True)
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -950,6 +894,7 @@ def test_application_form_get_with_validation_warnings(
     client,
     enable_factory_create,
     db_session,
+    user,
     user_auth_token,
     application_response,
     expected_warnings,
@@ -973,11 +918,8 @@ def test_application_form_get_with_validation_warnings(
         application_response=application_response,
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     # Make the GET request
     response = client.get(
@@ -997,6 +939,7 @@ def test_application_form_get_with_invalid_schema(
     client,
     enable_factory_create,
     db_session,
+    user,
     user_auth_token,
 ):
     """Test behavior when form has an invalid JSON schema"""
@@ -1018,11 +961,8 @@ def test_application_form_get_with_invalid_schema(
         application_response={"name": "Test Name"},
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     # Make the GET request
     response = client.get(
@@ -1035,7 +975,9 @@ def test_application_form_get_with_invalid_schema(
     assert "message" in response.json
 
 
-def test_application_submit_success(client, enable_factory_create, db_session, user_auth_token):
+def test_application_submit_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test successful submission of an application"""
     # Create a competition with a future closing date
     today = get_now_us_eastern_date()
@@ -1059,11 +1001,8 @@ def test_application_submit_success(client, enable_factory_create, db_session, u
 
     application_id = str(application.application_id)
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
@@ -1080,7 +1019,7 @@ def test_application_submit_success(client, enable_factory_create, db_session, u
 
 
 def test_application_submit_validation_issues(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
@@ -1101,8 +1040,6 @@ def test_application_submit_validation_issues(
         application=application, form=form, application_response={"name": 5}
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session).user
     ApplicationUserFactory.create(application=application, user=user)
 
     response = client.post(
@@ -1138,7 +1075,7 @@ def test_application_submit_validation_issues(
 
 
 def test_application_submit_missing_required_form(
-    client, enable_factory_create, db_session, user_auth_token
+    client, enable_factory_create, db_session, user, user_auth_token
 ):
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
@@ -1153,8 +1090,6 @@ def test_application_submit_missing_required_form(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session).user
     ApplicationUserFactory.create(application=application, user=user)
 
     response = client.post(
@@ -1178,19 +1113,54 @@ def test_application_submit_missing_required_form(
 @pytest.mark.parametrize(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
-def test_application_submit_forbidden(
-    client, enable_factory_create, db_session, user_auth_token, initial_status
+def test_application_form_update_forbidden_not_in_progress(
+    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+):
+    """Test form update fails if application is not in IN_PROGRESS status"""
+    # Create an application with a status other than IN_PROGRESS
+    application = ApplicationFactory.create(application_status=initial_status)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    form = FormFactory.create()
+    CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    request_data = {"application_response": {"name": "John Doe"}}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert forbidden response
+    assert response.status_code == 403
+    assert (
+        f"Cannot modify application. It is currently in status: {initial_status}"
+        in response.json["message"]
+    )
+    assert len(response.json["errors"]) == 1
+    assert response.json["errors"][0]["type"] == ValidationErrorType.NOT_IN_PROGRESS
+    assert (
+        response.json["errors"][0]["message"]
+        == "Cannot modify application, not currently in progress"
+    )
+
+
+@pytest.mark.parametrize(
+    "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+)
+def test_application_submit_forbidden_not_in_progress(
+    client, enable_factory_create, db_session, user, user_auth_token, initial_status
 ):
     """Test submission fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
     application = ApplicationFactory.create(application_status=initial_status)
     application_id = str(application.application_id)
 
-    # Get the user from the auth token and associate with application
-    user = parse_jwt_for_user(user_auth_token, db_session)
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user.user, application=application)
+    ApplicationUserFactory.create(user=user, application=application)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
@@ -1200,14 +1170,14 @@ def test_application_submit_forbidden(
     # Assert forbidden response
     assert response.status_code == 403
     assert (
-        f"Application cannot be submitted. It is currently in status: {initial_status.value}"
+        f"Cannot submit application. It is currently in status: {initial_status}"
         in response.json["message"]
     )
     assert len(response.json["errors"]) == 1
-    assert response.json["errors"][0]["type"] == ValidationErrorType.NOT_IN_PROGRESS.value
+    assert response.json["errors"][0]["type"] == ValidationErrorType.NOT_IN_PROGRESS
     assert (
         response.json["errors"][0]["message"]
-        == "Application cannot be submitted, not currently in progress"
+        == "Cannot submit application, not currently in progress"
     )
 
     # Verify application status remains unchanged
@@ -1215,16 +1185,12 @@ def test_application_submit_forbidden(
     assert application.application_status == initial_status
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_associates_user(client, enable_factory_create, db_session):
+def test_application_start_associates_user(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test that application creation associates the user from the token session with the application"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
-
-    # Create a user and get a token for them
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -1261,8 +1227,9 @@ def test_application_start_associates_user(client, enable_factory_create, db_ses
     assert application_user.application_id == application.application_id
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_with_custom_name(client, enable_factory_create, db_session):
+def test_application_start_with_custom_name(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation succeeds with custom application name"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=5)
@@ -1272,11 +1239,6 @@ def test_application_start_with_custom_name(client, enable_factory_create, db_se
     custom_name = "My Test Application"
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id, "application_name": custom_name}
-
-    # Create a user and get a token
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
@@ -1297,8 +1259,9 @@ def test_application_start_with_custom_name(client, enable_factory_create, db_se
     assert application.application_name == custom_name
 
 
-@freeze_time(TEST_DATE)
-def test_application_start_with_default_name(client, enable_factory_create, db_session):
+def test_application_start_with_default_name(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application creation uses opportunity number as default application name"""
     today = get_now_us_eastern_date()
     past_opening_date = today - timedelta(days=5)
@@ -1311,11 +1274,6 @@ def test_application_start_with_default_name(client, enable_factory_create, db_s
 
     competition_id = str(competition.competition_id)
     request_data = {"competition_id": competition_id}  # No application_name provided
-
-    # Create a user and get a token
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
@@ -1404,12 +1362,10 @@ def test_application_submit_forbidden_if_not_associated(
     assert "Unauthorized" in response.json["message"]
 
 
-def test_application_get_success_when_associated(client, enable_factory_create, db_session):
+def test_application_get_success_when_associated(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application get succeeds when user is associated with the application"""
-    # Create a user and associate it with an application
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-
     application = ApplicationFactory.create(with_forms=True)
 
     ApplicationUserFactory.create(application=application, user=user)
@@ -1424,12 +1380,10 @@ def test_application_get_success_when_associated(client, enable_factory_create, 
     assert response.json["data"]["application_id"] == str(application.application_id)
 
 
-def test_application_form_get_success_when_associated(client, enable_factory_create, db_session):
+def test_application_form_get_success_when_associated(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application form get succeeds when user is associated with the application"""
-    # Create a user and associate it with an application
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-
     application_form = ApplicationFormFactory.create(
         application_response={"name": "John Doe"},
     )
@@ -1446,12 +1400,10 @@ def test_application_form_get_success_when_associated(client, enable_factory_cre
     assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
 
 
-def test_application_form_update_success_when_associated(client, enable_factory_create, db_session):
+def test_application_form_update_success_when_associated(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application form update succeeds when user is associated with the application"""
-    # Create a user and associate it with an application
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
-
     application = ApplicationFactory.create()
 
     competition_form = CompetitionFormFactory.create(competition=application.competition)
@@ -1481,11 +1433,10 @@ def test_application_form_update_success_when_associated(client, enable_factory_
     assert application_form.application_response == {"name": "John Doe"}
 
 
-def test_application_submit_success_when_associated(client, enable_factory_create, db_session):
+def test_application_submit_success_when_associated(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
     """Test application submit succeeds when user is associated with the application"""
-    # Create a user and associate it with an application
-    user = UserFactory.create()
-    user_auth_token, _ = create_jwt_for_user(user, db_session)
 
     # Create a competition with a future closing date
     today = get_now_us_eastern_date()
@@ -1522,10 +1473,33 @@ def test_application_submit_success_when_associated(client, enable_factory_creat
     assert application.application_status == ApplicationStatus.SUBMITTED
 
 
-def get_user_from_token(db_session, user_auth_token):
-    """Helper function to get the user from an auth token for testing"""
-    # Parse the JWT and get the user token session
-    user_token_session = parse_jwt_for_user(user_auth_token, db_session)
+def test_application_get_includes_application_name_and_users(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes the new fields: application_status, application_name, and users"""
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
+    )
 
-    # Return the user associated with the token session
-    return user_token_session.user
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that the new fields are included in the response
+    assert (
+        response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS.value
+    )  # Using .value to get the string
+    assert response.json["data"]["application_name"] == "Test Application Name"
+
+    # Check that users are included
+    assert "users" in response.json["data"]
+    assert len(response.json["data"]["users"]) == 1
+    assert response.json["data"]["users"][0]["user_id"] == str(user.user_id)
+    assert response.json["data"]["users"][0]["email"] == user.email

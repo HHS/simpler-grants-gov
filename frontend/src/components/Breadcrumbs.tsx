@@ -59,10 +59,7 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
   });
 
   return (
-    <GridContainer
-      className="padding-top-1 tablet:padding-top-3 desktop-lg:padding-top-4"
-      data-testid="breadcrumb"
-    >
+    <GridContainer data-testid="breadcrumb">
       <BreadcrumbBar listProps={{ ...microdata.ol }}>
         {breadcrumArray}
       </BreadcrumbBar>

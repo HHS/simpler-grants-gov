@@ -27,7 +27,7 @@ export const SavedSearchesList = ({
   deleteText: string;
 }) => {
   return (
-    <ul className="usa-prose usa-list--unstyled grid-container">
+    <ul className="usa-list--unstyled grid-container">
       {savedSearches.map((savedSearch) => (
         <li key={savedSearch.id}>
           <div className="border-1px border-base-lighter padding-x-2 padding-y-105 margin-bottom-2 text-base-darker desktop:grid-col-fill">

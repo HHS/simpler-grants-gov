@@ -14,9 +14,9 @@ const ExperimentalContent = () => {
 
   return (
     <HomePageSection className="bg-base-lightest" title={t("title")}>
-      <h2 data-testid="homepage-experimental">{t("canDoHeader")}</h2>
-      <h3>{t("canDoSubHeader")}</h3>
-      <p className="font-sans-md line-height-sans-4">{t("canDoParagraph")}</p>
+      <h3 data-testid="homepage-experimental">{t("canDoHeader")}</h3>
+      <h4>{t("canDoSubHeader")}</h4>
+      <p>{t("canDoParagraph")}</p>
       <Link href="/search">
         <Button
           className="margin-y-2 usa-button--secondary"
@@ -26,8 +26,8 @@ const ExperimentalContent = () => {
           {t("tryLink")}
         </Button>
       </Link>
-      <h3>{t("cantDoHeader")}</h3>
-      <p className="font-sans-md line-height-sans-4">{t("cantDoParagraph")}</p>
+      <h4>{t("cantDoHeader")}</h4>
+      <p>{t("cantDoParagraph")}</p>
       <Grid row className="padding-y-2" gap="md">
         {iconSections.map((iconSection, iconSectionIdx) => (
           <Grid col={6} key={`experimental-iconsection-${iconSectionIdx}`}>

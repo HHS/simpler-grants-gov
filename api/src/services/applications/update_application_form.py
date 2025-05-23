@@ -9,6 +9,10 @@ from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import ApplicationForm, CompetitionForm, Form
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_in_progress,
+)
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
@@ -40,6 +44,9 @@ def update_application_form(
     """
     # Check if application exists
     application = get_application(db_session, application_id, user)
+
+    # Validate the application is in progress and can be modified
+    validate_application_in_progress(application, ApplicationAction.MODIFY)
 
     # Check if form exists and is attached to the competition
     form = db_session.execute(
