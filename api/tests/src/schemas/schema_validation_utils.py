@@ -179,6 +179,7 @@ class FieldTestSchema(Schema):
 
     field_enum = fields.Enum(EnumA)
     field_enum_invalid_choice = fields.Enum(EnumA)
+    field_enum_invalid_type = fields.Enum(EnumA)
     field_enum_required = fields.Enum(EnumB, required=True)
 
 
@@ -285,6 +286,7 @@ def get_invalid_field_test_schema_req():
         # field_raw_required not present
         "field_enum": 12345,
         "field_enum_invalid_choice": "notvalid",
+        "field_enum_invalid_type": {},
     }
 
 
@@ -333,5 +335,6 @@ def get_expected_validation_errors():
         "field_raw_required": [MISSING_DATA],
         "field_enum": [get_enum_error_msg(EnumA)],
         "field_enum_invalid_choice": [get_enum_error_msg(EnumA)],
+        "field_enum_invalid_type": [get_enum_error_msg(EnumA)],
         "field_enum_required": [MISSING_DATA],
     }

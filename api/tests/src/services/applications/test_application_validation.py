@@ -1,5 +1,8 @@
+from datetime import date
+
 import apiflask
 import pytest
+from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus
@@ -7,6 +10,7 @@ from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
     validate_application_in_progress,
+    validate_competition_open,
 )
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -213,4 +217,55 @@ def test_validate_application_in_progress_failure(enable_factory_create, db_sess
     )
     assert (
         excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
+    )
+
+
+@pytest.mark.parametrize(
+    "opening_date,closing_date,grace_period",
+    [
+        (None, None, None),
+        (date(2020, 1, 1), date(2030, 1, 1), None),
+        # On opening date
+        (date(2025, 1, 15), date(2030, 1, 1), None),
+        # On closing date
+        (date(2025, 1, 1), date(2025, 1, 15), None),
+        # On closing date with grace period
+        (date(2025, 1, 1), date(2025, 1, 5), 10),
+    ],
+)
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_validate_competition_open_happy(opening_date, closing_date, grace_period):
+    competition = CompetitionFactory.build(
+        opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
+    )
+
+    try:
+        validate_competition_open(competition, ApplicationAction.SUBMIT)
+    except Exception:
+        pytest.fail("An unexpected exception occurred")
+
+
+@pytest.mark.parametrize(
+    "opening_date,closing_date,grace_period",
+    [
+        # Closed already
+        (date(2020, 1, 1), date(2025, 1, 14), None),
+        # Not yet open
+        (date(2025, 1, 16), date(2025, 1, 25), None),
+    ],
+)
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_validate_competition_open_error(opening_date, closing_date, grace_period):
+    competition = CompetitionFactory.build(
+        opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
+    )
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        validate_competition_open(competition, ApplicationAction.SUBMIT)
+
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.message == "Cannot submit application - competition is not open"
+    assert (
+        excinfo.value.extra_data["validation_issues"][0].type
+        == ValidationErrorType.COMPETITION_NOT_OPEN
     )
