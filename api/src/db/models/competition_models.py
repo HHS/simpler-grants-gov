@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -163,12 +163,22 @@ class Form(ApiSchemaTable, TimestampMixin):
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_form"
 
+    __table_args__ = (
+        # We want to enforce that the competition doesn't have multiple of the same form
+        UniqueConstraint("competition_id", "form_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    competition_form_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+
     competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Competition.competition_id), primary_key=True
+        UUID, ForeignKey(Competition.competition_id), index=True
     )
     competition: Mapped[Competition] = relationship(Competition)
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), primary_key=True)
+    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id))
     form: Mapped[Form] = relationship(Form)
 
     is_required: Mapped[bool]
@@ -212,14 +222,25 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    application_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Application.application_id), nullable=False
-    )
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
     application: Mapped[Application] = relationship(Application)
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), nullable=False)
-    form: Mapped[Form] = relationship(Form)
-    application_response: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    competition_form_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(CompetitionForm.competition_form_id)
+    )
+    competition_form: Mapped[CompetitionForm] = relationship(CompetitionForm)
+
+    application_response: Mapped[dict] = mapped_column(JSONB)
+
+    @property
+    def form(self) -> Form:
+        """Property function for slightly easier access to the actual form object"""
+        return self.competition_form.form
+
+    @property
+    def form_id(self) -> uuid.UUID:
+        """Property function for slightly easier access to the form ID"""
+        return self.competition_form.form_id
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
