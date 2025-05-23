@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional
 
 from sqlalchemy import ColumnExpressionArgument, select
 from sqlalchemy.orm import noload, selectinload
@@ -22,7 +21,7 @@ def _fetch_opportunity(
     db_session: db.Session,
     where_clause: ColumnExpressionArgument[bool],
     load_all_opportunity_summaries: bool,
-) -> Optional[Opportunity]:
+) -> Opportunity | None:
     stmt = (
         select(Opportunity)
         .where(where_clause)
