@@ -37,11 +37,7 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
         <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid>
-<<<<<<< HEAD
-            <p>{t("paragraph_1")}</p>
-=======
-            <p className="usa-intro">{t("paragraph")}</p>
->>>>>>> 3f84e0441 (Update key names in i18n/en/index to be camelCase instead of snake_case)
+            <p>{t("paragraph")}</p>
             <Link className="usa-button margin-bottom-4" href="/subscribe">
               {t("buttonResub")}
             </Link>
