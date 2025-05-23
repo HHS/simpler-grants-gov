@@ -11,6 +11,7 @@ interface SearchFilterSectionProps {
   accordionTitle: string;
   query: Set<string>;
   facetCounts?: { [key: string]: number };
+  referenceOption?: FilterOptionWithChildren;
 }
 
 const SearchFilterSection = ({
@@ -19,15 +20,18 @@ const SearchFilterSection = ({
   accordionTitle,
   query,
   facetCounts,
+  referenceOption,
 }: SearchFilterSectionProps) => {
   return (
-    <div>
+    <>
       <div className="text-bold margin-top-1">{option.label}</div>
       <div className="padding-y-1">
         <AllOptionCheckbox
           title={option.label}
           queryParamKey="agency"
-          childOptions={option.children}
+          childOptions={
+            referenceOption ? referenceOption.children : option.children
+          }
           currentSelections={query}
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
@@ -44,7 +48,7 @@ const SearchFilterSection = ({
           ))}
         </ul>
       </div>
-    </div>
+    </>
   );
 };
 

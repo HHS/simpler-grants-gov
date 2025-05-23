@@ -99,6 +99,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-apply-form-prototype-off"
     },
+    FEATURE_SEARCH_DRAWER_ON = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-drawer-on"
+    },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"

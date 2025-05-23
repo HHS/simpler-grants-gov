@@ -14,8 +14,8 @@ type SimplerHandler<T> = (
 // adds trace id header to response
 // logs response
 export const respondWithTraceAndLogs =
-  <T = object>(handler: SimplerHandler<T>) =>
-  async (request: NextRequest, options: HandlerOptions<T>) => {
+  <Params = object>(handler: SimplerHandler<Params>) =>
+  async (request: NextRequest, options: HandlerOptions<Params>) => {
     const response = await handler(request, options || {});
     response.headers.append(
       AWSTraceIDHeader,

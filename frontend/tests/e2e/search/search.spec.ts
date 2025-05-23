@@ -78,9 +78,10 @@ test.describe("Search page tests", () => {
 
     await clickAccordionWithTitle(page, "Agency");
     const firstSubAgency = page
-      .locator("#opportunity-filter-agency > ul > li ul input")
+      .locator("div[data-testid='Agency-filter'] > ul > li ul input")
       .first();
 
+    await expect(firstSubAgency).toHaveAttribute("id");
     const agencyId = await firstSubAgency.getAttribute("id");
     expect(agencyId).toBeTruthy();
     if (!agencyId) {
