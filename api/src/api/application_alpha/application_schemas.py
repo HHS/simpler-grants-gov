@@ -65,6 +65,8 @@ class ApplicationGetResponseDataSchema(Schema):
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
 
+    form_validation_warnings = fields.Dict(metadata={"description": "", "example": {}})
+
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationGetResponseDataSchema())
