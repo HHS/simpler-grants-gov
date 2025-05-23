@@ -58,6 +58,7 @@ export async function handleFormAction(
     formData,
     formSchema,
   );
+
   const { validationErrors, errorMessage } = formValidate({
     formData: applicationFormData,
     formSchema,
