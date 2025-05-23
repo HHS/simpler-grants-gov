@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { usePrevious } from "src/hooks/usePrevious";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -22,7 +23,6 @@ import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { usePrevious } from "src/hooks/usePrevious";
 
 function SaveSearchInput({
   validationError,
