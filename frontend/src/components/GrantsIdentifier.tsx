@@ -19,14 +19,14 @@ const GrantsIdentifier = () => {
   const t = useTranslations("Identifier");
 
   const identifier_strings = {
-    link_about: t("link_about"),
-    link_accessibility: t("link_accessibility"),
-    link_foia: t("link_foia"),
-    link_fear: t("link_fear"),
-    link_ig: t("link_ig"),
-    link_performance: t("link_performance"),
-    link_privacy: t("link_privacy"),
-    logo_alt: t("logo_alt"),
+    link_about: t("linkAbout"),
+    link_accessibility: t("linkAccessibility"),
+    link_foia: t("linkFoia"),
+    link_fear: t("linkFear"),
+    link_ig: t("linkIg"),
+    link_performance: t("linkPerformance"),
+    link_privacy: t("linkPrivacy"),
+    logo_alt: t("logoAlt"),
   };
 
   const logoImage = (
@@ -92,7 +92,7 @@ const GrantsIdentifier = () => {
         {IdentifierLinkList}
       </IdentifierLinks>
       <IdentifierGov aria-label="U.S. government information and services">
-        {t.rich("gov_content", {
+        {t.rich("govContent", {
           usaLink: (chunks) => <a href={ExternalRoutes.USA}>{chunks}</a>,
         })}
       </IdentifierGov>

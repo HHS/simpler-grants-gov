@@ -2131,6 +2131,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunitySearchFilterV1'
+        top_level_agency:
+          type: string
+          minLength: 2
+          description: Top level agency for querying against database for it's sub_agencies
         experimental:
           type:
           - object
@@ -2892,6 +2896,15 @@ components:
         application_response:
           type: object
           additionalProperties: {}
+    ApplicationUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
     ApplicationGetResponseData:
       type: object
       properties:
@@ -2909,6 +2922,16 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        application_status:
+          type: string
+        application_name:
+          type: string
+        users:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationUser'
     ApplicationGetResponse:
       type: object
       properties:

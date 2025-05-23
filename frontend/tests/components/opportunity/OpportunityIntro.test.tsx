@@ -8,8 +8,8 @@ jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
       agency: "Agency:",
-      assistance_listings: "Assistance Listings:",
-      last_updated: "Last updated:",
+      assistanceListings: "Assistance Listings:",
+      lastUpdated: "Last updated:",
     };
     return translations[key] || key;
   }),

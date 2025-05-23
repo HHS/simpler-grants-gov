@@ -44,15 +44,15 @@ export async function subscribeEmailAction(
   });
   const schema = z.object({
     name: z.string().min(1, {
-      message: t("Subscribe.errors.missing_name"),
+      message: t("Subscribe.errors.missingName"),
     }),
     email: z
       .string()
       .min(1, {
-        message: t("Subscribe.errors.missing_email"),
+        message: t("Subscribe.errors.missingEmail"),
       })
       .email({
-        message: t("Subscribe.errors.invalid_email"),
+        message: t("Subscribe.errors.invalidEmail"),
       }),
   });
 
@@ -106,7 +106,7 @@ export async function subscribeEmailAction(
     if (responseData.includes("Already subscribed")) {
       return {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        errorMessage: t("Subscribe.errors.already_subscribed"),
+        errorMessage: t("Subscribe.errors.alreadySubscribed"),
         validationErrors: {},
       };
     }

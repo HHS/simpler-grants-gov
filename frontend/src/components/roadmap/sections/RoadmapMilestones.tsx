@@ -12,22 +12,19 @@ export default function RoadmapMilestones() {
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
       {/* Early 2025 Section - Always visible */}
-      <h2 className="font-sans-md margin-0 margin-top-1 tablet:font-sans-lg">
-        {t("contentTitle")}
-      </h2>
+      <h3 className="margin-bottom-4">{t("contentTitle")}</h3>
       {/* Render Early 2025 content items */}
 
       {contentItems &&
         Object.keys(contentItems).map((key) => {
           const title = t(`contentItems.${key}.title`);
           return (
-            <div key={`roadmap-milestones-${title}-key`}>
-              <h3 className="font-sans-sm margin-top-3 margin-bottom-1 tablet:font-sans-md">
-                {title}
-              </h3>
-              <p className="font-sans-xs margin-0 margin-bottom-0 line-height-sans-4">
-                {t(`contentItems.${key}.content`)}
-              </p>
+            <div
+              className="margin-bottom-4"
+              key={`roadmap-milestones-${title}-key`}
+            >
+              <h4>{title}</h4>
+              <p>{t(`contentItems.${key}.content`)}</p>
             </div>
           );
         })}
@@ -37,8 +34,8 @@ export default function RoadmapMilestones() {
           items={[
             {
               title: t("archivedRoadmapTitle"),
-              headingLevel: "h2",
-              className: "font-sans-md tablet:font-sans-lg",
+              headingLevel: "h3",
+              className: "",
               expanded: false,
               id: "archived-roadmap-content",
               content: (
@@ -47,14 +44,12 @@ export default function RoadmapMilestones() {
                     Object.keys(archivedRoadmapItems).map((key) => {
                       const title = t(`archivedRoadmapItems.${key}.title`);
                       return (
-                        <div key={`roadmap-milestones-late2024-${key}`}>
-                          <h3 className="font-sans-sm margin-top-3 margin-bottom-1 tablet:font-sans-md">
+                        <>
+                          <h4 key={`roadmap-milestones-late2024-${key}`}>
                             {title}
-                          </h3>
-                          <p className="font-sans-xs margin-0 margin-bottom-0 line-height-sans-4">
-                            {t(`archivedRoadmapItems.${key}.content`)}
-                          </p>
-                        </div>
+                          </h4>
+                          <p>{t(`archivedRoadmapItems.${key}.content`)}</p>
+                        </>
                       );
                     })}
                 </div>

@@ -252,6 +252,11 @@ class Enum(MixinField):
     ) -> typing.Any:
         val = self.field._deserialize(value, attr, data, **kwargs)
 
+        # If the value isn't a string, we know
+        # it can't be a StrEnum
+        if not isinstance(val, str):
+            raise self.make_error("unknown", choices=self.choices_text)
+
         enum_type = self.enum_mapping.get(val)
         if not enum_type:
             raise self.make_error("unknown", choices=self.choices_text)

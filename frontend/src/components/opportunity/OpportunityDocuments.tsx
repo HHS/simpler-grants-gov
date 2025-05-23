@@ -21,15 +21,15 @@ const DocumentTable = ({
     <>
       <thead>
         <tr>
-          <th scope="col">{t("table_col_file_name")}</th>
-          <th scope="col">{t("table_col_description")}</th>
-          <th scope="col">{t("table_col_last_updated")}</th>
+          <th scope="col">{t("tableColFileName")}</th>
+          <th scope="col">{t("tableColDescription")}</th>
+          <th scope="col">{t("tableColLastUpdated")}</th>
         </tr>
       </thead>
       <tbody>
         {documents.map((document, index) => (
           <tr key={index}>
-            <td data-label={t("table_col_file_name")}>
+            <td data-label={t("tableColFileName")}>
               <Link
                 target="_blank"
                 href={document.download_path}
@@ -38,10 +38,10 @@ const DocumentTable = ({
                 {document.file_name}
               </Link>
             </td>
-            <td data-label={t("table_col_description")}>
+            <td data-label={t("tableColDescription")}>
               <div>{document.file_description}</div>
             </td>
-            <td data-label={t("table_col_last_updated")}>
+            <td data-label={t("tableColLastUpdated")}>
               {/* https://day.js.org/docs/en/display/format */}
               {getConfiguredDayJs()(document.updated_at).format(
                 "MMM D, YYYY hh:mm A z",
@@ -62,7 +62,7 @@ const OpportunityDocuments = ({
 
   return (
     <Grid row className="margin-top-6">
-      <Grid col={8} className="usa-prose">
+      <Grid col={8}>
         <h2 id="opportunity_documents">{t("title")}</h2>
       </Grid>
       {documents.length > 0 ? (

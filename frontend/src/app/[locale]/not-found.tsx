@@ -12,24 +12,24 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("ErrorPages.page_not_found.page_title"),
-    description: t("Index.meta_description"),
+    title: t("ErrorPages.pageNotFound.pageTitle"),
+    description: t("Index.metaDescription"),
   };
   return meta;
 }
 
 // note that NotFound pages do not take props so cannot be translated
 export default function NotFound() {
-  const t = useTranslations("ErrorPages.page_not_found");
+  const t = useTranslations("ErrorPages.pageNotFound");
 
   return (
     <>
       <BetaAlert />
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15 measure-2">
         <h1>{t("title")}</h1>
-        <p className="margin-bottom-2">{t("message_content_1")}</p>
+        <p className="margin-bottom-2">{t("messageContent")}</p>
         <Link className="usa-link" href="/" key="returnToHome">
-          {t("visit_homepage_button")}
+          {t("visitHomepageButton")}
         </Link>
       </GridContainer>
     </>
