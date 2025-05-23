@@ -53,3 +53,7 @@ class SOAPFaultException(Exception):
         self.message = message
         self.fault = fault
         super().__init__(message, fault, *args)
+
+
+def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
+    return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})

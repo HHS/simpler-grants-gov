@@ -1,6 +1,6 @@
 from typing import Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
@@ -72,3 +72,15 @@ class GetOpportunityListResponse(BaseSOAPSchema):
     opportunity_details: list[OpportunityDetails] | None = Field(
         default=None, alias="OpportunityDetails"
     )
+
+    @field_validator("opportunity_details", mode="before")
+    @classmethod
+    def force_list(cls, value: dict | list | None) -> list | None:
+        """
+        Parsing the xml into a dict may result in this property being a dict instead of
+        a list so this method forces opportunity_details into list when there is only 1 opportunity
+        returned.
+        """
+        if isinstance(value, dict):
+            return [value]
+        return value
