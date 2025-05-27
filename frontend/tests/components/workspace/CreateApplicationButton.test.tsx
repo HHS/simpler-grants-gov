@@ -12,6 +12,16 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+const mockUseUser = jest.fn(() => ({
+  user: {
+    token: "faketoken",
+  },
+}));
+
+jest.mock("src/services/auth/useUser", () => ({
+  useUser: () => mockUseUser(),
+}));
+
 const mockStartApplication = jest.fn((_token) => Promise.resolve(true));
 
 jest.mock("src/services/fetch/fetchers/clientApplicationFetcher", () => ({

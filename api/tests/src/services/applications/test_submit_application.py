@@ -1,15 +1,11 @@
 import uuid
-from datetime import date, timedelta
+from datetime import timedelta
 
 import apiflask.exceptions
 import pytest
-from freezegun import freeze_time
 
 from src.constants.lookup_constants import ApplicationStatus
-from src.services.applications.submit_application import (
-    submit_application,
-    validate_competition_open,
-)
+from src.services.applications.submit_application import submit_application
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -22,9 +18,6 @@ from tests.src.db.models.factories import (
     UserFactory,
 )
 
-# Set a fixed date for freezing time in tests
-TEST_DATE = "2023-03-10"
-
 # Simple JSON schema used for tests below
 SIMPLE_JSON_SCHEMA = {
     "type": "object",
@@ -34,71 +27,6 @@ SIMPLE_JSON_SCHEMA = {
     },
     "required": ["name"],
 }
-
-
-# Tests for validate_competition_open
-@freeze_time(TEST_DATE)
-def test_validate_competition_open_success(enable_factory_create, db_session):
-    """Test that validating an open competition succeeds."""
-    current_date = date.fromisoformat(TEST_DATE)
-
-    # Test cases:
-    # 1. Competition with future closing date
-    # 2. Competition with past closing date but within grace period
-
-    # Future closing date
-    competition1 = CompetitionFactory.create(
-        closing_date=current_date + timedelta(days=1),
-        grace_period=0,
-    )
-    application1 = ApplicationFactory.create(competition=competition1)
-
-    # Should not raise any exception
-    validate_competition_open(application1)
-
-    # Past closing date but within grace period
-    competition2 = CompetitionFactory.create(
-        closing_date=current_date - timedelta(days=2),
-        grace_period=3,
-    )
-    application2 = ApplicationFactory.create(competition=competition2)
-
-    # Should not raise any exception
-    validate_competition_open(application2)
-
-
-@freeze_time(TEST_DATE)
-def test_validate_competition_open_failure(enable_factory_create, db_session):
-    """Test that validating a closed competition raises an error."""
-    current_date = date.fromisoformat(TEST_DATE)
-
-    # Create a competition with a past closing date (5 days ago) and a grace period of 3 days
-    # This means the competition has been closed for 2 days
-    competition = CompetitionFactory.create(
-        closing_date=current_date - timedelta(days=5),
-        grace_period=3,
-    )
-    application = ApplicationFactory.create(competition=competition)
-
-    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
-        validate_competition_open(application)
-
-    assert excinfo.value.status_code == 422
-    assert "Cannot submit application - competition is closed" in excinfo.value.message
-    assert (
-        excinfo.value.extra_data["validation_issues"][0].type
-        == ValidationErrorType.COMPETITION_ALREADY_CLOSED
-    )
-
-
-@freeze_time(TEST_DATE)
-def test_validate_competition_with_no_closing_date(enable_factory_create, db_session):
-    """Test that validating a competition with no closing date succeeds."""
-    competition = CompetitionFactory.create(closing_date=None)
-    application = ApplicationFactory.create(competition=competition)
-
-    # Should not raise any exception
-    validate_competition_open(application)
 
 
 # Tests for the main submit_application function

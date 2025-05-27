@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey
@@ -16,6 +16,7 @@ from src.db.models.lookup_models import (
     LkFormFamily,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.util.datetime_util import get_now_us_eastern_date
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -50,6 +51,10 @@ class Competition(ApiSchemaTable, TimestampMixin):
     opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id)
     )
+    opportunity_assistance_listing: Mapped[OpportunityAssistanceListing | None] = relationship(
+        uselist=False
+    )
+
     link_competition_open_to_applicant: Mapped[list["LinkCompetitionOpenToApplicant"]] = (
         relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
     )
@@ -73,6 +78,40 @@ class Competition(ApiSchemaTable, TimestampMixin):
     applications: Mapped[list["Application"]] = relationship(
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
+
+    @property
+    def is_open(self) -> bool:
+        """The competition is open if the following are both true:
+        * It is on/after the competition opening date OR the opening date is null
+        * It is on/before the competition close date + grace period OR the close date is null
+
+        Effectively, if the date is null, the check isn't necessary, a competition
+        with both opening and closing as null is open regardless of date.
+        """
+
+        current_date = get_now_us_eastern_date()
+
+        # Check whether we're on/after the current date
+        if self.opening_date is not None and current_date < self.opening_date:
+            return False
+
+        # If closing_date is not null, check if current date is after closing date + grace period
+        if self.closing_date is not None:
+
+            # If grace period is null/negative, make it 0
+            grace_period = self.grace_period
+            if grace_period is None or grace_period < 0:
+                grace_period = 0
+
+            actual_closing_date = self.closing_date + timedelta(days=grace_period)
+
+            # if past the actual closing date, it's not open
+            if current_date > actual_closing_date:
+                return False
+
+        # If it didn't hit any of the above cases
+        # then we consider it to be open
+        return True
 
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):

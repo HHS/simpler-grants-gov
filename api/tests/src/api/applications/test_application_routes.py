@@ -111,12 +111,8 @@ def test_application_start_before_opening_date(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is not yet open for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_YET_OPEN
-    assert response.json["errors"][0]["field"] == "opening_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (
@@ -147,12 +143,8 @@ def test_application_start_after_closing_date(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is already closed for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
-    assert response.json["errors"][0]["field"] == "closing_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (
@@ -218,12 +210,8 @@ def test_application_start_after_grace_period(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is already closed for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
-    assert response.json["errors"][0]["field"] == "closing_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (

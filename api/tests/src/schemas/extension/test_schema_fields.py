@@ -42,6 +42,11 @@ def test_enum_field():
     ):
         both_ab_field._deserialize("not_a_value", None, None)
 
+    with pytest.raises(
+        ValidationError, match="Must be one of: value1, value2, value3, value4, value5, value6."
+    ):
+        both_ab_field._deserialize({}, None, None)
+
 
 @pytest.mark.parametrize(
     "payload,expected_errors",

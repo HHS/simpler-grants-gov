@@ -34,8 +34,7 @@ class ValidationErrorType(StrEnum):
     NOT_IN_PROGRESS = "not_in_progress"
 
     # Competition window validation error types
-    COMPETITION_NOT_YET_OPEN = "competition_not_yet_open"
-    COMPETITION_ALREADY_CLOSED = "competition_already_closed"
+    COMPETITION_NOT_OPEN = "competition_not_open"
 
     # Application access validation error type
     UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
