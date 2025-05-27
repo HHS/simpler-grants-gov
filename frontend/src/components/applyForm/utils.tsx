@@ -191,7 +191,7 @@ export const buildField = ({
         value: String(label),
         label: getSimpleTranslationsSync({
           nameSpace: "Form",
-          translateAbleString: String(label),
+          translateableString: String(label),
         }),
       })),
       emptyValue: "- Select -",

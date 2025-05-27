@@ -1,3 +1,4 @@
+import { isObject } from "lodash";
 import { messages as En } from "src/i18n/messages/en/index";
 import { messages as Es } from "src/i18n/messages/es/index";
 
@@ -19,7 +20,7 @@ export function getMessagesSync(locale: string): Messages {
 type GetTranslationsSync = {
   nameSpace: string;
   locale?: string;
-  translateAbleString: string;
+  translateableString: string;
 };
 
 // NOTE: does not support t.rich or other features
@@ -30,10 +31,10 @@ export const getSimpleTranslationsSync = ({
 }: GetTranslationsSync) => {
   const messages = getMessagesSync(locale);
   const namespacedMessages = messages[nameSpace] as Messages;
-  if (typeof namespacedMessages === "object" && namespacedMessages !== null) {
-    const value = namespacedMessages[translateAbleString];
-    return typeof value === "string" ? value : translateAbleString;
+  if (isObject(namespacedMessages)) {
+    const value = namespacedMessages[translateableString];
+    return typeof value === "string" ? value : translateableString;
   } else {
-    return translateAbleString;
+    return translateableString;
   }
 };

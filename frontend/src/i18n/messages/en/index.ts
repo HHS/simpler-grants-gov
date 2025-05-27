@@ -697,6 +697,7 @@ export const messages = {
       },
     },
   },
+  // These values are currently for form enum translation, values coming fromt the API
   Form: {
     "AL: Alabama": "Alabama",
     "AK: Alaska": "Alaska",

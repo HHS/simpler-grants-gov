@@ -4,7 +4,7 @@ describe("getSimpleTranslationsSync", () => {
   it("returns original string for string that is not in namespace", () => {
     const result = getSimpleTranslationsSync({
       nameSpace: "Form",
-      translateAbleString: "hello",
+      translateableString: "hello",
     });
     expect(result).toBe("hello");
     expect(typeof result).toBe("string");
@@ -13,7 +13,7 @@ describe("getSimpleTranslationsSync", () => {
   it("returns fallback translations for correct string", () => {
     const result = getSimpleTranslationsSync({
       nameSpace: "Form",
-      translateAbleString: "AL: Alabama",
+      translateableString: "AL: Alabama",
     });
     expect(result).toBe("Alabama");
     expect(typeof result).toBe("string");
