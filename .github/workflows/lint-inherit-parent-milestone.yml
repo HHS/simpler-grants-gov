@@ -1,0 +1,25 @@
+name: Lint - Inherit parent milestone
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+defaults:
+  run:
+    working-directory: ./.github/linters # ensures that this job runs from the ./linters sub-directory
+
+jobs:
+  inherit-milestone:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run inherit parent milestone script
+        run: |
+          ./scripts/inherit-parent-milestone.sh "${{ github.event.issue.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

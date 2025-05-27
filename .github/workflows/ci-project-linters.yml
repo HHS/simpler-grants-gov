@@ -23,6 +23,10 @@ jobs:
       # Test issue with points and sprint values unset, but no linked PR,
       # to be used with set-points-and-sprint.sh test to demonstrate skipping
       ISSUE_WITHOUT_PR: "https://github.com/HHS/grants-product-and-delivery/issues/261"
+      # Test issue with parent, for inherit-parent-milestone.sh test
+      ISSUE_WITH_PARENT: "https://github.com/HHS/simpler-grants-gov/issues/5144"
+      # Test issue with sub-issues, for propagate-milestone-to-sub-issues.sh test
+      ISSUE_WITH_SUB_ISSUES: "https://github.com/HHS/simpler-grants-gov/issues/5107"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,4 +48,14 @@ jobs:
             --project 17 \
             --sprint-field "Sprint" \
             --points-field "Points" \
+            --dry-run
+
+      - name: Dry run - Inherit parent milestone
+        run: |
+          ./scripts/inherit-parent-milestone.sh "${ISSUE_WITH_PARENT}" \
+            --dry-run
+
+      - name: Dry run - Propagate milestone to sub-issues
+        run: |
+          ./scripts/propagate-milestone-to-sub-issues.sh "${ISSUE_WITH_SUB_ISSUES}" \
             --dry-run
