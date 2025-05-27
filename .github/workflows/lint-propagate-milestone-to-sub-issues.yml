@@ -28,9 +28,9 @@ jobs:
         id: set-url
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "url=${{ inputs.issue_url }}" >> $GITHUB_OUTPUT
+            echo "url=${{ inputs.issue_url }}" >> "$GITHUB_OUTPUT"
           else
-            echo "url=${{ github.event.issue.html_url }}" >> $GITHUB_OUTPUT
+            echo "url=${{ github.event.issue.html_url }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run propagate milestone to sub-issues script
