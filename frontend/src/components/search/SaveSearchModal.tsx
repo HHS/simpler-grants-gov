@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
@@ -11,7 +10,6 @@ import {
   Button,
   ErrorMessage,
   FormGroup,
-  Modal,
   ModalFooter,
   ModalHeading,
   ModalRef,
@@ -21,8 +19,8 @@ import {
 
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
+import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { SimplerModal } from "../SimplerModal";
 
 function SaveSearchInput({
   validationError,
@@ -102,8 +100,6 @@ function SuccessContent({
 // would cause an error when passing the function prop from parent client component see:
 // https://github.com/vercel/next.js/discussions/46795
 export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
-  const modalId = "save-search";
-
   const t = useTranslations("Search.saveSearch.modal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
@@ -198,6 +194,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {saved ? (
           <SuccessContent

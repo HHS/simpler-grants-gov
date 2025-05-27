@@ -123,6 +123,7 @@ export function DeleteSavedSearchModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {updated ? (
           <SuccessContent

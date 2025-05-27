@@ -2,7 +2,6 @@
 
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -190,6 +189,7 @@ export function EditSavedSearchModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {updated ? (
           <SuccessContent
