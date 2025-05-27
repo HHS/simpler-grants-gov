@@ -36,11 +36,14 @@ export const SavedSearchesList = ({
                 <h2 className="margin-y-105 line-height-sans-2">
                   <Link
                     href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
-                    className="margin-right-05"
+                    className="margin-right-05 font-sans-lg"
                   >
+                    <USWDSIcon
+                      name="search"
+                      className="usa-icon--size-3 text-middle text-primary-dark margin-right-1"
+                    />
                     {savedSearch.name}
                   </Link>
-                  <USWDSIcon name="search" />
                 </h2>
               </div>
               <div className="grid-col margin-top-2 text-right">
