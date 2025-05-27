@@ -1,7 +1,6 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -9,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Button,
-  Modal,
   ModalFooter,
   ModalHeading,
   ModalRef,
@@ -18,6 +16,7 @@ import {
 
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
+import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SuccessContent({
@@ -65,7 +64,6 @@ export function DeleteSavedSearchModal({
   const t = useTranslations("SavedSearches.deleteModal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
-  const isSSR = useIsSSR();
   const { clientFetch } = useClientFetch<Response>(
     "Error deleting saved search",
     { jsonResponse: false, authGatedRequest: true },
@@ -117,14 +115,11 @@ export function DeleteSavedSearchModal({
         <USWDSIcon name="delete" key="delete-saved-search" />
         {deleteText}
       </ModalToggleButton>
-      <Modal
-        renderToPortal={!isSSR}
-        ref={modalRef}
-        forceAction
+      <SimplerModal
+        modalRef={modalRef}
         className="text-wrap"
-        aria-labelledby={`${modalId}-heading`}
-        aria-describedby={`${modalId}-description`}
-        id={modalId}
+        modalId={"save-search"}
+        titleText={updated ? undefined : t("title")}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
@@ -137,7 +132,6 @@ export function DeleteSavedSearchModal({
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
             <p className="font-sans-2xs margin-y-4">
               {t("description")} &quot;{queryName}&quot;?
             </p>
@@ -179,7 +173,7 @@ export function DeleteSavedSearchModal({
             </ModalFooter>
           </>
         )}
-      </Modal>
+      </SimplerModal>
     </>
   );
 }

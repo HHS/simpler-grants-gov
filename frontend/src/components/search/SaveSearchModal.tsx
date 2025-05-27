@@ -22,6 +22,7 @@ import {
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { SimplerModal } from "../SimplerModal";
 
 function SaveSearchInput({
   validationError,
@@ -107,7 +108,6 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const searchParams = useSearchParams();
-  const isSSR = useIsSSR();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -190,14 +190,11 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
           {t("saveText")}
         </ModalToggleButton>
       </div>
-      <Modal
-        ref={modalRef}
-        forceAction
+      <SimplerModal
+        modalRef={modalRef}
         className="text-wrap"
-        aria-labelledby={`${modalId}-heading`}
-        aria-describedby={`${modalId}-description`}
-        id={modalId}
-        renderToPortal={!isSSR}
+        modalId={"save-search"}
+        titleText={saved ? undefined : t("title")}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
@@ -205,12 +202,11 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
         {saved ? (
           <SuccessContent
             modalRef={modalRef}
-            modalId={modalId}
+            modalId={"save-search"}
             onClose={onClose}
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
             <p>{t("description")}</p>
             {apiError && (
               <SimplerAlert
@@ -250,7 +246,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
             </ModalFooter>
           </>
         )}
-      </Modal>
+      </SimplerModal>
     </>
   );
 }

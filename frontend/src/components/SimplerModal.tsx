@@ -1,6 +1,7 @@
+import { noop } from "lodash";
 import { useIsSSR } from "src/hooks/useIsSSR";
 
-import { ReactNode, RefObject } from "react";
+import { KeyboardEventHandler, ReactNode, RefObject } from "react";
 import { Modal, ModalHeading, ModalRef } from "@trussworks/react-uswds";
 
 export function SimplerModal({
@@ -9,13 +10,17 @@ export function SimplerModal({
   modalId,
   titleText,
   children,
+  onKeyDown,
 }: {
-  modalRef: RefObject<ModalRef>;
+  modalRef: RefObject<ModalRef | null>;
   titleText?: string;
   modalId: string;
   className?: string;
   children: ReactNode;
+  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 }) {
+  // The Modal component throws an error during SSR unless we specify that it should not "render to portal"
+  // this hook allows us to opt out of that rendering behavior on the server
   const isSSR = useIsSSR();
   return (
     <Modal
@@ -23,11 +28,14 @@ export function SimplerModal({
       forceAction={false}
       className={className}
       aria-labelledby={`${modalId}-heading`}
-      aria-describedby={`${modalId}-description`}
+      aria-describedby={`${modalId}-description`} // be sure that children includes a div with this id
       id={modalId}
       renderToPortal={!isSSR}
+      onKeyDown={onKeyDown || noop}
     >
-      <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
+      {titleText && (
+        <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
+      )}
       {children}
     </Modal>
   );
