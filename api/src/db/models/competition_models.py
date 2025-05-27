@@ -199,6 +199,13 @@ class Application(ApiSchemaTable, TimestampMixin):
         "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
     )
 
+    application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list["User"]:
         """Return the list of User objects associated with this application"""
@@ -220,6 +227,22 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id), nullable=False)
     form: Mapped[Form] = relationship(Form)
     application_response: Mapped[dict] = mapped_column(JSONB, nullable=False)
+
+
+class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_attachment"
+
+    application_attachment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
+    application: Mapped[Application] = relationship(Application)
+
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+    mime_type: Mapped[str]
+    file_size_bytes: Mapped[int]
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
