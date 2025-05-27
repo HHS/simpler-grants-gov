@@ -26,7 +26,7 @@ type GetTranslationsSync = {
 export const getSimpleTranslationsSync = ({
   nameSpace,
   locale = "en",
-  translateAbleString,
+  translateableString,
 }: GetTranslationsSync) => {
   const messages = getMessagesSync(locale);
   const namespacedMessages = messages[nameSpace] as Messages;
