@@ -33,10 +33,10 @@ export const SavedSearchesList = ({
           <div className="border-1px border-base-lighter padding-x-2 padding-y-105 margin-bottom-2 text-base-darker desktop:grid-col-fill">
             <div className="grid-row padding-right-2">
               <div className="tablet:grid-col-8 grid-col-6">
-                <h2 className="margin-y-105 line-height-sans-2">
+                <h2 className="margin-y-105 font-sans-lg">
                   <Link
                     href={`/search${queryParamsToQueryString(savedSearch.searchParams)}savedSearch=${savedSearch.id}`}
-                    className="margin-right-05 font-sans-lg"
+                    className="margin-right-05"
                   >
                     <USWDSIcon
                       name="search"
