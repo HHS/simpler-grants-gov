@@ -1,5 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
+from src.constants.lookup_constants import ApplicationFormStatus
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -44,6 +45,8 @@ class ApplicationFormGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     form_id = fields.UUID()
     application_response = fields.Dict()
+
+    application_form_status = fields.Enum(ApplicationFormStatus, metadata={"description": "TODO"})
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

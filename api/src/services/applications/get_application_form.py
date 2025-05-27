@@ -37,6 +37,7 @@ def get_application_form(
     # Check if the user has access to the application
     check_user_application_access(application, user)
 
+    # TODO - move this to the validation util?
     warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
         application_form.application_response, application_form.form
     )

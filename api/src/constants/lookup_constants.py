@@ -156,3 +156,8 @@ class ApplicationStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     SUBMITTED = "submitted"
     ACCEPTED = "accepted"
+
+class ApplicationFormStatus(StrEnum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
