@@ -1,19 +1,17 @@
 "use-client";
 
-import { useIsSSR } from "src/hooks/useIsSSR";
 import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
 import {
   ButtonGroup,
-  Modal,
   ModalFooter,
-  ModalHeading,
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { SimplerModal } from "./SimplerModal";
 
 export const LOGIN_URL = "/api/auth/login";
 
@@ -34,50 +32,47 @@ export const LoginModal = ({
   closeText: string;
   modalId: string;
 }) => {
-  const isSSR = useIsSSR();
   return (
-    <Modal
-      ref={modalRef}
-      forceAction={false}
+    <SimplerModal
+      modalId={modalId}
+      modalRef={modalRef}
+      titleText={titleText}
       className="text-wrap"
-      aria-labelledby={`${modalId}-heading`}
-      aria-describedby={`${modalId}-description`}
-      id={modalId}
-      renderToPortal={!isSSR}
     >
-      <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
-      <p>{helpText}</p>
-      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
-      <ModalFooter>
-        <ButtonGroup>
-          <a
-            href={LOGIN_URL}
-            key="login-link"
-            className="usa-button"
-            onClick={() => {
-              const startURL = `${location.pathname}${location.search}`;
-              if (startURL !== "") {
-                SessionStorage.setItem("login-redirect", startURL);
-              }
-            }}
-          >
-            {buttonText}
-            <USWDSIcon
-              className="usa-icon margin-right-05 margin-left-neg-05"
-              name="launch"
-              key="login-gov-link-icon"
-            />
-          </a>
-          <ModalToggleButton
-            modalRef={modalRef}
-            closer
-            unstyled
-            className="padding-105 text-center"
-          >
-            {closeText}
-          </ModalToggleButton>
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
+      <>
+        <p>{helpText}</p>
+        <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+        <ModalFooter>
+          <ButtonGroup>
+            <a
+              href={LOGIN_URL}
+              key="login-link"
+              className="usa-button"
+              onClick={() => {
+                const startURL = `${location.pathname}${location.search}`;
+                if (startURL !== "") {
+                  SessionStorage.setItem("login-redirect", startURL);
+                }
+              }}
+            >
+              {buttonText}
+              <USWDSIcon
+                className="usa-icon margin-right-05 margin-left-neg-05"
+                name="launch"
+                key="login-gov-link-icon"
+              />
+            </a>
+            <ModalToggleButton
+              modalRef={modalRef}
+              closer
+              unstyled
+              className="padding-105 text-center"
+            >
+              {closeText}
+            </ModalToggleButton>
+          </ButtonGroup>
+        </ModalFooter>
+      </>
+    </SimplerModal>
   );
 };
