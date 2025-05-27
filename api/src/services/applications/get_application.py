@@ -11,6 +11,7 @@ from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_validation import get_application_form_errors
 from src.services.applications.auth_utils import check_user_application_access
 
+
 def get_application(db_session: db.Session, application_id: UUID, user: User) -> Application:
     """
     Get an application by ID, checking if the user has access to it.
@@ -37,7 +38,10 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
 
     return application
 
-def get_application_with_warnings(db_session: db.Session, application_id: UUID, user: User) -> tuple[Application, list[ValidationErrorDetail]]:
+
+def get_application_with_warnings(
+    db_session: db.Session, application_id: UUID, user: User
+) -> tuple[Application, list[ValidationErrorDetail]]:
     """
     Fetch an application along with validation warnings
     """
@@ -47,6 +51,8 @@ def get_application_with_warnings(db_session: db.Session, application_id: UUID, 
     # See what validation issues remain on the application's forms
     form_warnings, form_warning_map = get_application_form_errors(application)
 
-    application.form_validation_warnings = form_warning_map
+    # Attach the form warning map to the application so it appears
+    # in the response object
+    application.form_validation_warnings = form_warning_map  # type: ignore[attr-defined]
 
     return application, form_warnings

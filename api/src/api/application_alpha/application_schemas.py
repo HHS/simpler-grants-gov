@@ -65,7 +65,21 @@ class ApplicationGetResponseDataSchema(Schema):
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
 
-    form_validation_warnings = fields.Dict(metadata={"description": "", "example": {}})
+    form_validation_warnings = fields.Dict(
+        metadata={
+            "description": "Specific form validation issues",
+            "example": {
+                "123e4567-e89b-12d3-a456-426614174000": [
+                    {
+                        "field": "$",
+                        "message": "'name' is a required property",
+                        "type": "required",
+                        "value": None,
+                    }
+                ]
+            },
+        }
+    )
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

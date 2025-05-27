@@ -1131,7 +1131,6 @@ class ApplicationFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
 
-
     class Params:
         with_forms = factory.Trait(
             application_forms=factory.RelatedFactoryList(
