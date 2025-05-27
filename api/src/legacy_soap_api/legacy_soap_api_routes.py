@@ -53,3 +53,11 @@ def simpler_soap_grantors_api() -> tuple:
     )
     proxy_response, simpler_response = client.get_response()
     return proxy_response.to_flask_response()
+
+
+@legacy_soap_api_blueprint.get("/headers/<header_name>")
+def headers_lookup(header_name: str = "X-Amzn-Mtls-Clientcert") -> str:
+    import json
+
+    headers = dict(request.headers)
+    return json.dumps({"header_keys": list(headers.keys()), header_name: headers.get(header_name)})

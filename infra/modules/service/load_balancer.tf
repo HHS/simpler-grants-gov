@@ -83,7 +83,7 @@ resource "aws_lb_listener" "alb_listener_https" {
   protocol          = "HTTPS"
   certificate_arn   = var.certificate_arn
   mutual_authentication {
-    mode = "off"
+    mode = startswith(var.service_name, "api-") ? "passthrough" : "off"
   }
 
   # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
