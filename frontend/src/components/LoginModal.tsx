@@ -38,7 +38,7 @@ export const LoginModal = ({
   return (
     <Modal
       ref={modalRef}
-      forceAction
+      forceAction={false}
       className="text-wrap"
       aria-labelledby={`${modalId}-heading`}
       aria-describedby={`${modalId}-description`}
