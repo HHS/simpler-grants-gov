@@ -3,6 +3,8 @@ import { useIsSSR } from "src/hooks/useIsSSR";
 import { KeyboardEventHandler, ReactNode, RefObject } from "react";
 import { Modal, ModalHeading, ModalRef } from "@trussworks/react-uswds";
 
+import "react-dom";
+
 /*
 
   SimplerModal
