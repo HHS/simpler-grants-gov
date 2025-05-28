@@ -1,3 +1,4 @@
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import {
   QueryParamData,
   SearchAPIResponse,
@@ -10,6 +11,7 @@ import {
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
+  statusOptions,
 } from "./SearchFilterAccordion/SearchFilterOptions";
 
 export async function SearchDrawerFilters({
@@ -20,7 +22,7 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility, fundingInstrument, category } = searchParams;
+  const { eligibility, fundingInstrument, category, status } = searchParams;
 
   let searchResults;
   try {
@@ -33,6 +35,14 @@ export async function SearchDrawerFilters({
 
   return (
     <>
+      <CheckboxFilter
+        filterOptions={statusOptions}
+        query={status}
+        queryParamKey="status"
+        title={t("accordion.titles.status")}
+        defaultEmptySelection={new Set([SEARCH_NO_STATUS_VALUE])}
+        facetCounts={facetCounts?.opportunity_status || {}}
+      />
       <CheckboxFilter
         filterOptions={fundingOptions}
         query={fundingInstrument}
