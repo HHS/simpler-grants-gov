@@ -98,7 +98,7 @@ variable "instance_cpu" {
 variable "instance_memory" {
   description = "Memory in MiB for the ECS container instances"
   type        = number
-  default     = 2048
+  default     = 4096
 }
 
 variable "instance_desired_instance_count" {
