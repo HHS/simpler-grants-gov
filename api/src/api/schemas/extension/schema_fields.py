@@ -262,3 +262,9 @@ class Enum(MixinField):
             raise self.make_error("unknown", choices=self.choices_text)
 
         return enum_type(val)
+
+
+class File(original_fields.File, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
+    }

@@ -13,7 +13,7 @@ from src.api.application_alpha.application_schemas import (
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
     ApplicationUpdateRequestSchema,
-    ApplicationUpdateResponseSchema,
+    ApplicationUpdateResponseSchema, ApplicationAttachmentCreateSchema, ApplicationAttachmentCreateRequestSchema, ApplicationAttachmentCreateResponseSchema,
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
@@ -194,3 +194,21 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
 
     # Return success response
     return response.ApiResponse(message="Success")
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/attachments")
+@application_blueprint.input(ApplicationAttachmentCreateRequestSchema(), location="form_and_files")
+@application_blueprint.output(ApplicationAttachmentCreateResponseSchema())
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_attachment_create(db_session: db.Session, application_id: UUID, form_and_files_data: dict) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("POST /alpha/applications/:application_id/attachments")
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+
+    pass
