@@ -7,6 +7,7 @@ from tests.src.api.opportunities_v1.conftest import (
 )
 from tests.src.db.models.factories import (
     AgencyFactory,
+    CompetitionFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAttachmentFactory,
     OpportunityFactory,
@@ -185,3 +186,27 @@ def test_get_opportunity_returns_cdn_urls(
 
     assert attachment["download_path"].startswith("https://cdn.")
     assert "s3://" not in attachment["download_path"]
+
+
+def test_get_opportunity_with_competitions_200(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    # Create an opportunity with a competition
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity=opportunity)
+    db_session.commit()
+
+    # Make the GET request
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    # Check the response
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+
+    # Validate the competitions data is included
+    assert "competitions" in response_data
+    assert len(response_data["competitions"]) == 1
+    assert response_data["competitions"][0]["competition_id"] == str(competition.competition_id)
+    assert response_data["competitions"][0]["opportunity_id"] == opportunity.opportunity_id
