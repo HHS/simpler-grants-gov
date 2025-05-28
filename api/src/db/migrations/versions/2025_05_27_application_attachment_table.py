@@ -25,7 +25,7 @@ def upgrade():
         sa.Column("file_location", sa.Text(), nullable=False),
         sa.Column("file_name", sa.Text(), nullable=False),
         sa.Column("mime_type", sa.Text(), nullable=False),
-        sa.Column("file_size_bytes", sa.Integer(), nullable=False),
+        sa.Column("file_size_bytes", sa.BigInteger(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),

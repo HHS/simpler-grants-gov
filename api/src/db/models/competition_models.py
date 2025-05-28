@@ -242,7 +242,7 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_name: Mapped[str]
     mime_type: Mapped[str]
-    file_size_bytes: Mapped[int]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
