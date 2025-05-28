@@ -113,6 +113,7 @@ export async function subscribeEmailAction(
 
     // If the response is not ok or the response data is not what we expect, return an error message
     if (!sendyResponse.ok || !["1", "true"].includes(responseData)) {
+      console.error(JSON.stringify({ sendyResponse }));
       return {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         errorMessage,
@@ -122,7 +123,12 @@ export async function subscribeEmailAction(
   } catch (e) {
     // General try failure catch error
     const error = e as Error;
-    console.error("Error subscribing user:", error.message);
+    console.error(
+      "Error subscribing user:",
+      error.message,
+      " ",
+      error.cause?.toString(),
+    );
     return {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       errorMessage,
