@@ -86,6 +86,27 @@ Once you're done, verify access by running the following command to print out in
 aws sts get-caller-identity
 ```
 
+### Recommended AWS Profile Set Up
+
+#### Create a profile named grants (one-time set up)
+
+```bash
+$ aws configure --profile grants
+AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+Default region name [None]: us-east-2
+Default output format [None]: json
+```
+
+#### Utilize it for AWS work (ongoing)
+
+Execute this before running any AWS CLI or Terraform commands
+
+```bash
+AWS_PROFILE=grants
+aws sso login
+```
+
 ### References
 
 - [Configuration basics][1]
