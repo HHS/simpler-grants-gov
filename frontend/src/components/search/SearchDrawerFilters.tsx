@@ -1,12 +1,16 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import {
   QueryParamData,
   SearchAPIResponse,
 } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { Accordion } from "@trussworks/react-uswds";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
+import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
   eligibilityOptions,
@@ -22,7 +26,13 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility, fundingInstrument, category, status } = searchParams;
+  const { eligibility, fundingInstrument, category, status, agency } =
+    searchParams;
+
+  const agenciesPromise = Promise.all([
+    getAgenciesForFilterOptions(),
+    searchResultsPromise,
+  ]);
 
   let searchResults;
   try {
@@ -57,6 +67,26 @@ export async function SearchDrawerFilters({
         filterOptions={eligibilityOptions}
         facetCounts={facetCounts?.applicant_type || {}}
       />
+      <Suspense
+        fallback={
+          <Accordion
+            bordered={true}
+            items={[
+              {
+                title: t("accordion.titles.agency"),
+                content: [],
+                expanded: false,
+                id: "opportunity-filter-agency-disabled",
+                headingLevel: "h2",
+              },
+            ]}
+            multiselectable={true}
+            className="margin-top-4"
+          />
+        }
+      >
+        <AgencyFilter query={agency} agencyOptionsPromise={agenciesPromise} />
+      </Suspense>
       <CheckboxFilter
         filterOptions={categoryOptions}
         query={category}
