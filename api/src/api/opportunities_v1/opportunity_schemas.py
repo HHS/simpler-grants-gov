@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
@@ -313,6 +314,11 @@ class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
         fields.Nested(OpportunityAttachmentV1Schema),
         attribute="opportunity_attachments",  # This maps to the model's field name
         metadata={"description": "List of attachments associated with the opportunity"},
+    )
+
+    competitions = fields.List(
+        fields.Nested(CompetitionAlphaSchema),
+        metadata={"description": "List of competitions associated with the opportunity"},
     )
 
 

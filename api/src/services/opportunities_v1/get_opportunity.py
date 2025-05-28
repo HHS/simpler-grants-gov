@@ -35,7 +35,6 @@ def _fetch_opportunity(db_session: db.Session, opportunity_id: int) -> Opportuni
             lazyload(Opportunity.all_opportunity_summaries),
             lazyload(Opportunity.all_opportunity_notification_logs),
             lazyload(Opportunity.saved_opportunities_by_users),
-            lazyload(Opportunity.competitions),
             lazyload(Opportunity.versions),
         )
     )
