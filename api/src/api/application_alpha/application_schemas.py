@@ -71,7 +71,6 @@ class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
 
 
 class ApplicationAttachmentCreateSchema(Schema):
-    # TODO - rename this one
     application_attachment_id = fields.UUID(
         metadata={"description": "The ID of the uploaded application attachment"}
     )
