@@ -21,10 +21,12 @@ root
 
 ### Review automated linters
 
-| Workflow name                                         | Description                                                            | Trigger                        |
-| ----------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------ |
-| [Lint - Set points and sprint][set-points-and-sprint] | Sets default points and sprint value (if unset) when issues are closed | On issue close                 |
-| [Lint - Check wiki links][check-wiki-links]      | Checks that all wiki markdown files are linked in the SUMMARY.md       | Each PR that modifies the wiki |
+| Workflow name                                                                 | Description                                                                 | Trigger                        |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------ |
+| [Lint - Set points and sprint][set-points-and-sprint]                         | Sets default points and sprint value (if unset) when issues are closed       | On issue close                 |
+| [Lint - Check wiki links][check-wiki-links]                                   | Checks that all wiki markdown files are linked in the SUMMARY.md             | Each PR that modifies the wiki |
+| [Lint - Inherit parent milestone][inherit-parent-milestone]                   | Inherits the milestone from the parent issue to the issue and its sub-issues | On issue open                  |
+| [Lint - Propagate milestone to sub-issues][propagate-milestone-to-sub-issues] | Propagates the milestone from the parent issue to its sub-issues             | On issue milestone change       |
 
 ### Manually run the linters
 
@@ -59,3 +61,5 @@ root
 [set-points-and-sprint-script]: ./scripts/set-points-and-sprint.sh
 [get-project-items-query]: ./queries/getItemMetadata.graphql
 [check-wiki-links]: ../workflows/ci-wiki-links.yml
+[inherit-parent-milestone]: ../workflows/lint-inherit-parent-milestone.yml
+[propagate-milestone-to-sub-issues]: ../workflows/lint-propagate-milestone-to-sub-issues.yml
