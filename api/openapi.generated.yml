@@ -3001,6 +3001,16 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationUser'
+        form_validation_warnings:
+          type: object
+          description: Specific form validation issues
+          example:
+            123e4567-e89b-12d3-a456-426614174000:
+            - field: $
+              message: '''name'' is a required property'
+              type: required
+              value: null
+          additionalProperties: {}
     ApplicationGetResponse:
       type: object
       properties:
