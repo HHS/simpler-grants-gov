@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
@@ -12,6 +13,7 @@ from src.api.schemas.search_schema import (
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
+from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -216,23 +218,6 @@ class OpportunitySummaryV1Schema(Schema):
     )
 
 
-class OpportunityAssistanceListingV1Schema(Schema):
-    program_title = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "Space Technology",
-        },
-    )
-    assistance_listing_number = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The assistance listing number, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "43.012",
-        },
-    )
-
-
 class OpportunityV1Schema(Schema):
     opportunity_id = fields.Integer(
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
@@ -329,6 +314,11 @@ class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
         fields.Nested(OpportunityAttachmentV1Schema),
         attribute="opportunity_attachments",  # This maps to the model's field name
         metadata={"description": "List of attachments associated with the opportunity"},
+    )
+
+    competitions = fields.List(
+        fields.Nested(CompetitionAlphaSchema),
+        metadata={"description": "List of competitions associated with the opportunity"},
     )
 
 

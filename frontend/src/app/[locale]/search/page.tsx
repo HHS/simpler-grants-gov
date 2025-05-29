@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Search.title"),
-    description: t("Search.meta_description"),
+    description: t("Search.metaDescription"),
   };
   return meta;
 }

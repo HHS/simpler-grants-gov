@@ -4,7 +4,7 @@ from enum import StrEnum
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Form
+from src.db.models.competition_models import Application, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -12,42 +12,31 @@ logger = logging.getLogger(__name__)
 
 
 class ApplicationAction(StrEnum):
+    START = "start"
     SUBMIT = "submit"
     MODIFY = "modify"
-
-
-def get_required_forms_for_application(application: Application) -> list[Form]:
-    competition_forms = application.competition.competition_forms
-    required_competition_forms: list[Form] = []
-
-    for competition_form in competition_forms:
-        if competition_form.is_required:
-            required_competition_forms.append(competition_form.form)
-
-        # In the future some forms may be considered required based
-        # on a users answers (you said yes to X, form ABC is now required)
-        # but for now we'll only consider the always-required forms.
-
-    return required_competition_forms
 
 
 def get_required_form_errors(application: Application) -> list[ValidationErrorDetail]:
     """Get validation errors for an application missing required forms"""
 
-    required_forms: list[Form] = get_required_forms_for_application(application)
-
-    existing_application_form_ids = [app_form.form_id for app_form in application.application_forms]
+    existing_competition_form_ids = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
 
     required_form_errors: list[ValidationErrorDetail] = []
 
-    for required_form in required_forms:
-        if required_form.form_id not in existing_application_form_ids:
+    for competition_form in application.competition.competition_forms:
+        if (
+            competition_form.is_required
+            and competition_form.competition_form_id not in existing_competition_form_ids
+        ):
             required_form_errors.append(
                 ValidationErrorDetail(
-                    message=f"Form {required_form.form_name} is required",
+                    message=f"Form {competition_form.form.form_name} is required",
                     type=ValidationErrorType.MISSING_REQUIRED_FORM,
                     field="form_id",
-                    value=required_form.form_id,
+                    value=competition_form.form_id,
                 )
             )
 
@@ -117,7 +106,11 @@ def validate_application_in_progress(application: Application, action: Applicati
         message = f"Cannot {action} application. It is currently in status: {application.application_status}"
         logger.info(
             f"Cannot {action} application, not currently in progress",
-            extra={"action": action, "application_status": application.application_status},
+            extra={
+                "action": action,
+                "application_status": application.application_status,
+                "application_action": action,
+            },
         )
         raise_flask_error(
             403,
@@ -126,6 +119,35 @@ def validate_application_in_progress(application: Application, action: Applicati
                 ValidationErrorDetail(
                     type=ValidationErrorType.NOT_IN_PROGRESS,
                     message=f"Cannot {action} application, not currently in progress",
+                )
+            ],
+        )
+
+
+def validate_competition_open(competition: Competition, action: ApplicationAction) -> None:
+    """
+    Validate that the competition is still open for applications.
+    Takes into account the competition closing date and grace period.
+    """
+
+    if not competition.is_open:
+        message = f"Cannot {action} application - competition is not open"
+        logger.info(
+            message,
+            extra={
+                "opening_date": competition.opening_date,
+                "closing_date": competition.closing_date,
+                "grace_period": competition.grace_period,
+                "application_action": action,
+            },
+        )
+        raise_flask_error(
+            422,
+            message,
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.COMPETITION_NOT_OPEN,
+                    message="Competition is not open for application",
                 )
             ],
         )

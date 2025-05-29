@@ -111,12 +111,8 @@ def test_application_start_before_opening_date(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is not yet open for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_YET_OPEN
-    assert response.json["errors"][0]["field"] == "opening_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (
@@ -147,12 +143,8 @@ def test_application_start_after_closing_date(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is already closed for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
-    assert response.json["errors"][0]["field"] == "closing_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (
@@ -218,12 +210,8 @@ def test_application_start_after_grace_period(
     )
 
     assert response.status_code == 422
-    assert (
-        "Cannot start application - competition is already closed for applications"
-        in response.json["message"]
-    )
-    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_ALREADY_CLOSED
-    assert response.json["errors"][0]["field"] == "closing_date"
+    assert "Cannot start application - competition is not open" in response.json["message"]
+    assert response.json["errors"][0]["type"] == ValidationErrorType.COMPETITION_NOT_OPEN
 
     # Verify no application was created
     applications_count = (
@@ -362,7 +350,7 @@ def test_application_form_update_success_create(
     application_form = db_session.execute(
         select(ApplicationForm).where(
             ApplicationForm.application_id == application.application_id,
-            ApplicationForm.form_id == competition_form.form_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
         )
     ).scalar_one_or_none()
 
@@ -379,26 +367,24 @@ def test_application_form_update_success_update(
 
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
 
     existing_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
+        competition_form=competition_form,
         application_response={"name": "Original Name"},
     )
 
     # Associate user with application
     ApplicationUserFactory.create(user=user, application=application)
 
-    application_id = str(application.application_id)
-    form_id = str(existing_form.form_id)
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}",
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -456,14 +442,14 @@ def test_application_form_update_with_validation_warnings(
 
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
 
     existing_application_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
+        competition_form=competition_form,
         application_response={"name": "Original Name"},
     )
 
@@ -499,14 +485,14 @@ def test_application_form_update_with_invalid_schema_500(
 
     form = FormFactory.create(form_json_schema={"properties": ["bad"]})
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
 
     existing_application_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
+        competition_form=competition_form,
         application_response={"name": "Original Name"},
     )
 
@@ -533,14 +519,13 @@ def test_application_form_update_application_not_found(
 ):
     """Test application form update fails when application doesn't exist"""
     # Create form
-    form = FormFactory.create()
+    competition_form = CompetitionFormFactory.create()
 
     non_existent_application_id = str(uuid.uuid4())
-    form_id = str(form.form_id)
     request_data = {"application_response": {"name": "John Doe"}}
 
     response = client.put(
-        f"/alpha/applications/{non_existent_application_id}/forms/{form_id}",
+        f"/alpha/applications/{non_existent_application_id}/forms/{competition_form.form_id}",
         json=request_data,
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -553,7 +538,11 @@ def test_application_form_update_application_not_found(
 
     # Verify no application form was created
     application_forms = (
-        db_session.execute(select(ApplicationForm).where(ApplicationForm.form_id == form_id))
+        db_session.execute(
+            select(ApplicationForm).where(
+                ApplicationForm.competition_form_id == competition_form.form_id
+            )
+        )
         .scalars()
         .all()
     )
@@ -664,20 +653,15 @@ def test_application_form_update_complex_json(
     # Create application
     application = ApplicationFactory.create()
 
-    application_form = ApplicationFormFactory.create(
-        application=application,
-    )
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
 
-    CompetitionFormFactory.create(
-        competition=application.competition,
-        form=application_form.form,
+    application_form = ApplicationFormFactory.create(
+        application=application, competition_form=competition_form
     )
 
     # Associate user with application
     ApplicationUserFactory.create(user=user, application=application)
 
-    application_id = str(application.application_id)
-    form_id = str(application_form.form_id)
     complex_json = {
         "personal_info": {
             "name": "John Doe",
@@ -696,7 +680,7 @@ def test_application_form_update_complex_json(
 
     # Act
     response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}",
+        f"/alpha/applications/{application.application_id}/forms/{competition_form.form_id}",
         json=request_data,
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -709,8 +693,7 @@ def test_application_form_update_complex_json(
     db_session.expunge_all()
     application_form = db_session.execute(
         select(ApplicationForm).where(
-            ApplicationForm.application_id == application.application_id,
-            ApplicationForm.form_id == application_form.form_id,
+            ApplicationForm.application_form_id == application_form.application_form_id
         )
     ).scalar_one_or_none()
 
@@ -832,6 +815,82 @@ def test_application_get_success(client, enable_factory_create, db_session, user
         }
 
 
+def test_application_get_success_with_validation_issues(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+
+    # Create a competition with two forms
+    form_a = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form_b = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition = CompetitionFactory.create(competition_forms=[])
+    competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
+    competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
+
+    # Create an application with two app forms, one partially filled out, one not started
+    application = ApplicationFactory.create(competition=competition)
+    application_form_a = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"age": 500},
+    )
+    application_form_b = ApplicationFormFactory.create(
+        application=application, competition_form=competition_form_b, application_response={}
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    print(response.json)
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    assert len(response.json["warnings"]) == 2
+    for warning in response.json["warnings"]:
+        assert warning["field"] == "application_form_id"
+        assert warning["message"] == "The application form has outstanding errors."
+        assert warning["type"] == "application_form_validation"
+        assert warning["value"] in {
+            str(application_form_a.application_form_id),
+            str(application_form_b.application_form_id),
+        }
+
+    form_a_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_a.application_form_id)
+    ]
+    assert form_a_warnings == [
+        {
+            "field": "$",
+            "message": "'name' is a required property",
+            "type": "required",
+            "value": None,
+        },
+        {
+            "field": "$.age",
+            "message": "500 is greater than the maximum of 200",
+            "type": "maximum",
+            "value": None,
+        },
+    ]
+
+    form_b_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_b.application_form_id)
+    ]
+    assert form_b_warnings == [
+        {
+            "field": "$",
+            "message": "'name' is a required property",
+            "type": "required",
+            "value": None,
+        }
+    ]
+
+
 def test_application_get_application_not_found(
     client, enable_factory_create, db_session, user_auth_token
 ):
@@ -906,7 +965,7 @@ def test_application_form_get_with_validation_warnings(
     # Create application with the form
     application = ApplicationFactory.create()
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
@@ -914,7 +973,7 @@ def test_application_form_get_with_validation_warnings(
     # Create application form with the test response data
     application_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
+        competition_form=competition_form,
         application_response=application_response,
     )
 
@@ -949,7 +1008,7 @@ def test_application_form_get_with_invalid_schema(
     # Create application with the form
     application = ApplicationFactory.create()
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
@@ -957,7 +1016,7 @@ def test_application_form_get_with_invalid_schema(
     # Create application form with some data
     application_form = ApplicationFormFactory.create(
         application=application,
-        form=form,
+        competition_form=competition_form,
         application_response={"name": "Test Name"},
     )
 
@@ -986,7 +1045,7 @@ def test_application_submit_success(
 
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=competition,
         form=form,
     )
@@ -996,7 +1055,9 @@ def test_application_submit_success(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
     ApplicationFormFactory.create(
-        application=application, form=form, application_response={"name": "Test Name"}
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
     )
 
     application_id = str(application.application_id)
@@ -1027,7 +1088,7 @@ def test_application_submit_validation_issues(
 
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(
+    competition_form = CompetitionFormFactory.create(
         competition=competition,
         form=form,
     )
@@ -1037,7 +1098,7 @@ def test_application_submit_validation_issues(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
     application_form = ApplicationFormFactory.create(
-        application=application, form=form, application_response={"name": 5}
+        application=application, competition_form=competition_form, application_response={"name": 5}
     )
 
     ApplicationUserFactory.create(application=application, user=user)
@@ -1425,7 +1486,7 @@ def test_application_form_update_success_when_associated(
     application_form = db_session.execute(
         select(ApplicationForm).where(
             ApplicationForm.application_id == application.application_id,
-            ApplicationForm.form_id == competition_form.form_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
         )
     ).scalar_one_or_none()
 
@@ -1445,7 +1506,9 @@ def test_application_submit_success_when_associated(
 
     # Create a form and make it required for the competition
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
-    CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
+    competition_form = CompetitionFormFactory.create(
+        competition=competition, form=form, is_required=True
+    )
 
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(
@@ -1454,7 +1517,9 @@ def test_application_submit_success_when_associated(
 
     # Create an application form with valid data to ensure validation passes
     ApplicationFormFactory.create(
-        application=application, form=form, application_response={"name": "Valid Name"}
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Valid Name"},
     )
 
     # Create ApplicationUser association

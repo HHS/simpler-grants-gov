@@ -4,7 +4,8 @@ Fluent Bit is a log processor and forwarder designed for collecting, parsing, an
 
 ## Deployment
 
-We have a custom build of fluentbit, that can be from built like so, from the top level directory (eg. not this one, the one above it)
+We have a custom build of fluentbit, that can be from built like so, from the top level directory (eg. not this one, the one above it).
+Before running below, [make sure you have set up your AWS CLI and are logged in](../documentation/infra/set-up-infrastructure-tools.md#create-a-profile-named-grants).
 
 ```bash
 env APP_NAME=fluentbit make release-build
@@ -14,10 +15,10 @@ env APP_NAME=fluentbit make release-publish
 After you publish a new version of fluentbit, store it in the `fluent-bit-commit` [SSM parameter](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/fluent-bit-commit/). You can do so via
 
 ```bash
-aws ssm put-parameter --name fluent-bit-commit --value WHATEVER --overwrite
+aws ssm put-parameter --name fluent-bit-commit --value <IMAGE HASH JUST PUSHED UP VIA release-publish> --overwrite
 ```
 
-The next deploy of any given server will then pick up that commit.
+The next full deploy (not re-deploy) of any given server will then pick up that commit.
 
 ## Testing
 

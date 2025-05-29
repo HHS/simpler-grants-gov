@@ -1,5 +1,8 @@
+from datetime import date
+
 import apiflask
 import pytest
+from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus
@@ -7,6 +10,7 @@ from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
     validate_application_in_progress,
+    validate_competition_open,
 )
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -73,7 +77,7 @@ def form_c():
 
 
 @pytest.fixture
-def competition(form_a, form_b):
+def competition(form_a, form_b, form_c):
     comp = CompetitionFactory.build(competition_forms=[])
 
     # Build doesn't quite connect things for you, so attach the competition forms like this
@@ -81,22 +85,45 @@ def competition(form_a, form_b):
     comp.competition_forms = [
         CompetitionFormFactory.build(competition=comp, form=form_a, is_required=True),
         CompetitionFormFactory.build(competition=comp, form=form_b, is_required=True),
-        CompetitionFormFactory.build(competition=comp, form=form_b, is_required=False),
+        CompetitionFormFactory.build(competition=comp, form=form_c, is_required=False),
     ]
 
     return comp
 
 
-def test_validate_form_all_valid(competition, form_a, form_b, form_c):
+@pytest.fixture
+def competition_form_a(competition, form_a):
+    return next(filter(lambda c: c.form_id == form_a.form_id, competition.competition_forms), None)
+
+
+@pytest.fixture
+def competition_form_b(competition, form_b):
+    return next(filter(lambda c: c.form_id == form_b.form_id, competition.competition_forms), None)
+
+
+@pytest.fixture
+def competition_form_c(competition, form_c):
+    return next(filter(lambda c: c.form_id == form_c.form_id, competition.competition_forms), None)
+
+
+def test_validate_form_all_valid(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
     application = ApplicationFactory.build(competition=competition, application_forms=[])
     application_form_a = ApplicationFormFactory.build(
-        application=application, form=form_a, application_response=VALID_FORM_A_RESPONSE
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
     )
     application_form_b = ApplicationFormFactory.build(
-        application=application, form=form_b, application_response=VALID_FORM_B_RESPONSE
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, form=form_c, application_response=VALID_FORM_C_RESPONSE
+        application=application,
+        competition_form=competition_form_c,
+        application_response=VALID_FORM_C_RESPONSE,
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -105,13 +132,19 @@ def test_validate_form_all_valid(competition, form_a, form_b, form_c):
     assert len(error_detail) == 0
 
 
-def test_validate_form_all_valid_missing_optional_form(competition, form_a, form_b, form_c):
+def test_validate_form_all_valid_missing_optional_form(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
     application = ApplicationFactory.build(competition=competition, application_forms=[])
     application_form_a = ApplicationFormFactory.build(
-        application=application, form=form_a, application_response=VALID_FORM_A_RESPONSE
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
     )
     application_form_b = ApplicationFormFactory.build(
-        application=application, form=form_b, application_response=VALID_FORM_B_RESPONSE
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
     )
     application.application_forms = [application_form_a, application_form_b]
 
@@ -120,7 +153,7 @@ def test_validate_form_all_valid_missing_optional_form(competition, form_a, form
     assert len(error_detail) == 0
 
 
-def test_validate_forms_missing_required_forms(competition, form_a, form_b):
+def test_validate_forms_missing_required_forms(competition, competition_form_a, competition_form_b):
     # Add no forms, A & B are both required
     application = ApplicationFactory.build(competition=competition, application_forms=[])
 
@@ -132,24 +165,28 @@ def test_validate_forms_missing_required_forms(competition, form_a, form_b):
         assert validation_error.message in ["Form form_a is required", "Form form_b is required"]
         assert validation_error.type == ValidationErrorType.MISSING_REQUIRED_FORM
         assert validation_error.field == "form_id"
-        assert validation_error.value in [form_a.form_id, form_b.form_id]
+        assert validation_error.value in [competition_form_a.form_id, competition_form_b.form_id]
 
     # No error detail because that's only for specific validations
     assert len(error_detail) == 0
 
 
-def test_validate_forms_invalid_responses(competition, form_a, form_b, form_c):
+def test_validate_forms_invalid_responses(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
     application = ApplicationFactory.build(competition=competition, application_forms=[])
     application_form_a = ApplicationFormFactory.build(
-        application=application, form=form_a, application_response={"str_a": {}, "obj_a": {}}
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"str_a": {}, "obj_a": {}},
     )
     application_form_b = ApplicationFormFactory.build(
         application=application,
-        form=form_b,
+        competition_form=competition_form_b,
         application_response={"str_b": "text", "bool_b": "hello"},
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, form=form_c, application_response={}
+        application=application, competition_form=competition_form_c, application_response={}
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -213,4 +250,55 @@ def test_validate_application_in_progress_failure(enable_factory_create, db_sess
     )
     assert (
         excinfo.value.extra_data["validation_issues"][0].type == ValidationErrorType.NOT_IN_PROGRESS
+    )
+
+
+@pytest.mark.parametrize(
+    "opening_date,closing_date,grace_period",
+    [
+        (None, None, None),
+        (date(2020, 1, 1), date(2030, 1, 1), None),
+        # On opening date
+        (date(2025, 1, 15), date(2030, 1, 1), None),
+        # On closing date
+        (date(2025, 1, 1), date(2025, 1, 15), None),
+        # On closing date with grace period
+        (date(2025, 1, 1), date(2025, 1, 5), 10),
+    ],
+)
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_validate_competition_open_happy(opening_date, closing_date, grace_period):
+    competition = CompetitionFactory.build(
+        opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
+    )
+
+    try:
+        validate_competition_open(competition, ApplicationAction.SUBMIT)
+    except Exception:
+        pytest.fail("An unexpected exception occurred")
+
+
+@pytest.mark.parametrize(
+    "opening_date,closing_date,grace_period",
+    [
+        # Closed already
+        (date(2020, 1, 1), date(2025, 1, 14), None),
+        # Not yet open
+        (date(2025, 1, 16), date(2025, 1, 25), None),
+    ],
+)
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_validate_competition_open_error(opening_date, closing_date, grace_period):
+    competition = CompetitionFactory.build(
+        opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
+    )
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        validate_competition_open(competition, ApplicationAction.SUBMIT)
+
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.message == "Cannot submit application - competition is not open"
+    assert (
+        excinfo.value.extra_data["validation_issues"][0].type
+        == ValidationErrorType.COMPETITION_NOT_OPEN
     )

@@ -962,6 +962,8 @@ class CompetitionFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
+    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
+
     competition_forms = factory.RelatedFactoryList(
         "tests.src.db.models.factories.CompetitionFormFactory",
         factory_related_name="competition",
@@ -1098,7 +1100,7 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-    competition = factory.SubFactory(CompetitionFactory)
+    competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
     form = factory.SubFactory(FormFactory)
@@ -1121,7 +1123,7 @@ class ApplicationFactory(BaseFactory):
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
-    application_status = factory.LazyFunction(lambda: ApplicationStatus.IN_PROGRESS)
+    application_status = ApplicationStatus.IN_PROGRESS
     application_name = factory.Faker("sentence", nb_words=3)
 
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
@@ -1129,15 +1131,21 @@ class ApplicationFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
 
-    application_status = ApplicationStatus.IN_PROGRESS
-
     class Params:
         with_forms = factory.Trait(
+            # If we want forms created, we'll make a competition without any forms
+            # which will get added by the CompetitionForm factory below
+            competition=factory.SubFactory(CompetitionFactory, competition_forms=[]),
             application_forms=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.ApplicationFormFactory",
                 factory_related_name="application",
                 size=lambda: random.randint(1, 3),
-            )
+                # This SelfAttribute gets the competition we just made above
+                competition_form=factory.SubFactory(
+                    CompetitionFormFactory,
+                    competition=factory.SelfAttribute("..application.competition"),
+                ),
+            ),
         )
 
 
@@ -1150,8 +1158,8 @@ class ApplicationFormFactory(BaseFactory):
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
 
-    form = factory.SubFactory(FormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+    competition_form = factory.SubFactory(CompetitionFormFactory)
+    competition_form_id = factory.LazyAttribute(lambda o: o.competition_form.competition_form_id)
 
     application_response = factory.LazyFunction(
         lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}

@@ -62,8 +62,8 @@ There are multiple ways to authenticate, but we recommend creating a separate pr
 
 ```bash
 $ aws configure
-AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS Access Key ID [None]: <Your AWS Access Key ID>
+AWS Secret Access Key [None]: <Your AWS Secret Access Key>
 Default region name [None]: us-east-2
 Default output format [None]: json
 ```
@@ -72,8 +72,8 @@ Default output format [None]: json
 
 ```bash
 $ aws configure --profile dev
-AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS Access Key ID [None]: <Your AWS Access Key ID>
+AWS Secret Access Key [None]: <Your AWS Secret Access Key>
 Default region name [None]: us-east-2
 Default output format [None]: json
 ```
@@ -84,6 +84,27 @@ Once you're done, verify access by running the following command to print out in
 
 ```bash
 aws sts get-caller-identity
+```
+
+### Recommended AWS Profile Set Up
+
+#### Create a profile named grants (one-time set up)
+
+```bash
+$ aws configure --profile grants
+AWS Access Key ID [None]: <Your AWS Access Key ID>
+AWS Secret Access Key [None]: <Your AWS Secret Access Key>
+Default region name [None]: us-east-2
+Default output format [None]: json
+```
+
+#### Utilize it for AWS work (ongoing)
+
+Execute this before running any AWS CLI or Terraform commands
+
+```bash
+AWS_PROFILE=grants
+aws sso login
 ```
 
 ### References

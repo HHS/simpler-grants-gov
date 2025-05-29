@@ -3,20 +3,20 @@
 exports[`Homepage Building Content matches snapshot 1`] = `
 <div>
   <div
-    class="grid-container"
+    class="grid-container padding-y-4 tablet-lg:padding-y-6"
     data-testid="homepage-building"
   >
     <div
-      class="grid-row grid-gap-md padding-6"
+      class="grid-row grid-gap"
       data-testid="grid"
     >
       <div
-        class="tablet:grid-col"
+        class="tablet-lg:grid-col tablet-lg:padding-right-6"
         data-testid="grid"
       >
         <img
           alt="events-img"
-          class="height-auto position-relative padding-right-6 padding-top-3"
+          class="height-auto position-relative margin-bottom-2 tablet-lg:margin-bottom-0"
           data-nimg="1"
           decoding="async"
           height="40"
@@ -28,14 +28,14 @@ exports[`Homepage Building Content matches snapshot 1`] = `
         />
       </div>
       <div
-        class="tablet:grid-col"
+        class="tablet-lg:grid-col"
         data-testid="grid"
       >
         <div
           class=""
           data-testid="grid"
         >
-          <h1>
+          <h2>
             Building 
             <span
               class="text-italic"
@@ -49,19 +49,14 @@ exports[`Homepage Building Content matches snapshot 1`] = `
               for
             </span>
              you
-          </h1>
-        </div>
-        <div
-          class=""
-          data-testid="grid"
-        >
+          </h2>
           <p
-            class="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+            class="font-sans-md tablet-lg:font-sans-lg"
           >
             Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.
           </p>
           <p
-            class="line-height-sans-3 font-sans-md tablet:font-sans-lg text-balance"
+            class="font-sans-md tablet-lg:font-sans-lg"
           >
             All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.
           </p>

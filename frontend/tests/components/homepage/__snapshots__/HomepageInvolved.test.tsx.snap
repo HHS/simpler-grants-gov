@@ -10,16 +10,14 @@ exports[`Homepage Involved Content matches snapshot 1`] = `
       data-testid="gridContainer"
     >
       <div
-        class="grid-row"
+        class="grid-row grid-gap"
         data-testid="grid"
       >
         <div
           class="tablet-lg:grid-col-4"
           data-testid="grid"
         >
-          <h2
-            class="margin-0 font-sans-lg tablet:font-sans-xl tablet-lg:maxw-card-lg"
-          >
+          <h2>
             More ways to get involved
           </h2>
         </div>
@@ -44,29 +42,30 @@ exports[`Homepage Involved Content matches snapshot 1`] = `
                   href="/img.jpg#code"
                 />
               </svg>
-              <h3>
+              <h3
+                class="margin-top-2"
+              >
                 Contribute your technical expertise
               </h3>
-              <p
-                class="font-sans-md line-height-sans-4"
-              >
+              <p>
                 We're always excited to welcome new open source developers to our community.
               </p>
-              <a
-                class="font-sans-md line-height-sans-4"
-                href="https://wiki.simpler.grants.gov/get-involved/github-code"
-              >
-                Learn how to contribute code
-              </a>
-              <br />
-              <a
-                class="font-sans-md line-height-sans-4"
-                href="https://simplergrants.discourse.group/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Chat on the Discourse forum
-              </a>
+              <p>
+                <a
+                  href="https://wiki.simpler.grants.gov/get-involved/github-code"
+                >
+                  Learn how to contribute code
+                </a>
+              </p>
+              <p>
+                <a
+                  href="https://simplergrants.discourse.group/"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Chat on the Discourse forum
+                </a>
+              </p>
             </div>
             <div
               class="grid-col-6"
@@ -81,20 +80,21 @@ exports[`Homepage Involved Content matches snapshot 1`] = `
                   href="/img.jpg#chat"
                 />
               </svg>
-              <h3>
+              <h3
+                class="margin-top-2"
+              >
                 Participate in user research
               </h3>
-              <p
-                class="font-sans-md line-height-sans-4"
-              >
+              <p>
                 Be a part of the design process by taking part in usability tests and interviews.
               </p>
-              <a
-                class="font-sans-md line-height-sans-4"
-                href="https://ethn.io/91822"
-              >
-                Sign up to participate in future studies
-              </a>
+              <p>
+                <a
+                  href="https://ethn.io/91822"
+                >
+                  Sign up to participate in future studies
+                </a>
+              </p>
             </div>
           </div>
         </div>
