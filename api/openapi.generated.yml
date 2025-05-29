@@ -2981,10 +2981,10 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        competition_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+        competition:
+          type:
+          - object
+          $ref: '#/components/schemas/CompetitionAlpha'
         application_forms:
           type: array
           items:
