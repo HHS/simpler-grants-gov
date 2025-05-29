@@ -27,6 +27,11 @@ class ApplicationUpdateResponseDataSchema(Schema):
 class ApplicationUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationUpdateResponseDataSchema())
 
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
 
 class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
@@ -34,6 +39,11 @@ class ApplicationFormUpdateRequestSchema(Schema):
 
 class ApplicationFormUpdateResponseDataSchema(Schema):
     application_id = fields.UUID()
+
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -46,7 +56,10 @@ class ApplicationFormGetResponseDataSchema(Schema):
     form_id = fields.UUID()
     application_response = fields.Dict()
 
-    application_form_status = fields.Enum(ApplicationFormStatus, metadata={"description": "TODO"})
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

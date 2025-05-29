@@ -3,8 +3,8 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Competition
+from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -59,8 +59,8 @@ def get_application_form_errors(
 
     # For each application form, verify it passes JSON schema validation
     for application_form in application.application_forms:
-        form_validation_errors: list[ValidationErrorDetail] = validate_json_schema_for_form(
-            application_form.application_response, application_form.form
+        form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
+            application_form
         )
 
         if form_validation_errors:
@@ -76,6 +76,27 @@ def get_application_form_errors(
             )
 
     return form_errors, form_error_map
+
+
+def validate_application_form(application_form: ApplicationForm) -> list[ValidationErrorDetail]:
+    """Validate an application form, and set the current application form status"""
+    form_validation_errors: list[ValidationErrorDetail] = validate_json_schema_for_form(
+        application_form.application_response, application_form.form
+    )
+
+    # If there are no issues, we consider the form complete
+    if len(form_validation_errors) == 0:
+        application_form_status = ApplicationFormStatus.COMPLETE
+    # If the form has no answers, we assume it has not been started
+    elif len(application_form.application_response) == 0:
+        application_form_status = ApplicationFormStatus.NOT_STARTED
+    # If the form has been started, but has validation issues, assume it is in-progress
+    else:
+        application_form_status = ApplicationFormStatus.IN_PROGRESS
+
+    application_form.application_form_status = application_form_status  # type: ignore[attr-defined]
+
+    return form_validation_errors
 
 
 def validate_forms(application: Application) -> None:

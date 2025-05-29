@@ -6,10 +6,8 @@ import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.user_models import User
-from src.form_schema.jsonschema_validator import (
-    ValidationErrorDetail,
-    validate_json_schema_for_form,
-)
+from src.form_schema.jsonschema_validator import ValidationErrorDetail
+from src.services.applications.application_validation import validate_application_form
 from src.services.applications.auth_utils import check_user_application_access
 from src.services.applications.get_application import get_application
 
@@ -37,9 +35,7 @@ def get_application_form(
     # Check if the user has access to the application
     check_user_application_access(application, user)
 
-    # TODO - move this to the validation util?
-    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_form.application_response, application_form.form
-    )
+    # Get a list of validation warnings (also sets form status)
+    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
 
     return application_form, warnings
