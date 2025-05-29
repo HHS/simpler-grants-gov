@@ -828,7 +828,6 @@ def test_application_get_success_with_validation_issues(
 
     # Create an application with two app forms, one partially filled out, one not started
     application = ApplicationFactory.create(competition=competition)
-    # TODO - after merging the competition form changes - fix this / rely on the factories more
     application_form_a = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form_a,
