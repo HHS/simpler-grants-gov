@@ -65,17 +65,16 @@ class SearchNotificationTask(BaseNotificationTask):
             current_results = search_opportunities_id(self.search_client, searches[0].search_query)
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids or [])
-                current_results_set = set(current_results)
-
                 # Find NEW opportunities (in current but not in previous)
-                new_opportunities = current_results_set - previous_results
+                new_opportunities = set(current_results) - previous_results
+                top_new_opportunities = set(current_results[:25]) - previous_results
 
                 # Only add searches that have new opportunities
                 if new_opportunities:
                     user_id = saved_search.user_id
                     updated_saved_searches.setdefault(user_id, []).append(saved_search)
-                    # Add new opportunities for this user
-                    user_new_opportunities.setdefault(user_id, set()).update(new_opportunities)
+                    # Add top new opportunities for this user
+                    user_new_opportunities.setdefault(user_id, set()).update(top_new_opportunities)
 
                 # Always update the saved search with current results
                 saved_search.searched_opportunity_ids = current_results
@@ -89,7 +88,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            # Get all NEW opportunity IDs for this user
+            # Get all of the most relevant NEW opportunity IDs for this user
             new_opportunity_ids = user_new_opportunities[user_id]
 
             logger.info(
@@ -123,7 +122,6 @@ class SearchNotificationTask(BaseNotificationTask):
                         CurrentOpportunitySummary.opportunity_summary
                     )
                 )
-                .limit(10)
             )
 
             opportunities = self.db_session.execute(opportunities_stmt).scalars().all()
