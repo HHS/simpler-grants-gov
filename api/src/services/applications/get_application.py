@@ -5,7 +5,12 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import Application, ApplicationForm, Competition, CompetitionForm
+from src.db.models.competition_models import (
+    Application,
+    ApplicationForm,
+    Competition,
+    CompetitionForm,
+)
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.auth_utils import check_user_application_access
 
