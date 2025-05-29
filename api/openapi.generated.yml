@@ -2965,6 +2965,14 @@ components:
         application_response:
           type: object
           additionalProperties: {}
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationUser:
       type: object
       properties:
@@ -3063,6 +3071,14 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -3359,6 +3375,14 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationFormUpdateResponse:
       type: object
       properties:

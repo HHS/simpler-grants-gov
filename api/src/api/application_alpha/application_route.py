@@ -104,13 +104,11 @@ def application_form_update(
 
     with db_session.begin():
         # Call the service to update the application form
-        _, warnings = update_application_form(
+        application_form, warnings = update_application_form(
             db_session, application_id, form_id, application_response, user
         )
 
-    return response.ApiResponse(
-        message="Success", data={"application_id": application_id}, warnings=warnings
-    )
+    return response.ApiResponse(message="Success", data=application_form, warnings=warnings)
 
 
 @application_blueprint.get(
