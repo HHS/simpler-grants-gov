@@ -85,6 +85,20 @@ def test_get_s3_file_name(path, file_name):
     assert file_util.get_file_name(path) == file_name
 
 
+@pytest.mark.parametrize(
+    "path,file_name",
+    [
+        ("s3://bucket/folder/test~test.txt", "testtest.txt"),
+        ("s3://bucket_x/file.csv", "file.csv"),
+        ("s3://bucket-y/folder/path/to/abc has spaces.zip", "abc_has_spaces.zip"),
+        ("./folder/path file\\x", "path_filex"),
+        ("sftp://../../..//filename.....", "filename"),
+    ],
+)
+def test_get_secure_file_name(path, file_name):
+    assert file_util.get_secure_file_name(path) == file_name
+
+
 def test_get_file_length_bytes(tmp_path):
     test_content = "Hello, World!"
     test_file = tmp_path / "test.txt"

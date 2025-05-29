@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import botocore.client
 import smart_open
 from botocore.config import Config
+from werkzeug.utils import secure_filename
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 
@@ -35,7 +36,14 @@ def get_s3_file_key(path: str | Path) -> str:
 
 
 def get_file_name(path: str) -> str:
-    return os.path.basename(path)
+    return Path(path).name
+
+
+def get_secure_file_name(path: str) -> str:
+    """Grabs the filename of the path and then makes it safe for further path operations
+    while removing non-ascii characters.
+    """
+    return secure_filename(get_file_name(path))
 
 
 def join(*parts: str) -> str:
@@ -47,7 +55,9 @@ def join(*parts: str) -> str:
 ##################################
 
 
-def open_stream(path: str | Path, mode: str = "r", encoding: str | None = None) -> Any:
+def open_stream(
+    path: str | Path, mode: str = "r", encoding: str | None = None, content_type: str | None = None
+) -> Any:
     if is_s3_path(path):
         s3_client = get_s3_client()
 
@@ -57,7 +67,16 @@ def open_stream(path: str | Path, mode: str = "r", encoding: str | None = None) 
             read_timeout=60,
             retries={"max_attempts": 10},
         )
-        so_transport_params = {"client_kwargs": {"config": so_config}, "client": s3_client}
+
+        client_kwargs = {"config": so_config}
+        # By default all files uploaded to s3 have a generic "application/octet-stream" content-type
+        # which means if they're opened in a browser they always download.
+        # We can set the content type (mimetype) by passing it to the create multipart upload function.
+        # See: https://github.com/piskvorky/smart_open?tab=readme-ov-file#s3-advanced-usage
+        if content_type:
+            client_kwargs["S3.Client.create_multipart_upload"] = {"ContentType": content_type}
+
+        so_transport_params = {"client_kwargs": client_kwargs, "client": s3_client}
 
         return smart_open.open(path, mode, transport_params=so_transport_params, encoding=encoding)
     else:
