@@ -104,14 +104,19 @@ def is_empty_str(value: str | None) -> bool:
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
-    log_extra = {"opportunity_id": source_opportunity.opportunity_id}
+    log_extra = {
+        "legacy_opportunity_id": source_opportunity.opportunity_id,
+        "opportunity_id": existing_opportunity.opportunity_id if existing_opportunity else None,
+    }
 
     if existing_opportunity is None:
         logger.info("Creating new opportunity record", extra=log_extra)
 
     # We always create a new opportunity record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
-    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+    target_opportunity = Opportunity(legacy_opportunity_id=source_opportunity.opportunity_id)
+    if existing_opportunity:
+        target_opportunity.opportunity_id = existing_opportunity.opportunity_id
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle

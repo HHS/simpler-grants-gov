@@ -58,7 +58,7 @@ def setup_opportunity(
 
     if create_existing:
         f.OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id,
+            legacy_opportunity_id=source_opportunity.opportunity_id,
             opportunity_attachments=[],
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
@@ -398,7 +398,7 @@ def validate_opportunity(
 ):
     opportunity = (
         db_session.query(Opportunity)
-        .filter(Opportunity.opportunity_id == source_opportunity.opportunity_id)
+        .filter(Opportunity.legacy_opportunity_id == source_opportunity.opportunity_id)
         .one_or_none()
     )
 
