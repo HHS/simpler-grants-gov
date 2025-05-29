@@ -13,6 +13,7 @@ import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
+import { ClearSearchButton } from "./ClearSearchButton";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -52,7 +53,7 @@ export function SearchVersionTwo({
                 queryTermFromParent={convertedSearchParams.query}
               />
             </div>
-            <div className="display-flex desktop:flex-5 dsektop:margin-top-0">
+            <div className="display-flex desktop:flex-5">
               <div className="flex-2 flex-align-self-end">
                 <DrawerUnit
                   drawerId="search-filter-drawer"
@@ -71,6 +72,17 @@ export function SearchVersionTwo({
                 <SaveSearchPanel />
               </div>
             </div>
+          </div>
+          <div className="desktop:display-flex desktop:margin-bottom-2 desktop:margin-top-0 margin-top-2">
+            <div className="flex-6"></div>
+            <div className="flex-3">
+              <ClearSearchButton
+                buttonText={t("drawer.clearAll")}
+                includeIcon={true}
+                className="display-block margin-x-auto"
+              />
+            </div>
+            <div className="flex-3"></div>
           </div>
           <SearchResults
             searchParams={convertedSearchParams}
