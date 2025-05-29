@@ -319,6 +319,9 @@ export const messages = {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
+  LogoutSession: {
+    loading: "loading"
+  },
   ErrorPages: {
     genericError: {
       pageTitle: "Error | Simpler.Grants.gov",
