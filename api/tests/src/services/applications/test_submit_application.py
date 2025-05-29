@@ -37,13 +37,15 @@ def test_submit_application_success(enable_factory_create, db_session):
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
-    CompetitionFormFactory.create(competition=competition, form=form)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
     ApplicationFormFactory.create(
-        application=application, form=form, application_response={"name": "Test Name"}
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
     )
 
     # Create a user and associate with the application
@@ -95,13 +97,13 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
-    CompetitionFormFactory.create(competition=competition, form=form)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
     ApplicationFormFactory.create(
-        application=application, form=form, application_response={"name": 5}
+        application=application, competition_form=competition_form, application_response={"name": 5}
     )
 
     # Create a user and associate with the application

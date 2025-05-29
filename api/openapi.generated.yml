@@ -2769,6 +2769,68 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
+    CompetitionFormAlpha:
+      type: object
+      properties:
+        is_required:
+          type: boolean
+          description: Whether the form is required for all applications to the competition
+        form:
+          type:
+          - object
+          $ref: '#/components/schemas/FormAlpha'
+    CompetitionAlpha:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_id:
+          type: integer
+          description: The opportunity ID that the competition is associated with
+        competition_forms:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionFormAlpha'
+        competition_title:
+          type: string
+          description: The title of the competition
+          example: Proposal for Advanced Research
+        opening_date:
+          type: string
+          format: date
+          description: The opening date of the competition, the first day applications
+            are accepted
+        closing_date:
+          type: string
+          format: date
+          description: The closing date of the competition, the last day applications
+            are accepted
+        contact_info:
+          type: string
+          description: Contact info getting assistance with the competition
+          example: 'Bob Smith
+
+            FakeMail@fake.com'
+        opportunity_assistance_listing:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        open_to_applicants:
+          type: array
+          items:
+            enum:
+            - individual
+            - organization
+            type:
+            - string
+        is_open:
+          type: boolean
+          description: Whether the competition is open and accepting applications
     OpportunityWithAttachmentsV1:
       type: object
       properties:
@@ -2856,6 +2918,13 @@ components:
             type:
             - object
             $ref: '#/components/schemas/OpportunityAttachmentV1'
+        competitions:
+          type: array
+          description: List of competitions associated with the opportunity
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionAlpha'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -3027,68 +3096,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    CompetitionFormAlpha:
-      type: object
-      properties:
-        is_required:
-          type: boolean
-          description: Whether the form is required for all applications to the competition
-        form:
-          type:
-          - object
-          $ref: '#/components/schemas/FormAlpha'
-    CompetitionAlpha:
-      type: object
-      properties:
-        competition_id:
-          type: string
-          format: uuid
-          description: The competition ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-        opportunity_id:
-          type: integer
-          description: The opportunity ID that the competition is associated with
-        competition_forms:
-          type: array
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/CompetitionFormAlpha'
-        competition_title:
-          type: string
-          description: The title of the competition
-          example: Proposal for Advanced Research
-        opening_date:
-          type: string
-          format: date
-          description: The opening date of the competition, the first day applications
-            are accepted
-        closing_date:
-          type: string
-          format: date
-          description: The closing date of the competition, the last day applications
-            are accepted
-        contact_info:
-          type: string
-          description: Contact info getting assistance with the competition
-          example: 'Bob Smith
-
-            FakeMail@fake.com'
-        opportunity_assistance_listing:
-          type:
-          - object
-          $ref: '#/components/schemas/OpportunityAssistanceListingV1'
-        open_to_applicants:
-          type: array
-          items:
-            enum:
-            - individual
-            - organization
-            type:
-            - string
-        is_open:
-          type: boolean
-          description: Whether the competition is open and accepting applications
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -3483,4 +3490,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-

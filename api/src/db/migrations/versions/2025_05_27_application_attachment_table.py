@@ -1,7 +1,7 @@
 """application attachment table
 
 Revision ID: 071e2b0d79fe
-Revises: 5db7e263238a
+Revises: 005c50485359
 Create Date: 2025-05-27 15:10:11.890623
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "071e2b0d79fe"
-down_revision = "5db7e263238a"
+down_revision = "005c50485359"
 branch_labels = None
 depends_on = None
 
