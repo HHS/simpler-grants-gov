@@ -72,11 +72,18 @@ class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
 
 class ApplicationAttachmentCreateSchema(Schema):
     # TODO - rename this one
-    application_attachment_id = fields.UUID(metadata={"description": "The ID of the uploaded application attachment"})
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the uploaded application attachment"}
+    )
 
 
 class ApplicationAttachmentCreateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentCreateSchema())
 
+
 class ApplicationAttachmentCreateRequestSchema(Schema):
-    file_attachment = fields.File(required=True, allow_none=False, metadata={"description": "The file to attach to an application"})
+    file_attachment = fields.File(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The file to attach to an application"},
+    )

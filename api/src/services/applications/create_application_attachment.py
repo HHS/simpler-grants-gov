@@ -1,33 +1,93 @@
-from src.db.models.competition_models import ApplicationAttachment
-import src.adapters.db as db
+import logging
 import uuid
-from werkzeug.utils import secure_filename
+from typing import cast
+
+from werkzeug.datastructures import FileStorage
+
+import src.adapters.db as db
+import src.util.file_util as file_util
+from src.adapters.aws import S3Config
+from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
 
+logger = logging.getLogger(__name__)
 
-def create_application_attachment(db_session: db.Session, application_id: uuid.UUID, user: User, form_and_files_data: dict) -> ApplicationAttachment:
+
+def create_application_attachment(
+    db_session: db.Session, application_id: uuid.UUID, user: User, form_and_files_data: dict
+) -> ApplicationAttachment:
     # Fetch the application - handles checking if application exists & user can access
     application = get_application(db_session, application_id, user)
 
-    # TODO - need to test
-    # * What we get on the file object
-    # * How well this works with our file util
-    # *
+    # This uses a werkzeug FileStorage object for managing the file operations
+    # Mimetype is set if the user specifies it when uploading the file which
+    # if it's done via a standard HTML file box would include it.
+    file_attachment: FileStorage = cast(FileStorage, form_and_files_data.get("file_attachment"))
 
-    print(form_and_files_data)
-
-    file_name = secure_filename("TODO")
+    # secure_filename makes the file safe in path operations and removes non-ascii characters
+    secure_file_name = file_util.get_secure_file_name(file_attachment.filename)
+    application_attachment_id = uuid.uuid4()
 
     # Build the s3 path
-
-    application_attachment = ApplicationAttachment(
-        application_attachment_id=uuid.uuid4(),
-        application=application,
-        file_location="TODO",
-        file_name=file_name,
-        mime_type="TODO",
-        file_size_bytes=1, # TODO - also make this a biginteger column
+    s3_file_location = build_s3_application_attachment_path(
+        secure_file_name, application_id, application_attachment_id
     )
 
+    # Upload the file to s3
+    logger.info(
+        "Uploading application attachment to s3",
+        extra={"application_attachment_id": application_attachment_id},
+    )
+    with file_util.open_stream(
+        s3_file_location, mode="wb", content_type=file_attachment.mimetype
+    ) as writefile:
+        file_attachment.save(writefile)
+
+    # The content length is not set in most cases on the FileStorage object (needs to be done explicitly by user)
+    # so instead get the content-length from the file on s3 after we upload it.
+    file_size_bytes = file_util.get_file_length_bytes(s3_file_location)
+
+    # Create the application attachment
+    application_attachment = ApplicationAttachment(
+        application_attachment_id=application_attachment_id,
+        application=application,
+        file_location=s3_file_location,
+        # In the file_name column we store the users actual file name unmodified
+        # so when we display it on the UI it matches whatever they uploaded.
+        file_name=file_util.get_file_name(file_attachment.filename),
+        mime_type=file_attachment.mimetype,
+        file_size_bytes=file_size_bytes,
+    )
+    db_session.add(application_attachment)
+
+    logger.info(
+        "Created application attachment",
+        extra={"application_attachment_id": application_attachment_id},
+    )
     return application_attachment
+
+
+def build_s3_application_attachment_path(
+    file_name: str, application_id: uuid.UUID, application_attachment_id: uuid.UUID
+) -> str:
+    """Construct a path to the application attachments on s3
+
+    Will be formatted like:
+
+        s3://<bucket>/applications/<application_id>/attachments/<attachment_id>/<file_name>
+
+    We store each file in a separate folder as we don't require file names to be unique.
+    """
+    # We store files on the draft (non-public) s3 bucket, they are never public.
+    s3_config = S3Config()
+    base_path = s3_config.draft_files_bucket_path
+
+    return file_util.join(
+        base_path,
+        "applications",
+        str(application_id),
+        "attachments",
+        str(application_attachment_id),
+        file_name,
+    )
