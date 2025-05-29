@@ -58,7 +58,7 @@ def setup_opportunity(
 
     if create_existing:
         f.OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id,
+            legacy_opportunity_id=source_opportunity.opportunity_id,
             opportunity_attachments=[],
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
@@ -81,7 +81,7 @@ def setup_cfda(
 
     # If you don't provide an opportunity, you need to provide an ID
     if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_cfda = f.StagingTopportunityCfdaFactory.create(
         **source_values,
@@ -94,7 +94,7 @@ def setup_cfda(
     if create_existing:
         f.OpportunityAssistanceListingFactory.create(
             opportunity=opportunity,
-            opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
             timestamps_in_past=True,
@@ -178,7 +178,7 @@ def setup_applicant_type(
 
     source_applicant_type = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         at_id=legacy_lookup_value,
@@ -272,7 +272,7 @@ def setup_funding_category(
 
     source_funding_category = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fac_id=legacy_lookup_value,
@@ -398,7 +398,7 @@ def validate_opportunity(
 ):
     opportunity = (
         db_session.query(Opportunity)
-        .filter(Opportunity.opportunity_id == source_opportunity.opportunity_id)
+        .filter(Opportunity.legacy_opportunity_id == source_opportunity.opportunity_id)
         .one_or_none()
     )
 
@@ -442,7 +442,7 @@ def validate_assistance_listing(
     assistance_listing = (
         db_session.query(OpportunityAssistanceListing)
         .filter(
-            OpportunityAssistanceListing.opportunity_assistance_listing_id
+            OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
             == source_cfda.opp_cfda_id
         )
         .one_or_none()
@@ -574,7 +574,7 @@ def validate_applicant_type(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_applicant_type.is_forecast,
-            OpportunitySummary.opportunity_id == source_applicant_type.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_applicant_type.opportunity_id,
         )
         .scalar()
     )
@@ -667,7 +667,7 @@ def validate_funding_category(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_category.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_category.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_category.opportunity_id,
         )
         .scalar()
     )
