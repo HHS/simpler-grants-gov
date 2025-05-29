@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -123,6 +124,7 @@ export const UserControl = () => {
   const t = useTranslations("Header");
 
   const { user, logoutLocalUser } = useUser();
+  const { setQueryParam } = useSearchParamUpdater();
   const router = useRouter();
 
   const logout = useCallback(async (): Promise<void> => {
@@ -133,8 +135,10 @@ export const UserControl = () => {
 
     logoutLocalUser();
 
+    setQueryParam("auth_logout", "ok");
+
     router.refresh();
-  }, [logoutLocalUser, router]);
+  }, [logoutLocalUser, router, setQueryParam]);
 
   return (
     <>

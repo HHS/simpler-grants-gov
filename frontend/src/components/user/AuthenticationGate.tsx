@@ -1,7 +1,8 @@
 import { getSession } from "src/services/auth/session";
 
-import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+
+import { RequireLogin } from "./RequireLogin";
 
 export async function AuthenticationGate({
   children,
@@ -10,7 +11,7 @@ export async function AuthenticationGate({
 }) {
   const session = await getSession();
   if (!session?.token) {
-    return redirect("/");
+    return <RequireLogin />;
   }
   return children;
 }
