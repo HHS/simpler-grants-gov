@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Self
 
 from pydantic import Field, field_validator, model_validator
@@ -56,16 +57,18 @@ class GetOpportunityListRequest(BaseSOAPSchema):
 
 class OpportunityDetails(BaseSOAPSchema):
     agency_contact_info: str | None = Field(default=None, alias="AgencyContactInfo")
-    competition_title: str | None = Field(default=None, alias="CompetitionTitle")
+    cfda_details: CFDADetails | None = Field(default=None, alias="CFDADetails")
+    closing_date: date | None = Field(default=None, alias="ClosingDate")
     competition_id: str | None = Field(default=None, alias="CompetitionID")
+    competition_title: str | None = Field(default=None, alias="CompetitionTitle")
     funding_opportunity_title: str | None = Field(default=None, alias="FundingOpportunityTitle")
     funding_opportunity_number: str | None = Field(default=None, alias="FundingOpportunityNumber")
-    opening_date: str | None = Field(default=None, alias="OpeningDate")
-    closing_date: str | None = Field(default=None, alias="ClosingDate")
-    offering_agency: str | None = Field(default=None, alias="OfferingAgency")
-    schema_url: str | None = Field(default=None, alias="SchemaUrl")
     instructions_url: str | None = Field(default=None, alias="InstructionsUrl")
     is_multi_project: str | None = Field(default=None, alias="IsMultiProject")
+    offering_agency: str | None = Field(default=None, alias="OfferingAgency")
+    opening_date: date | None = Field(default=None, alias="OpeningDate")
+    package_id: str | None = Field(default=None, alias="PackageID")
+    schema_url: str | None = Field(default=None, alias="SchemaUrl")
 
 
 class GetOpportunityListResponse(BaseSOAPSchema):
