@@ -126,10 +126,7 @@ export async function subscribeEmailAction(
     // General try failure catch error
     const error = e as Error;
     console.error(
-      "Error subscribing user: Exception:",
-      error.message,
-      " ",
-      error.cause?.toString(),
+        `Error subscribing user: Exception: ${error.message} ${error.cause?.toString()}`
     );
     return {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
