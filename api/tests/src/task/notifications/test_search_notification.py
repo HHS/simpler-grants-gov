@@ -381,6 +381,75 @@ To unsubscribe from email notifications for this query, delete it from your save
     assert email_content.strip() == expected_single.strip()
 
 
+def test_search_notification_email_format_no_close_date(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails when there's no close date"""
+    # Create test opportunity with post date but no close date
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=3,
+        opportunity_title="Ongoing Research Grant Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-02-15"),
+        close_date=None,  # No close date - indefinite submission period
+        award_floor=50_000,
+        award_ceiling=500_000,
+        expected_number_of_awards=10,
+        is_cost_sharing=False,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "research"},
+        name="Research Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2],  # Previous results
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test opportunity with no close date format
+    expected_content = """A funding opportunity matching your saved search query was recently published.
+
+Ongoing Research Grant Program
+
+Status: Posted
+Submission period opens: 2/15/2025-(To be determined)
+Award range: $50,000-$500,000
+Expected awards: 10
+Cost sharing: No
+
+To unsubscribe from email notifications for this query, delete it from your saved search queries."""
+
+    assert email_content.strip() == expected_content.strip()
+
+
 def test_search_notification_email_format_multiple_opportunities(
     cli_runner,
     db_session,

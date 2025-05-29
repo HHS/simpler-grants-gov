@@ -202,13 +202,17 @@ class SearchNotificationTask(BaseNotificationTask):
             # Add submission period
             if summary.is_forecast:
                 message += "Submission period: To be announced.\n"
-            else:
-                if summary.post_date and summary.close_date:
-                    formatted_post = summary.post_date.strftime("%-m/%-d/%Y")
+            elif summary.post_date:
+                # Both post and close dates available
+                formatted_post = summary.post_date.strftime("%-m/%-d/%Y")
+                if summary.close_date:
                     formatted_close = summary.close_date.strftime("%-m/%-d/%Y")
                     message += f"Submission period: {formatted_post}–{formatted_close}\n"
                 else:
-                    message += "Submission period: To be announced.\n"
+                    # Post date available but no close date (indefinite submission period)
+                    message += f"Submission period opens: {formatted_post}-(To be determined)\n"
+            # The else case is No post date available - skip this opportunity entirely by not adding submission period
+            # This case should be rare as opportunities without post dates should be filtered out
 
             # Add award range
             if summary.award_floor is not None and summary.award_ceiling is not None:
