@@ -440,7 +440,7 @@ def test_search_notification_email_format_no_close_date(
 Ongoing Research Grant Program
 
 Status: Posted
-Submission period opens: 2/15/2025-(To be determined)
+Submission period: 2/15/2025-(To be determined)
 Award range: $50,000-$500,000
 Expected awards: 10
 Cost sharing: No

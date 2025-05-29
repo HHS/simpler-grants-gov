@@ -208,7 +208,7 @@ class SearchNotificationTask(BaseNotificationTask):
                     message += f"Submission period: {formatted_post}–{formatted_close}\n"
                 else:
                     # Post date available but no close date (indefinite submission period)
-                    message += f"Submission period opens: {formatted_post}-(To be determined)\n"
+                    message += f"Submission period: {formatted_post}-(To be determined)\n"
             # The else case is No post date available - skip this opportunity entirely by not adding submission period
             # This case should be rare as opportunities without post dates should be filtered out
 
