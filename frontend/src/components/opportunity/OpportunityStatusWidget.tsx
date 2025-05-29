@@ -63,7 +63,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
     switch (status) {
       case "archived":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("archived")}</strong>
               <span>{formatDate(archiveDate) || "--"}</span>
@@ -72,7 +72,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         );
       case "closed":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("closed")}</strong>
               <span>{formatDate(closeDate) || "--"}</span>

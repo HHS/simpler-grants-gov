@@ -988,6 +988,47 @@ class CompetitionInstructionFactory(BaseFactory):
     file_location = "file_location"
 
 
+class FormInstructionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.FormInstruction
+
+    form_instruction_id = Generators.UuidObj
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/form-instructions/{o.form_instruction_id}/{o.file_name}"
+    )
+    file_name = factory.Faker("file_name", extension="pdf")
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        # Extract file_contents from kwargs
+        file_contents = kwargs.pop("file_contents")
+        obj = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(obj.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your form instruction to {obj.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return obj
+
+
 class CompetitionAssistanceListingFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionAssistanceListing
@@ -1026,6 +1067,7 @@ class FormFactory(BaseFactory):
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
+    form_instruction = None  # By default no instruction, use with_instruction trait for this
 
     form_json_schema = {
         "type": "object",
@@ -1094,6 +1136,14 @@ class FormFactory(BaseFactory):
             },
         },
     ]
+
+    class Params:
+        with_instruction = factory.Trait(
+            form_instruction=factory.SubFactory(FormInstructionFactory),
+            form_instruction_id=factory.LazyAttribute(
+                lambda o: o.form_instruction.form_instruction_id if o.form_instruction else None
+            ),
+        )
 
 
 class CompetitionFormFactory(BaseFactory):
