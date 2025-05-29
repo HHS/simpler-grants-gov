@@ -33,10 +33,12 @@ export default function FeatureFlagsTable() {
               <td
                 data-testid={`${featureName}-default`}
                 style={{
-                  background: defaultFlags[featureName] ? "#81cc81" : "#fc6a6a",
+                  background: defaultFlags?.[featureName]
+                    ? "#81cc81"
+                    : "#fc6a6a",
                 }}
               >
-                {defaultFlags[featureName] ? "Enable" : "Disable"}
+                {defaultFlags?.[featureName] ? "Enable" : "Disable"}
               </td>
               <th scope="row">{featureName}</th>
               <td>
