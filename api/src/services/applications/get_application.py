@@ -1,16 +1,11 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import lazyload, selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import (
-    Application,
-    ApplicationForm,
-    Competition,
-    CompetitionForm,
-)
+from src.db.models.competition_models import Application, Competition
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.auth_utils import check_user_application_access
 
@@ -22,21 +17,12 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
     result = db_session.execute(
         select(Application)
         .options(
-            selectinload(Application.application_forms).selectinload(
-                ApplicationForm.competition_form
-            ),
-            selectinload(Application.application_users)
-            .selectinload(ApplicationUser.user)
-            .selectinload(User.linked_login_gov_external_user),
-            selectinload(Application.competition)
-            .selectinload(Competition.competition_forms)
-            .selectinload(CompetitionForm.form),
-            selectinload(Application.competition).selectinload(
-                Competition.opportunity_assistance_listing
-            ),
-            selectinload(Application.competition).selectinload(
-                Competition.link_competition_open_to_applicant
-            ),
+            selectinload("*"),
+            # Explicitly don't load these
+            lazyload(Application.competition, Competition.opportunity),
+            lazyload(Application.competition, Competition.applications),
+            lazyload(Application.application_users, ApplicationUser.user, User.saved_opportunities),
+            lazyload(Application.application_users, ApplicationUser.user, User.saved_searches),
         )
         .where(Application.application_id == application_id)
     )
