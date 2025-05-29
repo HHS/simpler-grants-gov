@@ -40,9 +40,10 @@ jobs:
       - name: Get commit hash
         id: get-commit-hash
         run: |
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{inputs.ref}} ${{ inputs.app_name}})
           COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
-          echo "Commit hash: $COMMIT_HASH"
-          echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-22.04
