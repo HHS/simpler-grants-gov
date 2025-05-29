@@ -823,17 +823,19 @@ def test_application_get_success_with_validation_issues(
     form_a = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     form_b = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition = CompetitionFactory.create(competition_forms=[])
-    CompetitionFormFactory.create(competition=competition, form=form_a)
-    CompetitionFormFactory.create(competition=competition, form=form_b)
+    competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
+    competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
 
     # Create an application with two app forms, one partially filled out, one not started
     application = ApplicationFactory.create(competition=competition)
     # TODO - after merging the competition form changes - fix this / rely on the factories more
     application_form_a = ApplicationFormFactory.create(
-        application=application, form=form_a, application_response={"age": 500}
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"age": 500},
     )
     application_form_b = ApplicationFormFactory.create(
-        application=application, form=form_b, application_response={}
+        application=application, competition_form=competition_form_b, application_response={}
     )
 
     # Associate user with application
