@@ -5,6 +5,7 @@ import requests
 
 import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas
+from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
@@ -49,7 +50,7 @@ class BaseSOAPClient:
         )
 
     def _process_response_response_content(self, soap_content: bytes) -> bytes:
-        if not self.config.inject_uuid_data:
+        if not self.config.inject_uuid_data or self.config.gg_s2s_proxy_header_key:
             return soap_content
         return format_local_soap_response(soap_content)
 
@@ -57,13 +58,21 @@ class BaseSOAPClient:
 class SimplerApplicantsS2SClient(BaseSOAPClient):
     def GetOpportunityListRequest(self) -> None:
         get_opportunity_list_request = schemas.GetOpportunityListRequest(
-            **get_envelope_dict(self.get_request_soap_dict_body(), self.soap_request.operation_name)
+            **get_envelope_dict(
+                self.soap_request_message.to_dict(), self.soap_request_operation_name
+            )
         )
         logger.info(
             "soap get_opportunity_list_request validated",
             extra={"get_opportunity_request": get_opportunity_list_request.model_dump()},
         )
-        return None
+        opportunity_list: schemas.GetOpportunityListResponse = get_opportunity_list_response(
+            self.db_session, get_opportunity_list_request
+        )
+        logger.info(
+            "get_opportunity_list_response",
+            extra={"opportunity_list": opportunity_list.model_dump(mode="json")},
+        )
 
     def get_response(self) -> tuple:
         # This method returns the raw response we get from the proxy request as well as
