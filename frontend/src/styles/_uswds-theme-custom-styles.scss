@@ -505,11 +505,11 @@ button.usa-pagination__button.usa-button {
 }
 
 // Accordions
-// .usa-accordion {}
 .usa-accordion__heading {
   border-bottom: 2px solid color(gray-warm-30);
 }
 
+// changes the modal into a drawer
 #search-filter-drawer {
   text-align: right;
   .usa-modal-overlay {
@@ -520,8 +520,21 @@ button.usa-pagination__button.usa-button {
     width: 100%;
   }
 }
-// Definition Lists
 
+// make modal close "X" use normal style rather than simpler button styline
+.usa-modal__close {
+  background-color: color("transparent");
+  border-bottom: none;
+  color: color("gray-warm-90");
+
+  &:hover {
+    background-color: color("transparent");
+    border-bottom: none;
+    color: color("gray-60");
+  }
+}
+
+// Definition Lists
 dl {
   dt {
     display: inline;
