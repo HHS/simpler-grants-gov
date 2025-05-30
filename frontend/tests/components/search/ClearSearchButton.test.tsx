@@ -8,7 +8,8 @@ const mockClearQueryParams = jest.fn();
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
-    clearQueryParams: () => mockClearQueryParams() as unknown,
+    clearQueryParams: (params: unknown) =>
+      mockClearQueryParams(params) as unknown,
   }),
 }));
 
@@ -27,8 +28,18 @@ describe("ClearSearchButton", () => {
     const button = screen.getByRole("button");
     await userEvent.click(button);
 
-    expect(mockClearQueryParams).toHaveBeenCalled();
+    expect(mockClearQueryParams).toHaveBeenCalledWith(undefined);
   });
+  it("calls clearQueryParams with `paramsToClear` if provided", async () => {
+    const paramsToClear = ["a", "bunch", "of", "random", "keys"];
+    render(<ClearSearchButton buttonText="hi" paramsToClear={paramsToClear} />);
+
+    const button = screen.getByRole("button");
+    await userEvent.click(button);
+
+    expect(mockClearQueryParams).toHaveBeenCalledWith(paramsToClear);
+  });
+
   it("includes icon where directed", () => {
     render(<ClearSearchButton buttonText="hi" includeIcon={true} />);
 

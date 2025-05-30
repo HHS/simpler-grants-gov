@@ -10,17 +10,19 @@ export function ClearSearchButton({
   buttonText,
   includeIcon = false,
   className,
+  paramsToClear,
 }: {
   buttonText: string;
   includeIcon?: boolean;
   className?: string;
+  paramsToClear?: string[];
 }) {
   const { clearQueryParams } = useSearchParamUpdater();
   return (
     <Button
       unstyled
       type="button"
-      onClick={() => clearQueryParams()}
+      onClick={() => clearQueryParams(paramsToClear)}
       className={className}
     >
       {includeIcon && (
