@@ -115,6 +115,10 @@ const headers = [
         key: "Cache-Control",
         value: "no-store, must-revalidate",
       },
+      {
+        key: "x-redirectOnLogout",
+        value: "1",
+      },
     ],
   },
   // don't cache if users has a session cookie

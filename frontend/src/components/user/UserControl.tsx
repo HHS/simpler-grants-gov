@@ -4,7 +4,7 @@ import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import {
   IconListContent,
@@ -124,6 +124,7 @@ export const UserControl = () => {
 
   const { user, logoutLocalUser } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   const logout = useCallback(async (): Promise<void> => {
     // this isn't using the clientFetch hook because we don't really need all that added functionality here
@@ -131,9 +132,18 @@ export const UserControl = () => {
       method: "POST",
     });
 
+    const res = await fetch(pathname, {
+      method: "GET",
+    });
+
     logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
+
+    if (res.headers.has("x-redirectOnLogout")) {
+      redirect("/");
+    } else {
+      router.refresh(); // call router.refresh() before so we can grab the header in AuthenticationGate as 1 and redirect while also logging out
+    }
+  }, [logoutLocalUser, router, pathname]);
 
   return (
     <>
