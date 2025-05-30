@@ -977,6 +977,15 @@ class CompetitionFactory(BaseFactory):
         unique=True,
     )
 
+    class Params:
+        with_instruction = factory.Trait(
+            competition_instructions=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.CompetitionInstructionFactory",
+                factory_related_name="competition",
+                size=1,
+            )
+        )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -985,7 +994,40 @@ class CompetitionInstructionFactory(BaseFactory):
     competition_instruction_id = Generators.UuidObj
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-    file_location = "file_location"
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/competitions/{o.competition_id}/instructions/{o.competition_instruction_id}/{o.file_name}"
+    )
+    file_name = factory.Faker("file_name", extension="pdf")
+
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't use file contents for build strategy
+        return super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        instruction = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(instruction.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your instruction file to {instruction.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return instruction
 
 
 class FormInstructionFactory(BaseFactory):
