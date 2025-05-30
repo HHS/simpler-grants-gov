@@ -1,11 +1,11 @@
 import { Meta } from "@storybook/react";
 
-import { OpportunityOverviewCard } from "src/components/application/OpportunityOverviewCard";
+import { OpportunityCard } from "src/components/application/OpportunityCard";
 
 const ApplicationPage = () => {
     return (
         <>
-            <OpportunityOverviewCard />
+            <OpportunityCard />
         </>
     )
 
