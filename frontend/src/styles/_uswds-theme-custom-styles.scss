@@ -499,7 +499,7 @@ button.usa-pagination__button.usa-button {
 // Tables
 .usa-table {
   &.overflow-wrap {
-    max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
+    min-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
     overflow-wrap: break-word;
   }
 }
