@@ -4,6 +4,7 @@ import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 import { useTranslations } from "next-intl";
 
 import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
+import { CheckboxFilter } from "src/components/search/Filters/CheckboxFilter";
 import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export async function AgencyFilterAccordion({
