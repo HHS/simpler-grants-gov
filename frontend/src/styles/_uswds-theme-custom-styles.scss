@@ -520,3 +520,15 @@ button.usa-pagination__button.usa-button {
     width: 100%;
   }
 }
+// Definition Lists
+
+dl {
+  dt {
+    display: inline;
+
+    & ~ dd {
+      display: inline;
+      margin-left: 0;
+    }
+  }
+}
