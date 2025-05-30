@@ -21,7 +21,7 @@ export const OpportunityAwardOverview = (props: OpportunityAwardOverviewProps) =
 
     return (
         <Grid tablet={{ col: 6, }} mobile={{ col: 12 }}>
-            <p className="text-bold ">{t('award')}</p>
+            <h4 className="font-ui-md text-bold">{t('award')}</h4>
             <dl className="margin-top-0">
                 <OpportunityItem opKey={t('programFunding')} opValue={programFunding} />
                 <OpportunityItem opKey={t('expectedAward')} opValue={expectedAward} />
