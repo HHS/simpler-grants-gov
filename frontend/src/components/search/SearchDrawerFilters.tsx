@@ -13,6 +13,7 @@ import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
+  closeDateOptions,
   eligibilityOptions,
   fundingOptions,
   statusOptions,
@@ -26,8 +27,14 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility, fundingInstrument, category, status, agency } =
-    searchParams;
+  const {
+    eligibility,
+    fundingInstrument,
+    category,
+    status,
+    agency,
+    closeDate,
+  } = searchParams;
 
   const agenciesPromise = Promise.all([
     getAgenciesForFilterOptions(),
@@ -93,6 +100,13 @@ export async function SearchDrawerFilters({
         queryParamKey={"category"}
         title={t("accordion.titles.category")}
         facetCounts={facetCounts?.funding_category || {}}
+      />
+      <CheckboxFilter
+        filterOptions={closeDateOptions}
+        query={closeDate}
+        queryParamKey={"closeDate"}
+        title={t("accordion.titles.closeDate")}
+        facetCounts={{}}
       />
     </>
   );

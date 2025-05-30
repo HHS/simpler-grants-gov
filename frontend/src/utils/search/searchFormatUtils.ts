@@ -9,6 +9,8 @@ import {
   validSearchQueryParamKeys,
 } from "src/types/search/searchQueryTypes";
 import {
+  DateRangeFilter,
+  OneOfFilter,
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortOrder,
@@ -29,12 +31,49 @@ const orderByFieldLookup = {
 };
 
 const filterNameMap = {
-  status: "opportunity_status",
-  fundingInstrument: "funding_instrument",
-  eligibility: "applicant_type",
-  agency: "agency",
-  category: "funding_category",
-} as const satisfies Record<FrontendFilterNames, BackendFilterNames>;
+  status: {
+    backendName: "opportunity_status",
+    dataType: "oneOf",
+  },
+  fundingInstrument: {
+    backendName: "funding_instrument",
+    dataType: "oneOf",
+  },
+  eligibility: {
+    backendName: "applicant_type",
+    dataType: "oneOf",
+  },
+  agency: {
+    backendName: "agency",
+    dataType: "oneOf",
+  },
+  category: {
+    backendName: "funding_category",
+    dataType: "oneOf",
+  },
+  closeDate: {
+    backendName: "close_date",
+    dataType: "dateRange",
+  },
+} as const;
+
+// things may get rough when we need to support a data type other than Set<string>...
+export const formatFilterData = (
+  data: Set<string>,
+  type: string,
+): DateRangeFilter & OneOfFilter => {
+  switch (type) {
+    case "oneOf": {
+      return { one_of: Array.from(data) };
+    }
+    case "dateRange": {
+      return { start_date: data.values()[0], end_date: data.values()[1] };
+    }
+    default: {
+      throw new Error("unknown search filter data type");
+    }
+  }
+};
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
@@ -71,11 +110,11 @@ export const buildFilters = (
   searchInputs: QueryParamData,
 ): SearchFilterRequestBody => {
   return Object.entries(filterNameMap).reduce(
-    (filters, [frontendFilterName, backendFilterName]) => {
+    (filters, [frontendFilterName, { backendName, dataType }]) => {
       const filterData =
         searchInputs[frontendFilterName as FrontendFilterNames];
       if (filterData && filterData.size) {
-        filters[backendFilterName] = { one_of: Array.from(filterData) };
+        filters[backendName] = formatFilterData(filterData, dataType);
       }
       return filters;
     },
@@ -91,7 +130,7 @@ export const searchToQueryParams = (
     searchRecord.filters && Object.keys(searchRecord.filters).length
       ? Object.entries(filterNameMap).reduce(
           (params, [frontendFilterName, backendFilterName]) => {
-            const filterData = searchRecord.filters[backendFilterName]?.one_of;
+            const filterData = searchRecord.filters[backendName]?.one_of;
             if (filterData) {
               params[frontendFilterName as keyof ValidSearchQueryParamData] =
                 filterData.join(",");

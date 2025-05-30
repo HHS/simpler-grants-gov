@@ -152,3 +152,26 @@ export const categoryOptions: FilterOption[] = [
   },
   { id: "category-other", label: "Other", value: "other" },
 ];
+
+export const closeDateOptions: FilterOption[] = [
+  {
+    id: "close-date-7",
+    label: "Next 7 days",
+    value: "7",
+  },
+  {
+    id: "close-date-30",
+    label: "Next 30 days",
+    value: "30",
+  },
+  {
+    id: "close-date-90",
+    label: "Next 90 days",
+    value: "90",
+  },
+  {
+    id: "close-date-120",
+    label: "Next 120 days",
+    value: "120",
+  },
+];
