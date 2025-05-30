@@ -11,7 +11,7 @@ export function SearchDrawerHeading() {
       <div className="flex-2">{t("title")}</div>
       <div className="flex-1">
         <ClearSearchButton
-          buttonText={t("clearAll")}
+          buttonText={t("clearFilters")}
           paramsToClear={[...searchFilterNames]}
         />
       </div>
