@@ -6,7 +6,7 @@ import SpriteSVG from "public/img/uswds-sprite.svg";
 interface IconProps {
   name: UswdsIconNames;
   className?: string;
-  height?: string;
+  height?: string; // looks like this doesn't work, use `usa-icon--size-$size` class instead
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

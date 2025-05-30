@@ -412,6 +412,17 @@ export const messages = {
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    filters: {
+      searchNoResults: {
+        title: "Your search didn't return any results.",
+        heading: "Suggestions:",
+        suggestions: [
+          "Check any terms you've entered for typos",
+          "Try different keywords",
+          "Try resetting filters or selecting fewer options",
+        ],
+      },
+    },
     accordion: {
       any: "Any",
       all: "All",

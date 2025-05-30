@@ -28,3 +28,10 @@ export interface FilterOption {
 export interface FilterOptionWithChildren extends FilterOption {
   children: FilterOption[];
 }
+
+export interface RelevantAgencyRecord {
+  agency_code: string;
+  agency_id: number;
+  agency_name: string;
+  top_level_agency: null | RelevantAgencyRecord;
+}
