@@ -30,4 +30,4 @@ jobs:
       - name: Run inherit parent deliverable script
         run: |
           ./scripts/inherit-parent-deliverable.sh "${{ github.event.issue.html_url }}" \
-            --project "${{ env.PROJECT_NUMBER }}"
+            --project "${PROJECT_NUMBER}"
