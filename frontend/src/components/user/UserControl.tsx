@@ -141,7 +141,7 @@ export const UserControl = () => {
     if (res.headers.has("x-redirectOnLogout")) {
       redirect("/");
     } else {
-      router.refresh(); // call router.refresh() before so we can grab the header in AuthenticationGate as 1 and redirect while also logging out
+      router.refresh();
     }
   }, [logoutLocalUser, router, pathname]);
 
