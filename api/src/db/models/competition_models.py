@@ -128,6 +128,16 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
 
 
+class FormInstruction(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "form_instruction"
+
+    form_instruction_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+
+
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_assistance_listing"
 
@@ -158,6 +168,12 @@ class Form(ApiSchemaTable, TimestampMixin):
     inactive_at: Mapped[datetime | None]
     form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
     form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    form_instruction_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(FormInstruction.form_instruction_id), nullable=True
+    )
+    form_instruction: Mapped[FormInstruction | None] = relationship(
+        FormInstruction, cascade="all, delete-orphan", single_parent=True
+    )
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
