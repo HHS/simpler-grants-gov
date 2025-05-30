@@ -21,7 +21,7 @@ export function DrawerUnit({
   children: ReactNode;
   closeText: string;
   openText: string;
-  headingText: string;
+  headingText: string | ReactNode;
   iconName?: UswdsIconNames;
 }) {
   const drawerRef = useRef<ModalRef>(null);

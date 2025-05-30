@@ -14,6 +14,7 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
+import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
 export function SearchVersionTwo({
   searchParams,
@@ -51,13 +52,13 @@ export function SearchVersionTwo({
                 queryTermFromParent={convertedSearchParams.query}
               />
             </div>
-            <div className="display-flex desktop:flex-5 dsektop:margin-top-0">
+            <div className="display-flex desktop:flex-5">
               <div className="flex-2 flex-align-self-end">
                 <DrawerUnit
                   drawerId="search-filter-drawer"
                   closeText={t("drawer.submit")}
                   openText={t("filterDisplayToggle.drawer")}
-                  headingText={t("drawer.title")}
+                  headingText={<SearchDrawerHeading />}
                   iconName="filter_list"
                 >
                   <SearchDrawerFilters

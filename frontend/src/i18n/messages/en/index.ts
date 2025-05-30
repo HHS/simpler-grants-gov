@@ -439,6 +439,7 @@ export const messages = {
     drawer: {
       title: "Filters",
       submit: "View results",
+      clearFilters: "Clear filters",
     },
     callToAction: {
       title: "Search funding opportunities",

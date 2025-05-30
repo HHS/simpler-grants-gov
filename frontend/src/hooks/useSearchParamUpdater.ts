@@ -66,11 +66,20 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
+  const clearQueryParams = (paramsToRemove?: string[]) => {
+    const paramsToClear = paramsToRemove || Array.from(params.keys());
+    paramsToClear.forEach((paramKey) => {
+      params.delete(paramKey);
+    });
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`);
+  };
+
   return {
     searchParams,
     updateQueryParams,
     replaceQueryParams,
     removeQueryParam,
     setQueryParam,
+    clearQueryParams,
   };
 }
