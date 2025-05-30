@@ -190,6 +190,26 @@ export const messages = {
     },
     genericErrorCta: "Please try refreshing the page.",
   },
+  Application: {
+    opportunityOverview: {
+      opportunity: "Opportunity",
+      name: 'Name',
+      number: 'Number',
+      posted: 'Posted',
+      agency: 'Agency',
+      assistanceListings: 'Assistance listings',
+      costSharingOrMatchingRequirement: 'Cost Sharing or matching requirement',
+      applicationInstruction: 'Application instructions',
+      grantorContactInfomation: 'Grantor contact information',
+      award: 'Award',
+      programFunding: 'Program funding',
+      expectedAward: 'Expected award',
+      awardMaximum: 'Award maximum',
+      awardMinimum: 'Award minimum',
+      estimatedAwardDate: 'Estimated award date',
+      estimatedProjectStartDate: 'Estimated project start date',
+    }
+  },
   Index: {
     pageTitle: "Simpler.Grants.gov",
     metaDescription:
