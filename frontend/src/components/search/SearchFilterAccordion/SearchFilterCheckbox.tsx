@@ -19,6 +19,7 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
   query,
   facetCounts,
 }) => {
+  console.log("!!!!", query, option);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     updateCheckedOption(event.target.value, checked);

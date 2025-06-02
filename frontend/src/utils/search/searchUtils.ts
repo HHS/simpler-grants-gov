@@ -93,10 +93,11 @@ function paramToSet(param: QuerySetParam, type?: string): Set<string> {
 }
 
 // for now, assuming that param values represent "number of days from the current day"
-function paramToDateRange(selectedDates: QuerySetParam): Set<string> {
-  if (!selectedDates || !selectedDates.length || selectedDates.length > 2) {
+function paramToDateRange(paramValue?: string): Set<string> {
+  if (!paramValue) {
     return new Set();
   }
+  const selectedDates = paramValue.split(",");
   // for relativeDates
   if (selectedDates.length === 1) {
     return new Set([selectedDates[0]]);
