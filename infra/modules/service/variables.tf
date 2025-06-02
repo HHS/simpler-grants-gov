@@ -134,6 +134,12 @@ variable "drop_linux_capabilities" {
   default     = true
 }
 
+variable "enable_api_gateway" {
+  description = "Whether to enable API Gateway for the service"
+  type        = bool
+  default     = false
+}
+
 variable "enable_load_balancer" {
   description = "Whether to enable a load balancer for the service"
   type        = bool
