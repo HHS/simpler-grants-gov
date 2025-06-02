@@ -3,15 +3,15 @@ import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManage
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { cookies } from "next/headers";
-import React, { ComponentType } from "react";
+import React, { ComponentType, ReactNode } from "react";
 
 // since this relies on search params coming in as a prop, it can only be used reliably on a top level page component
 // for other components we'll need a different implementation, likely one that delivers particular props to the wrapped component
 // that method is not easily implemented with top level page components, as their props are laregely dictated by the Next system
-const withFeatureFlag = <P, R>(
+const withFeatureFlag = <P, R extends ReactNode>(
   WrappedComponent: ComponentType<P>,
   featureFlagName: string,
-  onEnabled: () => R,
+  onEnabled: (props: P) => R,
 ) => {
   // if we're in the middle of a build, that means this is an ssg rendering pass.
   // in that case we can skip this whole feature flag business and move on with our lives
@@ -33,8 +33,7 @@ const withFeatureFlag = <P, R>(
           searchParams,
         )
       ) {
-        onEnabled();
-        return;
+        return onEnabled(props);
       }
 
       return <WrappedComponent {...props} />;

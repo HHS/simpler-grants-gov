@@ -108,16 +108,14 @@ const ResolvedSearchResults = async ({
 
 export default function SearchResults({
   searchParams,
-  query,
   loadingMessage,
   searchResultsPromise,
 }: {
   searchParams: QueryParamData;
-  query?: string | null;
   loadingMessage: string;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
-  const { page, sortby } = searchParams;
+  const { page, sortby, query } = searchParams;
   const suspenseKey = Object.entries(searchParams).join(",");
 
   return (

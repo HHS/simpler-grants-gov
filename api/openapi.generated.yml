@@ -3024,10 +3024,10 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        competition_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+        competition:
+          type:
+          - object
+          $ref: '#/components/schemas/CompetitionAlpha'
         application_forms:
           type: array
           items:
@@ -3044,6 +3044,16 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationUser'
+        form_validation_warnings:
+          type: object
+          description: Specific form validation issues
+          example:
+            123e4567-e89b-12d3-a456-426614174000:
+            - field: $
+              message: '''name'' is a required property'
+              type: required
+              value: null
+          additionalProperties: {}
     ApplicationGetResponse:
       type: object
       properties:
@@ -3490,4 +3500,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-
