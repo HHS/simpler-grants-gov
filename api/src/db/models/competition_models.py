@@ -79,6 +79,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
+    competition_instructions: Mapped[list["CompetitionInstruction"]] = relationship(
+        "CompetitionInstruction",
+        uselist=True,
+        back_populates="competition",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def is_open(self) -> bool:
         """The competition is open if the following are both true:
@@ -123,9 +130,12 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition: Mapped[Competition] = relationship(Competition)
+    competition: Mapped[Competition] = relationship(
+        Competition, back_populates="competition_instructions"
+    )
 
     file_location: Mapped[str]
+    file_name: Mapped[str]
 
 
 class FormInstruction(ApiSchemaTable, TimestampMixin):
