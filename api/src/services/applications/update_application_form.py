@@ -6,11 +6,11 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import ApplicationForm, CompetitionForm, Form
+from src.db.models.competition_models import ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
-from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.applications.application_validation import (
     ApplicationAction,
+    validate_application_form,
     validate_application_in_progress,
 )
 from src.services.applications.get_application import get_application
@@ -49,14 +49,14 @@ def update_application_form(
     validate_application_in_progress(application, ApplicationAction.MODIFY)
 
     # Check if form exists and is attached to the competition
-    form = db_session.execute(
-        select(Form)
-        .join(CompetitionForm, Form.form_id == CompetitionForm.form_id)
-        .where(CompetitionForm.competition_id == application.competition_id)
-        .where(Form.form_id == form_id)
+    competition_form = db_session.execute(
+        select(CompetitionForm).where(
+            CompetitionForm.competition_id == application.competition_id,
+            CompetitionForm.form_id == form_id,
+        )
     ).scalar_one_or_none()
 
-    if not form:
+    if not competition_form:
         raise_flask_error(
             404,
             f"Form with ID {form_id} not found or not attached to this application's competition",
@@ -65,7 +65,8 @@ def update_application_form(
     # Find existing application form or create a new one
     application_form = db_session.execute(
         select(ApplicationForm).where(
-            ApplicationForm.application_id == application_id, ApplicationForm.form_id == form_id
+            ApplicationForm.application_id == application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
         )
     ).scalar_one_or_none()
 
@@ -76,15 +77,13 @@ def update_application_form(
         # Create new application form
         application_form = ApplicationForm(
             application=application,
-            form=form,
+            competition_form=competition_form,
             application_response=application_response,
         )
         db_session.add(application_form)
 
-    # In a future PR, validation will be added here
-    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_response, form
-    )
+    # Get a list of validation warnings (also sets form status)
+    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
 
     logger.info(
         "Updated application form response",

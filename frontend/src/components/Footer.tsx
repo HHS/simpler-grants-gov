@@ -84,7 +84,7 @@ const Footer = () => {
         <GridContainer>
           <Grid row gap>
             <Grid tablet={{ col: 4 }}>
-              <div className="footer-logo-container position-relative dekstop:height-5">
+              <div className="footer-logo-container position-relative">
                 <Image
                   className="height-auto position-relative"
                   alt={t("logoAlt")}

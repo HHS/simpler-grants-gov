@@ -19,7 +19,7 @@ from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
-from src.services.applications.get_application import get_application
+from src.services.applications.get_application import get_application_with_warnings
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
@@ -104,13 +104,11 @@ def application_form_update(
 
     with db_session.begin():
         # Call the service to update the application form
-        _, warnings = update_application_form(
+        application_form, warnings = update_application_form(
             db_session, application_id, form_id, application_response, user
         )
 
-    return response.ApiResponse(
-        message="Success", data={"application_id": application_id}, warnings=warnings
-    )
+    return response.ApiResponse(message="Success", data=application_form, warnings=warnings)
 
 
 @application_blueprint.get(
@@ -166,12 +164,13 @@ def application_get(
     user = token_session.user
 
     with db_session.begin():
-        application = get_application(db_session, application_id, user)
+        application, warnings = get_application_with_warnings(db_session, application_id, user)
 
     # Return the application form data
     return response.ApiResponse(
         message="Success",
         data=application,
+        warnings=warnings,
     )
 
 

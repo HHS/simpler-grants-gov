@@ -3,8 +3,8 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Competition, Form
+from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.validation.validation_constants import ValidationErrorType
 
@@ -17,38 +17,26 @@ class ApplicationAction(StrEnum):
     MODIFY = "modify"
 
 
-def get_required_forms_for_application(application: Application) -> list[Form]:
-    competition_forms = application.competition.competition_forms
-    required_competition_forms: list[Form] = []
-
-    for competition_form in competition_forms:
-        if competition_form.is_required:
-            required_competition_forms.append(competition_form.form)
-
-        # In the future some forms may be considered required based
-        # on a users answers (you said yes to X, form ABC is now required)
-        # but for now we'll only consider the always-required forms.
-
-    return required_competition_forms
-
-
 def get_required_form_errors(application: Application) -> list[ValidationErrorDetail]:
     """Get validation errors for an application missing required forms"""
 
-    required_forms: list[Form] = get_required_forms_for_application(application)
-
-    existing_application_form_ids = [app_form.form_id for app_form in application.application_forms]
+    existing_competition_form_ids = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
 
     required_form_errors: list[ValidationErrorDetail] = []
 
-    for required_form in required_forms:
-        if required_form.form_id not in existing_application_form_ids:
+    for competition_form in application.competition.competition_forms:
+        if (
+            competition_form.is_required
+            and competition_form.competition_form_id not in existing_competition_form_ids
+        ):
             required_form_errors.append(
                 ValidationErrorDetail(
-                    message=f"Form {required_form.form_name} is required",
+                    message=f"Form {competition_form.form.form_name} is required",
                     type=ValidationErrorType.MISSING_REQUIRED_FORM,
                     field="form_id",
-                    value=required_form.form_id,
+                    value=competition_form.form_id,
                 )
             )
 
@@ -71,8 +59,8 @@ def get_application_form_errors(
 
     # For each application form, verify it passes JSON schema validation
     for application_form in application.application_forms:
-        form_validation_errors: list[ValidationErrorDetail] = validate_json_schema_for_form(
-            application_form.application_response, application_form.form
+        form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
+            application_form
         )
 
         if form_validation_errors:
@@ -88,6 +76,27 @@ def get_application_form_errors(
             )
 
     return form_errors, form_error_map
+
+
+def validate_application_form(application_form: ApplicationForm) -> list[ValidationErrorDetail]:
+    """Validate an application form, and set the current application form status"""
+    form_validation_errors: list[ValidationErrorDetail] = validate_json_schema_for_form(
+        application_form.application_response, application_form.form
+    )
+
+    # If there are no issues, we consider the form complete
+    if len(form_validation_errors) == 0:
+        application_form_status = ApplicationFormStatus.COMPLETE
+    # If the form has no answers, we assume it has not been started
+    elif len(application_form.application_response) == 0:
+        application_form_status = ApplicationFormStatus.NOT_STARTED
+    # If the form has been started, but has validation issues, assume it is in-progress
+    else:
+        application_form_status = ApplicationFormStatus.IN_PROGRESS
+
+    application_form.application_form_status = application_form_status  # type: ignore[attr-defined]
+
+    return form_validation_errors
 
 
 def validate_forms(application: Application) -> None:
