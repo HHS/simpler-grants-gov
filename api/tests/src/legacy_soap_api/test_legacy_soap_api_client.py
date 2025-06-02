@@ -11,7 +11,6 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import BASE_SOAP_API_RESPONSE_HEADERS
-from src.legacy_soap_api.soap_payload_handler import SoapPayload
 
 MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER = b"""
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
