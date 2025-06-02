@@ -102,3 +102,18 @@ describe("useSearchParamUpdater", () => {
     });
   });
 });
+
+describe("clearQueryParams", () => {
+  it("clears all query params if no argument is passed", () => {
+    mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
+    const { result } = renderHook(() => useSearchParamUpdater());
+    result.current.clearQueryParams();
+    expect(routerPush).toHaveBeenCalledWith("/test?");
+  });
+  it("clears selected query params based on passed argument", () => {
+    mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
+    const { result } = renderHook(() => useSearchParamUpdater());
+    result.current.clearQueryParams(["removeMe"]);
+    expect(routerPush).toHaveBeenCalledWith("/test?keepMe=cool");
+  });
+});

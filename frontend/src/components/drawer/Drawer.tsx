@@ -18,7 +18,7 @@ export function Drawer({
 }: {
   drawerRef: RefObject<ModalRef | null>;
   drawerId: string;
-  headingText: string;
+  headingText: string | ReactNode;
   closeText: string;
   children: ReactNode;
 }) {
@@ -34,14 +34,14 @@ export function Drawer({
       id={drawerId}
       renderToPortal={!isSSR}
     >
-      <div className="width-full display-flex flex-column maxh-tablet">
-        <div className="flex-1">
+      <div className="width-full display-flex flex-column height-full">
+        <div className="flex-auto">
           <ModalHeading id={`${drawerId}-heading`}>{headingText}</ModalHeading>
         </div>
-        <div className="overflow-auto border-top-05 flex-8 border-bottom-05 border-base-lightest padding-bottom-1">
+        <div className="overflow-auto border-top-05 flex-fill border-bottom-05 border-base-lightest padding-bottom-1">
           {children}
         </div>
-        <div className="flex-1">
+        <div className="flex-auto">
           <ModalFooter>
             <ModalToggleButton
               modalRef={drawerRef}
