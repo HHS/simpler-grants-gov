@@ -799,7 +799,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
-    assert response.json["data"]["competition_id"] == str(application.competition_id)
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
     response_application_forms = sorted(
         response.json["data"]["application_forms"], key=lambda x: x["application_form_id"]
     )
@@ -813,6 +813,82 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "form_id": str(application_form.form_id),
             "application_response": application_form.application_response,
         }
+
+
+def test_application_get_success_with_validation_issues(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+
+    # Create a competition with two forms
+    form_a = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form_b = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition = CompetitionFactory.create(competition_forms=[])
+    competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
+    competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
+
+    # Create an application with two app forms, one partially filled out, one not started
+    application = ApplicationFactory.create(competition=competition)
+    application_form_a = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"age": 500},
+    )
+    application_form_b = ApplicationFormFactory.create(
+        application=application, competition_form=competition_form_b, application_response={}
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    print(response.json)
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    assert len(response.json["warnings"]) == 2
+    for warning in response.json["warnings"]:
+        assert warning["field"] == "application_form_id"
+        assert warning["message"] == "The application form has outstanding errors."
+        assert warning["type"] == "application_form_validation"
+        assert warning["value"] in {
+            str(application_form_a.application_form_id),
+            str(application_form_b.application_form_id),
+        }
+
+    form_a_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_a.application_form_id)
+    ]
+    assert form_a_warnings == [
+        {
+            "field": "$",
+            "message": "'name' is a required property",
+            "type": "required",
+            "value": None,
+        },
+        {
+            "field": "$.age",
+            "message": "500 is greater than the maximum of 200",
+            "type": "maximum",
+            "value": None,
+        },
+    ]
+
+    form_b_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_b.application_form_id)
+    ]
+    assert form_b_warnings == [
+        {
+            "field": "$",
+            "message": "'name' is a required property",
+            "type": "required",
+            "value": None,
+        }
+    ]
 
 
 def test_application_get_application_not_found(
@@ -1363,6 +1439,7 @@ def test_application_get_success_when_associated(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
 
 
 def test_application_form_get_success_when_associated(
@@ -1480,6 +1557,10 @@ def test_application_get_includes_application_name_and_users(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+
+    # Check that the competition object is included
+    assert "competition" in response.json["data"]
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
 
     # Check that the new fields are included in the response
     assert (

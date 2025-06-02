@@ -40,8 +40,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [checks]
-    # needs: [checks, vulnerability-scans] <= enable when vulnerability scans have started passing
+    needs: [checks, vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
       environment: ${{ inputs.environment || 'dev' }}

@@ -1,3 +1,4 @@
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
 
@@ -59,11 +60,27 @@ class ApplicationUserSchema(Schema):
 
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
-    competition_id = fields.UUID()
+    competition = fields.Nested(CompetitionAlphaSchema())
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
     application_status = fields.String()
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
+
+    form_validation_warnings = fields.Dict(
+        metadata={
+            "description": "Specific form validation issues",
+            "example": {
+                "123e4567-e89b-12d3-a456-426614174000": [
+                    {
+                        "field": "$",
+                        "message": "'name' is a required property",
+                        "type": "required",
+                        "value": None,
+                    }
+                ]
+            },
+        }
+    )
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

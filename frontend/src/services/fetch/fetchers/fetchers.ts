@@ -8,6 +8,7 @@ import {
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
+  searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -122,3 +123,5 @@ export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
+
+export const searchAgencies = requesterForEndpoint(searchAgenciesEndpoint);

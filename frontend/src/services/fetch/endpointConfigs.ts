@@ -75,3 +75,10 @@ export const userRefreshEndpoint = {
   namespace: "users/token/refresh",
   method: "POST" as ApiMethod,
 };
+
+export const searchAgenciesEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "agencies/search",
+  method: "POST" as ApiMethod,
+};

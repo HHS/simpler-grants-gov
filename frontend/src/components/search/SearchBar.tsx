@@ -10,9 +10,13 @@ import { ErrorMessage, Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   queryTermFromParent: string | null | undefined;
+  tableView?: boolean;
 }
 
-export default function SearchBar({ queryTermFromParent }: SearchBarProps) {
+export default function SearchBar({
+  queryTermFromParent,
+  tableView = false,
+}: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
@@ -52,7 +56,8 @@ export default function SearchBar({ queryTermFromParent }: SearchBarProps) {
 
   return (
     <div
-      className={clsx("margin-top-5", "margin-bottom-2", {
+      className={clsx("margin-top-5", {
+        "margin-bottom-2": !tableView,
         "usa-form-group--error": !!validationError,
       })}
     >
@@ -86,7 +91,7 @@ export default function SearchBar({ queryTermFromParent }: SearchBarProps) {
           }}
         />
         <button className="usa-button" type="submit" onClick={handleSubmit}>
-          <span className="usa-search__submit-text">{t("bar.button")} </span>
+          <span className="usa-search__submit-text">{t("bar.button")}</span>
           <Icon.Search
             className="usa-search__submit-icon"
             size={4}
