@@ -71,7 +71,6 @@ def get_application_form_errors(
 
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:
-        # Run JSON schema validation
         form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
             application_form
         )

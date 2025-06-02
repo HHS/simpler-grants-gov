@@ -804,7 +804,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
-    assert response.json["data"]["competition_id"] == str(application.competition_id)
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
     response_application_forms = sorted(
         response.json["data"]["application_forms"], key=lambda x: x["application_form_id"]
     )
@@ -1470,6 +1470,7 @@ def test_application_get_success_when_associated(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_id"] == str(application.application_id)
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
 
 
 def test_application_form_get_success_when_associated(
@@ -1587,6 +1588,10 @@ def test_application_get_includes_application_name_and_users(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+
+    # Check that the competition object is included
+    assert "competition" in response.json["data"]
+    assert response.json["data"]["competition"]["competition_id"] == str(application.competition_id)
 
     # Check that the new fields are included in the response
     assert (

@@ -1,3 +1,4 @@
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
 from src.constants.lookup_constants import ApplicationFormStatus
@@ -75,7 +76,7 @@ class ApplicationUserSchema(Schema):
 
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
-    competition_id = fields.UUID()
+    competition = fields.Nested(CompetitionAlphaSchema())
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
     application_status = fields.String()
     application_name = fields.String()

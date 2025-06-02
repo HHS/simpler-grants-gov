@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
@@ -28,7 +28,9 @@ describe("SubscriptionForm", () => {
     render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
-    button.click();
+    act(() => {
+      button.click();
+    });
 
     expect(mockSubscribeEmail).toHaveBeenCalledWith(
       { errorMessage: "", validationErrors: {} },
@@ -54,7 +56,9 @@ describe("SubscriptionForm", () => {
     const { rerender } = render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
-    button.click();
+    act(() => {
+      button.click();
+    });
 
     rerender(<SubscriptionForm />);
 

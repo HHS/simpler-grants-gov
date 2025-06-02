@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
@@ -11,7 +10,6 @@ import {
   Button,
   ErrorMessage,
   FormGroup,
-  Modal,
   ModalFooter,
   ModalHeading,
   ModalRef,
@@ -21,6 +19,7 @@ import {
 
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
+import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SaveSearchInput({
@@ -101,13 +100,10 @@ function SuccessContent({
 // would cause an error when passing the function prop from parent client component see:
 // https://github.com/vercel/next.js/discussions/46795
 export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
-  const modalId = "save-search";
-
   const t = useTranslations("Search.saveSearch.modal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const searchParams = useSearchParams();
-  const isSSR = useIsSSR();
 
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
@@ -190,27 +186,24 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
           {t("saveText")}
         </ModalToggleButton>
       </div>
-      <Modal
-        ref={modalRef}
-        forceAction
+      <SimplerModal
+        modalRef={modalRef}
         className="text-wrap"
-        aria-labelledby={`${modalId}-heading`}
-        aria-describedby={`${modalId}-description`}
-        id={modalId}
-        renderToPortal={!isSSR}
+        modalId={"save-search"}
+        titleText={saved ? undefined : t("title")}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {saved ? (
           <SuccessContent
             modalRef={modalRef}
-            modalId={modalId}
+            modalId={"save-search"}
             onClose={onClose}
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
             <p>{t("description")}</p>
             {apiError && (
               <SimplerAlert
@@ -250,7 +243,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
             </ModalFooter>
           </>
         )}
-      </Modal>
+      </SimplerModal>
     </>
   );
 }
