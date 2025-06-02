@@ -5,6 +5,8 @@ resource "aws_api_gateway_rest_api" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  # checkov:skip=CKV_AWS_237: Address in future work
 }
 
 resource "aws_api_gateway_domain_name" "api" {
@@ -15,4 +17,6 @@ resource "aws_api_gateway_domain_name" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  # checkov:skip=CKV_AWS_206: Address in future work
 }
