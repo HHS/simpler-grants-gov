@@ -38,7 +38,7 @@ def get_competitions_from_opportunity_list_request(
 ) -> Sequence:
     if get_opportunity_list_request.package_id:
         return _get_competitions_by_legacy_package_id(
-            db_session, "PKG-00260155"  # "#get_opportunity_list_request.package_id
+            db_session, get_opportunity_list_request.package_id
         )
     return _get_competitions_by_opportunity_filter(
         db_session, get_opportunity_list_request.opportunity_filter
