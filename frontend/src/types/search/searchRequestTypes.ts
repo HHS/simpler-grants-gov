@@ -6,7 +6,7 @@ import { FilterQueryParamData } from "./searchQueryTypes";
 import { SortOptions } from "./searchSortTypes";
 
 export type OneOfFilter = { one_of: string[] };
-export type DateRangeFilter = { start_date: string; end_date: string };
+export type RelativeDateRangeFilter = { end_date_relative: string };
 
 export interface SearchFilterRequestBody {
   opportunity_status?: OneOfFilter;
@@ -14,7 +14,7 @@ export interface SearchFilterRequestBody {
   applicant_type?: OneOfFilter;
   agency?: OneOfFilter;
   funding_category?: OneOfFilter;
-  close_date?: DateRangeFilter;
+  close_date?: RelativeDateRangeFilter;
 }
 
 export type PaginationOrderBy =

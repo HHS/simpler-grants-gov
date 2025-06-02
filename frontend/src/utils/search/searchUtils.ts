@@ -66,6 +66,7 @@ export function convertSearchParamsToProperTypes(
     eligibility: paramToSet(params.eligibility),
     agency: paramToSet(params.agency),
     category: paramToSet(params.category),
+    closeDate: paramToDateRange(params.closeDate),
     sortby: (params.sortby as SortOptions) || null, // Convert empty string to null if needed
 
     // Ensure page is at least 1 or default to 1 if undefined
@@ -89,6 +90,19 @@ function paramToSet(param: QuerySetParam, type?: string): Set<string> {
     return new Set(param);
   }
   return new Set(param.split(","));
+}
+
+// for now, assuming that param values represent "number of days from the current day"
+function paramToDateRange(selectedDates: QuerySetParam): Set<string> {
+  if (!selectedDates || !selectedDates.length || selectedDates.length > 2) {
+    return new Set();
+  }
+  // for relativeDates
+  if (selectedDates.length === 1) {
+    return new Set([selectedDates[0]]);
+  }
+  // for absolute dates, unused at the moment
+  return new Set([selectedDates[0], selectedDates[1]]);
 }
 
 // Keeps page >= 1.
