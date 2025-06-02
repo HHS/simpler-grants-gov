@@ -498,6 +498,8 @@ button.usa-pagination__button.usa-button {
 
 // Tables
 .usa-table {
+  table-layout: fixed;
+
   &.overflow-wrap {
     min-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
     overflow-wrap: break-word;
