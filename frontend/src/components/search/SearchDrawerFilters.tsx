@@ -10,6 +10,7 @@ import { Suspense } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
+import { RadioButtonFilter } from "./Filters/RadioButtonFilter";
 import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
@@ -101,7 +102,7 @@ export async function SearchDrawerFilters({
         title={t("accordion.titles.category")}
         facetCounts={facetCounts?.funding_category || {}}
       />
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={closeDateOptions}
         query={closeDate}
         queryParamKey={"closeDate"}
