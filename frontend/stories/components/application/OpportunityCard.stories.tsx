@@ -5,9 +5,7 @@ import { OpportunityCard } from "src/components/application/OpportunityCard";
 const meta: Meta<typeof OpportunityCard> = {
   title: "Components/Application/OpportunityCard",
   component: OpportunityCard,
-  args: {
-    
-  },
+  args: {},
 };
 export default meta;
 
