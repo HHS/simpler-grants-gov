@@ -3,11 +3,12 @@ import uuid
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, Competition
+from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_validation import (
     ApplicationAction,
@@ -25,7 +26,9 @@ def create_application(
     """
     # Check if competition exists
     competition = db_session.execute(
-        select(Competition).where(Competition.competition_id == competition_id)
+        select(Competition)
+        .where(Competition.competition_id == competition_id)
+        .options(selectinload(Competition.competition_forms))
     ).scalar_one_or_none()
 
     if not competition:
@@ -48,6 +51,14 @@ def create_application(
 
     application_user = ApplicationUser(application=application, user=user)
     db_session.add(application_user)
+
+    # Initialize the competition forms for the application
+    for competition_form in competition.competition_forms:
+        application_form = ApplicationForm(
+            application=application, competition_form=competition_form, application_response={}
+        )
+
+        db_session.add(application_form)
 
     logger.info(
         "Created new application",
