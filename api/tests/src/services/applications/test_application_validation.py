@@ -147,9 +147,7 @@ def test_validate_form_all_valid_not_started_optional_form(
         application_response=VALID_FORM_B_RESPONSE,
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application,
-        competition_form=competition_form_c,
-        application_response={}
+        application=application, competition_form=competition_form_c, application_response={}
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -158,7 +156,9 @@ def test_validate_form_all_valid_not_started_optional_form(
     assert len(error_detail) == 0
 
 
-def test_validate_forms_missing_all_forms(competition, competition_form_a, competition_form_b, competition_form_c):
+def test_validate_forms_missing_all_forms(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
     # Add no forms, which will complain about all of them
     application = ApplicationFactory.build(competition=competition, application_forms=[])
 
@@ -167,15 +167,26 @@ def test_validate_forms_missing_all_forms(competition, competition_form_a, compe
     # All forms missing
     assert len(validation_errors) == 3
     for validation_error in validation_errors:
-        assert validation_error.message in ["Form form_a is missing", "Form form_b is missing", "Form form_c is missing"]
+        assert validation_error.message in [
+            "Form form_a is missing",
+            "Form form_b is missing",
+            "Form form_c is missing",
+        ]
         assert validation_error.type == ValidationErrorType.MISSING_APPLICATION_FORM
         assert validation_error.field == "form_id"
-        assert validation_error.value in [competition_form_a.form_id, competition_form_b.form_id, competition_form_c.form_id]
+        assert validation_error.value in [
+            competition_form_a.form_id,
+            competition_form_b.form_id,
+            competition_form_c.form_id,
+        ]
 
     # No error detail because that's only for specific validations
     assert len(error_detail) == 0
 
-def test_validate_forms_not_started_all_forms(competition, competition_form_a, competition_form_b, competition_form_c):
+
+def test_validate_forms_not_started_all_forms(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
     # Add the forms, but start none of them
     application = ApplicationFactory.build(competition=competition, application_forms=[])
     application_form_a = ApplicationFormFactory.build(
@@ -189,9 +200,7 @@ def test_validate_forms_not_started_all_forms(competition, competition_form_a, c
         application_response={},
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application,
-        competition_form=competition_form_c,
-        application_response={}
+        application=application, competition_form=competition_form_c, application_response={}
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -208,6 +217,7 @@ def test_validate_forms_not_started_all_forms(competition, competition_form_a, c
     # No error detail because that's only for specific validations
     assert len(error_detail) == 0
 
+
 def test_validate_forms_invalid_responses(
     competition, competition_form_a, competition_form_b, competition_form_c
 ):
@@ -223,7 +233,9 @@ def test_validate_forms_invalid_responses(
         application_response={"str_b": "text", "bool_b": "hello"},
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, competition_form=competition_form_c, application_response={"str_c": False}
+        application=application,
+        competition_form=competition_form_c,
+        application_response={"str_c": False},
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 

@@ -20,23 +20,27 @@ class ApplicationAction(StrEnum):
 def get_missing_app_form_errors(application: Application) -> list[ValidationErrorDetail]:
     """Get any errors for an application form missing
 
-       Under normal circumstances this shouldn't be possible as we create
-       all of the application forms when we start the application, but just
-       in case that does happen, we'll flag it here. This would require the
-       user to add at least an empty application form object for the given form.
+    Under normal circumstances this shouldn't be possible as we create
+    all of the application forms when we start the application, but just
+    in case that does happen, we'll flag it here. This would require the
+    user to add at least an empty application form object for the given form.
     """
 
-    existing_competition_form_ids = [app_form.competition_form_id for app_form in application.application_forms]
+    existing_competition_form_ids = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
 
     missing_form_errors: list[ValidationErrorDetail] = []
     for competition_form in application.competition.competition_forms:
         if competition_form.competition_form_id not in existing_competition_form_ids:
-            missing_form_errors.append(ValidationErrorDetail(
-                message=f"Form {competition_form.form.form_name} is missing",
-                type=ValidationErrorType.MISSING_APPLICATION_FORM,
-                field="form_id",
-                value=competition_form.form_id,
-            ))
+            missing_form_errors.append(
+                ValidationErrorDetail(
+                    message=f"Form {competition_form.form.form_name} is missing",
+                    type=ValidationErrorType.MISSING_APPLICATION_FORM,
+                    field="form_id",
+                    value=competition_form.form_id,
+                )
+            )
 
     return missing_form_errors
 
@@ -46,6 +50,7 @@ def is_form_required(application_form: ApplicationForm) -> bool:
     # This is very simple at the moment, but in the future this might
     # be calculated based on a users answers on another form.
     return application_form.competition_form.is_required
+
 
 def get_application_form_errors(
     application: Application,
