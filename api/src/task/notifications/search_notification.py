@@ -66,11 +66,10 @@ class SearchNotificationTask(BaseNotificationTask):
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids or [])
                 # Find NEW opportunities (in current but not in previous)
-                new_opportunities = set(current_results) - previous_results
                 top_new_opportunities = set(current_results[:25]) - previous_results
 
                 # Only add searches that have new opportunities
-                if new_opportunities:
+                if top_new_opportunities:
                     user_id = saved_search.user_id
                     updated_saved_searches.setdefault(user_id, []).append(saved_search)
                     # Add top new opportunities for this user
