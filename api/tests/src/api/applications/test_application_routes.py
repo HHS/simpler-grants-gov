@@ -840,7 +840,7 @@ def test_application_get_success_with_validation_issues(
         application_response={"age": 500},
     )
     application_form_b = ApplicationFormFactory.create(
-        application=application, competition_form=competition_form_b, application_response={}
+        application=application, competition_form=competition_form_b, application_response={"age": 20}
     )
 
     # Associate user with application
@@ -905,7 +905,7 @@ def test_application_get_success_with_validation_issues(
     )
     assert (
         application_form_statuses[str(application_form_b.application_form_id)]
-        == ApplicationFormStatus.NOT_STARTED
+        == ApplicationFormStatus.IN_PROGRESS
     )
 
 
@@ -1166,7 +1166,7 @@ def test_application_submit_missing_required_form(
 
     form = FormFactory.create(form_name="ExampleForm-ABC", form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
 
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(
@@ -1174,6 +1174,9 @@ def test_application_submit_missing_required_form(
     )
 
     ApplicationUserFactory.create(application=application, user=user)
+
+    # Setup an application form without any answers yet
+    ApplicationFormFactory.create(application=application, competition_form=competition_form, application_response={})
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",

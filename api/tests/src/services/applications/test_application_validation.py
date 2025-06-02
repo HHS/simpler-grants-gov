@@ -132,7 +132,7 @@ def test_validate_form_all_valid(
     assert len(error_detail) == 0
 
 
-def test_validate_form_all_valid_missing_optional_form(
+def test_validate_form_all_valid_not_started_optional_form(
     competition, competition_form_a, competition_form_b, competition_form_c
 ):
     application = ApplicationFactory.build(competition=competition, application_forms=[])
@@ -146,20 +146,58 @@ def test_validate_form_all_valid_missing_optional_form(
         competition_form=competition_form_b,
         application_response=VALID_FORM_B_RESPONSE,
     )
-    application.application_forms = [application_form_a, application_form_b]
+    application_form_c = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_c,
+        application_response={}
+    )
+    application.application_forms = [application_form_a, application_form_b, application_form_c]
 
     validation_errors, error_detail = get_application_form_errors(application)
     assert len(validation_errors) == 0
     assert len(error_detail) == 0
 
 
-def test_validate_forms_missing_required_forms(competition, competition_form_a, competition_form_b):
-    # Add no forms, A & B are both required
+def test_validate_forms_missing_all_forms(competition, competition_form_a, competition_form_b, competition_form_c):
+    # Add no forms, which will complain about all of them
     application = ApplicationFactory.build(competition=competition, application_forms=[])
 
     validation_errors, error_detail = get_application_form_errors(application)
 
-    # Two required forms
+    # All forms missing
+    assert len(validation_errors) == 3
+    for validation_error in validation_errors:
+        assert validation_error.message in ["Form form_a is missing", "Form form_b is missing", "Form form_c is missing"]
+        assert validation_error.type == ValidationErrorType.MISSING_APPLICATION_FORM
+        assert validation_error.field == "form_id"
+        assert validation_error.value in [competition_form_a.form_id, competition_form_b.form_id, competition_form_c.form_id]
+
+    # No error detail because that's only for specific validations
+    assert len(error_detail) == 0
+
+def test_validate_forms_not_started_all_forms(competition, competition_form_a, competition_form_b, competition_form_c):
+    # Add the forms, but start none of them
+    application = ApplicationFactory.build(competition=competition, application_forms=[])
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response={},
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response={},
+    )
+    application_form_c = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_c,
+        application_response={}
+    )
+    application.application_forms = [application_form_a, application_form_b, application_form_c]
+
+    validation_errors, error_detail = get_application_form_errors(application)
+
+    # All forms missing
     assert len(validation_errors) == 2
     for validation_error in validation_errors:
         assert validation_error.message in ["Form form_a is required", "Form form_b is required"]
@@ -169,7 +207,6 @@ def test_validate_forms_missing_required_forms(competition, competition_form_a, 
 
     # No error detail because that's only for specific validations
     assert len(error_detail) == 0
-
 
 def test_validate_forms_invalid_responses(
     competition, competition_form_a, competition_form_b, competition_form_c
@@ -186,7 +223,7 @@ def test_validate_forms_invalid_responses(
         application_response={"str_b": "text", "bool_b": "hello"},
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, competition_form=competition_form_c, application_response={}
+        application=application, competition_form=competition_form_c, application_response={"str_c": False}
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -220,7 +257,7 @@ def test_validate_forms_invalid_responses(
 
     form_c_validation_issues = error_detail[str(application_form_c.application_form_id)]
     assert set(form_c_validation_issues) == {
-        ValidationErrorDetail(type="required", message="'str_c' is a required property", field="$")
+        ValidationErrorDetail(type="type", message="False is not of type 'string'", field="$.str_c")
     }
 
 
