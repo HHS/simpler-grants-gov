@@ -63,12 +63,12 @@ class OpportunityDetails(BaseSOAPSchema):
     competition_title: str | None = Field(default=None, alias="CompetitionTitle")
     funding_opportunity_title: str | None = Field(default=None, alias="FundingOpportunityTitle")
     funding_opportunity_number: str | None = Field(default=None, alias="FundingOpportunityNumber")
-    instructions_url: str | None = Field(default=None, alias="InstructionsUrl")
+    instructions_url: str | None = Field(default=None, alias="InstructionsURL")
     is_multi_project: str | None = Field(default=None, alias="IsMultiProject")
     offering_agency: str | None = Field(default=None, alias="OfferingAgency")
     opening_date: date | None = Field(default=None, alias="OpeningDate")
     package_id: str | None = Field(default=None, alias="PackageID")
-    schema_url: str | None = Field(default=None, alias="SchemaUrl")
+    schema_url: str | None = Field(default=None, alias="SchemaURL")
 
 
 class GetOpportunityListResponse(BaseSOAPSchema):

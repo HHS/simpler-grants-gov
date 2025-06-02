@@ -11,6 +11,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import BASE_SOAP_API_RESPONSE_HEADERS
+from src.legacy_soap_api.soap_payload_handler import SoapPayload
 
 MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER = b"""
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
@@ -49,16 +50,20 @@ class TestSOAPClientSmokeTest:
             full_path="/",
         )
 
-    def test_can_instantiate(self, mock_soap_request) -> None:
-        assert isinstance(BaseSOAPClient(mock_soap_request), BaseSOAPClient)
-        assert isinstance(SimplerApplicantsS2SClient(mock_soap_request), SimplerApplicantsS2SClient)
-        assert isinstance(SimplerGrantorsS2SClient(mock_soap_request), SimplerGrantorsS2SClient)
+    def test_can_instantiate(self, mock_soap_request, db_session) -> None:
+        assert isinstance(BaseSOAPClient(mock_soap_request, db_session), BaseSOAPClient)
+        assert isinstance(
+            SimplerApplicantsS2SClient(mock_soap_request, db_session), SimplerApplicantsS2SClient
+        )
+        assert isinstance(
+            SimplerGrantorsS2SClient(mock_soap_request, db_session), SimplerGrantorsS2SClient
+        )
 
 
 class TestSimplerApplicantsClient:
     @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
-    def test_get_opportunity_list(self, mock_proxy_request, mock_logger):
+    def test_get_opportunity_list(self, mock_proxy_request, mock_logger, db_session):
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
         mock_soap_request = SOAPRequest(
@@ -67,13 +72,13 @@ class TestSimplerApplicantsClient:
             data=MOCK_REQUEST_WITH_VALID_OPPORTUNITY_FILTER,
             full_path="/",
         )
-        client = SimplerApplicantsS2SClient(mock_soap_request)
+        client = SimplerApplicantsS2SClient(mock_soap_request, db_session=db_session)
         result, simpler_response = client.get_response()
         assert result == mock_proxy_request_response
         assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
 
         # What we expect until we query sgg db for results.
-        assert simpler_response is None
+        assert isinstance(simpler_response, SOAPResponse)
 
         # Assert that the payload was validated in GetOpportunityListRequest method.
         mock_logger.assert_called_once_with(
@@ -92,7 +97,9 @@ class TestSimplerApplicantsClient:
 
     @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
-    def test_get_opportunity_list_invalid_opportunity_filter(self, mock_proxy_request, mock_logger):
+    def test_get_opportunity_list_invalid_opportunity_filter(
+        self, mock_proxy_request, mock_logger, db_session
+    ):
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
         mock_soap_request = SOAPRequest(
@@ -101,7 +108,7 @@ class TestSimplerApplicantsClient:
             data=MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER,
             full_path="/",
         )
-        client = SimplerApplicantsS2SClient(mock_soap_request)
+        client = SimplerApplicantsS2SClient(mock_soap_request, db_session=db_session)
         result, simpler_response = client.get_response()
         assert result == mock_proxy_request_response
         assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
@@ -116,7 +123,7 @@ class TestSimplerApplicantsClient:
 
         # Assert that the GetOpportunityListRequest failed validation.
         mock_logger.assert_called_once_with(
-            "soap_applicants_api_fault",
+            "simpler_soap_api_fault",
             extra={
                 "err": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
                 "fault": OpportunityListRequestInvalidParams.model_dump(),

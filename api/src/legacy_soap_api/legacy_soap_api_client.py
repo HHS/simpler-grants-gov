@@ -9,10 +9,12 @@ from src.legacy_soap_api.applicants.services import get_opportunity_list_respons
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    SOAP_OPERATION_CONFIGS,
     SOAPFaultException,
     format_local_soap_response,
     get_envelope_dict,
     get_soap_response,
+    wrap_envelope_dict,
 )
 from src.legacy_soap_api.soap_payload_handler import SoapPayload
 
@@ -54,25 +56,28 @@ class BaseSOAPClient:
             return soap_content
         return format_local_soap_response(soap_content)
 
+    def get_soap_request_dict(self) -> dict:
+        return get_envelope_dict(
+            self.soap_request_message.to_dict(), self.soap_request_operation_name
+        )
+
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
-    def GetOpportunityListRequest(self) -> None:
+    def __init__(self, soap_request: SOAPRequest, db_session: db.Session) -> None:
+        super().__init__(soap_request, db_session)
+        self.operation_config = SOAP_OPERATION_CONFIGS["applicants"].get(
+            self.soap_request_operation_name
+        )
+
+    def GetOpportunityListRequest(self) -> schemas.GetOpportunityListResponse:
         get_opportunity_list_request = schemas.GetOpportunityListRequest(
-            **get_envelope_dict(
-                self.soap_request_message.to_dict(), self.soap_request_operation_name
-            )
+            **self.get_soap_request_dict()
         )
         logger.info(
             "soap get_opportunity_list_request validated",
             extra={"get_opportunity_request": get_opportunity_list_request.model_dump()},
         )
-        opportunity_list: schemas.GetOpportunityListResponse = get_opportunity_list_response(
-            self.db_session, get_opportunity_list_request
-        )
-        logger.info(
-            "get_opportunity_list_response",
-            extra={"opportunity_list": opportunity_list.model_dump(mode="json")},
-        )
+        return get_opportunity_list_response(self.db_session, get_opportunity_list_request)
 
     def get_response(self) -> tuple:
         # This method returns the raw response we get from the proxy request as well as
@@ -81,19 +86,32 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
         if not operation_method:
             logger.info(f"soap_operation_not_supported: {self.soap_request_operation_name}")
             return self.proxy_response, None
+        if not self.operation_config:
+            logger.info(f"soap_operation_config_not_found: {self.soap_request_operation_name}")
+            return self.proxy_response, None
 
         try:
             simpler_response = operation_method()
+            simpler_soap_payload = SoapPayload(
+                soap_payload=wrap_envelope_dict(
+                    soap_xml_dict=simpler_response.model_dump(mode="json", by_alias=True),
+                    operation_name=self.operation_config.response_operation_name,
+                ),
+                force_list_attributes=self.operation_config.force_list_attributes,
+                operation_name=self.operation_config.response_operation_name,
+            )
+            simpler_soap_response = get_soap_response(data=simpler_soap_payload.envelope.encode())
         except SOAPFaultException as e:
             logger.info(
-                "soap_applicants_api_fault",
+                "simpler_soap_api_fault",
                 extra={"err": e.message, "fault": e.fault.model_dump()},
             )
-            simpler_response = get_soap_response(
+            simpler_soap_response = get_soap_response(
                 data=e.fault.to_xml(),
                 status_code=500,
             )
-        return self.proxy_response, simpler_response
+
+        return self.proxy_response, simpler_soap_response
 
 
 class SimplerGrantorsS2SClient(BaseSOAPClient):

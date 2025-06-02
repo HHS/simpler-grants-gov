@@ -78,9 +78,9 @@ def _build_get_opportunity_details(competition_model: Competition) -> Opportunit
         cfda_details=_get_cfda_details(competition_model.opportunity_assistance_listing),
         offering_agency=competition_model.opportunity.agency_name,
         package_id=competition_model.legacy_package_id,
+        agency_contact_info=competition_model.contact_info,
         schema_url="",
         instructions_url="",
-        agency_contact_info="",
     )
 
 
