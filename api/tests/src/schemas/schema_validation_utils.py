@@ -34,6 +34,7 @@ INVALID_SPECIAL_DECIMAL = MarshmallowErrorContainer(
     "Special numeric values (nan or infinity) are not permitted.",
 )
 INVALID_EMAIL = MarshmallowErrorContainer(ValidationErrorType.FORMAT, "Not a valid email address.")
+INVALID_FILE = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file.")
 UNKNOWN_FIELD = MarshmallowErrorContainer(ValidationErrorType.UNKNOWN, "Unknown field.")
 
 
@@ -182,6 +183,12 @@ class FieldTestSchema(Schema):
     field_enum_invalid_type = fields.Enum(EnumA)
     field_enum_required = fields.Enum(EnumB, required=True)
 
+    # These tests verify JSON can be submitted, but these file
+    # fields are only usable as a form, so allow them to be None
+    # so we can set something to at least test the error scenarios.
+    field_file = fields.File(allow_none=True)
+    field_file_required = fields.File(required=True, allow_none=True)
+
 
 ########################
 # Requests for the above schema
@@ -237,6 +244,10 @@ def get_valid_field_test_schema_req():
         "field_enum": EnumA.VALUE1,
         "field_enum_invalid_choice": EnumA.VALUE2,
         "field_enum_required": EnumB.VALUE4,
+        # We cannot pass the file stream in as JSON, so the only
+        # valid values for files are None
+        "field_file": None,
+        "field_file_required": None,
     }
 
 
@@ -287,6 +298,8 @@ def get_invalid_field_test_schema_req():
         "field_enum": 12345,
         "field_enum_invalid_choice": "notvalid",
         "field_enum_invalid_type": {},
+        "field_file": 10,
+        # field_file_required not present
     }
 
 
@@ -337,4 +350,6 @@ def get_expected_validation_errors():
         "field_enum_invalid_choice": [get_enum_error_msg(EnumA)],
         "field_enum_invalid_type": [get_enum_error_msg(EnumA)],
         "field_enum_required": [MISSING_DATA],
+        "field_file": [INVALID_FILE],
+        "field_file_required": [MISSING_DATA],
     }
