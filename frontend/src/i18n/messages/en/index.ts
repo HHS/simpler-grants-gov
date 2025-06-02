@@ -301,7 +301,7 @@ export const messages = {
   },
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
-    title: "You’re subscribed",
+    title: "You're subscribed",
     intro:
       "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
@@ -412,6 +412,17 @@ export const messages = {
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    filters: {
+      searchNoResults: {
+        title: "Your search didn't return any results.",
+        heading: "Suggestions:",
+        suggestions: [
+          "Check any terms you've entered for typos",
+          "Try different keywords",
+          "Try resetting filters or selecting fewer options",
+        ],
+      },
+    },
     accordion: {
       any: "Any",
       all: "All",
@@ -435,6 +446,11 @@ export const messages = {
       label:
         "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
       button: "Search",
+    },
+    drawer: {
+      title: "Filters",
+      submit: "View results",
+      clearFilters: "Clear filters",
     },
     callToAction: {
       title: "Search funding opportunities",
@@ -491,6 +507,7 @@ export const messages = {
     filterDisplayToggle: {
       showFilters: "Show Filters",
       hideFilters: "Hide Filters",
+      drawer: "Filters",
     },
     genericErrorCta: "Please try your search again.",
     validationError: "Search Validation Error",

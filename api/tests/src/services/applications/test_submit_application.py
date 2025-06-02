@@ -87,6 +87,33 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     assert excinfo.value.message == "The application has issues in its form responses."
     assert (
         excinfo.value.extra_data["validation_issues"][0].type
+        == ValidationErrorType.MISSING_APPLICATION_FORM
+    )
+
+
+def test_submit_application_with_not_started_required_form(enable_factory_create, db_session, user):
+    competition = CompetitionFactory.create(competition_forms=[])
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+
+    ApplicationFormFactory.create(
+        application=application, competition_form=competition_form, application_response={}
+    )
+
+    # Create a user and associate with the application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        submit_application(db_session, application.application_id, user)
+
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.message == "The application has issues in its form responses."
+    assert (
+        excinfo.value.extra_data["validation_issues"][0].type
         == ValidationErrorType.MISSING_REQUIRED_FORM
     )
 

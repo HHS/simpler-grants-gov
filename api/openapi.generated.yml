@@ -924,6 +924,49 @@ paths:
               $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/attachments:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentCreateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Create an attachment on an application
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -2965,6 +3008,14 @@ components:
         application_response:
           type: object
           additionalProperties: {}
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationUser:
       type: object
       properties:
@@ -2981,10 +3032,10 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        competition_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+        competition:
+          type:
+          - object
+          $ref: '#/components/schemas/CompetitionAlpha'
         application_forms:
           type: array
           items:
@@ -3001,6 +3052,16 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationUser'
+        form_validation_warnings:
+          type: object
+          description: Specific form validation issues
+          example:
+            123e4567-e89b-12d3-a456-426614174000:
+            - field: $
+              message: '''name'' is a required property'
+              type: required
+              value: null
+          additionalProperties: {}
     ApplicationGetResponse:
       type: object
       properties:
@@ -3053,6 +3114,14 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -3299,6 +3368,38 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAttachmentCreateRequest:
+      type: object
+      properties:
+        file_attachment:
+          description: The file to attach to an application
+          type: string
+          format: binary
+      required:
+      - file_attachment
+    ApplicationAttachmentCreate:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the uploaded application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationAttachmentCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserUpdateSavedSearchRequest:
       type: object
       properties:
@@ -3349,6 +3450,14 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationFormUpdateResponse:
       type: object
       properties:

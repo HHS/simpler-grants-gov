@@ -1,12 +1,14 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import lazyload, selectinload
 
 import src.adapters.db as db
+from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import Application, ApplicationForm
+from src.db.models.competition_models import Application, Competition
 from src.db.models.user_models import ApplicationUser, User
+from src.services.applications.application_validation import get_application_form_errors
 from src.services.applications.auth_utils import check_user_application_access
 
 
@@ -17,12 +19,12 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
     result = db_session.execute(
         select(Application)
         .options(
-            selectinload(Application.application_forms).selectinload(
-                ApplicationForm.competition_form
-            ),
-            selectinload(Application.application_users)
-            .selectinload(ApplicationUser.user)
-            .selectinload(User.linked_login_gov_external_user),
+            selectinload("*"),
+            # Explicitly don't load these
+            lazyload(Application.competition, Competition.opportunity),
+            lazyload(Application.competition, Competition.applications),
+            lazyload(Application.application_users, ApplicationUser.user, User.saved_opportunities),
+            lazyload(Application.application_users, ApplicationUser.user, User.saved_searches),
         )
         .where(Application.application_id == application_id)
     )
@@ -37,3 +39,22 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
     check_user_application_access(application, user)
 
     return application
+
+
+def get_application_with_warnings(
+    db_session: db.Session, application_id: UUID, user: User
+) -> tuple[Application, list[ValidationErrorDetail]]:
+    """
+    Fetch an application along with validation warnings
+    """
+    # Fetch an application, handles the auth checks as well
+    application = get_application(db_session, application_id, user)
+
+    # See what validation issues remain on the application's forms
+    form_warnings, form_warning_map = get_application_form_errors(application)
+
+    # Attach the form warning map to the application so it appears
+    # in the response object
+    application.form_validation_warnings = form_warning_map  # type: ignore[attr-defined]
+
+    return application, form_warnings

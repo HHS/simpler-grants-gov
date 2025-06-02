@@ -79,6 +79,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
+    competition_instructions: Mapped[list["CompetitionInstruction"]] = relationship(
+        "CompetitionInstruction",
+        uselist=True,
+        back_populates="competition",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def is_open(self) -> bool:
         """The competition is open if the following are both true:
@@ -123,9 +130,22 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition: Mapped[Competition] = relationship(Competition)
+    competition: Mapped[Competition] = relationship(
+        Competition, back_populates="competition_instructions"
+    )
 
     file_location: Mapped[str]
+    file_name: Mapped[str]
+
+
+class FormInstruction(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "form_instruction"
+
+    form_instruction_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    file_location: Mapped[str]
+    file_name: Mapped[str]
 
 
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
@@ -158,6 +178,12 @@ class Form(ApiSchemaTable, TimestampMixin):
     inactive_at: Mapped[datetime | None]
     form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
     form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    form_instruction_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(FormInstruction.form_instruction_id), nullable=True
+    )
+    form_instruction: Mapped[FormInstruction | None] = relationship(
+        FormInstruction, cascade="all, delete-orphan", single_parent=True
+    )
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -209,6 +235,13 @@ class Application(ApiSchemaTable, TimestampMixin):
         "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
     )
 
+    application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list["User"]:
         """Return the list of User objects associated with this application"""
@@ -241,6 +274,22 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     def form_id(self) -> uuid.UUID:
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
+
+
+class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_attachment"
+
+    application_attachment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
+    application: Mapped[Application] = relationship(Application)
+
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+    mime_type: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):

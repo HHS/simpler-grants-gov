@@ -77,7 +77,7 @@ describe("subscribeEmailAction", () => {
     try {
       await subscribeEmailAction(t, testFormData);
     } finally {
-      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenCalledTimes(2);
     }
 
     // Test valid response

@@ -4,7 +4,6 @@ import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
-import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import {
@@ -13,6 +12,7 @@ import {
   fundingOptions,
   statusOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
+import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 
 export default async function SearchFilters({
@@ -71,19 +71,12 @@ export default async function SearchFilters({
       />
       <Suspense
         fallback={
-          <Accordion
-            bordered={true}
-            items={[
-              {
-                title: t("accordion.titles.agency"),
-                content: [],
-                expanded: false,
-                id: "opportunity-filter-agency-disabled",
-                headingLevel: "h2",
-              },
-            ]}
-            multiselectable={true}
-            className="margin-top-4"
+          <CheckboxFilter
+            filterOptions={[]}
+            query={agency}
+            queryParamKey={"agency"}
+            title={t("accordion.titles.agency")}
+            facetCounts={{}}
           />
         }
       >

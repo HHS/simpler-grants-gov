@@ -1,5 +1,7 @@
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
+from src.constants.lookup_constants import ApplicationFormStatus
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -26,6 +28,11 @@ class ApplicationUpdateResponseDataSchema(Schema):
 class ApplicationUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationUpdateResponseDataSchema())
 
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
 
 class ApplicationFormUpdateRequestSchema(Schema):
     application_response = fields.Dict(required=True)
@@ -33,6 +40,11 @@ class ApplicationFormUpdateRequestSchema(Schema):
 
 class ApplicationFormUpdateResponseDataSchema(Schema):
     application_id = fields.UUID()
+
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -44,6 +56,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     form_id = fields.UUID()
     application_response = fields.Dict()
+
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -59,12 +76,46 @@ class ApplicationUserSchema(Schema):
 
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
-    competition_id = fields.UUID()
+    competition = fields.Nested(CompetitionAlphaSchema())
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
     application_status = fields.String()
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
 
+    form_validation_warnings = fields.Dict(
+        metadata={
+            "description": "Specific form validation issues",
+            "example": {
+                "123e4567-e89b-12d3-a456-426614174000": [
+                    {
+                        "field": "$",
+                        "message": "'name' is a required property",
+                        "type": "required",
+                        "value": None,
+                    }
+                ]
+            },
+        }
+    )
+
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationGetResponseDataSchema())
+
+
+class ApplicationAttachmentCreateSchema(Schema):
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the uploaded application attachment"}
+    )
+
+
+class ApplicationAttachmentCreateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationAttachmentCreateSchema())
+
+
+class ApplicationAttachmentCreateRequestSchema(Schema):
+    file_attachment = fields.File(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The file to attach to an application"},
+    )

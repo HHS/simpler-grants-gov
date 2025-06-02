@@ -6,6 +6,8 @@ from src.adapters.db import flask_db
 from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (
+    ApplicationAttachmentCreateRequestSchema,
+    ApplicationAttachmentCreateResponseSchema,
     ApplicationFormGetResponseSchema,
     ApplicationFormUpdateRequestSchema,
     ApplicationFormUpdateResponseSchema,
@@ -19,7 +21,8 @@ from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
-from src.services.applications.get_application import get_application
+from src.services.applications.create_application_attachment import create_application_attachment
+from src.services.applications.get_application import get_application_with_warnings
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
@@ -104,13 +107,11 @@ def application_form_update(
 
     with db_session.begin():
         # Call the service to update the application form
-        _, warnings = update_application_form(
+        application_form, warnings = update_application_form(
             db_session, application_id, form_id, application_response, user
         )
 
-    return response.ApiResponse(
-        message="Success", data={"application_id": application_id}, warnings=warnings
-    )
+    return response.ApiResponse(message="Success", data=application_form, warnings=warnings)
 
 
 @application_blueprint.get(
@@ -166,12 +167,13 @@ def application_get(
     user = token_session.user
 
     with db_session.begin():
-        application = get_application(db_session, application_id, user)
+        application, warnings = get_application_with_warnings(db_session, application_id, user)
 
     # Return the application form data
     return response.ApiResponse(
         message="Success",
         data=application,
+        warnings=warnings,
     )
 
 
@@ -194,3 +196,28 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
 
     # Return success response
     return response.ApiResponse(message="Success")
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/attachments")
+@application_blueprint.input(ApplicationAttachmentCreateRequestSchema(), location="form_and_files")
+@application_blueprint.output(ApplicationAttachmentCreateResponseSchema())
+@application_blueprint.doc(responses=[200, 401, 404, 422])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_attachment_create(
+    db_session: db.Session, application_id: UUID, form_and_files_data: dict
+) -> response.ApiResponse:
+    """Create an attachment on an application"""
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("POST /alpha/applications/:application_id/attachments")
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        application_attachment = create_application_attachment(
+            db_session, application_id, user, form_and_files_data
+        )
+
+    return response.ApiResponse(message="Success", data=application_attachment)
