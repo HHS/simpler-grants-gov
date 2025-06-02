@@ -3,12 +3,15 @@
  */
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import {
+  agenciesToFilterOptions,
   areSetsEqual,
   getAgencyDisplayName,
   paramsToFormattedQuery,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
+import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
 describe("sortFilterOptions", () => {
   it("alphabetically sorts top level and child options by label", () => {
@@ -221,5 +224,135 @@ describe("paramsToFormattedQuery", () => {
         ]),
       ),
     ).toEqual("?key=value,anotherValue&big=small&simpler=grants");
+  });
+});
+
+describe("agenciesToFilterOptions", () => {
+  it("converts a simple list of top level agencies to filter options", () => {
+    expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
+      {
+        id: "DOCNIST",
+        label: "National Institute of Standards and Technology",
+        value: "DOCNIST",
+      },
+      {
+        id: "MOCKNIST",
+        label: "Mational Institute",
+        value: "MOCKNIST",
+      },
+      {
+        id: "MOCKTRASH",
+        label: "Mational TRASH",
+        value: "MOCKTRASH",
+      },
+      {
+        id: "FAKEORG",
+        label: "Completely fake",
+        value: "FAKEORG",
+      },
+    ]);
+  });
+
+  it("converts a complex list of nested agencies to filter options", () => {
+    const fakeAgencyResponseData: RelevantAgencyRecord[] = [
+      {
+        agency_code: "DOCNIST",
+        agency_name: "National Institute of Standards and Technology",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "Hello-HI",
+        agency_name: "Hello",
+        top_level_agency: {
+          agency_code: "DOCNIST",
+          agency_id: 2,
+          agency_name: "irrelevant",
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+      {
+        agency_code: "MOCKNIST",
+        agency_name: "Mational Institute",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "MORE-TRASH",
+        agency_name: "More TRASH",
+        top_level_agency: {
+          agency_code: "MOCKTRASH",
+          agency_id: 2,
+          agency_name: "irrelevant",
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+      {
+        agency_code: "MOCKTRASH",
+        agency_name: "Mational TRASH",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "FAKEORG",
+        agency_name: "Completely fake",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "There-Again",
+        agency_name: "Again",
+        top_level_agency: {
+          agency_code: "DOCNIST",
+          agency_id: 2,
+          agency_name: "irrelevant",
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+    ];
+    expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
+      {
+        id: "DOCNIST",
+        label: "National Institute of Standards and Technology",
+        value: "DOCNIST",
+        children: [
+          {
+            id: "Hello-HI",
+            label: "Hello",
+            value: "Hello-HI",
+          },
+          {
+            id: "There-Again",
+            label: "Again",
+            value: "There-Again",
+          },
+        ],
+      },
+      {
+        id: "MOCKNIST",
+        label: "Mational Institute",
+        value: "MOCKNIST",
+      },
+      {
+        id: "MOCKTRASH",
+        label: "Mational TRASH",
+        value: "MOCKTRASH",
+        children: [
+          {
+            id: "MORE-TRASH",
+            label: "More TRASH",
+            value: "MORE-TRASH",
+          },
+        ],
+      },
+      {
+        id: "FAKEORG",
+        label: "Completely fake",
+        value: "FAKEORG",
+      },
+    ]);
   });
 });
