@@ -6,13 +6,7 @@ from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
-from src.util.env_config import PydanticBaseEnvConfig
-from src.util.file_util import convert_public_s3_to_cdn_url, pre_sign_file_location
-
-
-class AttachmentConfig(PydanticBaseEnvConfig):
-    # If the CDN URL is set, we'll use it instead of pre-signing the file locations
-    cdn_url: str | None = None
+from src.util.file_util import CDNConfig, convert_public_s3_to_cdn_url, pre_sign_file_location
 
 
 def _fetch_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
@@ -59,7 +53,7 @@ def pre_sign_opportunity_file_location(
 def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     opportunity = _fetch_opportunity(db_session, opportunity_id)
 
-    attachment_config = AttachmentConfig()
+    attachment_config = CDNConfig()
     if attachment_config.cdn_url is not None:
         s3_config = S3Config()
         for opp_att in opportunity.opportunity_attachments:

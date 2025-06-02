@@ -9,10 +9,15 @@ import smart_open
 from botocore.config import Config
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+from src.util.env_config import PydanticBaseEnvConfig
 
 ##################################
 # Path parsing utils
 ##################################
+
+
+class CDNConfig(PydanticBaseEnvConfig):
+    cdn_url: str | None = None
 
 
 def is_s3_path(path: str | Path) -> bool:
@@ -179,3 +184,16 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
     return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
+
+
+def presign_or_s3_cdnify_url(file_path: str) -> str:
+    """
+    Generates a URL for file download, either using CDN or pre-signed URL.
+    """
+    cdn_config = CDNConfig()
+    s3_config = S3Config()
+
+    if cdn_config.cdn_url is not None:
+        return convert_public_s3_to_cdn_url(file_path, cdn_config.cdn_url, s3_config)
+    else:
+        return pre_sign_file_location(file_path)

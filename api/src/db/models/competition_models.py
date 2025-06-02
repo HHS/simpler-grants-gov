@@ -147,6 +147,12 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_name: Mapped[str]
 
+    @property
+    def download_path(self) -> str:
+        from src.util.file_util import presign_or_s3_cdnify_url
+
+        return presign_or_s3_cdnify_url(self.file_location)
+
 
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_assistance_listing"
