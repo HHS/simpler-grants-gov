@@ -64,6 +64,7 @@ const toOneOfFilter = (data: Set<string>): OneOfFilter => {
     one_of: Array.from(data),
   };
 };
+
 const toRelativeDateRangeFilter = (
   data: Set<string>,
 ): RelativeDateRangeFilter => {

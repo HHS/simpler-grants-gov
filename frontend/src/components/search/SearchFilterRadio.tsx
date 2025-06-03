@@ -19,7 +19,7 @@ export const SearchFilterRadio = ({
   name,
   label,
   onChange,
-  disabled = false, // Default enabled. Pass in a mounted from parent if necessary.
+  disabled = false,
   checked = false,
   value,
   facetCount,
