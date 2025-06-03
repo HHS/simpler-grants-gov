@@ -2805,6 +2805,25 @@ components:
           type:
           - object
           $ref: '#/components/schemas/FormAlpha'
+    CompetitionInstructionAlpha:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: The name of the instruction file
+          example: competition_instructions.pdf
+        download_path:
+          type: string
+          description: The URL to download the instruction file
+          example: https://cdn.example.com/competition-instructions/file.pdf
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time when the instruction was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time when the instruction was last updated
     CompetitionAlpha:
       type: object
       properties:
@@ -2822,6 +2841,13 @@ components:
             type:
             - object
             $ref: '#/components/schemas/CompetitionFormAlpha'
+        competition_instructions:
+          type: array
+          description: List of instruction files associated with this competition
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionInstructionAlpha'
         competition_title:
           type: string
           description: The title of the competition
