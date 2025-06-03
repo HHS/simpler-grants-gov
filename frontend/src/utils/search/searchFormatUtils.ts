@@ -63,12 +63,12 @@ const filterConfigurations = [
   },
 ] as const;
 
-const toOneOfFilter = (data: Set<string>): OneOfFilter => {
+export const toOneOfFilter = (data: Set<string>): OneOfFilter => {
   return {
     one_of: Array.from(data),
   };
 };
-const toRelativeDateRangeFilter = (
+export const toRelativeDateRangeFilter = (
   data: Set<string>,
 ): RelativeDateRangeFilter => {
   const convertedData = Array.from(data);
@@ -77,10 +77,12 @@ const toRelativeDateRangeFilter = (
   };
 };
 
-const fromOneOfFilter = (data: OneOfFilter): string =>
+export const fromOneOfFilter = (data: OneOfFilter): string =>
   data?.one_of?.length ? data.one_of.join(",") : "";
-// TODO implement this as a RELATIVE date range filter, which will take  build in optional support for ABSOLUTE
-const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string => {
+
+export const fromRelativeDateRangeFilter = (
+  data: RelativeDateRangeFilter,
+): string => {
   return data?.end_date_relative;
 };
 

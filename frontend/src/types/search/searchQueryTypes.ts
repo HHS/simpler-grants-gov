@@ -8,7 +8,6 @@ export interface FilterQueryParamData {
   eligibility: Set<string>;
   agency: Set<string>;
   category: Set<string>;
-  // closeDate: string[]; // order matters here, so using an array instead of set
   closeDate: Set<string>;
 }
 

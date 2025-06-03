@@ -432,7 +432,7 @@ export const messages = {
         agency: "Agency",
         category: "Category",
         status: "Opportunity status",
-        closeDate: "Closing Date Range",
+        closeDate: "Closing date range",
       },
       options: {
         status: {
