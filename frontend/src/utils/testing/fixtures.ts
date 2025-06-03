@@ -35,6 +35,7 @@ export const searchFetcherParams: QueryParamData = {
   agency: new Set(),
   category: new Set(),
   eligibility: new Set(),
+  closeDate: new Set(),
   query: "research",
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
@@ -101,6 +102,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   funding_category: {
+    arbitraryKey: 1,
+  },
+  close_date: {
     arbitraryKey: 1,
   },
 };

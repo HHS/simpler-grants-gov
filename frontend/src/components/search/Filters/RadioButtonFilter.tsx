@@ -43,7 +43,7 @@ export function RadioButtonFilter({
               <SearchFilterRadio
                 id={`${title}-any-radio`}
                 name={`Any ${title}`}
-                label={`Any ${title}`}
+                label={`Any ${title.toLowerCase()}`}
                 onChange={toggleRadioSelection}
                 value={undefined}
                 facetCount={undefined}

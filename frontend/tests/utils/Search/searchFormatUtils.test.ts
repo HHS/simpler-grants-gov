@@ -86,6 +86,17 @@ describe("buildFilters", () => {
     expect(filters.agency).toEqual(undefined);
     expect(filters.funding_category).toEqual(undefined);
   });
+  it("handles date ranges", () => {
+    const filters = buildFilters({
+      ...searchFetcherParams,
+      ...{
+        closeDate: new Set(["500"]),
+      },
+    });
+    expect(filters.close_date).toEqual({
+      end_date_relative: "500",
+    });
+  });
 });
 
 describe("buildPagination", () => {
@@ -204,6 +215,17 @@ describe("searchToQueryParams", () => {
 
     const emptyQueryParams = searchToQueryParams({} as SavedSearchQuery);
     expect(emptyQueryParams).toEqual({ query: "" });
+  });
+  it("correctly handles date ranges", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: {
+        ...fakeSavedSearch.filters,
+        close_date: { end_date_relative: "500" },
+      },
+    });
+
+    expect(queryParams.closeDate).toEqual("500");
   });
 });
 

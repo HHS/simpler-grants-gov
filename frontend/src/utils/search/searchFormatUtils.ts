@@ -1,9 +1,5 @@
-import { filter, groupBy, pickBy } from "lodash";
+import { pickBy } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
-import {
-  BackendFilterNames,
-  FrontendFilterNames,
-} from "src/types/search/searchFilterTypes";
 import {
   ValidSearchQueryParamData,
   validSearchQueryParamKeys,
@@ -63,12 +59,12 @@ const filterConfigurations = [
   },
 ] as const;
 
-export const toOneOfFilter = (data: Set<string>): OneOfFilter => {
+const toOneOfFilter = (data: Set<string>): OneOfFilter => {
   return {
     one_of: Array.from(data),
   };
 };
-export const toRelativeDateRangeFilter = (
+const toRelativeDateRangeFilter = (
   data: Set<string>,
 ): RelativeDateRangeFilter => {
   const convertedData = Array.from(data);
@@ -77,12 +73,10 @@ export const toRelativeDateRangeFilter = (
   };
 };
 
-export const fromOneOfFilter = (data: OneOfFilter): string =>
+const fromOneOfFilter = (data: OneOfFilter): string =>
   data?.one_of?.length ? data.one_of.join(",") : "";
 
-export const fromRelativeDateRangeFilter = (
-  data: RelativeDateRangeFilter,
-): string => {
+const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string => {
   return data?.end_date_relative;
 };
 
@@ -147,40 +141,43 @@ export const buildFilters = (
 export const searchToQueryParams = (
   searchRecord: SavedSearchQuery,
 ): ValidSearchQueryParamData => {
-  const filters = Object.entries(searchRecord.filters).reduce(
-    (
-      queryParams,
-      [backendKey, backendFilterData]: [
-        string,
-        OneOfFilter | RelativeDateRangeFilter,
-      ],
-    ) => {
-      const config = filterConfigurations.find(
-        (config) => config.backendName === backendKey,
-      );
-      if (!config) {
-        console.error(
-          "Bad search query configuration, key not found",
-          backendKey,
-        );
-        return queryParams;
-      }
-      const { dataType, frontendName } = config;
-      // this will need adjusting if we add more filter data types
-      const queryParamValue =
-        dataType === "oneOf"
-          ? fromOneOfFilter(backendFilterData as OneOfFilter)
-          : fromRelativeDateRangeFilter(
-              backendFilterData as RelativeDateRangeFilter,
+  const filters =
+    searchRecord.filters && Object.keys(searchRecord.filters).length
+      ? Object.entries(searchRecord.filters).reduce(
+          (
+            queryParams,
+            [backendKey, backendFilterData]: [
+              string,
+              OneOfFilter | RelativeDateRangeFilter,
+            ],
+          ) => {
+            const config = filterConfigurations.find(
+              (config) => config.backendName === backendKey,
             );
-      if (queryParamValue) {
-        queryParams[frontendName as keyof ValidSearchQueryParamData] =
-          queryParamValue;
-      }
-      return queryParams;
-    },
-    {} as ValidSearchQueryParamData,
-  );
+            if (!config) {
+              console.error(
+                "Bad search query configuration, key not found",
+                backendKey,
+              );
+              return queryParams;
+            }
+            const { dataType, frontendName } = config;
+            // this will need adjusting if we add more filter data types
+            const queryParamValue =
+              dataType === "oneOf"
+                ? fromOneOfFilter(backendFilterData as OneOfFilter)
+                : fromRelativeDateRangeFilter(
+                    backendFilterData as RelativeDateRangeFilter,
+                  );
+            if (queryParamValue) {
+              queryParams[frontendName as keyof ValidSearchQueryParamData] =
+                queryParamValue;
+            }
+            return queryParams;
+          },
+          {} as ValidSearchQueryParamData,
+        )
+      : {};
 
   const sortby = paginationToSortby(searchRecord?.pagination?.sort_order || []);
 

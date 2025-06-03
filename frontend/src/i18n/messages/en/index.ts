@@ -588,6 +588,7 @@ export const messages = {
       query: "Search terms",
       page: "Page",
       sortby: "Sort by",
+      closeDate: "Close date",
     },
     editModal: {
       loading: "Updating",
