@@ -1,4 +1,5 @@
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { formatCurrency } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
@@ -6,7 +7,6 @@ import { Grid } from "@trussworks/react-uswds";
 import OpportunityAwardGridRow, {
   AwardDataKeys,
 } from "./OpportunityAwardGridRow";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
 
 type Props = {
   opportunityData: BaseOpportunity;
