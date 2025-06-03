@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Grid, GridContainer, Link } from "@trussworks/react-uswds";
 import { OpportunityAssistanceListing, OpportunityOverview as OpportunityOverviewType } from "src/types/opportunity/opportunityResponseTypes";
 import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 type OpportunityOverviewProps = {
   overview: OpportunityOverviewType;
@@ -50,25 +51,24 @@ const OpportunityItemLink = ({
 
 const OpportunityOverview = (props: OpportunityOverviewProps) => {
   const {
-    opportunity_title,
-    opportunity_id,
-    opportunity_number,
-    post_date,
-    agency_name,
-    opportunity_assistance_listings,
-    is_cost_sharing,
     agency_code,
-    agency_email_address,
-    agency_phone_number,
-    estimated_total_program_funding,
-    expected_number_of_awards,
+    agency_contact_description,
+    agency_name,
     award_ceiling,
     award_floor,
-    close_date
+    close_date,
+    estimated_total_program_funding,
+    expected_number_of_awards,
+    is_cost_sharing,
+    post_date,
+    opportunity_assistance_listings,
+    opportunity_id,
+    opportunity_title,
+    opportunity_number,
   } = props.overview;
   const t = useTranslations("Application.opportunityOverview");
 
-  const opportunityAssistanceListings = (opportunityAssistanceListings: OpportunityAssistanceListing[]) => {
+  const displayOpportunityAssistanceListings = (opportunityAssistanceListings: OpportunityAssistanceListing[]) => {
     const listings: string[] = []
 
     opportunityAssistanceListings.map((opportunityAssistanceListing) => {
@@ -80,25 +80,15 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
     return listings.length ? listings.join(', ') : null;
   }
 
-  const isCostSharing = (is_cost_sharing: boolean | null) => {
-    if (is_cost_sharing != null) {
-      return is_cost_sharing ? 'Yes' : 'No'
+  const displayIsCostSharing = (isCostSharing: boolean | null) => {
+    if (isCostSharing != null) {
+      return isCostSharing ? 'Yes' : 'No'
     }
 
     return null
   }
 
-  const grantorContactInformation = (name: string | null, email: string | null, phone: string | null) => {
-    const contactInformation = []
-
-    if (name != null) contactInformation.push(name)
-    if (email != null) contactInformation.push(email)
-    if (phone != null) contactInformation.push(phone)
-
-    return contactInformation.length ? contactInformation.join(', ') : null
-  }
-
-  const agency = (agencyName: string | null, agencyCode: string | null) => {
+  const displayAgencyAndCode = (agencyName: string | null, agencyCode: string | null) => {
     let agencyTitle = null
 
     if(agencyName) {
@@ -114,25 +104,39 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
     return agencyTitle
   }
 
+  const displayPostedDate = (postDate: string | null) => {
+    if(postDate) {
+      return getConfiguredDayJs()(postDate).format("MMM D, YYYY hh:mm A z")
+    }
+    return null
+  }
+
+  const displayEstimatedAwardDate = (estimatedAwardDate: string | null) => {
+    if(estimatedAwardDate) {
+      return getConfiguredDayJs()(estimatedAwardDate).format("MMM D, YYYY hh:mm A z")
+    }
+    return null
+  }
+
   return (
     <>
       <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
         <dl className="margin-top-0">
           <OpportunityItemLink opKey={t("name")} opValue={opportunity_title} opId={opportunity_id} />
           <OpportunityItem opKey={t("number")} opValue={opportunity_number} />
-          <OpportunityItem opKey={t("posted")} opValue={post_date} />
-          <OpportunityItem opKey={t("agency")} opValue={agency(agency_name, agency_code)} />
+          <OpportunityItem opKey={t("posted")} opValue={displayPostedDate(post_date)} />
+          <OpportunityItem opKey={t("agency")} opValue={displayAgencyAndCode(agency_name, agency_code)} />
           <OpportunityItem
             opKey={t("assistanceListings")}
-            opValue={opportunityAssistanceListings(opportunity_assistance_listings)}
+            opValue={displayOpportunityAssistanceListings(opportunity_assistance_listings)}
           />
           <OpportunityItem
             opKey={t("costSharingOrMatchingRequirement")}
-            opValue={isCostSharing(is_cost_sharing)}
+            opValue={displayIsCostSharing(is_cost_sharing)}
           />
           <OpportunityItem
             opKey={t("grantorContactInfomation")}
-            opValue={grantorContactInformation(agency_name, agency_email_address, agency_phone_number)}
+            opValue={agency_contact_description}
           />
         </dl>
       </Grid>
@@ -148,7 +152,7 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
           <OpportunityItem opKey={t("awardMinimum")} opValue={formatCurrency(award_floor)} />
           <OpportunityItem
             opKey={t("estimatedAwardDate")}
-            opValue={close_date}
+            opValue={displayEstimatedAwardDate(close_date)}
           />
         </dl>
       </Grid>
@@ -156,34 +160,8 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
   );
 };
 
-export const OpportunityCard = () => {
+export const OpportunityCard = ( opportunityOverview: OpportunityOverviewType ) => {
   const t = useTranslations("Application.opportunityOverview");
-  const opportunityOverview = {
-    opportunity_title: 'The opportunity title',
-    opportunity_id: 2342,
-    opportunity_number: 'adf33a',
-    post_date: 'May 22, 2025',
-    close_date: 'May 22, 2027',
-    agency_name: 'Administration for Children and Families',
-    opportunity_assistance_listings: [
-      {
-        assistance_listing_number: '0',
-        program_title: 'title'
-      },
-      {
-        assistance_listing_number: '1',
-        program_title: 'title 2'
-      },
-    ],
-    is_cost_sharing: false,
-    agency_code: 'ACYF/CB',
-    agency_email_address: 'something@email.com',
-    agency_phone_number: '7703120099',
-    estimated_total_program_funding: 1400,
-    expected_number_of_awards: 14,
-    award_ceiling: 100,
-    award_floor: 1
-  };
 
   return (
     <GridContainer
