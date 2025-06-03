@@ -43,10 +43,10 @@ class CompetitionAlphaSchema(Schema):
     )
 
     competition_forms = fields.List(fields.Nested(CompetitionFormAlphaSchema()))
-    
+
     competition_instructions = fields.List(
         fields.Nested(CompetitionInstructionAlphaSchema()),
-        metadata={"description": "List of instruction files associated with this competition"}
+        metadata={"description": "List of instruction files associated with this competition"},
     )
 
     competition_title = fields.String(

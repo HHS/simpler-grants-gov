@@ -137,7 +137,7 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
     file_name: Mapped[str]
-    
+
     @property
     def download_path(self) -> str:
         return presign_or_s3_cdnify_url(self.file_location)

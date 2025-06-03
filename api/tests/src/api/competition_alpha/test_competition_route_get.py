@@ -42,7 +42,7 @@ def test_competition_get_with_instructions_200(client, api_auth_token, enable_fa
     # Mock the download_path property for CompetitionInstruction
     presigned_url = "https://example.com/competition-instructions/file.pdf"
     with mock.patch(
-        "src.db.models.competition_models.CompetitionInstruction.download_path", 
+        "src.db.models.competition_models.CompetitionInstruction.download_path",
         new_callable=mock.PropertyMock,
         return_value=presigned_url,
     ):
@@ -74,7 +74,7 @@ def test_competition_get_with_cdn_instructions_200(
     # Mock the download_path property for CompetitionInstruction
     cdn_url = "https://cdn.example.com/competition-instructions/file.pdf"
     with mock.patch(
-        "src.db.models.competition_models.CompetitionInstruction.download_path", 
+        "src.db.models.competition_models.CompetitionInstruction.download_path",
         new_callable=mock.PropertyMock,
         return_value=cdn_url,
     ):
