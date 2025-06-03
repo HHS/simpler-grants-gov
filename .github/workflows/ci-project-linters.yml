@@ -59,3 +59,17 @@ jobs:
         run: |
           ./scripts/propagate-milestone-to-sub-issues.sh "${ISSUE_WITH_SUB_ISSUES}" \
             --dry-run
+
+      - name: Dry run - Bulk inherit parent metadata
+        run: |
+          ./scripts/bulk-inherit-parent-metadata.sh \
+            --org "HHS" \
+            --project 13 \
+            --dry-run
+
+      - name: Dry run - Inherit parent deliverable
+        run: |
+          ./scripts/inherit-parent-deliverable.sh \
+            --url "${ISSUE_WITH_PARENT}" \
+            --project 13 \
+            --dry-run
