@@ -2,15 +2,15 @@ import { BaseOpportunity, OpportunityOverview } from "src/types/opportunity/oppo
 
 export const mapOpportunityOverview = (opportunity: BaseOpportunity): OpportunityOverview => {
     const {
+        agency_name,
+        agency_code,
         opportunity_assistance_listings,
         opportunity_id,
         opportunity_number,
         opportunity_title
     } = opportunity
     const {
-        agency_code,
         agency_contact_description,
-        agency_name,
         award_ceiling,
         award_floor,
         estimated_total_program_funding,
