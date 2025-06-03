@@ -296,10 +296,6 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     mime_type: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
 
-    @property
-    def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
-
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_competition_open_to_applicant"
