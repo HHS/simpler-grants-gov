@@ -1,4 +1,5 @@
 from datetime import date
+from unittest import mock
 
 import pytest
 from marshmallow import ValidationError
@@ -54,15 +55,20 @@ def test_request_schema_validation():
 def test_response_schema_single(sample_extract_metadata):
     schema = ExtractMetadataResponseSchema()
 
-    sample_extract_metadata.download_path = "http://www.example.com"
-    extract_metadata = schema.dump(sample_extract_metadata)
+    # Mock the download_path property
+    with mock.patch(
+        "src.db.models.extract_models.ExtractMetadata.download_path",
+        new_callable=mock.PropertyMock,
+        return_value="http://www.example.com",
+    ):
+        extract_metadata = schema.dump(sample_extract_metadata)
 
-    assert extract_metadata["download_path"] == "http://www.example.com"
-
-    assert extract_metadata["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
-    assert extract_metadata["extract_type"] == "opportunities_csv"
-    assert extract_metadata["download_path"] == "http://www.example.com"
-    assert extract_metadata["file_size_bytes"] == 2048
+        assert extract_metadata["download_path"] == "http://www.example.com"
+        assert (
+            extract_metadata["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
+        )
+        assert extract_metadata["extract_type"] == "opportunities_csv"
+        assert extract_metadata["file_size_bytes"] == 2048
 
 
 def test_response_schema_list(sample_extract_metadata):
@@ -78,13 +84,25 @@ def test_response_schema_list(sample_extract_metadata):
 
     metadata_list = {"data": [sample_extract_metadata, other_extract_metadata]}
 
-    result = schema.dump(metadata_list)
+    # Mock the download_path property for both objects
+    with mock.patch(
+        "src.db.models.extract_models.ExtractMetadata.download_path",
+        new_callable=mock.PropertyMock,
+        return_value="http://www.example.com",
+    ):
+        result = schema.dump(metadata_list)
 
-    assert len(result["data"]) == 2
-    assert result["data"][0]["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
-    assert result["data"][0]["extract_type"] == "opportunities_csv"
-    assert result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
-    assert result["data"][1]["extract_type"] == "opportunities_json"
+        assert len(result["data"]) == 2
+        assert (
+            result["data"][0]["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
+        )
+        assert result["data"][0]["extract_type"] == "opportunities_csv"
+        assert result["data"][0]["download_path"] == "http://www.example.com"
+        assert (
+            result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
+        )
+        assert result["data"][1]["extract_type"] == "opportunities_json"
+        assert result["data"][1]["download_path"] == "http://www.example.com"
 
 
 def test_request_schema_null_values():
