@@ -2,24 +2,6 @@ import { APIResponse } from "src/types/apiResponseTypes";
 
 export type OpportunityStatus = "archived" | "closed" | "posted" | "forecasted";
 
-export type OpportunityOverview = 
-  Pick<BaseOpportunity,
-    'opportunity_title' |
-    'opportunity_id' |
-    'opportunity_number' |
-    'agency_name' |
-    'agency_code' |
-    'opportunity_assistance_listings'> &
-  Pick<Summary,
-    'is_cost_sharing' |
-    'agency_contact_description' |
-    'estimated_total_program_funding' |
-    'expected_number_of_awards' |
-    'award_ceiling' |
-    'award_floor'|
-    'post_date' |
-    'close_date'>;
-
 export interface OpportunityAssistanceListing {
   assistance_listing_number: string;
   program_title: string;
@@ -96,3 +78,21 @@ export interface OpportunityDetail extends BaseOpportunity {
 export interface OpportunityApiResponse extends APIResponse {
   data: OpportunityDetail;
 }
+
+export type OpportunityOverview = 
+  Pick<BaseOpportunity,
+    'opportunity_title' |
+    'opportunity_id' |
+    'opportunity_number' |
+    'agency_name' |
+    'agency_code' |
+    'opportunity_assistance_listings'> &
+  Pick<Summary,
+    'is_cost_sharing' |
+    'agency_contact_description' |
+    'estimated_total_program_funding' |
+    'expected_number_of_awards' |
+    'award_ceiling' |
+    'award_floor'|
+    'post_date' |
+    'close_date'>;

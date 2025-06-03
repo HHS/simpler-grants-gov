@@ -21,19 +21,19 @@ export const mapOpportunityOverview = (opportunity: BaseOpportunity): Opportunit
     } = opportunity.summary
 
     return {
-        opportunity_title: opportunity_title,
-        opportunity_id: opportunity_id,
-        opportunity_number: opportunity_number,
-        post_date: post_date,
-        close_date: close_date,
-        agency_name: agency_name,
-        opportunity_assistance_listings: opportunity_assistance_listings,
-        is_cost_sharing: is_cost_sharing,
-        agency_code: agency_code,
-        agency_contact_description: agency_contact_description,
-        estimated_total_program_funding: estimated_total_program_funding,
-        expected_number_of_awards: expected_number_of_awards,
-        award_ceiling: award_ceiling,
-        award_floor: award_floor
+        opportunity_title,
+        opportunity_id,
+        opportunity_number,
+        post_date,
+        close_date,
+        agency_name,
+        opportunity_assistance_listings,
+        is_cost_sharing,
+        agency_code,
+        agency_contact_description,
+        estimated_total_program_funding,
+        expected_number_of_awards,
+        award_ceiling,
+        award_floor
     };
 }

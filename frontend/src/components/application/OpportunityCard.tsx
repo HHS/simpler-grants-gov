@@ -71,11 +71,11 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
   const displayOpportunityAssistanceListings = (opportunityAssistanceListings: OpportunityAssistanceListing[]) => {
     const listings: string[] = []
 
-    opportunityAssistanceListings.map((opportunityAssistanceListing) => {
+    opportunityAssistanceListings.forEach((opportunityAssistanceListing) => {
       const { assistance_listing_number, program_title } = opportunityAssistanceListing
       listings.push(`${assistance_listing_number} -- ${program_title}`
-
-      )})
+      )
+    })
 
     return listings.length ? listings.join(', ') : null;
   }
