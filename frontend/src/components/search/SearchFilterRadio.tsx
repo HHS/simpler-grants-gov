@@ -30,8 +30,8 @@ export const SearchFilterRadio = ({
     label={
       <>
         <span>{label}</span>
-        {facetCount && (
-          <span className="text-base-dark padding-left-05">{facetCount}</span>
+        {Number.isInteger(facetCount) && (
+          <span className="text-base-dark padding-left-05">[{facetCount}]</span>
         )}
       </>
     }

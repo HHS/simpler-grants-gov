@@ -1,9 +1,8 @@
 "use client";
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { QueryContext } from "src/services/search/QueryProvider";
 
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 
 import {
   BasicSearchFilterAccordion,
@@ -60,7 +59,8 @@ export function RadioButtonFilter({
                 label={option.label}
                 onChange={toggleRadioSelection}
                 value={option.value}
-                facetCount={facetCounts?.[option.value] || 0}
+                facetCount={facetCounts && (facetCounts?.[option.value] || 0)}
+                checked={query.has(option.value)}
               />
             </li>
           ))}

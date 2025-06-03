@@ -107,7 +107,7 @@ export async function SearchDrawerFilters({
         query={closeDate}
         queryParamKey={"closeDate"}
         title={t("accordion.titles.closeDate")}
-        facetCounts={{}}
+        facetCounts={facetCounts?.close_date}
       />
     </>
   );
