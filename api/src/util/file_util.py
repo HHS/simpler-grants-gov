@@ -209,8 +209,9 @@ def presign_or_s3_cdnify_url(file_path: str) -> str:
     """
     Generates a URL for file download, either using CDN or pre-signed URL.
     """
-    cdn_config = CDNConfig()
-    s3_config = S3Config()
+def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None) -> str:
+    if s3_config is None:
+        s3_config = get_s3_config()
 
     if cdn_config.cdn_url is not None:
         return convert_public_s3_to_cdn_url(file_path, cdn_config.cdn_url, s3_config)
