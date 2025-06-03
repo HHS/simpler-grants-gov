@@ -1,11 +1,11 @@
 import logging
 from typing import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 
 import src.adapters.db as db
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import OpportunityAssistanceListing
+from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
     GetOpportunityListRequest,
@@ -55,8 +55,27 @@ def _get_competitions_by_legacy_package_id(
 
 def _get_competitions_by_opportunity_filter(
     db_session: db.Session, opportunity_filter: OpportunityFilter | None
-) -> list[Competition]:
-    return []
+) -> Sequence:
+    if not opportunity_filter:
+        return []
+    return db_session.execute(
+        select(Competition)
+        .join(Opportunity)
+        .where(and_(*_get_opportunity_filter_and_clause(opportunity_filter)))
+    ).all()
+
+
+def _get_opportunity_filter_and_clause(opportunity_filter: OpportunityFilter) -> Sequence:
+    and_clause = []
+    if opportunity_filter.competition_id:
+        and_clause.append(Competition.public_competition_id == opportunity_filter.competition_id)
+    if opportunity_filter.funding_opportunity_number:
+        and_clause.append(
+            Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
+        )
+    # if opportunity_filter.cfda_number:
+    #     and_clause.append(Opportunity.assistance_listing_number == opportunity_filter.cfda_number)
+    return and_clause
 
 
 def _build_get_opportunity_list_response(competitions: list) -> GetOpportunityListResponse:
@@ -79,8 +98,6 @@ def _build_get_opportunity_details(competition_model: Competition) -> Opportunit
         offering_agency=competition_model.opportunity.agency_name,
         package_id=competition_model.legacy_package_id,
         agency_contact_info=competition_model.contact_info,
-        schema_url="",
-        instructions_url="",
     )
 
 

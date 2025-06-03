@@ -3,7 +3,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
-from src.legacy_soap_api.applicants.schemas import OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR
+from src.legacy_soap_api.applicants.schemas import (
+    OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
+)
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
@@ -11,6 +13,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import BASE_SOAP_API_RESPONSE_HEADERS
+from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
 MOCK_REQUEST_WITH_INVALID_OPPORTUNITY_FILTER = b"""
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
@@ -38,6 +41,18 @@ MOCK_REQUEST_WITH_VALID_OPPORTUNITY_FILTER = b"""
 </soapenv:Envelope>
 """
 
+MOCK_COMPETITION_LEGACY_PACKAGE_ID = "PKG-SOAPCLIENT11"
+MOCK_GET_OPPORTUNITY_LIST_REQUEST_WITH_PACKAGE_ID = f"""
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <app:GetOpportunityListRequest>
+        <PackageID>{MOCK_COMPETITION_LEGACY_PACKAGE_ID}</PackageID>
+      </app:GetOpportunityListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
+""".encode()
+
 
 class TestSOAPClientSmokeTest:
     @pytest.fixture(scope="class")
@@ -60,9 +75,8 @@ class TestSOAPClientSmokeTest:
 
 
 class TestSimplerApplicantsClient:
-    @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
-    def test_get_opportunity_list(self, mock_proxy_request, mock_logger, db_session):
+    def test_get_opportunity_list(self, mock_proxy_request, db_session):
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
         mock_soap_request = SOAPRequest(
@@ -75,24 +89,10 @@ class TestSimplerApplicantsClient:
         result, simpler_response = client.get_response()
         assert result == mock_proxy_request_response
         assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
+        assert client.GetOpportunityListRequest() is not None
 
         # What we expect until we query sgg db for results.
         assert isinstance(simpler_response, SOAPResponse)
-
-        # Assert that the payload was validated in GetOpportunityListRequest method.
-        mock_logger.assert_called_once_with(
-            "soap get_opportunity_list_request validated",
-            extra={
-                "get_opportunity_request": {
-                    "package_id": None,
-                    "opportunity_filter": {
-                        "funding_opportunity_number": "HDTRA1-25-S-0001",
-                        "cfda_number": None,
-                        "competition_id": None,
-                    },
-                }
-            },
-        )
 
     @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
     @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
@@ -127,4 +127,35 @@ class TestSimplerApplicantsClient:
                 "err": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
                 "fault": OpportunityListRequestInvalidParams.model_dump(),
             },
+        )
+
+    @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
+    def test_get_opportunity_list_by_package_id(
+        self, mock_proxy_request, db_session, enable_factory_create
+    ):
+        # Create an opportunity with a competition
+        opportunity = OpportunityFactory.create()
+        sgg_competition_result = CompetitionFactory.create(
+            opportunity=opportunity, legacy_package_id=MOCK_COMPETITION_LEGACY_PACKAGE_ID
+        )
+        db_session.commit()
+        mock_proxy_request_response = MagicMock()
+        mock_proxy_request.return_value = mock_proxy_request_response
+        mock_soap_request = SOAPRequest(
+            method="POST",
+            headers={},
+            data=MOCK_GET_OPPORTUNITY_LIST_REQUEST_WITH_PACKAGE_ID,
+            full_path="/",
+        )
+        client = SimplerApplicantsS2SClient(mock_soap_request, db_session=db_session)
+        result, simpler_response = client.get_response()
+        assert result == mock_proxy_request_response
+        assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
+
+        assert isinstance(simpler_response, SOAPResponse)
+
+        response = client.GetOpportunityListRequest()
+        assert len(response.opportunity_details) == 1
+        assert (
+            response.opportunity_details[0].package_id == sgg_competition_result.legacy_package_id
         )

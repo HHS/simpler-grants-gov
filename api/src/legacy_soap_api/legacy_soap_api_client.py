@@ -73,11 +73,19 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
         get_opportunity_list_request = schemas.GetOpportunityListRequest(
             **self.get_soap_request_dict()
         )
-        logger.info(
-            "soap get_opportunity_list_request validated",
-            extra={"get_opportunity_request": get_opportunity_list_request.model_dump()},
+        opportunity_list = get_opportunity_list_response(
+            self.db_session, get_opportunity_list_request
         )
-        return get_opportunity_list_response(self.db_session, get_opportunity_list_request)
+
+        # It is ok to log this response since it is public and does not contain PII.
+        logger.info(
+            "soap get_opportunity_list_response retrieved",
+            extra={
+                "get_opportunity_list_request": get_opportunity_list_request.model_dump(),
+                "get_opportunity_list_response": opportunity_list.model_dump(),
+            },
+        )
+        return opportunity_list
 
     def get_response(self) -> tuple:
         # This method returns the raw response we get from the proxy request as well as
