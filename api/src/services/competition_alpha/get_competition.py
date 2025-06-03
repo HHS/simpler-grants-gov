@@ -24,6 +24,8 @@ def get_competition(db_session: db.Session, competition_id: uuid.UUID) -> Compet
             selectinload(Competition.opportunity_assistance_listing),
             # Grab who can apply to the application
             selectinload(Competition.link_competition_open_to_applicant),
+            # Grab the competition instructions
+            selectinload(Competition.competition_instructions),
         )
         .options()
     ).scalar_one_or_none()

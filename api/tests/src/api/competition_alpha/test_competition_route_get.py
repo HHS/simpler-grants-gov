@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from unittest import mock
 
 import pytest
 from freezegun import freeze_time
@@ -32,6 +33,66 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
         == competition.opportunity_assistance_listing.assistance_listing_number
     )
     assert response_competition["open_to_applicants"] == competition.open_to_applicants
+
+
+def test_competition_get_with_instructions_200(client, api_auth_token, enable_factory_create):
+    # Create a competition with instructions
+    competition = CompetitionFactory.create(with_instruction=True)
+
+    # Mock the download_path property for CompetitionInstruction
+    presigned_url = "https://example.com/competition-instructions/file.pdf"
+    with mock.patch(
+        "src.db.models.competition_models.CompetitionInstruction.download_path", 
+        new_callable=mock.PropertyMock,
+        return_value=presigned_url,
+    ):
+        resp = client.get(
+            f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+
+    # Verify the competition instructions are included in the response
+    assert len(response_competition["competition_instructions"]) > 0
+    instruction = response_competition["competition_instructions"][0]
+    assert instruction["file_name"] == competition.competition_instructions[0].file_name
+    assert instruction["download_path"] == presigned_url
+    assert "created_at" in instruction
+    assert "updated_at" in instruction
+
+
+def test_competition_get_with_cdn_instructions_200(
+    client, api_auth_token, enable_factory_create, monkeypatch_session
+):
+    # Set the CDN URL environment variable
+    monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
+
+    # Create a competition with instructions
+    competition = CompetitionFactory.create(with_instruction=True)
+
+    # Mock the download_path property for CompetitionInstruction
+    cdn_url = "https://cdn.example.com/competition-instructions/file.pdf"
+    with mock.patch(
+        "src.db.models.competition_models.CompetitionInstruction.download_path", 
+        new_callable=mock.PropertyMock,
+        return_value=cdn_url,
+    ):
+        resp = client.get(
+            f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+
+    # Verify the competition instructions are included in the response
+    assert len(response_competition["competition_instructions"]) > 0
+    instruction = response_competition["competition_instructions"][0]
+    assert instruction["file_name"] == competition.competition_instructions[0].file_name
+    assert instruction["download_path"] == cdn_url
+    assert instruction["download_path"].startswith("https://cdn.")
+    assert "created_at" in instruction
+    assert "updated_at" in instruction
 
 
 def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_create):
