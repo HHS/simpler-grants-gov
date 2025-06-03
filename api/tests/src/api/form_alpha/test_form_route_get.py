@@ -23,9 +23,13 @@ def test_form_get_with_instructions_200(client, api_auth_token, enable_factory_c
     # Create a form with instructions
     form = FormFactory.create(with_instruction=True)
 
-    # Mock the presigned URL generation
+    # Mock the download_path property
     presigned_url = "https://example.com/presigned-url"
-    with mock.patch("src.util.file_util.presign_or_s3_cdnify_url", return_value=presigned_url):
+    with mock.patch(
+        "src.db.models.competition_models.FormInstruction.download_path",
+        new_callable=mock.PropertyMock,
+        return_value=presigned_url,
+    ):
         resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
 
     assert resp.status_code == 200
@@ -48,9 +52,13 @@ def test_form_get_with_cdn_instructions_200(
     # Create a form with instructions
     form = FormFactory.create(with_instruction=True)
 
-    # Mock the CDN URL generation
+    # Mock the download_path property
     cdn_url = "https://cdn.example.com/form-instructions/file.pdf"
-    with mock.patch("src.util.file_util.convert_public_s3_to_cdn_url", return_value=cdn_url):
+    with mock.patch(
+        "src.db.models.competition_models.FormInstruction.download_path",
+        new_callable=mock.PropertyMock,
+        return_value=cdn_url,
+    ):
         resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
 
     assert resp.status_code == 200

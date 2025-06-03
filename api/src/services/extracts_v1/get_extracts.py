@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import asc, desc, select
 
 import src.adapters.db as db
+from src.adapters.aws import S3Config
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.lookup_models import LkExtractType
@@ -78,8 +79,9 @@ def get_extracts(
     extracts = paginator.page_at(page_offset=list_params.pagination.page_offset)
     pagination_info = PaginationInfo.from_pagination_params(list_params.pagination, paginator)
 
+    s3_config = S3Config()
     for extract in extracts:
         file_loc = extract.file_path
-        setattr(extract, "download_path", pre_sign_file_location(file_loc))  # noqa: B010
+        setattr(extract, "download_path", pre_sign_file_location(file_loc, s3_config))  # noqa: B010
 
     return extracts, pagination_info

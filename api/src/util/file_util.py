@@ -10,15 +10,10 @@ from botocore.config import Config
 from werkzeug.utils import secure_filename
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
-from src.util.env_config import PydanticBaseEnvConfig
 
 ##################################
 # Path parsing utils
 ##################################
-
-
-class CDNConfig(PydanticBaseEnvConfig):
-    cdn_url: str | None = None
 
 
 def is_s3_path(path: str | Path) -> bool:
@@ -88,8 +83,7 @@ def open_stream(
         return smart_open.open(path, mode, encoding=encoding)
 
 
-def pre_sign_file_location(file_path: str) -> str:
-    s3_config = S3Config()
+def pre_sign_file_location(file_path: str, s3_config: S3Config) -> str:
     s3_client = get_s3_client(s3_config, get_boto_session())
     bucket, key = split_s3_url(file_path)
     pre_sign_file_loc = s3_client.generate_presigned_url(
@@ -205,15 +199,14 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
     return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
 
 
-def presign_or_s3_cdnify_url(file_path: str) -> str:
+def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) -> str:
     """
     Generates a URL for file download, either using CDN or pre-signed URL.
     """
-def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None) -> str:
     if s3_config is None:
-        s3_config = get_s3_config()
+        s3_config = S3Config()
 
-    if cdn_config.cdn_url is not None:
-        return convert_public_s3_to_cdn_url(file_path, cdn_config.cdn_url, s3_config)
+    if s3_config.cdn_url is not None:
+        return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
     else:
-        return pre_sign_file_location(file_path)
+        return pre_sign_file_location(file_path, s3_config)
