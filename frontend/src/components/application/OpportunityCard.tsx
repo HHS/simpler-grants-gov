@@ -89,7 +89,7 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
     opportunity_id,
     opportunity_title,
     opportunity_number,
-    summary
+    summary,
   } = opportunity;
 
   return (
@@ -159,7 +159,11 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
   );
 };
 
-export const OpportunityCard = ({ opportunityOverview } : { opportunityOverview: OpportunityOverviewType }) => {
+export const OpportunityCard = ({
+  opportunityOverview,
+}: {
+  opportunityOverview: OpportunityOverviewType;
+}) => {
   const t = useTranslations("Application.opportunityOverview");
 
   return (

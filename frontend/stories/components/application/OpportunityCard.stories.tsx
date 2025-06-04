@@ -1,7 +1,5 @@
 import { Meta } from "@storybook/react";
-import {
-  OpportunityOverview,
-} from "src/types/opportunity/opportunityResponseTypes";
+import { OpportunityOverview } from "src/types/opportunity/opportunityResponseTypes";
 
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import opportunityMock from "./opportunity.mock.json";
@@ -10,7 +8,7 @@ const meta: Meta<typeof OpportunityCard> = {
   title: "Components/Application/OpportunityCard",
   component: OpportunityCard,
   args: {
-    opportunityOverview: opportunityMock as unknown as OpportunityOverview
+    opportunityOverview: opportunityMock as unknown as OpportunityOverview,
   },
 };
 export default meta;
