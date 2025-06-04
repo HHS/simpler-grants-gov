@@ -8,9 +8,7 @@ import { formatCurrency } from "src/utils/formatCurrencyUtil";
 import { useTranslations } from "next-intl";
 import { Grid, GridContainer, Link } from "@trussworks/react-uswds";
 
-type OpportunityOverviewProps = {
-  overview: OpportunityOverviewType;
-};
+type OpportunityOverviewProps = OpportunityOverviewType;
 
 const OpportunityItem = ({
   opKey,
@@ -20,7 +18,7 @@ const OpportunityItem = ({
   opValue?: string | null;
 }) => {
   return (
-    <div>
+    <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{opKey}:</dt>
       <dd>{opValue ?? "--"}</dd>
     </div>
@@ -37,7 +35,7 @@ const OpportunityItemLink = ({
   opId: number;
 }) => {
   return (
-    <div>
+    <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{opKey}:</dt>
       <dd>
         <Link
@@ -52,81 +50,53 @@ const OpportunityItemLink = ({
   );
 };
 
-const OpportunityOverview = (props: OpportunityOverviewProps) => {
-  const {
-    agency_code,
-    agency_contact_description,
-    agency_name,
-    award_ceiling,
-    award_floor,
-    close_date,
-    estimated_total_program_funding,
-    expected_number_of_awards,
-    is_cost_sharing,
-    post_date,
-    opportunity_assistance_listings,
-    opportunity_id,
-    opportunity_title,
-    opportunity_number,
-  } = props.overview;
-  const t = useTranslations("Application.opportunityOverview");
-
-  const displayOpportunityAssistanceListings = (
-    opportunityAssistanceListings: OpportunityAssistanceListing[],
-  ) => {
-    const listings: string[] = [];
-
-    opportunityAssistanceListings.forEach((opportunityAssistanceListing) => {
+const displayOpportunityAssistanceListings = (
+  opportunityAssistanceListings: OpportunityAssistanceListing[],
+) => {
+  const listings: void[] | string[] = opportunityAssistanceListings.map(
+    (opportunityAssistanceListing) => {
       const { assistance_listing_number, program_title } =
         opportunityAssistanceListing;
-      listings.push(`${assistance_listing_number} -- ${program_title}`);
-    });
+      return `${assistance_listing_number} -- ${program_title}`;
+    },
+  );
 
-    return listings.length ? listings.join(", ") : null;
-  };
+  return listings.length ? listings.join(", ") : null;
+};
 
-  const displayIsCostSharing = (isCostSharing: boolean | null) => {
-    if (isCostSharing != null) {
-      return isCostSharing ? "Yes" : "No";
-    }
+const displayIsCostSharing = (isCostSharing: boolean | null) => {
+  if (isCostSharing !== null) {
+    return isCostSharing ? "Yes" : "No";
+  }
 
-    return null;
-  };
+  return null;
+};
 
-  const displayAgencyAndCode = (
-    agencyName: string | null,
-    agencyCode: string | null,
-  ) => {
-    let agencyTitle = null;
+const displayAgencyAndCode = (
+  agencyName: string | null,
+  agencyCode: string | null,
+) => (agencyCode && agencyName ? `${agencyName} - ${agencyCode}` : null);
 
-    if (agencyName) {
-      agencyTitle = agencyName;
-    }
+const displayDate = (date: string | null) =>
+  date ? getConfiguredDayJs()(date).format("MMM D, YYYY hh:mm A z") : null;
 
-    if (agencyCode && agencyTitle) {
-      agencyTitle = `${agencyTitle} - ${agencyCode}`;
-    } else {
-      agencyTitle = agencyCode;
-    }
-
-    return agencyTitle;
-  };
-
-  const displayPostedDate = (postDate: string | null) => {
-    if (postDate) {
-      return getConfiguredDayJs()(postDate).format("MMM D, YYYY hh:mm A z");
-    }
-    return null;
-  };
-
-  const displayEstimatedAwardDate = (estimatedAwardDate: string | null) => {
-    if (estimatedAwardDate) {
-      return getConfiguredDayJs()(estimatedAwardDate).format(
-        "MMM D, YYYY hh:mm A z",
-      );
-    }
-    return null;
-  };
+const OpportunityOverview = ({
+  agency_code,
+  agency_contact_description,
+  agency_name,
+  award_ceiling,
+  award_floor,
+  close_date,
+  estimated_total_program_funding,
+  expected_number_of_awards,
+  is_cost_sharing,
+  post_date,
+  opportunity_assistance_listings,
+  opportunity_id,
+  opportunity_title,
+  opportunity_number,
+}: OpportunityOverviewProps) => {
+  const t = useTranslations("Application.opportunityOverview");
 
   return (
     <>
@@ -140,7 +110,7 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
           <OpportunityItem opKey={t("number")} opValue={opportunity_number} />
           <OpportunityItem
             opKey={t("posted")}
-            opValue={displayPostedDate(post_date)}
+            opValue={displayDate(post_date)}
           />
           <OpportunityItem
             opKey={t("agency")}
@@ -163,7 +133,7 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
         </dl>
       </Grid>
       <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-        <h4 className="font-ui-md text-bold">{t("award")}</h4>
+        <h4 className="font-ui-md text-bold margin-bottom-1">{t("award")}</h4>
         <dl className="margin-top-0">
           <OpportunityItem
             opKey={t("programFunding")}
@@ -187,7 +157,7 @@ const OpportunityOverview = (props: OpportunityOverviewProps) => {
           />
           <OpportunityItem
             opKey={t("estimatedAwardDate")}
-            opValue={displayEstimatedAwardDate(close_date)}
+            opValue={displayDate(close_date)}
           />
         </dl>
       </Grid>
@@ -203,11 +173,34 @@ export const OpportunityCard = (
   return (
     <GridContainer
       data-testid="oppotunity-card"
-      className="padding-x-2 border border-gray-10"
+      className="border radius-md border-base-lighter padding-x-2"
     >
       <h3 className="margin-top-2">{t("opportunity")}</h3>
-      <Grid row>
-        <OpportunityOverview overview={opportunityOverview} />
+      <Grid row gap>
+        <OpportunityOverview
+          agency_code={opportunityOverview.agency_code}
+          agency_contact_description={
+            opportunityOverview.agency_contact_description
+          }
+          agency_name={opportunityOverview.agency_name}
+          award_ceiling={opportunityOverview.award_ceiling}
+          award_floor={opportunityOverview.award_floor}
+          close_date={opportunityOverview.close_date}
+          estimated_total_program_funding={
+            opportunityOverview.estimated_total_program_funding
+          }
+          expected_number_of_awards={
+            opportunityOverview.expected_number_of_awards
+          }
+          is_cost_sharing={opportunityOverview.is_cost_sharing}
+          post_date={opportunityOverview.post_date}
+          opportunity_assistance_listings={
+            opportunityOverview.opportunity_assistance_listings
+          }
+          opportunity_id={opportunityOverview.opportunity_id}
+          opportunity_title={opportunityOverview.opportunity_title}
+          opportunity_number={opportunityOverview.opportunity_number}
+        />
       </Grid>
     </GridContainer>
   );
