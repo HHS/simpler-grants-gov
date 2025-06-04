@@ -73,7 +73,10 @@ export function SearchVersionTwo({
               </div>
             </div>
           </div>
-          <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
+          <AndOrPanel
+            hasSearchTerm={!!convertedSearchParams.query}
+            andOrParam={convertedSearchParams.andOr}
+          />
           <SearchResults
             searchParams={convertedSearchParams}
             loadingMessage={t("loading")}

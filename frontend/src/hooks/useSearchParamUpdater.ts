@@ -74,6 +74,15 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`);
   };
 
+  const setStaticQueryParam = (key: string, value: string) => {
+    params.set(key, value);
+    window.history.pushState(
+      null,
+      "",
+      `${pathname}${paramsToFormattedQuery(params)}`,
+    );
+  };
+
   return {
     searchParams,
     updateQueryParams,
@@ -81,5 +90,6 @@ export function useSearchParamUpdater() {
     removeQueryParam,
     setQueryParam,
     clearQueryParams,
+    setStaticQueryParam,
   };
 }
