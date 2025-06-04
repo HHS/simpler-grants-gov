@@ -17,7 +17,7 @@ from src.db.models.lookup_models import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
-from src.util.file_util import pre_sign_file_location
+from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -147,6 +147,10 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     )
     file_location: Mapped[str]
     file_name: Mapped[str]
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_location)
 
 
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):

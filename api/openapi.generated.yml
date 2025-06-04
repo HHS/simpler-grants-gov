@@ -2717,6 +2717,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    FormInstruction:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: The name of the form instruction file
+          example: instructions.pdf
+        download_path:
+          type: string
+          description: The download URL for the form instruction file
+        created_at:
+          type: string
+          format: date-time
+          description: The timestamp when the form instruction was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The timestamp when the form instruction was last updated
     FormAlpha:
       type: object
       properties:
@@ -2767,6 +2785,14 @@ components:
             definition: /properties/ApplicationNumber
           - type: field
             definition: /properties/Date
+        form_instruction:
+          description: The instruction file for the form, if available
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/FormInstruction'
+          - type: 'null'
     FormResponseAlpha:
       type: object
       properties:

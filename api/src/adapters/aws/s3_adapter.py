@@ -13,6 +13,9 @@ class S3Config(PydanticBaseEnvConfig):
     s3_endpoint_url: str | None = None
     presigned_s3_duration: int = 7200  # 2 hours in seconds
 
+    # CDN URL for public files - if set, will be used instead of presigned URLs
+    cdn_url: str | None = None
+
     ### S3 Buckets
     # note that we default these to None
     # so that we don't need to set all of these for every
