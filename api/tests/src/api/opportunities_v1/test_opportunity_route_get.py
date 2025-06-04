@@ -113,6 +113,9 @@ def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_
 def test_get_opportunity_s3_endpoint_url_200(
     client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch_session
 ):
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+    
     monkeypatch_session.delenv("CDN_URL")
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
