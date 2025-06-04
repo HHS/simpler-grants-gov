@@ -17,7 +17,7 @@ from src.db.models.lookup_models import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
-from src.util.file_util import presign_or_s3_cdnify_url
+from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -302,7 +302,10 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
 
     @property
     def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
+        """Get the presigned s3 url path for downloading the file"""
+        # NOTE: These attachments will only ever be in a non-public
+        # bucket so we only can presign their URL, we can't use the CDN path.
+        return pre_sign_file_location(self.file_location)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):

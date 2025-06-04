@@ -1191,6 +1191,49 @@ paths:
       summary: Get an application form by ID
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/attachments/{application_attachment_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity
+      tags:
+      - Application Alpha
+      summary: Fetch an application attachment
+      security:
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -3563,6 +3606,52 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAttachmentGet:
+      type: object
+      properties:
+        download_path:
+          type: string
+          description: The file's download path
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the uploaded application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The mime type / content type of the file
+          example: application/pdf
+    ApplicationAttachmentGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentGet'
         status_code:
           type: integer
           description: The HTTP status code

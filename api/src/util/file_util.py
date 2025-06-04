@@ -15,6 +15,19 @@ from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 # Path parsing utils
 ##################################
 
+# Module-level singleton for default S3Config
+_s3_config = None
+
+
+def get_default_s3_config() -> S3Config:
+    """
+    Returns a singleton instance of S3Config to avoid reading env vars repeatedly.
+    """
+    global _s3_config
+    if _s3_config is None:
+        _s3_config = S3Config()
+    return _s3_config
+
 
 def is_s3_path(path: str | Path) -> bool:
     return str(path).startswith("s3://")
@@ -83,7 +96,10 @@ def open_stream(
         return smart_open.open(path, mode, encoding=encoding)
 
 
-def pre_sign_file_location(file_path: str, s3_config: S3Config) -> str:
+def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) -> str:
+    if s3_config is None:
+        s3_config = get_default_s3_config()
+
     s3_client = get_s3_client(s3_config, get_boto_session())
     bucket, key = split_s3_url(file_path)
     pre_sign_file_loc = s3_client.generate_presigned_url(
@@ -204,9 +220,9 @@ def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) 
     Generates a URL for file download, either using CDN or pre-signed URL.
     """
     if s3_config is None:
-        s3_config = S3Config()
+        s3_config = get_default_s3_config()
 
-    if s3_config.cdn_url is not None:
+    if s3_config.cdn_url:
         return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
     else:
         return pre_sign_file_location(file_path, s3_config)

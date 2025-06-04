@@ -2,13 +2,22 @@ import uuid
 from pathlib import Path
 
 import pytest
+import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
 from src.db.models.competition_models import ApplicationAttachment
-from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
+from tests.src.db.models.factories import (
+    ApplicationAttachmentFactory,
+    ApplicationFactory,
+    ApplicationUserFactory,
+)
 
 attachment_dir = Path(__file__).parent / "attachments"
+
+##########################################
+# Create application attachment tests
+##########################################
 
 
 @pytest.mark.parametrize(
@@ -121,6 +130,107 @@ def test_application_attachment_create_403_not_the_owner(
         f"/alpha/applications/{application.application_id}/attachments",
         headers={"X-SGG-Token": user_auth_token},
         data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Unauthorized"
+
+
+##########################################
+# Get application attachment tests
+##########################################
+
+
+def test_application_attachment_get_200(
+    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+):
+    file_contents = "this is text in my file"
+
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_contents=file_contents
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    response_data = response.json["data"]
+
+    assert response_data["application_attachment_id"] == str(
+        application_attachment.application_attachment_id
+    )
+    assert response_data["file_name"] == application_attachment.file_name
+    assert response_data["mime_type"] == application_attachment.mime_type
+    assert response_data["file_size_bytes"] == application_attachment.file_size_bytes
+
+    # Verify the download path returned is a presigned URL we can download
+    response = requests.get(response_data["download_path"], timeout=5)
+    assert response.text == file_contents
+
+
+def test_application_attachment_get_404_application_not_found(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application_id = uuid.uuid4()
+
+    response = client.get(
+        f"/alpha/applications/{application_id}/attachments/{application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert response.json["message"] == f"Application with ID {application_id} not found"
+
+
+def test_application_attachment_get_404_application_attachment_not_found(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    application_attachment_id = uuid.uuid4()
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        response.json["message"]
+        == f"Application attachment with ID {application_attachment_id} not found"
+    )
+
+
+def test_application_attachment_get_401_invalid_token(
+    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": "not-a-token"},
+    )
+
+    assert response.status_code == 401
+    assert response.json["message"] == "Unable to process token"
+
+
+def test_application_attachment_get_403_not_the_owner(
+    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application)  # There is an owner, it's someone else
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 403
