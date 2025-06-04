@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import asc, desc, select
 
 import src.adapters.db as db
-from src.adapters.aws import S3Config
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.lookup_models import LkExtractType
