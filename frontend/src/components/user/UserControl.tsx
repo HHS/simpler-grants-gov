@@ -133,7 +133,7 @@ export const UserControl = () => {
     });
 
     const res = await fetch(pathname, {
-      method: "GET",
+      method: "HEAD",
     });
 
     logoutLocalUser();
