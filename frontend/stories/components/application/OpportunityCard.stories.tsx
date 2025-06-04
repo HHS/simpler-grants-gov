@@ -10,7 +10,7 @@ const meta: Meta<typeof OpportunityCard> = {
   title: "Components/Application/OpportunityCard",
   component: OpportunityCard,
   args: {
-    ...opportunityMock as unknown as OpportunityOverview
+    opportunityOverview: opportunityMock as unknown as OpportunityOverview
   },
 };
 export default meta;
