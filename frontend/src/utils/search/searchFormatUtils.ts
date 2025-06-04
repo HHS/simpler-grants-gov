@@ -1,18 +1,16 @@
 import { pickBy } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import {
-  BackendFilterNames,
-  FrontendFilterNames,
-} from "src/types/search/searchFilterTypes";
-import {
   ValidSearchQueryParamData,
   validSearchQueryParamKeys,
 } from "src/types/search/searchQueryTypes";
 import {
+  OneOfFilter,
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortOrder,
   QueryParamData,
+  RelativeDateRangeFilter,
   SavedSearchQuery,
   SearchFetcherActionType,
   SearchFilterRequestBody,
@@ -28,13 +26,60 @@ const orderByFieldLookup = {
   closeDate: ["close_date"],
 };
 
-const filterNameMap = {
-  status: "opportunity_status",
-  fundingInstrument: "funding_instrument",
-  eligibility: "applicant_type",
-  agency: "agency",
-  category: "funding_category",
-} as const satisfies Record<FrontendFilterNames, BackendFilterNames>;
+const filterConfigurations = [
+  {
+    frontendName: "status",
+    backendName: "opportunity_status",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "fundingInstrument",
+    backendName: "funding_instrument",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "eligibility",
+    backendName: "applicant_type",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "agency",
+    backendName: "agency",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "category",
+    backendName: "funding_category",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "closeDate",
+    backendName: "close_date",
+    dataType: "dateRange",
+  },
+] as const;
+
+const toOneOfFilter = (data: Set<string>): OneOfFilter => {
+  return {
+    one_of: Array.from(data),
+  };
+};
+
+const toRelativeDateRangeFilter = (
+  data: Set<string>,
+): RelativeDateRangeFilter => {
+  const convertedData = Array.from(data);
+  return {
+    end_date_relative: convertedData[0],
+  };
+};
+
+const fromOneOfFilter = (data: OneOfFilter): string =>
+  data?.one_of?.length ? data.one_of.join(",") : "";
+
+const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string => {
+  return data?.end_date_relative;
+};
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
@@ -65,19 +110,29 @@ export const filterSearchParams = (
   );
 };
 
-// Translate frontend filter param names to expected backend parameter names, and use one_of syntax
+// Translate frontend filter param names to expected backend parameter names
 // implicitly filters out any unexpected params from searchInputs
 export const buildFilters = (
   searchInputs: QueryParamData,
 ): SearchFilterRequestBody => {
-  return Object.entries(filterNameMap).reduce(
-    (filters, [frontendFilterName, backendFilterName]) => {
-      const filterData =
-        searchInputs[frontendFilterName as FrontendFilterNames];
-      if (filterData && filterData.size) {
-        filters[backendFilterName] = { one_of: Array.from(filterData) };
+  return Object.entries(searchInputs).reduce(
+    (requestBody, [queryKey, queryValue]: [string, Set<string>]) => {
+      if (!queryValue || !queryValue.size) {
+        return requestBody;
       }
-      return filters;
+      const config = filterConfigurations.find(
+        (config) => config.frontendName === queryKey,
+      );
+      if (!config) {
+        return requestBody;
+      }
+      const { dataType, backendName } = config;
+      if (dataType === "oneOf") {
+        requestBody[backendName] = toOneOfFilter(queryValue);
+      } else if (dataType === "dateRange") {
+        requestBody[backendName] = toRelativeDateRangeFilter(queryValue);
+      }
+      return requestBody;
     },
     {} as SearchFilterRequestBody,
   );
@@ -89,14 +144,37 @@ export const searchToQueryParams = (
 ): ValidSearchQueryParamData => {
   const filters =
     searchRecord.filters && Object.keys(searchRecord.filters).length
-      ? Object.entries(filterNameMap).reduce(
-          (params, [frontendFilterName, backendFilterName]) => {
-            const filterData = searchRecord.filters[backendFilterName]?.one_of;
-            if (filterData) {
-              params[frontendFilterName as keyof ValidSearchQueryParamData] =
-                filterData.join(",");
+      ? Object.entries(searchRecord.filters).reduce(
+          (
+            queryParams,
+            [backendKey, backendFilterData]: [
+              string,
+              OneOfFilter | RelativeDateRangeFilter,
+            ],
+          ) => {
+            const config = filterConfigurations.find(
+              (config) => config.backendName === backendKey,
+            );
+            if (!config) {
+              console.error(
+                "Bad search query configuration, key not found",
+                backendKey,
+              );
+              return queryParams;
             }
-            return params;
+            const { dataType, frontendName } = config;
+            // this will need adjusting if we add more filter data types
+            const queryParamValue =
+              dataType === "oneOf"
+                ? fromOneOfFilter(backendFilterData as OneOfFilter)
+                : fromRelativeDateRangeFilter(
+                    backendFilterData as RelativeDateRangeFilter,
+                  );
+            if (queryParamValue) {
+              queryParams[frontendName as keyof ValidSearchQueryParamData] =
+                queryParamValue;
+            }
+            return queryParams;
           },
           {} as ValidSearchQueryParamData,
         )

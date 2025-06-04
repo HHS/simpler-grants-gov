@@ -8,6 +8,7 @@ export interface FilterQueryParamData {
   eligibility: Set<string>;
   agency: Set<string>;
   category: Set<string>;
+  closeDate: Set<string>;
 }
 
 // this is used for UI display so order matters

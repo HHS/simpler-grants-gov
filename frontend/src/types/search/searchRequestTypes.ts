@@ -5,12 +5,16 @@ import { BackendFilterNames } from "./searchFilterTypes";
 import { FilterQueryParamData } from "./searchQueryTypes";
 import { SortOptions } from "./searchSortTypes";
 
+export type OneOfFilter = { one_of: string[] };
+export type RelativeDateRangeFilter = { end_date_relative: string };
+
 export interface SearchFilterRequestBody {
-  opportunity_status?: { one_of: string[] };
-  funding_instrument?: { one_of: string[] };
-  applicant_type?: { one_of: string[] };
-  agency?: { one_of: string[] };
-  funding_category?: { one_of: string[] };
+  opportunity_status?: OneOfFilter;
+  funding_instrument?: OneOfFilter;
+  applicant_type?: OneOfFilter;
+  agency?: OneOfFilter;
+  funding_category?: OneOfFilter;
+  close_date?: RelativeDateRangeFilter;
 }
 
 export type PaginationOrderBy =

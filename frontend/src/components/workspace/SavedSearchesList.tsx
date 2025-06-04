@@ -76,7 +76,7 @@ export const SavedSearchesList = ({
                   return value ? (
                     <div key={key}>
                       <span className="text-bold">{paramDisplay}: </span>
-                      <span>{value.replaceAll(",", ", ")}</span>
+                      <span>{value.toString().replaceAll(",", ", ")}</span>
                     </div>
                   ) : null;
                 },
