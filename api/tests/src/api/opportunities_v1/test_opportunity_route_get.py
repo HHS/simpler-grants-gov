@@ -1,6 +1,7 @@
 import pytest
 import requests
 
+import src.util.file_util as file_util
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,
@@ -160,6 +161,9 @@ def test_get_opportunity_404_not_found_is_draft(client, api_auth_token, enable_f
 def test_get_opportunity_returns_cdn_urls(
     client, api_auth_token, monkeypatch_session, enable_factory_create, db_session, mock_s3_bucket
 ):
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+
     monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
     """Test that S3 file locations are converted to CDN URLs in the response"""
     # Create an opportunity with a specific attachment

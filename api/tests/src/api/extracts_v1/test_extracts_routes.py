@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-from unittest import mock
 
 import pytest
 
 import src.util.datetime_util as datetime_util
+import src.util.file_util as file_util
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from tests.src.db.models.factories import ExtractMetadataFactory
@@ -178,9 +178,16 @@ def test_extract_metadata_get_pagination_info(
 
 
 def test_extract_metadata_presigned_url(
-    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket
+    client, api_auth_token, monkeypatch, enable_factory_create, db_session, mock_s3_bucket
 ):
     """Test that pre-signed URLs are generated correctly and can be used to download files"""
+
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch.setattr(file_util, "_s3_config", None)
+
+    monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
+    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     # Create test extract with known file content
     test_content = b"test file content"
@@ -193,56 +200,7 @@ def test_extract_metadata_presigned_url(
         file_size_bytes=len(test_content),
     )
 
-    # Mock the download_path property to return a predictable URL
-    mock_url = "https://example.com/presigned-url"
-    with mock.patch(
-        "src.db.models.extract_models.ExtractMetadata.download_path",
-        new_callable=mock.PropertyMock,
-        return_value=mock_url,
-    ):
-        # Request extract metadata
-        payload = {
-            "filters": {"extract_type": "opportunities_csv"},
-            "pagination": {
-                "page_size": 10,
-                "page_offset": 1,
-                "order_by": "created_at",
-                "sort_direction": "descending",
-            },
-        }
-
-        response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
-
-        assert response.status_code == 200
-        data = response.json["data"]
-        assert len(data) == 1
-
-        # Verify the download_path matches our mocked URL
-        assert data[0]["download_path"] == mock_url
-        assert mock_url in data[0]["download_path"]
-
-
-def test_extract_metadata_with_presigned_url(
-    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch
-):
-    """Test that when cdn_url is None, presigning is used for the download_path in the API response"""
-
-    # Create test extract with an S3 path
-    test_file_path = f"s3://{mock_s3_bucket}/presign-test/file.csv"
-
-    # Create extract metadata
-    ExtractMetadataFactory(
-        extract_type=ExtractType.OPPORTUNITIES_CSV,
-        file_path=test_file_path,
-        file_size_bytes=1024,
-    )
-
-    # Set environment variables instead of creating a mock config
-    monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
-    monkeypatch.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
-
-    # Request extract metadata through the API
+    # Request extract metadata
     payload = {
         "filters": {"extract_type": "opportunities_csv"},
         "pagination": {
@@ -255,10 +213,9 @@ def test_extract_metadata_with_presigned_url(
 
     response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
 
-    # Verify the response
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 1
 
-    # Verify the download_path is the presigned URL, not a CDN URL
+    # Verify the download_path matches our mocked URL
     assert "X-Amz-Signature" in data[0]["download_path"]

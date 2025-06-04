@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 from marshmallow import ValidationError
 
+import src.util.file_util as file_util
 from src.api.extracts_v1.extract_schema import (
     ExtractMetadataListResponseSchema,
     ExtractMetadataRequestSchema,
@@ -120,6 +121,8 @@ def test_request_schema_null_values():
 
 def test_extract_metadata_with_presigned_url(monkeypatch):
     """Test that when cdn_url is None, presigning is used instead of CDN URLs"""
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch.setattr(file_util, "_s3_config", None)
 
     # Create a metadata object with a valid S3 path
     extract = ExtractMetadata(
