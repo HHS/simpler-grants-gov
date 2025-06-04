@@ -14,7 +14,7 @@ export function useSearchParamUpdater() {
   const params = new URLSearchParams(searchParams);
 
   // note that providing an empty string as `queryParamValue` will remove the param.
-  // also note that "query" is the name of a query param, but it being handled separately
+  // also note that "query" is the name of a query param, but it is being handled separately
   // in this implementation. To set a new keyword query in the url without touching other params,
   // you can use a call such as `updateQueryParams("", "query", queryTerm)`.
   const updateQueryParams = (
@@ -74,15 +74,25 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`);
   };
 
-  const setStaticQueryParam = (key: string, value: string) => {
+  // const setStaticQueryParam = (key: string, value: string) => {
+  //   params.set(key, value);
+  //   window.history.pushState(
+  //     null,
+  //     "",
+  //     `${pathname}${paramsToFormattedQuery(params)}`,
+  //   );
+  // };
+
+  // updates local query params but does not navigate
+  // queued query param update will be applied during next call to
+  // any other useSearchParamUpdater function
+  // returns the local params state
+  const setQueuedQueryParam = (key: string, value: string) => {
     params.set(key, value);
-    window.history.pushState(
-      null,
-      "",
-      `${pathname}${paramsToFormattedQuery(params)}`,
-    );
+    return params;
   };
 
+  console.log("$$$ local params", params);
   return {
     searchParams,
     updateQueryParams,
@@ -90,6 +100,8 @@ export function useSearchParamUpdater() {
     removeQueryParam,
     setQueryParam,
     clearQueryParams,
-    setStaticQueryParam,
+    // setStaticQueryParam,
+    setQueuedQueryParam,
+    // localParams: params,
   };
 }
