@@ -1,4 +1,5 @@
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { formatCurrency } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
@@ -21,17 +22,6 @@ type TranslationKeys =
 
 const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.awardInfo");
-
-  const formatCurrency = (number: number | null) => {
-    if (number) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-      }).format(number);
-    }
-    return "";
-  };
 
   const formatSubContent = (content: boolean | string | null | string[]) => {
     function formatStringReturnValue(str: string): string {
