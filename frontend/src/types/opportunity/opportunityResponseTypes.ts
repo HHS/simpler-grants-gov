@@ -87,15 +87,5 @@ export type OpportunityOverview = Pick<
   | "agency_name"
   | "agency_code"
   | "opportunity_assistance_listings"
-> &
-  Pick<
-    Summary,
-    | "is_cost_sharing"
-    | "agency_contact_description"
-    | "estimated_total_program_funding"
-    | "expected_number_of_awards"
-    | "award_ceiling"
-    | "award_floor"
-    | "post_date"
-    | "close_date"
-  >;
+  | "summary"
+>;

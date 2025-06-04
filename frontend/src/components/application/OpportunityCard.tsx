@@ -84,19 +84,12 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
   const t = useTranslations("Application.opportunityOverview");
   const {
     agency_code,
-    agency_contact_description,
     agency_name,
-    award_ceiling,
-    award_floor,
-    close_date,
-    estimated_total_program_funding,
-    expected_number_of_awards,
-    is_cost_sharing,
-    post_date,
     opportunity_assistance_listings,
     opportunity_id,
     opportunity_title,
     opportunity_number,
+    summary
   } = opportunity;
 
   return (
@@ -111,7 +104,7 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
           <OpportunityItem opKey={t("number")} opValue={opportunity_number} />
           <OpportunityItem
             opKey={t("posted")}
-            opValue={displayDate(post_date)}
+            opValue={displayDate(summary.post_date)}
           />
           <OpportunityItem
             opKey={t("agency")}
@@ -125,11 +118,11 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
           />
           <OpportunityItem
             opKey={t("costSharingOrMatchingRequirement")}
-            opValue={displayIsCostSharing(is_cost_sharing)}
+            opValue={displayIsCostSharing(summary.is_cost_sharing)}
           />
           <OpportunityItem
             opKey={t("grantorContactInfomation")}
-            opValue={agency_contact_description}
+            opValue={summary.agency_contact_description}
           />
         </dl>
       </Grid>
@@ -138,27 +131,27 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
         <dl className="margin-top-0">
           <OpportunityItem
             opKey={t("programFunding")}
-            opValue={formatCurrency(estimated_total_program_funding)}
+            opValue={formatCurrency(summary.estimated_total_program_funding)}
           />
           <OpportunityItem
             opKey={t("expectedAward")}
             opValue={
-              expected_number_of_awards
-                ? String(expected_number_of_awards)
+              summary.expected_number_of_awards
+                ? String(summary.expected_number_of_awards)
                 : null
             }
           />
           <OpportunityItem
             opKey={t("awardMaximum")}
-            opValue={formatCurrency(award_ceiling)}
+            opValue={formatCurrency(summary.award_ceiling)}
           />
           <OpportunityItem
             opKey={t("awardMinimum")}
-            opValue={formatCurrency(award_floor)}
+            opValue={formatCurrency(summary.award_floor)}
           />
           <OpportunityItem
             opKey={t("estimatedAwardDate")}
-            opValue={displayDate(close_date)}
+            opValue={displayDate(summary.close_date)}
           />
         </dl>
       </Grid>

@@ -6,11 +6,11 @@ import {
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import opportunityMock from "./opportunity.mock.json";
 
-const meta: Meta<OpportunityOverview> = {
+const meta: Meta<typeof OpportunityCard> = {
   title: "Components/Application/OpportunityCard",
   component: OpportunityCard,
   args: {
-    ...opportunityMock,
+    ...opportunityMock as unknown as OpportunityOverview
   },
 };
 export default meta;
