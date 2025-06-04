@@ -115,7 +115,7 @@ def test_get_opportunity_s3_endpoint_url_200(
 ):
     # Reset the global _s3_config to ensure a fresh config is created
     monkeypatch_session.setattr(file_util, "_s3_config", None)
-    
+
     monkeypatch_session.delenv("CDN_URL")
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
