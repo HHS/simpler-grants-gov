@@ -59,10 +59,7 @@ def _get_competitions_by_opportunity_filter(
     if not opportunity_filter:
         return []
     return db_session.execute(
-        select(Competition)
-        .join(Opportunity)
-        .join(OpportunityAssistanceListing)
-        .where(and_(*_get_opportunity_filter_and_clause(opportunity_filter)))
+        select(Competition).where(and_(*_get_opportunity_filter_and_clause(opportunity_filter)))
     ).all()
 
 
