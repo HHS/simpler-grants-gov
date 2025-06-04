@@ -220,3 +220,45 @@ def test_extract_metadata_presigned_url(
         # Verify the download_path matches our mocked URL
         assert data[0]["download_path"] == mock_url
         assert mock_url in data[0]["download_path"]
+
+
+def test_extract_metadata_with_presigned_url(
+    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch
+):
+    """Test that when cdn_url is None, presigning is used for the download_path in the API response"""
+
+    # Create test extract with an S3 path
+    test_file_path = f"s3://{mock_s3_bucket}/presign-test/file.csv"
+
+    # Create extract metadata
+    ExtractMetadataFactory(
+        extract_type=ExtractType.OPPORTUNITIES_CSV,
+        file_path=test_file_path,
+        file_size_bytes=1024,
+    )
+
+    # Set environment variables instead of creating a mock config
+    monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
+    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+
+    # Request extract metadata through the API
+    payload = {
+        "filters": {"extract_type": "opportunities_csv"},
+        "pagination": {
+            "page_size": 10,
+            "page_offset": 1,
+            "order_by": "created_at",
+            "sort_direction": "descending",
+        },
+    }
+
+    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+
+    # Verify the response
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 1
+
+    # Verify the download_path is the presigned URL, not a CDN URL
+    assert "X-Amz-Signature" in data[0]["download_path"]

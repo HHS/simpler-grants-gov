@@ -1,5 +1,4 @@
 from datetime import date
-from unittest import mock
 
 import pytest
 from marshmallow import ValidationError
@@ -57,10 +56,11 @@ def test_response_schema_single(sample_extract_metadata):
 
     extract_metadata = schema.dump(sample_extract_metadata)
 
-    assert extract_metadata["download_path"] == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
     assert (
-        extract_metadata["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
+        extract_metadata["download_path"]
+        == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
     )
+    assert extract_metadata["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
     assert extract_metadata["extract_type"] == "opportunities_csv"
     assert extract_metadata["file_size_bytes"] == 2048
 
@@ -81,16 +81,18 @@ def test_response_schema_list(sample_extract_metadata):
     result = schema.dump(metadata_list)
 
     assert len(result["data"]) == 2
-    assert (    
-        result["data"][0]["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
-    )
+    assert result["data"][0]["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
     assert result["data"][0]["extract_type"] == "opportunities_csv"
-    assert result["data"][0]["download_path"] == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
     assert (
-        result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
+        result["data"][0]["download_path"]
+        == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
     )
+    assert result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
     assert result["data"][1]["extract_type"] == "opportunities_json"
-    assert result["data"][1]["download_path"] == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract2.xml"
+    assert (
+        result["data"][1]["download_path"]
+        == "http://localhost:4566/local-mock-public-bucket/test/path/test_extract2.xml"
+    )
 
 
 def test_request_schema_null_values():
@@ -114,3 +116,26 @@ def test_request_schema_null_values():
     assert result["filters"]["extract_type"] is None
     assert result["filters"]["created_at"]["start_date"] == date(2023, 10, 1)
     assert result["filters"]["created_at"]["end_date"] is None
+
+
+def test_extract_metadata_with_presigned_url(monkeypatch):
+    """Test that when cdn_url is None, presigning is used instead of CDN URLs"""
+
+    # Create a metadata object with a valid S3 path
+    extract = ExtractMetadata(
+        extract_type="opportunities_csv",
+        file_name="test_presign.csv",
+        file_path="s3://local-mock-public-bucket/presign-test/test_presign.csv",
+        file_size_bytes=1024,
+    )
+
+    # Set environment variables instead of creating a mock config
+    monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
+    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
+
+    # Get the download_path which should now use the presigned URL path
+    result_url = extract.download_path
+
+    # Verify we got the presigned URL (not a CDN URL)
+    assert "X-Amz-Signature" in result_url

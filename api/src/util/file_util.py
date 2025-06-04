@@ -206,7 +206,7 @@ def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) 
     if s3_config is None:
         s3_config = S3Config()
 
-    if s3_config.cdn_url is not None:
+    if s3_config.cdn_url:
         return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
     else:
         return pre_sign_file_location(file_path, s3_config)
