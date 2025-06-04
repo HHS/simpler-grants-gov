@@ -7,6 +7,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import ExtractType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExtractType
+from src.util.file_util import presign_or_s3_cdnify_url
 
 
 class ExtractMetadata(ApiSchemaTable, TimestampMixin):
@@ -23,3 +24,7 @@ class ExtractMetadata(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
     file_path: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_path)
