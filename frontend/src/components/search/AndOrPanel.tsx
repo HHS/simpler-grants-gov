@@ -1,8 +1,9 @@
 "use client";
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { QueryContext } from "src/services/search/QueryProvider";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 
 import { andOrOptions } from "./SearchFilterAccordion/SearchFilterOptions";
 import { SearchFilterRadio } from "./SearchFilterRadio";
@@ -17,13 +18,15 @@ export function AndOrPanel({
   const {
     // setStaticQueryParam,
     setQueryParam,
-    setQueuedQueryParam,
-    // localParams,
+    // setQueuedQueryParam,
+    // // localParams,
   } = useSearchParamUpdater();
 
-  const [localAndOrParam, setLocalAndOrParam] = useState<string | null>(
-    andOrParam.has("or") ? "or" : "and",
-  );
+  const { localAndOrParam, setLocalAndOrParam } = useContext(QueryContext);
+
+  // const [localAndOrParam, setLocalAndOrParam] = useState<string | null>(
+  //   andOrParam.has("or") ? "or" : "and",
+  // );
 
   // const andOrParam = localParams.get("andOr");
 
@@ -33,10 +36,9 @@ export function AndOrPanel({
         setLocalAndOrParam(event.target.value);
         return setQueryParam("andOr", event.target.value);
       }
-      const localParams = setQueuedQueryParam("andOr", event.target.value);
-      setLocalAndOrParam(localParams?.get("andOr"));
-      // setStaticQueryParam("andOr", event.target.value);
-      // return setQueryParam("andOr", event.target.value);
+      // const localParams = setQueuedQueryParam("andOr", event.target.value);
+      setLocalAndOrParam(event.target.value);
+      // setStaticQueryParam("andOr", event.target.value); // does not trigger any re-renders, so url updates but useSearchParams doesn't pick up the change
     },
     [hasSearchTerm],
   );
@@ -48,9 +50,7 @@ export function AndOrPanel({
     return "or";
   }, [localAndOrParam]);
 
-  console.log("$$$ memo", checkedOptionValue);
   return andOrOptions.map((option) => {
-    console.log("$$$", option.value, localAndOrParam);
     return (
       <SearchFilterRadio
         key={option.value}

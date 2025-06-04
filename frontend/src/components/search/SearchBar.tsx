@@ -51,7 +51,8 @@ export default function SearchBar({
   tableView = false,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { queryTerm, updateQueryTerm } = useContext(QueryContext);
+  const { queryTerm, updateQueryTerm, localAndOrParam } =
+    useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
   const [validationError, setValidationError] = useState<string>();
@@ -65,7 +66,11 @@ export default function SearchBar({
     if (validationError) {
       setValidationError(undefined);
     }
-    updateQueryParams("", "query", queryTerm);
+    if (localAndOrParam) {
+      updateQueryParams("andOr", localAndOrParam, queryTerm);
+      return;
+    }
+    updateQueryParams("", "", queryTerm);
   };
 
   // if we have "refresh=true" query param, clear the input

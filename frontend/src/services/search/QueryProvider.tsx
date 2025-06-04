@@ -24,6 +24,7 @@ export default function QueryProvider({
   const [queryTerm, setQueryTerm] = useState(defaultTerm);
   const [totalPages, setTotalPages] = useState("na");
   const [totalResults, setTotalResults] = useState("");
+  const [localAndOrParam, setLocalAndOrParam] = useState("");
 
   const updateQueryTerm = useCallback((term: string) => {
     setQueryTerm(term);
@@ -37,6 +38,10 @@ export default function QueryProvider({
     setTotalPages(page);
   }, []);
 
+  const updateLocalAndOrParam = useCallback((paramValue: string) => {
+    setLocalAndOrParam(paramValue);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       queryTerm,
@@ -45,6 +50,8 @@ export default function QueryProvider({
       updateTotalPages,
       totalResults,
       updateTotalResults,
+      updateLocalAndOrParam,
+      localAndOrParam,
     }),
     [
       queryTerm,
@@ -53,6 +60,8 @@ export default function QueryProvider({
       updateTotalPages,
       totalResults,
       updateTotalResults,
+      updateLocalAndOrParam,
+      localAndOrParam,
     ],
   );
 
