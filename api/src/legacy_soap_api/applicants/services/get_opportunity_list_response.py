@@ -61,6 +61,7 @@ def _get_competitions_by_opportunity_filter(
     return db_session.execute(
         select(Competition)
         .join(Opportunity)
+        .join(OpportunityAssistanceListing)
         .where(and_(*_get_opportunity_filter_and_clause(opportunity_filter)))
     ).all()
 
@@ -73,8 +74,10 @@ def _get_opportunity_filter_and_clause(opportunity_filter: OpportunityFilter) ->
         and_clause.append(
             Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
         )
-    # if opportunity_filter.cfda_number:
-    #     and_clause.append(Opportunity.assistance_listing_number == opportunity_filter.cfda_number)
+    if opportunity_filter.cfda_number:
+        and_clause.append(
+            OpportunityAssistanceListing.assistance_listing_number == opportunity_filter.cfda_number
+        )
     return and_clause
 
 

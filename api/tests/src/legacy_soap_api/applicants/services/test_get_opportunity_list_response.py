@@ -10,7 +10,6 @@ def test_get_opportunity_list_by_package_id(db_session, enable_factory_create):
     opportunity_list_request = GetOpportunityListRequest(package_id=mock_package_id)
     opportunity = OpportunityFactory.create()
     CompetitionFactory.create(opportunity=opportunity, legacy_package_id=mock_package_id)
-    db_session.commit()
     result = get_opportunity_list_response(db_session, opportunity_list_request)
     assert len(result.opportunity_details) == 1
     assert result.opportunity_details[0].package_id == mock_package_id
@@ -40,7 +39,6 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id(
     mock_opportunity_number = "1234"
     opportunity = OpportunityFactory.create(opportunity_number=mock_opportunity_number)
     CompetitionFactory.create(opportunity=opportunity)
-    db_session.commit()
     opportunity_list_request = GetOpportunityListRequest(
         opportunity_filter=OpportunityFilter(funding_opportunity_number=mock_opportunity_number)
     )
@@ -50,6 +48,28 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id(
 
     # Test adding another competition results in entries returned
     CompetitionFactory.create(opportunity=opportunity, public_competition_id="ABC-134-22222")
-    db_session.commit()
     result = get_opportunity_list_response(db_session, opportunity_list_request)
     assert len(result.opportunity_details) == 2
+
+
+def test_get_opportunity_list_by_opportunity_filter_opportunity_id_no_results(db_session):
+    for dne_opportunity_list_request in (
+        GetOpportunityListRequest(package_id="dne"),
+        GetOpportunityListRequest(
+            opportunity_filter=OpportunityFilter(
+                competition_id="dne",
+                funding_opportunity_number="dne",
+            )
+        ),
+        GetOpportunityListRequest(
+            opportunity_filter=OpportunityFilter(competition_id="dne", cfda_number="dne")
+        ),
+    ):
+        assert (
+            len(
+                get_opportunity_list_response(
+                    db_session, dne_opportunity_list_request
+                ).opportunity_details
+            )
+            == 0
+        )

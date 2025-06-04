@@ -136,7 +136,6 @@ class TestSimplerApplicantsClient:
         sgg_competition_result = CompetitionFactory.create(
             opportunity=opportunity, legacy_package_id=MOCK_COMPETITION_LEGACY_PACKAGE_ID
         )
-        db_session.commit()
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
         mock_soap_request = SOAPRequest(
