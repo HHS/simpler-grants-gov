@@ -67,7 +67,7 @@ export default function SearchBar({
       setValidationError(undefined);
     }
     if (localAndOrParam) {
-      updateQueryParams("andOr", localAndOrParam, queryTerm);
+      updateQueryParams(localAndOrParam, "andOr", queryTerm);
       return;
     }
     updateQueryParams("", "", queryTerm);

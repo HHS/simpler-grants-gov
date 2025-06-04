@@ -1,5 +1,6 @@
 "use client";
 
+import { update } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 
@@ -22,7 +23,7 @@ export function AndOrPanel({
     // // localParams,
   } = useSearchParamUpdater();
 
-  const { localAndOrParam, setLocalAndOrParam } = useContext(QueryContext);
+  const { localAndOrParam, updateLocalAndOrParam } = useContext(QueryContext);
 
   // const [localAndOrParam, setLocalAndOrParam] = useState<string | null>(
   //   andOrParam.has("or") ? "or" : "and",
@@ -33,11 +34,11 @@ export function AndOrPanel({
   const toggleAndOrSelection = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (hasSearchTerm) {
-        setLocalAndOrParam(event.target.value);
+        updateLocalAndOrParam(event.target.value);
         return setQueryParam("andOr", event.target.value);
       }
       // const localParams = setQueuedQueryParam("andOr", event.target.value);
-      setLocalAndOrParam(event.target.value);
+      updateLocalAndOrParam(event.target.value);
       // setStaticQueryParam("andOr", event.target.value); // does not trigger any re-renders, so url updates but useSearchParams doesn't pick up the change
     },
     [hasSearchTerm],
