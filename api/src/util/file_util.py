@@ -83,7 +83,10 @@ def open_stream(
         return smart_open.open(path, mode, encoding=encoding)
 
 
-def pre_sign_file_location(file_path: str, s3_config: S3Config) -> str:
+def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) -> str:
+    if s3_config is None:
+        s3_config = S3Config()
+
     s3_client = get_s3_client(s3_config, get_boto_session())
     bucket, key = split_s3_url(file_path)
     pre_sign_file_loc = s3_client.generate_presigned_url(
