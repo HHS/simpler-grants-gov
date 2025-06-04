@@ -10,7 +10,6 @@ export interface FilterQueryParamData {
   category: Set<string>;
   closeDate: Set<string>;
   costSharing: Set<string>;
-  andOr: Set<string>;
 }
 
 // this is used for UI display so order matters

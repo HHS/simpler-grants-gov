@@ -192,11 +192,11 @@ export const andOrOptions = [
   {
     id: "andOr-and",
     label: "Must include all words (ex. labor AND welfare)",
-    value: "and",
+    value: "AND",
   },
   {
     id: "andOr-or",
     label: "May include any words (ex. labor OR welfare)",
-    value: "or",
+    value: "OR",
   },
 ];

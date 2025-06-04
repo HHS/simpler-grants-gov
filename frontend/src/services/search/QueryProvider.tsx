@@ -10,6 +10,8 @@ interface QueryContextParams {
   updateTotalPages: (page: string) => void;
   totalResults: string;
   updateTotalResults: (total: string) => void;
+  updateLocalAndOrParam: (value: string) => void;
+  localAndOrParam: string;
 }
 
 export const QueryContext = createContext({} as QueryContextParams);
