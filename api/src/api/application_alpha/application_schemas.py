@@ -1,6 +1,10 @@
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    WarningMixinSchema,
+)
 from src.constants.lookup_constants import ApplicationFormStatus
 
 
@@ -119,3 +123,27 @@ class ApplicationAttachmentCreateRequestSchema(Schema):
         allow_none=False,
         metadata={"description": "The file to attach to an application"},
     )
+
+
+class ApplicationAttachmentGetSchema(FileResponseSchema):
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the uploaded application attachment"}
+    )
+
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the application attachment file",
+            "example": "my_example.pdf",
+        }
+    )
+
+    mime_type = fields.String(
+        metadata={
+            "description": "The mime type / content type of the file",
+            "example": "application/pdf",
+        }
+    )
+
+
+class ApplicationAttachmentGetResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationAttachmentGetSchema())
