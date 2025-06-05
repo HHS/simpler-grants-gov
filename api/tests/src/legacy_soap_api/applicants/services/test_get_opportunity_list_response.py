@@ -1,12 +1,20 @@
 import pytest
 
 from src.db.models.competition_models import Competition
-from src.legacy_soap_api.applicants.schemas import GetOpportunityListRequest, OpportunityFilter
+from src.legacy_soap_api.applicants.schemas import (
+    CFDADetails,
+    GetOpportunityListRequest,
+    OpportunityFilter,
+)
 from src.legacy_soap_api.applicants.services.get_opportunity_list_response import (
     get_opportunity_list_response,
 )
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
+from tests.src.db.models.factories import (
+    CompetitionFactory,
+    OpportunityAssistanceListingFactory,
+    OpportunityFactory,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -63,6 +71,25 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id(
     assert len(result.opportunity_details) == 2
 
 
+def test_get_opportunity_list_by_assistance_listing_number(db_session, enable_factory_create):
+    mock_opportunity_assistance_listing_number = "10.10"
+    mock_program_title = "Fake program title"
+    opportunity_assistance_listing = OpportunityAssistanceListingFactory(
+        assistance_listing_number=mock_opportunity_assistance_listing_number,
+        program_title=mock_program_title,
+    )
+    CompetitionFactory.create(opportunity_assistance_listing=opportunity_assistance_listing)
+    opportunity_list_request = GetOpportunityListRequest(
+        opportunity_filter=OpportunityFilter(cfda_number=mock_opportunity_assistance_listing_number)
+    )
+    result = get_opportunity_list_response(db_session, opportunity_list_request)
+    assert len(result.opportunity_details) == 1
+    assert result.opportunity_details[0].cfda_details == CFDADetails(
+        number=mock_opportunity_assistance_listing_number,
+        title=mock_program_title,
+    )
+
+
 def test_get_opportunity_list_by_opportunity_filter_opportunity_id_no_results(db_session):
     for dne_opportunity_list_request in (
         GetOpportunityListRequest(package_id="dne"),
@@ -76,11 +103,7 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id_no_results(db
             opportunity_filter=OpportunityFilter(competition_id="dne", cfda_number="dne")
         ),
     ):
-        assert (
-            len(
-                get_opportunity_list_response(
-                    db_session, dne_opportunity_list_request
-                ).opportunity_details
-            )
-            == 0
+        opportunities_list_response = get_opportunity_list_response(
+            db_session, dne_opportunity_list_request
         )
+        assert len(opportunities_list_response.opportunity_details) == 0
