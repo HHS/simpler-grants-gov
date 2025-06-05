@@ -60,7 +60,6 @@ export type MinimalOpportunity = {
 };
 
 export interface BaseOpportunity extends MinimalOpportunity {
-  agency: string | null;
   agency_code: string | null;
   agency_name: string | null;
   category: string | null;

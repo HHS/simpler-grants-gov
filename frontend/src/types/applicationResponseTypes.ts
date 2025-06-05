@@ -1,4 +1,5 @@
 import { APIResponse } from "src/types/apiResponseTypes";
+
 import { Competition } from "./competitionsResponseTypes";
 
 export interface ApplicationResponseDetail {
@@ -21,7 +22,7 @@ export interface ApplicationDetail {
   users: {
     email: string;
     user_id: string;
-  }
+  };
 }
 
 export interface ApplicationStartApiResponse extends APIResponse {
