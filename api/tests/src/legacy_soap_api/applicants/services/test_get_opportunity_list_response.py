@@ -1,7 +1,7 @@
 import pytest
 
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
     GetOpportunityListRequest,
@@ -20,10 +20,10 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture(autouse=True)
 def truncate_competitions(db_session):
-    # This will truncate the competitions and opportunities before each
-    # test that uses this fixture
+    # This will truncate the competitions and related data for each test within this test file.
     cascade_delete_from_db_table(db_session, Competition)
     cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, OpportunityAssistanceListing)
 
 
 def test_get_opportunity_list_by_package_id(db_session, enable_factory_create):

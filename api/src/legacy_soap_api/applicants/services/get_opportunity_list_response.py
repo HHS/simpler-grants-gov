@@ -1,7 +1,7 @@
 import logging
 from typing import Sequence
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 
 import src.adapters.db as db
 from src.db.models.competition_models import Competition
@@ -21,13 +21,8 @@ def get_opportunity_list_response(
     db_session: db.Session,
     get_opportunity_list_request: GetOpportunityListRequest,
 ) -> GetOpportunityListResponse:
-    competitions = list(
-        map(
-            lambda c: c[0],
-            get_competitions_from_opportunity_list_request(
-                db_session, get_opportunity_list_request
-            ),
-        )
+    competitions = get_competitions_from_opportunity_list_request(
+        db_session, get_opportunity_list_request
     )
     opened_competitions = _get_opened_competitions(competitions)
     return _build_get_opportunity_list_response(opened_competitions)
@@ -48,9 +43,15 @@ def get_competitions_from_opportunity_list_request(
 def _get_competitions_by_legacy_package_id(
     db_session: db.Session, legacy_package_id: str
 ) -> Sequence:
-    return db_session.execute(
-        select(Competition).where(Competition.legacy_package_id == legacy_package_id)
-    ).all()
+    return (
+        db_session.execute(
+            select(Competition)
+            .join(Opportunity)
+            .where(Competition.legacy_package_id == legacy_package_id)
+        )
+        .scalars()
+        .all()
+    )
 
 
 def _get_competitions_by_opportunity_filter(
@@ -58,9 +59,21 @@ def _get_competitions_by_opportunity_filter(
 ) -> Sequence:
     if not opportunity_filter:
         return []
-    return db_session.execute(
-        select(Competition).where(and_(*_get_opportunity_filter_and_clause(opportunity_filter)))
-    ).all()
+
+    query = select(Competition).join(Opportunity)
+    if opportunity_filter.cfda_number:
+        query.join(
+            OpportunityAssistanceListing,
+            OpportunityAssistanceListing.assistance_listing_number
+            == opportunity_filter.cfda_number,
+        )
+    if opportunity_filter.competition_id:
+        query = query.where(Competition.public_competition_id == opportunity_filter.competition_id)
+    if opportunity_filter.funding_opportunity_number:
+        query = query.where(
+            Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
+        )
+    return db_session.execute(query).scalars().all()
 
 
 def _get_opportunity_filter_and_clause(opportunity_filter: OpportunityFilter) -> Sequence:
@@ -112,6 +125,6 @@ def _get_cfda_details(
     )
 
 
-def _get_opened_competitions(competitions: list[Competition]) -> list[Competition]:
+def _get_opened_competitions(competitions: Sequence[Competition]) -> list[Competition]:
     open_competitions = list(filter(lambda competition: competition.is_open, competitions))
     return open_competitions if open_competitions else []
