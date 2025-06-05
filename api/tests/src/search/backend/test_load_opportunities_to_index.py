@@ -106,7 +106,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         assert resp.total_records == len(opportunities)
 
-        assert set([opp.opportunity_id for opp in opportunities]) == set(
+        assert set([str(opp.opportunity_id) for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
 
@@ -117,7 +117,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         assert resp.total_records == len(opportunities)
 
-        assert set([opp.opportunity_id for opp in opportunities]) == set(
+        assert set([str(opp.opportunity_id) for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
 
@@ -142,7 +142,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         assert resp.total_records == len(opportunities)
 
-        assert set([opp.opportunity_id for opp in opportunities]) == set(
+        assert set([str(opp.opportunity_id) for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
 
@@ -189,7 +189,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
 
-        record = [d for d in resp.records if d.get("opportunity_id") == opportunity.opportunity_id]
+        record = [
+            d for d in resp.records if d.get("opportunity_id") == str(opportunity.opportunity_id)
+        ]
         attachments = record[0]["attachments"]
 
         expected_number_of_processed_attachments = 1
