@@ -74,14 +74,16 @@ def setup_cfda(
     is_already_processed: bool = False,
     source_values: dict | None = None,
     all_fields_null: bool = False,
-    opportunity: Opportunity | None = None,
+    opportunity: Opportunity | staging.opportunity.Topportunity | None = None,
 ) -> staging.opportunity.TopportunityCfda:
     if source_values is None:
         source_values = {}
 
     # If you don't provide an opportunity, you need to provide an ID
-    if opportunity is not None:
+    if isinstance(opportunity, Opportunity):
         source_values["opportunity_id"] = opportunity.legacy_opportunity_id
+    elif isinstance(opportunity, staging.opportunity.Topportunity):
+        source_values["opportunity_id"] = opportunity.opportunity_id
 
     source_cfda = f.StagingTopportunityCfdaFactory.create(
         **source_values,
@@ -90,15 +92,25 @@ def setup_cfda(
         already_transformed=is_already_processed,
         all_fields_null=all_fields_null,
     )
-
+    # TODO: Clean this up.
     if create_existing:
-        f.OpportunityAssistanceListingFactory.create(
-            opportunity=opportunity,
-            legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
-            # set created_at/updated_at to an earlier time so its clear
-            # when they were last updated
-            timestamps_in_past=True,
-        )
+        if isinstance(opportunity, Opportunity):
+            f.OpportunityAssistanceListingFactory.create(
+                opportunity=opportunity,
+                legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+                # set created_at/updated_at to an earlier time so its clear
+                # when they were last updated
+                timestamps_in_past=True,
+            )
+        elif isinstance(opportunity, staging.opportunity.Topportunity):
+            pass
+            # f.OpportunityAssistanceListingFactory.create(
+            #     opportunity=opportunity,
+            #     legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            #     # set created_at/updated_at to an earlier time so its clear
+            #     # when they were last updated
+            #     timestamps_in_past=True,
+            # )
 
     return source_cfda
 
@@ -107,7 +119,7 @@ def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
-    opportunity: Opportunity | None,
+    opportunity: Opportunity | staging.opportunity.Topportunity | None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     is_existing_current_opportunity_summary: bool = False,
@@ -130,8 +142,10 @@ def setup_synopsis_forecast(
     if revision_number is not None:
         source_values["revision_number"] = revision_number
 
-    if opportunity is not None:
+    if isinstance(opportunity, Opportunity):
         source_values["opportunity_id"] = opportunity.legacy_opportunity_id
+    elif isinstance(opportunity, staging.opportunity.Topportunity):
+        source_values["opportunity_id"] = opportunity.opportunity_id
 
     source_summary = factory_cls.create(
         **source_values,
@@ -320,7 +334,7 @@ def setup_agency(
 
 def setup_opportunity_attachment(
     create_existing: bool,
-    opportunity: Opportunity,
+    opportunity: Opportunity | staging.opportunity.Topportunity,
     config: S3Config,
     is_delete: bool = False,
     is_already_processed: bool = False,
@@ -329,9 +343,13 @@ def setup_opportunity_attachment(
     if source_values is None:
         source_values = {}
 
+    if isinstance(opportunity, Opportunity):
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
+    elif isinstance(opportunity, staging.opportunity.Topportunity):
+        source_values["opportunity_id"] = opportunity.opportunity_id
+
     synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
         opportunity=None,
-        opportunity_id=opportunity.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         **source_values,
@@ -345,11 +363,25 @@ def setup_opportunity_attachment(
         with file_util.open_stream(s3_path, "w") as outfile:
             outfile.write(f.fake.sentence(25))
 
-        f.OpportunityAttachmentFactory.create(
-            legacy_attachment_id=synopsis_attachment.syn_att_id,
-            opportunity=opportunity,
-            file_location=s3_path,
-        )
+        if isinstance(opportunity, Opportunity):
+            f.OpportunityAttachmentFactory.create(
+                legacy_attachment_id=synopsis_attachment.syn_att_id,
+                opportunity=opportunity,
+                file_location=s3_path,
+            )
+        elif isinstance(opportunity, staging.opportunity.Topportunity):
+            opportunity = f.OpportunityFactory.create(
+                legacy_opportunity_id=opportunity.opportunity_id,
+                opportunity_attachments=[],
+                # set created_at/updated_at to an earlier time so its clear
+                # when they were last updated
+                timestamps_in_past=True,
+            )
+            f.OpportunityAttachmentFactory.create(
+                legacy_attachment_id=synopsis_attachment.syn_att_id,
+                opportunity=opportunity,
+                file_location=s3_path,
+            )
 
     return synopsis_attachment
 
