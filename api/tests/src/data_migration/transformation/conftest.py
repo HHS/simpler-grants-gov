@@ -74,16 +74,13 @@ def setup_cfda(
     is_already_processed: bool = False,
     source_values: dict | None = None,
     all_fields_null: bool = False,
-    opportunity: Opportunity | staging.opportunity.Topportunity | None = None,
+    opportunity: Opportunity | None = None,
 ) -> staging.opportunity.TopportunityCfda:
     if source_values is None:
         source_values = {}
 
-    # If you don't provide an opportunity, you need to provide an ID
-    if isinstance(opportunity, Opportunity):
+    if opportunity is not None:
         source_values["opportunity_id"] = opportunity.legacy_opportunity_id
-    elif isinstance(opportunity, staging.opportunity.Topportunity):
-        source_values["opportunity_id"] = opportunity.opportunity_id
 
     source_cfda = f.StagingTopportunityCfdaFactory.create(
         **source_values,
@@ -92,25 +89,15 @@ def setup_cfda(
         already_transformed=is_already_processed,
         all_fields_null=all_fields_null,
     )
-    # TODO: Clean this up.
-    if create_existing:
-        if isinstance(opportunity, Opportunity):
-            f.OpportunityAssistanceListingFactory.create(
-                opportunity=opportunity,
-                legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
-                # set created_at/updated_at to an earlier time so its clear
-                # when they were last updated
-                timestamps_in_past=True,
-            )
-        elif isinstance(opportunity, staging.opportunity.Topportunity):
-            pass
-            # f.OpportunityAssistanceListingFactory.create(
-            #     opportunity=opportunity,
-            #     legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
-            #     # set created_at/updated_at to an earlier time so its clear
-            #     # when they were last updated
-            #     timestamps_in_past=True,
-            # )
+
+    if create_existing and opportunity is not None:
+        f.OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity,
+            legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            # set created_at/updated_at to an earlier time so its clear
+            # when they were last updated
+            timestamps_in_past=True,
+        )
 
     return source_cfda
 

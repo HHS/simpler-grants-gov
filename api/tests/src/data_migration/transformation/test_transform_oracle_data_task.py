@@ -56,8 +56,12 @@ class TestTransformFullRunTask(BaseTestClass):
             create_existing=False, source_values={"owningagency": "INSERTAGENCY-ABC"}
         )
 
-        cfda1 = setup_cfda(create_existing=False, opportunity=opportunity)
-        cfda2 = setup_cfda(create_existing=False, opportunity=opportunity)
+        cfda1 = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": opportunity.opportunity_id}
+        )
+        cfda2 = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": opportunity.opportunity_id}
+        )
 
         # Attachments
         attachment1 = setup_opportunity_attachment(
