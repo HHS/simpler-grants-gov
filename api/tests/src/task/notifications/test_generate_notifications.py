@@ -61,12 +61,18 @@ def test_search_notifications_cli(
     """Test that verifies we can collect and send search notifications via CLI"""
 
     # Create a saved search that needs notification
+    # Use the first three opportunity IDs from the test data
+    test_opportunity_ids = [
+        "02df19e1-45bf-4882-8d77-fe21bd49b27e",  # NASA_SPACE_FELLOWSHIP
+        "05d86d8b-05ba-46ea-ba27-9e3cee87762b",  # NASA_INNOVATIONS
+        "192be7c8-5f0f-44ce-ac26-4be55ff6a055",  # NASA_SUPERSONIC
+    ]
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=test_opportunity_ids,
     )
 
     notification_logs_count = (
@@ -275,12 +281,18 @@ def test_combined_notifications_cli(
     )
 
     # Create a saved search that needs notification
+    # Use the first three opportunity IDs from the test data
+    test_opportunity_ids = [
+        "02df19e1-45bf-4882-8d77-fe21bd49b27e",  # NASA_SPACE_FELLOWSHIP
+        "05d86d8b-05ba-46ea-ba27-9e3cee87762b",  # NASA_INNOVATIONS
+        "192be7c8-5f0f-44ce-ac26-4be55ff6a055",  # NASA_SUPERSONIC
+    ]
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=test_opportunity_ids,
     )
 
     result = cli_runner.invoke(args=["task", "generate-notifications"])
@@ -334,12 +346,23 @@ def test_grouped_search_queries_cli(
     same_search_query = {"keywords": "shared search"}
 
     # Create saved searches with the same query but different results
+    # Use different sets of opportunity IDs from the test data
+    test_opportunity_ids_1 = [
+        "02df19e1-45bf-4882-8d77-fe21bd49b27e",  # NASA_SPACE_FELLOWSHIP
+        "05d86d8b-05ba-46ea-ba27-9e3cee87762b",  # NASA_INNOVATIONS
+        "192be7c8-5f0f-44ce-ac26-4be55ff6a055",  # NASA_SUPERSONIC
+    ]
+    test_opportunity_ids_2 = [
+        "28386de7-8a70-4466-8344-c6464cb5828e",  # NASA_K12_DIVERSITY
+        "2a80ca2e-4f17-43dd-b1ad-ba7f684cb915",  # LOC_TEACHING
+        "387b3e49-3f99-4d3d-bc0a-dccca77a8111",  # LOC_HIGHER_EDUCATION
+    ]
     saved_search1 = factories.UserSavedSearchFactory.create(
         user=user1,
         search_query=same_search_query,
         name="User 1 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=test_opportunity_ids_1,
     )
 
     saved_search2 = factories.UserSavedSearchFactory.create(
@@ -347,7 +370,7 @@ def test_grouped_search_queries_cli(
         search_query=same_search_query,
         name="User 2 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[4, 5, 6],
+        searched_opportunity_ids=test_opportunity_ids_2,
     )
 
     result = cli_runner.invoke(args=["task", "generate-notifications"])
@@ -375,6 +398,7 @@ def test_grouped_search_queries_cli(
     assert saved_search2.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
 
+# TODO: Fix this test
 def test_search_notifications_on_index_change(
     cli_runner,
     db_session,
@@ -383,21 +407,27 @@ def test_search_notifications_on_index_change(
     user_with_email,
     opportunity_index,
     search_client,
+    setup_search_data,
 ):
     """Test that verifies notifications are generated when search results change due to index updates"""
     # Create a saved search with initial results
+    # Use the first two opportunity IDs from the test data
+    initial_opportunity_ids = [
+        "02df19e1-45bf-4882-8d77-fe21bd49b27e",  # NASA_SPACE_FELLOWSHIP
+        "05d86d8b-05ba-46ea-ba27-9e3cee87762b",  # NASA_INNOVATIONS
+    ]
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],  # Initial results
+        searched_opportunity_ids=initial_opportunity_ids,
     )
 
     # Update the search index with new data that will change the results
     schema = OpportunityV1Schema()
+    # Create a new opportunity with a UUID that's not in the initial results
     new_opportunity = factories.OpportunityFactory.create(
-        opportunity_id=999,
         opportunity_title="New Test Opportunity",
     )
     factories.OpportunitySummaryFactory.build(
@@ -424,13 +454,15 @@ def test_search_notifications_on_index_change(
 
     # Verify the saved search was updated with new results
     db_session.refresh(saved_search)
-    assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+    assert new_opportunity.opportunity_id in saved_search.searched_opportunity_ids
+    # saved search last notified should be updated
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
     task_rerun = NotificationTask(db_session, search_client)
     task_rerun.run()
 
+    # Check notification logs again - should still be only one since no new changes detected
     notification_logs = (
         db_session.query(UserNotificationLog)
         .filter(
@@ -439,6 +471,8 @@ def test_search_notifications_on_index_change(
         )
         .all()
     )
+    # The second run should not create additional notifications since the search results haven't changed
+    # from what was saved after the first run
     assert len(notification_logs) == 1  # Should still only be one notification
 
 
@@ -446,6 +480,11 @@ def test_pagination_params_are_stripped_from_search_query(
     cli_runner, db_session, enable_factory_create, user, clear_notification_logs
 ):
     """Test that pagination parameters are stripped from search queries"""
+    # Use the first two opportunity IDs from the test data
+    test_opportunity_ids = [
+        "02df19e1-45bf-4882-8d77-fe21bd49b27e",  # NASA_SPACE_FELLOWSHIP
+        "05d86d8b-05ba-46ea-ba27-9e3cee87762b",  # NASA_INNOVATIONS
+    ]
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
         search_query={
@@ -454,7 +493,7 @@ def test_pagination_params_are_stripped_from_search_query(
         },
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],
+        searched_opportunity_ids=test_opportunity_ids,
     )
 
     params = _strip_pagination_params(saved_search.search_query)
