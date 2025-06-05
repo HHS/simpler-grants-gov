@@ -209,7 +209,9 @@ def transform_assistance_listing(
 
 
 def transform_opportunity_summary(
-    source_summary: SourceSummary, incoming_summary: OpportunitySummary | None
+    source_summary: SourceSummary,
+    incoming_summary: OpportunitySummary | None,
+    opportunity: Opportunity | None,
 ) -> OpportunitySummary:
     log_extra = get_log_extra_summary(source_summary)
 
@@ -218,15 +220,19 @@ def transform_opportunity_summary(
         # These values are a part of a unique key for identifying across tables, we don't
         # ever want to modify them once created
         target_summary = OpportunitySummary(
-            opportunity_id=source_summary.opportunity_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
         )
+        if opportunity:
+            target_summary.opportunity_id = opportunity.opportunity_id
     else:
         # We create a new summary object and merge it outside this function
         # that way if any modifications occur on the object and then it errors
         # they aren't actually applied
         target_summary = OpportunitySummary(
-            opportunity_summary_id=incoming_summary.opportunity_summary_id
+            opportunity_id=incoming_summary.opportunity_id,
+            opportunity_summary_id=incoming_summary.opportunity_summary_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
         )
 
     # Fields in all 4 source tables

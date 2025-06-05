@@ -88,7 +88,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
 
             logger.info("Transforming and upserting opportunity summary", extra=extra)
             transformed_opportunity_summary = transform_util.transform_opportunity_summary(
-                source_summary, target_summary
+                source_summary, target_summary, opportunity
             )
 
             if is_insert:

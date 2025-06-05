@@ -105,7 +105,7 @@ class TestTransformFullRunTask(BaseTestClass):
 
         created_opportunity: Opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+            .filter(Opportunity.legacy_opportunity_id == opportunity.opportunity_id)
             .one_or_none()
         )
 
@@ -116,7 +116,7 @@ class TestTransformFullRunTask(BaseTestClass):
         assert created_opportunity is not None
         validate_opportunity(db_session, opportunity)
         assert {
-            al.opportunity_assistance_listing_id
+            al.legacy_opportunity_assistance_listing_id
             for al in created_opportunity.opportunity_assistance_listings
         } == {cfda1.opp_cfda_id, cfda2.opp_cfda_id}
 
@@ -174,7 +174,7 @@ class TestTransformFullRunTask(BaseTestClass):
             no_current_summary=True, opportunity_assistance_listings=[], agency_code="UPDATEAGENCY"
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[]
+            opportunity_id=existing_opportunity.legacy_opportunity_id, cfdas=[]
         )
 
         # Attachments
@@ -371,14 +371,14 @@ class TestTransformFullRunTask(BaseTestClass):
 
         updated_opportunity: Opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+            .filter(Opportunity.legacy_opportunity_id == opportunity.opportunity_id)
             .one_or_none()
         )
 
         assert updated_opportunity is not None
         validate_opportunity(db_session, opportunity)
         assert {
-            al.opportunity_assistance_listing_id
+            al.legacy_opportunity_assistance_listing_id
             for al in updated_opportunity.opportunity_assistance_listings
         } == {cfda_insert.opp_cfda_id, cfda_update.opp_cfda_id}
 
@@ -437,7 +437,7 @@ class TestTransformFullRunTask(BaseTestClass):
             opportunity_attachments=[],
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True
+            opportunity_id=existing_opportunity.legacy_opportunity_id, cfdas=[], is_deleted=True
         )
 
         cfda = setup_cfda(create_existing=True, is_delete=True, opportunity=existing_opportunity)
@@ -546,7 +546,9 @@ class TestTransformFullRunTask(BaseTestClass):
             no_current_summary=True, opportunity_assistance_listings=[]
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], already_transformed=True
+            opportunity_id=existing_opportunity.legacy_opportunity_id,
+            cfdas=[],
+            already_transformed=True,
         )
 
         summary_synopsis = f.OpportunitySummaryFactory(

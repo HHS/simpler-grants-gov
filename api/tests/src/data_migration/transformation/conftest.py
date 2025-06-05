@@ -131,7 +131,7 @@ def setup_synopsis_forecast(
         source_values["revision_number"] = revision_number
 
     if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_summary = factory_cls.create(
         **source_values,
@@ -225,7 +225,7 @@ def setup_funding_instrument(
 
     source_funding_instrument = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fi_id=legacy_lookup_value,
@@ -331,7 +331,7 @@ def setup_opportunity_attachment(
 
     synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
         opportunity=None,
-        opportunity_id=opportunity.opportunity_id,
+        opportunity_id=opportunity.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         **source_values,
@@ -346,7 +346,7 @@ def setup_opportunity_attachment(
             outfile.write(f.fake.sentence(25))
 
         f.OpportunityAttachmentFactory.create(
-            attachment_id=synopsis_attachment.syn_att_id,
+            legacy_attachment_id=synopsis_attachment.syn_att_id,
             opportunity=opportunity,
             file_location=s3_path,
         )
@@ -471,7 +471,7 @@ def get_summary_from_source(db_session, source_summary):
     opportunity_summary = (
         db_session.query(OpportunitySummary)
         .filter(
-            OpportunitySummary.opportunity_id == source_summary.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_summary.opportunity_id,
             OpportunitySummary.is_forecast == is_forecast,
             # Populate existing to force it to fetch updates from the DB
         )
@@ -620,7 +620,7 @@ def validate_funding_instrument(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_instrument.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_instrument.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_instrument.opportunity_id,
         )
         .scalar()
     )
@@ -774,7 +774,7 @@ def validate_opportunity_attachment(
 
     opportunity_attachment = (
         db_session.query(OpportunityAttachment)
-        .filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id)
+        .filter(OpportunityAttachment.legacy_attachment_id == source_attachment.syn_att_id)
         .one_or_none()
     )
 
@@ -787,8 +787,7 @@ def validate_opportunity_attachment(
         source_attachment,
         opportunity_attachment,
         [
-            ("syn_att_id", "attachment_id"),
-            ("opportunity_id", "opportunity_id"),
+            ("syn_att_id", "legacy_attachment_id"),
             ("mime_type", "mime_type"),
             ("file_name", "file_name"),
             ("file_desc", "file_description"),
@@ -859,7 +858,7 @@ def setup_competition(
         if not existing_cfda:
             f.StagingTopportunityCfdaFactory.create(
                 opp_cfda_id=opportunity_assistance_listing_id,
-                opportunity_id=opportunity.opportunity_id,
+                opportunity_id=opportunity.legacy_opportunity_id,
                 opportunity=None,  # Prevent factory from creating another opportunity
             )
 
