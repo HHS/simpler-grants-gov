@@ -21,6 +21,7 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 type OpportunityListingProps = {
@@ -122,6 +123,8 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
+  console.log(opportunityData)
+
   return (
     <div>
       <BetaAlert />
@@ -133,6 +136,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
       >
         <div className="padding-y-3">
           <OpportunitySaveUserControl />
+          {opportunityData.competition_id && (
+            <OpportunityCompetitionStart
+              competitionId={opportunityData.competition_id}
+            />
+          )}
         </div>
         <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
