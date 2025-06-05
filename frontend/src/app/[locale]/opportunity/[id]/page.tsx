@@ -123,8 +123,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
-  console.log(opportunityData)
-
   return (
     <div>
       <BetaAlert />
@@ -134,11 +132,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
-        <div className="padding-y-3">
+        <div className="padding-y-3 display-flex">
           <OpportunitySaveUserControl />
-          {opportunityData.competition_id && (
+          {opportunityData.competitions && (
             <OpportunityCompetitionStart
-              competitionId={opportunityData.competition_id}
+              competitions={opportunityData.competitions}
             />
           )}
         </div>

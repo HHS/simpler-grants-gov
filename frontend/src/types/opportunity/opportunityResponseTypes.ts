@@ -59,17 +59,12 @@ export type MinimalOpportunity = {
   summary: MinimalSummary;
 };
 
-export type Competition = {
-  competition_id: string;
-  competiion_title: string;
-  competition_info: string;
-};
-
-export interface BaseOpportunity extends MinimalOpportunity, Competition {
+export interface BaseOpportunity extends MinimalOpportunity {
   agency_code: string | null;
   agency_name: string | null;
   category: string | null;
   category_explanation: string | null;
+  competitions: [Competition] | null;
   created_at: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[]; // need to true up vs OpportunityAssistanceListing
   opportunity_number: string;

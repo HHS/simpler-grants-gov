@@ -1,3 +1,5 @@
+import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+
 export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
@@ -106,12 +108,22 @@ export const messages = {
       errorUnsave: "Error undoing save. Please try again.",
     },
     saveloginModal: {
-      title: "Sign in to save this opportunity",
-      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
-      description:
-        "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
       button: "Sign in with Login.gov",
       close: "Cancel",
+      description:
+        "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
+      title: "Sign in to save this opportunity",
+    },
+    startApplicationButtonText: "Start new application",
+    startAppplicationModal: {
+      cancelButtonText: "Cancel",
+      description:
+        "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+      name: "Name of this application",
+      requiredText: "All fields are required.",
+      saveButtonText: "Save",
+      title: "New application",
     },
     intro: {
       agency: "Agency: ",
