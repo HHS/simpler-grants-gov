@@ -1,10 +1,10 @@
 import uuid
 from datetime import date
-from unittest import mock
 
 import pytest
 from freezegun import freeze_time
 
+import src.util.file_util as file_util
 from tests.src.db.models.factories import CompetitionFactory
 
 
@@ -35,64 +35,96 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
     assert response_competition["open_to_applicants"] == competition.open_to_applicants
 
 
-def test_competition_get_with_instructions_200(client, api_auth_token, enable_factory_create):
-    # Create a competition with instructions
+def test_competition_get_with_instructions_200(
+    client, api_auth_token, enable_factory_create, monkeypatch_session, mock_s3_bucket
+):
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+
+    # Set environment variables for S3 configuration
+    monkeypatch_session.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
+    monkeypatch_session.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch_session.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+
+    # Create a competition with instructions and custom file contents
     competition = CompetitionFactory.create(with_instruction=True)
 
-    # Mock the download_path property for CompetitionInstruction
-    presigned_url = "https://example.com/competition-instructions/file.pdf"
-    with mock.patch(
-        "src.db.models.competition_models.CompetitionInstruction.download_path",
-        new_callable=mock.PropertyMock,
-        return_value=presigned_url,
-    ):
-        resp = client.get(
-            f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
-        )
+    # Reference the instruction object
+    instruction = competition.competition_instructions[0]
+
+    # Make the GET request
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+    )
 
     assert resp.status_code == 200
     response_competition = resp.get_json()["data"]
 
     # Verify the competition instructions are included in the response
     assert len(response_competition["competition_instructions"]) > 0
-    instruction = response_competition["competition_instructions"][0]
-    assert instruction["file_name"] == competition.competition_instructions[0].file_name
-    assert instruction["download_path"] == presigned_url
-    assert "created_at" in instruction
-    assert "updated_at" in instruction
+    response_instruction = response_competition["competition_instructions"][0]
+
+    # Verify instruction metadata
+    assert response_instruction["file_name"] == instruction.file_name
+    assert "created_at" in response_instruction
+    assert "updated_at" in response_instruction
+
+    # Verify the download URL is a presigned URL (contains signature)
+    assert "X-Amz-Signature" in response_instruction["download_path"]
+
+    # Extract relevant parts from the file_location
+    competition_id_str = str(competition.competition_id)
+    instruction_id_str = str(instruction.competition_instruction_id)
+
+    # Verify key components are in the download path
+    assert competition_id_str in response_instruction["download_path"]
+    assert instruction_id_str in response_instruction["download_path"]
+    assert instruction.file_name in response_instruction["download_path"]
 
 
 def test_competition_get_with_cdn_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch_session
+    client, api_auth_token, enable_factory_create, monkeypatch_session, mock_s3_bucket
 ):
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+
     # Set the CDN URL environment variable
     monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
+    monkeypatch_session.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch_session.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
 
     # Create a competition with instructions
     competition = CompetitionFactory.create(with_instruction=True)
 
-    # Mock the download_path property for CompetitionInstruction
-    cdn_url = "https://cdn.example.com/competition-instructions/file.pdf"
-    with mock.patch(
-        "src.db.models.competition_models.CompetitionInstruction.download_path",
-        new_callable=mock.PropertyMock,
-        return_value=cdn_url,
-    ):
-        resp = client.get(
-            f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
-        )
+    # Reference the instruction object directly
+    instruction = competition.competition_instructions[0]
+
+    # Make the GET request
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+    )
 
     assert resp.status_code == 200
     response_competition = resp.get_json()["data"]
 
     # Verify the competition instructions are included in the response
     assert len(response_competition["competition_instructions"]) > 0
-    instruction = response_competition["competition_instructions"][0]
-    assert instruction["file_name"] == competition.competition_instructions[0].file_name
-    assert instruction["download_path"] == cdn_url
-    assert instruction["download_path"].startswith("https://cdn.")
-    assert "created_at" in instruction
-    assert "updated_at" in instruction
+    response_instruction = response_competition["competition_instructions"][0]
+
+    # Verify instruction metadata
+    assert response_instruction["file_name"] == instruction.file_name
+    assert "created_at" in response_instruction
+    assert "updated_at" in response_instruction
+
+    # Verify the download URL is a CDN URL
+    assert response_instruction["download_path"].startswith("https://cdn.example.com")
+
+    # Extract relevant parts from the file_location
+    competition_id_str = str(competition.competition_id)
+    instruction_id_str = str(instruction.competition_instruction_id)
+
+    # Verify key components are in the download path
+    assert competition_id_str in response_instruction["download_path"]
+    assert instruction_id_str in response_instruction["download_path"]
+    assert instruction.file_name in response_instruction["download_path"]
 
 
 def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_create):
