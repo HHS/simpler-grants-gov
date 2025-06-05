@@ -1,4 +1,5 @@
 import { APIResponse } from "src/types/apiResponseTypes";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 export type OpportunityStatus = "archived" | "closed" | "posted" | "forecasted";
 
@@ -59,6 +60,7 @@ export type MinimalOpportunity = {
 };
 
 export interface BaseOpportunity extends MinimalOpportunity {
+  agency: string | null;
   agency_code: string | null;
   agency_name: string | null;
   category: string | null;
@@ -73,6 +75,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
 
 export interface OpportunityDetail extends BaseOpportunity {
   attachments: OpportunityDocument[];
+  competitions: [Competition] | null;
 }
 
 export interface OpportunityApiResponse extends APIResponse {
