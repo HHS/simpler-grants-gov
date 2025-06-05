@@ -198,9 +198,3 @@ class TestGetOpportunityList:
             number=assistance_listing_number,
             title=program_title,
         )
-        CompetitionFactory.create(
-            opportunity_assistance_listing=OpportunityAssistanceListingFactory(
-                assistance_listing_number=assistance_listing_number,
-                program_title=program_title,
-            )
-        )
