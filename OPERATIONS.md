@@ -122,7 +122,8 @@ notable constraint of OpenSearch, relative to ECS and the Database.
 
 We manage several secret values that need to be rotated yearly.
 
-### Application Certificates
+### Application SSL Certificates
+🚨🚨🚨 - Unclear how a cert rotation works with terraform pointing to a certificate in ACM by domain name. Leave a little extra time until we figure that out and document better below.
 
 #### Application Certificates: Part 1: Generate A Cert
 
