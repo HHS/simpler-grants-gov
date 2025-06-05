@@ -56,7 +56,6 @@ def test_response_schema_single(sample_extract_metadata, monkeypatch):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
     monkeypatch.setenv("CDN_URL", "")
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
     monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     schema = ExtractMetadataResponseSchema()
@@ -75,7 +74,6 @@ def test_response_schema_list(sample_extract_metadata, monkeypatch):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
     monkeypatch.setenv("CDN_URL", "")
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
     monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     schema = ExtractMetadataListResponseSchema()
@@ -143,7 +141,6 @@ def test_extract_metadata_with_presigned_url(monkeypatch):
 
     # Set environment variables instead of creating a mock config
     monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
     monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     # Get the download_path which should now use the presigned URL path

@@ -36,14 +36,13 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
 
 
 def test_competition_get_with_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch_session, mock_s3_bucket
+    client, api_auth_token, enable_factory_create, monkeypatch, mock_s3_bucket
 ):
-    monkeypatch_session.setattr(file_util, "_s3_config", None)
+    monkeypatch.setattr(file_util, "_s3_config", None)
 
     # Set environment variables for S3 configuration
-    monkeypatch_session.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
-    monkeypatch_session.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
-    monkeypatch_session.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+    monkeypatch.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+    monkeypatch.delenv("CDN_URL")
 
     # Create a competition with instructions and custom file contents
     competition = CompetitionFactory.create(with_instruction=True)
@@ -82,14 +81,13 @@ def test_competition_get_with_instructions_200(
 
 
 def test_competition_get_with_cdn_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch_session, mock_s3_bucket
+    client, api_auth_token, enable_factory_create, monkeypatch, mock_s3_bucket
 ):
-    monkeypatch_session.setattr(file_util, "_s3_config", None)
+    monkeypatch.setattr(file_util, "_s3_config", None)
 
     # Set the CDN URL environment variable
-    monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
-    monkeypatch_session.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
-    monkeypatch_session.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+    monkeypatch.setenv("CDN_URL", "https://cdn.example.com")
+    monkeypatch.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
 
     # Create a competition with instructions
     competition = CompetitionFactory.create(with_instruction=True)
