@@ -8,6 +8,7 @@ from . import (
     extract_models,
     lookup_models,
     opportunity_models,
+    sam_extract_models,
     task_models,
     user_models,
 )
@@ -27,5 +28,6 @@ __all__ = [
     "extract_models",
     "task_models",
     "competition_models",
+    "sam_extract_models",
     "entity_models",
 ]

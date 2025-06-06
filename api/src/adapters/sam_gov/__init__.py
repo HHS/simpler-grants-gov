@@ -1,4 +1,4 @@
-"""SAM.gov API client implementation."""
+"""SAM.gov API adapter module"""
 
 from src.adapters.sam_gov.client import BaseSamGovClient, SamGovClient
 from src.adapters.sam_gov.config import SamGovConfig, get_config
@@ -12,7 +12,6 @@ from src.adapters.sam_gov.models import (
     FileType,
     SamExtractRequest,
     SamExtractResponse,
-    SensitivityLevel,
 )
 
 __all__ = [
@@ -29,5 +28,4 @@ __all__ = [
     "FileType",
     "SamExtractRequest",
     "SamExtractResponse",
-    "SensitivityLevel",
 ]
