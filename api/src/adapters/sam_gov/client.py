@@ -104,9 +104,6 @@ class SamGovClient(BaseSamGovClient):
             IOError: If there is an issue saving the file.
             Exception: For any other errors.
         """
-        # Validate that file_name is provided
-        if not extract_request.file_name:
-            raise ValueError("file_name must be provided for downloads")
 
         # Validate that API key is provided
         if not self.api_key:
