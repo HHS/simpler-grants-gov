@@ -85,7 +85,9 @@ export async function handleFormAction(
     );
     if (saveSuccess) {
       if (sumbitType === "submit") {
-        redirect(`/formPrototype/success`);
+        redirect(
+          `/workspace/applications/application/${applicationId}/form/${formId}/success`,
+        );
       } else {
         return {
           applicationId,

@@ -11,10 +11,6 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/events",
-      "/formPrototype/[applicationId]/form/[formId]",
-      "/formPrototype/[applicationId]",
-      "/formPrototype",
-      "/formPrototype/success",
       "/health",
       "/login",
       "/maintenance",
@@ -29,6 +25,9 @@ describe("getNextRoutes", () => {
       "/subscribe/unsubscribe",
       "/unauthenticated",
       "/vision",
+      "/workspace/applications/application/[applicationId]/form/[formId]",
+      "/workspace/applications/application/[applicationId]/form/[formId]/success",
+      "/workspace/applications/application/[applicationId]",
     ]);
   });
 });

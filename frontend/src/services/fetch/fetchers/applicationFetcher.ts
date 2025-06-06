@@ -9,6 +9,7 @@ import { fetchApplicationWithMethod } from "./fetchers";
 
 export const handleStartApplication = async (
   competitionID: string,
+  applicationName: string,
   token: string,
 ): Promise<ApplicationStartApiResponse> => {
   const ssgToken = {
@@ -17,7 +18,7 @@ export const handleStartApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
     additionalHeaders: ssgToken,
-    body: { competition_id: competitionID, name: "test" },
+    body: { competition_id: competitionID, name: applicationName },
   });
 
   return (await response.json()) as ApplicationStartApiResponse;

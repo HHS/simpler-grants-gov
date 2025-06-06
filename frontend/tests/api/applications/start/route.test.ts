@@ -2,9 +2,25 @@
  * @jest-environment node
  */
 
-import { POST } from "src/app/api/applications/start/route";
+import { startApplicationHandler } from "src/app/api/applications/start/handler";
+
+import { NextRequest } from "next/server";
 
 const getSessionMock = jest.fn();
+
+const fakeRequestStartApp = (success = true, method: string) => {
+  return {
+    json: jest.fn(() => {
+      return success
+        ? Promise.resolve({
+            competitionId: "1",
+            applicationName: "Test Application",
+          })
+        : Promise.resolve({ competitionId: null, applicationName: null });
+    }),
+    method,
+  } as unknown as NextRequest;
+};
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
@@ -20,11 +36,15 @@ jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
 
 describe("POST request", () => {
   afterEach(() => jest.clearAllMocks());
-  it("saves saved opportunity", async () => {
+  it("starts application", async () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
     }));
-    const response = await POST();
+
+    const response = await startApplicationHandler(
+      fakeRequestStartApp(true, "POST"),
+    );
+
     const json = (await response.json()) as {
       message: string;
       applicationId: string;
