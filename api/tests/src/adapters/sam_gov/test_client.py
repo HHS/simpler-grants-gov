@@ -8,6 +8,7 @@ import pytest
 import requests
 import requests_mock
 from requests.exceptions import Timeout
+from pydantic import ValidationError
 
 from src.adapters.sam_gov.client import SamGovClient
 from src.adapters.sam_gov.config import SamGovConfig
@@ -208,10 +209,8 @@ class TestSamGovClient:
 
             # Verify the request was made with the API key in the headers
             assert m.called
-            assert "api_key=test-api-key" in m.last_request.url
-
-            # Verify headers don't include the API key
-            assert "x-api-key" not in m.last_request.headers
+            assert "x-api-key" in m.last_request.headers
+            assert m.last_request.headers["x-api-key"] == config.api_key
 
     def test_download_extract_missing_file_name(self, client, tmpdir):
         """Test downloading an extract with a missing file name."""
@@ -229,14 +228,10 @@ class TestSamGovClient:
         with pytest.raises(ValueError, match="API key must be provided for SAM.gov API access"):
             client.download_extract(request, str(output_path))
 
-    def test_download_extract_missing_api_url(self, config, tmpdir):
+    def test_download_extract_missing_api_url(self):
         """Test downloading an extract with a missing API URL."""
-        config.base_url = None
-        client = SamGovClient(config)
-        request = SamExtractRequest(file_name="test.zip")
-        output_path = tmpdir.join("test.zip")
-        with pytest.raises(ValueError, match="API URL must be provided for SAM.gov API access"):
-            client.download_extract(request, str(output_path))
+        with pytest.raises(ValidationError):
+            SamGovConfig(base_url=None, api_key="test-api-key")
 
     def test_download_extract_api_error(self, client, config, tmpdir):
         """Test downloading an extract with an API error."""
@@ -244,7 +239,8 @@ class TestSamGovClient:
         output_path = tmpdir.join("test.zip")
         with requests_mock.Mocker() as m:
             m.get(
-                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
+                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip",
+                request_headers={"x-api-key": config.api_key},
                 status_code=404,
                 json={"error": "Extract not found"},
             )
@@ -257,10 +253,9 @@ class TestSamGovClient:
         output_path = tmpdir.join("test.zip")
         with requests_mock.Mocker() as m:
             m.get(
-                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip&api_key={config.api_key}",
+                f"{config.base_url}/data-services/v1/extracts?fileName=test.zip",
+                request_headers={"x-api-key": config.api_key},
                 exc=requests.exceptions.ConnectionError,
             )
             with pytest.raises(Exception, match="Request failed"):
                 client.download_extract(request, str(output_path))
-            assert "x-api-key" in m.last_request.headers
-            assert m.last_request.headers["x-api-key"] == config.api_key
