@@ -8,6 +8,7 @@ from src.api.application_alpha.application_blueprint import application_blueprin
 from src.api.application_alpha.application_schemas import (
     ApplicationAttachmentCreateRequestSchema,
     ApplicationAttachmentCreateResponseSchema,
+    ApplicationAttachmentDeleteResponseSchema,
     ApplicationAttachmentGetResponseSchema,
     ApplicationFormGetResponseSchema,
     ApplicationFormUpdateRequestSchema,
@@ -23,6 +24,7 @@ from src.auth.api_jwt_auth import api_jwt_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
+from src.services.applications.delete_application_attachment import delete_application_attachment
 from src.services.applications.get_application import get_application_with_warnings
 from src.services.applications.get_application_attachment import get_application_attachment
 from src.services.applications.get_application_form import get_application_form
@@ -251,3 +253,29 @@ def application_attachment_get(
         )
 
     return response.ApiResponse(message="Success", data=application_attachment)
+
+
+@application_blueprint.delete(
+    "/applications/<uuid:application_id>/attachments/<uuid:application_attachment_id>"
+)
+@application_blueprint.output(ApplicationAttachmentDeleteResponseSchema())
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_attachment_delete(
+    db_session: db.Session, application_id: UUID, application_attachment_id: UUID
+) -> response.ApiResponse:
+    """Delete an application attachment"""
+    add_extra_data_to_current_request_logs(
+        {"application_id": application_id, "application_attachment_id": application_attachment_id}
+    )
+    logger.info("DELETE /alpha/applications/:application_id/attachments/:application_attachment_id")
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        delete_application_attachment(db_session, application_id, application_attachment_id, user)
+
+    return response.ApiResponse(message="Success")
