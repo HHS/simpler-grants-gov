@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
@@ -235,6 +236,13 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
 
     application_name: Mapped[str | None]
+
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
+    organization: Mapped[Organization] = relationship(
+        Organization, uselist=False, back_populates="applications"
+    )
 
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
