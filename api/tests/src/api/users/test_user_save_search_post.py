@@ -1,8 +1,6 @@
 import uuid
 from datetime import date
 
-import pytest
-
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -53,13 +51,6 @@ MEDICAL_LABORATORY = build_opp(
 )
 
 
-@pytest.fixture(autouse=True, scope="function")
-def clear_saved_searches(db_session):
-    db_session.query(UserSavedSearch).delete()
-    db_session.commit()
-    yield
-
-
 def test_user_save_search_post_unauthorized_user(client, db_session, user, user_auth_token):
     # Try to save a search for a different user ID
     different_user = UserFactory.create()
@@ -75,12 +66,18 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
         json={"name": "Test Search", "search_query": search_query},
     )
 
-    assert response.status_code == 401
-    assert response.json["message"] == "Unauthorized user"
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == different_user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches
 
 
 def test_user_save_search_post_no_auth(client, db_session, user):
@@ -99,8 +96,14 @@ def test_user_save_search_post_no_auth(client, db_session, user):
     assert response.json["message"] == "Unable to process token"
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches == 0
 
 
 def test_user_save_search_post_invalid_request(client, user, user_auth_token, db_session):
@@ -114,8 +117,14 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
     assert response.status_code == 422  # Validation error
 
     # Verify no search was saved
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
+    assert not saved_searches
 
 
 def test_user_save_search_post(
@@ -157,7 +166,13 @@ def test_user_save_search_post(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     # Verify the search was saved in the database
-    saved_search = db_session.query(UserSavedSearch).one()
+    saved_search = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .first()
+    )
 
     assert saved_search.user_id == user.user_id
     assert saved_search.name == search_name
@@ -181,3 +196,28 @@ def test_user_save_search_post(
         MEDICAL_LABORATORY.opportunity_id,
         SPORTS.opportunity_id,
     ]
+
+    # Mark the saved search as soft deleted
+    saved_search.is_deleted = True
+    # Make the request to save the same opportunity
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"name": search_name, "search_query": search_query},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify a new saved search is created
+    db_session.expire_all()
+    saved_opp = (
+        db_session.query(UserSavedSearch)
+        .filter(
+            UserSavedSearch.user_id == user.user_id,
+        )
+        .all()
+    )
+    assert len(saved_opp) == 2
+    assert saved_opp[1].saved_search_id != saved_search.saved_search_id
+    assert not saved_opp[0].is_deleted

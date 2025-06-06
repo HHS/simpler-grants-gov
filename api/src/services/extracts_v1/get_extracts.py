@@ -13,7 +13,6 @@ from src.pagination.pagination_models import PaginationInfo, PaginationParams, S
 from src.pagination.paginator import Paginator
 from src.search.search_models import DateSearchFilter
 from src.util import datetime_util
-from src.util.file_util import pre_sign_file_location
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +76,5 @@ def get_extracts(
 
     extracts = paginator.page_at(page_offset=list_params.pagination.page_offset)
     pagination_info = PaginationInfo.from_pagination_params(list_params.pagination, paginator)
-
-    for extract in extracts:
-        file_loc = extract.file_path
-        setattr(extract, "download_path", pre_sign_file_location(file_loc))  # noqa: B010
 
     return extracts, pagination_info

@@ -15,7 +15,7 @@ import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const SAVED_OPPS_PAGE_LINK = "/saved-grants";
+const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 
 export const OpportunitySaveUserControl = () => {
   const t = useTranslations("OpportunityListing");
@@ -50,9 +50,9 @@ export const OpportunitySaveUserControl = () => {
         body: JSON.stringify({ opportunityId }),
       });
       setSaved(data.type === "save");
-    } catch (error) {
+    } catch (e) {
       setSavedError(true);
-      console.error(error);
+      console.error(e);
     } finally {
       setshowMessage(true);
       setLoading(false);
@@ -67,27 +67,28 @@ export const OpportunitySaveUserControl = () => {
       .then((data) => {
         data && setSaved(true);
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((e) => {
+        console.error(e);
       })
       .finally(() => {
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opportunityId, user?.token]);
 
   const messageText = saved
     ? savedError
-      ? t("save_message.error_unsave")
-      : t.rich("save_message.save", {
-          linkSavedGrants: (chunks) => (
+      ? t("saveMessage.errorUnsave")
+      : t.rich("saveMessage.save", {
+          linkSavedOpportunities: (chunks) => (
             <Link className="text-black" href={SAVED_OPPS_PAGE_LINK}>
               {chunks}
             </Link>
           ),
         })
     : savedError
-      ? t("save_message.error_save")
-      : t("save_message.unsave");
+      ? t("saveMessage.errorSave")
+      : t("saveMessage.unsave");
 
   const { checkFeatureFlag } = useFeatureFlags();
   if (!checkFeatureFlag("savedOpportunitiesOn")) return null;
@@ -98,14 +99,14 @@ export const OpportunitySaveUserControl = () => {
           buttonClick={userSavedOppCallback}
           messageClick={closeMessage}
           buttonId="opp-save-button"
-          defaultText={t("save_button.save")}
+          defaultText={t("saveButton.save")}
           error={savedError}
           messageText={messageText}
           message={showMessage}
           loading={loading}
-          loadingText={t("save_button.loading")}
+          loadingText={t("saveButton.loading")}
           saved={saved}
-          savedText={t("save_button.saved")}
+          savedText={t("saveButton.saved")}
         />
       ) : (
         <>
@@ -115,15 +116,15 @@ export const OpportunitySaveUserControl = () => {
             className="usa-button usa-button--outline"
           >
             <USWDSIcon name="star_outline" className="button-icon-large" />
-            {t("save_button.save")}
+            {t("saveButton.save")}
           </ModalToggleButton>
           <LoginModal
             modalRef={modalRef as React.RefObject<ModalRef>}
-            helpText={t("save_login_modal.help")}
-            buttonText={t("save_login_modal.button")}
-            closeText={t("save_login_modal.close")}
-            descriptionText={t("save_login_modal.description")}
-            titleText={t("save_login_modal.title")}
+            helpText={t("saveloginModal.help")}
+            buttonText={t("saveloginModal.button")}
+            closeText={t("saveloginModal.close")}
+            descriptionText={t("saveloginModal.description")}
+            titleText={t("saveloginModal.title")}
             modalId="opp-save-login-modal"
           />
         </>

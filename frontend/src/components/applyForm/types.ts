@@ -11,11 +11,12 @@ import { ErrorObject } from "ajv";
 import { HTMLAttributes } from "react";
 
 export type SchemaField = {
-  type: string;
-  title: string;
+  type?: string;
+  title?: string;
   minLength?: number;
   maxLength?: number;
   format?: string;
+  enum?: string[];
   description?: string;
 };
 
@@ -40,11 +41,22 @@ export type FieldErrors = ErrorObject<
   unknown
 >[];
 
+export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+
 export type UiSchemaField = {
   type: "field";
-  definition?: `/properties/${string}`;
-  schema?: SchemaField;
-};
+  widget?: WidgetTypes;
+} & (
+  | {
+      definition: `/properties/${string}`;
+      schema?: undefined;
+    }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: `/properties/${string}`;
+      schema: SchemaField;
+    }
+);
 
 export interface UiSchemaSection {
   type: "section";

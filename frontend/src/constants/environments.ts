@@ -1,5 +1,3 @@
-import { stringToBoolean } from "src/utils/generalUtils";
-
 const {
   NEXT_PUBLIC_BASE_PATH,
   USE_SEARCH_MOCK_DATA,
@@ -18,18 +16,21 @@ const {
   FEATURE_SAVED_OPPORTUNITIES_ON,
   FEATURE_SAVED_SEARCHES_ON,
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  FEATURE_SEARCH_DRAWER_ON,
   AUTH_LOGIN_URL,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
+  NEXT_RUNTIME,
 } = process.env;
 
 export const featureFlags = {
-  opportunityOff: stringToBoolean(FEATURE_OPPORTUNITY_OFF),
-  searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
-  authOn: stringToBoolean(FEATURE_AUTH_ON),
-  savedOpportunitiesOn: stringToBoolean(FEATURE_SAVED_OPPORTUNITIES_ON),
-  savedSearchesOn: stringToBoolean(FEATURE_SAVED_SEARCHES_ON),
-  applyFormPrototypeOff: stringToBoolean(FEATURE_APPLY_FORM_PROTOTYPE_OFF),
+  opportunityOff: FEATURE_OPPORTUNITY_OFF,
+  searchOff: FEATURE_SEARCH_OFF,
+  authOn: FEATURE_AUTH_ON,
+  savedOpportunitiesOn: FEATURE_SAVED_OPPORTUNITIES_ON,
+  savedSearchesOn: FEATURE_SAVED_SEARCHES_ON,
+  applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  searchDrawerOn: FEATURE_SEARCH_DRAWER_ON,
 };
 
 // home for all interpreted server side environment variables
@@ -51,4 +52,5 @@ export const environment: { [key: string]: string } = {
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   API_JWT_PUBLIC_KEY: API_JWT_PUBLIC_KEY || "",
   NEW_RELIC_ENABLED: NEW_RELIC_ENABLED || "false",
+  NEXT_RUNTIME: NEXT_RUNTIME || "",
 };

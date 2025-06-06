@@ -62,6 +62,24 @@ A field can have a `schema` without a `definition`. However, this field will onl
 }
 ```
 
+### Determining field types
+
+The field type for the form is inferred by inspecting the schema for the field. For example, a string field is by default an input field with type "text" while a string with `maxLength` greater than `255` is a text area field.
+
+This can be overridden with the `widget` key in the UI Schema. Available widget types are `Checkbox`, `Radio`, `Select`, `Text`, and `TextArea`. For example:
+
+```
+{
+   {
+        type: "field",
+        definition: "/properties/TestField1",
+        widget: "TextArea"
+    }
+}
+```
+
+will produce a `<textarea/>` field in the form. It is possible to create fields without the correct schema elements, for example a `Select` widget without any `enum` entries will create an empty `<select/>` field.
+
 ### Sections
 
 Sections wrap fields, or other sections:

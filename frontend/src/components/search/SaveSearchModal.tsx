@@ -10,7 +10,6 @@ import {
   Button,
   ErrorMessage,
   FormGroup,
-  Modal,
   ModalFooter,
   ModalHeading,
   ModalRef,
@@ -18,8 +17,9 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
+import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SaveSearchInput({
@@ -34,7 +34,13 @@ function SaveSearchInput({
 
   return (
     <FormGroup error={!!validationError}>
-      <label htmlFor="saved-search-input">{t("inputLabel")}</label>
+      <label htmlFor="saved-search-input">
+        {t.rich("inputLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
+      </label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <TextInput
@@ -47,6 +53,8 @@ function SaveSearchInput({
           defaultValue={""}
           onChange={(e) => updateSavedSearchName(e.target?.value)}
           type="text"
+          required
+          aria-required
         />
       </div>
     </FormGroup>
@@ -66,9 +74,13 @@ function SuccessContent({
   return (
     <>
       <ModalHeading id={`${modalId}-heading`}>{t("successTitle")}</ModalHeading>
-      <div className="usa-prose">
-        <p className="font-sans-2xs margin-y-4">{t("successDescription")}</p>
-      </div>
+      <p>
+        {t.rich("successDescription", {
+          workspaceLink: (chunks) => (
+            <a href="/saved-search-queries">{chunks}</a>
+          ),
+        })}
+      </p>
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}
@@ -88,8 +100,6 @@ function SuccessContent({
 // would cause an error when passing the function prop from parent client component see:
 // https://github.com/vercel/next.js/discussions/46795
 export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
-  const modalId = "save-search";
-
   const t = useTranslations("Search.saveSearch.modal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
@@ -176,48 +186,44 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
           {t("saveText")}
         </ModalToggleButton>
       </div>
-      <Modal
-        ref={modalRef}
-        forceAction
+      <SimplerModal
+        modalRef={modalRef}
         className="text-wrap"
-        aria-labelledby={`${modalId}-heading`}
-        aria-describedby={`${modalId}-description`}
-        id={modalId}
+        modalId={"save-search"}
+        titleText={saved ? undefined : t("title")}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {saved ? (
           <SuccessContent
             modalRef={modalRef}
-            modalId={modalId}
+            modalId={"save-search"}
             onClose={onClose}
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            <div className="usa-prose">
-              <p className="font-sans-2xs margin-y-4">{t("description")}</p>
-            </div>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId="saveSearchApiError"
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
-                <SaveSearchInput
-                  validationError={validationError}
-                  updateSavedSearchName={setSavedSearchName}
-                />
-                <ModalFooter>
+            <p>{t("description")}</p>
+            {apiError && (
+              <SimplerAlert
+                alertClick={() => setApiError(false)}
+                buttonId="saveSearchApiError"
+                messageText={t("apiError")}
+                type="error"
+              />
+            )}
+            <SaveSearchInput
+              validationError={validationError}
+              updateSavedSearchName={setSavedSearchName}
+            />
+            <ModalFooter>
+              {loading ? (
+                <LoadingButton id="save-search-button" message={t("loading")} />
+              ) : (
+                <>
                   <Button
-                    type={"button"}
+                    type="button"
                     onClick={handleSubmit}
                     data-testid="save-search-button"
                   >
@@ -232,12 +238,12 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
                   >
                     {t("cancelText")}
                   </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+                </>
+              )}
+            </ModalFooter>
           </>
         )}
-      </Modal>
+      </SimplerModal>
     </>
   );
 }

@@ -153,7 +153,7 @@ def parse_jwt_for_user(
     token_session: UserTokenSession | None = db_session.execute(
         select(UserTokenSession)
         .where(UserTokenSession.token_id == sub_id)
-        .options(selectinload("*"))
+        .options(selectinload(UserTokenSession.user))
     ).scalar()
 
     # We check both the token expires_at timestamp as well as an
@@ -197,8 +197,8 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
 
         add_extra_data_to_current_request_logs(
             {
-                "auth.user_id": str(user_token_session.user_id),
-                "auth.token_id": str(user_token_session.token_id),
+                "auth.user_id": user_token_session.user_id,
+                "auth.token_id": user_token_session.token_id,
             }
         )
         logger.info("JWT Authentication Successful")

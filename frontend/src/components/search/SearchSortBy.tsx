@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { SortOption } from "src/types/search/searchRequestTypes";
+import { SortOption } from "src/types/search/searchSortTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -21,26 +21,26 @@ export default function SearchSortBy({ queryTerm, sortby }: SearchSortByProps) {
       label: t("sortBy.options.default"),
       value: "relevancy",
     },
-    { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
-    { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
-    { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
-    { label: t("sortBy.options.close_date_asc"), value: "closeDateAsc" },
+    { label: t("sortBy.options.postedDateDesc"), value: "postedDateDesc" },
+    { label: t("sortBy.options.postedDateAsc"), value: "postedDateAsc" },
+    { label: t("sortBy.options.closeDateDesc"), value: "closeDateDesc" },
+    { label: t("sortBy.options.closeDateAsc"), value: "closeDateAsc" },
     {
-      label: t("sortBy.options.opportunity_title_asc"),
+      label: t("sortBy.options.opportunityTitleAsc"),
       value: "opportunityTitleAsc",
     },
     {
-      label: t("sortBy.options.opportunity_title_desc"),
+      label: t("sortBy.options.opportunityTitleDesc"),
       value: "opportunityTitleDesc",
     },
-    { label: t("sortBy.options.agency_asc"), value: "agencyAsc" },
-    { label: t("sortBy.options.agency_desc"), value: "agencyDesc" },
+    { label: t("sortBy.options.agencyAsc"), value: "agencyAsc" },
+    { label: t("sortBy.options.agencyDesc"), value: "agencyDesc" },
     {
-      label: t("sortBy.options.opportunity_number_desc"),
+      label: t("sortBy.options.opportunityNumberDesc"),
       value: "opportunityNumberDesc",
     },
     {
-      label: t("sortBy.options.opportunity_number_asc"),
+      label: t("sortBy.options.opportunityNumberAsc"),
       value: "opportunityNumberAsc",
     },
   ];

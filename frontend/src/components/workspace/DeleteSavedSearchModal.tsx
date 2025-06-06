@@ -1,7 +1,6 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useIsSSR } from "src/hooks/useIsSSR";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -9,15 +8,15 @@ import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Button,
-  Modal,
   ModalFooter,
   ModalHeading,
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import Loading from "src/components/Loading";
+import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
+import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 function SuccessContent({
@@ -51,9 +50,11 @@ function SuccessContent({
 export function DeleteSavedSearchModal({
   savedSearchId,
   deleteText,
+  queryName,
 }: {
   savedSearchId: string;
   deleteText: string;
+  queryName: string;
 }) {
   const modalId = useMemo(
     () => `delete-save-search-${savedSearchId}`,
@@ -63,7 +64,6 @@ export function DeleteSavedSearchModal({
   const t = useTranslations("SavedSearches.deleteModal");
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
-  const isSSR = useIsSSR();
   const { clientFetch } = useClientFetch<Response>(
     "Error deleting saved search",
     { jsonResponse: false, authGatedRequest: true },
@@ -112,20 +112,18 @@ export function DeleteSavedSearchModal({
         className="padding-1 hover:bg-base-lightest"
         unstyled
       >
-        <USWDSIcon name="edit" key="delete-saved-search" />
+        <USWDSIcon name="delete" key="delete-saved-search" />
         {deleteText}
       </ModalToggleButton>
-      <Modal
-        renderToPortal={!isSSR}
-        ref={modalRef}
-        forceAction
+      <SimplerModal
+        modalRef={modalRef}
         className="text-wrap"
-        aria-labelledby={`${modalId}-heading`}
-        aria-describedby={`${modalId}-description`}
-        id={modalId}
+        modalId={"save-search"}
+        titleText={updated ? undefined : t("title")}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        onClose={onClose}
       >
         {updated ? (
           <SuccessContent
@@ -135,21 +133,26 @@ export function DeleteSavedSearchModal({
           />
         ) : (
           <>
-            <ModalHeading id={`${modalId}-heading`}>{t("title")}</ModalHeading>
-            {loading ? (
-              <Loading />
-            ) : (
-              <>
-                {apiError && (
-                  <SimplerAlert
-                    alertClick={() => setApiError(false)}
-                    buttonId={`deleteSavedSearchApiError-${savedSearchId}`}
-                    messageText={t("apiError")}
-                    type="error"
-                  />
-                )}
+            <p className="font-sans-2xs margin-y-4">
+              {t("description")} &quot;{queryName}&quot;?
+            </p>
+            {apiError && (
+              <SimplerAlert
+                alertClick={() => setApiError(false)}
+                buttonId={`deleteSavedSearchApiError-${savedSearchId}`}
+                messageText={t("apiError")}
+                type="error"
+              />
+            )}
 
-                <ModalFooter>
+            <ModalFooter>
+              {loading ? (
+                <LoadingButton
+                  id={`delete-saved-search-button-${savedSearchId}`}
+                  message={t("loading")}
+                />
+              ) : (
+                <>
                   <Button
                     type={"button"}
                     onClick={handleSubmit}
@@ -166,12 +169,12 @@ export function DeleteSavedSearchModal({
                   >
                     {t("cancelText")}
                   </ModalToggleButton>
-                </ModalFooter>
-              </>
-            )}
+                </>
+              )}
+            </ModalFooter>
           </>
         )}
-      </Modal>
+      </SimplerModal>
     </>
   );
 }

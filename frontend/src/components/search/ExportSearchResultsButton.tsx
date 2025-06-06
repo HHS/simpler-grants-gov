@@ -31,6 +31,7 @@ export function ExportSearchResultsButton() {
         );
       })
       .catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (

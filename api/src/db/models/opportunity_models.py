@@ -24,6 +24,7 @@ from src.db.models.lookup_models import (
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
+from src.util.file_util import presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
@@ -451,6 +452,12 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     created_by: Mapped[str | None]
     updated_by: Mapped[str | None]
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
+
+    @property
+    def download_path(self) -> str | None:
+        if self.file_location:
+            return presign_or_s3_cdnify_url(self.file_location)
+        return None
 
 
 class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):

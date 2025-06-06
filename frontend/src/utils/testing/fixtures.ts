@@ -1,13 +1,17 @@
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
+  FilterOption,
+  RelevantAgencyRecord,
+} from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
+import {
   PaginationOrderBy,
   PaginationSortDirection,
   QueryParamData,
+  SearchAPIResponse,
   SearchFetcherActionType,
-  ValidSearchQueryParamData,
 } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: 12345,
@@ -118,3 +122,76 @@ export const fakeOpportunityDocument = {
   updated_at: Date.now().toString(),
   file_description: "a description for your file",
 };
+
+export const initialFilterOptions: FilterOption[] = [
+  {
+    id: "funding-instrument-cooperative_agreement",
+    label: "Cooperative Agreement",
+    value: "cooperative_agreement",
+  },
+  {
+    id: "funding-instrument-grant",
+    label: "Grant",
+    value: "grant",
+  },
+  {
+    id: "funding-instrument-procurement_contract",
+    label: "Procurement Contract ",
+    value: "procurement_contract",
+  },
+  {
+    id: "funding-instrument-other",
+    label: "Other",
+    value: "other",
+  },
+];
+
+export const fakeAttachments = [
+  {
+    created_at: "2007-11-02T15:23:09+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25293/YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_description: "Announcement",
+    file_name: "YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_size_bytes: 111616,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:09+00:00",
+  },
+  {
+    created_at: "2007-11-02T15:23:10+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25294/YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_description: "Mandatory POGI",
+    file_name: "YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_size_bytes: 122880,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:10+00:00",
+  },
+];
+
+export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
+  {
+    agency_code: "DOCNIST",
+    agency_name: "National Institute of Standards and Technology",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKNIST",
+    agency_name: "Mational Institute",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKTRASH",
+    agency_name: "Mational TRASH",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "FAKEORG",
+    agency_name: "Completely fake",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+];

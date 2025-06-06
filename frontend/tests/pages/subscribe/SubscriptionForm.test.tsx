@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
@@ -28,7 +28,9 @@ describe("SubscriptionForm", () => {
     render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
-    button.click();
+    act(() => {
+      button.click();
+    });
 
     expect(mockSubscribeEmail).toHaveBeenCalledWith(
       { errorMessage: "", validationErrors: {} },
@@ -40,6 +42,7 @@ describe("SubscriptionForm", () => {
   // action function is replaced with `javascript:throw new Error('A React form was unexpectedly submitted')`
   // See also https://github.com/facebook/react/blob/f83903bfcc5a61811bd1b69b14f0ebbac4754462/packages/react-dom-bindings/src/client/ReactDOMComponent.js#L468
   // - DWS 2-12-25
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("shows relevant errors returned by action", () => {
     mockSubscribeEmail.mockImplementation(() =>
       Promise.resolve({
@@ -53,7 +56,9 @@ describe("SubscriptionForm", () => {
     const { rerender } = render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
-    button.click();
+    act(() => {
+      button.click();
+    });
 
     rerender(<SubscriptionForm />);
 

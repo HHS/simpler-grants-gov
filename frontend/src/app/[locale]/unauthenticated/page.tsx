@@ -7,8 +7,8 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 export async function generateMetadata() {
   const t = await getTranslations();
   const meta: Metadata = {
-    title: t("ErrorPages.unauthenticated.page_title"),
-    description: t("Index.meta_description"),
+    title: t("ErrorPages.unauthenticated.pageTitle"),
+    description: t("Index.metaDescription"),
   };
   return meta;
 }

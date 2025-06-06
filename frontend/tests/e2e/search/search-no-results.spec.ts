@@ -34,13 +34,12 @@ test.describe("Search page tests", () => {
 
     await page.waitForURL("/search?query=" + searchTerm);
 
-    // eslint-disable-next-line testing-library/prefer-screen-queries
     const resultsHeading = page.getByRole("heading", {
       name: /0 Opportunities/i,
     });
     await expect(resultsHeading).toBeVisible();
 
-    await expect(page.locator("div.usa-prose h2")).toHaveText(
+    await expect(page.locator("div.search-results-content h2")).toHaveText(
       "Your search did not return any results.",
     );
   });

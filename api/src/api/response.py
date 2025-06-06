@@ -17,6 +17,7 @@ class ValidationErrorDetail:
     type: str
     message: str = ""
     field: str | None = None
+    value: Any | None = None
 
 
 class ValidationException(apiflask.exceptions.HTTPError):
@@ -118,6 +119,12 @@ def restructure_error_response(error: apiflask.exceptions.HTTPError) -> Tuple[di
             validation_errors.extend(process_marshmallow_issues(marshmallow_issues))
 
             del body["data"]["headers"]
+
+        marshmallow_issues = error.detail.get("form_and_files")
+        if marshmallow_issues:
+            validation_errors.extend(process_marshmallow_issues(marshmallow_issues))
+
+            del body["data"]["form_and_files"]
 
     # If we called raise_flask_error with a list of validation_issues
     # then they get appended to the error response here

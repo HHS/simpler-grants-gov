@@ -1,21 +1,19 @@
 "use client";
 
-import { camelCase } from "lodash";
+import clsx from "clsx";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 import {
   FilterOption,
   FilterOptionWithChildren,
-  ValidSearchQueryParam,
-} from "src/types/search/searchResponseTypes";
-import { areSetsEqual } from "src/utils/search/searchUtils";
+} from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 import { useContext, useMemo } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
-import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
 import { AnyOptionCheckbox } from "./AnyOptionCheckbox";
 
 export interface AccordionItemProps {
@@ -27,14 +25,31 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface SearchFilterAccordionProps {
+export interface CommonSearchFilterAccordionProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
+}
+
+export interface BasicSearchFilterAccordionProps
+  extends CommonSearchFilterAccordionProps {
+  className?: string;
+  wrapForScroll?: boolean;
+  expanded?: boolean;
+  children: React.ReactNode;
+}
+
+export interface SearchAccordionContentProps
+  extends CommonSearchFilterAccordionProps {
   filterOptions: FilterOption[];
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
   includeAnyOption?: boolean;
+}
+
+export interface SearchFilterAccordionProps
+  extends SearchAccordionContentProps {
+  wrapForScroll?: boolean;
 }
 
 const AccordionTitle = ({
@@ -64,9 +79,9 @@ const AccordionContent = ({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
-}: SearchFilterAccordionProps) => {
+}: SearchAccordionContentProps) => {
   const { queryTerm } = useContext(QueryContext);
-  const { updateQueryParams, searchParams } = useSearchParamUpdater();
+  const { updateQueryParams } = useSearchParamUpdater();
 
   // TODO: implement this within the components where it's used to make it more testable
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
@@ -80,59 +95,15 @@ const AccordionContent = ({
     updateQueryParams(updatedParamValue, queryParamKey, queryTerm);
   };
 
-  // all top level selectable filter options
-  const allOptionValues = useMemo(
-    () =>
-      new Set(
-        filterOptions.reduce((values: string[], option) => {
-          if (option.children) {
-            return values;
-          }
-          values.push(option.value);
-          return values;
-        }, []),
-      ),
-    [filterOptions],
-  );
-
   const isNoneSelected = useMemo(() => query.size === 0, [query]);
-
-  // need to add any existing relevant search params to the passed in set
-  // TODO: split this into two functions and implement within the components where they're used to make it more testable
-  const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
-    if (all && newSelections) {
-      // get existing current selected options for this accordion from url
-      const currentSelections = new Set(
-        searchParams.get(camelCase(title))?.split(","),
-      );
-      // add existing to newly selected section
-      const sectionPlusCurrent = new Set([
-        ...currentSelections,
-        ...newSelections,
-      ]);
-      updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
-    } else {
-      const clearedSelections = newSelections?.size
-        ? newSelections
-        : new Set<string>();
-      updateQueryParams(clearedSelections, queryParamKey, queryTerm);
-    }
-  };
 
   return (
     <>
-      <SearchFilterToggleAll
-        onSelectAll={() => toggleSelectAll(true, allOptionValues)}
-        onClearAll={() => toggleSelectAll(false, defaultEmptySelection)}
-        isAllSelected={areSetsEqual(allOptionValues, query)}
-        isNoneSelected={isNoneSelected}
-      />
-
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
           <li>
             <AnyOptionCheckbox
-              title={title}
+              title={title.toLowerCase()}
               checked={isNoneSelected}
               queryParamKey={queryParamKey}
               defaultEmptySelection={defaultEmptySelection}
@@ -141,18 +112,14 @@ const AccordionContent = ({
         )}
         {filterOptions.map((option) => (
           <li key={option.id}>
-            {/* If we have children, show a "section" dropdown, otherwise show just a checkbox */}
+            {/* If we have children, show a "section", otherwise show just a checkbox */}
             {option.children ? (
               // SearchFilterSection will map over all children of this option
               <SearchFilterSection
                 option={option as FilterOptionWithChildren}
-                value={option.value}
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
-                toggleSelectAll={toggleSelectAll}
                 accordionTitle={title}
-                isSectionAllSelected={areSetsEqual}
-                isSectionNoneSelected={() => query.size === 0}
                 facetCounts={facetCounts}
               />
             ) : (
@@ -171,6 +138,7 @@ const AccordionContent = ({
   );
 };
 
+// current prod implementation, assumes all filters will be checkbox based
 export function SearchFilterAccordion({
   filterOptions,
   title,
@@ -179,6 +147,7 @@ export function SearchFilterAccordion({
   facetCounts,
   defaultEmptySelection,
   includeAnyOption = true,
+  wrapForScroll = false,
 }: SearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -197,6 +166,9 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
+      className: wrapForScroll
+        ? "maxh-mobile-lg overflow-auto position-relative"
+        : "",
     },
   ];
 
@@ -206,6 +178,39 @@ export function SearchFilterAccordion({
       items={accordionOptions}
       multiselectable={true}
       className="margin-top-4"
+    />
+  );
+}
+
+// new implementation, flexible to take whatever content it gets fed, not just checkboxes
+export function BasicSearchFilterAccordion({
+  children,
+  title,
+  queryParamKey,
+  query,
+  className,
+  expanded = false,
+  wrapForScroll = true,
+}: BasicSearchFilterAccordionProps) {
+  const accordionOptions: AccordionItemProps[] = [
+    {
+      title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
+      content: children,
+      expanded,
+      id: `opportunity-filter-${queryParamKey as string}`,
+      headingLevel: "h2",
+      className: wrapForScroll
+        ? "maxh-mobile-lg overflow-auto position-relative"
+        : "",
+    },
+  ];
+
+  return (
+    <Accordion
+      bordered={true}
+      items={accordionOptions}
+      multiselectable={true}
+      className={clsx("margin-top-4", className)}
     />
   );
 }

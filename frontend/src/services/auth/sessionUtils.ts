@@ -2,6 +2,7 @@
 
 import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
+import { clientTokenExpirationInterval } from "src/constants/auth";
 
 import { cookies } from "next/headers";
 
@@ -9,7 +10,8 @@ export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
 // returns a new date 15 minutes from time of function call
-export const newExpirationDate = () => new Date(Date.now() + 15 * 60 * 1000);
+export const newExpirationDate = () =>
+  new Date(Date.now() + clientTokenExpirationInterval);
 
 // extracts payload object from jwt string using passed encrytion key and algo
 export const decrypt = async (
@@ -22,8 +24,8 @@ export const decrypt = async (
       algorithms: [algorithm],
     });
     return payload;
-  } catch (error) {
-    console.error(`Failed to decrypt session cookie with ${algorithm}`, error);
+  } catch (e) {
+    console.error(`Failed to decrypt session cookie with ${algorithm}`, e);
     return null;
   }
 };

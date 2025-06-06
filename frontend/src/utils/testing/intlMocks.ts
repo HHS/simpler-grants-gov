@@ -16,11 +16,6 @@ export const localeParams = new Promise<{ locale: string }>((resolve) => {
 
 // mocking all types of messages, could split by message type in the future
 export const mockMessages = {
-  Research: {
-    impact: {
-      boxes: ["firstKey"],
-    },
-  },
   Roadmap: {
     pageHeaderTitle: "Product roadmap",
     sections: {
@@ -39,6 +34,45 @@ export const mockMessages = {
         title: "process test title",
         sectionSummary: "process test summary",
         contentItems: [{ title: "test title 4", content: "test content 4" }],
+      },
+    },
+  },
+  Homepage: {
+    pageTitle: "Test Title",
+    pageDescription: "Test page description",
+    github_link: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "experimental test title",
+        canDoHeader: "test can do header",
+        canDoSubHeader: "test can do subheader",
+        canDoParagraph: "test can do paragraph",
+        tryLink: "test try link",
+        cantDoHeader: "test cant do header",
+        cantDoParagraph: "test cant do paragraph",
+        iconSections: [
+          {
+            description: "test icon section description",
+            http: "test iconSections http",
+            iconName: "test iconSections iconName",
+            link: "test iconSections link",
+            title: "test iconSections title",
+          },
+        ],
+      },
+      building: {
+        title: "test building title",
+        paragraphs: ["test building paragraph"],
+      },
+      involved: {
+        title: "test title",
+        technicalTitle: "test technical title",
+        technicalDescription: "test technical description",
+        technicalLink: "test technical link",
+        participateTitle: "test participate title",
+        participateDescription: "test participate description",
+        participateLink: "test participate link",
+        discourseLink: "test discourse link",
       },
     },
   },
@@ -105,15 +139,15 @@ export const mockMessages = {
           ],
         ],
       },
-      get_there: {
+      getThere: {
         title: "How we get there",
         contentTitle: "Guided by research, shaped by your experience",
-        paragraph_1:
+        paragraph1:
           "To build a better Grants.gov, we listen to the people who use it. Through ongoing research, user feedback, and real conversations with applicants and grantors, we identify challenges and prioritize opportunities for improvement.",
-        paragraph_2:
+        paragraph2:
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
-        link_text_1: "Read more about the research on our public wiki",
-        link_text_2: "Sign up to participate in future user studies",
+        linkText1: "Read more about the research on our public wiki",
+        linkText2: "Sign up to participate in future user studies",
       },
     },
   },

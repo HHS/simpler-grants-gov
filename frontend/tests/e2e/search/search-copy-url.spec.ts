@@ -1,31 +1,48 @@
 import { expect, test } from "@playwright/test";
+import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
 
-test("should copy search query URL to clipboard", async ({ page }) => {
-  await page.goto("/search");
+import {
+  fillSearchInputAndSubmit,
+  toggleMobileSearchFilters,
+} from "./searchSpecUtil";
 
-  const searchInput = page.getByLabel("Search terms Enter keywords,");
-  await searchInput.fill("education grants");
-  await searchInput.press("Enter");
-
-  await page.waitForURL(/.*search.*query=education\+grants.*/, {
-    timeout: 10000,
-  });
-
-  // Check if we need to show filters
-  const showFiltersButton = page.getByRole("button", { name: "Show Filters" });
-  if (await showFiltersButton.isVisible()) {
-    await showFiltersButton.click();
-    await page.waitForTimeout(500);
+test("should copy search query URL to clipboard", async ({ page }, {
+  project,
+}) => {
+  // clipboard testing does not work in webkit
+  if (project.name.match(/[Ww]ebkit/)) {
+    return;
   }
 
-  // Look for the copy button
+  await page.goto("/search");
+
+  // this is dumb but webkit has an issue with trying to fill in the input too quickly
+  // if the expect in here fails, we give it another shot after 5 seconds
+  // this way we avoid an arbitrary timeout, and do not slow down the other tests
+  try {
+    await fillSearchInputAndSubmit("education grants", page);
+  } catch (e) {
+    await fillSearchInputAndSubmit("education grants", page);
+  }
+
+  if (project.name.match(/[Mm]obile/)) {
+    await toggleMobileSearchFilters(page);
+  }
+
   const copyButton = page.getByText("Copy this search query");
   await copyButton.waitFor({ state: "visible", timeout: 5000 });
+  await waitForURLContainsQueryParam(page, "query");
 
-  // Click the button and verify that the action is successful
   await copyButton.click();
 
-  // Get the current URL to verify it contains the expected query
-  const currentUrl = page.url();
-  expect(currentUrl).toContain("/search?query=education+grants");
+  // const clipboardText = await page.evaluate("navigator.clipboard.readText()");
+  // expect(clipboardText).toContain("/search?query=education+grants");
+
+  const searchInput = page.locator("#query");
+  await searchInput.fill("");
+  await searchInput.press("ControlOrMeta+V");
+
+  await expect(searchInput).toHaveValue(
+    "http://127.0.0.1:3000/search?query=education+grants",
+  );
 });

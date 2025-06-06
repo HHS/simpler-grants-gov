@@ -1,36 +1,13 @@
-import "@testing-library/jest-dom/extend-expect";
-
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { FilterOption } from "src/types/search/searchResponseTypes";
+import { initialFilterOptions } from "src/utils/testing/fixtures";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-
-const initialFilterOptions: FilterOption[] = [
-  {
-    id: "funding-instrument-cooperative_agreement",
-    label: "Cooperative Agreement",
-    value: "cooperative_agreement",
-  },
-  {
-    id: "funding-instrument-grant",
-    label: "Grant",
-    value: "grant",
-  },
-  {
-    id: "funding-instrument-procurement_contract",
-    label: "Procurement Contract ",
-    value: "procurement_contract",
-  },
-  {
-    id: "funding-instrument-other",
-    label: "Other",
-    value: "other",
-  },
-];
+import SearchFilterAccordion, {
+  BasicSearchFilterAccordion,
+} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 const fakeFacetCounts = {
   grant: 1,
@@ -47,10 +24,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-describe("SearchFilterAccordion", () => {
-  const title = "Test Accordion";
-  const queryParamKey = "fundingInstrument";
+const title = "Test Accordion";
+const queryParamKey = "fundingInstrument";
 
+describe("SearchFilterAccordion", () => {
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchFilterAccordion
@@ -80,42 +57,6 @@ describe("SearchFilterAccordion", () => {
     expect(screen.getByText("Grant")).toBeInTheDocument();
     expect(screen.getByText("Procurement Contract")).toBeInTheDocument();
     expect(screen.getByText("Other")).toBeInTheDocument();
-  });
-
-  it("displays select all and clear all correctly", () => {
-    const { rerender } = render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set()}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    const selectAllButton = screen.getByText("Select All");
-    expect(selectAllButton).toBeInTheDocument();
-    expect(selectAllButton).toBeEnabled();
-
-    const clearAllButton = screen.getByText("Clear All");
-    expect(clearAllButton).toBeInTheDocument();
-    expect(clearAllButton).toBeDisabled();
-
-    const updatedQuery = new Set("");
-    updatedQuery.add("Cooperative Agreement");
-    // after clicking one of the boxes, the page should rerender
-    // both select all and clear all should be enabled
-    rerender(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={updatedQuery}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-    expect(selectAllButton).toBeEnabled();
-    expect(clearAllButton).toBeEnabled();
   });
 
   it("has hidden attribute when collapsed", () => {
@@ -173,5 +114,142 @@ describe("SearchFilterAccordion", () => {
       selector: ".usa-tag.usa-tag--big.radius-pill.margin-left-1",
     });
     expect(countSpan).toBeInTheDocument();
+  });
+  it("adds an any option checkbox by default", () => {
+    render(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={fakeFacetCounts}
+      />,
+    );
+    const accordionToggleButton = screen.getByRole("button");
+    fireEvent.click(accordionToggleButton);
+    const anyCheckbox = screen.getByRole("checkbox", {
+      name: "Any test accordion",
+    });
+    expect(anyCheckbox).toBeInTheDocument();
+  });
+  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+    render(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={fakeFacetCounts}
+        wrapForScroll={true}
+      />,
+    );
+
+    const scrollableContainer = screen.getByTestId(
+      `accordionItem_opportunity-filter-${queryParamKey}`,
+    );
+
+    expect(scrollableContainer).toHaveClass("overflow-auto");
+
+    const initialScrollTop = scrollableContainer.scrollTop;
+
+    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
+
+    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
+
+    // Assert that the document body has not scrolled
+    expect(window.scrollY).toBe(0);
+  });
+});
+
+describe("BasicSearchFilterAccordion", () => {
+  it("should not have basic accessibility issues", async () => {
+    const { container } = render(
+      <BasicSearchFilterAccordion
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set()}
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("has hidden attribute when collapsed", () => {
+    render(
+      <BasicSearchFilterAccordion
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
+    );
+
+    const accordionToggleButton = screen.getByTestId(
+      "accordionButton_opportunity-filter-status",
+    );
+    const contentDiv = screen.getByTestId(
+      "accordionItem_opportunity-filter-status",
+    );
+    expect(contentDiv).toHaveAttribute("hidden");
+
+    // Toggle the accordion and the hidden attribute should be removed
+    fireEvent.click(accordionToggleButton);
+    expect(contentDiv).not.toHaveAttribute("hidden");
+  });
+
+  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+    render(
+      <BasicSearchFilterAccordion
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
+    );
+
+    const scrollableContainer = screen.getByTestId(
+      `accordionItem_opportunity-filter-${queryParamKey}`,
+    );
+
+    expect(scrollableContainer).toHaveClass("overflow-auto");
+
+    const initialScrollTop = scrollableContainer.scrollTop;
+
+    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
+
+    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
+
+    // Assert that the document body has not scrolled
+    expect(window.scrollY).toBe(0);
+  });
+
+  it("renders the correct title", () => {
+    render(
+      <BasicSearchFilterAccordion
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+      >
+        <div>some filter content</div>
+      </BasicSearchFilterAccordion>,
+    );
+    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+  });
+  it("displays content", () => {
+    render(
+      <BasicSearchFilterAccordion
+        title={title}
+        queryParamKey={"status"}
+        query={new Set()}
+      >
+        <div data-testid="some content">some filter content</div>
+      </BasicSearchFilterAccordion>,
+    );
+
+    expect(screen.getByTestId("some content")).toBeInTheDocument();
   });
 });
