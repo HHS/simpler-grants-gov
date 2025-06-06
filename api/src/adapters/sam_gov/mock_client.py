@@ -3,13 +3,11 @@
 import json
 import logging
 import os
-from datetime import datetime, timedelta
 
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
-from src.util import datetime_util
 from src.util.file_util import copy_file, open_stream
-
+from src.util import datetime_util
 logger = logging.getLogger(__name__)
 
 # Example SAM.gov extract files
@@ -113,7 +111,7 @@ class MockSamGovClient(BaseSamGovClient):
             file_name=file_name,
             file_size=self.extracts[file_name]["size"],
             content_type=self.extracts[file_name]["content_type"],
-            download_date=datetime.now(),
+            download_date=datetime_util.utc_now(),
         )
 
     def add_mock_extract(

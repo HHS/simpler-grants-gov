@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import date, datetime
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 
 import pytest
 from freezegun import freeze_time
@@ -182,9 +182,7 @@ class TestSamExtractsTask(BaseTestClass):
         # Check monthly
         monthly_filename = f"SAM_FOUO_MONTHLY_V2_{MONTHLY_EXTRACT_DATE.strftime('%Y%m%d')}.ZIP"
         monthly_record = (
-            db_session.query(SamExtractFile)
-            .filter_by(extract_type=SamGovExtractType.MONTHLY)
-            .one()
+            db_session.query(SamExtractFile).filter_by(extract_type=SamGovExtractType.MONTHLY).one()
         )
         assert monthly_record.filename == monthly_filename
 
@@ -192,9 +190,7 @@ class TestSamExtractsTask(BaseTestClass):
         num_days = CURRENT_DATE.day
 
         daily_records = (
-            db_session.query(SamExtractFile)
-            .filter_by(extract_type=SamGovExtractType.DAILY)
-            .count()
+            db_session.query(SamExtractFile).filter_by(extract_type=SamGovExtractType.DAILY).count()
         )
         assert daily_records == num_days
 
