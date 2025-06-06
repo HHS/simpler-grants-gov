@@ -1,5 +1,6 @@
 from typing import Any
 
+
 def build_path_str(path: list[str]) -> str:
     """Build a path string for validation issues
 
@@ -7,6 +8,7 @@ def build_path_str(path: list[str]) -> str:
     the JSON Schema validation
     """
     return ".".join(["$"] + path)
+
 
 def get_nested_value(data: dict, path: list[str]) -> Any:
     """Fetch a value from a dictionary based on the nested path
@@ -34,6 +36,7 @@ def get_nested_value(data: dict, path: list[str]) -> Any:
             return None
 
     return data
+
 
 def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
     """Populate a value in a series of nested dictionaries
@@ -64,7 +67,9 @@ def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
         # we wouldn't want to change "my_field" to a dict and erase a users answer.
         # This is likely a configurational issue we should be alerted to.
         if not isinstance(data, dict):
-            raise ValueError(f"Unable to populate nested value, value in path is not a dictionary: {'.'.join(path)}")
+            raise ValueError(
+                f"Unable to populate nested value, value in path is not a dictionary: {'.'.join(path)}"
+            )
 
     data[path[-1]] = value
 

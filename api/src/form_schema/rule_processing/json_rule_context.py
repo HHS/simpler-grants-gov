@@ -1,8 +1,10 @@
+import copy
+from dataclasses import dataclass
+
 from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import Opportunity
-from dataclasses import dataclass
-import copy
+
 
 @dataclass
 class JsonRuleConfig:
@@ -11,6 +13,7 @@ class JsonRuleConfig:
     do_pre_population: bool = True
     do_post_population: bool = True
     do_field_validation: bool = True
+
 
 class JsonRuleContext:
 
@@ -23,7 +26,6 @@ class JsonRuleContext:
         self.json_data = copy.deepcopy(self.application_form.application_response)
 
         self.validation_issues: list[ValidationErrorDetail] = []
-
 
     @property
     def opportunity(self) -> Opportunity:

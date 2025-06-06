@@ -35,7 +35,7 @@ TABLES_TO_LOAD = [
     "tuser_account_mapper",
     "tsubscription",
     "tsubscription_search",
-    "tsubscription_opportunity"
+    "tsubscription_opportunity",
 ]
 
 

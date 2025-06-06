@@ -1,24 +1,40 @@
-import uuid
-
-from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig
-from src.form_schema.rule_processing.json_rule_processor import process_rule_schema, JsonRuleContext, process_rule_schema_for_context
-from tests.src.db.models.factories import ApplicationFormFactory, OpportunityFactory, CompetitionFactory, ApplicationFactory, CompetitionFormFactory, AgencyFactory, LinkExternalUserFactory, \
-    ApplicationUserFactory, FormFactory
 import freezegun
 
+from src.api.response import ValidationErrorDetail
+from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig
+from src.form_schema.rule_processing.json_rule_processor import (
+    JsonRuleContext,
+    process_rule_schema_for_context,
+)
+from src.validation.validation_constants import ValidationErrorType
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    ApplicationAttachmentFactory,
+    ApplicationFactory,
+    ApplicationFormFactory,
+    ApplicationUserFactory,
+    CompetitionFactory,
+    CompetitionFormFactory,
+    FormFactory,
+    LinkExternalUserFactory,
+    OpportunityFactory,
+)
+
+
 def setup_context(
-        json_data: dict,
-        rule_schema: dict,
-        # These are various params that be set in the application
-        # if the value is None, we'll just leave it to the factory to set.
-        opportunity_number: str | None = None,
-        opportunity_title: str | None = None,
-        agency_name: str | None = None,
-        user_email: str | None = None,
-        # Configurational params
-        do_pre_population: bool = True,
-        do_post_population: bool = True,
-        do_field_validation: bool = True
+    json_data: dict,
+    rule_schema: dict | None,
+    # These are various params that be set in the application
+    # if the value is None, we'll just leave it to the factory to set.
+    opportunity_number: str | None = None,
+    opportunity_title: str | None = None,
+    agency_name: str | None = None,
+    user_email: str | None = None,
+    attachment_ids: list[str] | None = None,
+    # Configurational params
+    do_pre_population: bool = True,
+    do_post_population: bool = True,
+    do_field_validation: bool = True,
 ):
     agency_params = {}
     if agency_name is not None:
@@ -31,20 +47,34 @@ def setup_context(
     if opportunity_title is not None:
         opp_params["opportunity_title"] = opportunity_title
 
-
     opportunity = OpportunityFactory.create(**opp_params)
     competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
     form = FormFactory.create(form_rule_schema=rule_schema)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(competition=competition)
-    application_form = ApplicationFormFactory.create(application=application, competition_form=competition_form, application_response=json_data)
+    application_form = ApplicationFormFactory.create(
+        application=application, competition_form=competition_form, application_response=json_data
+    )
+
+    if attachment_ids is not None:
+        for attachment_id in attachment_ids:
+            ApplicationAttachmentFactory.create(
+                application_attachment_id=attachment_id, application=application
+            )
 
     if user_email is not None:
         link_user = LinkExternalUserFactory.create(email=user_email)
         ApplicationUserFactory.create(application=application, user=link_user.user)
 
-    return JsonRuleContext(application_form, JsonRuleConfig(do_pre_population=do_pre_population, do_post_population=do_post_population, do_field_validation=do_field_validation))
+    return JsonRuleContext(
+        application_form,
+        JsonRuleConfig(
+            do_pre_population=do_pre_population,
+            do_post_population=do_post_population,
+            do_field_validation=do_field_validation,
+        ),
+    )
 
 
 @freezegun.freeze_time("2025-01-15 12:00:00", tz_offset=0)
@@ -52,43 +82,50 @@ def test_process_rule_schema(enable_factory_create):
 
     rule_schema = {
         "opp_number_field": {
-            "gg_pre_population": {
-                "rule": "opportunity_number"
-            },
+            "gg_pre_population": {"rule": "opportunity_number"},
         },
         "nested": {
-            "opp_title_field": {
-                "gg_pre_population": {
-                    "rule": "opportunity_title"
-                }
-            },
+            "opp_title_field": {"gg_pre_population": {"rule": "opportunity_title"}},
+            "missing_attachment_id_field": {"gg_validation": {"rule": "attachment"}},
             "inner_nested": {
-                "agency_name_field": {
-                    "gg_pre_population": {
-                        "rule": "agency_name"
-                    }
-                },
-                "date_field": {
-                    "gg_post_population": {
-                        "rule": "current_date"
-                    }
-                }
-            }
+                "agency_name_field": {"gg_pre_population": {"rule": "agency_name"}},
+                "date_field": {"gg_post_population": {"rule": "current_date"}},
+            },
         },
-        "signature_field": {
-            "gg_post_population": {
-                "rule": "signature"
-            }
-        }
+        "signature_field": {"gg_post_population": {"rule": "signature"}},
+        "attachment_id_field": {"gg_validation": {"rule": "attachment"}},
     }
 
-
-    context = setup_context({"existing_field": "bob", "opp_number_field": "something else", "nested": {"another_nested_field": "X"}}, rule_schema=rule_schema, opportunity_number="ABC-XYZ-123", opportunity_title="My opportunity title", agency_name="My example agency", user_email="mymail@example.com")
+    context = setup_context(
+        {
+            "existing_field": "bob",
+            "opp_number_field": "something else",
+            "nested": {
+                "another_nested_field": "X",
+                "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+            },
+            "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+        },
+        rule_schema=rule_schema,
+        opportunity_number="ABC-XYZ-123",
+        opportunity_title="My opportunity title",
+        agency_name="My example agency",
+        user_email="mymail@example.com",
+        attachment_ids=["d97253ea-d512-4aa8-b3dc-bf75834e1e90"],
+    )
 
     process_rule_schema_for_context(context)
 
     # Verify that the actual DB object is not modified
-    assert context.application_form.application_response == {"existing_field": "bob", "opp_number_field": "something else", "nested": {"another_nested_field": "X"}}
+    assert context.application_form.application_response == {
+        "existing_field": "bob",
+        "opp_number_field": "something else",
+        "nested": {
+            "another_nested_field": "X",
+            "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+        },
+        "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+    }
     # The json data is modified with the new fields populated
     assert context.json_data == {
         "existing_field": "bob",
@@ -96,23 +133,41 @@ def test_process_rule_schema(enable_factory_create):
         "nested": {
             "opp_title_field": "My opportunity title",
             "another_nested_field": "X",
-            "inner_nested": {
-                "agency_name_field": "My example agency",
-                "date_field": "2025-01-15"
-            }
+            "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+            "inner_nested": {"agency_name_field": "My example agency", "date_field": "2025-01-15"},
         },
-        "signature_field": "mymail@example.com"
+        "signature_field": "mymail@example.com",
+        "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
     }
 
-    print("---")
-    print(context.application_form.application_response)
-    print(context.json_data)
+    assert len(context.validation_issues) == 1
+    assert context.validation_issues[0] == ValidationErrorDetail(
+        type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+        message="Field references application_attachment_id not on the application",
+        field="$.nested.missing_attachment_id_field",
+        value="2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+    )
 
-def test_process_null_rule_schema():
+
+def test_process_null_rule_schema(enable_factory_create):
+    # Null rule schema means nothing will get processed
+    context = setup_context({}, None)
+    process_rule_schema_for_context(context)
+
+    assert context.application_form.application_response == {}
+    assert context.json_data == {}
+    assert context.validation_issues == []
+
+
+def test_configurations():
+    # TODO
     pass
+
 
 def test_bad_rule_schema():
+    # TODO
     pass
 
-# TODO - more tests (validation, other scenarios?)
+
+# TODO - more tests (other scenarios?)
 # TODO - logging
