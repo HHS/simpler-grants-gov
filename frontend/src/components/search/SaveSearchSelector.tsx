@@ -64,11 +64,12 @@ export const SaveSearchSelector = ({
         setLoading(false);
         setSavedSearches(savedSearches);
       })
-      .catch((e) => {
+      .catch((error) => {
         setLoading(false);
-        console.error("Error fetching saved searches", e);
-        setApiError(e as Error);
+        console.error("Error fetching saved searches", error);
+        setApiError(error as Error);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.token, setSavedSearches]);
 
   // note that selected value will be the search id since select values

@@ -21,6 +21,15 @@ jest.mock("src/utils/generalUtils", () => ({
     mockQueryParamsToQueryString(...args) as unknown,
 }));
 
+// this is dumb - the original function only works in jest node envs
+// and there is a reference to `document` somewhere in the import tree here so
+// switching over doesn't work - reimplemented without `size` reference,
+// since that's the only part that's broken in JSdom
+jest.mock("src/utils/search/searchUtils", () => ({
+  paramsToFormattedQuery: (params: URLSearchParams) =>
+    `?${decodeURIComponent(params.toString())}`,
+}));
+
 describe("useSearchParamUpdater", () => {
   afterEach(() => {
     mockSearchParams = new URLSearchParams();
@@ -91,5 +100,20 @@ describe("useSearchParamUpdater", () => {
         scroll: false,
       });
     });
+  });
+});
+
+describe("clearQueryParams", () => {
+  it("clears all query params if no argument is passed", () => {
+    mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
+    const { result } = renderHook(() => useSearchParamUpdater());
+    result.current.clearQueryParams();
+    expect(routerPush).toHaveBeenCalledWith("/test?");
+  });
+  it("clears selected query params based on passed argument", () => {
+    mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
+    const { result } = renderHook(() => useSearchParamUpdater());
+    result.current.clearQueryParams(["removeMe"]);
+    expect(routerPush).toHaveBeenCalledWith("/test?keepMe=cool");
   });
 });

@@ -1,5 +1,7 @@
-import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import {
+  QueryParamData,
+  SearchAPIResponse,
+} from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
 
@@ -25,7 +27,7 @@ const SearchResultsSkeleton = ({
   return (
     <>
       <SearchResultsHeader sortby={sortby} />
-      <div className="usa-prose">
+      <div className="search-results-content">
         <div className="tablet-lg:display-flex">
           <SearchPagination loading={true} page={page} query={query} />
         </div>
@@ -81,7 +83,7 @@ const ResolvedSearchResults = async ({
         sortby={sortby}
         totalFetchedResults={totalResults}
       />
-      <div className="usa-prose">
+      <div className="search-results-content">
         <div className="tablet-lg:display-flex">
           <ExportSearchResultsButton />
           <SearchPagination
@@ -106,16 +108,14 @@ const ResolvedSearchResults = async ({
 
 export default function SearchResults({
   searchParams,
-  query,
   loadingMessage,
   searchResultsPromise,
 }: {
   searchParams: QueryParamData;
-  query?: string | null;
   loadingMessage: string;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
-  const { page, sortby } = searchParams;
+  const { page, sortby, query } = searchParams;
   const suspenseKey = Object.entries(searchParams).join(",");
 
   return (

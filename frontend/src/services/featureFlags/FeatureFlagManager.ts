@@ -6,8 +6,9 @@ import {
   defaultFeatureFlags,
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
-import { featureFlags } from "src/constants/environments";
+import { environment, featureFlags } from "src/constants/environments";
 import {
+  assignBaseFlags,
   FEATURE_FLAGS_KEY,
   getFeatureFlagsFromCookie,
   isValidFeatureFlag,
@@ -38,7 +39,7 @@ export class FeatureFlagsManager {
   // this supports easier integration of the class on the client side, as server side flags can be passed down
   private _envVarFlags;
 
-  constructor(envVarFlags: FeatureFlags) {
+  constructor(envVarFlags: OptionalStringDict) {
     this._envVarFlags = envVarFlags;
   }
 
@@ -46,7 +47,7 @@ export class FeatureFlagsManager {
     return { ...this._defaultFeatureFlags };
   }
 
-  private get featureFlagsFromEnvironment(): FeatureFlags {
+  private get featureFlagsFromEnvironment(): OptionalStringDict {
     return { ...this._envVarFlags };
   }
 
@@ -60,10 +61,10 @@ export class FeatureFlagsManager {
 
   */
   get featureFlags(): FeatureFlags {
-    return {
-      ...this.defaultFeatureFlags,
-      ...this.featureFlagsFromEnvironment,
-    };
+    return assignBaseFlags(
+      this.defaultFeatureFlags,
+      this.featureFlagsFromEnvironment,
+    );
   }
 
   /**
@@ -133,11 +134,14 @@ export class FeatureFlagsManager {
     // beyond default values. Unfortunately, this breaks the implementation of the feature
     // flag admin view, which depends on reading all flags from cookies, so the logic has beeen removed
 
-    const featureFlags = {
-      ...this.featureFlags,
-      ...getFeatureFlagsFromCookie(request.cookies),
-      ...featureFlagsFromQuery,
-    };
+    const featureFlags =
+      environment.ENVIRONMENT === "prod"
+        ? { ...this.featureFlags }
+        : {
+            ...this.featureFlags,
+            ...getFeatureFlagsFromCookie(request.cookies),
+            ...featureFlagsFromQuery,
+          };
 
     setCookie(JSON.stringify(featureFlags), response.cookies);
 

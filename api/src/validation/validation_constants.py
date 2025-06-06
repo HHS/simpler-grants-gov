@@ -30,3 +30,14 @@ class ValidationErrorType(StrEnum):
     MIN_VALUE = "min_value"
     MAX_VALUE = "max_value"
     MIN_OR_MAX_VALUE = "min_or_max_value"
+
+    NOT_IN_PROGRESS = "not_in_progress"
+
+    # Competition window validation error types
+    COMPETITION_NOT_OPEN = "competition_not_open"
+
+    # Application access validation error type
+    UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
+    MISSING_REQUIRED_FORM = "missing_required_form"
+    APPLICATION_FORM_VALIDATION = "application_form_validation"
+    MISSING_APPLICATION_FORM = "missing_application_form"

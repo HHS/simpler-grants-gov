@@ -4,23 +4,22 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import Application, ApplicationForm
-from src.form_schema.jsonschema_validator import (
-    ValidationErrorDetail,
-    validate_json_schema_for_form,
-)
+from src.db.models.competition_models import ApplicationForm
+from src.db.models.user_models import User
+from src.form_schema.jsonschema_validator import ValidationErrorDetail
+from src.services.applications.application_validation import validate_application_form
+from src.services.applications.auth_utils import check_user_application_access
+from src.services.applications.get_application import get_application
 
 
 def get_application_form(
-    db_session: db.Session, application_id: UUID, app_form_id: UUID
+    db_session: db.Session, application_id: UUID, app_form_id: UUID, user: User
 ) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
-    # Check if application exists
-    application = db_session.execute(
-        select(Application).where(Application.application_id == application_id)
-    ).scalar_one_or_none()
-
-    if not application:
-        raise_flask_error(404, f"Application with ID {application_id} not found")
+    """
+    Get an application form by ID, checking if the user has access to it.
+    """
+    # Get the application
+    application = get_application(db_session, application_id, user)
 
     # Get the application form
     application_form = db_session.execute(
@@ -33,8 +32,10 @@ def get_application_form(
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
-    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_form.application_response, application_form.form
-    )
+    # Check if the user has access to the application
+    check_user_application_access(application, user)
+
+    # Get a list of validation warnings (also sets form status)
+    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
 
     return application_form, warnings

@@ -15,6 +15,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Matt Dragon
 * Michael Chouinard
 * Mike Huneke
+* My Duong
 
 ## Content and Design
 
@@ -39,5 +40,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 
 * Margaret Spring
 * Max Kramer
+* Chris Weekley
+* Chris Kuryak
+* Eric Serrato
 
 

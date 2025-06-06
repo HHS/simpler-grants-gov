@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { fakeSearchAPIResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
@@ -67,7 +68,10 @@ const fakeOptions = [
 describe("AgencyFilterAccordion", () => {
   it("is accessible", async () => {
     const component = await AgencyFilterAccordion({
-      agencyOptionsPromise: Promise.resolve(fakeOptions),
+      agencyOptionsPromise: Promise.resolve([
+        fakeOptions,
+        fakeSearchAPIResponse,
+      ]),
       query: new Set(),
     });
     const { container } = render(component);
@@ -78,7 +82,10 @@ describe("AgencyFilterAccordion", () => {
   // just want to confirm it renders
   it("renders async component (asserting on mock suspended state)", async () => {
     const component = await AgencyFilterAccordion({
-      agencyOptionsPromise: Promise.resolve(fakeOptions),
+      agencyOptionsPromise: Promise.resolve([
+        fakeOptions,
+        fakeSearchAPIResponse,
+      ]),
       query: new Set(),
     });
     render(component);

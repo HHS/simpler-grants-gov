@@ -252,8 +252,28 @@ class Enum(MixinField):
     ) -> typing.Any:
         val = self.field._deserialize(value, attr, data, **kwargs)
 
+        # If the value isn't a string, we know
+        # it can't be a StrEnum
+        if not isinstance(val, str):
+            raise self.make_error("unknown", choices=self.choices_text)
+
         enum_type = self.enum_mapping.get(val)
         if not enum_type:
             raise self.make_error("unknown", choices=self.choices_text)
 
         return enum_type(val)
+
+
+class File(original_fields.File, MixinField):
+    """A binary file for uploading schemas
+
+    NOTE: This only works on requests, and the schema must be used
+          in a "form" or "form_and_fields" section, it does not work
+          as part of a JSON body.
+
+          See: https://apiflask.com/request/#file-uploading
+    """
+
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
+    }

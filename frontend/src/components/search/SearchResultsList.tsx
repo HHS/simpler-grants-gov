@@ -1,7 +1,7 @@
 "use server";
 
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { getTranslations } from "next-intl/server";
 
@@ -24,7 +24,7 @@ export default async function SearchResultsList({
     (opportunity) => opportunity.opportunity_id,
   );
   if (searchResults.status_code !== 200) {
-    return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
+    return <ServerErrorAlert callToAction={t("genericErrorCta")} />;
   }
 
   if (searchResults.data.length === 0) {

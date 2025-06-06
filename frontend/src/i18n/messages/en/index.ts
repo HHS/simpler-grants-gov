@@ -1,4 +1,60 @@
 export const messages = {
+  Homepage: {
+    pageTitle: "Let's build a simpler Grants.gov together",
+    pageDescription:
+      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+    githubLink: "Follow on GitHub",
+    sections: {
+      experimental: {
+        title: "Test out our experimental features",
+        canDoHeader: "Tell us what's working (and what's not)",
+        canDoSubHeader: "What you can do now",
+        canDoParagraph:
+          "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
+        tryLink: "Try the new simpler search",
+        cantDoHeader: "What you can't do quite yet",
+        cantDoParagraph:
+          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+        iconSections: [
+          {
+            description:
+              "We're excited to hear from you to learn how we can improve.",
+            http: "mailto:simpler@grants.gov",
+            iconName: "build",
+            link: "Contact us at simpler@grants.gov",
+            title: "Send us your feedback and suggestions.",
+          },
+          {
+            description:
+              "Our newsletter delivers the latest news straight to your inbox.",
+            http: "/subscribe",
+            iconName: "mail",
+            link: "Subscribe to our newsletter",
+            title: "Be the first to hear about new features.",
+          },
+        ],
+      },
+      building: {
+        title: "Building <span>with</span> you, not <span>for</span> you",
+        paragraphs: [
+          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
+        ],
+      },
+      involved: {
+        title: "More ways to get involved",
+        technicalTitle: "Contribute your technical expertise",
+        technicalDescription:
+          "We're always excited to welcome new open source developers to our community.",
+        technicalLink: "Learn how to contribute code",
+        participateTitle: "Participate in user research",
+        participateDescription:
+          "Be a part of the design process by taking part in usability tests and interviews.",
+        participateLink: "Sign up to participate in future studies",
+        discourseLink: "Chat on the Discourse forum",
+      },
+    },
+  },
   Events: {
     pageTitle: "Events | Simpler.Grants.gov",
     pageDescription:
@@ -28,28 +84,28 @@ export const messages = {
       link: "Read about the Spring 2025 Coding Challenge",
     },
   },
-  Beta_alert: {
-    alert_title:
+  BetaAlert: {
+    alertTitle:
       "This site is a work in progress, with new features and updates based on your feedback.",
     alert:
       "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
   },
   OpportunityListing: {
-    page_title: "Opportunity Listing",
-    meta_description:
+    pageTitle: "Opportunity Listing",
+    metaDescription:
       "Read detailed information about this funding opportunity.",
-    save_button: {
+    saveButton: {
       save: "Save",
       saved: "Saved",
       loading: "Updating",
     },
-    save_message: {
-      save: "This opportunity was saved to <linkSavedGrants>Saved grants</linkSavedGrants>.",
+    saveMessage: {
+      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
       unsave: "This opportunity was unsaved.",
-      error_save: "Error saving. Please try again.",
-      error_unsave: "Error undoing save. Please try again.",
+      errorSave: "Error saving. Please try again.",
+      errorUnsave: "Error undoing save. Please try again.",
     },
-    save_login_modal: {
+    saveloginModal: {
       title: "Sign in to save this opportunity",
       help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
       description:
@@ -59,128 +115,105 @@ export const messages = {
     },
     intro: {
       agency: "Agency: ",
-      assistance_listings: "Assistance Listings: ",
-      last_updated: "Last Updated: ",
+      assistanceListings: "Assistance Listings: ",
+      lastUpdated: "Last Updated: ",
     },
     description: {
       title: "Description",
       eligibility: "Eligibility",
-      eligible_applicants: "Eligible applicants",
-      additional_info: "Additional information",
-      contact_info: "Grantor contact information",
-      contact_description: "Description",
+      eligibleApplicants: "Eligible applicants",
+      additionalInfo: "Additional information",
+      contactInfo: "Grantor contact information",
+      contactDescription: "Description",
       email: "Email",
-      show_description: "Show full description",
-      hide_summary_description: "Hide full description",
-      jump_to_documents: "Jump to all documents",
-      zip_download: "Download all",
+      showDescription: "Show full description",
+      hideSummaryDescription: "Hide full description",
+      jumpToDocuments: "Jump to all documents",
+      zipDownload: "Download all",
     },
     documents: {
       title: "Documents",
-      table_col_description: "Description",
-      table_col_file_name: "File name",
-      table_col_last_updated: "Last updated",
+      tableColDescription: "Description",
+      tableColFileName: "File name",
+      tableColLastUpdated: "Last updated",
       type: {
-        funding_details: "Funding Details",
+        fundingDetails: "Funding Details",
         other: "Other",
       },
       noDocuments: "No documents are currently available here",
     },
-    award_info: {
+    awardInfo: {
       yes: "Yes",
       no: "No",
-      program_funding: "Program Funding",
-      expected_awards: "Expected awards",
-      award_ceiling: "Award Ceiling",
-      award_floor: "Award Floor",
-      opportunity_number: "Funding opportunity number",
-      cost_sharing: "Cost sharing or matching requirement",
-      funding_instrument: "Funding instrument type",
-      opportunity_category: "Opportunity Category",
-      opportunity_category_explanation: "Opportunity Category Explanation",
-      funding_activity: "Category of Funding Activity",
-      category_explanation: "Category Explanation",
+      programFunding: "Program Funding",
+      expectedAwards: "Expected awards",
+      awardCeiling: "Award Ceiling",
+      awardFloor: "Award Floor",
+      opportunityNumber: "Funding opportunity number",
+      costSharing: "Cost sharing or matching requirement",
+      fundingInstrument: "Funding instrument type",
+      opportunityCategory: "Opportunity Category",
+      opportunityCategoryExplanation: "Opportunity Category Explanation",
+      fundingActivity: "Category of Funding Activity",
+      categoryExplanation: "Category Explanation",
     },
     history: {
       history: "History",
-      posted_date: "Posted date",
-      closing_date: "Original closing date for applications",
-      archive_date: "Archive date",
-      forecasted_award_date: "Estimated Award Date",
-      forecasted_post_date: "Estimated Post Date",
-      forecasted_close_date: "Estimated Application Due Date",
-      forecasted_close_date_description: "Estimated Due Date Description",
-      forecasted_close_date_description_not_available: "Not available",
-      forecasted_project_start_date: "Estimated Project Start Date",
-      forecasted_last_updated: "Last Updated Date",
-      fiscal_year: "Fiscal Year",
+      postedDate: "Posted date",
+      closingDate: "Original closing date for applications",
+      archiveDate: "Archive date",
+      forecastedAwardDate: "Estimated Award Date",
+      forecastedPostDate: "Estimated Post Date",
+      forecastedCloseDate: "Estimated Application Due Date",
+      forecastedCloseDateDescription: "Estimated Due Date Description",
+      forecastedCloseDateDescriptionNotAvailable: "Not available",
+      forecastedProjectStartDate: "Estimated Project Start Date",
+      forecastedLastUpdated: "Last Updated Date",
+      fiscalYear: "Fiscal Year",
 
       version: "Version",
     },
     link: {
       title: "Link to additional information",
     },
-    status_widget: {
+    statusWidget: {
       archived: "Archived: ",
       closed: "Closed: ",
       closing: "Closing: ",
       forecasted: "Forecasted",
     },
     cta: {
-      apply_title: "Application process",
-      apply_content:
+      applyTitle: "Application process",
+      applyContent:
         "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
-      button_content: "View on Grants.gov",
+      buttonContent: "View on Grants.gov",
     },
-    generic_error_cta: "Please try refreshing the page.",
+    genericErrorCta: "Please try refreshing the page.",
+  },
+  Application: {
+    opportunityOverview: {
+      opportunity: "Opportunity",
+      name: "Name",
+      number: "Number",
+      posted: "Posted",
+      agency: "Agency",
+      assistanceListings: "Assistance listings",
+      costSharingOrMatchingRequirement: "Cost Sharing or matching requirement",
+      applicationInstruction: "Application instructions",
+      grantorContactInfomation: "Grantor contact information",
+      award: "Award",
+      programFunding: "Program funding",
+      expectedAward: "Expected award",
+      awardMaximum: "Award maximum",
+      awardMinimum: "Award minimum",
+      estimatedAwardDate: "Estimated award date",
+      estimatedProjectStartDate: "Estimated project start date",
+    },
   },
   Index: {
-    page_title: "Simpler.Grants.gov",
-    meta_description:
+    pageTitle: "Simpler.Grants.gov",
+    metaDescription:
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
-    goal: {
-      paragraph_1:
-        "Grants.gov should be extremely simple and easy to use. Our mission is to improve the efficiency of federal grant processes and continuously improve the experience for grant seekers, applicants, and agencies.",
-      title_2: "Grant seekers & applicants",
-      paragraph_2:
-        "We’re improving the way you discover relevant opportunities, making it easier to search for, find, and apply for the funding you need.",
-      title_3: "Federal grantmaking agencies",
-      paragraph_3:
-        "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
-      cta: "Subscribe for project updates",
-    },
-    process_and_research: {
-      title_1: "The process",
-      title_2: "The research",
-      paragraph_1:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source, and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works, what can be improved, and what should happen next.",
-      paragraph_2:
-        "We conduct extensive research to gather insights from applicants, potential applicants, and grantmakers. You can sign up to participate and help inform and inspire new features as we build a simpler Grants.gov together.",
-      cta_1: "Learn about our progress",
-      cta_2: "Learn more about our research",
-    },
-    fo_title: "Improvements to funding opportunity announcements",
-    fo_paragraph_1:
-      "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
-    fo_paragraph_2:
-      "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
-    fo_title_2: "View our grant announcement prototypes",
-    fo_paragraph_3:
-      "We recently simplified the language of four grant announcements and applied visual and user‑centered design principles to increase their readability and usability.",
-    acl_prototype: "Link to ACL Notice of Funding Opportunity example pdf",
-    acf_prototype: "Link to ACF Notice of Funding Opportunity example pdf",
-    cdc_prototype: "Link to CDC Notice of Funding Opportunity example pdf",
-    samhsa_prototype:
-      "Link to SAMHSA Notice of Funding Opportunity example pdf",
-    fo_title_3: "We want to hear from you!",
-    fo_paragraph_4:
-      "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
-    fo_title_4:
-      "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
-    fo_paragraph_5:
-      "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
-    wtgi_paragraph_2:
-      "<strong>Questions?</strong> Contact us at <email>{{email}}</email>.",
   },
   Vision: {
     pageTitle: "Vision | Simpler.Grants.gov",
@@ -245,165 +278,25 @@ export const messages = {
           ],
         ],
       },
-      get_there: {
+      getThere: {
         title: "How we get there",
         contentTitle: "Guided by research, shaped by your experience",
-        paragraph_1:
+        paragraph1:
           "To build a better Grants.gov, we listen to the people who use it. Through ongoing research, user feedback, and real conversations with applicants and grantors, we identify challenges and prioritize opportunities for improvement.",
-        paragraph_2:
+        paragraph2:
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
-        link_text_1: "Read more about the research on our public wiki",
-        link_text_2: "Sign up to participate in future user studies",
+        linkText1: "Read more about the research on our public wiki",
+        linkText2: "Sign up to participate in future user studies",
       },
-    },
-  },
-  Research: {
-    page_title: "Research | Simpler.Grants.gov",
-    intro: {
-      title: "Our existing research",
-      content:
-        "We conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
-    },
-    methodology: {
-      title: "The methodology",
-      paragraph_1:
-        "<p>Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. We recruited equitably to ensure a diverse pool of participants.</p><p>The quantity of participants was well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants.</p><p>With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.</p>",
-      title_2: "Research objectives:",
-      paragraph_2:
-        "<ul><li>Examine existing user journeys and behaviors, identifying how Grants.gov fits into their overall approach</li><li>Learn from user experiences, roles, challenges</li><li>Identify barriers and how a simpler Grants.gov can create a more intuitive user experience, especially for new users</li></ul>",
-      title_3: "Want to participate in user research?",
-      cta: "Sign up to join a usability study",
-    },
-    archetypes: {
-      title: "Applicant archetypes",
-      paragraph_1:
-        "Archetypes are compelling summaries that highlight the types of applicants that Grants.gov serves. They’re informed by and summarize user research data, and represent user behaviors, attitudes, motivations, pain points, and goals. We’ll use these archetypes to influence our design decisions, guide the product’s direction, and keep our work human-centered. ",
-      novice: {
-        title: "The Novice",
-        paragraph_1:
-          "Applicants lacking familiarity with the grant application process, including first-time or infrequent applicants and those who never apply",
-        paragraph_2:
-          "Novices are often new to the grants application process. They face a steep learning curve to find and apply for funding opportunities. Solving their needs will generate a more inclusive Grants.gov experience.",
-      },
-      collaborator: {
-        title: "The Collaborator",
-        paragraph_1:
-          "Applicants who've applied before, working with colleagues or partner organizations to increase their chances of success",
-        paragraph_2:
-          "Collaborators have more familiarity with Grants.gov. But they face challenges with coordinating application materials, and often resorting to tools and resources outside of Grants.gov.",
-      },
-      maestro: {
-        title: "The Maestro",
-        paragraph_1:
-          "Frequent applicants familiar with Grants.gov, who are often directly responsible for managing multiple applications at once",
-        paragraph_2:
-          "Maestros have an established approach to applying, which may include software and tools outside of Grants.gov. Their primary concerns are rooted in determining grant feasibility and staying ahead of deadlines.",
-      },
-      supervisor: {
-        title: "The Supervisor",
-        paragraph_1:
-          "Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros.",
-        paragraph_2:
-          "Supervisors are responsible for oversight, approvals, final submissions, and keeping registrations up to date. Their time is limited, as they're often busy with the organization's other needs.",
-      },
-    },
-    themes: {
-      title: "General themes",
-      paragraph_1:
-        "The existing Grants.gov website works best for those who use it regularly. Larger organizations and teams of Collaborators and Maestros are typically more familiar with the ins and outs of the system. To create a simpler Grants.gov with an intuitive user experience that addresses the needs of all archetypes, four themes were defined:",
-      title_2: "Frictionless functionality ",
-      paragraph_2:
-        "Reduce the burden on applicants and grantmakers, from both a process and systems perspective, by addressing the pain points that negatively affect their experience",
-      title_3: "Sophisticated self-direction",
-      paragraph_3:
-        "Meet users where they are during crucial moments, by providing a guided journey through opt-in contextual support that reduces their need to find help outside the system",
-      title_4: "Demystify the grants process",
-      paragraph_4:
-        "Ensure that all users have the same easy access to instructional and educational information that empowers them to have a smoother, informed, and confident user experience",
-      title_5: "Create an ownable identity",
-      paragraph_5:
-        "Create a presence that reflections our mission and supports our users through visual brand, content strategy, and user interface design systems",
-    },
-    impact: {
-      title: "Where can we have the most impact?",
-      paragraph_1:
-        "The most burden is on the Novice to become an expert on the grants process and system. In order to execute our mission, there is a need to improve awareness, access, and choice. This requires reaching out to those who are unfamiliar with the grant application process.",
-      paragraph_2: "There are many common barriers that users face:",
-      title_2:
-        "Are there challenges you’ve experienced that aren’t captured here?",
-      paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates</subscribe></strong> to be notified of upcoming user research efforts.",
-      boxes: [
-        {
-          title: "Digital connectivity",
-          content:
-            "Depending on availability and geography, a stable internet connection is not a guarantee to support a digital-only experience.",
-        },
-        {
-          title: "Organization size",
-          content:
-            "Not all organizations have dedicated resources for seeking grant funding. Many are 1-person shops who are trying to do it all.",
-        },
-        {
-          title: "Overworked",
-          content:
-            "New organizations are often too burdened with internal paperwork and infrastructure to support external funding and reporting.",
-        },
-        {
-          title: "Expertise",
-          content:
-            "Small organizations face higher turnover, and alumni often take their institutional knowledge and expertise with them when they leave.",
-        },
-        {
-          title: "Cognitive load",
-          content:
-            "Applicants often apply for funding through several agencies, requiring they learn multiple processes and satisfy varying requirements.",
-        },
-        {
-          title: "Language",
-          content:
-            "Applicants are faced with a lot of jargon without context or definitions, which is especially difficult when English is not their native language.",
-        },
-        {
-          title: "Education",
-          content:
-            "It often requires a high level of education to comprehend the complexity and language of funding opportunity announcements.",
-        },
-        {
-          title: "Lost at the start",
-          content:
-            "Novices don’t see a clear call-to-action for getting started, and they have trouble finding the one-on-one help at the beginning of the process.",
-        },
-        {
-          title: "Overwhelmed by search",
-          content:
-            "New applicants misuse the keyword search function and have trouble understanding the acronyms and terminology.",
-        },
-        {
-          title: "Confused by announcements",
-          content:
-            "Novices have difficulty determining their eligibility and understanding the details of the funding opportunity announcement.",
-        },
-        {
-          title: "Time",
-          content:
-            'Most individuals wear a lot of hats (community advocate, program lead, etc.) and "grants applicant" is only part of their responsibilities and requires efficiency.',
-        },
-        {
-          title: "Blindsided by requirements",
-          content:
-            "New applicants are caught off guard by SAM.gov registration and often miss the format and file name requirements.",
-        },
-      ],
     },
   },
   Subscribe: {
-    page_title: "Subscribe | Simpler.Grants.gov",
-    meta_description:
+    pageTitle: "Subscribe | Simpler.Grants.gov",
+    metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
     title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
-    paragraph_1:
+    paragraph1:
       "If you sign up for the Simpler.Grants.gov product updates, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
@@ -417,50 +310,50 @@ export const messages = {
       button: "Subscribe",
     },
     errors: {
-      missing_name: "Please enter a name.",
-      missing_email: "Please enter an email address.",
-      invalid_email:
+      missingName: "Please enter a name.",
+      missingEmail: "Please enter an email address.",
+      invalidEmail:
         "Enter an email address in the correct format, like name@example.com.",
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
-      already_subscribed: "This email address has already been subscribed.",
+      alreadySubscribed: "This email address has already been subscribed.",
     },
   },
-  Subscription_confirmation: {
-    page_title: "Subscription Confirmation | Simpler.Grants.gov",
-    title: "You’re subscribed",
+  SubscriptionConfirmation: {
+    pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
+    title: "You're subscribed",
     intro:
       "You are signed up to receive project updates from Simpler.Grants.gov.",
-    paragraph_1:
+    paragraph1:
       "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
-  Unsubscription_confirmation: {
-    page_title: "Unsubscribe | Simpler.Grants.gov",
+  UnsubscriptionConfirmation: {
+    pageTitle: "Unsubscribe | Simpler.Grants.gov",
     title: "You have unsubscribed",
     intro:
       "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph_1: "Did you unsubscribe by accident? Sign up again.",
-    button_resub: "Re-subscribe",
+    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    buttonResub: "Re-subscribe",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
-    generic_error: {
-      page_title: "Error | Simpler.Grants.gov",
+    genericError: {
+      pageTitle: "Error | Simpler.Grants.gov",
     },
     unauthorized: {
-      page_title: "Unauthorized | Simpler.Grants.gov",
+      pageTitle: "Unauthorized | Simpler.Grants.gov",
     },
     unauthenticated: {
-      page_title: "Unauthenticated | Simpler.Grants.gov",
+      pageTitle: "Unauthenticated | Simpler.Grants.gov",
     },
-    page_not_found: {
-      page_title: "Page Not Found | Simpler.Grants.gov",
+    pageNotFound: {
+      pageTitle: "Page Not Found | Simpler.Grants.gov",
       title: "Oops, we can't find that page.",
-      message_content_1: "It may have been moved or no longer exists.",
-      visit_homepage_button: "Visit our homepage",
+      messageContent: "It may have been moved or no longer exists.",
+      visitHomepageButton: "Visit our homepage",
     },
   },
   Header: {
@@ -473,14 +366,14 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
-      wiki: "Public wiki",
       research: "Research",
       roadmap: "Product roadmap",
-      savedGrants: "Saved opportunities",
+      savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
       subscribe: "Subscribe",
       vision: "Our vision",
+      wiki: "Public wiki",
       workspace: "Workspace",
     },
     title: "Simpler.Grants.gov",
@@ -494,60 +387,65 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
-  Hero: {
-    title: "We're building a simpler Grants.gov!",
-    content:
-      "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
-    search_link: "Search for grants",
-    github_link: "Follow on GitHub",
-  },
   Footer: {
-    agency_name: "Grants.gov",
-    agency_contact_center: "Grants.gov Program Management Office",
+    agencyName: "Grants.gov",
+    agencyContactCenter: "Grants.gov Program Management Office",
     telephone: "1-800-518-4726",
-    return_to_top: "Return to top",
-    link_x_twitter: "X (Twitter)",
-    link_youtube: "YouTube",
-    link_github: "Github",
-    link_rss: "RSS",
-    link_newsletter: "Newsletter",
-    link_blog: "Blog",
-    logo_alt: "Grants.gov logo",
+    returnToTop: "Return to top",
+    linkXTwitter: "X (Twitter)",
+    linkYoutube: "YouTube",
+    linkGithub: "Github",
+    linkRss: "RSS",
+    linkNewsletter: "Newsletter",
+    linkBlog: "Blog",
+    logoAlt: "Grants.gov logo",
   },
   Identifier: {
     identity:
       "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
-    gov_content:
+    govContent:
       "Looking for U.S. government information and services? Visit <usaLink>USA.gov</usaLink>",
-    link_about: "About HHS",
-    link_accessibility: "Accessibility support",
-    link_foia: "FOIA requests",
-    link_fear: "EEO/No Fear Act",
-    link_ig: "Office of the Inspector General",
-    link_performance: "Performance reports",
-    link_privacy: "Privacy Policy",
-    logo_alt: "HHS logo",
+    linkAbout: "About HHS",
+    linkAccessibility: "Accessibility support",
+    linkFoia: "FOIA requests",
+    linkFear: "EEO/No Fear Act",
+    linkIg: "Office of the Inspector General",
+    linkPerformance: "Performance reports",
+    linkPrivacy: "Privacy Policy",
+    logoAlt: "HHS logo",
   },
   Layout: {
-    skip_to_main: "Skip to main content",
+    skipToMain: "Skip to main content",
   },
   Errors: {
     heading: "We're sorry.",
-    generic_message: "There seems to have been an error.",
-    try_again: "Please try again.",
+    genericMessage: "There seems to have been an error.",
+    tryAgain: "Please try again.",
     unauthorized: "Unauthorized",
     unauthenticated: "Not signed in",
-    authorization_fail:
+    authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
-    meta_description:
+    metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    filters: {
+      searchNoResults: {
+        title: "Your search didn't return any results.",
+        heading: "Suggestions:",
+        suggestions: [
+          "Check any terms you've entered for typos",
+          "Try different keywords",
+          "Try resetting filters or selecting fewer options",
+        ],
+      },
+    },
     accordion: {
       any: "Any",
+      all: "All",
       titles: {
         funding: "Funding instrument",
         eligibility: "Eligibility",
@@ -568,6 +466,11 @@ export const messages = {
       label:
         "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
       button: "Search",
+    },
+    drawer: {
+      title: "Filters",
+      submit: "View results",
+      clearFilters: "Clear filters",
     },
     callToAction: {
       title: "Search funding opportunities",
@@ -596,22 +499,22 @@ export const messages = {
         posted: "Posted: ",
         agency: "Agency: ",
       },
-      opportunity_number: "Opportunity Number: ",
-      award_ceiling: "Award Ceiling: ",
+      opportunityNumber: "Opportunity Number: ",
+      awardCeiling: "Award Ceiling: ",
       floor: "Floor: ",
     },
     sortBy: {
       options: {
-        posted_date_desc: "Posted date (Newest)",
-        posted_date_asc: "Posted date (Oldest)",
-        close_date_desc: "Close date (Newest)",
-        close_date_asc: "Close date (Oldest)",
-        opportunity_title_asc: "Opportunity title (A to Z)",
-        opportunity_title_desc: "Opportunity title (Z to A)",
-        agency_asc: "Agency (A to Z)",
-        agency_desc: "Agency (Z to A)",
-        opportunity_number_asc: "Opportunity number (Ascending)",
-        opportunity_number_desc: "Opportunity number (Descending)",
+        postedDateDesc: "Posted date (Newest)",
+        postedDateAsc: "Posted date (Oldest)",
+        closeDateDesc: "Close date (Newest)",
+        closeDateAsc: "Close date (Oldest)",
+        opportunityTitleAsc: "Opportunity title (A to Z)",
+        opportunityTitleDesc: "Opportunity title (Z to A)",
+        agencyAsc: "Agency (A to Z)",
+        agencyDesc: "Agency (Z to A)",
+        opportunityNumberAsc: "Opportunity number (Ascending)",
+        opportunityNumberDesc: "Opportunity number (Descending)",
         default: "Most relevant (Default)",
       },
       label: "Sort by",
@@ -624,15 +527,16 @@ export const messages = {
     filterDisplayToggle: {
       showFilters: "Show Filters",
       hideFilters: "Hide Filters",
+      drawer: "Filters",
     },
-    generic_error_cta: "Please try your search again.",
+    genericErrorCta: "Please try your search again.",
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",
     exportButton: {
       title: "Export results",
     },
-    beta_alert: {
-      alert_title:
+    betaAlert: {
+      alertTitle:
         "We’re actively building this search experience. Help us improve!",
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
@@ -651,17 +555,18 @@ export const messages = {
         general: "About saved searches",
       },
       modal: {
-        title: "Save search query",
+        title: "Name this search query",
+        loading: "Saving",
         description:
-          "Name and save this set of search terms and filters. To quickly begin future searches, select and apply a saved query.",
-        inputLabel: "Query name",
+          "Save these search terms and filters with a name for easy access later.",
+        inputLabel: "Name <required>(required)</required>",
         saveText: "Save",
         cancelText: "Cancel",
         closeText: "Close",
         emptyNameError: "Please name this query.",
-        successTitle: "Success!",
+        successTitle: "Query successfully saved",
         successDescription:
-          "Your search has been saved. To view search results for this search at any time, select the search from the drop down on the search page.",
+          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
@@ -704,10 +609,9 @@ export const messages = {
       sortby: "Sort by",
     },
     editModal: {
-      title: "Edit name of search query",
-      description:
-        "<strong>Tip:</strong> You can’t edit a saved query’s search terms or filters. However, you can apply the query to a new search, make changes, and save it as a new query",
-      inputLabel: "Query name (required)",
+      loading: "Updating",
+      title: "Edit",
+      inputLabel: "New name <required>(required)</required>",
       saveText: "Save",
       cancelText: "Cancel",
       closeText: "Close",
@@ -716,18 +620,20 @@ export const messages = {
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
+      loading: "Deleting",
       title: "Delete saved query?",
       deleteText: "Yes, delete",
       cancelText: "Cancel",
       apiError: "Error deleting saved query. Try again later.",
+      description: "Delete ",
     },
   },
-  SavedGrants: {
-    heading: "Saved grants",
+  SavedOpportunities: {
+    heading: "Saved opportunities",
     noSavedCTA:
       "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
-    title: "Saved Grants | Simpler.Grants.gov",
+    title: "Saved Opportunities | Simpler.Grants.gov",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -736,40 +642,75 @@ export const messages = {
       "This project is transparent, iterative, and agile. All of the code we're writing is open source and our roadmap is public. See what we're building and prioritizing.",
     sections: {
       progress: {
-        title: "What we're working on right now",
+        title: "What we're working on",
         contentItems: [
           [
             {
-              title: "Simpler application workflow prototype",
+              title: "Beta launch of Simpler Search on Grants.gov",
               content:
-                "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+                "<p>We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.</p><p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
             },
             {
-              title:
-                "Full support for opportunity page attachments (NOFOs/downloads)",
+              title: "New opportunities for open-source collaboration",
               content:
-                "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+                "<p>We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p><p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
             },
           ],
           [
             {
-              title: "Authentication via Login.gov",
+              title: "An 'Apply' workflow pilot",
               content:
-                "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+                "<p>We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p><p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
             },
             {
-              title: "Search & opportunity page improvements",
+              title: "SOAP Proxy for the 'Apply' workflow",
               content:
-                "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+                "<p>We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p><p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
+            },
+          ],
+          [
+            {
+              title: "User research on permissions",
+              content:
+                "<p>We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p><p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
+            },
+            {
+              title: "Automated API key management",
+              content:
+                "<p>We're building tools so authorized users can securely generate and manage their API keys independently without admin support.</p><p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
             },
           ],
         ],
         link: "View all deliverables on GitHub",
       },
       milestones: {
-        title: "Recent milestones reached",
-        contentTitle: "Late 2024",
+        title: "What we've delivered",
+        contentTitle: "Early 2025",
         contentItems: [
+          {
+            title: "Simpler application workflow prototype",
+            content:
+              "We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.",
+          },
+          {
+            title:
+              "Full support for opportunity page attachments (NOFOs/downloads)",
+            content:
+              "The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.",
+          },
+          {
+            title: "Authentication via Login.gov",
+            content:
+              "Finalizing authentication enabled grant seekers to create an account using Login.gov’s single sign-on platform. This move reduced the steps and friction users experience when signing up.",
+          },
+          {
+            title: "Search & opportunity page improvements",
+            content:
+              "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
+          },
+        ],
+        archivedRoadmapTitle: "Late 2024",
+        archivedRoadmapItems: [
           {
             title: "RESTful API launch",
             content:
@@ -778,12 +719,12 @@ export const messages = {
           {
             title: "Coding Challenge pilot",
             content:
-              "We’re excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+              "We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
           },
           {
             title: "Search UI usability test",
             content:
-              "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+              "We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
           },
           {
             title: "Opportunity page launch",
@@ -825,5 +766,348 @@ export const messages = {
         ],
       },
     },
+  },
+  // These values are currently for form enum translation, values coming fromt the API
+  Form: {
+    "AL: Alabama": "Alabama",
+    "AK: Alaska": "Alaska",
+    "AZ: Arizona": "Arizona",
+    "AR: Arkansas": "Arkansas",
+    "CA: California": "California",
+    "CO: Colorado": "Colorado",
+    "CT: Connecticut": "Connecticut",
+    "DE: Delaware": "Delaware",
+    "DC: District of Columbia": "District of Columbia",
+    "FL: Florida": "Florida",
+    "GA: Georgia": "Georgia",
+    "HI: Hawaii": "Hawaii",
+    "ID: Idaho": "Idaho",
+    "IL: Illinois": "Illinois",
+    "IN: Indiana": "Indiana",
+    "IA: Iowa": "Iowa",
+    "KS: Kansas": "Kansas",
+    "KY: Kentucky": "Kentucky",
+    "LA: Louisiana": "Louisiana",
+    "ME: Maine": "Maine",
+    "MD: Maryland": "Maryland",
+    "MA: Massachusetts": "Massachusetts",
+    "MI: Michigan": "Michigan",
+    "MN: Minnesota": "Minnesota",
+    "MS: Mississippi": "Mississippi",
+    "MO: Missouri": "Missouri",
+    "MT: Montana": "Montana",
+    "NE: Nebraska": "Nebraska",
+    "NV: Nevada": "Nevada",
+    "NH: New Hampshire": "New Hampshire",
+    "NJ: New Jersey": "New Jersey",
+    "NM: New Mexico": "New Mexico",
+    "NY: New York": "New York",
+    "NC: North Carolina": "North Carolina",
+    "ND: North Dakota": "North Dakota",
+    "OH: Ohio": "Ohio",
+    "OK: Oklahoma": "Oklahoma",
+    "OR: Oregon": "Oregon",
+    "PA: Pennsylvania": "Pennsylvania",
+    "RI: Rhode Island": "Rhode Island",
+    "SC: South Carolina": "South Carolina",
+    "SD: South Dakota": "South Dakota",
+    "TN: Tennessee": "Tennessee",
+    "TX: Texas": "Texas",
+    "UT: Utah": "Utah",
+    "VT: Vermont": "Vermont",
+    "VA: Virginia": "Virginia",
+    "WA: Washington": "Washington",
+    "WV: West Virginia": "West Virginia",
+    "WI: Wisconsin": "Wisconsin",
+    "WY: Wyoming": "Wyoming",
+    "AS: American Samoa": "American Samoa",
+    "FM: Federated States of Micronesia": "Federated States of Micronesia",
+    "GU: Guam": "Guam",
+    "MH: Marshall Islands": "Marshall Islands",
+    "MP: Northern Mariana Islands": "Northern Mariana Islands",
+    "PW: Palau": "Palau",
+    "PR: Puerto Rico": "Puerto Rico",
+    "VI: Virgin Islands": "Virgin Islands",
+    "FQ: Baker Island": "Baker Island",
+    "HQ: Howland Island": "Howland Island",
+    "DQ: Jarvis Island": "Jarvis Island",
+    "JQ: Johnston Atoll": "Johnston Atoll",
+    "KQ: Kingman Reef": "Kingman Reef",
+    "MQ: Midway Islands": "Midway Islands",
+    "BQ: Navassa Island": "Navassa Island",
+    "LQ: Palmyra Atoll": "Palmyra Atoll",
+    "WQ: Wake Island": "Wake Island",
+    "AA: Armed Forces Americas (except Canada)":
+      "Armed Forces Americas (except Canada)",
+    "AE: Armed Forces Europe, the Middle East, and Canada":
+      "Armed Forces Europe, the Middle East, and Canada",
+    "AP: Armed Forces Pacific": "Armed Forces Pacific",
+    "AFG: AFGHANISTAN": "Afghanistan",
+    "XQZ: AKROTIRI": "Akrotiri",
+    "ALB: ALBANIA": "Albania",
+    "DZA: ALGERIA": "Algeria",
+    "AND: ANDORRA": "Andorra",
+    "AGO: ANGOLA": "Angola",
+    "AIA: ANGUILLA": "Anguilla",
+    "ATA: ANTARCTICA": "Antarctica",
+    "ATG: ANTIGUA AND BARBUDA": "Antigua And Barbuda",
+    "ARG: ARGENTINA": "Argentina",
+    "ARM: ARMENIA": "Armenia",
+    "ABW: ARUBA": "Aruba",
+    "XAC: ASHMORE AND CARTIER ISLANDS": "Ashmore And Cartier Islands",
+    "AUS: AUSTRALIA": "Australia",
+    "AUT: AUSTRIA": "Austria",
+    "AZE: AZERBAIJAN": "Azerbaijan",
+    "BHS: BAHAMAS, THE": "Bahamas, The",
+    "BHR: BAHRAIN": "Bahrain",
+    "BGD: BANGLADESH": "Bangladesh",
+    "BRB: BARBADOS": "Barbados",
+    "XBI: BASSAS DA INDIA": "Bassas Da India",
+    "BLR: BELARUS": "Belarus",
+    "BEL: BELGIUM": "Belgium",
+    "BLZ: BELIZE": "Belize",
+    "BEN: BENIN": "Benin",
+    "BMU: BERMUDA": "Bermuda",
+    "BTN: BHUTAN": "Bhutan",
+    "BOL: BOLIVIA": "Bolivia",
+    "BES: BONAIRE, SINT EUSTATIUS, AND SABA":
+      "Bonaire, Sint Eustatius, And Saba",
+    "BIH: BOSNIA AND HERZEGOVINA": "Bosnia And Herzegovina",
+    "BWA: BOTSWANA": "Botswana",
+    "BVT: BOUVET ISLAND": "Bouvet Island",
+    "BRA: BRAZIL": "Brazil",
+    "IOT: BRITISH INDIAN OCEAN TERRITORY": "British Indian Ocean Territory",
+    "BRN: BRUNEI": "Brunei",
+    "BGR: BULGARIA": "Bulgaria",
+    "BFA: BURKINA FASO": "Burkina Faso",
+    "MMR: BURMA": "Burma",
+    "BDI: BURUNDI": "Burundi",
+    "CPV: CABO VERDE": "Cabo Verde",
+    "KHM: CAMBODIA": "Cambodia",
+    "CMR: CAMEROON": "Cameroon",
+    "CAN: CANADA": "Canada",
+    "CYM: CAYMAN ISLANDS": "Cayman Islands",
+    "CAF: CENTRAL AFRICAN REPUBLIC": "Central African Republic",
+    "TCD: CHAD": "Chad",
+    "CHL: CHILE": "Chile",
+    "CHN: CHINA": "China",
+    "CXR: CHRISTMAS ISLAND": "Christmas Island",
+    "CPT: CLIPPERTON ISLAND": "Clipperton Island",
+    "CCK: COCOS (KEELING) ISLANDS": "Cocos (Keeling) Islands",
+    "COL: COLOMBIA": "Colombia",
+    "COM: COMOROS": "Comoros",
+    "COG: CONGO (BRAZZAVILLE)": "Congo (Brazzaville)",
+    "COD: CONGO (KINSHASA)": "Congo (Kinshasa)",
+    "COK: COOK ISLANDS": "Cook Islands",
+    "XCS: CORAL SEA ISLANDS": "Coral Sea Islands",
+    "CRI: COSTA RICA": "Costa Rica",
+    "CIV: CÔTE D'IVOIRE": "Côte D'Ivoire",
+    "HRV: CROATIA": "Croatia",
+    "CUB: CUBA": "Cuba",
+    "CUW: CURAÇAO": "Curaçao",
+    "CYP: CYPRUS": "Cyprus",
+    "CZE: CZECHIA": "Czechia",
+    "DNK: DENMARK": "Denmark",
+    "XXD: DHEKELIA": "Dhekelia",
+    "DGA: DIEGO GARCIA": "Diego Garcia",
+    "DJI: DJIBOUTI": "Djibouti",
+    "DMA: DOMINICA": "Dominica",
+    "DOM: DOMINICAN REPUBLIC": "Dominican Republic",
+    "ECU: ECUADOR": "Ecuador",
+    "EGY: EGYPT": "Egypt",
+    "SLV: EL SALVADOR": "El Salvador",
+    "XAZ: ENTITY 1": "Entity 1",
+    "XCR: ENTITY 2": "Entity 2",
+    "XCY: ENTITY 3": "Entity 3",
+    "XKM: ENTITY 4": "Entity 4",
+    "XKN: ENTITY 5": "Entity 5",
+    "AX3: ENTITY 6": "Entity 6",
+    "GNQ: EQUATORIAL GUINEA": "Equatorial Guinea",
+    "ERI: ERITREA": "Eritrea",
+    "EST: ESTONIA": "Estonia",
+    "SWZ: ESWATINI": "Eswatini",
+    "ETH: ETHIOPIA": "Ethiopia",
+    "XEU: EUROPA ISLAND": "Europa Island",
+    "FLK: FALKLAND ISLANDS (ISLAS MALVINAS)":
+      "Falkland Islands (Islas Malvinas)",
+    "FRO: FAROE ISLANDS": "Faroe Islands",
+    "FJI: FIJI": "Fiji",
+    "FIN: FINLAND": "Finland",
+    "FRA: FRANCE": "France",
+    "GUF: FRENCH GUIANA": "French Guiana",
+    "PYF: FRENCH POLYNESIA": "French Polynesia",
+    "ATF: FRENCH SOUTHERN AND ANTARCTIC LANDS":
+      "French Southern And Antarctic Lands",
+    "GAB: GABON": "Gabon",
+    "GMB: GAMBIA, THE": "Gambia, The",
+    "XGZ: GAZA STRIP": "Gaza Strip",
+    "GEO: GEORGIA": "Georgia",
+    "DEU: GERMANY": "Germany",
+    "GHA: GHANA": "Ghana",
+    "GIB: GIBRALTAR": "Gibraltar",
+    "XGL: GLORIOSO ISLANDS": "Glorioso Islands",
+    "GRC: GREECE": "Greece",
+    "GRL: GREENLAND": "Greenland",
+    "GRD: GRENADA": "Grenada",
+    "GLP: GUADELOUPE": "Guadeloupe",
+    "GTM: GUATEMALA": "Guatemala",
+    "GGY: GUERNSEY": "Guernsey",
+    "GIN: GUINEA": "Guinea",
+    "GNB: GUINEA-BISSAU": "Guinea-Bissau",
+    "GUY: GUYANA": "Guyana",
+    "HTI: HAITI": "Haiti",
+    "HMD: HEARD ISLAND AND MCDONALD ISLANDS":
+      "Heard Island And Mcdonald Islands",
+    "HND: HONDURAS": "Honduras",
+    "HKG: HONG KONG": "Hong Kong",
+    "HUN: HUNGARY": "Hungary",
+    "ISL: ICELAND": "Iceland",
+    "IND: INDIA": "India",
+    "IDN: INDONESIA": "Indonesia",
+    "IRN: IRAN": "Iran",
+    "IRQ: IRAQ": "Iraq",
+    "IRL: IRELAND": "Ireland",
+    "IMN: ISLE OF MAN": "Isle Of Man",
+    "ISR: ISRAEL": "Israel",
+    "ITA: ITALY": "Italy",
+    "JAM: JAMAICA": "Jamaica",
+    "XJM: JAN MAYEN": "Jan Mayen",
+    "JPN: JAPAN": "Japan",
+    "JEY: JERSEY": "Jersey",
+    "JOR: JORDAN": "Jordan",
+    "XJN: JUAN DE NOVA ISLAND": "Juan De Nova Island",
+    "KAZ: KAZAKHSTAN": "Kazakhstan",
+    "KEN: KENYA": "Kenya",
+    "KIR: KIRIBATI": "Kiribati",
+    "PRK: KOREA, NORTH": "Korea, North",
+    "KOR: KOREA, SOUTH": "Korea, South",
+    "XKS: KOSOVO": "Kosovo",
+    "KWT: KUWAIT": "Kuwait",
+    "KGZ: KYRGYZSTAN": "Kyrgyzstan",
+    "LAO: LAOS": "Laos",
+    "LVA: LATVIA": "Latvia",
+    "LBN: LEBANON": "Lebanon",
+    "LSO: LESOTHO": "Lesotho",
+    "LBR: LIBERIA": "Liberia",
+    "LBY: LIBYA": "Libya",
+    "LIE: LIECHTENSTEIN": "Liechtenstein",
+    "LTU: LITHUANIA": "Lithuania",
+    "LUX: LUXEMBOURG": "Luxembourg",
+    "MAC: MACAU": "Macau",
+    "MDG: MADAGASCAR": "Madagascar",
+    "MWI: MALAWI": "Malawi",
+    "MYS: MALAYSIA": "Malaysia",
+    "MDV: MALDIVES": "Maldives",
+    "MLI: MALI": "Mali",
+    "MLT: MALTA": "Malta",
+    "MTQ: MARTINIQUE": "Martinique",
+    "MRT: MAURITANIA": "Mauritania",
+    "MUS: MAURITIUS": "Mauritius",
+    "MYT: MAYOTTE": "Mayotte",
+    "MEX: MEXICO": "Mexico",
+    "MDA: MOLDOVA": "Moldova",
+    "MCO: MONACO": "Monaco",
+    "MNG: MONGOLIA": "Mongolia",
+    "MNE: MONTENEGRO": "Montenegro",
+    "MSR: MONTSERRAT": "Montserrat",
+    "MAR: MOROCCO": "Morocco",
+    "MOZ: MOZAMBIQUE": "Mozambique",
+    "NAM: NAMIBIA": "Namibia",
+    "NRU: NAURU": "Nauru",
+    "NPL: NEPAL": "Nepal",
+    "NLD: NETHERLANDS": "Netherlands",
+    "NCL: NEW CALEDONIA": "New Caledonia",
+    "NZL: NEW ZEALAND": "New Zealand",
+    "NIC: NICARAGUA": "Nicaragua",
+    "NER: NIGER": "Niger",
+    "NGA: NIGERIA": "Nigeria",
+    "NIU: NIUE": "Niue",
+    "NFK: NORFOLK ISLAND": "Norfolk Island",
+    "MKD: NORTH MACEDONIA": "North Macedonia",
+    "NOR: NORWAY": "Norway",
+    "OMN: OMAN": "Oman",
+    "PAK: PAKISTAN": "Pakistan",
+    "PAN: PANAMA": "Panama",
+    "PNG: PAPUA NEW GUINEA": "Papua New Guinea",
+    "XPR: PARACEL ISLANDS": "Paracel Islands",
+    "PRY: PARAGUAY": "Paraguay",
+    "PER: PERU": "Peru",
+    "PHL: PHILIPPINES": "Philippines",
+    "PCN: PITCAIRN ISLANDS": "Pitcairn Islands",
+    "POL: POLAND": "Poland",
+    "PRT: PORTUGAL": "Portugal",
+    "QAT: QATAR": "Qatar",
+    "REU: REUNION": "Reunion",
+    "ROU: ROMANIA": "Romania",
+    "RUS: RUSSIA": "Russia",
+    "RWA: RWANDA": "Rwanda",
+    "BLM: SAINT BARTHELEMY": "Saint Barthelemy",
+    "SHN: SAINT HELENA, ASCENSION, AND TRISTAN DA CUNHA":
+      "Saint Helena, Ascension, And Tristan Da Cunha",
+    "KNA: SAINT KITTS AND NEVIS": "Saint Kitts And Nevis",
+    "LCA: SAINT LUCIA": "Saint Lucia",
+    "MAF: SAINT MARTIN": "Saint Martin",
+    "SPM: SAINT PIERRE AND MIQUELON": "Saint Pierre And Miquelon",
+    "VCT: SAINT VINCENT AND THE GRENADINES": "Saint Vincent And The Grenadines",
+    "WSM: SAMOA": "Samoa",
+    "SMR: SAN MARINO": "San Marino",
+    "STP: SAO TOME AND PRINCIPE": "Sao Tome And Principe",
+    "SAU: SAUDI ARABIA": "Saudi Arabia",
+    "SEN: SENEGAL": "Senegal",
+    "SRB: SERBIA": "Serbia",
+    "SYC: SEYCHELLES": "Seychelles",
+    "SLE: SIERRA LEONE": "Sierra Leone",
+    "SGP: SINGAPORE": "Singapore",
+    "SXM: SINT MAARTEN": "Sint Maarten",
+    "SVK: SLOVAKIA": "Slovakia",
+    "SVN: SLOVENIA": "Slovenia",
+    "SLB: SOLOMON ISLANDS": "Solomon Islands",
+    "SOM: SOMALIA": "Somalia",
+    "ZAF: SOUTH AFRICA": "South Africa",
+    "SGS: SOUTH GEORGIA AND SOUTH SANDWICH ISLANDS":
+      "South Georgia And South Sandwich Islands",
+    "SSD: SOUTH SUDAN": "South Sudan",
+    "ESP: SPAIN": "Spain",
+    "XSP: SPRATLY ISLANDS": "Spratly Islands",
+    "LKA: SRI LANKA": "Sri Lanka",
+    "SDN: SUDAN": "Sudan",
+    "SUR: SURINAME": "Suriname",
+    "XSV: SVALBARD": "Svalbard",
+    "SWE: SWEDEN": "Sweden",
+    "CHE: SWITZERLAND": "Switzerland",
+    "SYR: SYRIA": "Syria",
+    "TWN: TAIWAN": "Taiwan",
+    "TJK: TAJIKISTAN": "Tajikistan",
+    "TZA: TANZANIA": "Tanzania",
+    "THA: THAILAND": "Thailand",
+    "TLS: TIMOR-LESTE": "Timor-Leste",
+    "TGO: TOGO": "Togo",
+    "TKL: TOKELAU": "Tokelau",
+    "TON: TONGA": "Tonga",
+    "TTO: TRINIDAD AND TOBAGO": "Trinidad And Tobago",
+    "XTR: TROMELIN ISLAND": "Tromelin Island",
+    "TUN: TUNISIA": "Tunisia",
+    "TUR: TURKEY": "Turkey",
+    "TKM: TURKMENISTAN": "Turkmenistan",
+    "TCA: TURKS AND CAICOS ISLANDS": "Turks And Caicos Islands",
+    "TUV: TUVALU": "Tuvalu",
+    "UGA: UGANDA": "Uganda",
+    "UKR: UKRAINE": "Ukraine",
+    "ARE: UNITED ARAB EMIRATES": "United Arab Emirates",
+    "GBR: UNITED KINGDOM": "United Kingdom",
+    "USA: UNITED STATES": "United States",
+    "URY: URUGUAY": "Uruguay",
+    "UZB: UZBEKISTAN": "Uzbekistan",
+    "VUT: VANUATU": "Vanuatu",
+    "VAT: VATICAN CITY": "Vatican City",
+    "VEN: VENEZUELA": "Venezuela",
+    "VNM: VIETNAM": "Vietnam",
+    "VGB: VIRGIN ISLANDS, BRITISH": "Virgin Islands, British",
+    "WLF: WALLIS AND FUTUNA": "Wallis And Futuna",
+    "XWB: WEST BANK": "West Bank",
+    "ESH: WESTERN SAHARA": "Western Sahara",
+    "YEM: YEMEN": "Yemen",
+    "ZMB: ZAMBIA": "Zambia",
+    "ZWE: ZIMBABWE": "Zimbabwe",
   },
 };

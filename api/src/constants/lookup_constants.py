@@ -140,7 +140,6 @@ class FormFamily(StrEnum):
     SF_424_MANDATORY = "sf-424-mandatory"
     SF_424_SHORT_ORGANIZATION = "sf-424-short-organization"
 
-
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
@@ -155,3 +154,19 @@ class SamGovProcessingStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
+class SamGovImportType(StrEnum):
+    MONTHLY_EXTRACT = "monthly_extract"
+    DAILY_EXTRACT = "daily_extract"
+    API = "api"
+
+
+class ApplicationStatus(StrEnum):
+    IN_PROGRESS = "in_progress"
+    SUBMITTED = "submitted"
+    ACCEPTED = "accepted"
+
+
+class ApplicationFormStatus(StrEnum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"

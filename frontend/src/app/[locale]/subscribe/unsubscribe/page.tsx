@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Subscribe.page_title"),
-    description: t("Index.meta_description"),
+    title: t("Subscribe.pageTitle"),
+    description: t("Index.metaDescription"),
   };
 
   return meta;
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 export default function Unsubscribe({ params }: LocalizedPageProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
-  const t = useTranslations("Unsubscription_confirmation");
+  const t = useTranslations("UnsubscriptionConfirmation");
 
   return (
     <>
@@ -33,17 +33,13 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
       <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
-        <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-          {t("title")}
-        </h1>
-        <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl margin-bottom-0">
-          {t("intro")}
-        </p>
+        <h1>{t("title")}</h1>
+        <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid>
-            <p className="usa-intro">{t("paragraph_1")}</p>
+            <p>{t("paragraph")}</p>
             <Link className="usa-button margin-bottom-4" href="/subscribe">
-              {t("button_resub")}
+              {t("buttonResub")}
             </Link>
           </Grid>
         </Grid>

@@ -82,7 +82,7 @@ client = create_sam_gov_client(config=config)
 
 ## Authentication
 
-The SAM.gov API requires an API key for authentication. The client passes this key as a query parameter in the request URL.
+The SAM.gov API requires an API key for authentication. The client passes this key as a header.
 
 ## Environment Variables
 

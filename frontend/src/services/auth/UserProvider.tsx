@@ -5,6 +5,7 @@ import noop from "lodash/noop";
 import { UserContext } from "src/services/auth/useUser";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { UserProfile, UserSession } from "src/types/authTypes";
+import { isExpired, isExpiring } from "src/utils/dateUtil";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -62,7 +63,15 @@ export default function UserProvider({
   const refreshIfExpired = useCallback(async (): Promise<
     boolean | undefined
   > => {
-    if (localUser?.expiresAt && new Date(localUser.expiresAt) < new Date()) {
+    if (isExpired(localUser?.expiresAt)) {
+      await getUserSession().then(noop).catch(noop);
+      return true;
+    }
+  }, [localUser?.expiresAt, getUserSession]);
+
+  // if token is less than 10 mins from its expiration, refresh the user to get a token refresh
+  const refreshIfExpiring = useCallback(async () => {
+    if (isExpiring(localUser?.expiresAt)) {
       await getUserSession().then(noop).catch(noop);
       return true;
     }
@@ -76,8 +85,9 @@ export default function UserProvider({
       refreshUser: getUserSession,
       hasBeenLoggedOut,
       logoutLocalUser,
-      resetHasBeenLoggedOut,
       refreshIfExpired,
+      refreshIfExpiring,
+      resetHasBeenLoggedOut,
     }),
     [
       localUser,
@@ -87,6 +97,7 @@ export default function UserProvider({
       hasBeenLoggedOut,
       logoutLocalUser,
       refreshIfExpired,
+      refreshIfExpiring,
       resetHasBeenLoggedOut,
     ],
   );

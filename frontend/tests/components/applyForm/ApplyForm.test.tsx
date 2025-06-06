@@ -18,6 +18,8 @@ const formSchema: RJSFSchema = {
     dob: { type: "string", format: "date", title: "Date of birth" },
     address: { type: "string", title: "test address" },
     state: { type: "string", title: "test state" },
+    checkbox: { type: "boolean", title: "I agree" },
+    textarea: { type: "string", maxLength: 256, title: "Text area" },
   },
   required: ["name"],
 };
@@ -50,6 +52,29 @@ const uiSchema: UiSchema = [
       {
         type: "field",
         definition: "/properties/state",
+      },
+    ],
+  },
+  {
+    type: "section",
+    label: "Field Variations",
+    name: "FieldVariations",
+    children: [
+      {
+        type: "field",
+        definition: "/properties/address",
+        widget: "Select",
+        schema: {
+          enum: ["test select option"],
+        },
+      },
+      {
+        type: "field",
+        definition: "/properties/textarea",
+      },
+      {
+        type: "field",
+        definition: "/properties/checkbox",
       },
     ],
   },
@@ -90,6 +115,17 @@ describe("ApplyForm", () => {
 
     const nav = screen.getByTestId("InPageNavigation");
     expect(nav).toHaveTextContent("On this form");
+
+    const textareaField = screen.getByTestId("textarea");
+    expect(textareaField).toBeInTheDocument();
+    expect(textareaField).not.toBeRequired();
+    expect(textareaField).toHaveAttribute("maxlength", "256");
+
+    const selectField = screen.getByTestId("Select");
+    expect(selectField).toBeInTheDocument();
+    expect(selectField).not.toBeRequired();
+    expect(screen.getAllByRole("option").length).toBe(2);
+    expect(screen.getByText("test select option")).toBeInTheDocument();
 
     const button = screen.getByTestId("apply-form-submit");
     expect(button).toBeInTheDocument();

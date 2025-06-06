@@ -16,10 +16,6 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
-  // const count = await searchInput.count();
-  // const buttonCount = await searchInput.count();
-  // console.log("!!! searchinput", count, buttonCount);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
   await searchInput.fill(term);
   await expect(searchInput).toHaveValue(term);
   await submitButton.click();
@@ -112,12 +108,13 @@ export async function clickPaginationPageNumber(
 }
 
 export async function clickLastPaginationPage(page: Page) {
-  const paginationButtons = page.locator("li > button");
+  const paginationButtons = page.locator("li.usa-pagination__page-no > button");
   const count = await paginationButtons.count();
 
   // must be more than 1 page
   if (count > 2) {
-    await paginationButtons.nth(count - 2).click();
+    const button = paginationButtons.nth(count - 1);
+    await button.click();
   }
   // Delay for pagination debounce
   await page.waitForTimeout(400);

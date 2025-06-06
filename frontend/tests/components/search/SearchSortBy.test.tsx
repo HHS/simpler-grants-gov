@@ -49,7 +49,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).not.toHaveTextContent(
-      "sortBy.options.opportunity_title_desc",
+      "sortBy.options.opportunityTitleDesc",
     );
 
     fireEvent.select(screen.getByRole("combobox"), {
@@ -61,7 +61,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).toHaveTextContent(
-      "sortBy.options.opportunity_title_desc",
+      "sortBy.options.opportunityTitleDesc",
     );
   });
 
@@ -87,7 +87,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).not.toHaveTextContent(
-      "sortBy.options.opportunity_number_asc",
+      "sortBy.options.opportunityNumberAsc",
     );
 
     fireEvent.select(screen.getByRole("combobox"), {
@@ -99,7 +99,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).toHaveTextContent(
-      "sortBy.options.opportunity_number_asc",
+      "sortBy.options.opportunityNumberAsc",
     );
   });
 });

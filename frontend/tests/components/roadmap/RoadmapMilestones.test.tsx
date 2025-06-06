@@ -7,7 +7,7 @@ describe("RoadmapMilestones Content", () => {
     render(<RoadmapMilestones />);
     const RoadmapMilestonesH2 = screen.getByRole("heading", {
       level: 2,
-      name: /Recent milestones reached?/i,
+      name: /What we've delivered?/i,
     });
 
     expect(RoadmapMilestonesH2).toBeInTheDocument();

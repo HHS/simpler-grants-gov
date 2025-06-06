@@ -26,6 +26,8 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
+    owner       = "navapbc"
+    app         = module.app_config.app_name
     environment = var.environment_name
     description = "Database resources for the ${var.environment_name} environment"
   })
@@ -83,7 +85,6 @@ module "database" {
   source = "../../modules/database"
 
   name                        = "${local.prefix}${local.database_config.cluster_name}"
-  access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
   # The following are not AWS infra resources and therefore do not need to be

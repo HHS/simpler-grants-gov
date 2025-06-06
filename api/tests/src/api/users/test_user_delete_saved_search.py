@@ -3,6 +3,7 @@ import uuid
 import pytest
 
 from src.db.models.user_models import UserSavedSearch, UserTokenSession
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
@@ -17,9 +18,7 @@ def saved_search(enable_factory_create, user, db_session):
 
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
-    db_session.query(UserSavedSearch).delete()
-    db_session.query(UserTokenSession).delete()
-    db_session.commit()
+    cascade_delete_from_db_table(db_session, UserTokenSession)
     yield
 
 
@@ -34,11 +33,15 @@ def test_user_delete_saved_search_unauthorized_user(
         headers={"X-SGG-Token": user_auth_token},
     )
 
-    assert response.status_code == 401
-    assert response.json["message"] == "Unauthorized user"
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
 
     # Verify search was not deleted
-    saved_searches = db_session.query(UserSavedSearch).all()
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
+    )
     assert len(saved_searches) == 1
 
 
@@ -54,7 +57,11 @@ def test_user_delete_saved_search_no_auth(
     assert response.json["message"] == "Unable to process token"
 
     # Verify search was not deleted
-    saved_searches = db_session.query(UserSavedSearch).all()
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
+    )
     assert len(saved_searches) == 1
 
 
@@ -75,7 +82,9 @@ def test_user_delete_saved_search_not_found(
     assert response.json["message"] == "Saved search not found"
 
 
-def test_user_delete_saved_search(client, db_session, user, user_auth_token, saved_search):
+def test_user_delete_saved_search(
+    client, db_session, user, user_auth_token, enable_factory_create, saved_search
+):
     response = client.delete(
         f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
         headers={"X-SGG-Token": user_auth_token},
@@ -85,5 +94,11 @@ def test_user_delete_saved_search(client, db_session, user, user_auth_token, sav
     assert response.json["message"] == "Success"
 
     # Verify the search was deleted
-    saved_searches = db_session.query(UserSavedSearch).all()
-    assert len(saved_searches) == 0
+    db_session.expire_all()
+    saved_searches = (
+        db_session.query(UserSavedSearch)
+        .filter(UserSavedSearch.saved_search_id == saved_search.saved_search_id)
+        .all()
+    )
+    assert len(saved_searches) == 1
+    assert saved_searches[0].is_deleted

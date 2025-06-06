@@ -69,10 +69,11 @@ class TestSamGovClient:
 
             request = SamExtractRequest(file_name=file_name)
 
-            # Mock the API response with API key in query params
+            # Mock the API response, verifying the x-api-key header
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}",
+                    request_headers={"x-api-key": config.api_key},
                     content=file_content,
                     headers={
                         "Content-Type": "application/zip",
@@ -109,7 +110,8 @@ class TestSamGovClient:
             # Mock a 404 response from the API
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}",
+                    request_headers={"x-api-key": config.api_key},
                     status_code=404,
                     json={"error": "File not found"},
                 )
@@ -139,7 +141,8 @@ class TestSamGovClient:
             # Mock a 500 error response from the API
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}",
+                    request_headers={"x-api-key": config.api_key},
                     status_code=500,
                     json={"error": "Internal server error"},
                 )
@@ -169,7 +172,8 @@ class TestSamGovClient:
             # Mock a timeout by raising a Timeout exception
             with requests_mock.Mocker() as m:
                 m.get(
-                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}&api_key={config.api_key}",
+                    f"{config.base_url}/data-services/v1/extracts?fileName={file_name}",
+                    request_headers={"x-api-key": config.api_key},
                     exc=Timeout,
                 )
 
@@ -184,8 +188,8 @@ class TestSamGovClient:
             if os.path.exists(output_path):
                 os.unlink(output_path)
 
-    def test_api_key_in_query_params(self):
-        """Test that the API key is included in the query parameters."""
+    def test_api_key_in_headers(self):
+        """Test that the API key is included in the headers."""
         config = SamGovConfig(
             base_url="https://test-api.sam.gov",
             api_key="test-api-key",
@@ -194,18 +198,21 @@ class TestSamGovClient:
 
         with requests_mock.Mocker() as m:
             m.get(
-                "https://test-api.sam.gov/test-endpoint?api_key=test-api-key", json={"status": "ok"}
+                "https://test-api.sam.gov/test-endpoint",
+                request_headers={"x-api-key": config.api_key},
+                json={"status": "ok"},
             )
 
             # Make a request using the _request method
             client._request("GET", "test-endpoint")
 
-            # Verify the request was made with the API key in the query parameters
+            # Verify the request was made with the API key in the headers
             assert m.called
             assert "api_key=test-api-key" in m.last_request.url
 
             # Verify headers don't include the API key
             assert "x-api-key" not in m.last_request.headers
+
 
     def test_download_extract_missing_file_name(self, client, tmpdir):
         """Test downloading an extract with a missing file name."""
@@ -256,3 +263,5 @@ class TestSamGovClient:
             )
             with pytest.raises(Exception, match="Request failed"):
                 client.download_extract(request, str(output_path))
+            assert "x-api-key" in m.last_request.headers
+            assert m.last_request.headers["x-api-key"] == config.api_key

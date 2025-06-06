@@ -1,6 +1,8 @@
 "use server";
 
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
+import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
@@ -9,8 +11,8 @@ import { FormDetail } from "src/types/formResponseTypes";
 import { redirect } from "next/navigation";
 
 import { FieldErrors } from "./types";
-import { parseSchema, shapeFormData } from "./utils";
-import { validateFormData } from "./validate";
+import { shapeFormData } from "./utils";
+import { validateJsonBySchema } from "./validate";
 
 type applyFormErrors = {
   errorMessage: string;
@@ -28,6 +30,18 @@ export async function handleFormAction(
   formData: FormData,
 ) {
   const { formId, applicationId, successMessage } = _prevState;
+  const session = await getSession();
+  if (!session || !session.token) {
+    return {
+      applicationId,
+      errorMessage: "Error submitting form. User not authenticated.",
+      formData,
+      formId,
+      successMessage: "",
+      validationErrors: [],
+    };
+  }
+  const sumbitType = formData.get("apply-form-button");
 
   const formSchema = await getFormSchema(formId);
   if (!formSchema) {
@@ -36,27 +50,30 @@ export async function handleFormAction(
       errorMessage: "Error submitting form",
       formData,
       formId,
-      successMessage,
+      successMessage: "",
       validationErrors: [],
     };
   }
-
-  const { validationErrors, errorMessage } = formValidate({
-    formData,
-    formSchema,
-  });
   const applicationFormData = shapeFormData<ApplicationResponseDetail>(
     formData,
     formSchema,
   );
+
+  const { validationErrors, errorMessage } = formValidate({
+    formData: applicationFormData,
+    formSchema,
+  });
   if (validationErrors.length) {
-    await handleSave(applicationFormData, applicationId, formId);
+    await handleSave(applicationFormData, applicationId, formId, session.token);
     return {
       applicationId,
-      errorMessage,
+      errorMessage:
+        sumbitType === "save"
+          ? "Form validation errors"
+          : "Unable to submit due to form validation errors",
       formData: applicationFormData,
       formId,
-      successMessage,
+      successMessage: "Form saved",
       validationErrors,
     };
   } else {
@@ -64,9 +81,10 @@ export async function handleFormAction(
       applicationFormData,
       applicationId,
       formId,
+      session.token,
     );
     if (saveSuccess) {
-      if (formData.get("apply-form-button") === "submit") {
+      if (sumbitType === "submit") {
         redirect(`/formPrototype/success`);
       } else {
         return {
@@ -94,12 +112,14 @@ const handleSave = async (
   applicationFormData: ApplicationResponseDetail,
   applicationId: string,
   formId: string,
+  sessionToken: string,
 ) => {
   try {
     const resp = await handleUpdateApplicationForm(
       applicationFormData,
       applicationId,
       formId,
+      sessionToken,
     );
     if (resp.status_code === 200) {
       return true;
@@ -115,7 +135,7 @@ const handleSave = async (
 };
 
 async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
-  let formSchema = <FormDetail>{};
+  let formDetail = <FormDetail>{};
   try {
     const response = await getFormDetails(formId);
     if (response.status_code !== 200) {
@@ -124,24 +144,30 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
         response,
       );
     }
-    formSchema = response.data;
+    formDetail = response.data;
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
   }
-  return await parseSchema(formSchema.form_json_schema);
+  let formSchema = {};
+  try {
+    formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+  } catch (e) {
+    console.error("Error parsing JSON schema", e);
+  }
+  return formSchema;
 }
 
 function formValidate({
   formData,
   formSchema,
 }: {
-  formData: FormData;
+  formData: ApplicationResponseDetail;
   formSchema: RJSFSchema;
 }): applyFormErrors {
-  const errors = validateFormData(formData, formSchema);
+  const errors = validateJsonBySchema(formData, formSchema);
   if (errors) {
     return {
-      errorMessage: "Error submitting form",
+      errorMessage: "Form validation errors",
       validationErrors: errors,
     };
   } else {

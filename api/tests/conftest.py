@@ -257,7 +257,9 @@ def agency_index(search_client, monkeypatch_session):
     # with an actual one, similar to how we create schemas for database tests
     index_name = f"test-agency-index-{uuid.uuid4().int}"
 
-    search_client.create_index(index_name)
+    search_client.create_index(
+        index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
+    )
 
     try:
         yield index_name
@@ -394,7 +396,8 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
-    monkeypatch.delenv("S3_ENDPOINT_URL")
+    monkeypatch.delenv("S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("CDN_URL", raising=False)
 
 
 @pytest.fixture
