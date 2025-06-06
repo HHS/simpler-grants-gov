@@ -213,7 +213,6 @@ class TestSamGovClient:
             # Verify headers don't include the API key
             assert "x-api-key" not in m.last_request.headers
 
-
     def test_download_extract_missing_file_name(self, client, tmpdir):
         """Test downloading an extract with a missing file name."""
         request = SamExtractRequest(file_name="")

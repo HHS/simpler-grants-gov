@@ -15,8 +15,8 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
     SamGovExtractType,
-    SamGovProcessingStatus,
     SamGovImportType,
+    SamGovProcessingStatus,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
