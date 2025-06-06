@@ -153,14 +153,17 @@ class MockSamGovClient(BaseSamGovClient):
         """
         logger.info("Using mock SAM.gov client to get monthly extract info")
 
-        # Return mock data for the first day of the current month
+        # Return mock data for the first Sunday of the current month
         current_date = datetime_util.utcnow()
         first_day_of_month = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # In the Gregorian calendar, Monday is 0 and Sunday is 6
+        days_to_sunday = (6 - first_day_of_month.weekday()) % 7
+        first_sunday = first_day_of_month + timedelta(days=days_to_sunday)
 
         return SamExtractInfo(
             url="https://example.com/sam/monthly/extract.zip",
-            filename=f"sam_monthly_extract_{first_day_of_month.strftime('%Y%m')}.zip",
-            updated_at=first_day_of_month,
+            filename=f"sam_monthly_extract_{first_sunday.strftime('%Y%m')}.zip",
+            updated_at=first_sunday,
         )
 
     def get_daily_extract_info(self) -> list[SamExtractInfo]:
