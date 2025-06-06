@@ -55,9 +55,6 @@ def test_request_schema_validation():
 def test_response_schema_single(sample_extract_metadata, monkeypatch):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
-    monkeypatch.setenv("CDN_URL", "")
-    monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
-
     schema = ExtractMetadataResponseSchema()
 
     extract_metadata = schema.dump(sample_extract_metadata)
@@ -72,9 +69,6 @@ def test_response_schema_single(sample_extract_metadata, monkeypatch):
 
 def test_response_schema_list(sample_extract_metadata, monkeypatch):
     monkeypatch.setattr(file_util, "_s3_config", None)
-
-    monkeypatch.setenv("CDN_URL", "")
-    monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     schema = ExtractMetadataListResponseSchema()
 
