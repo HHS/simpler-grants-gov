@@ -13,11 +13,6 @@ export const startApplication = async (
   if (!token) {
     throw new Error(`Error starting application`);
   }
-  console.log("Starting application with:", {
-    applicationName,
-    competitionId,
-    token,
-  });
   const res = await fetch("/api/applications/start", {
     method: "POST",
     body: JSON.stringify({

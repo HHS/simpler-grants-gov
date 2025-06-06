@@ -1,24 +1,29 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import { ApiRequestError, parseErrorStatus, UnauthorizedError } from "src/errors";
+import {
+  ApiRequestError,
+  parseErrorStatus,
+} from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
+import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { FormDetail } from "src/types/formResponseTypes";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
-import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
-import { getSession } from "src/services/auth/session";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
   const meta: Metadata = {
-    title: `Form demo application landing page`,
+    title: `Application landing page`,
   };
   return meta;
 }
@@ -41,7 +46,7 @@ const FormLinks = ({
           return (
             <li key={form.form.form_name}>
               <Link
-                href={`/formPrototype/${applicationId}/form/${form.form.form_id}`}
+                href={`/workspace/applications/application/${applicationId}/form/${form.form.form_id}`}
               >
                 {form.form.form_name}
               </Link>
@@ -56,13 +61,18 @@ const FormLinks = ({
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    return new UnauthorizedError("No active session to access application");
+    return <TopLevelError />;
   }
   const { applicationId } = await params;
   let forms = [];
+  let opportunity = {} as OpportunityDetail;
 
   try {
-    const response = await getApplicationDetails(applicationId, userSession?.token);
+    const response = await getApplicationDetails(
+      applicationId,
+      userSession?.token,
+    );
+
     if (response.status_code !== 200) {
       console.error(
         `Error retrieving application details for (${applicationId})`,
@@ -70,7 +80,19 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       );
       return <TopLevelError />;
     }
-    forms = response.data.competition_forms;
+    forms = response.data.competition.competition_forms;
+    const opportunityId = response.data.competition.opportunity_id;
+    const opportunityResponse = await getOpportunityDetails(
+      String(opportunityId),
+    );
+    if (opportunityResponse.status_code !== 200) {
+      console.error(
+        `Error retrieving opportunity details for (${opportunityId})`,
+        response,
+      );
+      return <TopLevelError />;
+    }
+    opportunity = opportunityResponse.data;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -86,7 +108,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     <>
       <BetaAlert containerClasses="margin-top-5" />
       <GridContainer>
-        <h1>Form demo application page</h1>
+        <h1>Application</h1>
+        <OpportunityCard opportunityOverview={opportunity} />
         <legend className="usa-legend">
           The following is a list of available forms.
         </legend>

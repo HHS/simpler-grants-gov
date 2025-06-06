@@ -18,7 +18,6 @@ type sendyResponse = {
 
 export async function subscribeEmail(_prevState: unknown, formData: FormData) {
   const t = await getTranslations();
-  console.log(formData);
 
   const { errorMessage, validationErrors } = await subscribeEmailAction(
     t,

@@ -5,7 +5,7 @@ import { startApplication } from "src/services/fetch/fetchers/clientApplicationF
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-     import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useRef, useState } from "react";
 import {
   Button,
@@ -61,9 +61,8 @@ const StartApplicationModal = ({
   const modalId = "start-application";
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
-  const [apiError, setApiError] = useState<boolean>();
+  const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
-  const [saved, setSaved] = useState<boolean>();
 
   const handleSubmit = useCallback(() => {
     if (!user?.token) return;
@@ -71,30 +70,27 @@ const StartApplicationModal = ({
     if (validationError) {
       setValidationError(undefined);
     }
-    console.log("going", savedSearchName);
     if (!savedSearchName) {
-      setValidationError("Please enter a name for your application.");
+      setValidationError(t("startAppplicationModal.validationError"));
       return;
     }
     setLoading(true);
     startApplication(competitionId, savedSearchName, user.token)
       .then((data) => {
-        console.log("data", data);
         const { applicationId } = data;
         router.push(`/workspace/applications/application/${applicationId}`);
       })
       .catch((error) => {
-        console.log("error", error);
+        setError(t("startAppplicationModal.error"));
         console.error(error);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [router, user, savedSearchName, validationError]);
+  }, [competitionId, router, savedSearchName, t, user, validationError]);
 
   const onClose = useCallback(() => {
-    setSaved(false);
-    setApiError(false);
+    setError("");
     setLoading(false);
     setValidationError(undefined);
     setSavedSearchName("");
@@ -122,6 +118,8 @@ const StartApplicationModal = ({
       >
         <IndividiualCompetitionStartForm
           competitionTitle={competitionTitle}
+          loading={loading}
+          error={error}
           onClose={onClose}
           onSubmit={handleSubmit}
           onChange={onChange}
@@ -135,6 +133,8 @@ const StartApplicationModal = ({
 
 export const IndividiualCompetitionStartForm = ({
   competitionTitle,
+  error = "",
+  loading = false,
   modalRef,
   onChange,
   onClose,
@@ -142,6 +142,8 @@ export const IndividiualCompetitionStartForm = ({
   validationError = "",
 }: {
   competitionTitle: string;
+  loading?: boolean;
+  error?: string;
   modalRef: RefObject<ModalRef | null>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
@@ -162,6 +164,7 @@ export const IndividiualCompetitionStartForm = ({
           </span>
         </Label>
         {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <TextInput
           type="text"
@@ -171,7 +174,9 @@ export const IndividiualCompetitionStartForm = ({
         />
         <ModalFooter>
           <Button onClick={onSubmit} type="button">
-            {t("startAppplicationModal.saveButtonText")}
+            {loading
+              ? "loading..."
+              : t("startAppplicationModal.saveButtonText")}
           </Button>
           <ModalToggleButton
             modalRef={modalRef}

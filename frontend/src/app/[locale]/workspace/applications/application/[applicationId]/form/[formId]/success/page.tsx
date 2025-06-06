@@ -19,7 +19,7 @@ function FormSuccess() {
   return (
     <>
       <BetaAlert />
-      <h1>Form Demo Success</h1>
+      <h1>Form save success</h1>
       <Alert
         heading="Successful form submission"
         headingLevel="h3"

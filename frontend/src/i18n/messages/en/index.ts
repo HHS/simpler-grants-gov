@@ -1,5 +1,3 @@
-import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
-
 export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
@@ -120,10 +118,12 @@ export const messages = {
       cancelButtonText: "Cancel",
       description:
         "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+      error: "Error starting the application. Please try again.",
       name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",
       title: "New application",
+      validationError: "Please enter a name for your application.",
     },
     intro: {
       agency: "Agency: ",

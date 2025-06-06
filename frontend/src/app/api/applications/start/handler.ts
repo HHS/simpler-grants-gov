@@ -8,15 +8,16 @@ export const startApplicationHandler = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session start application");
     }
-    const { competitionId, applicationName } = await request.json();
-    console.log(competitionId, applicationName);
+    const { competitionId, applicationName } = await request.json() as {
+      competitionId: string;
+      applicationName: string;
+    };
 
     const response = await handleStartApplication(
       applicationName,
       competitionId,
       session.token,
     );
-    console.log("Response from handleStartApplication:", response);
 
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
