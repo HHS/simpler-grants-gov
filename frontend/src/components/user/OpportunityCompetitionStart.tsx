@@ -1,12 +1,15 @@
 "use client";
 
 import { useUser } from "src/services/auth/useUser";
+import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { RefObject, useRef } from "react";
+     import { useRouter } from 'next/navigation';
+import { RefObject, useCallback, useRef, useState } from "react";
 import {
   Button,
+  ErrorMessage,
   FormGroup,
   Label,
   ModalFooter,
@@ -18,17 +21,16 @@ import {
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const handleStartApplicationClose = () => {};
-
 export const OpportunityCompetitionStart = ({
   competitions,
 }: {
   competitions: [Competition];
 }) => {
   const { user } = useUser();
+  // const { checkFeatureFlag } = useFeatureFlags();
 
   const openCompetitions = competitionData({ competitions });
-  console.log(openCompetitions);
+
   if (!openCompetitions.length || !user?.token) {
     return <></>;
   } else {
@@ -37,7 +39,6 @@ export const OpportunityCompetitionStart = ({
         <StartApplicationModal
           competitionTitle={openCompetitions[0].competition_title}
           competitionId={openCompetitions[0].competition_id}
-          onClose={handleStartApplicationClose}
         />
       </>
     );
@@ -47,28 +48,64 @@ export const OpportunityCompetitionStart = ({
 type StartApplicationModalProps = {
   competitionId: string;
   competitionTitle: string;
-  error?: boolean;
-  saved?: boolean;
-  savedText?: string;
-  onClose: () => void;
 };
 
 const StartApplicationModal = ({
   competitionId,
   competitionTitle,
-  error,
-  saved = false,
-  savedText,
-  onClose,
 }: StartApplicationModalProps) => {
   const modalRef = useRef<ModalRef>(null);
+  const { user } = useUser();
+  const router = useRouter();
   const t = useTranslations("OpportunityListing");
   const modalId = "start-application";
+  const [validationError, setValidationError] = useState<string>();
+  const [savedSearchName, setSavedSearchName] = useState<string>();
+  const [apiError, setApiError] = useState<boolean>();
+  const [loading, setLoading] = useState<boolean>();
+  const [saved, setSaved] = useState<boolean>();
+
+  const handleSubmit = useCallback(() => {
+    if (!user?.token) return;
+
+    if (validationError) {
+      setValidationError(undefined);
+    }
+    console.log("going", savedSearchName);
+    if (!savedSearchName) {
+      setValidationError("Please enter a name for your application.");
+      return;
+    }
+    setLoading(true);
+    startApplication(competitionId, savedSearchName, user.token)
+      .then((data) => {
+        console.log("data", data);
+        const { applicationId } = data;
+        router.push(`/workspace/applications/application/${applicationId}`);
+      })
+      .catch((error) => {
+        console.log("error", error);
+        console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [router, user, savedSearchName, validationError]);
+
+  const onClose = useCallback(() => {
+    setSaved(false);
+    setApiError(false);
+    setLoading(false);
+    setValidationError(undefined);
+    setSavedSearchName("");
+  }, []);
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSavedSearchName(e.target.value);
+  }, []);
 
   return (
     <div className="display-flex flex-align-start">
-      {error}
-
       <ModalToggleButton modalRef={modalRef} opener className="usa-button">
         <USWDSIcon name="add" />
         {t("startApplicationButtonText")}
@@ -84,16 +121,12 @@ const StartApplicationModal = ({
         onClose={onClose}
       >
         <IndividiualCompetitionStartForm
-          cancelButtonText={t("startAppplicationModal.cancelButtonText")}
           competitionTitle={competitionTitle}
-          competitionId={competitionId}
-          description={t("startAppplicationModal.description")}
-          name={t("startAppplicationModal.name")}
-          requiredText={t("startAppplicationModal.requiredText")}
-          saveButtonText={t("startAppplicationModal.saveButtonText")}
           onClose={onClose}
+          onSubmit={handleSubmit}
+          onChange={onChange}
           modalRef={modalRef}
-          modalId={modalId}
+          validationError={validationError}
         />
       </SimplerModal>
     </div>
@@ -101,45 +134,45 @@ const StartApplicationModal = ({
 };
 
 export const IndividiualCompetitionStartForm = ({
-  cancelButtonText,
-  competitionId,
   competitionTitle,
-  description,
-  name,
   modalRef,
-  modalId,
+  onChange,
   onClose,
-  saveButtonText,
-  requiredText,
+  onSubmit,
+  validationError = "",
 }: {
-  cancelButtonText: string;
-  competitionId: string;
   competitionTitle: string;
-  name: string;
-  description: string;
   modalRef: RefObject<ModalRef | null>;
-  modalId: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
-  requiredText: string;
-  saveButtonText: string;
+  onSubmit: () => void;
+  validationError?: string;
 }) => {
+  const t = useTranslations("OpportunityListing");
+
   return (
     <div className="display-flex flex-align-start">
-      <FormGroup>
+      <FormGroup error={!!validationError}>
         <p className="font-sans-md">{competitionTitle}</p>
-        <p>{requiredText}</p>
+        <p>{t("startAppplicationModal.requiredText")}</p>
         <Label id={`label-for-name`} key={`label-for-name`} htmlFor="name">
-          {name}
-          {description && (
-            <span>
-              <br /> {description}
-            </span>
-          )}
+          {t("startAppplicationModal.name")}
+          <span>
+            <br /> {t("startAppplicationModal.description")}
+          </span>
         </Label>
+        {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
 
-        <TextInput type={"number"} name={"wtf"} id={"name"} />
+        <TextInput
+          type="text"
+          name="application-name"
+          id="application-name"
+          onChange={onChange}
+        />
         <ModalFooter>
-          <Button type="button">{saveButtonText}</Button>
+          <Button onClick={onSubmit} type="button">
+            {t("startAppplicationModal.saveButtonText")}
+          </Button>
           <ModalToggleButton
             modalRef={modalRef}
             closer
@@ -147,7 +180,7 @@ export const IndividiualCompetitionStartForm = ({
             className="padding-105 text-center"
             onClick={onClose}
           >
-            {cancelButtonText}
+            {t("startAppplicationModal.cancelButtonText")}
           </ModalToggleButton>
         </ModalFooter>
       </FormGroup>

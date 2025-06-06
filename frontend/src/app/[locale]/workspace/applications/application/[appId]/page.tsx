@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import { COMPETITION_ID } from "src/constants/competitions";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { ApiRequestError, parseErrorStatus, UnauthorizedError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
 import { FormDetail } from "src/types/formResponseTypes";
@@ -12,6 +11,8 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
+import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { getSession } from "src/services/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -53,14 +54,18 @@ const FormLinks = ({
 };
 
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
+  const userSession = await getSession();
+  if (!userSession || !userSession.token) {
+    return new UnauthorizedError("No active session to access application");
+  }
   const { applicationId } = await params;
   let forms = [];
 
   try {
-    const response = await getCompetitionDetails(COMPETITION_ID);
+    const response = await getApplicationDetails(applicationId, userSession?.token);
     if (response.status_code !== 200) {
       console.error(
-        `Error retrieving competition details for competitionId (${COMPETITION_ID})`,
+        `Error retrieving application details for (${applicationId})`,
         response,
       );
       return <TopLevelError />;
@@ -69,7 +74,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
-        `Error retrieving competition details for competitionId (${COMPETITION_ID})`,
+        `Error retrieving application details for application (${applicationId})`,
         e,
       );
       return <NotFound />;
