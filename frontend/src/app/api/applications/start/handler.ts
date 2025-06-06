@@ -8,7 +8,7 @@ export const startApplicationHandler = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session start application");
     }
-    const { competitionId, applicationName } = await request.json() as {
+    const { competitionId, applicationName } = (await request.json()) as {
       competitionId: string;
       applicationName: string;
     };
