@@ -10,6 +10,7 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.pagination.paginator import Paginator
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import OpportunityFactory
 
 DEFAULT_OPPORTUNITY_PARAMS = {
@@ -26,9 +27,7 @@ def create_opportunities(db_session, enable_factory_create):
     # Note that we can't just do db_session.query(Opportunity).delete() as the cascade deletes won't work automatically:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-queryguide-update-delete-caveats
     # but if we do it individually they will
-    opportunities = db_session.query(Opportunity).all()
-    for opp in opportunities:
-        db_session.delete(opp)
+    cascade_delete_from_db_table(db_session, Opportunity)
 
     # 5 with the default params
     OpportunityFactory.create_batch(5, **DEFAULT_OPPORTUNITY_PARAMS)

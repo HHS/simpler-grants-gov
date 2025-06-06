@@ -2,6 +2,8 @@ import logging
 
 from flask import request
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
@@ -14,15 +16,17 @@ logger = logging.getLogger(__name__)
 
 
 @legacy_soap_api_blueprint.post("/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort")
-def simpler_soap_applicants_api() -> tuple:
+@flask_db.with_db_session()
+def simpler_soap_applicants_api(db_session: db.Session) -> tuple:
     logger.info("applicants soap request received")
     client = SimplerApplicantsS2SClient(
+        db_session=db_session,
         soap_request=SOAPRequest(
             method="POST",
             full_path=request.full_path,
             headers=dict(request.headers),
             data=request.data,
-        )
+        ),
     )
     add_extra_data_to_current_request_logs(
         {
@@ -35,15 +39,17 @@ def simpler_soap_applicants_api() -> tuple:
 
 
 @legacy_soap_api_blueprint.post("/grantsws-agency/services/v2/AgencyWebServicesSoapPort")
-def simpler_soap_grantors_api() -> tuple:
+@flask_db.with_db_session()
+def simpler_soap_grantors_api(db_session: db.Session) -> tuple:
     logger.info("grantors soap request received")
     client = SimplerGrantorsS2SClient(
+        db_session=db_session,
         soap_request=SOAPRequest(
             method="POST",
             full_path=request.full_path,
             headers=dict(request.headers),
             data=request.data,
-        )
+        ),
     )
     add_extra_data_to_current_request_logs(
         {
