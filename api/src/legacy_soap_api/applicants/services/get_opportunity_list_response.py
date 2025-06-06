@@ -31,64 +31,41 @@ def get_opportunity_list_response(
 def get_competitions_from_opportunity_list_request(
     db_session: db.Session, get_opportunity_list_request: GetOpportunityListRequest
 ) -> Sequence:
-    if get_opportunity_list_request.package_id:
-        return _get_competitions_by_legacy_package_id(
-            db_session, get_opportunity_list_request.package_id
-        )
-    return _get_competitions_by_opportunity_filter(
-        db_session, get_opportunity_list_request.opportunity_filter
+    return _get_competitions(
+        db_session,
+        get_opportunity_list_request.package_id,
+        get_opportunity_list_request.opportunity_filter,
     )
 
 
-def _get_competitions_by_legacy_package_id(
-    db_session: db.Session, legacy_package_id: str
+def _get_competitions(
+    db_session: db.Session,
+    legacy_package_id: str | None,
+    opportunity_filter: OpportunityFilter | None,
 ) -> Sequence:
-    return (
-        db_session.execute(
-            select(Competition)
-            .join(Opportunity)
-            .where(Competition.legacy_package_id == legacy_package_id)
-        )
-        .scalars()
-        .all()
-    )
-
-
-def _get_competitions_by_opportunity_filter(
-    db_session: db.Session, opportunity_filter: OpportunityFilter | None
-) -> Sequence:
-    if not opportunity_filter:
+    if legacy_package_id is None and opportunity_filter is None:
         return []
 
-    query = select(Competition).join(Opportunity)
-    if opportunity_filter.cfda_number:
-        query.join(
-            OpportunityAssistanceListing,
-            OpportunityAssistanceListing.assistance_listing_number
-            == opportunity_filter.cfda_number,
-        )
-    if opportunity_filter.competition_id:
-        query = query.where(Competition.public_competition_id == opportunity_filter.competition_id)
-    if opportunity_filter.funding_opportunity_number:
-        query = query.where(
-            Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
-        )
-    return db_session.execute(query).scalars().all()
+    stmt = select(Competition).join(Opportunity)
 
-
-def _get_opportunity_filter_and_clause(opportunity_filter: OpportunityFilter) -> Sequence:
-    and_clause = []
-    if opportunity_filter.competition_id:
-        and_clause.append(Competition.public_competition_id == opportunity_filter.competition_id)
-    if opportunity_filter.funding_opportunity_number:
-        and_clause.append(
-            Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
-        )
-    if opportunity_filter.cfda_number:
-        and_clause.append(
-            OpportunityAssistanceListing.assistance_listing_number == opportunity_filter.cfda_number
-        )
-    return and_clause
+    if legacy_package_id is not None:
+        stmt = stmt.where(Competition.legacy_package_id == legacy_package_id)
+    elif opportunity_filter is not None:
+        if opportunity_filter.cfda_number:
+            stmt.join(
+                OpportunityAssistanceListing,
+                OpportunityAssistanceListing.assistance_listing_number
+                == opportunity_filter.cfda_number,
+            )
+        if opportunity_filter.competition_id:
+            stmt = stmt.where(
+                Competition.public_competition_id == opportunity_filter.competition_id
+            )
+        if opportunity_filter.funding_opportunity_number:
+            stmt = stmt.where(
+                Opportunity.opportunity_number == opportunity_filter.funding_opportunity_number
+            )
+    return db_session.execute(stmt).scalars().all()
 
 
 def _build_get_opportunity_list_response(competitions: list) -> GetOpportunityListResponse:
@@ -126,5 +103,4 @@ def _get_cfda_details(
 
 
 def _get_opened_competitions(competitions: Sequence[Competition]) -> list[Competition]:
-    open_competitions = list(filter(lambda competition: competition.is_open, competitions))
-    return open_competitions if open_competitions else []
+    return list(filter(lambda competition: competition.is_open, competitions))

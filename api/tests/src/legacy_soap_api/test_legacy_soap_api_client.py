@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.opportunity_models import Opportunity
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.applicants.schemas import (
     OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
@@ -53,7 +53,6 @@ class TestGetOpportunityList:
         # This will truncate the competitions and related data for each test within this test class.
         cascade_delete_from_db_table(db_session, Competition)
         cascade_delete_from_db_table(db_session, Opportunity)
-        cascade_delete_from_db_table(db_session, OpportunityAssistanceListing)
 
     @pytest.fixture
     def soap_request(self):

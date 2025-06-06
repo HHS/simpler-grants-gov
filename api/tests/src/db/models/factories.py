@@ -962,7 +962,9 @@ class CompetitionFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
-    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
+    opportunity_assistance_listing = factory.SubFactory(
+        OpportunityAssistanceListingFactory, opportunity=factory.SelfAttribute("..opportunity")
+    )
 
     competition_forms = factory.RelatedFactoryList(
         "tests.src.db.models.factories.CompetitionFormFactory",
