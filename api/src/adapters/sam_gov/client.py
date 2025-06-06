@@ -67,9 +67,13 @@ class SamGovClient(BaseSamGovClient):
         Returns:
             Dictionary of headers.
         """
+        if not self.api_key:
+            raise ValueError("API key must be provided for SAM.gov API access")
+
         return {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "x-api-key": self.api_key,
         }
 
     def download_extract(
@@ -105,7 +109,7 @@ class SamGovClient(BaseSamGovClient):
         # Build URL and parameters for file download
         url = urljoin(self.api_url, "data-services/v1/extracts")
 
-        params = {"fileName": extract_request.file_name, "api_key": self.api_key}
+        params = {"fileName": extract_request.file_name}
 
         try:
             headers = self._build_headers()
@@ -187,7 +191,6 @@ class SamGovClient(BaseSamGovClient):
         # Add API key to query parameters
         if params is None:
             params = {}
-        params["api_key"] = self.api_key
 
         if "timeout" not in kwargs:
             kwargs["timeout"] = 30  # Default timeout

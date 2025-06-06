@@ -1,6 +1,6 @@
 """Models for SAM.gov API client."""
 
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from pydantic import BaseModel, Field
 
