@@ -10,9 +10,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const FEATURE_FLAGS_KEY = "_ff";
 
-// 3 months
+// 7 days
 export const getCookieExpiration = () =>
-  new Date(Date.now() + 1000 * 60 * 60 * 24 * 90);
+  new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 
 /**
  * Check whether it is a valid feature flag.
@@ -71,6 +71,13 @@ export function setCookie(value: string, cookies: NextResponse["cookies"]) {
     value,
     expires,
   });
+}
+
+/**
+ * Delete a cookie using the NextResponse['cookies'] interface
+ */
+export function deleteCookie(cookies: NextResponse["cookies"]) {
+  cookies?.delete({ name: FEATURE_FLAGS_KEY });
 }
 
 /**
