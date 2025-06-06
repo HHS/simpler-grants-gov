@@ -1,3 +1,4 @@
+from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import Opportunity
 from dataclasses import dataclass
@@ -20,6 +21,8 @@ class JsonRuleContext:
         # We create a copy of the json answers, just in case there
         # is any problem we won't immediately change the answer in the DB
         self.json_data = copy.deepcopy(self.application_form.application_response)
+
+        self.validation_issues: list[ValidationErrorDetail] = []
 
 
     @property

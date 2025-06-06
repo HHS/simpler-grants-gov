@@ -1,4 +1,4 @@
-from src.form_schema.rule_processing.json_rule_util import populate_nested_value, get_nested_value
+from src.form_schema.rule_processing.json_rule_util import populate_nested_value, get_nested_value, build_path_str
 import pytest
 
 @pytest.mark.parametrize("existing_json,path,value,expected_json",[
@@ -32,3 +32,12 @@ def test_populate_nested_value_non_dict_in_path():
 ])
 def test_get_nested_value(json_data,path,expected_value):
     assert get_nested_value(json_data, path) == expected_value
+
+@pytest.mark.parametrize("path,expected_str",[
+    (["path", "to", "field"], "$.path.to.field"),
+    (["my_field"], "$.my_field"),
+    ([], "$"),
+    (["a", "b", "c", "d", "e"], "$.a.b.c.d.e"),
+])
+def test_build_path_str(path, expected_str):
+    assert build_path_str(path) == expected_str

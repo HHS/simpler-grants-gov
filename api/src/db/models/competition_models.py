@@ -190,6 +190,8 @@ class Form(ApiSchemaTable, TimestampMixin):
         FormInstruction, cascade="all, delete-orphan", single_parent=True
     )
 
+    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
+
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_form"

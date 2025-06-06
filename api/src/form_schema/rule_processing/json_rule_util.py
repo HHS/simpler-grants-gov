@@ -1,5 +1,12 @@
 from typing import Any
 
+def build_path_str(path: list[str]) -> str:
+    """Build a path string for validation issues
+
+    We prepend $. on the front to mimic the format of
+    the JSON Schema validation
+    """
+    return ".".join(["$"] + path)
 
 def get_nested_value(data: dict, path: list[str]) -> Any:
     """Fetch a value from a dictionary based on the nested path

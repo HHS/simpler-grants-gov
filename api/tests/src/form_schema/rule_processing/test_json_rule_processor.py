@@ -1,14 +1,14 @@
 import uuid
 
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig
-from src.form_schema.rule_processing.json_rule_processor import process_rule_schema, JsonRuleContext
+from src.form_schema.rule_processing.json_rule_processor import process_rule_schema, JsonRuleContext, process_rule_schema_for_context
 from tests.src.db.models.factories import ApplicationFormFactory, OpportunityFactory, CompetitionFactory, ApplicationFactory, CompetitionFormFactory, AgencyFactory, LinkExternalUserFactory, \
-    ApplicationUserFactory
+    ApplicationUserFactory, FormFactory
 import freezegun
 
 def setup_context(
         json_data: dict,
-        # rule_schema: dict, # TODO - needs to be in the table
+        rule_schema: dict,
         # These are various params that be set in the application
         # if the value is None, we'll just leave it to the factory to set.
         opportunity_number: str | None = None,
@@ -34,7 +34,8 @@ def setup_context(
 
     opportunity = OpportunityFactory.create(**opp_params)
     competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
-    competition_form = CompetitionFormFactory.create(competition=competition)
+    form = FormFactory.create(form_rule_schema=rule_schema)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(competition=competition)
     application_form = ApplicationFormFactory.create(application=application, competition_form=competition_form, application_response=json_data)
@@ -82,9 +83,9 @@ def test_process_rule_schema(enable_factory_create):
     }
 
 
-    context = setup_context({"existing_field": "bob", "opp_number_field": "something else", "nested": {"another_nested_field": "X"}}, opportunity_number="ABC-XYZ-123", opportunity_title="My opportunity title", agency_name="My example agency", user_email="mymail@example.com")
+    context = setup_context({"existing_field": "bob", "opp_number_field": "something else", "nested": {"another_nested_field": "X"}}, rule_schema=rule_schema, opportunity_number="ABC-XYZ-123", opportunity_title="My opportunity title", agency_name="My example agency", user_email="mymail@example.com")
 
-    process_rule_schema(context, rule_schema, [])
+    process_rule_schema_for_context(context)
 
     # Verify that the actual DB object is not modified
     assert context.application_form.application_response == {"existing_field": "bob", "opp_number_field": "something else", "nested": {"another_nested_field": "X"}}
@@ -106,3 +107,12 @@ def test_process_rule_schema(enable_factory_create):
     print("---")
     print(context.application_form.application_response)
     print(context.json_data)
+
+def test_process_null_rule_schema():
+    pass
+
+def test_bad_rule_schema():
+    pass
+
+# TODO - more tests (validation, other scenarios?)
+# TODO - logging
