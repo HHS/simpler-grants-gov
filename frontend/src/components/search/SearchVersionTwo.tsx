@@ -13,6 +13,7 @@ import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
+import { AndOrPanel } from "./AndOrPanel";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -72,6 +73,7 @@ export function SearchVersionTwo({
               </div>
             </div>
           </div>
+          <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
           <SearchResults
             searchParams={convertedSearchParams}
             loadingMessage={t("loading")}

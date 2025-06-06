@@ -188,6 +188,7 @@ function convertSearchInputSetsToArrays(
       : [],
     agency: searchInputs.agency ? Array.from(searchInputs.agency) : [],
     category: searchInputs.category ? Array.from(searchInputs.category) : [],
+    closeDate: searchInputs.closeDate ? Array.from(searchInputs.closeDate) : [],
     query: searchInputs.query,
     sortby: searchInputs.sortby,
     page: searchInputs.page,

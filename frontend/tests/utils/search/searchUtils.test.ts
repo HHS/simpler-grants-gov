@@ -9,6 +9,7 @@ import {
   areSetsEqual,
   getAgencyDisplayName,
   paramsToFormattedQuery,
+  paramToDateRange,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
 import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
@@ -354,5 +355,20 @@ describe("agenciesToFilterOptions", () => {
         value: "FAKEORG",
       },
     ]);
+  });
+});
+
+describe("paramToDateRange", () => {
+  it("returns empty set if no param value", () => {
+    expect(paramToDateRange()).toEqual(new Set());
+  });
+  it("returns first value in set if only one param value", () => {
+    expect(paramToDateRange("hi")).toEqual(new Set(["hi"]));
+  });
+  it("returns set of first two values (comma separated) in param otherwise", () => {
+    expect(paramToDateRange("hi,there")).toEqual(new Set(["hi", "there"]));
+    expect(paramToDateRange("hi,there,again")).toEqual(
+      new Set(["hi", "there"]),
+    );
   });
 });
