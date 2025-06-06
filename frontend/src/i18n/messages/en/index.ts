@@ -219,12 +219,12 @@ export const messages = {
     pageTitle: "Vision | Simpler.Grants.gov",
     pageHeaderTitle: "Our vision",
     pageHeaderParagraph:
-      "We believe that applying for federal financial assistance should be simple, accessible, and easy. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
+      "We believe that applying for federal financial assistance should be simple and straightforward. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
     sections: {
       mission: {
         title: "Our mission",
         paragraph:
-          "We want to increase access to federal funding opportunities and continuously improve the grants experience for everyone—whether you’re an applicant searching for funding or a federal agency posting opportunities.",
+          "We’re dedicated to making federal funding opportunities simpler to navigate and the grants experience more seamless for everyone.",
         contentItems: [
           [
             {
