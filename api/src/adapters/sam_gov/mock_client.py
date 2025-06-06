@@ -112,7 +112,7 @@ class MockSamGovClient(BaseSamGovClient):
             file_name=file_name,
             file_size=self.extracts[file_name]["size"],
             content_type=self.extracts[file_name]["content_type"],
-            download_date=datetime_util.utc_now(),
+            download_date=datetime_util.utcnow(),
         )
 
     def add_mock_extract(

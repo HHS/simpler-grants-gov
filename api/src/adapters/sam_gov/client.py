@@ -139,7 +139,7 @@ class SamGovClient(BaseSamGovClient):
                 file_name=output_path,
                 file_size=int(response.headers.get("Content-Length", 0)),
                 content_type=response.headers.get("Content-Type", "application/octet-stream"),
-                download_date=datetime_util.utc_now(),
+                download_date=datetime_util.utcnow(),
             )
 
             return extract_response
