@@ -40,10 +40,6 @@ def test_competition_get_with_instructions_200(
 ):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
-    # Set environment variables for S3 configuration
-    monkeypatch.setenv("PUBLIC_FILES_BUCKET", f"s3://{mock_s3_bucket}")
-    monkeypatch.delenv("CDN_URL")
-
     # Create a competition with instructions and custom file contents
     competition = CompetitionFactory.create(with_instruction=True)
 
