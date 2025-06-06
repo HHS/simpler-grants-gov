@@ -1,7 +1,7 @@
 """Create sam extract files
 
 Revision ID: 88fe2421df91
-Revises: 3b0705202c54
+Revises: 071e2b0d79fe
 Create Date: 2025-05-07 19:13:21.359795
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "88fe2421df91"
-down_revision = "3b0705202c54"
+down_revision = "071e2b0d79fe"
 branch_labels = None
 depends_on = None
 
