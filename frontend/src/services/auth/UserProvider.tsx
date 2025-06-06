@@ -1,7 +1,7 @@
 "use client";
 
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
-import { useReactiveGetCookie } from "cookies-next";
+import { useGetCookie } from "cookies-next";
 import noop from "lodash/noop";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
@@ -19,7 +19,7 @@ export default function UserProvider({
   featureFlagDefaults: FeatureFlags;
   children: React.ReactNode;
 }) {
-  const getCookie = useReactiveGetCookie();
+  const getCookie = useGetCookie();
   const cookie = decodeURIComponent(getCookie(FEATURE_FLAGS_KEY) || "{}");
   const [localUser, setLocalUser] = useState<UserProfile>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
