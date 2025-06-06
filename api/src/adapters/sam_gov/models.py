@@ -1,11 +1,11 @@
 """Models for SAM.gov API client."""
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class EntityStatus(str, Enum):
+class EntityStatus(StrEnum):
     """Entity status in SAM.gov."""
 
     ACTIVE = "ACTIVE"
