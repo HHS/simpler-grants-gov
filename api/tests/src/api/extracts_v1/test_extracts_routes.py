@@ -186,7 +186,6 @@ def test_extract_metadata_presigned_url(
     monkeypatch.setattr(file_util, "_s3_config", None)
 
     monkeypatch.setenv("CDN_URL", "")  # Empty string to ensure no CDN is used
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
     monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://local-mock-public-bucket")
 
     # Create test extract with known file content
