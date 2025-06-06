@@ -1240,6 +1240,10 @@ class ApplicationFactory(BaseFactory):
             ),
         )
 
+        with_organization = factory.Trait(
+            organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
+        )
+
 
 class ApplicationFormFactory(BaseFactory):
     class Meta:
@@ -2439,10 +2443,26 @@ class OrganizationFactory(BaseFactory):
         model = entity_models.Organization
 
     organization_id = Generators.UuidObj
-    sam_gov_entity = sometimes_none(factory.SubFactory(SamGovEntityFactory), none_chance=0.2)
+    sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
     sam_gov_entity_id = factory.LazyAttribute(
         lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
     )
+
+    class Params:
+        no_sam_gov_entity = factory.Trait(sam_gov_entity=None)
+
+
+class OrganizationUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.OrganizationUser
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    is_organization_owner = True
 
 
 class ApplicationUserFactory(BaseFactory):
