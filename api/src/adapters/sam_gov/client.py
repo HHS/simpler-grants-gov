@@ -2,7 +2,6 @@
 
 import abc
 import logging
-from datetime import datetime
 from typing import Any
 from urllib.parse import urljoin
 
@@ -10,6 +9,7 @@ import requests
 
 from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
+from src.util import datetime_util
 from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
@@ -139,7 +139,7 @@ class SamGovClient(BaseSamGovClient):
                 file_name=output_path,
                 file_size=int(response.headers.get("Content-Length", 0)),
                 content_type=response.headers.get("Content-Type", "application/octet-stream"),
-                download_date=datetime.now(),
+                download_date=datetime_util.utc_now(),
             )
 
             return extract_response

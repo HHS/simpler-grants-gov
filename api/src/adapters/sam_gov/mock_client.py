@@ -6,8 +6,9 @@ import os
 
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
-from src.util.file_util import copy_file, open_stream
 from src.util import datetime_util
+from src.util.file_util import copy_file, open_stream
+
 logger = logging.getLogger(__name__)
 
 # Example SAM.gov extract files
