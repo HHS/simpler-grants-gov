@@ -52,6 +52,13 @@ def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
             },
     }
     """
+    # If the path is empty, we assume the rule is misconfigured
+    # as we can't populate a field we don't know the name of
+    if len(path) == 0:
+        raise ValueError("Unable to populate nested value, empty path given")
+
+    # Iterate down the path, creating dicts if one
+    # does not already exist.
     data = json_data
     for part in path[:-1]:
         if part in data:
@@ -71,6 +78,7 @@ def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
                 f"Unable to populate nested value, value in path is not a dictionary: {'.'.join(path)}"
             )
 
+    # Set (and override) the value
     data[path[-1]] = value
 
     return json_data

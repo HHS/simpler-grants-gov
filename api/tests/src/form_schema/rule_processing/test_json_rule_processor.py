@@ -164,10 +164,75 @@ def test_configurations():
     pass
 
 
-def test_bad_rule_schema():
-    # TODO
-    pass
+def test_bad_rule_schema_no_rule(enable_factory_create, caplog):
+    rule_schema={
+        "my_field": {
+            "gg_pre_population": {}
+        }
+    }
+    context = setup_context({}, rule_schema=rule_schema)
+    process_rule_schema_for_context(context)
 
+    # Verify nothing was changed
+    assert context.application_form.application_response == {}
+    assert context.json_data == {}
+    assert context.validation_issues == []
+
+    # Verify we logged a warning for a bad rule
+    assert "Rule code is null for configuration" in caplog.messages
+
+def test_bad_rule_schema_rule_not_configured(enable_factory_create, caplog):
+    rule_schema={
+        "my_field": {
+            "gg_post_population": {
+                "rule": "not-a-real-rule"
+            }
+        }
+    }
+    context = setup_context({}, rule_schema=rule_schema)
+    process_rule_schema_for_context(context)
+
+    # Verify nothing was changed
+    assert context.application_form.application_response == {}
+    assert context.json_data == {}
+    assert context.validation_issues == []
+
+    # Verify we logged a warning for a bad rule
+    assert "Rule code does not have a defined mapper" in caplog.messages
+
+def test_bad_rule_schema_at_top_level_population(enable_factory_create, caplog):
+    rule_schema={
+        "gg_post_population": {
+            "rule": "current_date"
+        }
+    }
+    context = setup_context({}, rule_schema=rule_schema)
+    process_rule_schema_for_context(context)
+
+    # Verify nothing was changed
+    assert context.application_form.application_response == {}
+    assert context.json_data == {}
+    assert context.validation_issues == []
+
+    # Verify we logged a warning for a bad rule
+    assert "Failed to handle field population" in caplog.messages
+
+def test_bad_rule_schema_at_top_level_validation(enable_factory_create, caplog):
+    rule_schema={
+        "gg_validation": {
+            "rule": "attachment"
+        }
+    }
+    context = setup_context({}, rule_schema=rule_schema)
+    process_rule_schema_for_context(context)
+
+    # Verify nothing was changed
+    assert context.application_form.application_response == {}
+    assert context.json_data == {}
+    assert context.validation_issues == []
+
+    # Verify we logged a warning for a bad rule
+    assert "Failed to handle field population" in caplog.messages
 
 # TODO - more tests (other scenarios?)
 # TODO - logging

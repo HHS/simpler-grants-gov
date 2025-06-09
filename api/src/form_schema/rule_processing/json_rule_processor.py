@@ -30,7 +30,7 @@ handlers: dict[str, Callable[[JsonRuleContext, dict, list[str]], None]] = {
 
 
 def process_rule_schema_for_context(context: JsonRuleContext) -> None:
-    """TODO"""
+    """TODO Process"""
     # If there is no rule schema configured, return
     rule_schema = context.application_form.form.form_rule_schema
     if rule_schema is None:
