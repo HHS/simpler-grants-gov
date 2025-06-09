@@ -118,6 +118,9 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
                 data=e.fault.to_xml(),
                 status_code=500,
             )
+        except Exception as e:
+            logger.info(f"simpler_soap_api_err: Unable to generate soap response: {e}")
+            simpler_soap_response = None
 
         return self.proxy_response, simpler_soap_response
 
