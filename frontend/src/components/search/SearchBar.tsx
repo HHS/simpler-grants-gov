@@ -12,7 +12,7 @@ import { ErrorMessage, Icon, Label } from "@trussworks/react-uswds";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 interface SearchBarProps {
-  queryTermFromParent: string | null | undefined;
+  queryTermFromParent?: string | null;
   tableView?: boolean;
 }
 

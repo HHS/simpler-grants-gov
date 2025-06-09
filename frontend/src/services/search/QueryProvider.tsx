@@ -1,18 +1,9 @@
 "use client";
 
+import { QueryContextParams } from "src/types/search/searchQueryTypes";
+
 import { useSearchParams } from "next/navigation";
 import { createContext, useCallback, useMemo, useState } from "react";
-
-interface QueryContextParams {
-  queryTerm: string | null | undefined;
-  updateQueryTerm: (term: string) => void;
-  totalPages: string | null | undefined;
-  updateTotalPages: (page: string) => void;
-  totalResults: string;
-  updateTotalResults: (total: string) => void;
-  updateLocalAndOrParam: (value: string) => void;
-  localAndOrParam: string;
-}
 
 export const QueryContext = createContext({} as QueryContextParams);
 

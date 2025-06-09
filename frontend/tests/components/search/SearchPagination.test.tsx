@@ -1,16 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { QueryContext } from "src/services/search/QueryProvider";
+import {
+  FakeQueryProvider,
+  mockUpdateTotalPages,
+  mockUpdateTotalResults,
+} from "src/utils/testing/providerMocks";
 
 import React from "react";
 
 import SearchPagination from "src/components/search/SearchPagination";
 
-let fakeTotalPages = "1";
-const mockUpdateTotalPages = jest.fn();
-const mockUpdateTotalResults = jest.fn();
 const mockUpdateQueryParams = jest.fn();
-const mockUpdateLocalAndOrParam = jest.fn();
 
 // Mock the useSearchParamUpdater hook
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -19,32 +19,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-const FakeQueryProvider = ({ children }: { children: React.ReactNode }) => {
-  const contextValue = {
-    updateTotalPages: mockUpdateTotalPages,
-    updateTotalResults: mockUpdateTotalResults,
-    totalPages: fakeTotalPages,
-    queryTerm: "",
-    // eslint-disable-next-line
-    updateQueryTerm: () => {},
-    totalResults: "",
-    updateLocalAndOrParam: mockUpdateLocalAndOrParam,
-    localAndOrParam: "",
-  };
-  return (
-    <QueryContext.Provider value={contextValue}>
-      {children}
-    </QueryContext.Provider>
-  );
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe("SearchPagination", () => {
   beforeEach(() => {
-    fakeTotalPages = "1";
     jest.clearAllMocks();
   });
 
@@ -74,9 +54,9 @@ describe("SearchPagination", () => {
     expect(screen.getByRole("navigation")).toBeInTheDocument();
   });
   it("Does not render Pagination component when pages <= 0", () => {
-    fakeTotalPages = "0";
+    // fakeTotalPages = "0";
     render(
-      <FakeQueryProvider>
+      <FakeQueryProvider totalPages="0">
         <SearchPagination page={1} query={"test"} totalPages={0} />
       </FakeQueryProvider>,
     );
