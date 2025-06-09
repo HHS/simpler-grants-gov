@@ -32,7 +32,7 @@ export default function FeatureFlagsTable() {
         <thead>
           <tr>
             <th scope="col">Default</th>
-            <th scope="col">Current</th>
+            <th scope="col">Your Setting</th>
             <th scope="col">Feature Flag</th>
             <th scope="col">Actions</th>
           </tr>
