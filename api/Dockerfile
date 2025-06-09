@@ -56,8 +56,26 @@ ARG RUN_USER
 # In between ARG RUN_USER and USER ${RUN_USER}, the user is still root
 # If there is anything that needs to be ran as root, this is the spot
 
-# Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz
+# Install graphviz which is used to generate ERD diagrams and playwright headless browser library deps.
+RUN apt-get update && apt-get install --no-install-recommends --yes \
+    graphviz \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libxss1 \
+    libasound2 \
+    libxcomposite1 \
+    libxrandr2 \
+    libgtk-3-0 \
+    libgbm1 \
+    libdrm2 \
+    libu2f-udev \
+    fonts-liberation \
+    libappindicator3-1 \
+    xdg-utils \
+    lsb-release \
+    libatk1.0-0 \
+    libpangocairo-1.0-0 \
+    && rm -fr /var/lib/apt/lists/*
 
 USER ${RUN_USER}
 WORKDIR /api
@@ -67,6 +85,8 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.in-project false && poetry env use python
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
+
+RUN poetry run playwright install
 
 COPY . /api
 
@@ -115,6 +135,8 @@ RUN poetry install --no-root --only main
 # version section in pyproject.toml, you will need to change the dist/... to match
 # or the application will not build
 RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
+
+RUN poetry run playwright install
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defiend in pyproject.toml

@@ -7,6 +7,7 @@ from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
 from pydantic import Field
+from playwright.sync_api import sync_playwright
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -153,6 +154,23 @@ def configure_app(app: APIFlask) -> None:
     @app.error_processor
     def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:
         return restructure_error_response(error)
+
+    @app.get("/pdf/download")
+    def download_pdf():
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+            page.goto("http://host.docker.internal:3000/pdf")
+            page.wait_for_load_state("networkidle")
+            div_selector = "#pdf-id-target"
+            div_html = page.inner_html(div_selector)
+            new_page = context.new_page()
+            new_page.set_content(f"<html><body>{div_html}</body></html>")
+            new_page.wait_for_load_state("load")
+            new_page.pdf(path="data.pdf", format="A4")
+            browser.close()
+        return "success"
 
 
 def register_blueprints(app: APIFlask) -> None:
