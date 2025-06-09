@@ -1,6 +1,6 @@
 """Models for SAM.gov API client."""
 
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,7 @@ class EntityStatus(StrEnum):
     INACTIVE = "INACTIVE"
 
 
-class EntityType(str, Enum):
+class EntityType(StrEnum):
     """Entity type in SAM.gov."""
 
     BUSINESS = "BUSINESS"
@@ -20,7 +20,7 @@ class EntityType(str, Enum):
     INDIVIDUAL = "INDIVIDUAL"
 
 
-class SensitivityLevel(str, Enum):
+class SensitivityLevel(StrEnum):
     """Sensitivity level for SAM.gov API requests."""
 
     PUBLIC = "PUBLIC"
@@ -28,7 +28,7 @@ class SensitivityLevel(str, Enum):
     SENSITIVE = "SENSITIVE"
 
 
-class FileType(str, Enum):
+class FileType(StrEnum):
     """File types available for SAM.gov extracts."""
 
     ENTITY = "ENTITY"
@@ -37,14 +37,14 @@ class FileType(str, Enum):
     BIO = "BIO"
 
 
-class FileFormat(str, Enum):
+class FileFormat(StrEnum):
     """File formats available for SAM.gov extracts."""
 
     UTF8 = "UTF8"
     ASCII = "ASCII"
 
 
-class ExtractType(str, Enum):
+class ExtractType(StrEnum):
     """Extract types available for SAM.gov."""
 
     MONTHLY = "MONTHLY"
