@@ -23,7 +23,7 @@ export function AndOrPanel({ hasSearchTerm }: { hasSearchTerm: boolean }) {
       // if a search term isn't present, queue up the and/or value to be applied when we run the next search
       updateLocalAndOrParam(event.target.value);
     },
-    [hasSearchTerm],
+    [hasSearchTerm, setQueryParam, updateLocalAndOrParam],
   );
 
   return andOrOptions.map((option) => {

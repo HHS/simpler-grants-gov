@@ -62,11 +62,7 @@ describe("SearchBar", () => {
     const searchButton = screen.getByRole("button", { name: /search/i });
     fireEvent.click(searchButton);
 
-    expect(mockUpdateQueryParams).toHaveBeenCalledWith(
-      "",
-      "query",
-      "new query",
-    );
+    expect(mockUpdateQueryParams).toHaveBeenCalledWith("", "", "new query");
   });
 
   it("raises a validation error on submit if search term is > 99 characters, then clears error on successful search", () => {
@@ -99,7 +95,7 @@ describe("SearchBar", () => {
     fireEvent.click(searchButton);
     expect(mockUpdateQueryParams).toHaveBeenCalledWith(
       "",
-      "query",
+      "",
       "totally valid search terms",
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

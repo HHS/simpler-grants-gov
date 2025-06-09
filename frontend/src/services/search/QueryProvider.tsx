@@ -40,6 +40,8 @@ export default function QueryProvider({
     setTotalPages(page);
   }, []);
 
+  // added here rather than in the useSearchParamUpdater hook since this value needs to be
+  // consistent across the app, not just per hook invocation. See https://github.com/HHS/simpler-grants-gov/issues/5276 for more
   const updateLocalAndOrParam = useCallback((paramValue: string) => {
     setLocalAndOrParam(paramValue);
   }, []);

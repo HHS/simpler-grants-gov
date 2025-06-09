@@ -74,25 +74,6 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`);
   };
 
-  // const setStaticQueryParam = (key: string, value: string) => {
-  //   params.set(key, value);
-  //   window.history.pushState(
-  //     null,
-  //     "",
-  //     `${pathname}${paramsToFormattedQuery(params)}`,
-  //   );
-  // };
-
-  // updates local query params but does not navigate
-  // queued query param update will be applied during next call to
-  // any other useSearchParamUpdater function
-  // returns the local params state
-  const setQueuedQueryParam = (key: string, value: string) => {
-    params.set(key, value);
-    return params;
-  };
-
-  console.log("$$$ local params", params);
   return {
     searchParams,
     updateQueryParams,
@@ -100,8 +81,5 @@ export function useSearchParamUpdater() {
     removeQueryParam,
     setQueryParam,
     clearQueryParams,
-    // setStaticQueryParam,
-    setQueuedQueryParam,
-    // localParams: params,
   };
 }

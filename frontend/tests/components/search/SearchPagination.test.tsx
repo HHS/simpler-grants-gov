@@ -10,6 +10,7 @@ let fakeTotalPages = "1";
 const mockUpdateTotalPages = jest.fn();
 const mockUpdateTotalResults = jest.fn();
 const mockUpdateQueryParams = jest.fn();
+const mockUpdateLocalAndOrParam = jest.fn();
 
 // Mock the useSearchParamUpdater hook
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -27,6 +28,8 @@ const FakeQueryProvider = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line
     updateQueryTerm: () => {},
     totalResults: "",
+    updateLocalAndOrParam: mockUpdateLocalAndOrParam,
+    localAndOrParam: "",
   };
   return (
     <QueryContext.Provider value={contextValue}>
