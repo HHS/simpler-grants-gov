@@ -43,12 +43,14 @@ def test_populate_nested_value_non_dict_in_path():
     ):
         populate_nested_value({"my_field": 10}, ["my_field", "nested"], "hello")
 
+
 def test_populate_nested_value_empty_path():
     with pytest.raises(
         ValueError,
         match="Unable to populate nested value, empty path given",
     ):
         populate_nested_value({"my_field": 10}, [], "hello")
+
 
 @pytest.mark.parametrize(
     "json_data,path,expected_value",
