@@ -37,7 +37,7 @@ export const messages = {
       building: {
         title: "Building <span>with</span> you, not <span>for</span> you",
         paragraphs: [
-          "Transparency is the foundation of good government. That’s why we’re committed to sharing our process and working in the open.",
+          "Transparency is the foundation of good government. That's why we're committed to sharing our process and working in the open.",
           "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
         ],
       },
@@ -109,8 +109,8 @@ export const messages = {
       button: "Sign in with Login.gov",
       close: "Cancel",
       description:
-        "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
-      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
+        "You'll be redirected to Login.gov to sign in or create an account. Then, you'll return to Simpler.Grants.gov as a signed-in user.",
+      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don't have an account? You can create one.",
       title: "Sign in to save this opportunity",
     },
     startApplicationButtonText: "Start new application",
@@ -236,7 +236,7 @@ export const messages = {
       mission: {
         title: "Our mission",
         paragraph:
-          "We’re dedicated to making federal funding opportunities simpler to navigate and the grants experience more seamless for everyone.",
+          "We're dedicated to making federal funding opportunities simpler to navigate and the grants experience more seamless for everyone.",
         contentItems: [
           [
             {
@@ -309,7 +309,7 @@ export const messages = {
     title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     paragraph1:
-      "If you sign up for the Simpler.Grants.gov product updates, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
+      "If you sign up for the Simpler.Grants.gov product updates, we'll keep you informed of our progress and you'll know about every opportunity to get involved.",
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
@@ -337,7 +337,7 @@ export const messages = {
     intro:
       "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
+      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -395,7 +395,7 @@ export const messages = {
     title: "Sign in to Simpler.Grants.gov",
     help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
     description:
-      "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+      "You'll be redirected to Login.gov to sign in or create an account. Then, you'll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
@@ -549,7 +549,7 @@ export const messages = {
     },
     betaAlert: {
       alertTitle:
-        "We’re actively building this search experience. Help us improve!",
+        "We're actively building this search experience. Help us improve!",
       alert:
         "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
     },
@@ -595,14 +595,14 @@ export const messages = {
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
-    body: "Our team is working to improve the site, and we’ll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
+    body: "Our team is working to improve the site, and we'll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
   SavedSearches: {
     heading: "Saved search queries",
     noSavedCTA:
-      "You don’t have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+      "You don't have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
     title: "Saved Search Queries | Simpler.Grants.gov",
     error:
@@ -643,7 +643,7 @@ export const messages = {
   SavedOpportunities: {
     heading: "Saved opportunities",
     noSavedCTA:
-      "To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+      "To add an opportunity to your list, use the Save button next to its title on the listing's page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
@@ -713,7 +713,7 @@ export const messages = {
           {
             title: "Authentication via Login.gov",
             content:
-              "Finalizing authentication enabled grant seekers to create an account using Login.gov’s single sign-on platform. This move reduced the steps and friction users experience when signing up.",
+              "Finalizing authentication enabled grant seekers to create an account using Login.gov's single sign-on platform. This move reduced the steps and friction users experience when signing up.",
           },
           {
             title: "Search & opportunity page improvements",
@@ -763,7 +763,7 @@ export const messages = {
           {
             title: "Transparent",
             content:
-              "We’re building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
+              "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
             title: "Iterative",
