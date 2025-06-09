@@ -1,7 +1,7 @@
 import uuid
 from unittest.mock import patch
 
-from src.legacy_soap_api.legacy_soap_api_utils import format_local_soap_response
+from src.legacy_soap_api.legacy_soap_api_utils import format_local_soap_response, get_envelope_dict
 
 
 def test_format_local_soap_response() -> None:
@@ -12,3 +12,9 @@ def test_format_local_soap_response() -> None:
     with patch.object(uuid, "uuid4", return_value=mock_uuid):
         given = format_local_soap_response(mock_response)
         assert expected == given
+
+
+def test_get_envelope_dict() -> None:
+    operation_name = "a"
+    soap_xml_dict = {"Envelope": {"Body": {operation_name: {1: 1}}}}
+    assert get_envelope_dict(soap_xml_dict, operation_name) == {1: 1}

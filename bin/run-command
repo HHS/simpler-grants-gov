@@ -47,6 +47,8 @@ app_name="$1"
 environment="$2"
 command="$3"
 
+./bin/terraform-init "infra/${app_name}/service" "${environment}"
+
 echo "==============="
 echo "Running command"
 echo "==============="

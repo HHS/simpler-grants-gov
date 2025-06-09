@@ -1,6 +1,7 @@
+from datetime import date
 from typing import Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
@@ -56,19 +57,33 @@ class GetOpportunityListRequest(BaseSOAPSchema):
 
 class OpportunityDetails(BaseSOAPSchema):
     agency_contact_info: str | None = Field(default=None, alias="AgencyContactInfo")
-    competition_title: str | None = Field(default=None, alias="CompetitionTitle")
+    cfda_details: CFDADetails | None = Field(default=None, alias="CFDADetails")
+    closing_date: date | None = Field(default=None, alias="ClosingDate")
     competition_id: str | None = Field(default=None, alias="CompetitionID")
+    competition_title: str | None = Field(default=None, alias="CompetitionTitle")
     funding_opportunity_title: str | None = Field(default=None, alias="FundingOpportunityTitle")
     funding_opportunity_number: str | None = Field(default=None, alias="FundingOpportunityNumber")
-    opening_date: str | None = Field(default=None, alias="OpeningDate")
-    closing_date: str | None = Field(default=None, alias="ClosingDate")
-    offering_agency: str | None = Field(default=None, alias="OfferingAgency")
-    schema_url: str | None = Field(default=None, alias="SchemaUrl")
-    instructions_url: str | None = Field(default=None, alias="InstructionsUrl")
+    instructions_url: str | None = Field(default=None, alias="InstructionsURL")
     is_multi_project: str | None = Field(default=None, alias="IsMultiProject")
+    offering_agency: str | None = Field(default=None, alias="OfferingAgency")
+    opening_date: date | None = Field(default=None, alias="OpeningDate")
+    package_id: str | None = Field(default=None, alias="PackageID")
+    schema_url: str | None = Field(default=None, alias="SchemaURL")
 
 
 class GetOpportunityListResponse(BaseSOAPSchema):
     opportunity_details: list[OpportunityDetails] | None = Field(
         default=None, alias="OpportunityDetails"
     )
+
+    @field_validator("opportunity_details", mode="before")
+    @classmethod
+    def force_list(cls, value: dict | list | None) -> list | None:
+        """
+        Parsing the xml into a dict may result in this property being a dict instead of
+        a list so this method forces opportunity_details into list when there is only 1 opportunity
+        returned.
+        """
+        if isinstance(value, dict):
+            return [value]
+        return value
