@@ -3,10 +3,10 @@
 import json
 import logging
 import os
+import shutil
 
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
-from src.util import datetime_util
 from src.util.file_util import copy_file, open_stream
 
 logger = logging.getLogger(__name__)
@@ -39,28 +39,29 @@ MOCK_EXTRACTS = {
 class MockSamGovClient(BaseSamGovClient):
     """Mock client for SAM.gov API for local development and testing."""
 
-    def __init__(
-        self, mock_data_file: str | None = None, mock_extract_dir: str | None = None
-    ) -> None:
+    def __init__(self, mock_data_file: str | None = None, mock_extract_dir: str | None = None):
         """Initialize the mock client.
 
         Args:
-            mock_data_file: Optional path to a JSON file containing mock data.
+            mock_data_file: Optional path to a JSON file containing mock extract metadata.
+                           If provided, will load mock extracts data from this file.
             mock_extract_dir: Optional path to a directory containing mock extract files.
+                           If provided, will use these files for extract downloads.
         """
         self.extracts = MOCK_EXTRACTS.copy()
-        self.mock_data_file = mock_data_file
         self.mock_extract_dir = mock_extract_dir
 
-        # Load mock data from file if provided
+        # Load additional mock data from file if provided
         if mock_data_file and os.path.exists(mock_data_file):
             try:
                 with open(mock_data_file, "r") as f:
-                    mock_data = json.load(f)
-                    if "extracts" in mock_data:
-                        self.extracts.update(mock_data["extracts"])
+                    additional_data = json.load(f)
+
+                # Add custom extract definitions if available
+                if "extracts" in additional_data and isinstance(additional_data["extracts"], dict):
+                    self.extracts.update(additional_data["extracts"])
             except Exception as e:
-                logger.error(f"Failed to load mock data from {mock_data_file}: {str(e)}")
+                logger.error(f"Error loading mock data from {mock_data_file}: {e}")
 
     def download_extract(self, request: SamExtractRequest, output_path: str) -> SamExtractResponse:
         """Download a mock extract file.
@@ -109,10 +110,7 @@ class MockSamGovClient(BaseSamGovClient):
                 f.write(os.urandom(mock_file_size))
 
         return SamExtractResponse(
-            file_name=file_name,
-            file_size=self.extracts[file_name]["size"],
-            content_type=self.extracts[file_name]["content_type"],
-            download_date=datetime_util.utcnow(),
+            file_name=output_path,
         )
 
     def add_mock_extract(
@@ -126,20 +124,17 @@ class MockSamGovClient(BaseSamGovClient):
 
         Args:
             file_name: Name of the extract file.
-            size: Size in bytes of the extract file. If file_path is provided, this might be overwritten.
+            size: Size in bytes of the extract file.
             content_type: Content type of the extract file.
             file_path: Optional path to an actual file to use as the extract.
-                      If provided, the size will be derived from the file.
+                      If provided, the size parameter will be ignored.
         """
-        actual_size = size
-        if file_path and os.path.exists(file_path):
-            actual_size = os.path.getsize(file_path)
-            # Note: The file content itself is not stored or copied anymore,
-            # only its metadata (name, size, content_type) is used.
-            # The download_extract method will generate random content
-            # based on this metadata if the file isn't in MOCK_EXTRACTS.
-
         self.extracts[file_name] = {
-            "size": actual_size,
+            "size": size,
             "content_type": content_type,
         }
+
+        # If a file path is provided, copy it to the mock_extract_dir if available
+        if file_path and self.mock_extract_dir:
+            os.makedirs(self.mock_extract_dir, exist_ok=True)
+            shutil.copyfile(file_path, os.path.join(self.mock_extract_dir, file_name))

@@ -1,7 +1,6 @@
 """Models for SAM.gov API client."""
 
-from datetime import datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
@@ -13,7 +12,7 @@ class EntityStatus(StrEnum):
     INACTIVE = "INACTIVE"
 
 
-class EntityType(str, Enum):
+class EntityType(StrEnum):
     """Entity type in SAM.gov."""
 
     BUSINESS = "BUSINESS"
@@ -21,7 +20,15 @@ class EntityType(str, Enum):
     INDIVIDUAL = "INDIVIDUAL"
 
 
-class FileType(str, Enum):
+class SensitivityLevel(StrEnum):
+    """Sensitivity level for SAM.gov API requests."""
+
+    PUBLIC = "PUBLIC"
+    FOUO = "FOUO"
+    SENSITIVE = "SENSITIVE"
+
+
+class FileType(StrEnum):
     """File types available for SAM.gov extracts."""
 
     ENTITY = "ENTITY"
@@ -30,14 +37,14 @@ class FileType(str, Enum):
     BIO = "BIO"
 
 
-class FileFormat(str, Enum):
+class FileFormat(StrEnum):
     """File formats available for SAM.gov extracts."""
 
     UTF8 = "UTF8"
     ASCII = "ASCII"
 
 
-class ExtractType(str, Enum):
+class ExtractType(StrEnum):
     """Extract types available for SAM.gov."""
 
     MONTHLY = "MONTHLY"
@@ -73,6 +80,3 @@ class SamExtractResponse(BaseModel):
     """Response metadata for a successful SAM.gov extract download."""
 
     file_name: str = Field(..., description="The name of the downloaded file")
-    file_size: int = Field(..., description="The size of the downloaded file in bytes")
-    content_type: str = Field(..., description="The content type of the downloaded file")
-    download_date: datetime = Field(..., description="When the extract was downloaded")

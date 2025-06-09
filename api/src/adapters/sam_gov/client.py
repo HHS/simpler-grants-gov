@@ -9,7 +9,6 @@ import requests
 
 from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
-from src.util import datetime_util
 from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
@@ -137,9 +136,6 @@ class SamGovClient(BaseSamGovClient):
             # Build response object
             extract_response = SamExtractResponse(
                 file_name=output_path,
-                file_size=int(response.headers.get("Content-Length", 0)),
-                content_type=response.headers.get("Content-Type", "application/octet-stream"),
-                download_date=datetime_util.utcnow(),
             )
 
             return extract_response

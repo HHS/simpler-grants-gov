@@ -147,3 +147,7 @@ class ApplicationAttachmentGetSchema(FileResponseSchema):
 
 class ApplicationAttachmentGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentGetSchema())
+
+
+class ApplicationAttachmentDeleteResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
