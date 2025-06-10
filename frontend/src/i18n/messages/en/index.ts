@@ -221,6 +221,17 @@ export const messages = {
       estimatedAwardDate: "Estimated award date",
       estimatedProjectStartDate: "Estimated project start date",
     },
+    competitionFormTable: {
+      status: "Status",
+      form: "Form",
+      attachment: "Attachment",
+      instructions: "Instructions",
+      updated: "Last updated",
+      include: "Include with application",
+      downloadInstructions: "Download instructions",
+      requiredForms: " Required Forms",
+      conditionalForms: "Condictionally Required Forms",
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",

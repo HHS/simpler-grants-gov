@@ -1,0 +1,170 @@
+{
+  "application_forms": [
+    {
+      "application_form_id": "123e4567-e89b-12d3-a456-426614174000",
+      "application_form_status": "not_started",
+      "application_id": "123e4567-e89b-12d3-a456-426614174000",
+      "application_response": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "form_id": "123e4567-e89b-12d3-a456-426614174000"
+    }
+  ],
+  "application_id": "123e4567-e89b-12d3-a456-426614174000",
+  "application_name": "string",
+  "application_status": "string",
+  "competition": {
+    "closing_date": "2025-06-10",
+    "competition_forms": [
+      {
+        "form": {
+          "form_id": "123e4567-e89b-12d3-a456-426614174000",
+          "form_instruction": {
+            "created_at": "2025-06-10T16:16:52.165Z",
+            "download_path": "string",
+            "file_name": "instructions.pdf",
+            "updated_at": "2025-06-10T16:16:52.165Z"
+          },
+          "form_json_schema": {
+            "properties": {
+              "ApplicationNumber": {
+                "maxLength": 120,
+                "minLength": 1,
+                "title": "Application number",
+                "type": "number"
+              },
+              "Date": {
+                "format": "date",
+                "title": "Date of application ",
+                "type": "string"
+              },
+              "Description": {
+                "maxLength": 15,
+                "minLength": 0,
+                "title": "Description for application",
+                "type": "string"
+              },
+              "Title": {
+                "maxLength": 60,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              }
+            },
+            "title": "Test form for testing",
+            "type": "object"
+          },
+          "form_name": "ABC Project Form",
+          "form_ui_schema": [
+            {
+              "definition": "/properties/Title",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/Description",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/ApplicationNumber",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/Date",
+              "type": "field"
+            }
+          ]
+        },
+        "is_required": true
+      },
+      {
+        "form": {
+          "form_id": "123e4567-e89b-12d3-a456-426614174000",
+          "form_instruction": {
+            "created_at": "2025-06-10T16:16:52.165Z",
+            "download_path": "string",
+            "file_name": "instructions.pdf",
+            "updated_at": "2025-06-10T16:16:52.165Z"
+          },
+          "form_json_schema": {
+            "properties": {
+              "ApplicationNumber": {
+                "maxLength": 120,
+                "minLength": 1,
+                "title": "Application number",
+                "type": "number"
+              },
+              "Date": {
+                "format": "date",
+                "title": "Date of application ",
+                "type": "string"
+              },
+              "Description": {
+                "maxLength": 15,
+                "minLength": 0,
+                "title": "Description for application",
+                "type": "string"
+              },
+              "Title": {
+                "maxLength": 60,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              }
+            },
+            "title": "Test form for testing",
+            "type": "object"
+          },
+          "form_name": "DEF Project Form",
+          "form_ui_schema": [
+            {
+              "definition": "/properties/Title",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/Description",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/ApplicationNumber",
+              "type": "field"
+            },
+            {
+              "definition": "/properties/Date",
+              "type": "field"
+            }
+          ]
+        },
+        "is_required": false
+      }
+    ],
+    "competition_id": "123e4567-e89b-12d3-a456-426614174000",
+    "competition_title": "Proposal for Advanced Research",
+    "contact_info": "Bob Smith\nFakeMail@fake.com",
+    "is_open": true,
+    "open_to_applicants": ["individual"],
+    "opening_date": "2025-06-10",
+    "opportunity_assistance_listing": {
+      "assistance_listing_number": "43.012",
+      "program_title": "Space Technology"
+    },
+    "opportunity_id": 0
+  },
+  "form_validation_warnings": {
+    "123e4567-e89b-12d3-a456-426614174000": [
+      {
+        "field": "$",
+        "message": "'name' is a required property",
+        "type": "required",
+        "value": null
+      }
+    ]
+  },
+  "users": [
+    {
+      "email": "string",
+      "user_id": "123e4567-e89b-12d3-a456-426614174000"
+    }
+  ]
+}

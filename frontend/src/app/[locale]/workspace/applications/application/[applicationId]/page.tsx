@@ -15,6 +15,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
+import { CompetitionFormsTable } from "src/components/workspace/CompetitionFormsTable";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <legend className="usa-legend">
           The following is a list of available forms.
         </legend>
+        <CompetitionFormsTable forms={forms} applicationId={applicationId} />
         <FormLinks forms={forms} applicationId={applicationId} />
       </GridContainer>
     </>
