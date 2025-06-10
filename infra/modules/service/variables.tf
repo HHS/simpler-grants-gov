@@ -288,3 +288,9 @@ variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
 }
+
+variable "pinpoint_app_id" {
+  type        = "string"
+  description = "Pinpoint App ID"
+  default     = ""
+}

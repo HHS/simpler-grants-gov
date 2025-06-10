@@ -188,6 +188,8 @@ module "service" {
     }
   } : null
 
+  pinpoint_app_id = local.pinpoint_app_id
+
   extra_environment_variables = merge(
     {
       BUCKET_NAME = local.storage_config.bucket_name
