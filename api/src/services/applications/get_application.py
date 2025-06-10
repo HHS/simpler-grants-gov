@@ -7,6 +7,7 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, Competition
+from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_validation import get_application_form_errors
 from src.services.applications.auth_utils import check_user_application_access
@@ -20,6 +21,8 @@ def get_application(db_session: db.Session, application_id: UUID, user: User) ->
         select(Application)
         .options(
             selectinload("*"),
+            # Explicitly load organization and its sam_gov_entity
+            selectinload(Application.organization).selectinload(Organization.sam_gov_entity),
             # Explicitly don't load these
             lazyload(Application.competition, Competition.opportunity),
             lazyload(Application.competition, Competition.applications),

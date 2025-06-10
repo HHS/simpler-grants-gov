@@ -79,6 +79,21 @@ class ApplicationUserSchema(Schema):
     is_application_owner = fields.Boolean()
 
 
+class SamGovEntitySchema(Schema):
+    """Schema for SAM.gov entity information"""
+
+    uei = fields.String()
+    legal_business_name = fields.String()
+    expiration_date = fields.Date()
+
+
+class OrganizationSchema(Schema):
+    """Schema for organization information"""
+
+    organization_id = fields.UUID()
+    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
+
+
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition = fields.Nested(CompetitionAlphaSchema())
@@ -86,6 +101,7 @@ class ApplicationGetResponseDataSchema(Schema):
     application_status = fields.String()
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
+    organization = fields.Nested(OrganizationSchema(), allow_none=True)
 
     form_validation_warnings = fields.Dict(
         metadata={
