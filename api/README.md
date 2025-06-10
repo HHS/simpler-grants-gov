@@ -46,7 +46,14 @@ See [development.md](../documentation/api/development.md) for installation and d
 ```bash
 make run-generate-notifications
 # executes poetry run flask task generate-notifications
+
+# more generically, you can construct poetry run flask calls with make cmd
+make cmd args="data-migration setup-foreign-tables"
+make cmd args="data-migration load-transform --no-load --transform --no-set-current"
+make cmd args="task create-analytics-db-csvs"
 ```
+
+Poetry CLI commands are of the form `<task group> <task name> <any other params>`. So in the above, data-migration is the task group for the first two, but then the task name is setup-foreign-tables and load-transform
 
 ### In AWS
 
