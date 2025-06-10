@@ -14,12 +14,12 @@ import CompetitionStartFormIndividiual from "src/components/workspace/Competitio
 
 type StartApplicationModalProps = {
   competitionId: string;
-  competitionTitle: string;
+  opportunityTitle: string;
 };
 
 const StartApplicationModal = ({
   competitionId,
-  competitionTitle,
+  opportunityTitle,
 }: StartApplicationModalProps) => {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
@@ -89,7 +89,7 @@ const StartApplicationModal = ({
         onClose={onClose}
       >
         <CompetitionStartFormIndividiual
-          competitionTitle={competitionTitle}
+          opportunityTitle={opportunityTitle}
           loading={loading}
           error={error}
           onClose={onClose}

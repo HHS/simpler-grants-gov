@@ -14,7 +14,7 @@ import {
 } from "@trussworks/react-uswds";
 
 const CompetitionStartFormIndividiual = ({
-  competitionTitle,
+  opportunityTitle,
   error = "",
   loading = false,
   modalRef,
@@ -23,7 +23,7 @@ const CompetitionStartFormIndividiual = ({
   onSubmit,
   validationError = "",
 }: {
-  competitionTitle: string;
+  opportunityTitle: string;
   loading?: boolean;
   error?: string;
   modalRef: RefObject<ModalRef | null>;
@@ -36,10 +36,19 @@ const CompetitionStartFormIndividiual = ({
 
   return (
     <div className="display-flex flex-align-start">
-      <FormGroup error={!!validationError}>
-        <p className="font-sans-md">{competitionTitle}</p>
-        <p>{t("startAppplicationModal.requiredText")}</p>
-        <Label id={`label-for-name`} key={`label-for-name`} htmlFor="name">
+      <FormGroup error={!!validationError} className="margin-top-1">
+        <p className="font-sans-sm" data-testid="opportunity-title">
+          {opportunityTitle}
+        </p>
+        <p className="font-sans-3xs">
+          {t("startAppplicationModal.requiredText")}
+        </p>
+        <Label
+          id={`label-for-name`}
+          key={`label-for-name`}
+          htmlFor="application-name"
+          className="font-sans-2xs"
+        >
           {t("startAppplicationModal.name")}
           <span>
             <br /> {t("startAppplicationModal.description")}

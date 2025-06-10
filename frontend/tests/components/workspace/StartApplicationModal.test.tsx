@@ -49,7 +49,7 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -61,7 +61,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -71,11 +71,14 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
+    expect(screen.queryAllByTestId("opportunity-title")[0]).toHaveTextContent(
+      "blessed opportunity",
+    );
 
     const toggle = await screen.findByTestId(
       "open-start-application-modal-button",
@@ -85,7 +88,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -95,7 +98,7 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -107,7 +110,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -119,7 +122,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -129,7 +132,7 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -141,7 +144,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -153,7 +156,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -168,7 +171,7 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -180,7 +183,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -194,7 +197,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -207,7 +210,7 @@ describe("StartApplicationModal", () => {
     const { rerender } = render(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -219,7 +222,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
 
@@ -233,7 +236,7 @@ describe("StartApplicationModal", () => {
     rerender(
       <StartApplicationModal
         competitionId="1"
-        competitionTitle="new competition"
+        opportunityTitle="blessed opportunity"
       />,
     );
     await waitFor(() => {

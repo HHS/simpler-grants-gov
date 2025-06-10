@@ -134,11 +134,13 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
       >
         <div className="padding-y-3 display-flex">
           <OpportunitySaveUserControl />
-          {opportunityData.competitions && (
-            <OpportunityCompetitionStart
-              competitions={opportunityData.competitions}
-            />
-          )}
+          {opportunityData.competitions &&
+            opportunityData.opportunity_title && (
+              <OpportunityCompetitionStart
+                opportunityTitle={opportunityData.opportunity_title}
+                competitions={opportunityData.competitions}
+              />
+            )}
         </div>
         <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">

@@ -8,13 +8,14 @@ import StartApplicationModal from "src/components/workspace/StartApplicationModa
 
 export const OpportunityCompetitionStart = ({
   competitions,
+  opportunityTitle,
 }: {
   competitions: [Competition];
+  opportunityTitle: string;
 }) => {
   const { user } = useUser();
   const { checkFeatureFlag } = useFeatureFlags();
-
-  const openCompetitions = competitionData({ competitions });
+  const openCompetitions = selectOpenCompetitions({ competitions });
 
   if (
     !openCompetitions.length ||
@@ -26,7 +27,7 @@ export const OpportunityCompetitionStart = ({
     return (
       <>
         <StartApplicationModal
-          competitionTitle={openCompetitions[0].competition_title}
+          opportunityTitle={opportunityTitle}
           competitionId={openCompetitions[0].competition_id}
         />
       </>
@@ -34,7 +35,7 @@ export const OpportunityCompetitionStart = ({
   }
 };
 
-export const competitionData = ({
+export const selectOpenCompetitions = ({
   competitions,
 }: {
   competitions: [Competition];
