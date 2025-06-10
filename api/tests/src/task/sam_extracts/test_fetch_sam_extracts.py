@@ -12,9 +12,9 @@ from src.adapters.sam_gov.models import SamExtractResponse
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.sam_extracts.fetch_sam_extracts import (
-    SamExtractsTask, 
-    get_first_sunday_of_month, 
-    get_monthly_extract_date
+    SamExtractsTask,
+    get_first_sunday_of_month,
+    get_monthly_extract_date,
 )
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -157,7 +157,7 @@ class TestSamExtractsTask(BaseTestClass):
         # Calculate expected number of calls - only weekdays (Tue-Sat) from April 7 to April 10
         # April 6 (Sunday) is the monthly extract date
         # April 7 (Monday) - skipped
-        # April 8 (Tuesday) - included  
+        # April 8 (Tuesday) - included
         # April 9 (Wednesday) - included
         # April 10 (Thursday) - included
         expected_calls = 3
@@ -169,7 +169,7 @@ class TestSamExtractsTask(BaseTestClass):
         assert len(records) == expected_calls
         assert all(r.extract_type == SamGovExtractType.DAILY for r in records)
         assert all(r.processing_status == SamGovProcessingStatus.PENDING for r in records)
-        
+
         # Verify the dates are correct (excluding Sunday and Monday)
         record_dates = {r.extract_date for r in records}
         expected_dates = {date(2025, 4, 8), date(2025, 4, 9), date(2025, 4, 10)}
@@ -177,7 +177,9 @@ class TestSamExtractsTask(BaseTestClass):
 
         # Verify metrics
         assert task.increment.call_count == expected_calls
-        task.increment.assert_has_calls([call(task.Metrics.DAILY_EXTRACTS_FETCHED)] * expected_calls)
+        task.increment.assert_has_calls(
+            [call(task.Metrics.DAILY_EXTRACTS_FETCHED)] * expected_calls
+        )
 
     @freeze_time(CURRENT_DATE)
     def test_run_task_all_new(self, task, db_session, mock_sam_gov_client):

@@ -11,8 +11,8 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-from src.adapters.aws.s3_adapter import get_s3_client
 from src.adapters.aws import S3Config
+from src.adapters.aws.s3_adapter import get_s3_client
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.factory import create_sam_gov_client
 from src.adapters.sam_gov.models import SamExtractRequest
@@ -139,21 +139,21 @@ class SamExtractsTask(Task):
 
     def _fetch_daily_extracts(self, monthly_extract_date: date) -> None:
         """Fetch all daily extracts since the monthly extract date that we don't already have.
-        
+
         Daily extracts are produced Tuesday-Saturday, so we skip Sundays and Mondays.
         """
         current_date = datetime_util.utcnow().date()
-        
+
         # Start from the day after the monthly extract
         date_to_process = monthly_extract_date
 
         while date_to_process <= current_date:
             date_to_process = date_to_process + timedelta(days=1)
-            
+
             # Skip if we've gone past the current date
             if date_to_process > current_date:
                 break
-                
+
             # Skip Sundays (6) and Mondays (0) as daily extracts are only produced Tuesday-Saturday
             if date_to_process.weekday() in (0, 6):
                 continue
@@ -203,24 +203,24 @@ class SamExtractsTask(Task):
 
 def get_monthly_extract_date(current_date: date) -> date:
     """Get the appropriate monthly extract date for the given current date.
-    
+
     If the current date is before the first Sunday of the current month,
     return the first Sunday of the previous month. Otherwise, return the
     first Sunday of the current month.
-    
+
     Args:
         current_date: The current date
-        
+
     Returns:
         The date of the monthly extract that should be used
     """
     # Get the first Sunday of the current month
     first_sunday_current = get_first_sunday_of_month(current_date.year, current_date.month)
-    
+
     # If the current date is on or after the first Sunday, use it
     if current_date >= first_sunday_current:
         return first_sunday_current
-    
+
     # Otherwise, go to the previous month
     if current_date.month == 1:
         # January -> December of previous year
