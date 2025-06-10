@@ -49,7 +49,9 @@ def create_application(
     )
     db_session.add(application)
 
-    application_user = ApplicationUser(application=application, user=user)
+    application_user = ApplicationUser(
+        application=application, user=user, is_application_owner=True
+    )
     db_session.add(application_user)
 
     # Initialize the competition forms for the application
