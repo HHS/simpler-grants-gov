@@ -76,6 +76,7 @@ class ApplicationUserSchema(Schema):
 
     user_id = fields.UUID()
     email = fields.String()
+    is_application_owner = fields.Boolean()
 
 
 class SamGovEntitySchema(Schema):

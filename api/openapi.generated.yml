@@ -3156,30 +3156,8 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
         email:
           type: string
-    SamGovEntity:
-      type: object
-      properties:
-        uei:
-          type: string
-        legal_business_name:
-          type: string
-        expiration_date:
-          type: string
-          format: date
-    Organization:
-      type: object
-      properties:
-        organization_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        sam_gov_entity:
-          type:
-          - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
-          - type: 'null'
+        is_application_owner:
+          type: boolean
     ApplicationGetResponseData:
       type: object
       properties:
@@ -3207,13 +3185,6 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationUser'
-        organization:
-          type:
-          - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/Organization'
-          - type: 'null'
         form_validation_warnings:
           type: object
           description: Specific form validation issues
