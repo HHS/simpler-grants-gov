@@ -296,11 +296,19 @@ setup-foreign-tables:
 seed-local-legacy-tables:
 	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
 
+##################################################
+# Tasks/Jobs
+##################################################
+
 populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
 populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-agency-data $(args)
+
+run-generate-notifications: ## Send email notifications
+	$(FLASK_CMD) generate-notifications $(args)
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################

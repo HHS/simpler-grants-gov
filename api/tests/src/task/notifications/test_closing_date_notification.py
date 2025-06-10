@@ -19,7 +19,7 @@ from tests.lib.db_testing import cascade_delete_from_db_table
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
