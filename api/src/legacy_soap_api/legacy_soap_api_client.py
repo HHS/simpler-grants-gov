@@ -20,11 +20,14 @@ from src.legacy_soap_api.soap_payload_handler import SoapPayload
 
 logger = logging.getLogger(__name__)
 
+MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
+
 
 class BaseSOAPClient:
     def __init__(self, soap_request: SOAPRequest, db_session: db.Session) -> None:
         self.config = LegacySoapAPIConfig()
         self.soap_request = soap_request
+        self.internal_request_headers = self._get_internal_request_headers()
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
         self.soap_request_operation_name = self.soap_request_message.operation_name
         self.proxy_response = self._proxy_soap_request()
@@ -36,12 +39,9 @@ class BaseSOAPClient:
         This method handles proxying requests to grants.gov SOAP API and retrieving
         and returning the xml data as is from the existing SOAP API.
         """
-        gg_s2s_uri = self.soap_request.headers.get(
-            self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
-        )
         response = requests.request(
             method=self.soap_request.method,
-            url=os.path.join(gg_s2s_uri, self.soap_request.full_path.lstrip("/")),
+            url=self.get_soap_proxy_url(),
             data=self.soap_request.data,
             headers=self.soap_request.headers,
         )
@@ -60,6 +60,23 @@ class BaseSOAPClient:
         return get_envelope_dict(
             self.soap_request_message.to_dict(), self.soap_request_operation_name
         )
+
+    def get_soap_proxy_url(self) -> str:
+        return os.path.join(
+            self.internal_request_headers["gg_s2s_uri"], self.soap_request.full_path.lstrip("/")
+        )
+
+    def _get_internal_request_headers(self) -> dict:
+        """
+        This method extracts and removes headers that will only be relevant in the SGG
+        side of the soap api and not be included in the proxy request to GG.
+        """
+        return {
+            "gg_s2s_uri": self.soap_request.headers.pop(
+                self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
+            ),
+            "client_certificate": self.soap_request.headers.pop(MTLS_CERT_HEADER_KEY, None),
+        }
 
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
