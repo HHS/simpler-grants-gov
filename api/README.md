@@ -39,6 +39,30 @@ root
 
 See [development.md](../documentation/api/development.md) for installation and development instructions.
 
+## Running jobs/tasks
+
+### Locally
+
+```bash
+make run-generate-notifications
+# executes poetry run flask task generate-notifications
+```
+
+### In AWS
+
+1. Ensure your [SSO login](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
+2. Setup your terraform environment
+
+   ```bash
+   bin/terraform-init infra/api/service <env>
+   ```
+
+3. Run the job
+
+   ```bash
+   bin/run-command api <env> '["poetry", "run", "flask", "task", "generate-notifications"]'
+   ```
+
 ## Technical Information
 
 * [API Technical Overview](../documentation/api/technical-overview.md)
