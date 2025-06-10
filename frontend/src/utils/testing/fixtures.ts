@@ -108,6 +108,9 @@ export const fakeFacetCounts = {
   close_date: {
     arbitraryKey: 1,
   },
+  is_cost_sharing: {
+    true: 1,
+  },
 };
 
 export const fakeSearchAPIResponse: SearchAPIResponse = {

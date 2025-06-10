@@ -10,6 +10,7 @@ describe("BadRequestError (as an example of other error types)", () => {
     agency: new Set(["NASA"]),
     category: new Set(["science"]),
     closeDate: new Set(["500"]),
+    costSharing: new Set(["true"]),
     query: "space exploration",
     sortby: "relevancy",
     page: 1,
