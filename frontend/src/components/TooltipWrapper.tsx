@@ -1,5 +1,3 @@
-"use client";
-
 import { ForwardRefExoticComponent, ReactNode } from "react";
 import { Tooltip } from "@trussworks/react-uswds";
 
