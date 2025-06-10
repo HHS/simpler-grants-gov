@@ -1280,7 +1280,7 @@ def test_application_submit_forbidden_not_in_progress(
 def test_application_start_associates_user(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test that application creation associates the user from the token session with the application"""
+    """Test that application creation associates the user from the token session with the application and marks them as owner"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -1306,7 +1306,7 @@ def test_application_start_associates_user(
     assert application is not None
     assert str(application.competition_id) == competition_id
 
-    # Verify user is associated with the application
+    # Verify user is associated with the application and marked as owner
     application_user = db_session.execute(
         select(ApplicationUser).where(
             ApplicationUser.application_id == application_id,
@@ -1317,6 +1317,7 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
+    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
