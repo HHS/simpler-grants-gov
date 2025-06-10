@@ -10,7 +10,7 @@ FROM python:3.13-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir poetry==1.5
+RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 
 RUN apt-get update \
     # Remove existing packages before installing their never versions
@@ -29,6 +29,7 @@ RUN apt-get update \
         wget \
         libtasn1-6 \
         libgnutls30 \
+        systemd \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -fr /var/lib/apt/lists/* \

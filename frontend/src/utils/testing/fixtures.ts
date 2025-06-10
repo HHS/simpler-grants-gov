@@ -1,6 +1,9 @@
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import {
+  FilterOption,
+  RelevantAgencyRecord,
+} from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   PaginationOrderBy,
@@ -163,5 +166,32 @@ export const fakeAttachments = [
     file_size_bytes: 122880,
     mime_type: "application/msword",
     updated_at: "2007-11-02T15:23:10+00:00",
+  },
+];
+
+export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
+  {
+    agency_code: "DOCNIST",
+    agency_name: "National Institute of Standards and Technology",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKNIST",
+    agency_name: "Mational Institute",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKTRASH",
+    agency_name: "Mational TRASH",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "FAKEORG",
+    agency_name: "Completely fake",
+    top_level_agency: null,
+    agency_id: 1,
   },
 ];

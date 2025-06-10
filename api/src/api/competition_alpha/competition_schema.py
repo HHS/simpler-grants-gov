@@ -5,6 +5,27 @@ from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 
 
+class CompetitionInstructionAlphaSchema(Schema):
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the instruction file",
+            "example": "competition_instructions.pdf",
+        }
+    )
+    download_path = fields.String(
+        metadata={
+            "description": "The URL to download the instruction file",
+            "example": "https://cdn.example.com/competition-instructions/file.pdf",
+        }
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "The date and time when the instruction was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "The date and time when the instruction was last updated"}
+    )
+
+
 class CompetitionFormAlphaSchema(Schema):
     is_required = fields.Boolean(
         metadata={
@@ -22,6 +43,11 @@ class CompetitionAlphaSchema(Schema):
     )
 
     competition_forms = fields.List(fields.Nested(CompetitionFormAlphaSchema()))
+
+    competition_instructions = fields.List(
+        fields.Nested(CompetitionInstructionAlphaSchema()),
+        metadata={"description": "List of instruction files associated with this competition"},
+    )
 
     competition_title = fields.String(
         metadata={

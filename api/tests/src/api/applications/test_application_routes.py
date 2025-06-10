@@ -4,6 +4,7 @@ from datetime import timedelta
 import pytest
 from sqlalchemy import select
 
+from src.constants.lookup_constants import ApplicationFormStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
@@ -399,7 +400,7 @@ def test_application_form_update_success_update(
 
 
 @pytest.mark.parametrize(
-    "application_response,expected_warnings",
+    "application_response,expected_warnings,expected_form_status",
     [
         # Missing required field
         (
@@ -412,6 +413,7 @@ def test_application_form_update_success_update(
                     "value": None,
                 }
             ],
+            ApplicationFormStatus.NOT_STARTED,
         ),
         # Validation on age field
         (
@@ -424,9 +426,10 @@ def test_application_form_update_success_update(
                     "value": None,
                 }
             ],
+            ApplicationFormStatus.IN_PROGRESS,
         ),
         # Extra fields are fine with our setup
-        ({"name": "bob", "age": 50, "something_else": ""}, []),
+        ({"name": "bob", "age": 50, "something_else": ""}, [], ApplicationFormStatus.COMPLETE),
     ],
 )
 def test_application_form_update_with_validation_warnings(
@@ -437,6 +440,7 @@ def test_application_form_update_with_validation_warnings(
     user_auth_token,
     application_response,
     expected_warnings,
+    expected_form_status,
 ):
     application = ApplicationFactory.create()
 
@@ -466,6 +470,7 @@ def test_application_form_update_with_validation_warnings(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_status"] == expected_form_status
     assert response.json["warnings"] == expected_warnings
 
     # Verify application form was updated in the database
@@ -812,6 +817,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "application_id": str(application.application_id),
             "form_id": str(application_form.form_id),
             "application_response": application_form.application_response,
+            "application_form_status": ApplicationFormStatus.IN_PROGRESS,
         }
 
 
@@ -834,7 +840,9 @@ def test_application_get_success_with_validation_issues(
         application_response={"age": 500},
     )
     application_form_b = ApplicationFormFactory.create(
-        application=application, competition_form=competition_form_b, application_response={}
+        application=application,
+        competition_form=competition_form_b,
+        application_response={"age": 20},
     )
 
     # Associate user with application
@@ -844,8 +852,6 @@ def test_application_get_success_with_validation_issues(
         f"/alpha/applications/{application.application_id}",
         headers={"X-SGG-Token": user_auth_token},
     )
-
-    print(response.json)
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
@@ -890,6 +896,20 @@ def test_application_get_success_with_validation_issues(
         }
     ]
 
+    # Validate the application form statuses are as expected
+    application_form_statuses = {
+        app_form["application_form_id"]: app_form["application_form_status"]
+        for app_form in response.json["data"]["application_forms"]
+    }
+    assert (
+        application_form_statuses[str(application_form_a.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+    assert (
+        application_form_statuses[str(application_form_b.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+
 
 def test_application_get_application_not_found(
     client, enable_factory_create, db_session, user_auth_token
@@ -919,10 +939,10 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
 
 
 @pytest.mark.parametrize(
-    "application_response,expected_warnings",
+    "application_response,expected_warnings,expected_form_status",
     [
         # Valid data - no warnings
-        ({"name": "John Doe", "age": 30}, []),
+        ({"name": "John Doe", "age": 30}, [], ApplicationFormStatus.COMPLETE),
         # Missing required field
         (
             {},
@@ -934,6 +954,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
                     "value": None,
                 }
             ],
+            ApplicationFormStatus.NOT_STARTED,
         ),
         # Validation on age field
         (
@@ -946,6 +967,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
                     "value": None,
                 }
             ],
+            ApplicationFormStatus.IN_PROGRESS,
         ),
     ],
 )
@@ -957,6 +979,7 @@ def test_application_form_get_with_validation_warnings(
     user_auth_token,
     application_response,
     expected_warnings,
+    expected_form_status,
 ):
     """Test that GET application form endpoint includes schema validation warnings"""
     # Create a form with our test schema
@@ -991,6 +1014,7 @@ def test_application_form_get_with_validation_warnings(
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
     assert response.json["data"]["application_response"] == application_response
+    assert response.json["data"]["application_form_status"] == expected_form_status
     assert response.json["warnings"] == expected_warnings
 
 
@@ -1144,7 +1168,9 @@ def test_application_submit_missing_required_form(
 
     form = FormFactory.create(form_name="ExampleForm-ABC", form_json_schema=SIMPLE_JSON_SCHEMA)
 
-    CompetitionFormFactory.create(competition=competition, form=form, is_required=True)
+    competition_form = CompetitionFormFactory.create(
+        competition=competition, form=form, is_required=True
+    )
 
     # Create an application in the IN_PROGRESS state
     application = ApplicationFactory.create(
@@ -1152,6 +1178,11 @@ def test_application_submit_missing_required_form(
     )
 
     ApplicationUserFactory.create(application=application, user=user)
+
+    # Setup an application form without any answers yet
+    ApplicationFormFactory.create(
+        application=application, competition_form=competition_form, application_response={}
+    )
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",

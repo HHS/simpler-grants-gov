@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
@@ -17,6 +18,7 @@ from src.db.models.lookup_models import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
+from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -79,6 +81,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
+    competition_instructions: Mapped[list["CompetitionInstruction"]] = relationship(
+        "CompetitionInstruction",
+        uselist=True,
+        back_populates="competition",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def is_open(self) -> bool:
         """The competition is open if the following are both true:
@@ -123,9 +132,16 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition: Mapped[Competition] = relationship(Competition)
+    competition: Mapped[Competition] = relationship(
+        Competition, back_populates="competition_instructions"
+    )
 
     file_location: Mapped[str]
+    file_name: Mapped[str]
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_location)
 
 
 class FormInstruction(ApiSchemaTable, TimestampMixin):
@@ -136,6 +152,10 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     )
     file_location: Mapped[str]
     file_name: Mapped[str]
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_location)
 
 
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
@@ -217,12 +237,26 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     application_name: Mapped[str | None]
 
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
+    organization: Mapped[Organization] = relationship(
+        Organization, uselist=False, back_populates="applications"
+    )
+
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
     )
 
     application_users: Mapped[list["ApplicationUser"]] = relationship(
         "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
+    )
+
+    application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -257,6 +291,29 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     def form_id(self) -> uuid.UUID:
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
+
+
+class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_attachment"
+
+    application_attachment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
+    application: Mapped[Application] = relationship(Application)
+
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+    mime_type: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    @property
+    def download_path(self) -> str:
+        """Get the presigned s3 url path for downloading the file"""
+        # NOTE: These attachments will only ever be in a non-public
+        # bucket so we only can presign their URL, we can't use the CDN path.
+        return pre_sign_file_location(self.file_location)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):

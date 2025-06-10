@@ -16,18 +16,20 @@ class SoapPayload:
     def __init__(
         self,
         soap_payload: str | dict,
-        force_list_attributes: list | None = None,
+        force_list_attributes: tuple | None = None,
         keymap: dict[str, dict[str, set]] | None = None,
+        operation_name: str | None = None,
     ) -> None:
         self.payload = soap_payload
+        self.force_list_attributes = force_list_attributes if force_list_attributes else tuple()
         self.keymap: dict[str, dict[str, set]] = (
             keymap if keymap else defaultdict(lambda: {"original_keys": set(), "namespaces": set()})
         )
-        self.force_list_attributes = force_list_attributes if force_list_attributes else []
+        self._operation_name = operation_name
 
         # Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags and preserve the content before and after the envelope.
         self.pre_envelope = ""
-        self.envelope = None
+        self.envelope = ""
         self.post_envelope = ""
         if isinstance(self.payload, str):
             if match := re.search(ENVELOPE_REGEX, self.payload, re.DOTALL):
@@ -47,6 +49,8 @@ class SoapPayload:
         """
         if not self.envelope:
             return ""
+        if self._operation_name:
+            return self._operation_name
         try:
             root = DET.fromstring(self.envelope)
             body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")

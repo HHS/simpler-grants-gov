@@ -7,12 +7,26 @@ from urllib.parse import urlparse
 import botocore.client
 import smart_open
 from botocore.config import Config
+from werkzeug.utils import secure_filename
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 
 ##################################
 # Path parsing utils
 ##################################
+
+# Module-level singleton for default S3Config
+_s3_config = None
+
+
+def get_default_s3_config() -> S3Config:
+    """
+    Returns a singleton instance of S3Config to avoid reading env vars repeatedly.
+    """
+    global _s3_config
+    if _s3_config is None:
+        _s3_config = S3Config()
+    return _s3_config
 
 
 def is_s3_path(path: str | Path) -> bool:
@@ -35,7 +49,14 @@ def get_s3_file_key(path: str | Path) -> str:
 
 
 def get_file_name(path: str) -> str:
-    return os.path.basename(path)
+    return Path(path).name
+
+
+def get_secure_file_name(path: str) -> str:
+    """Grabs the filename of the path and then makes it safe for further path operations
+    while removing non-ascii characters.
+    """
+    return secure_filename(get_file_name(path))
 
 
 def join(*parts: str) -> str:
@@ -47,7 +68,9 @@ def join(*parts: str) -> str:
 ##################################
 
 
-def open_stream(path: str | Path, mode: str = "r", encoding: str | None = None) -> Any:
+def open_stream(
+    path: str | Path, mode: str = "r", encoding: str | None = None, content_type: str | None = None
+) -> Any:
     if is_s3_path(path):
         s3_client = get_s3_client()
 
@@ -57,15 +80,26 @@ def open_stream(path: str | Path, mode: str = "r", encoding: str | None = None) 
             read_timeout=60,
             retries={"max_attempts": 10},
         )
-        so_transport_params = {"client_kwargs": {"config": so_config}, "client": s3_client}
+
+        client_kwargs = {"config": so_config}
+        # By default all files uploaded to s3 have a generic "application/octet-stream" content-type
+        # which means if they're opened in a browser they always download.
+        # We can set the content type (mimetype) by passing it to the create multipart upload function.
+        # See: https://github.com/piskvorky/smart_open?tab=readme-ov-file#s3-advanced-usage
+        if content_type:
+            client_kwargs["S3.Client.create_multipart_upload"] = {"ContentType": content_type}
+
+        so_transport_params = {"client_kwargs": client_kwargs, "client": s3_client}
 
         return smart_open.open(path, mode, transport_params=so_transport_params, encoding=encoding)
     else:
         return smart_open.open(path, mode, encoding=encoding)
 
 
-def pre_sign_file_location(file_path: str) -> str:
-    s3_config = S3Config()
+def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) -> str:
+    if s3_config is None:
+        s3_config = get_default_s3_config()
+
     s3_client = get_s3_client(s3_config, get_boto_session())
     bucket, key = split_s3_url(file_path)
     pre_sign_file_loc = s3_client.generate_presigned_url(
@@ -179,3 +213,16 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
     return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
+
+
+def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) -> str:
+    """
+    Generates a URL for file download, either using CDN or pre-signed URL.
+    """
+    if s3_config is None:
+        s3_config = get_default_s3_config()
+
+    if s3_config.cdn_url:
+        return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
+    else:
+        return pre_sign_file_location(file_path, s3_config)

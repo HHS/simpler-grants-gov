@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,6 +10,11 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import SamGovImportType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkSamGovImportType
+
+# Add conditional import for type checking to avoid circular imports
+if TYPE_CHECKING:
+    from src.db.models.competition_models import Application
+    from src.db.models.user_models import OrganizationUser
 
 
 class SamGovEntity(ApiSchemaTable, TimestampMixin):
@@ -67,4 +73,15 @@ class Organization(ApiSchemaTable, TimestampMixin):
     # Relationships
     sam_gov_entity: Mapped[SamGovEntity | None] = relationship(
         SamGovEntity, back_populates="organizations"
+    )
+
+    organization_users: Mapped[list["OrganizationUser"]] = relationship(
+        "OrganizationUser",
+        uselist=True,
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
+
+    applications: Mapped[list["Application"]] = relationship(
+        "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )

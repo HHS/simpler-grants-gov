@@ -8,9 +8,9 @@ from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
-from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.applications.application_validation import (
     ApplicationAction,
+    validate_application_form,
     validate_application_in_progress,
 )
 from src.services.applications.get_application import get_application
@@ -82,10 +82,8 @@ def update_application_form(
         )
         db_session.add(application_form)
 
-    # In a future PR, validation will be added here
-    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_response, competition_form.form
-    )
+    # Get a list of validation warnings (also sets form status)
+    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
 
     logger.info(
         "Updated application form response",

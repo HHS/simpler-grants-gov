@@ -190,6 +190,26 @@ export const messages = {
     },
     genericErrorCta: "Please try refreshing the page.",
   },
+  Application: {
+    opportunityOverview: {
+      opportunity: "Opportunity",
+      name: "Name",
+      number: "Number",
+      posted: "Posted",
+      agency: "Agency",
+      assistanceListings: "Assistance listings",
+      costSharingOrMatchingRequirement: "Cost Sharing or matching requirement",
+      applicationInstruction: "Application instructions",
+      grantorContactInfomation: "Grantor contact information",
+      award: "Award",
+      programFunding: "Program funding",
+      expectedAward: "Expected award",
+      awardMaximum: "Award maximum",
+      awardMinimum: "Award minimum",
+      estimatedAwardDate: "Estimated award date",
+      estimatedProjectStartDate: "Estimated project start date",
+    },
+  },
   Index: {
     pageTitle: "Simpler.Grants.gov",
     metaDescription:
@@ -199,12 +219,12 @@ export const messages = {
     pageTitle: "Vision | Simpler.Grants.gov",
     pageHeaderTitle: "Our vision",
     pageHeaderParagraph:
-      "We believe that applying for federal financial assistance should be simple, accessible, and easy. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
+      "We believe that applying for federal financial assistance should be simple and straightforward. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
     sections: {
       mission: {
         title: "Our mission",
         paragraph:
-          "We want to increase access to federal funding opportunities and continuously improve the grants experience for everyone—whether you’re an applicant searching for funding or a federal agency posting opportunities.",
+          "We’re dedicated to making federal funding opportunities simpler to navigate and the grants experience more seamless for everyone.",
         contentItems: [
           [
             {
@@ -412,6 +432,17 @@ export const messages = {
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    filters: {
+      searchNoResults: {
+        title: "Your search didn't return any results.",
+        heading: "Suggestions:",
+        suggestions: [
+          "Check any terms you've entered for typos",
+          "Try different keywords",
+          "Try resetting filters or selecting fewer options",
+        ],
+      },
+    },
     accordion: {
       any: "Any",
       all: "All",
@@ -439,6 +470,7 @@ export const messages = {
     drawer: {
       title: "Filters",
       submit: "View results",
+      clearFilters: "Clear filters",
     },
     callToAction: {
       title: "Search funding opportunities",
