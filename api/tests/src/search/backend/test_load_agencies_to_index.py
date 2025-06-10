@@ -33,7 +33,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         enable_factory_create,
     ):
         # Create Agencies to load into the search index
-        agencies = [AgencyFactory.create(agency_code="DOD")]
+        agencies = [AgencyFactory.create(agency_code="LOADAGENCY1")]
         agencies.extend(AgencyFactory.create_batch(size=5, top_level_agency=agencies[0]))
 
         load_agencies_to_index.run()
@@ -70,18 +70,20 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         enable_factory_create,
     ):
         # Setup data
-        hhs = AgencyFactory.create(agency_name="HHS")
-        usda = AgencyFactory.create(agency_name="USDA")
-        dod = AgencyFactory.create(agency_name="DOD")
-        nih = AgencyFactory.create(agency_name="NIH")
+        posted_agency = AgencyFactory.create(agency_name="POSTED_AGENCY")
+        closed_agency = AgencyFactory.create(agency_name="CLOSED_AGENCY")
+        forecasted_agency = AgencyFactory.create(agency_name="FORECASTED_AGENCY")
+        archived_agency = AgencyFactory.create(agency_name="ARCHIVED_AGENCY")
 
-        OpportunityFactory.create(agency_code=hhs.agency_code)  # POSTED
-        OpportunityFactory.create(agency_code=usda.agency_code, is_closed_summary=True)  # CLOSED
+        OpportunityFactory.create(agency_code=posted_agency.agency_code)  # POSTED
         OpportunityFactory.create(
-            agency_code=dod.agency_code, is_forecasted_summary=True
+            agency_code=closed_agency.agency_code, is_closed_summary=True
+        )  # CLOSED
+        OpportunityFactory.create(
+            agency_code=forecasted_agency.agency_code, is_forecasted_summary=True
         )  # FORECASTED
         OpportunityFactory.create(
-            agency_code=nih.agency_code, is_archived_non_forecast_summary=True
+            agency_code=archived_agency.agency_code, is_archived_non_forecast_summary=True
         )  # ARCHIVED
 
         load_agencies_to_index.index_name = (
@@ -94,12 +96,22 @@ class TestLoadAgenciesToIndex(BaseTestClass):
 
         assert resp.total_records == 4
 
-        hhs_agency = next(agency for agency in resp.records if agency["agency_name"] == "HHS")
-        usda_agency = next(agency for agency in resp.records if agency["agency_name"] == "USDA")
-        dod_agency = next(agency for agency in resp.records if agency["agency_name"] == "DOD")
-        nih_agency = next(agency for agency in resp.records if agency["agency_name"] == "NIH")
+        posted_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "POSTED_AGENCY"
+        )
+        closed_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "CLOSED_AGENCY"
+        )
+        forecasted_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "FORECASTED_AGENCY"
+        )
+        archived_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "ARCHIVED_AGENCY"
+        )
 
-        assert hhs_agency["opportunity_statuses"] == [OpportunityStatus.POSTED.value]
-        assert usda_agency["opportunity_statuses"] == [OpportunityStatus.CLOSED.value]
-        assert dod_agency["opportunity_statuses"] == [OpportunityStatus.FORECASTED.value]
-        assert nih_agency["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]
+        assert posted_agency_resp["opportunity_statuses"] == [OpportunityStatus.POSTED.value]
+        assert closed_agency_resp["opportunity_statuses"] == [OpportunityStatus.CLOSED.value]
+        assert forecasted_agency_resp["opportunity_statuses"] == [
+            OpportunityStatus.FORECASTED.value
+        ]
+        assert archived_agency_resp["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]
