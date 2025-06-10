@@ -184,6 +184,4 @@ module "service" {
   )
 
   is_temporary = local.is_temporary
-
-  pinpoint_app_id = module.notifications[0].app_id
 }
