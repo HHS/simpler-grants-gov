@@ -12,6 +12,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.adapters.aws.s3_adapter import get_s3_client
+from src.adapters.aws import S3Config
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.factory import create_sam_gov_client
 from src.adapters.sam_gov.models import SamExtractRequest
@@ -30,8 +31,6 @@ class SamExtractsConfig(PydanticBaseEnvConfig):
     """Configuration for SAM extracts fetching task"""
 
     sam_gov_api_url: str = Field(alias="SAM_GOV_BASE_URL", default="https://api.sam.gov")
-    s3_bucket: str = Field(alias="SAM_GOV_EXTRACTS_S3_BUCKET")
-    s3_prefix: str = Field(alias="SAM_GOV_EXTRACTS_S3_PREFIX", default="sam-extracts/")
 
 
 @task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
@@ -63,6 +62,7 @@ class SamExtractsTask(Task):
     ) -> None:
         super().__init__(db_session)
         self.config = SamExtractsConfig()
+        self.s3_config = S3Config()
         self.sam_gov_client = sam_gov_client
         self.s3_client = s3_client or get_s3_client()
 
@@ -70,10 +70,10 @@ class SamExtractsTask(Task):
         """Main task logic to fetch SAM.gov extracts"""
         with self.db_session.begin():
             logger.info("Attempting to fetch monthly extract.")
-            self._fetch_monthly_extract()
+            monthly_extract_date = self._fetch_monthly_extract()
 
-            logger.info("Attempting to fetch daily extracts for the current month.")
-            self._fetch_daily_extracts_for_month()
+            logger.info("Attempting to fetch daily extracts.")
+            self._fetch_daily_extracts(monthly_extract_date)
 
     def _get_latest_extract_date(self, extract_type: SamGovExtractType) -> date | None:
         """Get the date of the most recent extract of the specified type"""
@@ -89,15 +89,15 @@ class SamExtractsTask(Task):
         result = self.db_session.execute(stmt).scalar_one_or_none()
         return result
 
-    def _fetch_monthly_extract(self) -> bool:
+    def _fetch_monthly_extract(self) -> date:
         """Fetch the latest monthly extract if needed.
 
         Returns:
-            True if a new extract was fetched, False otherwise
+            The date of the monthly extract that should be used as the base for daily extracts
         """
-        # Get the first Sunday of the current month
+        # Get the appropriate monthly extract date for the current time
         current_date = datetime_util.utcnow().date()
-        target_date = get_first_sunday_of_month(current_date.year, current_date.month)
+        target_date = get_monthly_extract_date(current_date)
 
         # Check if we already have this extract
         stmt = select(SamExtractFile).where(
@@ -109,14 +109,13 @@ class SamExtractsTask(Task):
 
         if existing:
             logger.info(f"Monthly extract for {target_date} already exists")
-            return False
+            return target_date
 
         # Construct the filename based on the target date
         filename = f"SAM_FOUO_MONTHLY_V2_{target_date.strftime('%Y%m%d')}.ZIP"
 
-        # Download the extract
-        s3_key = f"{self.config.s3_prefix}monthly/{filename}"
-        s3_path = f"s3://{self.config.s3_bucket}/{s3_key}"
+        # Build the s3 path using the draft bucket
+        s3_path = f"{self.s3_config.draft_files_bucket_path}/sam-extracts/monthly/{filename}"
 
         request = SamExtractRequest(file_name=filename)
         self.sam_gov_client.download_extract(request, s3_path)
@@ -136,36 +135,51 @@ class SamExtractsTask(Task):
         self.increment(self.Metrics.MONTHLY_EXTRACTS_FETCHED)
 
         logger.info(f"Successfully downloaded monthly extract for {target_date}")
-        return True
+        return target_date
 
-    def _fetch_daily_extracts_for_month(self) -> None:
-        """Fetch all daily extracts for the current month that we don't already have."""
+    def _fetch_daily_extracts(self, monthly_extract_date: date) -> None:
+        """Fetch all daily extracts since the monthly extract date that we don't already have.
+        
+        Daily extracts are produced Tuesday-Saturday, so we skip Sundays and Mondays.
+        """
         current_date = datetime_util.utcnow().date()
-        start_of_month = current_date.replace(day=1)
+        
+        # Start from the day after the monthly extract
+        date_to_process = monthly_extract_date
 
-        # Iterate through each day of the current month
-        for day_offset in range(current_date.day):
-            process_date = start_of_month + timedelta(days=day_offset)
+        while date_to_process <= current_date:
+            date_to_process = date_to_process + timedelta(days=1)
+            
+            # Skip if we've gone past the current date
+            if date_to_process > current_date:
+                break
+                
+            # Skip Sundays (6) and Mondays (0) as daily extracts are only produced Tuesday-Saturday
+            if date_to_process.weekday() in (0, 6):
+                continue
 
             # Construct the filename for the daily extract
-            filename = f"SAM_FOUO_DAILY_V2_{process_date.strftime('%Y%m%d')}.ZIP"
+            filename = f"SAM_FOUO_DAILY_V2_{date_to_process.strftime('%Y%m%d')}.ZIP"
 
-            # Check if we already have this extract by filename
-            stmt = select(SamExtractFile).where(SamExtractFile.filename == filename)
+            # Check if we already have this extract by date and type for safety
+            stmt = select(SamExtractFile).where(
+                SamExtractFile.extract_type == SamGovExtractType.DAILY,
+                SamExtractFile.extract_date == date_to_process,
+                SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
+            )
             existing = self.db_session.execute(stmt).scalar_one_or_none()
 
             if existing:
                 logger.info(
-                    f"Daily extract for {process_date} (file: {filename}) already has been processed."
+                    f"Daily extract for {date_to_process} (file: {filename}) already has been processed."
                 )
                 continue
 
             # Download the extract
             logger.info(
-                f"New daily extract found for {process_date} (file: {filename}). Downloading."
+                f"New daily extract found for {date_to_process} (file: {filename}). Downloading."
             )
-            s3_key = f"{self.config.s3_prefix}daily/{filename}"
-            s3_path = f"s3://{self.config.s3_bucket}/{s3_key}"
+            s3_path = f"{self.s3_config.draft_files_bucket_path}/sam-extracts/daily/{filename}"
 
             request = SamExtractRequest(file_name=filename)
             self.sam_gov_client.download_extract(request, s3_path)
@@ -173,7 +187,7 @@ class SamExtractsTask(Task):
             # Record the extract in the database
             extract = SamExtractFile(
                 extract_type=SamGovExtractType.DAILY,
-                extract_date=process_date,
+                extract_date=date_to_process,
                 filename=filename,
                 s3_path=s3_path,
                 processing_status=SamGovProcessingStatus.PENDING,
@@ -184,7 +198,36 @@ class SamExtractsTask(Task):
             # Increment the metric
             self.increment(self.Metrics.DAILY_EXTRACTS_FETCHED)
 
-            logger.info(f"Successfully downloaded daily extract for {process_date}")
+            logger.info(f"Successfully downloaded daily extract for {date_to_process}")
+
+
+def get_monthly_extract_date(current_date: date) -> date:
+    """Get the appropriate monthly extract date for the given current date.
+    
+    If the current date is before the first Sunday of the current month,
+    return the first Sunday of the previous month. Otherwise, return the
+    first Sunday of the current month.
+    
+    Args:
+        current_date: The current date
+        
+    Returns:
+        The date of the monthly extract that should be used
+    """
+    # Get the first Sunday of the current month
+    first_sunday_current = get_first_sunday_of_month(current_date.year, current_date.month)
+    
+    # If the current date is on or after the first Sunday, use it
+    if current_date >= first_sunday_current:
+        return first_sunday_current
+    
+    # Otherwise, go to the previous month
+    if current_date.month == 1:
+        # January -> December of previous year
+        return get_first_sunday_of_month(current_date.year - 1, 12)
+    else:
+        # Any other month -> previous month of same year
+        return get_first_sunday_of_month(current_date.year, current_date.month - 1)
 
 
 def get_first_sunday_of_month(year: int, month: int) -> date:
