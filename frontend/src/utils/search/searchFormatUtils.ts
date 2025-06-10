@@ -88,8 +88,30 @@ const toBooleanFilter = (data: Set<string>): BooleanFilter => ({
 const fromOneOfFilter = (data: OneOfFilter): string =>
   data?.one_of?.length ? data.one_of.join(",") : "";
 
-const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string => {
-  return data?.end_date_relative;
+const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string =>
+  data?.end_date_relative;
+
+const fromBooleanFilter = (data: BooleanFilter): string => {
+  if (!data?.one_of?.length) {
+    return "";
+  }
+  return data.one_of[0] ? "true" : "false";
+};
+
+const backendFilterToQueryParamValue = (
+  backendFilterData: OneOfFilter | RelativeDateRangeFilter | BooleanFilter,
+  dataType: "oneOf" | "boolean" | "dateRange",
+) => {
+  switch (dataType) {
+    case "oneOf":
+      return fromOneOfFilter(backendFilterData as OneOfFilter);
+    case "dateRange":
+      return fromRelativeDateRangeFilter(
+        backendFilterData as RelativeDateRangeFilter,
+      );
+    case "boolean":
+      return fromBooleanFilter(backendFilterData as BooleanFilter);
+  }
 };
 
 // transforms raw query param data into structured search object format that the API needs
@@ -162,7 +184,7 @@ export const searchToQueryParams = (
             queryParams,
             [backendKey, backendFilterData]: [
               string,
-              OneOfFilter | RelativeDateRangeFilter,
+              OneOfFilter | RelativeDateRangeFilter | BooleanFilter,
             ],
           ) => {
             const config = filterConfigurations.find(
@@ -175,17 +197,15 @@ export const searchToQueryParams = (
               );
               return queryParams;
             }
-            const { dataType, frontendName } = config;
-            // this will need adjusting if we add more filter data types
-            const queryParamValue =
-              dataType === "oneOf"
-                ? fromOneOfFilter(backendFilterData as OneOfFilter)
-                : fromRelativeDateRangeFilter(
-                    backendFilterData as RelativeDateRangeFilter,
-                  );
+
+            const queryParamValue = backendFilterToQueryParamValue(
+              backendFilterData,
+              config.dataType,
+            );
             if (queryParamValue) {
-              queryParams[frontendName as keyof ValidSearchQueryParamData] =
-                queryParamValue;
+              queryParams[
+                config.frontendName as keyof ValidSearchQueryParamData
+              ] = queryParamValue;
             }
             return queryParams;
           },
