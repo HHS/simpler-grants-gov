@@ -5,6 +5,7 @@ import {
   validSearchQueryParamKeys,
 } from "src/types/search/searchQueryTypes";
 import {
+  BooleanFilter,
   OneOfFilter,
   PaginationOrderBy,
   PaginationRequestBody,
@@ -57,6 +58,11 @@ const filterConfigurations = [
     backendName: "close_date",
     dataType: "dateRange",
   },
+  {
+    frontendName: "costSharing",
+    backendName: "is_cost_sharing",
+    dataType: "boolean",
+  },
 ] as const;
 
 const toOneOfFilter = (data: Set<string>): OneOfFilter => {
@@ -73,6 +79,11 @@ const toRelativeDateRangeFilter = (
     end_date_relative: convertedData[0],
   };
 };
+
+// comes in as Set but should have only one entry, take the first
+const toBooleanFilter = (data: Set<string>): BooleanFilter => ({
+  one_of: [Array.from(data)[0] === "true"],
+});
 
 const fromOneOfFilter = (data: OneOfFilter): string =>
   data?.one_of?.length ? data.one_of.join(",") : "";
@@ -131,6 +142,8 @@ export const buildFilters = (
         requestBody[backendName] = toOneOfFilter(queryValue);
       } else if (dataType === "dateRange") {
         requestBody[backendName] = toRelativeDateRangeFilter(queryValue);
+      } else if (dataType === "boolean") {
+        requestBody[backendName] = toBooleanFilter(queryValue);
       }
       return requestBody;
     },
