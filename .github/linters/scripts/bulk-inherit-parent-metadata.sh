@@ -157,8 +157,8 @@ function updateProjectItem()
     gh api graphql \
       --field projectId="${project_id}" \
       --field itemId="${item_id}" \
-      --field deliverableFieldId="${deliverable_field_id}" \
-      --field deliverableValue="${deliverable_val}" \
+      --field fieldId="${deliverable_field_id}" \
+      -f value="${deliverable_val}" \
       -f query="${query}"
   fi
 }
