@@ -17,6 +17,18 @@ class SOAPResponse(BaseModel):
         return self.data, self.status_code, self.headers
 
 
+class SOAPClientCertificate(BaseModel):
+    cert: str
+    serial_number: str
+
+    def get_pem(self, key_map: dict) -> str:
+        return f"{key_map[self.serial_number]}\n\n{self.cert}"
+
+
+class SOAPAuth(BaseModel):
+    certificate: SOAPClientCertificate | None = None
+
+
 class BaseSOAPSchema(BaseModel):
     """
     This schema is for incoming and outgoing parsed SOAP messages

@@ -1,13 +1,15 @@
 import logging
 import os
+from tempfile import NamedTemporaryFile
 
 import requests
 
 import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
+from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPAuth, SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAP_OPERATION_CONFIGS,
     SOAPFaultException,
@@ -20,12 +22,11 @@ from src.legacy_soap_api.soap_payload_handler import SoapPayload
 
 logger = logging.getLogger(__name__)
 
-MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
-
 
 class BaseSOAPClient:
-    def __init__(self, soap_request: SOAPRequest, db_session: db.Session) -> None:
+    def __init__(self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth) -> None:
         self.config = LegacySoapAPIConfig()
+        self.auth = auth
         self.soap_request = soap_request
         self.internal_request_headers = self._get_internal_request_headers()
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
@@ -39,17 +40,50 @@ class BaseSOAPClient:
         This method handles proxying requests to grants.gov SOAP API and retrieving
         and returning the xml data as is from the existing SOAP API.
         """
-        response = requests.request(
+        request_args = dict(
             method=self.soap_request.method,
             url=self.get_soap_proxy_url(),
             data=self.soap_request.data,
-            headers=self.soap_request.headers,
+            headers=self.get_proxy_request_headers(),
         )
+
+        if not self.auth.certificate:
+            logger.info("soap_api_proxy: proxying unauthorized request")
+            response = requests.request(**request_args)
+        else:
+            logger.info("soap_api_proxy: proxying authorized request")
+            temp_file_path = None
+            with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
+                temp_file_path = temp_cert_file.name
+                logger.info(
+                    "soap_api_proxy: created temp certificate file",
+                    extra={"temp_file_path": temp_file_path},
+                )
+                temp_cert_file.write(self.get_client_cert())
+                temp_cert_file.flush()
+                response = requests.request(**request_args, cert=temp_file_path)
+
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+                logger.warning(
+                    "soap_api_proxy: temp certificate cleaned up but file not automatically deleted"
+                )
         return SOAPResponse(
             data=self._process_response_response_content(response.content),
             status_code=response.status_code,
             headers=dict(response.headers),
         )
+
+    def get_client_cert(self) -> str:
+        cert = ""
+        try:
+            cert = self.auth.certificate.get_pem(self.config.soap_auth_map)
+            logger.info("soap_client_certificate: found associated key by serial number")
+        except KeyError:
+            logger.info("soap_client_certificate: serial number not configured")
+        except Exception:
+            logger.info("soap_client_certificate: unable to generate key")
+        return cert
 
     def _process_response_response_content(self, soap_content: bytes) -> bytes:
         if not self.config.inject_uuid_data or self.config.gg_s2s_proxy_header_key:
@@ -66,22 +100,18 @@ class BaseSOAPClient:
             self.internal_request_headers["gg_s2s_uri"], self.soap_request.full_path.lstrip("/")
         )
 
-    def _get_internal_request_headers(self) -> dict:
-        """
-        This method extracts and removes headers that will only be relevant in the SGG
-        side of the soap api and not be included in the proxy request to GG.
-        """
+    def get_proxy_request_headers(self) -> dict:
+        # These request header keys are utilized in simpler soap api and are not
+        # required in the proxy requests.
+        simpler_soap_header_keys = {self.config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY}
         return {
-            "gg_s2s_uri": self.soap_request.headers.pop(
-                self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
-            ),
-            "client_certificate": self.soap_request.headers.pop(MTLS_CERT_HEADER_KEY, None),
+            k: v for k, v in self.soap_request.headers.items() if k not in simpler_soap_header_keys
         }
 
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
-    def __init__(self, soap_request: SOAPRequest, db_session: db.Session) -> None:
-        super().__init__(soap_request, db_session)
+    def __init__(self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth) -> None:
+        super().__init__(soap_request, db_session, auth)
         self.operation_config = SOAP_OPERATION_CONFIGS["applicants"].get(
             self.soap_request_operation_name
         )
