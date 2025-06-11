@@ -107,7 +107,10 @@ def _handle_mock_response(request: dict, to_address: str) -> PinpointResponse:
     response = PinpointResponse(
         Result={
             to_address: PinpointResult(
-                DeliveryStatus="SUCCESSFUL", StatusCode=200, StatusMessage="Ok", MessageId=str(uuid.uuid4())
+                DeliveryStatus="SUCCESSFUL",
+                StatusCode=200,
+                StatusMessage="Ok",
+                MessageId=str(uuid.uuid4()),
             )
         }
     )
