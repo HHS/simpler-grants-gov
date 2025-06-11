@@ -79,7 +79,7 @@ jobs:
 
       - name: Build release
         if: steps.check-image-published.outputs.is_image_published == 'false'
-        run: make APP_NAME=${{ inputs.app_name }} release-build
+        run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build
 
       - name: Publish release
         if: steps.check-image-published.outputs.is_image_published == 'false'
