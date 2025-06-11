@@ -1,3 +1,4 @@
+import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { FormDetail, FormInstruction } from "src/types/formResponseTypes";
 
@@ -6,32 +7,6 @@ import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-export const CompetitionFormsTable = ({
-  forms,
-  applicationId,
-}: {
-  forms: CompetitionForms;
-  applicationId: string;
-}) => {
-  const requiredForms = selectForms({ forms, required: true });
-  const conditionalRequiredForms = selectForms({ forms, required: false });
-  const t = useTranslations("Application.competitionFormTable");
-
-  return (
-    <>
-      <h3>{t("requiredForms")}</h3>
-
-      <CompetitionTable forms={requiredForms} applicationId={applicationId} />
-      <h3>{t("conditionalForms")}</h3>
-
-      <CompetitionTable
-        forms={conditionalRequiredForms}
-        applicationId={applicationId}
-      />
-    </>
-  );
-};
 
 export const selectForms = ({
   forms,
@@ -48,12 +23,64 @@ export const selectForms = ({
   }, []);
 };
 
-const CompetitionTable = ({
-  forms,
-  applicationId,
+const selectApplicationForm = ({
+  applicationForms,
+  formId,
 }: {
-  forms: FormDetail[];
+  applicationForms: ApplicationFormDetail[];
+  formId: string;
+}) => {
+  return applicationForms
+    ? applicationForms.find(
+        (applicationForm) => applicationForm.form_id === formId,
+      )
+    : null;
+};
+
+export const CompetitionFormsTable = ({
+  applicationForms,
+  applicationId,
+  forms,
+}: {
+  applicationForms: ApplicationFormDetail[];
   applicationId: string;
+  forms: CompetitionForms;
+}) => {
+  const requiredForms = selectForms({ forms, required: true });
+  const conditionalRequiredForms = selectForms({ forms, required: false });
+  const t = useTranslations("Application.competitionFormTable");
+
+  return (
+    <>
+      <h3>{t("requiredForms")}</h3>
+      <CompetitionTable
+        forms={requiredForms}
+        applicationForms={applicationForms}
+        applicationId={applicationId}
+      />
+      {conditionalRequiredForms.length > 0 && (
+        <>
+          <h3>{t("conditionalForms")}</h3>
+          <p>{t("conditionalFormsDescription")}</p>
+          <CompetitionTable
+            forms={conditionalRequiredForms}
+            applicationForms={applicationForms}
+            applicationId={applicationId}
+          />
+        </>
+      )}
+    </>
+  );
+};
+
+const CompetitionTable = ({
+  applicationForms,
+  applicationId,
+  forms,
+}: {
+  applicationForms: ApplicationFormDetail[];
+  applicationId: string;
+  forms: FormDetail[];
 }) => {
   const t = useTranslations("Application.competitionFormTable");
 
@@ -61,66 +88,82 @@ const CompetitionTable = ({
     <Table className="width-full overflow-wrap">
       <thead>
         <tr>
-          <th scope="col" className="bg-base-lighter">
+          <th scope="col" className="bg-base-lightest padding-y-205">
             {t("status")}
           </th>
-          <th scope="col" className="bg-base-lighter">
+          <th scope="col" className="bg-base-lightest padding-y-205">
             {t("form")}
           </th>
-          <th scope="col" className="bg-base-lighter">
-            {t("attachment")}
-          </th>
-          <th scope="col" className="bg-base-lighter">
+          <th scope="col" className="bg-base-lightest padding-y-205">
             {t("instructions")}
           </th>
-          <th scope="col" className="bg-base-lighter">
+          <th scope="col" className="bg-base-lightest padding-y-205">
             {t("updated")}
           </th>
         </tr>
       </thead>
-      <CompetitionTableBody forms={forms} applicationId={applicationId} />
+      <tbody>
+        {forms.map((form, index) => (
+          <tr key={index}>
+            <td data-label={t("status")}>
+              <CompetitionStatus
+                applicationForms={applicationForms}
+                formId={form.form_id}
+              />
+            </td>
+            <td data-label={t("form")}>
+              <Link
+                className="text-bold"
+                href={`/workspace/applications/application/${applicationId}/form/${form.form_id}`}
+              >
+                {form.form_name}
+              </Link>
+            </td>
+            <td data-label={t("instructions")}>
+              {form.form_instruction && (
+                <InstructionsLink
+                  instsruction={form.form_instruction}
+                  text={t("downloadInstructions")}
+                />
+              )}
+            </td>
+            <td data-label={t("updated")}>
+              <div> -- </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
     </Table>
   );
 };
 
-const CompetitionTableBody = ({
-  forms,
-  applicationId,
+const CompetitionStatus = ({
+  formId,
+  applicationForms,
 }: {
-  forms: FormDetail[];
-  applicationId: string;
+  applicationForms: ApplicationFormDetail[];
+  formId: string;
 }) => {
-  const t = useTranslations("Application.competitionFormTable");
+  const t = useTranslations("Application.competitionFormTable.statuses");
+  const applicationForm = selectApplicationForm({ formId, applicationForms });
 
-  return (
-    <tbody>
-      {forms.map((form, index) => (
-        <tr key={index}>
-          <td data-label={t("status")}>--</td>
-          <td data-label={t("form")}>
-            <Link
-              className="text-bold"
-              href={`/workspace/applications/application/${applicationId}/form/${form.form_id}`}
-            >
-              {form.form_name}
-            </Link>
-          </td>
-          <td data-label={t("attachment")}>
-            <div> -- </div>
-          </td>
-          <td data-label={t("instructions")}>
-            <InstructionsLink
-              instsruction={form.form_instruction}
-              text={t("downloadInstructions")}
-            />
-          </td>
-          <td data-label={t("updated")}>
-            <div> -- </div>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  );
+  if (applicationForm?.application_form_status === "in_progress") {
+    return (
+      <div className="display-flex flex-align-center text-bold icon-active">
+        <USWDSIcon name="loop" className="margin-right-2px" />
+        {t("in_progress")}
+      </div>
+    );
+  } else if (applicationForm?.application_form_status === "complete") {
+    return (
+      <div className="display-flex flex-align-center text-bold">
+        <USWDSIcon name="check" className="text-primary margin-right-2px" />
+        {t("complete")}
+      </div>
+    );
+  } else {
+    return <>-</>;
+  }
 };
 
 const InstructionsLink = ({

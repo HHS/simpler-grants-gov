@@ -231,6 +231,13 @@ export const messages = {
       downloadInstructions: "Download instructions",
       requiredForms: " Required Forms",
       conditionalForms: "Condictionally Required Forms",
+      conditionalFormsDescription:
+        "Additional forms may be required based on your answers in the required forms.",
+      statuses: {
+        not_started: "Not started",
+        in_progress: "In progress",
+        complete: "Complete",
+      },
     },
   },
   Index: {
