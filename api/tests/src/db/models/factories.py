@@ -2422,6 +2422,8 @@ class SamGovEntityFactory(BaseFactory):
     uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
+    initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")
+    last_update_date = factory.Faker("date_between", start_date="-1y", end_date="today")
     ebiz_poc_email = factory.Faker("email")
     ebiz_poc_first_name = factory.Faker("first_name")
     ebiz_poc_last_name = factory.Faker("last_name")

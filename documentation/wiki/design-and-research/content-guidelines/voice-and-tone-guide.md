@@ -116,7 +116,7 @@ Some grants are also open to individuals (like fellowships) and foreign organiza
 {% hint style="warning" %}
 **How many grantors can register under an agency?**
 
-An unlimited number of grantors can be registered under an agency. An unlimited number of grantors can be registered under an agency.
+An unlimited number of grantors can be registered under an agency.
 {% endhint %}
 
 {% hint style="success" %}
@@ -144,7 +144,9 @@ You’re in charge of what information you get from Grants.gov. Log in or create
 * We bring clarity to complex topics.
 
 {% hint style="warning" %}
-**Understanding the Reporting and Oversight Process In 2006, the Federal Funding** Accountability and Transparency Act (FFATA) set in motion a government-wide reporting procedure that has continued to evolve.
+**Understanding the Reporting and Oversight Process**&#x20;
+
+In 2006, the Federal Funding Accountability and Transparency Act (FFATA) set in motion a government-wide reporting procedure that has continued to evolve.
 
 The law requires that information about entities and organizations receiving federal funds be disclosed to the public via a central website, USAspending.gov. This information currently includes the entity's name, amount of the grant, funding agency, and location – among other requirements – and is published by the grant-making agency on USASpending.gov.
 {% endhint %}

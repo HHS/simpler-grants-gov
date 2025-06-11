@@ -1,5 +1,5 @@
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -17,6 +17,8 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
+    OrganizationFactory,
+    SamGovEntityFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -818,6 +820,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "form_id": str(application_form.form_id),
             "application_response": application_form.application_response,
             "application_form_status": ApplicationFormStatus.IN_PROGRESS,
+            "is_required": True,
         }
 
 
@@ -1280,7 +1283,7 @@ def test_application_submit_forbidden_not_in_progress(
 def test_application_start_associates_user(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test that application creation associates the user from the token session with the application"""
+    """Test that application creation associates the user from the token session with the application and marks them as owner"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -1306,7 +1309,7 @@ def test_application_start_associates_user(
     assert application is not None
     assert str(application.competition_id) == competition_id
 
-    # Verify user is associated with the application
+    # Verify user is associated with the application and marked as owner
     application_user = db_session.execute(
         select(ApplicationUser).where(
             ApplicationUser.application_id == application_id,
@@ -1317,6 +1320,7 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
+    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
@@ -1604,3 +1608,111 @@ def test_application_get_includes_application_name_and_users(
     assert len(response.json["data"]["users"]) == 1
     assert response.json["data"]["users"][0]["user_id"] == str(user.user_id)
     assert response.json["data"]["users"][0]["email"] == user.email
+
+
+def test_application_get_includes_organization_with_sam_gov_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes organization with SAM.gov entity data"""
+    # Create a SAM.gov entity with test data
+    sam_gov_entity = SamGovEntityFactory.create(
+        uei="TEST123456789",
+        legal_business_name="Test Organization LLC",
+        expiration_date=date(2025, 12, 31),
+    )
+
+    # Create an organization linked to the SAM.gov entity
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+
+    # Create an application with the organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application with Organization",
+        organization=organization,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization is included
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is not None
+    assert response.json["data"]["organization"]["organization_id"] == str(
+        organization.organization_id
+    )
+
+    # Check that sam_gov_entity is included with the required fields
+    sam_gov_data = response.json["data"]["organization"]["sam_gov_entity"]
+    assert sam_gov_data is not None
+    assert sam_gov_data["uei"] == "TEST123456789"
+    assert sam_gov_data["legal_business_name"] == "Test Organization LLC"
+    assert sam_gov_data["expiration_date"] == "2025-12-31"
+
+
+def test_application_get_includes_organization_without_sam_gov_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes organization without SAM.gov entity data"""
+    # Create an organization without a SAM.gov entity
+    organization = OrganizationFactory.create(sam_gov_entity=None)
+
+    # Create an application with the organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application with Organization",
+        organization=organization,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization is included but sam_gov_entity is null
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is not None
+    assert response.json["data"]["organization"]["organization_id"] == str(
+        organization.organization_id
+    )
+    assert response.json["data"]["organization"]["sam_gov_entity"] is None
+
+
+def test_application_get_without_organization(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response handles null organization correctly"""
+    # Create an application without an organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application without Organization",
+        organization=None,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization field is present but null
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is None
