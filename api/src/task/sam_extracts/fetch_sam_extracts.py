@@ -75,20 +75,6 @@ class SamExtractsTask(Task):
             logger.info("Attempting to fetch daily extracts.")
             self._fetch_daily_extracts(monthly_extract_date)
 
-    def _get_latest_extract_date(self, extract_type: SamGovExtractType) -> date | None:
-        """Get the date of the most recent extract of the specified type"""
-        stmt = (
-            select(SamExtractFile.extract_date)
-            .where(
-                SamExtractFile.extract_type == extract_type,
-                SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
-            )
-            .order_by(SamExtractFile.extract_date.desc())
-            .limit(1)
-        )
-        result = self.db_session.execute(stmt).scalar_one_or_none()
-        return result
-
     def _fetch_monthly_extract(self) -> date:
         """Fetch the latest monthly extract if needed.
 
