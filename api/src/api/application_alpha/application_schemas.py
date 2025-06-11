@@ -66,6 +66,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Status indicating how much of a form has been filled out"},
     )
 
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
+    )
+
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
@@ -159,6 +164,13 @@ class ApplicationAttachmentGetSchema(FileResponseSchema):
             "description": "The mime type / content type of the file",
             "example": "application/pdf",
         }
+    )
+
+    created_at = fields.DateTime(
+        metadata={"description": "When the application attachment was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application attachment was last updated"}
     )
 
 
