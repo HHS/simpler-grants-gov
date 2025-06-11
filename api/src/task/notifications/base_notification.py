@@ -65,24 +65,27 @@ class BaseNotificationTask(Task):
                     message=user_notification.content,
                     app_id=self.notification_config.app_id,
                 )
+
+                email_response = response.results.get(user_notification.user_email, None)
+
                 logger.info(
                     "Successfully delivered notification to user",
                     extra={
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,
                         "notification_log_id": notification_log.user_notification_log_id,
-                        "pinpoint_delivery_status": response.results[
-                            user_notification.user_email
-                        ].delivery_status,
-                        "pinpoint_message_id": response.results[
-                            user_notification.user_email
-                        ].message_id,
-                        "pinpoint_status_code": response.results[
-                            user_notification.user_email
-                        ].status_code,
-                        "pinpoint_status_message": response.results[
-                            user_notification.user_email
-                        ].status_message,
+                        "pinpoint_delivery_status": (
+                            email_response.delivery_status if email_response else None
+                        ),
+                        "pinpoint_message_id": (
+                            email_response.message_id if email_response else None
+                        ),
+                        "pinpoint_status_code": (
+                            email_response.status_code if email_response else None
+                        ),
+                        "pinpoint_status_message": (
+                            email_response.status_message if email_response else None
+                        ),
                     },
                 )
                 notification_log.notification_sent = True
