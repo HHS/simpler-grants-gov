@@ -479,6 +479,7 @@ export const messages = {
       label:
         "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
       button: "Search",
+      exclusionTip: `Tip: Use a minus sign to exclude words or phrases, like "-research"`,
     },
     drawer: {
       title: "Filters",
