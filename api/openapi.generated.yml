@@ -3147,6 +3147,9 @@ components:
           - complete
           type:
           - string
+        is_required:
+          type: boolean
+          description: Whether this form is required for the application
     ApplicationUser:
       type: object
       properties:
