@@ -66,6 +66,10 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Status indicating how much of a form has been filled out"},
     )
 
+    is_required = fields.Boolean(
+        metadata={"description": "Whether this form is required for the application"}
+    )
+
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
