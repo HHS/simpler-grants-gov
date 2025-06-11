@@ -3147,7 +3147,6 @@ components:
           - complete
           type:
           - string
-<<<<<<< HEAD
         created_at:
           type: string
           format: date-time
@@ -3156,11 +3155,9 @@ components:
           type: string
           format: date-time
           description: When the application form was last updated
-=======
         is_required:
           type: boolean
           description: Whether this form is required for the application
->>>>>>> main
     ApplicationUser:
       type: object
       properties:
@@ -3740,11 +3737,11 @@ components:
         created_at:
           type: string
           format: date-time
-          description: When the application attachment was created
+          readOnly: true
         updated_at:
           type: string
           format: date-time
-          description: When the application attachment was last updated
+          readOnly: true
         application_attachment_id:
           type: string
           format: uuid
@@ -3795,3 +3792,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
