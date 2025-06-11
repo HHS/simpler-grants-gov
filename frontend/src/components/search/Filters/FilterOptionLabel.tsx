@@ -1,8 +1,7 @@
+import clsx from "clsx";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import dynamic from "next/dynamic";
-
-import TooltipWrapper from "src/components/TooltipWrapper";
 
 const DynamicTooltipWrapper = dynamic(
   () => import("src/components/TooltipWrapper"),
@@ -18,25 +17,30 @@ export function FilterOptionLabel({
   option: FilterOption;
   facetCounts?: { [key: string]: number };
 }) {
-  const OptionLabelText = <span>{option.label}</span>;
-  return (
+  const OptionLabelText = (
     <>
-      {option.tooltip ? (
-        <DynamicTooltipWrapper
-          label={option.tooltip}
-          title={option.label}
-          className="usa-button--unstyled"
-        >
-          {OptionLabelText}
-        </DynamicTooltipWrapper>
-      ) : (
-        OptionLabelText
-      )}
+      <span>{option.label}</span>
       {!!facetCounts && (
-        <span className="text-base-dark padding-left-05">
+        <span
+          className={clsx("text-base-dark", {
+            "padding-left-05": !option.tooltip,
+          })}
+        >
           [{facetCounts[option.value] || 0}]
         </span>
       )}
     </>
+  );
+  return option.tooltip ? (
+    <DynamicTooltipWrapper
+      label={<div className="text-wrap">{option.tooltip}</div>}
+      title={option.label}
+      className="usa-button--unstyled"
+      wrapperclasses="simpler-wrap-tooltip"
+    >
+      {OptionLabelText}
+    </DynamicTooltipWrapper>
+  ) : (
+    OptionLabelText
   );
 }

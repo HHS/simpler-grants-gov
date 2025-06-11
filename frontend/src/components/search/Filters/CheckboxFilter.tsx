@@ -98,7 +98,7 @@ export function CheckboxFilter({
   query,
   queryParamKey,
   title,
-  wrapForScroll = true,
+  contentClassName,
   defaultEmptySelection,
   includeAnyOption = true,
   filterOptions,
@@ -109,7 +109,7 @@ export function CheckboxFilter({
       query={query}
       queryParamKey={queryParamKey}
       title={title}
-      wrapForScroll={wrapForScroll}
+      contentClassName={contentClassName}
       expanded={!!query.size}
       className="width-100 padding-right-5"
     >

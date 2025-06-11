@@ -34,7 +34,7 @@ export interface CommonSearchFilterAccordionProps {
 export interface BasicSearchFilterAccordionProps
   extends CommonSearchFilterAccordionProps {
   className?: string;
-  wrapForScroll?: boolean;
+  contentClassName?: string;
   expanded?: boolean;
   children: React.ReactNode;
 }
@@ -49,7 +49,8 @@ export interface SearchAccordionContentProps
 
 export interface SearchFilterAccordionProps
   extends SearchAccordionContentProps {
-  wrapForScroll?: boolean;
+  wrapForScroll?: boolean; // to be retired when drawer moves to prod
+  contentClassName?: string;
 }
 
 const AccordionTitle = ({
@@ -189,8 +190,8 @@ export function BasicSearchFilterAccordion({
   queryParamKey,
   query,
   className,
+  contentClassName,
   expanded = false,
-  wrapForScroll = true,
 }: BasicSearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -199,9 +200,7 @@ export function BasicSearchFilterAccordion({
       expanded,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: wrapForScroll
-        ? "maxh-mobile-lg overflow-auto position-relative"
-        : "",
+      className: contentClassName || "",
     },
   ];
 
