@@ -4,6 +4,7 @@ export const backendFilterNames = [
   "applicant_type",
   "agency",
   "funding_category",
+  "close_date",
 ] as const;
 
 export const searchFilterNames = [
@@ -12,6 +13,7 @@ export const searchFilterNames = [
   "eligibility",
   "agency",
   "category",
+  "closeDate",
 ] as const;
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];

@@ -464,6 +464,7 @@ export const messages = {
         agency: "Agency",
         category: "Category",
         status: "Opportunity status",
+        closeDate: "Closing date range",
       },
       options: {
         status: {
@@ -619,6 +620,7 @@ export const messages = {
       query: "Search terms",
       page: "Page",
       sortby: "Sort by",
+      closeDate: "Close date",
     },
     editModal: {
       loading: "Updating",

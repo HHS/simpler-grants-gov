@@ -1,11 +1,11 @@
-import { fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import { CheckboxFilter } from "src/components/search/Filters/CheckboxFilter";
+import { RadioButtonFilter } from "src/components/search/Filters/RadioButtonFilter";
 
 const fakeFacetCounts = {
   grant: 1,
@@ -14,21 +14,21 @@ const fakeFacetCounts = {
   cooperative_agreement: 1,
 };
 
-const mockUpdateQueryParams = jest.fn();
+const mockSetQueryParam = jest.fn();
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
-    updateQueryParams: mockUpdateQueryParams,
+    setQueryParam: mockSetQueryParam,
   }),
 }));
 
-describe("CheckboxFilter", () => {
+describe("RadioButtonFilter", () => {
   const title = "Test Accordion";
-  const queryParamKey = "fundingInstrument";
+  const queryParamKey = "closeDate";
 
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -40,9 +40,9 @@ describe("CheckboxFilter", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("displays the correct checkbox labels", () => {
+  it("displays the correct radio labels", () => {
     render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -57,9 +57,9 @@ describe("CheckboxFilter", () => {
     expect(screen.getByText("Other")).toBeInTheDocument();
   });
 
-  it("checks boxes correctly and updates count", () => {
+  it("checks radio buttons correctly and updates count", () => {
     const { rerender } = render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -73,7 +73,7 @@ describe("CheckboxFilter", () => {
     updatedQuery.add("Grant");
 
     rerender(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -88,9 +88,9 @@ describe("CheckboxFilter", () => {
     });
     expect(countSpan).toBeInTheDocument();
   });
-  it("adds an any option checkbox by default", () => {
+  it("adds an any option radio by default", async () => {
     render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -99,16 +99,17 @@ describe("CheckboxFilter", () => {
       />,
     );
     const accordionToggleButton = screen.getByRole("button");
-    fireEvent.click(accordionToggleButton);
-    const anyCheckbox = screen.getByRole("checkbox", {
+    await userEvent.click(accordionToggleButton);
+    const anyRadio = screen.getByRole("radio", {
       name: "Any test accordion",
     });
-    expect(anyCheckbox).toBeInTheDocument();
+    expect(anyRadio).toBeInTheDocument();
+    expect(anyRadio).toBeChecked();
   });
 
   it("should be expanded by default if there are selected options", () => {
     render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -118,14 +119,14 @@ describe("CheckboxFilter", () => {
       />,
     );
 
-    const checkbox = screen.getByText("Cooperative Agreement");
+    const radio = screen.getByText("Cooperative Agreement");
 
-    expect(checkbox).toBeVisible();
+    expect(radio).toBeVisible();
   });
 
   it("should not be expanded by default if there no are selected options", () => {
     render(
-      <CheckboxFilter
+      <RadioButtonFilter
         filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
@@ -135,8 +136,28 @@ describe("CheckboxFilter", () => {
       />,
     );
 
-    const checkbox = screen.queryByText("Cooperative Agreement");
+    const radio = screen.queryByText("Cooperative Agreement");
 
-    expect(checkbox).not.toBeVisible();
+    expect(radio).not.toBeVisible();
+  });
+  it("calls setQueryParam correctly on toggle", async () => {
+    render(
+      <RadioButtonFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set()}
+        facetCounts={undefined}
+        includeAnyOption={false}
+      />,
+    );
+    const accordionToggleButton = screen.getByRole("button");
+    await userEvent.click(accordionToggleButton);
+    const radioOption = screen.getByRole("radio", {
+      name: "Grant",
+    });
+    expect(radioOption).toBeInTheDocument();
+    await userEvent.click(radioOption);
+    expect(mockSetQueryParam).toHaveBeenCalledWith(queryParamKey, "grant");
   });
 });

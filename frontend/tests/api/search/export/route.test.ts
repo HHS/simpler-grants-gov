@@ -20,6 +20,7 @@ const fakeConvertedParams = {
   category: new Set(),
   eligibility: new Set(),
   fundingInstrument: new Set(),
+  closeDate: new Set(),
   page: 1,
   query: "",
   sortby: null,
