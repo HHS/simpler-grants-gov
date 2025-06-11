@@ -10,6 +10,7 @@ from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
+    ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
@@ -822,7 +823,53 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "application_form_status": ApplicationFormStatus.IN_PROGRESS,
             "created_at": application_form.created_at.isoformat(),
             "updated_at": application_form.updated_at.isoformat(),
+            "is_required": True,
         }
+
+
+def test_application_get_with_attachments(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    attachment1 = ApplicationAttachmentFactory.create(
+        application=application, file_name="my_file_a.txt"
+    )
+    attachment2 = ApplicationAttachmentFactory.create(
+        application=application, file_name="my_file_b.pdf"
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    resp_application_attachments = response.json["data"]["application_attachments"]
+    assert len(resp_application_attachments) == 2
+
+    # Sort by file name which we set above so attachment1 is always first
+    resp_application_attachments.sort(key=lambda a: a["file_name"])
+
+    assert resp_application_attachments[0]["application_attachment_id"] == str(
+        attachment1.application_attachment_id
+    )
+    assert resp_application_attachments[0]["file_name"] == attachment1.file_name
+    assert resp_application_attachments[0]["mime_type"] == attachment1.mime_type
+    assert resp_application_attachments[0]["file_size_bytes"] == attachment1.file_size_bytes
+    assert resp_application_attachments[0]["created_at"] == attachment1.created_at.isoformat()
+    assert resp_application_attachments[0]["updated_at"] == attachment1.updated_at.isoformat()
+
+    assert resp_application_attachments[1]["application_attachment_id"] == str(
+        attachment2.application_attachment_id
+    )
+    assert resp_application_attachments[1]["file_name"] == attachment2.file_name
+    assert resp_application_attachments[1]["mime_type"] == attachment2.mime_type
+    assert resp_application_attachments[1]["file_size_bytes"] == attachment2.file_size_bytes
+    assert resp_application_attachments[1]["created_at"] == attachment2.created_at.isoformat()
+    assert resp_application_attachments[1]["updated_at"] == attachment2.updated_at.isoformat()
 
 
 def test_application_get_success_with_validation_issues(

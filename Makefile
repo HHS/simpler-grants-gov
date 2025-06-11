@@ -256,11 +256,16 @@ GIT_REPO_AVAILABLE := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 
 # Generate a unique tag based solely on the git hash.
 # This will be the identifier used for deployment via terraform.
-ifdef GIT_REPO_AVAILABLE
-IMAGE_TAG := $(shell git rev-parse HEAD)
+
+ifdef IMAGE_TAG
 else
-IMAGE_TAG := "unknown-dev.$(DATE)"
+	ifdef GIT_REPO_AVAILABLE
+	IMAGE_TAG := $(shell git rev-parse HEAD)
+	else
+	IMAGE_TAG := "unknown-dev.$(DATE)"
+	endif
 endif
+
 
 # Generate an informational tag so we can see where every image comes from.
 DATE := $(shell date -u '+%Y%m%d.%H%M%S')

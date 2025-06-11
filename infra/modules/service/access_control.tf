@@ -97,6 +97,15 @@ data "aws_iam_policy_document" "task_executor" {
       resources = [for secret in var.secrets : secret.valueFrom]
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.pinpoint_app_id) > 0 ? [1] : []
+    content {
+      sid       = "SendViaPinpoint"
+      actions   = ["mobiletargeting:SendMessages"]
+      resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
+    }
+  }
 }
 
 data "aws_iam_policy_document" "runtime_logs" {
