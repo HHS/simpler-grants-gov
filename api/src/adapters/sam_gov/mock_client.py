@@ -126,7 +126,6 @@ class MockSamGovClient(BaseSamGovClient):
             file_name: Name of the extract file.
             size: Size in bytes of the extract file.
             content_type: Content type of the extract file.
-            sensitivity: Sensitivity level of the extract.
             file_path: Optional path to an actual file to use as the extract.
                       If provided, the size parameter will be ignored.
         """
