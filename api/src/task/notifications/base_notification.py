@@ -59,7 +59,7 @@ class BaseNotificationTask(Task):
             )
             self.db_session.add(notification_log)
             try:
-                send_pinpoint_email_raw(
+                response = send_pinpoint_email_raw(
                     to_address=user_notification.user_email,
                     subject=user_notification.subject,
                     message=user_notification.content,
@@ -71,6 +71,10 @@ class BaseNotificationTask(Task):
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,
                         "notification_log_id": notification_log.user_notification_log_id,
+                        "pinpoint_delivery_status": response.results[user_notification.user_email].delivery_status,
+                        "pinpoint_message_id": response.results[user_notification.user_email].message_id,
+                        "pinpoint_status_code": response.results[user_notification.user_email].status_code,
+                        "pinpoint_status_message": response.results[user_notification.user_email].status_message
                     },
                 )
                 notification_log.notification_sent = True
