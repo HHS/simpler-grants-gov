@@ -3185,6 +3185,34 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntity'
           - type: 'null'
+    ApplicationAttachmentNoLink:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The MIME type / content-type of the file
+          example: application/pdf
+        file_size_bytes:
+          type: integer
+          description: The size of the attachment in bytes
+          example: 12340
+        created_at:
+          type: string
+          format: date-time
+          description: When the application attachment was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application attachment was last updated
     ApplicationGetResponseData:
       type: object
       properties:
@@ -3229,6 +3257,12 @@ components:
               type: required
               value: null
           additionalProperties: {}
+        application_attachments:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAttachmentNoLink'
     ApplicationGetResponse:
       type: object
       properties:

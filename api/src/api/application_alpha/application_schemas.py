@@ -98,6 +98,36 @@ class OrganizationSchema(Schema):
     sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
 
 
+class ApplicationAttachmentNoLinkSchema(Schema):
+    """A schema for an application attachment, but without a file_download URL"""
+
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the application attachment"}
+    )
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the application attachment file",
+            "example": "my_example.pdf",
+        }
+    )
+    mime_type = fields.String(
+        metadata={
+            "description": "The MIME type / content-type of the file",
+            "example": "application/pdf",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={"description": "The size of the attachment in bytes", "example": 12340}
+    )
+
+    created_at = fields.DateTime(
+        metadata={"description": "When the application attachment was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application attachment was last updated"}
+    )
+
+
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition = fields.Nested(CompetitionAlphaSchema())
@@ -122,6 +152,8 @@ class ApplicationGetResponseDataSchema(Schema):
             },
         }
     )
+
+    application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
