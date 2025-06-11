@@ -159,8 +159,8 @@ export const messages = {
       no: "No",
       programFunding: "Program Funding",
       expectedAwards: "Expected awards",
-      awardCeiling: "Award Ceiling",
-      awardFloor: "Award Floor",
+      awardCeiling: "Award Maximum",
+      awardFloor: "Award Minimum",
       opportunityNumber: "Funding opportunity number",
       costSharing: "Cost sharing or matching requirement",
       fundingInstrument: "Funding instrument type",
@@ -469,7 +469,7 @@ export const messages = {
       options: {
         status: {
           forecasted: "Forecasted",
-          posted: "Posted",
+          posted: "Open",
           closed: "Closed",
           archived: "Archived",
         },
@@ -513,8 +513,8 @@ export const messages = {
         agency: "Agency: ",
       },
       opportunityNumber: "Opportunity Number: ",
-      awardCeiling: "Award Ceiling: ",
-      floor: "Floor: ",
+      awardCeiling: "Award Maximum: ",
+      floor: "Minimum: ",
     },
     sortBy: {
       options: {
