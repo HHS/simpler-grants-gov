@@ -74,7 +74,7 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
 
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(index=True)
 
 
 class UserTokenSession(ApiSchemaTable, TimestampMixin):

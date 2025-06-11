@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EntityStatus(StrEnum):
@@ -54,15 +54,12 @@ class ExtractType(StrEnum):
 class SamExtractRequest(BaseModel):
     """Request model for SAM.gov Extract Downloads API."""
 
+    model_config = ConfigDict(validate_assignment=True)
+
     file_name: str = Field(
         ...,
         description="The specific file name to download (e.g., SAM_PUBLIC_MONTHLY_V2_20220406.ZIP)",
     )
-
-    class Config:
-        """Pydantic config."""
-
-        validate_assignment = True
 
     def to_params(self) -> dict[str, str | bool]:
         """Convert the request to query parameters for the API request."""
