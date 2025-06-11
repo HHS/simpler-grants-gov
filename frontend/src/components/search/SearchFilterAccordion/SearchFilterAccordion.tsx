@@ -49,7 +49,10 @@ export interface SearchAccordionContentProps
 
 export interface SearchFilterAccordionProps
   extends SearchAccordionContentProps {
-  wrapForScroll?: boolean; // to be retired when drawer moves to prod
+  wrapForScroll?: boolean;
+}
+
+export interface SearchFilterProps extends SearchAccordionContentProps {
   contentClassName?: string;
 }
 

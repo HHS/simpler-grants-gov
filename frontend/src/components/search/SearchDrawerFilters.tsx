@@ -62,7 +62,7 @@ export async function SearchDrawerFilters({
         title={t("accordion.titles.status")}
         defaultEmptySelection={new Set([SEARCH_NO_STATUS_VALUE])}
         facetCounts={facetCounts?.opportunity_status || {}}
-        contentClassName="maxh-mobile-lg overflow-auto position-relative"
+        contentClassName="maxh-mobile-lg overflow-auto position-relative" // these classes allow the filter contents to scroll
       />
       <CheckboxFilter
         filterOptions={fundingOptions}

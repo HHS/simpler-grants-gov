@@ -12,12 +12,12 @@ import { useContext, useMemo } from "react";
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import {
   BasicSearchFilterAccordion,
-  SearchFilterAccordionProps,
+  SearchFilterProps,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 
-interface CheckboxFilterBodyProps extends SearchFilterAccordionProps {
+interface CheckboxFilterBodyProps extends SearchFilterProps {
   referenceOptions?: FilterOption[];
 }
 
@@ -103,7 +103,7 @@ export function CheckboxFilter({
   includeAnyOption = true,
   filterOptions,
   facetCounts,
-}: SearchFilterAccordionProps) {
+}: SearchFilterProps) {
   return (
     <BasicSearchFilterAccordion
       query={query}
