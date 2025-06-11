@@ -7,7 +7,10 @@ from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import ValidationErrorDetail
-from src.services.applications.application_validation import validate_application_form
+from src.services.applications.application_validation import (
+    is_form_required,
+    validate_application_form,
+)
 from src.services.applications.auth_utils import check_user_application_access
 from src.services.applications.get_application import get_application
 
@@ -37,5 +40,8 @@ def get_application_form(
 
     # Get a list of validation warnings (also sets form status)
     warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
+
+    # Set the is_required field on the application form object
+    application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
 
     return application_form, warnings
