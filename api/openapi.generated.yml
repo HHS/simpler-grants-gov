@@ -3147,6 +3147,14 @@ components:
           - complete
           type:
           - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the application form was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application form was last updated
     ApplicationUser:
       type: object
       properties:
@@ -3692,11 +3700,11 @@ components:
         created_at:
           type: string
           format: date-time
-          readOnly: true
+          description: When the application attachment was created
         updated_at:
           type: string
           format: date-time
-          readOnly: true
+          description: When the application attachment was last updated
         application_attachment_id:
           type: string
           format: uuid
