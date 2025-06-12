@@ -84,8 +84,8 @@ def send_pinpoint_email_raw(
                     }
                 }
             },
+            "TraceId": trace_id,
         },
-        "TraceId": trace_id,
     }
     # If we are running locally (or in unit tests), don't actually query
     # AWS - unlike our other AWS integrations, there is no mocking support yet
