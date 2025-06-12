@@ -189,6 +189,7 @@ module "service" {
   } : null
 
   pinpoint_app_id = local.pinpoint_app_id
+  hosted_zone     = local.network_config.domain_config.hosted_zone
 
   extra_environment_variables = merge(
     {

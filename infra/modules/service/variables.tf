@@ -294,3 +294,9 @@ variable "pinpoint_app_id" {
   description = "Pinpoint App ID"
   default     = ""
 }
+
+variable "hosted_zone" {
+  type        = string
+  description = "The domain where SES is set up for emails"
+  default     = null
+}
