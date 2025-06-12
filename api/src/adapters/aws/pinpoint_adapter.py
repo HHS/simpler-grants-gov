@@ -62,7 +62,7 @@ def send_pinpoint_email_raw(
     message: str,
     app_id: str,
     pinpoint_client: botocore.client.BaseClient | None = None,
-    trace_id: str | None = None,
+    trace_id: str = str(uuid.uuid4()),
 ) -> PinpointResponse:
 
     if pinpoint_client is None:

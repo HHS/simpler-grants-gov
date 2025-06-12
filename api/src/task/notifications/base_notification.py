@@ -63,6 +63,7 @@ class BaseNotificationTask(Task):
                     subject=user_notification.subject,
                     message=user_notification.content,
                     app_id=self.notification_config.app_id,
+                    trace_id=trace_id,
                 )
 
                 email_response = response.results.get(user_notification.user_email, None)
