@@ -62,11 +62,14 @@ def send_pinpoint_email_raw(
     message: str,
     app_id: str,
     pinpoint_client: botocore.client.BaseClient | None = None,
-    trace_id: str = str(uuid.uuid4()),
+    trace_id: str | None = None,
 ) -> PinpointResponse:
 
     if pinpoint_client is None:
         pinpoint_client = get_pinpoint_client()
+
+    if trace_id is None:
+        trace_id = str(uuid.uuid4())
 
     # Based on: https://docs.aws.amazon.com/code-library/latest/ug/python_3_pinpoint_code_examples.html
     request = {
