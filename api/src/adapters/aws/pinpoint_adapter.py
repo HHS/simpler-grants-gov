@@ -98,10 +98,6 @@ def send_pinpoint_email_raw(
 
     try:
         raw_response = pinpoint_client.send_messages(**request)
-        logger.info(
-            "Pinpoint Request Sent",
-            extra={"trace_id": trace_id},
-        )
     except ClientError:
         logger.exception("Failed to send email", extra={"trace_id": trace_id})
         raise
