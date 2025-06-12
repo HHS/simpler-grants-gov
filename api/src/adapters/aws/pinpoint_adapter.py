@@ -98,8 +98,7 @@ def send_pinpoint_email_raw(
         logger.info(
             "Pinpoint Request Sent",
             extra={
-                "trace_id": trace_id,
-                "request_id": raw_response.RequestId if raw_response else None,
+                "trace_id": trace_id
             },
         )
     except ClientError:
