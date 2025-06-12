@@ -122,6 +122,15 @@ data "aws_iam_policy_document" "email_access" {
       resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.pinpoint_app_id) > 0 ? [1] : []
+    content {
+      sid       = "SendSESEmail"
+      actions   = ["ses:SendEmail"]
+      resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "task_executor" {
