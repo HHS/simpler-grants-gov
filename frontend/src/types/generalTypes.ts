@@ -1,5 +1,9 @@
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
+export type RegexMatchedString<Pattern extends RegExp> = string & {
+  __regexPattern: Pattern;
+};
+
 type Only<T, U> = {
   [P in keyof T]: T[P];
 } & {
