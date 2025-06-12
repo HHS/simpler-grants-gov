@@ -36,6 +36,7 @@ export const searchFetcherParams: QueryParamData = {
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  costSharing: new Set(),
   query: "research",
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
@@ -106,6 +107,9 @@ export const fakeFacetCounts = {
   },
   close_date: {
     arbitraryKey: 1,
+  },
+  is_cost_sharing: {
+    true: 1,
   },
 };
 

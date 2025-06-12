@@ -97,6 +97,17 @@ describe("buildFilters", () => {
       end_date_relative: "500",
     });
   });
+  it("handles boolean filters", () => {
+    const filters = buildFilters({
+      ...searchFetcherParams,
+      ...{
+        costSharing: new Set(["true"]),
+      },
+    });
+    expect(filters.is_cost_sharing).toEqual({
+      one_of: [true],
+    });
+  });
 });
 
 describe("buildPagination", () => {
@@ -226,6 +237,17 @@ describe("searchToQueryParams", () => {
     });
 
     expect(queryParams.closeDate).toEqual("500");
+  });
+  it("correctly handles boolean filters", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: {
+        ...fakeSavedSearch.filters,
+        is_cost_sharing: { one_of: [true] },
+      },
+    });
+
+    expect(queryParams.costSharing).toEqual("true");
   });
 });
 

@@ -15,6 +15,7 @@ import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
   closeDateOptions,
+  costSharingOptions,
   eligibilityOptions,
   fundingOptions,
   statusOptions,
@@ -35,6 +36,7 @@ export async function SearchDrawerFilters({
     status,
     agency,
     closeDate,
+    costSharing,
   } = searchParams;
 
   const agenciesPromise = Promise.all([
@@ -108,6 +110,13 @@ export async function SearchDrawerFilters({
         queryParamKey={"closeDate"}
         title={t("accordion.titles.closeDate")}
         facetCounts={facetCounts?.close_date}
+      />
+      <RadioButtonFilter
+        filterOptions={costSharingOptions}
+        query={costSharing}
+        queryParamKey={"costSharing"}
+        title={t("accordion.titles.costSharing")}
+        facetCounts={facetCounts?.is_cost_sharing}
       />
     </>
   );

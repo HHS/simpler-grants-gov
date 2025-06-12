@@ -175,3 +175,16 @@ export const closeDateOptions: FilterOption[] = [
     value: "120",
   },
 ];
+
+export const costSharingOptions: FilterOption[] = [
+  {
+    id: "cost-sharing-yes",
+    label: "Yes",
+    value: "true",
+  },
+  {
+    id: "cost-sharing-no",
+    label: "No",
+    value: "false",
+  },
+];

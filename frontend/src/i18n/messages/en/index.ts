@@ -465,6 +465,7 @@ export const messages = {
         category: "Category",
         status: "Opportunity status",
         closeDate: "Closing date range",
+        costSharing: "Cost sharing",
       },
       options: {
         status: {
@@ -622,6 +623,7 @@ export const messages = {
       page: "Page",
       sortby: "Sort by",
       closeDate: "Close date",
+      costSharing: "Cost sharing",
     },
     editModal: {
       loading: "Updating",
