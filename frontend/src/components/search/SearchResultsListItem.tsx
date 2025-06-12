@@ -73,7 +73,11 @@ export default function SearchResultsListItem({
               <span
                 className={`${metadataBorderClasses} tablet:order-0 order-2`}
               >
-                <strong>{t("resultsListItem.summary.posted")}</strong>
+                <strong>
+                  {opportunity.opportunity_status === "forecasted"
+                    ? t("resultsListItem.summary.forecasted")
+                    : t("resultsListItem.summary.posted")}
+                </strong>
                 {opportunity?.summary?.post_date
                   ? formatDate(opportunity?.summary?.post_date)
                   : "--"}

@@ -172,6 +172,7 @@ export const messages = {
     history: {
       history: "History",
       postedDate: "Posted date",
+      forecastPostedDate: "Forecast posted date",
       closingDate: "Original closing date for applications",
       archiveDate: "Archive date",
       forecastedAwardDate: "Estimated Award Date",
@@ -207,7 +208,7 @@ export const messages = {
       opportunity: "Opportunity",
       name: "Name",
       number: "Number",
-      posted: "Posted",
+      posted: "Posted date",
       agency: "Agency",
       assistanceListings: "Assistance listings",
       costSharingOrMatchingRequirement: "Cost Sharing or matching requirement",
@@ -509,7 +510,8 @@ export const messages = {
         forecasted: "Forecasted",
       },
       summary: {
-        posted: "Posted: ",
+        forecasted: "Forecast posted date: ",
+        posted: "Posted date: ",
         agency: "Agency: ",
       },
       opportunityNumber: "Opportunity Number: ",
