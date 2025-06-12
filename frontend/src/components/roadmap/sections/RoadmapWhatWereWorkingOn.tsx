@@ -1,6 +1,9 @@
-import { useMessages, useTranslations } from "next-intl";
+import { ExternalRoutes } from "src/constants/routes";
 
-import GithubIssueLink, { gitHubLinkForIssue } from "src/components/GithubLink";
+import { useMessages, useTranslations } from "next-intl";
+import Link from "next/link";
+
+import { gitHubLinkForIssue } from "src/components/GithubLink";
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -40,15 +43,19 @@ export default function RoadmapWhatWereWorkingOn() {
           ))}
         </div>
       ))}
-      <div className="display-flex flex-align-center">
-        <USWDSIcon
-          name="github"
-          className="usa-icon usa-icon--size-3 text-primary-darker margin-right-05"
-        />
-        <p className="font-sans-xs margin-0">
-          <GithubIssueLink chunks={t("link")} />
-        </p>
-      </div>
+      <p>
+        <Link
+          target="_blank"
+          className="usa-link--external"
+          href={ExternalRoutes.GITHUB_REPO_DELIVERABLES}
+        >
+          <USWDSIcon
+            name="github"
+            className="usa-icon usa-icon--size-3 margin-right-05 text-middle"
+          />
+          {t("link")}
+        </Link>
+      </p>
     </RoadmapPageSection>
   );
 }
