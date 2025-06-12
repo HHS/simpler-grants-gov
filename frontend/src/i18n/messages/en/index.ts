@@ -230,7 +230,7 @@ export const messages = {
       include: "Include with application",
       downloadInstructions: "Download instructions",
       requiredForms: " Required Forms",
-      conditionalForms: "Condictionally Required Forms",
+      conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
         "Additional forms may be required based on your answers in the required forms.",
       statuses: {
