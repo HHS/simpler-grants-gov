@@ -41,6 +41,7 @@ class PinpointResult(BaseModel):
     delivery_status: str = Field(alias="DeliveryStatus")
     status_code: int = Field(alias="StatusCode")
     status_message: str = Field(alias="StatusMessage")
+    message_id: str = Field(alias="MessageId")
 
 
 class PinpointResponse(BaseModel):
@@ -106,7 +107,10 @@ def _handle_mock_response(request: dict, to_address: str) -> PinpointResponse:
     response = PinpointResponse(
         Result={
             to_address: PinpointResult(
-                DeliveryStatus="SUCCESSFUL", StatusCode=200, StatusMessage=str(uuid.uuid4())
+                DeliveryStatus="SUCCESSFUL",
+                StatusCode=200,
+                StatusMessage="Ok",
+                MessageId=str(uuid.uuid4()),
             )
         }
     )
