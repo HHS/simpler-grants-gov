@@ -170,7 +170,7 @@ const InstructionsLink = ({
   instsruction,
   text,
 }: {
-  instsruction: FormInstruction;
+  instruction: FormInstruction;
   text: string;
 }) => {
   return (
