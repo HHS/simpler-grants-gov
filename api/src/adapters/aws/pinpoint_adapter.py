@@ -41,7 +41,8 @@ class PinpointResult(BaseModel):
     delivery_status: str = Field(alias="DeliveryStatus")
     status_code: int = Field(alias="StatusCode")
     status_message: str = Field(alias="StatusMessage")
-    message_id: str = Field(alias="MessageId", default="not-sent")
+    message_id: str = Field(alias="MessageId", default="message-not-sent")
+    trace_id: str | None = Field(alias="TraceId", default=None)
 
 
 class PinpointResponse(BaseModel):
