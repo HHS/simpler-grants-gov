@@ -209,6 +209,7 @@ export const messages = {
       name: "Name",
       number: "Number",
       posted: "Posted date",
+      forecastDate: "Forecast posted date",
       agency: "Agency",
       assistanceListings: "Assistance listings",
       costSharingOrMatchingRequirement: "Cost Sharing or matching requirement",
