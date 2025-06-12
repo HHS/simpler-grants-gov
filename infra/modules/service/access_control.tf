@@ -114,17 +114,17 @@ data "aws_iam_policy_document" "runtime_logs" {
 }
 
 data "aws_iam_policy_document" "email_access" {
-    statement {
-      sid       = "SendViaPinpoint"
-      actions   = ["mobiletargeting:SendMessages"]
-      resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
-    }
-    statement {
-      sid       = "SendSESEmail"
-      actions   = ["ses:SendEmail"]
-      resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"]
-    }
+  statement {
+    sid       = "SendViaPinpoint"
+    actions   = ["mobiletargeting:SendMessages"]
+    resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
   }
+  statement {
+    sid       = "SendSESEmail"
+    actions   = ["ses:SendEmail"]
+    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"]
+  }
+}
 
 
 resource "aws_iam_role_policy" "task_executor" {
@@ -156,7 +156,7 @@ resource "aws_iam_role_policy_attachment" "runtime_logs" {
 }
 
 resource "aws_iam_role_policy_attachment" "email_access" {
-  count      = length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
 
   role       = aws_iam_role.app_service.name
   policy_arn = aws_iam_policy.email_access.arn
