@@ -61,6 +61,7 @@ def send_pinpoint_email_raw(
     message: str,
     app_id: str,
     pinpoint_client: botocore.client.BaseClient | None = None,
+    trace_id: str | None = None,
 ) -> PinpointResponse:
 
     if pinpoint_client is None:
@@ -83,6 +84,7 @@ def send_pinpoint_email_raw(
                 }
             },
         },
+        "TraceId": trace_id,
     }
     # If we are running locally (or in unit tests), don't actually query
     # AWS - unlike our other AWS integrations, there is no mocking support yet
@@ -92,8 +94,15 @@ def send_pinpoint_email_raw(
 
     try:
         raw_response = pinpoint_client.send_messages(**request)
+        logger.info(
+            "Pinpoint Request Sent",
+            extra={
+                "trace_id": trace_id,
+                "request_id": raw_response.RequestId if raw_response else None,
+            },
+        )
     except ClientError:
-        logger.exception("Failed to send email")
+        logger.exception("Failed to send email", extra={"trace_id": trace_id})
         raise
 
     return PinpointResponse.model_validate(raw_response["MessageResponse"])
