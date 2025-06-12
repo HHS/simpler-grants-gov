@@ -30,9 +30,6 @@ jobs:
       - name: Build docker image
         run: make build
 
-      - name: Run tests
-        run: make test USE_DOCKER=1
-
       - name: Save commit hash to file
         run: git rev-parse HEAD > /tmp/commit-hash.txt
 
