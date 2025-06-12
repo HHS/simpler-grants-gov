@@ -24,7 +24,7 @@ def _validate_organization_membership(
 ) -> Organization:
     # Fetch the organization
     organization = db_session.execute(
-        select(Organization).where(Organization.organization_id == organization_id)
+        select(Organization).where(Organization.organization_id == organization_id).options(selectinload(Organization.organization_users))
     ).scalar_one_or_none()
 
     if not organization:
