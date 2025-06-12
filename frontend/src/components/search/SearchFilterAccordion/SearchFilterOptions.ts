@@ -38,6 +38,8 @@ export const fundingOptions: FilterOption[] = [
     id: "funding-instrument-cooperative_agreement",
     label: "Cooperative Agreement",
     value: "cooperative_agreement",
+    tooltip:
+      "Cooperative agreements involve direct, active participation by the federal agency. In contrast, grant agreements only provide financial assistance.",
   },
   {
     id: "funding-instrument-grant",
@@ -48,6 +50,8 @@ export const fundingOptions: FilterOption[] = [
     id: "funding-instrument-procurement_contract",
     label: "Procurement Contract ",
     value: "procurement_contract",
+    tooltip:
+      "Procurement contracts let the government buy goods or services for internal use, while grants support projects that serve a public purpose.",
   },
   {
     id: "funding-instrument-other",

@@ -61,25 +61,6 @@ export async function expectCheckboxIDIsChecked(
   await expect(checkbox).toBeChecked();
 }
 
-export async function toggleCheckboxes(
-  page: Page,
-  checkboxObject: Record<string, string>,
-  queryParamName: string,
-) {
-  let runningQueryParams = "";
-  for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
-    await toggleCheckbox(page, checkboxID);
-    runningQueryParams += runningQueryParams
-      ? `,${queryParamValue}`
-      : queryParamValue;
-    await waitForURLContainsQueryParamValue(
-      page,
-      queryParamName,
-      runningQueryParams,
-    );
-  }
-}
-
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
   await checkBox.isEnabled();
