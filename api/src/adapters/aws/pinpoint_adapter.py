@@ -106,7 +106,29 @@ def send_pinpoint_email_raw(
         logger.exception("Failed to send email", extra={"trace_id": trace_id})
         raise
 
-    return PinpointResponse.model_validate(raw_response["MessageResponse"])
+    response_object = PinpointResponse.model_validate(raw_response["MessageResponse"])
+    email_response = response_object.results.get(to_address, None)
+
+    if email_response:
+        if email_response.delivery_status != "SUCCESSFUL":
+            logger.exception(
+                "Failed to send email",
+                extra={
+                    "pinpoint_delivery_status": (
+                        email_response.delivery_status if email_response else None
+                    ),
+                    "pinpoint_message_id": (email_response.message_id if email_response else None),
+                    "pinpoint_status_code": (
+                        email_response.status_code if email_response else None
+                    ),
+                    "pinpoint_status_message": (
+                        email_response.status_message if email_response else None
+                    ),
+                    "pinpoint_trace_id": trace_id,
+                },
+            )
+
+    return response_object
 
 
 _mock_responses: list[tuple[dict, PinpointResponse]] = []

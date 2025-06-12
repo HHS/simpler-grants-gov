@@ -48,7 +48,7 @@ class BaseNotificationTask(Task):
             trace_id = str(uuid.uuid4())
             logger.info(
                 "Sending notification to user",
-                extra={"user_id": user_notification.user_id, "trace_id": trace_id},
+                extra={"user_id": user_notification.user_id, "pinpoint_trace_id": trace_id},
             )
             notification_log = UserNotificationLog(
                 user_notification_log_id=uuid.uuid4(),
@@ -86,7 +86,7 @@ class BaseNotificationTask(Task):
                         "pinpoint_status_message": (
                             email_response.status_message if email_response else None
                         ),
-                        "trace_id": trace_id,
+                        "pinpoint_trace_id": trace_id,
                     },
                 )
                 notification_log.notification_sent = True
@@ -101,7 +101,7 @@ class BaseNotificationTask(Task):
                     extra={
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,
-                        "trace_id": trace_id,
+                        "pinpoint_trace_id": trace_id,
                     },
                 )
                 self.increment(Metrics.FAILED_TO_SEND)
