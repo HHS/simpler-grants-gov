@@ -218,7 +218,7 @@ class LoadOpportunitiesToIndex(Task):
             # refresh index
             self.search_client.refresh_index(self.index_name)
 
-            # Update updated_at timestamp instead of deleting records
+            # Update updated_at timestamp instead of deleting records             ## this is not updating the updated_at column
             self.db_session.execute(
                 update(OpportunityChangeAudit)
                 .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
