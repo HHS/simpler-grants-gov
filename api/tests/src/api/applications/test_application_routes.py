@@ -22,6 +22,7 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     OrganizationUserFactory,
     SamGovEntityFactory,
+    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -2021,8 +2022,6 @@ def test_application_start_organization_membership_validation_works_with_multipl
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test that organization membership validation works correctly with multiple users"""
-    from tests.src.db.models.factories import UserFactory
-
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
