@@ -14,5 +14,8 @@ locals {
 
     # Configure the REPLY-TO email address if it should be different from the sender.
     reply_to_email = "notifications@${var.domain_name}"
+
+    #Email zone name, since the SES permissions use that not api. which is what the service knows as it's name
+    hosted_zone = local.network_config.domain_config.hosted_zone
   } : null
 }

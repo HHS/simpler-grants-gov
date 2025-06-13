@@ -36,6 +36,32 @@ logger = logging.getLogger(__name__)
 }
 """
 
+# An example of a failed SES response from Pinpoint:
+"""
+{
+    "ResponseMetadata": {
+        "RequestId": "abcdef11-1111-2222-3333-4444abcabc",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            # A bunch of generic HTTP/AWS headers
+        },
+        "RetryAttempts": 0
+    },
+    "MessageResponse": {
+        "ApplicationId": "abc123",
+        "RequestId": "ABCD-ASDASDASDAS",
+        "Result": {
+            "person@fake.com": {
+                "DeliveryStatus": "PERMANENT_FAILURE",
+                "StatusCode": 403,
+                "StatusMessage": "User is not authorized to perform `ses:SendEmail' on resource `arn:aws:ses:us-east-1:315341936575:configuration-set/dev-simpler-grants-gov' (Service: AmazonSimpleEmailServiceV2; Status Code: 403; Error Code: AccessDeniedException; Request ID: 0852ee10-6b47-4423-82bd-c9fe272b0bab; Proxy: null)"
+                "MessageId": "message-not-sent"
+            }
+        }
+    }
+}
+"""
+
 
 class PinpointResult(BaseModel):
     delivery_status: str = Field(alias="DeliveryStatus")
@@ -68,6 +94,9 @@ def send_pinpoint_email_raw(
     if pinpoint_client is None:
         pinpoint_client = get_pinpoint_client()
 
+    if trace_id is None:
+        trace_id = str(uuid.uuid4())
+
     # Based on: https://docs.aws.amazon.com/code-library/latest/ug/python_3_pinpoint_code_examples.html
     request = {
         "ApplicationId": app_id,
@@ -95,18 +124,36 @@ def send_pinpoint_email_raw(
 
     try:
         raw_response = pinpoint_client.send_messages(**request)
-        logger.info(
-            "Pinpoint Request Sent",
-            extra={
-                "trace_id": trace_id,
-                "request_id": raw_response.RequestId if raw_response else None,
-            },
-        )
     except ClientError:
         logger.exception("Failed to send email", extra={"trace_id": trace_id})
         raise
 
-    return PinpointResponse.model_validate(raw_response["MessageResponse"])
+    response_object = PinpointResponse.model_validate(raw_response["MessageResponse"])
+    email_response = response_object.results.get(to_address, None)
+
+    if email_response:
+        if email_response.delivery_status != "SUCCESSFUL":
+            logger.exception(
+                "Failed to send email",
+                extra={
+                    "pinpoint_delivery_status": (
+                        email_response.delivery_status if email_response else None
+                    ),
+                    "pinpoint_message_id": (email_response.message_id if email_response else None),
+                    "pinpoint_status_code": (
+                        email_response.status_code if email_response else None
+                    ),
+                    "pinpoint_status_message": (
+                        email_response.status_message if email_response else None
+                    ),
+                    "pinpoint_trace_id": trace_id,
+                },
+            )
+            raise Exception(
+                f"Failed to send email pinpoint_trace_id: {trace_id} with pinpoint_delivery_status: {email_response.delivery_status if email_response else None}"
+            )
+
+    return response_object
 
 
 _mock_responses: list[tuple[dict, PinpointResponse]] = []
