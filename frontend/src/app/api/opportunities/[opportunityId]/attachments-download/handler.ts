@@ -1,6 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { deduplicateFilenames } from "src/utils/opportunity/zipDownloadUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -34,11 +35,17 @@ export async function getAttachmentsDownload(
     }
     const blobWriter = new zip.BlobWriter();
     const zipWriter = new zip.ZipWriter(blobWriter);
-    const addPromises = getOpportunity.data.attachments?.map((attachment) => {
-      return zipWriter.add(
-        attachment.file_name,
-        new zip.HttpReader(attachment.download_path),
-      );
+    // const deduplicatedFilenames = deduplicateFilenames(getOpportunity.data.attachments);
+    // const zippedFilenames = {} as { [key:string]: number}
+    const zipEntries = attachmentsToZipEntries(getOpportunity.data.attachments);
+    const addPromises = zipEntries.map((entry) => {
+      return zipWriter.add(...entry);
+      // const currentFilenameCount = zippedFilenames[attachment.file_name];
+      // const zipFilename = currentFilenameCount > 1 ? `${attachment.file_name}` : attachment.file_name
+      // return zipWriter.add(
+      //   attachment.file_name,
+      //   new zip.HttpReader(attachment.download_path),
+      // );
     });
 
     await Promise.all([...addPromises, zipWriter.close()]);
