@@ -26,7 +26,7 @@ class SOAPClientCertificate(BaseModel):
 
 
 class SOAPAuth(BaseModel):
-    certificate: SOAPClientCertificate | None = None
+    certificate: SOAPClientCertificate
 
 
 class BaseSOAPSchema(BaseModel):

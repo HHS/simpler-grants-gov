@@ -7,7 +7,7 @@ import requests
 import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
-from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY
+from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, SessionResumptionAdapter
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPAuth, SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
@@ -24,11 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseSOAPClient:
-    def __init__(self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth) -> None:
+    def __init__(
+        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None
+    ) -> None:
         self.config = LegacySoapAPIConfig()
         self.auth = auth
         self.soap_request = soap_request
-        self.internal_request_headers = self._get_internal_request_headers()
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
         self.soap_request_operation_name = self.soap_request_message.operation_name
         self.proxy_response = self._proxy_soap_request()
@@ -40,19 +41,21 @@ class BaseSOAPClient:
         This method handles proxying requests to grants.gov SOAP API and retrieving
         and returning the xml data as is from the existing SOAP API.
         """
-        request_args = dict(
+        session = requests.Session()
+        session.mount("https://", SessionResumptionAdapter())
+        request = requests.Request(
             method=self.soap_request.method,
             url=self.get_soap_proxy_url(),
             data=self.soap_request.data,
             headers=self.get_proxy_request_headers(),
         )
 
-        if not self.auth.certificate:
+        if not self.auth:
             logger.info("soap_api_proxy: proxying unauthorized request")
-            response = requests.request(**request_args)
+            prepared = session.prepare_request(request)
+            response = session.send(prepared)
         else:
             logger.info("soap_api_proxy: proxying authorized request")
-            temp_file_path = None
             with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
                 temp_file_path = temp_cert_file.name
                 logger.info(
@@ -61,13 +64,9 @@ class BaseSOAPClient:
                 )
                 temp_cert_file.write(self.get_client_cert())
                 temp_cert_file.flush()
-                response = requests.request(**request_args, cert=temp_file_path)
+                prepared = session.prepare_request(request)
+                response = session.send(prepared, cert=temp_file_path)
 
-            if os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-                logger.warning(
-                    "soap_api_proxy: temp certificate cleaned up but file not automatically deleted"
-                )
         return SOAPResponse(
             data=self._process_response_response_content(response.content),
             status_code=response.status_code,
@@ -76,6 +75,8 @@ class BaseSOAPClient:
 
     def get_client_cert(self) -> str:
         cert = ""
+        if not self.auth:
+            return cert
         try:
             cert = self.auth.certificate.get_pem(self.config.soap_auth_map)
             logger.info("soap_client_certificate: found associated key by serial number")
@@ -97,7 +98,10 @@ class BaseSOAPClient:
 
     def get_soap_proxy_url(self) -> str:
         return os.path.join(
-            self.internal_request_headers["gg_s2s_uri"], self.soap_request.full_path.lstrip("/")
+            self.soap_request.headers.get(
+                self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
+            ),
+            self.soap_request.full_path.lstrip("/"),
         )
 
     def get_proxy_request_headers(self) -> dict:
@@ -110,7 +114,9 @@ class BaseSOAPClient:
 
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
-    def __init__(self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth) -> None:
+    def __init__(
+        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None
+    ) -> None:
         super().__init__(soap_request, db_session, auth)
         self.operation_config = SOAP_OPERATION_CONFIGS["applicants"].get(
             self.soap_request_operation_name
