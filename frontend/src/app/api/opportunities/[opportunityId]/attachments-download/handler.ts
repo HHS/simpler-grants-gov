@@ -1,7 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { deduplicateFilenames } from "src/utils/opportunity/zipDownloadUtils";
+import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 

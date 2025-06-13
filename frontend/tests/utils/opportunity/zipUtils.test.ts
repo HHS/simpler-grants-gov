@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { deduplicateFilename } from "src/utils/opportunity/zipDownloadUtils";
+import { deduplicateFilename } from "src/utils/opportunity/zipUtils";
 
 describe("deduplicateFilename", () => {
   it("adds a (1) sequence if previous filename has no sequence", () => {
