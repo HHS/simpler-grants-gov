@@ -39,7 +39,7 @@ def get_user_organizations(db_session: db.Session, user_id: UUID) -> list[dict[s
             org_data["sam_gov_entity"] = {
                 "uei": sam_gov_entity.uei,
                 "legal_business_name": sam_gov_entity.legal_business_name,
-                "expiration_date": sam_gov_entity.expiration_date.isoformat(),
+                "expiration_date": sam_gov_entity.expiration_date,
             }
 
         organizations.append(org_data)
