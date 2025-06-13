@@ -46,6 +46,8 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     competition_id = json_data["competition_id"]
     # application_name is optional, so we use get to avoid a KeyError
     application_name = json_data.get("application_name", None)
+    # organization_id is optional, so we use get to avoid a KeyError
+    organization_id = json_data.get("organization_id", None)
     add_extra_data_to_current_request_logs({"competition_id": competition_id})
     logger.info("POST /alpha/applications/start")
 
@@ -54,7 +56,9 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     user = token_session.user
 
     with db_session.begin():
-        application = create_application(db_session, competition_id, user, application_name)
+        application = create_application(
+            db_session, competition_id, user, application_name, organization_id
+        )
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}

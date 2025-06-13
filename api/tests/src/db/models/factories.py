@@ -1273,6 +1273,9 @@ class ApplicationAttachmentFactory(BaseFactory):
     application_id = factory.LazyAttribute(lambda a: a.application.application_id)
     application = factory.SubFactory(ApplicationFactory)
 
+    user_id = factory.LazyAttribute(lambda a: a.user.user_id)
+    user = factory.SubFactory(UserFactory)
+
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name", extension="text")
 

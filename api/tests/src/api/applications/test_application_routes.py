@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import pytest
 from sqlalchemy import select
 
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import ApplicationFormStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
@@ -19,7 +20,9 @@ from tests.src.db.models.factories import (
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
     SamGovEntityFactory,
+    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -1762,3 +1765,299 @@ def test_application_get_without_organization(
     # Check that organization field is present but null
     assert "organization" in response.json["data"]
     assert response.json["data"]["organization"] is None
+
+
+def test_application_start_with_organization_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successful creation of an application with an organization"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with the organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert str(application.organization_id) == organization_id
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_with_organization_and_custom_name(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation with organization and custom name"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    custom_name = "My Custom Application"
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+        "application_name": custom_name,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with the organization and custom name
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert str(application.organization_id) == organization_id
+    assert application.application_name == custom_name
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_organization_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization doesn't exist"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    nonexistent_organization_id = str(uuid.uuid4())  # Random UUID that doesn't exist
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": nonexistent_organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 404
+    assert "Organization not found" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_user_not_organization_member(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when user is not a member of the organization"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization but DON'T associate user with it
+    organization = OrganizationFactory.create()
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 403
+    assert "User is not a member of the organization" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_without_organization_still_works(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application creation still works without organization_id (backward compatibility)"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        # No organization_id provided
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created without organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.organization_id is None
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_with_null_organization_id(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application creation works with explicit null organization_id"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": None,  # Explicitly set to null
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created without organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.organization_id is None
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_invalid_organization_id_format(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails with invalid organization_id format"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": "invalid-uuid-format",  # Invalid UUID format
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert "validation error" in response.json["message"].lower()
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_membership_validation_works_with_multiple_users(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that organization membership validation works correctly with multiple users"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization
+    organization = OrganizationFactory.create()
+
+    # Create two users - one is member, one is not
+    user_member = user  # This user will be a member
+    user_non_member = UserFactory.create()
+
+    # Associate only the first user with the organization
+    OrganizationUserFactory.create(organization=organization, user=user_member)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    # Test with member user - should succeed
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Test with non-member user - should fail
+    non_member_token, _ = create_jwt_for_user(user_non_member, db_session)
+    db_session.commit()
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": non_member_token}
+    )
+
+    assert response.status_code == 403
+    assert "User is not a member of the organization" in response.json["message"]
