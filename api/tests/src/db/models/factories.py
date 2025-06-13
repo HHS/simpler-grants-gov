@@ -438,7 +438,7 @@ class OpportunityFactory(BaseFactory):
                 "tests.src.db.models.factories.OpportunityAttachmentFactory",
                 factory_related_name="opportunity",
                 size=2,
-                duplicate_filename=True
+                duplicate_filename=True,
             )
         )
 
@@ -792,9 +792,7 @@ class OpportunityAttachmentFactory(BaseFactory):
         model = opportunity_models.OpportunityAttachment
 
     class Params:
-        duplicate_filename = factory.Trait(
-            file_name="duplicate.txt"
-        )
+        duplicate_filename = factory.Trait(file_name="duplicate.txt")
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
