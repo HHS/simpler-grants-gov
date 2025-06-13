@@ -14,6 +14,9 @@ const customJestConfig = {
   // if using TypeScript with a baseUrl set to the root directory then you need the below for alias' to work
   moduleDirectories: ["node_modules", "<rootDir>/"],
   testPathIgnorePatterns: ["<rootDir>/tests/e2e"],
+  moduleNameMapper: {
+    "@zip.js/zip.js": "<rootDir>/__mocks__/zipjs.ts",
+  },
 };
 
 module.exports = createJestConfig(customJestConfig);

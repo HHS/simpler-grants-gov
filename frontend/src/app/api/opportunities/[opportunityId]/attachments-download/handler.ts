@@ -6,7 +6,7 @@ import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function getAttachmentsDownload(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ opportunityId: string }> },
 ): Promise<Response> {
   const { opportunityId } = await params;
@@ -35,17 +35,9 @@ export async function getAttachmentsDownload(
     }
     const blobWriter = new zip.BlobWriter();
     const zipWriter = new zip.ZipWriter(blobWriter);
-    // const deduplicatedFilenames = deduplicateFilenames(getOpportunity.data.attachments);
-    // const zippedFilenames = {} as { [key:string]: number}
     const zipEntries = attachmentsToZipEntries(getOpportunity.data.attachments);
     const addPromises = zipEntries.map((entry) => {
       return zipWriter.add(...entry);
-      // const currentFilenameCount = zippedFilenames[attachment.file_name];
-      // const zipFilename = currentFilenameCount > 1 ? `${attachment.file_name}` : attachment.file_name
-      // return zipWriter.add(
-      //   attachment.file_name,
-      //   new zip.HttpReader(attachment.download_path),
-      // );
     });
 
     await Promise.all([...addPromises, zipWriter.close()]);

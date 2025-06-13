@@ -22,6 +22,7 @@ export const deduplicateFilename = (claimedFilename: string) => {
   return `${unsequencedName}(${parseInt(sequence) + 1})${extension}`;
 };
 
+// this is here mainly to handle deduplicating filenames to be added to a zip file
 export const attachmentsToZipEntries = (
   attachments: OpportunityDocument[],
 ): ZipEntry[] => {

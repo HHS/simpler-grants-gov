@@ -2,7 +2,12 @@
  * @jest-environment node
  */
 
-import { deduplicateFilename } from "src/utils/opportunity/zipUtils";
+// import * as zip from "@zip.js/zip.js";
+
+import {
+  attachmentsToZipEntries,
+  deduplicateFilename,
+} from "src/utils/opportunity/zipUtils";
 
 describe("deduplicateFilename", () => {
   it("adds a (1) sequence if previous filename has no sequence", () => {
@@ -26,5 +31,53 @@ describe("deduplicateFilename", () => {
     expect(deduplicateFilename("hello(3).something(1).txt")).toEqual(
       "hello(3).something(2).txt",
     );
+  });
+});
+
+describe("attachmentsToZipEntries", () => {
+  it("returns an empty array if passed no attachments", () => {
+    // @ts-ignore
+    expect(attachmentsToZipEntries(null)).toEqual([]);
+    expect(attachmentsToZipEntries([])).toEqual([]);
+  });
+  it("returns a basic list of filenames and HttpReader instances", () => {
+    expect(
+      attachmentsToZipEntries([
+        {
+          file_name: "file.txt",
+          download_path: "/file.txt",
+          updated_at: "yesterday",
+        },
+        {
+          file_name: "file.csv",
+          download_path: "/file.csv",
+          updated_at: "tomorrow",
+        },
+      ]),
+    ).toEqual([
+      ["file.txt", expect.any(zip.HttpReader)],
+      ["file.csv", expect.any(zip.HttpReader)],
+    ]);
+  });
+  it("returns a basic list of filenames and HttpReader instances", () => {
+    expect(
+      attachmentsToZipEntries([
+        {
+          file_name: "file.txt",
+          download_path: "/file.txt",
+          updated_at: "yesterday",
+        },
+        {
+          file_name: "file.csv",
+          download_path: "/file.csv",
+          updated_at: "tomorrow",
+        },
+      ]),
+    ).toEqual([
+      ["file.txt", expect.any(zip.HttpReader)],
+      ["file.csv", expect.any(zip.HttpReader)],
+    ]);
+
+    expect();
   });
 });
