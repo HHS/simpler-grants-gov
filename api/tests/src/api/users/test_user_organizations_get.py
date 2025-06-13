@@ -186,8 +186,12 @@ class TestUserOrganizationsGet:
         org_without_sam = OrganizationFactory.create(sam_gov_entity=None)
 
         # Create organization-user relationships
-        OrganizationUserFactory.create(user=user, organization=org_with_sam, is_organization_owner=True)
-        OrganizationUserFactory.create(user=user, organization=org_without_sam, is_organization_owner=False)
+        OrganizationUserFactory.create(
+            user=user, organization=org_with_sam, is_organization_owner=True
+        )
+        OrganizationUserFactory.create(
+            user=user, organization=org_without_sam, is_organization_owner=False
+        )
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)

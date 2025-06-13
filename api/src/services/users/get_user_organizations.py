@@ -14,7 +14,9 @@ def _fetch_user_organizations(db_session: db.Session, user_id: UUID) -> list[Org
     stmt = (
         select(OrganizationUser)
         .where(OrganizationUser.user_id == user_id)
-        .options(selectinload(OrganizationUser.organization).selectinload(Organization.sam_gov_entity))
+        .options(
+            selectinload(OrganizationUser.organization).selectinload(Organization.sam_gov_entity)
+        )
     )
 
     organization_users = db_session.execute(stmt).scalars().all()
