@@ -1,6 +1,14 @@
 from pydantic import BaseModel, ConfigDict
 
 
+class SOAPClientCertificateNotConfigured(Exception):
+    pass
+
+
+class SOAPClientCertificateParsingError(Exception):
+    pass
+
+
 class SOAPRequest(BaseModel):
     data: bytes
     full_path: str
@@ -15,18 +23,6 @@ class SOAPResponse(BaseModel):
 
     def to_flask_response(self) -> tuple:
         return self.data, self.status_code, self.headers
-
-
-class SOAPClientCertificate(BaseModel):
-    cert: str
-    serial_number: str
-
-    def get_pem(self, key_map: dict) -> str:
-        return f"{key_map[self.serial_number]}\n\n{self.cert}"
-
-
-class SOAPAuth(BaseModel):
-    certificate: SOAPClientCertificate
 
 
 class BaseSOAPSchema(BaseModel):

@@ -7,13 +7,20 @@ import requests
 import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
-from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, SessionResumptionAdapter
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    MTLS_CERT_HEADER_KEY,
+    SessionResumptionAdapter,
+    SOAPAuth,
+    SOAPClientCertificateLookupError,
+    SOAPClientCertificateNotConfigured,
+)
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPAuth, SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAP_OPERATION_CONFIGS,
     SOAPFaultException,
     format_local_soap_response,
+    get_auth_error_response,
     get_envelope_dict,
     get_soap_response,
     wrap_envelope_dict,
@@ -65,7 +72,10 @@ class BaseSOAPClient:
                 temp_cert_file.write(self.get_client_cert())
                 temp_cert_file.flush()
                 prepared = session.prepare_request(request)
-                response = session.send(prepared, cert=temp_file_path)
+                try:
+                    response = session.send(prepared, cert=temp_file_path)
+                except requests.exceptions.SSLError:
+                    return get_auth_error_response()
 
         return SOAPResponse(
             data=self._process_response_response_content(response.content),
@@ -74,16 +84,15 @@ class BaseSOAPClient:
         )
 
     def get_client_cert(self) -> str:
+        """This is temp auth solution"""
         cert = ""
         if not self.auth:
             return cert
         try:
             cert = self.auth.certificate.get_pem(self.config.soap_auth_map)
-            logger.info("soap_client_certificate: found associated key by serial number")
-        except KeyError:
-            logger.info("soap_client_certificate: serial number not configured")
-        except Exception:
-            logger.info("soap_client_certificate: unable to generate key")
+            logger.info("soap_client_certificate: found associated key")
+        except (SOAPClientCertificateLookupError, SOAPClientCertificateNotConfigured) as e:
+            logger.warning(f"soap_client_certificate: {e}")
         return cert
 
     def _process_response_response_content(self, soap_content: bytes) -> bytes:

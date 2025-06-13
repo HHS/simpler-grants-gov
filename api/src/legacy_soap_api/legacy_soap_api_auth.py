@@ -4,10 +4,11 @@ from typing import Any
 from urllib.parse import unquote
 
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
+from pydantic import BaseModel
 from requests.adapters import HTTPAdapter
 
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPAuth, SOAPClientCertificate
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -15,9 +16,47 @@ logger = logging.getLogger(__name__)
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
 
 
+class SOAPClientCertificateNotConfigured(Exception):
+    pass
+
+
+class SOAPClientCertificateLookupError(Exception):
+    pass
+
+
+class SOAPClientCertificate(BaseModel):
+    cert: str
+    serial_number: int
+    fingerprint: str
+
+    def get_pem(self, key_map: dict) -> str:
+        """Note that this auth mechanism will only be configured in lower environments
+
+        There will be no prod configurations for this auth mechanism.
+        """
+        try:
+            return f"{key_map[self.fingerprint]}\n\n{self.cert}"
+        except KeyError:
+            raise SOAPClientCertificateNotConfigured(f"{self.serial_number} cert is not configured") from None
+        except Exception:
+            raise SOAPClientCertificateLookupError(
+                f"could not retrieve client cert for serial {self.serial_number}"
+            ) from None
+
+
+class SOAPAuth(BaseModel):
+    certificate: SOAPClientCertificate
+
+
 class SessionResumptionAdapter(HTTPAdapter):
+    """
+    This request adapter prevents session resumption at the ssl layer.
+
+    Session resumption must be disabled for outbound requests to existing GG
+    SOAP api proxy requests due to how we will handle auth.
+    """
+
     def init_poolmanager(self, *args: Any, **kwargs: Any) -> None:
-        # Create a fresh context with no session cache
         context = ssl.create_default_context()
         kwargs["ssl_context"] = context
         super().init_poolmanager(*args, **kwargs)
@@ -39,13 +78,16 @@ def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
         )
         logger.info("soap_client_certificate: successfully extracted certificate and serial number")
     except Exception:
-        logger.warning("soap_client_certificate: could not parse and extract serial number")
+        logger.info("soap_client_certificate: could not parse and extract serial number")
     return auth
 
 
 def get_soap_client_certificate(urlencoded_cert: str) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
-    serial_number = str(
-        load_pem_x509_certificate(cert_str.encode(), default_backend()).serial_number
+    cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
+    return SOAPClientCertificate(
+        cert=cert_str,
+        fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
+        issuer=cert.issuer.rfc4514_string(),
+        serial_number=cert.serial_number,
     )
-    return SOAPClientCertificate(cert=cert_str, serial_number=serial_number)
