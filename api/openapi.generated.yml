@@ -3320,7 +3320,12 @@ components:
             - object
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
         application_status:
-          type: string
+          enum:
+          - in_progress
+          - submitted
+          - accepted
+          type:
+          - string
         application_name:
           type: string
         users:

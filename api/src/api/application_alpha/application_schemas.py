@@ -5,7 +5,7 @@ from src.api.schemas.response_schema import (
     FileResponseSchema,
     WarningMixinSchema,
 )
-from src.constants.lookup_constants import ApplicationFormStatus
+from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -138,7 +138,7 @@ class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition = fields.Nested(CompetitionAlphaSchema())
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
-    application_status = fields.String()
+    application_status = fields.Enum(ApplicationStatus)
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
     organization = fields.Nested(OrganizationSchema(), allow_none=True)
