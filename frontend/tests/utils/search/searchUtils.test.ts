@@ -395,6 +395,7 @@ describe("convertSearchParamsToProperTypes", () => {
       agency: new Set([fakeSearchParamDict.agency]),
       category: new Set([fakeSearchParamDict.category]),
       closeDate: new Set(["7"]),
+      costSharing: new Set(),
       andOr: fakeSearchParamDict.andOr,
       sortby: fakeSearchParamDict.sortby,
       page: 1,
