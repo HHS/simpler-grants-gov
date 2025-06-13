@@ -36,6 +36,32 @@ logger = logging.getLogger(__name__)
 }
 """
 
+# An example of a failed SES response from Pinpoint:
+"""
+{
+    "ResponseMetadata": {
+        "RequestId": "abcdef11-1111-2222-3333-4444abcabc",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            # A bunch of generic HTTP/AWS headers
+        },
+        "RetryAttempts": 0
+    },
+    "MessageResponse": {
+        "ApplicationId": "abc123",
+        "RequestId": "ABCD-ASDASDASDAS",
+        "Result": {
+            "person@fake.com": {
+                "DeliveryStatus": "PERMANENT_FAILURE",
+                "StatusCode": 403,
+                "StatusMessage": "User is not authorized to perform `ses:SendEmail' on resource `arn:aws:ses:us-east-1:315341936575:configuration-set/dev-simpler-grants-gov' (Service: AmazonSimpleEmailServiceV2; Status Code: 403; Error Code: AccessDeniedException; Request ID: 0852ee10-6b47-4423-82bd-c9fe272b0bab; Proxy: null)"
+                "MessageId": "message-not-sent"
+            }
+        }
+    }
+}
+"""
+
 
 class PinpointResult(BaseModel):
     delivery_status: str = Field(alias="DeliveryStatus")
