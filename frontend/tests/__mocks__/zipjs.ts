@@ -34,16 +34,6 @@ export class FakeHttpReader {
   }
 }
 
-// const mockZipJs = {
-//   HttpReader: () => {},
-//   BlobWriter: FakeBlobWriter,
-//   ZipWriter: () => ({
-//     add: mockZipWriterAdd,
-//   }),
-// };
-
-// export default mockZipJs;
-
 export const HttpReader = FakeHttpReader;
 export const BlobWriter = FakeBlobWriter;
 export const ZipWriter = FakeZipWriter;
