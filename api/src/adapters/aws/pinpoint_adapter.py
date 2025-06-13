@@ -149,6 +149,9 @@ def send_pinpoint_email_raw(
                     "pinpoint_trace_id": trace_id,
                 },
             )
+            raise Exception(
+                f"Failed to send email pinpoint_trace_id: {trace_id} with pinpoint_delivery_status: {email_response.delivery_status if email_response else None}"
+            )
 
     return response_object
 
