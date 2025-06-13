@@ -80,3 +80,17 @@ def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
     body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
     return {"Envelope": {"Body": {**body}}}
+
+
+def get_auth_error_response() -> SOAPResponse:
+    data = b"""
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <soap:Fault>
+            <faultcode>soap:Server</faultcode>
+            <faultstring>Auth error</faultstring>
+        </soap:Fault>
+    </soap:Body>
+</soap:Envelope>
+"""
+    return SOAPResponse(data=format_local_soap_response(data), status_code=500, headers={})

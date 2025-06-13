@@ -80,5 +80,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/domain-verification-content"
     }
+
+    SOAP_AUTH_CONTENT = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-auth-content"
+    }
   }
 }
