@@ -14,6 +14,7 @@ from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
+    UserOrganizationsResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSavedSearchesRequestSchema,
@@ -38,6 +39,7 @@ from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
+from src.services.users.get_user_organizations import get_user_organizations
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
@@ -166,6 +168,34 @@ def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
         return response.ApiResponse(message="Success", data=user)
 
     raise_flask_error(401, "Unauthorized user")
+
+
+@user_blueprint.get("/<uuid:user_id>/organizations")
+@user_blueprint.output(UserOrganizationsResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id/organizations")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        organizations = get_user_organizations(db_session, user_id)
+
+    logger.info(
+        "Retrieved organizations for user",
+        extra={
+            "user_id": user_id,
+            "organization_count": len(organizations),
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=organizations)
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities")
