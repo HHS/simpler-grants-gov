@@ -4,14 +4,20 @@
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
+import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
 import {
   agenciesToFilterOptions,
   areSetsEqual,
+  convertSearchParamsToProperTypes,
   getAgencyDisplayName,
   paramsToFormattedQuery,
+  paramToDateRange,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
-import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
+import {
+  fakeAgencyResponseData,
+  fakeSearchParamDict,
+} from "src/utils/testing/fixtures";
 
 describe("sortFilterOptions", () => {
   it("alphabetically sorts top level and child options by label", () => {
@@ -354,5 +360,46 @@ describe("agenciesToFilterOptions", () => {
         value: "FAKEORG",
       },
     ]);
+  });
+});
+
+describe("paramToDateRange", () => {
+  it("returns empty set if no param value", () => {
+    expect(paramToDateRange()).toEqual(new Set());
+  });
+  it("returns first value in set if only one param value", () => {
+    expect(paramToDateRange("hi")).toEqual(new Set(["hi"]));
+  });
+  it("returns set of first two values (comma separated) in param otherwise", () => {
+    expect(paramToDateRange("hi,there")).toEqual(new Set(["hi", "there"]));
+    expect(paramToDateRange("hi,there,again")).toEqual(
+      new Set(["hi", "there"]),
+    );
+  });
+});
+
+describe("convertSearchParamsToProperTypes", () => {
+  it("converts search param strings to proper types", () => {
+    expect(
+      convertSearchParamsToProperTypes({
+        unhandledParam: "whatever",
+        closeDate: "7",
+        ...fakeSearchParamDict,
+      }),
+    ).toEqual({
+      unhandledParam: "whatever",
+      query: fakeSearchParamDict.query,
+      status: new Set(fakeSearchParamDict.status.split(",")),
+      fundingInstrument: new Set([fakeSearchParamDict.fundingInstrument]),
+      eligibility: new Set([fakeSearchParamDict.eligibility]),
+      agency: new Set([fakeSearchParamDict.agency]),
+      category: new Set([fakeSearchParamDict.category]),
+      closeDate: new Set(["7"]),
+      costSharing: new Set(),
+      andOr: fakeSearchParamDict.andOr,
+      sortby: fakeSearchParamDict.sortby,
+      page: 1,
+      actionType: SearchFetcherActionType.InitialLoad,
+    });
   });
 });

@@ -204,7 +204,7 @@ test.describe("Search page tests", () => {
     // check all 4 boxes
     const statusCheckboxes = {
       "status-forecasted": "forecasted",
-      "status-posted": "posted",
+      "status-open": "posted",
       "status-closed": "closed",
       "status-archived": "archived",
     };

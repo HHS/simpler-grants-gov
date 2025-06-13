@@ -58,6 +58,8 @@ describe("SearchResults", () => {
           category: new Set(),
           agency: new Set(),
           eligibility: new Set(),
+          closeDate: new Set(),
+          costSharing: new Set(),
         }}
         loadingMessage={""}
         searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}

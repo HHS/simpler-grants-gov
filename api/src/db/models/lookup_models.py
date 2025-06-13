@@ -14,7 +14,9 @@ from src.constants.lookup_constants import (
     JobStatus,
     OpportunityCategory,
     OpportunityStatus,
+    SamGovExtractType,
     SamGovImportType,
+    SamGovProcessingStatus,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
@@ -144,6 +146,21 @@ COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
+    ]
+)
+
+SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
+    [
+        LookupStr(SamGovProcessingStatus.PENDING, 1),
+        LookupStr(SamGovProcessingStatus.COMPLETED, 2),
+        LookupStr(SamGovProcessingStatus.FAILED, 3),
+    ]
+)
+
+SAM_GOV_EXTRACT_TYPE_CONFIG = LookupConfig(
+    [
+        LookupStr(SamGovExtractType.MONTHLY, 1),
+        LookupStr(SamGovExtractType.DAILY, 2),
     ]
 )
 
@@ -326,6 +343,34 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
         return LkCompetitionOpenToApplicant(
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(SAM_GOV_PROCESSING_STATUS_CONFIG)
+class LkSamGovProcessingStatus(LookupTable, TimestampMixin):
+    __tablename__ = "lk_sam_gov_processing_status"
+
+    sam_gov_processing_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkSamGovProcessingStatus":
+        return LkSamGovProcessingStatus(
+            sam_gov_processing_status_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(SAM_GOV_EXTRACT_TYPE_CONFIG)
+class LkSamGovExtractType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_sam_gov_extract_type"
+
+    sam_gov_extract_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkSamGovExtractType":
+        return LkSamGovExtractType(
+            sam_gov_extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
 
 

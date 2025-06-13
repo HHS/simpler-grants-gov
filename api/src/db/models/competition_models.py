@@ -303,6 +303,9 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
     application: Mapped[Application] = relationship(Application)
 
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), nullable=False)
+    user: Mapped["User"] = relationship("User")
+
     file_location: Mapped[str]
     file_name: Mapped[str]
     mime_type: Mapped[str]

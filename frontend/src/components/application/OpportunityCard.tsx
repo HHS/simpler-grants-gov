@@ -90,6 +90,7 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
     opportunity_title,
     opportunity_number,
     summary,
+    opportunity_status,
   } = opportunity;
 
   return (
@@ -103,7 +104,11 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
           />
           <OpportunityItem opKey={t("number")} opValue={opportunity_number} />
           <OpportunityItem
-            opKey={t("posted")}
+            opKey={
+              opportunity_status === "forecasted"
+                ? t("forecastDate")
+                : t("posted")
+            }
             opValue={displayDate(summary.post_date)}
           />
           <OpportunityItem
