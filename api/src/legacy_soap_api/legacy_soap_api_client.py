@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class BaseSOAPClient:
     def __init__(
-        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None
+        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None = None
     ) -> None:
         self.config = LegacySoapAPIConfig()
         self.auth = auth
@@ -115,7 +115,7 @@ class BaseSOAPClient:
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
     def __init__(
-        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None
+        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None = None
     ) -> None:
         super().__init__(soap_request, db_session, auth)
         self.operation_config = SOAP_OPERATION_CONFIGS["applicants"].get(
