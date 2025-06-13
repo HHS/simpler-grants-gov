@@ -67,6 +67,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Status indicating how much of a form has been filled out"},
     )
 
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
+    )
+
     is_required = fields.Boolean(
         metadata={"description": "Whether this form is required for the application"}
     )

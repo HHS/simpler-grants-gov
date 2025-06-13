@@ -824,6 +824,8 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "form_id": str(application_form.form_id),
             "application_response": application_form.application_response,
             "application_form_status": ApplicationFormStatus.IN_PROGRESS,
+            "created_at": application_form.created_at.isoformat(),
+            "updated_at": application_form.updated_at.isoformat(),
             "is_required": True,
         }
 

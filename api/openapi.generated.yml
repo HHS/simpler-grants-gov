@@ -3153,6 +3153,14 @@ components:
           - complete
           type:
           - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the application form was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application form was last updated
         is_required:
           type: boolean
           description: Whether this form is required for the application
