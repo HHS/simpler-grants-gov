@@ -2,7 +2,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.entity_models import Organization
@@ -14,7 +14,7 @@ def _fetch_user_organizations(db_session: db.Session, user_id: UUID) -> list[Org
     stmt = (
         select(OrganizationUser)
         .where(OrganizationUser.user_id == user_id)
-        .options(joinedload(OrganizationUser.organization).joinedload(Organization.sam_gov_entity))
+        .options(selectinload(OrganizationUser.organization).selectinload(Organization.sam_gov_entity))
     )
 
     organization_users = db_session.execute(stmt).scalars().all()
@@ -32,15 +32,9 @@ def get_user_organizations(db_session: db.Session, user_id: UUID) -> list[dict[s
 
         org_data: dict[str, Any] = {
             "organization_id": str(organization.organization_id),
-            "sam_gov_entity": None,
+            "is_organization_owner": org_user.is_organization_owner,
+            "sam_gov_entity": sam_gov_entity,
         }
-
-        if sam_gov_entity:
-            org_data["sam_gov_entity"] = {
-                "uei": sam_gov_entity.uei,
-                "legal_business_name": sam_gov_entity.legal_business_name,
-                "expiration_date": sam_gov_entity.expiration_date,
-            }
 
         organizations.append(org_data)
 
