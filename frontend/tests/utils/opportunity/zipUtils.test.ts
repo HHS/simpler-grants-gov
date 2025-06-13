@@ -2,40 +2,37 @@
  * @jest-environment node
  */
 
-// import * as zip from "@zip.js/zip.js";
-
 import {
   attachmentsToZipEntries,
   deduplicateFilename,
 } from "src/utils/opportunity/zipUtils";
+import { FakeHttpReader } from "tests/__mocks__/zipjs";
 
 describe("deduplicateFilename", () => {
-  it("adds a (1) sequence if previous filename has no sequence", () => {
-    expect(deduplicateFilename("hello.txt")).toEqual("hello(1).txt");
+  it("returns original filename if no previous usage of name is found", () => {
+    expect(deduplicateFilename("hello.txt", {})).toEqual("hello.txt");
   });
-  it("adds to existing sequence if present", () => {
-    expect(deduplicateFilename("hello(1).txt")).toEqual("hello(2).txt");
-    // expect(deduplicateFilename("hello(1235).txt")).toEqual("hello(1236).txt");
+  it("adds existing sequence if present", () => {
+    expect(deduplicateFilename("hello.txt", { "hello.txt": 1 })).toEqual(
+      "hello(1).txt",
+    );
   });
   it("handles a filename without an extension", () => {
-    expect(deduplicateFilename("hello")).toEqual("hello(1)");
-    expect(deduplicateFilename("hello(1)")).toEqual("hello(2)");
+    expect(deduplicateFilename("hello", { hello: 1 })).toEqual("hello(1)");
+    expect(deduplicateFilename("hello", { hello: 2 })).toEqual("hello(2)");
   });
-  it("handles a filename with periods", () => {
-    expect(deduplicateFilename("hello.something.txt")).toEqual(
-      "hello.something(1).txt",
-    );
-    expect(deduplicateFilename("hello.something(1).txt")).toEqual(
-      "hello.something(2).txt",
-    );
-    expect(deduplicateFilename("hello(3).something(1).txt")).toEqual(
-      "hello(3).something(2).txt",
-    );
+  it("handles a filename with periods and parentheses", () => {
+    expect(
+      deduplicateFilename("hello(3).something.txt", {
+        "hello(3).something.txt": 2,
+      }),
+    ).toEqual("hello(3).something(2).txt");
   });
 });
 
 describe("attachmentsToZipEntries", () => {
   it("returns an empty array if passed no attachments", () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     expect(attachmentsToZipEntries(null)).toEqual([]);
     expect(attachmentsToZipEntries([])).toEqual([]);
@@ -55,29 +52,51 @@ describe("attachmentsToZipEntries", () => {
         },
       ]),
     ).toEqual([
-      ["file.txt", expect.any(zip.HttpReader)],
-      ["file.csv", expect.any(zip.HttpReader)],
+      ["file.txt", expect.any(FakeHttpReader)],
+      ["file.csv", expect.any(FakeHttpReader)],
     ]);
   });
-  it("returns a basic list of filenames and HttpReader instances", () => {
+  it("returns a list with all duplicate filenames handled", () => {
     expect(
       attachmentsToZipEntries([
         {
           file_name: "file.txt",
-          download_path: "/file.txt",
+          download_path: "/anything/file.txt",
           updated_at: "yesterday",
         },
         {
-          file_name: "file.csv",
-          download_path: "/file.csv",
+          file_name: "file.txt",
+          download_path: "/something/file.txt",
           updated_at: "tomorrow",
+        },
+        {
+          file_name: "file.txt",
+          download_path: "/another/file.txt",
+          updated_at: "today",
+        },
+        {
+          file_name: "Lou Bega - Mambo #5.mp3",
+          download_path: "/good_songs/Lou Bega - Mambo #5.mp3",
+          updated_at: "tomorrow",
+        },
+        {
+          file_name: "Lou Bega - Mambo #5.mp3",
+          download_path: "/bad_songs/Lou Bega - Mambo #5.mp3",
+          updated_at: "today",
+        },
+        {
+          file_name: "exec.bat",
+          download_path: "/exec.bat",
+          updated_at: "today",
         },
       ]),
     ).toEqual([
-      ["file.txt", expect.any(zip.HttpReader)],
-      ["file.csv", expect.any(zip.HttpReader)],
+      ["file.txt", expect.any(FakeHttpReader)],
+      ["file(1).txt", expect.any(FakeHttpReader)],
+      ["file(2).txt", expect.any(FakeHttpReader)],
+      ["Lou Bega - Mambo #5.mp3", expect.any(FakeHttpReader)],
+      ["Lou Bega - Mambo #5(1).mp3", expect.any(FakeHttpReader)],
+      ["exec.bat", expect.any(FakeHttpReader)],
     ]);
-
-    expect();
   });
 });

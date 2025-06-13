@@ -4,22 +4,29 @@ import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTy
 type ZipEntry = [string, zip.HttpReader];
 
 const splitFilenameRegexp = /(.+)+\.(.+)/;
-const fileNameSequenceRegexp = /(.*)\((\w+)\)$/;
 
 // adds a numerical "sequence" to the filename to deduplicate it from other files with the same name
 // ex. filename.txt -> filename(1).txt
 // ex. filename(1).txt -> filename(2).txt
-export const deduplicateFilename = (claimedFilename: string) => {
+export const deduplicateFilename = (
+  filename: string,
+  claimedFilenames: { [key: string]: number },
+) => {
+  const claimedFilename = Object.keys(claimedFilenames).find(
+    (claimedFilename) => claimedFilename === filename,
+  );
+  if (!claimedFilename) {
+    return filename;
+  }
+
+  const currentSequence = claimedFilenames[filename];
+
   const splitMatch = claimedFilename.match(splitFilenameRegexp);
-  // need to handle cases without  a file extension
+  // need to handle cases without a file extension
   const name = splitMatch ? splitMatch[1] : claimedFilename;
   const extension = splitMatch ? `.${splitMatch[2]}` : "";
-  const sequenceMatch = name.match(fileNameSequenceRegexp);
-  if (!sequenceMatch || !sequenceMatch[2]) {
-    return `${name}(1)${extension}`;
-  }
-  const [__, unsequencedName, sequence] = sequenceMatch;
-  return `${unsequencedName}(${parseInt(sequence) + 1})${extension}`;
+
+  return `${name}(${currentSequence})${extension}`;
 };
 
 // this is here mainly to handle deduplicating filenames to be added to a zip file
@@ -32,22 +39,24 @@ export const attachmentsToZipEntries = (
   const entries = attachments.reduce(
     (acc, attachment) => {
       const { zipEntries, claimedFilenames } = acc;
-      const claimedFilename = claimedFilenames.find(
-        (claimedFilename) => claimedFilename === attachment.file_name,
+      const zipFilename = deduplicateFilename(
+        attachment.file_name,
+        claimedFilenames,
       );
-      const zipFilename = claimedFilename
-        ? deduplicateFilename(claimedFilename)
-        : attachment.file_name;
-      claimedFilenames.push(zipFilename);
+      claimedFilenames[attachment.file_name] = claimedFilenames[
+        attachment.file_name
+      ]
+        ? claimedFilenames[attachment.file_name] + 1
+        : 1;
       zipEntries.push([
         zipFilename,
         new zip.HttpReader(attachment.download_path),
       ]);
       return { zipEntries, claimedFilenames };
     },
-    { zipEntries: [], claimedFilenames: [] } as {
+    { zipEntries: [], claimedFilenames: {} } as {
       zipEntries: ZipEntry[];
-      claimedFilenames: string[];
+      claimedFilenames: { [key: string]: number };
     },
   );
   return entries.zipEntries;
