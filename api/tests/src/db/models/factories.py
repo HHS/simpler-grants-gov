@@ -433,6 +433,15 @@ class OpportunityFactory(BaseFactory):
             )
         )
 
+        has_attachment_with_duplicate_filename = factory.Trait(
+            opportunity_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OpportunityAttachmentFactory",
+                factory_related_name="opportunity",
+                size=2,
+                duplicate_filename=True
+            )
+        )
+
 
 class OpportunityVersionFactory(BaseFactory):
     class Meta:
@@ -781,6 +790,11 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
+
+    class Params:
+        duplicate_filename = factory.Trait(
+            file_name="duplicate.txt"
+        )
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)

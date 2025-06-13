@@ -61,13 +61,4 @@ export const attachmentsToZipEntries = (
     },
   );
   return entries.zipEntries;
-
-  // const entries = attachments.reduce(
-  //   (acc, attachment) => {
-  //     const [zipEntries, claimedFilenames] = acc;
-  //     return [zipEntries, claimedFilenames];
-  //   },
-  //   [],
-  // );
-  // return { anything: "thanks" };
 };
