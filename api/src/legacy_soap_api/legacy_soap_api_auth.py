@@ -37,7 +37,9 @@ class SOAPClientCertificate(BaseModel):
         try:
             return f"{key_map[self.fingerprint]}\n\n{self.cert}"
         except KeyError:
-            raise SOAPClientCertificateNotConfigured(f"{self.serial_number} cert is not configured") from None
+            raise SOAPClientCertificateNotConfigured(
+                f"{self.serial_number} cert is not configured"
+            ) from None
         except Exception:
             raise SOAPClientCertificateLookupError(
                 f"could not retrieve client cert for serial {self.serial_number}"
