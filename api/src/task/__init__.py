@@ -6,5 +6,6 @@ import src.task.notifications.generate_notifications  # noqa: F401 E402 isort:sk
 import src.task.opportunities.export_opportunity_data_task  # noqa: F401 E402 isort:skip
 import src.task.analytics.create_analytics_db_csvs  # noqa: F401 E402 isort:skip
 import src.task.notifications.email_notification  # noqa: F401 E402 isort:skip
+import src.task.sam_extracts.process_sam_extracts    # noqa: F401 E402 isort:skip
 
 __all__ = ["task_blueprint"]
