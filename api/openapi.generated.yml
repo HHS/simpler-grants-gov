@@ -583,6 +583,44 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/organizations:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Organizations
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -3077,6 +3115,49 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SamGovEntity:
+      type: object
+      properties:
+        uei:
+          type: string
+        legal_business_name:
+          type: string
+        expiration_date:
+          type: string
+          format: date
+    UserOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sam_gov_entity:
+          description: SAM.gov entity information for the organization
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntity'
+          - type: 'null'
+    UserOrganizationsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organizations the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserSaveSearchRequest:
       type: object
       properties:
@@ -3167,16 +3248,6 @@ components:
           type: string
         is_application_owner:
           type: boolean
-    SamGovEntity:
-      type: object
-      properties:
-        uei:
-          type: string
-        legal_business_name:
-          type: string
-        expiration_date:
-          type: string
-          format: date
     Organization:
       type: object
       properties:
