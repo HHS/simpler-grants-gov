@@ -29,6 +29,11 @@ describe("formatSearchRequestBody", () => {
     expect(formatted.query).toEqual("research");
   });
 
+  it("adds andOr to top level of object", () => {
+    const formatted = formatSearchRequestBody(searchFetcherParams);
+    expect(formatted.query_operator).toEqual("OR");
+  });
+
   it("creates object with filters and pagination", () => {
     const formatted = formatSearchRequestBody(searchFetcherParams);
     expect(formatted.pagination).toEqual({

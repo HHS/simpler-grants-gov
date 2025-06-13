@@ -41,6 +41,7 @@ export const searchFetcherParams: QueryParamData = {
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
+  andOr: "OR",
 };
 
 export const arbitrarySearchPagination = {
@@ -203,3 +204,14 @@ export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
     agency_id: 1,
   },
 ];
+
+export const fakeSearchParamDict = {
+  status: "forecasted,posted,archived,closed",
+  eligibility: "state_governments",
+  query: "simpler",
+  category: "recovery_act",
+  agency: "CPSC",
+  fundingInstrument: "cooperative_agreement",
+  andOr: "OR",
+  sortby: "closeDateAsc",
+};
