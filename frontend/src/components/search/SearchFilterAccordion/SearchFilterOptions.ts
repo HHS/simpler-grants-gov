@@ -17,8 +17,8 @@ export const statusOptions: FilterOption[] = [
     value: "forecasted",
   },
   {
-    id: "status-posted",
-    label: "Posted",
+    id: "status-open",
+    label: "Open",
     value: "posted",
   },
   {
