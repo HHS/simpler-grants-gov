@@ -57,7 +57,7 @@ class BaseSOAPClient:
             headers=self.get_proxy_request_headers(),
         )
 
-        if not self.auth:
+        if not self.auth or self.config.soap_auth_map == {}:
             logger.info("soap_api_proxy: proxying unauthorized request")
             prepared = session.prepare_request(request)
             response = session.send(prepared)
