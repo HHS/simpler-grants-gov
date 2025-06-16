@@ -893,6 +893,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "created_at": application_form.created_at.isoformat(),
             "updated_at": application_form.updated_at.isoformat(),
             "is_required": True,
+            "application_attachments": [],
         }
 
 
