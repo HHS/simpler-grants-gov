@@ -4,15 +4,18 @@ import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 import { useTranslations } from "next-intl";
 
 import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
-import { CheckboxFilter } from "src/components/search/Filters/CheckboxFilter";
 import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export async function AgencyFilterAccordion({
   query,
   agencyOptionsPromise,
+  topLevelQuery,
+  className,
 }: {
   query: Set<string>;
   agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
+  topLevelQuery: Set<string>;
+  className?: string;
 }) {
   const t = useTranslations("Search");
 
@@ -31,43 +34,15 @@ export async function AgencyFilterAccordion({
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
+      className={className}
     >
       <AgencyFilterContent
         query={query}
         title={t("accordion.titles.agency")}
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        topLevelQuery={topLevelQuery}
       />
     </BasicSearchFilterAccordion>
-  );
-}
-
-export async function AgencyFilter({
-  query,
-  agencyOptionsPromise,
-}: {
-  query: Set<string>;
-  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
-}) {
-  const t = useTranslations("Search");
-
-  let agencies: FilterOption[] = [];
-  let facetCounts: { [key: string]: number } = {};
-  try {
-    let searchResults: SearchAPIResponse;
-    [agencies, searchResults] = await agencyOptionsPromise;
-    facetCounts = searchResults.facet_counts.agency;
-  } catch (e) {
-    // Come back to this to show the user an error
-    console.error("Unable to fetch agencies for filter list", e);
-  }
-  return (
-    <CheckboxFilter
-      filterOptions={agencies}
-      query={query}
-      queryParamKey={"agency"}
-      title={t("accordion.titles.agency")}
-      facetCounts={facetCounts}
-    />
   );
 }
