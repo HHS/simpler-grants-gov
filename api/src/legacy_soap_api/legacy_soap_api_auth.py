@@ -9,8 +9,6 @@ from cryptography.x509 import load_pem_x509_certificate
 from pydantic import BaseModel
 from requests.adapters import HTTPAdapter
 
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
-
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
@@ -37,12 +35,10 @@ class SOAPClientCertificate(BaseModel):
         try:
             return f"{key_map[self.fingerprint]}\n\n{self.cert}"
         except KeyError:
-            raise SOAPClientCertificateNotConfigured(
-                f"{self.serial_number} cert is not configured"
-            ) from None
+            raise SOAPClientCertificateNotConfigured("cert is not configured") from None
         except Exception:
             raise SOAPClientCertificateLookupError(
-                f"could not retrieve client cert for serial {self.serial_number}"
+                "could not retrieve client cert for serial number"
             ) from None
 
 
@@ -73,11 +69,6 @@ def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
     auth = None
     try:
         auth = SOAPAuth(certificate=get_soap_client_certificate(mtls_cert))
-        add_extra_data_to_current_request_logs(
-            {
-                "soap_client_certificate_serial_number": auth.certificate.serial_number,
-            }
-        )
         logger.info("soap_client_certificate: successfully extracted certificate and serial number")
     except Exception:
         logger.info("soap_client_certificate: could not parse and extract serial number")

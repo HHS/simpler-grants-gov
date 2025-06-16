@@ -34,9 +34,6 @@ def simpler_soap_applicants_api(db_session: db.Session) -> tuple:
         {
             "soap_api": "applicants",
             "soap_proxy_request_operation_name": client.soap_request_operation_name,
-            "soap_certificate_serial_number": (
-                client.auth.certificate.serial_number if client.auth else None
-            ),
         }
     )
     proxy_response, simpler_response = client.get_response()

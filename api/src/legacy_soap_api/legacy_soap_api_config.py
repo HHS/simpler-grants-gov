@@ -23,5 +23,5 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
             try:
                 self.soap_auth_map = json.loads(self.soap_auth_content)
             except Exception:
-                # This except is to prevent the entire API from starting up if the value is malformed
+                # This except is to make sure the API still starts up, even if the value is malformed
                 logger.exception("Could not load soap auth content")

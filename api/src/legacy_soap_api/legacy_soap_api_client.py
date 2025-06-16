@@ -92,7 +92,7 @@ class BaseSOAPClient:
             cert = self.auth.certificate.get_pem(self.config.soap_auth_map)
             logger.info("soap_client_certificate: found associated key")
         except (SOAPClientCertificateLookupError, SOAPClientCertificateNotConfigured) as e:
-            logger.warning(f"soap_client_certificate: {e}")
+            logger.info(f"soap_client_certificate: {e}")
         return cert
 
     def _process_response_response_content(self, soap_content: bytes) -> bytes:
