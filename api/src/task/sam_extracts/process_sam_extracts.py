@@ -1,22 +1,28 @@
+import logging
 import zipfile
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import StrEnum
-import logging
 from typing import Sequence
+
+from sqlalchemy import select
+
 import src.adapters.db as db
 from src.adapters.db import flask_db
-from src.constants.lookup_constants import SamGovProcessingStatus, SamGovExtractType, SamGovImportType
+from src.constants.lookup_constants import (
+    SamGovExtractType,
+    SamGovImportType,
+    SamGovProcessingStatus,
+)
 from src.db.models.entity_models import SamGovEntity, SamGovEntityImportType
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task import task_blueprint
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
-from dataclasses import dataclass, field
-from sqlalchemy import select
-
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
+
 
 # Indexes in the sam.gov extracts start counting from 1
 # To keep these numbers matching those in the doc, we also
@@ -43,6 +49,7 @@ class SamGovEntityContainer:
 
     deleted_ueis: list[str] = field(default_factory=list)
     expired_ueis: list[str] = field(default_factory=list)
+
 
 class ProcessSamExtractsTask(Task):
 
@@ -91,7 +98,9 @@ class ProcessSamExtractsTask(Task):
                     entity_map[entity.uei] = entity
 
                 for sam_gov_entity in sam_gov_entity_container.processed_entities:
-                    self.load_sam_gov_entity_to_db(sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra)
+                    self.load_sam_gov_entity_to_db(
+                        sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
+                    )
 
                 # TODO - what do we do with delete/expired daily records?
 
@@ -100,10 +109,19 @@ class ProcessSamExtractsTask(Task):
 
     def get_extracts_to_process(self) -> Sequence[SamExtractFile]:
         """Fetch all the sam.gov extract files in ascending order"""
-        return self.db_session.execute(select(SamExtractFile).where(SamExtractFile.processing_status == SamGovProcessingStatus.PENDING).order_by(SamExtractFile.extract_date.asc())).scalars().all()
+        return (
+            self.db_session.execute(
+                select(SamExtractFile)
+                .where(SamExtractFile.processing_status == SamGovProcessingStatus.PENDING)
+                .order_by(SamExtractFile.extract_date.asc())
+            )
+            .scalars()
+            .all()
+        )
 
-
-    def process_extract(self, sam_extract_file: SamExtractFile, extract_log_extra: dict) -> SamGovEntityContainer:
+    def process_extract(
+        self, sam_extract_file: SamExtractFile, extract_log_extra: dict
+    ) -> SamGovEntityContainer:
         logger.info("Processing sam.gov extract file", extra=extract_log_extra)
 
         with file_util.open_stream(sam_extract_file.s3_path, mode="rb") as extract_file:
@@ -111,11 +129,12 @@ class ProcessSamExtractsTask(Task):
 
                 files_in_zip = extract_zip.namelist()
                 if len(files_in_zip) != 1:
-                    raise Exception(f"Expected exactly one file in sam.gov extract zip, found: {','.join(files_in_zip)}")
+                    raise Exception(
+                        f"Expected exactly one file in sam.gov extract zip, found: {','.join(files_in_zip)}"
+                    )
 
                 file_bytes = extract_zip.read(files_in_zip[0])
                 return self.process_dat(file_bytes.decode("utf-8"), extract_log_extra)
-
 
     def process_dat(self, dat_text: str, extract_log_extra: dict) -> SamGovEntityContainer:
 
@@ -170,12 +189,20 @@ class ProcessSamExtractsTask(Task):
                 sam_gov_entity = build_sam_gov_entity(tokens)
                 container.processed_entities.append(sam_gov_entity)
             except ValueError:
-                logger.exception("Failed to convert sam.gov entity record into DB model", extra=log_extra)
+                logger.exception(
+                    "Failed to convert sam.gov entity record into DB model", extra=log_extra
+                )
                 self.increment(self.Metrics.ENTITY_ERROR_COUNT)
 
         return container
 
-    def load_sam_gov_entity_to_db(self, sam_gov_entity: SamGovEntity, entity_map: dict[str, SamGovEntity], extract_file_type: SamGovExtractType, extract_log_extra: dict) -> None:
+    def load_sam_gov_entity_to_db(
+        self,
+        sam_gov_entity: SamGovEntity,
+        entity_map: dict[str, SamGovEntity],
+        extract_file_type: SamGovExtractType,
+        extract_log_extra: dict,
+    ) -> None:
         """Load the sam.gov entity record to the DB"""
         existing_sam_gov_entity = entity_map.get(sam_gov_entity.uei, None)
 
@@ -183,7 +210,11 @@ class ProcessSamExtractsTask(Task):
             "uei": sam_gov_entity.uei,
         } | extract_log_extra
 
-        import_type = SamGovImportType.MONTHLY_EXTRACT if extract_file_type == SamGovExtractType.MONTHLY else SamGovImportType.DAILY_EXTRACT
+        import_type = (
+            SamGovImportType.MONTHLY_EXTRACT
+            if extract_file_type == SamGovExtractType.MONTHLY
+            else SamGovImportType.DAILY_EXTRACT
+        )
 
         # If the sam.gov entity is new, just add it
         # If it's not new, we'll only update it if
@@ -194,7 +225,9 @@ class ProcessSamExtractsTask(Task):
             self.increment(self.Metrics.ENTITY_INSERTED_COUNT)
             self.db_session.add(sam_gov_entity)
 
-            import_log_record = SamGovEntityImportType(sam_gov_entity=sam_gov_entity, sam_gov_import_type=import_type)
+            import_log_record = SamGovEntityImportType(
+                sam_gov_entity=sam_gov_entity, sam_gov_import_type=import_type
+            )
             self.db_session.add(import_log_record)
 
         elif sam_gov_entity.last_update_date > existing_sam_gov_entity.last_update_date:
@@ -208,7 +241,10 @@ class ProcessSamExtractsTask(Task):
                 sam_gov_entity.sam_gov_entity_id = existing_sam_gov_entity.sam_gov_entity_id
                 self.db_session.merge(sam_gov_entity)
 
-                import_log_record = SamGovEntityImportType(sam_gov_entity_id=sam_gov_entity.sam_gov_entity_id, sam_gov_import_type=import_type)
+                import_log_record = SamGovEntityImportType(
+                    sam_gov_entity_id=sam_gov_entity.sam_gov_entity_id,
+                    sam_gov_import_type=import_type,
+                )
                 self.db_session.add(import_log_record)
         else:
             # If there is no update - also don't create an import log record
@@ -216,18 +252,23 @@ class ProcessSamExtractsTask(Task):
             self.increment(self.Metrics.ENTITY_NO_OP_COUNT)
 
 
-
 def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
     uei = get_token_value(tokens, ExtractIndex.UEI, can_be_blank=False)
-    legal_business_name = get_token_value(tokens, ExtractIndex.LEGAL_BUSINESS_NAME, can_be_blank=False)
-    registration_expiration_date = get_token_value(tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False)
+    legal_business_name = get_token_value(
+        tokens, ExtractIndex.LEGAL_BUSINESS_NAME, can_be_blank=False
+    )
+    registration_expiration_date = get_token_value(
+        tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False
+    )
     ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL)
     ebiz_first_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_FIRST_NAME)
     ebiz_last_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_LAST_NAME)
     debt_subject_to_offset = get_token_value(tokens, ExtractIndex.DEBT_SUBJECT_TO_OFFSET)
     exclusion_status_flag = get_token_value(tokens, ExtractIndex.EXCLUSION_STATUS_FLAG)
     entity_eft_indicator = get_token_value(tokens, ExtractIndex.ENTITY_EFT_INDICATOR)
-    initial_registration_date = get_token_value(tokens, ExtractIndex.INITIAL_REGISTRATION_DATE, can_be_blank=False)
+    initial_registration_date = get_token_value(
+        tokens, ExtractIndex.INITIAL_REGISTRATION_DATE, can_be_blank=False
+    )
     last_update_date = get_token_value(tokens, ExtractIndex.LAST_UPDATE_DATE, can_be_blank=False)
 
     sam_gov_entity = SamGovEntity(
@@ -241,7 +282,7 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
         ebiz_poc_last_name=ebiz_last_name,
         has_debt_subject_to_offset=convert_debt_subject_to_offset(debt_subject_to_offset),
         has_exclusion_status=convert_exclusion_status_flag(exclusion_status_flag),
-        eft_indicator=entity_eft_indicator if entity_eft_indicator else None
+        eft_indicator=entity_eft_indicator if entity_eft_indicator else None,
     )
 
     return sam_gov_entity
@@ -260,9 +301,11 @@ def get_token_value(tokens: list[str], index: int, can_be_blank: bool = True) ->
 
     return value
 
+
 def convert_date(date_str: str) -> date:
     # TODO - what if the date is malformed?
     return datetime.strptime(date_str, "%Y%m%d").date()
+
 
 def convert_debt_subject_to_offset(value_str: str) -> bool:
     if value_str == "Y":
@@ -273,6 +316,7 @@ def convert_debt_subject_to_offset(value_str: str) -> bool:
         return False
 
     raise ValueError(f"Convert debt subject to offset has unexpected value: {value_str}")
+
 
 def convert_exclusion_status_flag(value_str: str) -> bool:
     if value_str == "D":
