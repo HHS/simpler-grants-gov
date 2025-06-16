@@ -1,6 +1,7 @@
-import { uniq } from "lodash";
+import { difference, uniq } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { FilterOption } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { isSubset } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
@@ -14,6 +15,15 @@ import { Checkbox } from "@trussworks/react-uswds";
   * Selecting AllOptionCheckbox selects all child options
   * Deselecting AllOptionCheckbox deselects all child options
   * Will become deselected if any child options are deselected
+
+  Note that this supports two different implementations:
+
+  * either supply topLevelQueryParamKey, topLevelQuery, and topLevelQueryValue
+    * this will control selection of filters via a separate "top level" query param such as "topLevelAgency"
+  * if these are not supplied, selection will be controlled directly by selection of values on the "queryParamKey"
+
+  Currently only the first implementation is being used. If we decide that the second implementation is not
+  needed we can remove support
 
 */
 
@@ -29,7 +39,7 @@ export const AllOptionCheckbox = ({
   title: string;
   currentSelections: Set<string>;
   childOptions: FilterOption[];
-  queryParamKey: string;
+  queryParamKey: ValidSearchQueryParam;
   topLevelQueryParamKey?: string;
   topLevelQuery?: Set<string>;
   topLevelQueryValue?: string;
@@ -44,21 +54,28 @@ export const AllOptionCheckbox = ({
   );
 
   const topLevelSelected = useMemo(() => {
-    return topLevelQuery && topLevelQuery.has(topLevelQueryValue);
+    return (
+      topLevelQuery &&
+      topLevelQueryValue &&
+      topLevelQuery.has(topLevelQueryValue)
+    );
   }, [topLevelQuery, topLevelQueryValue]);
 
   const [checked, setChecked] = useState<boolean>(
     topLevelSelected ||
       isSubset<string>(childOptionValues, currentSelectionValues),
   );
-  const { setQueryParam } = useSearchParamUpdater();
+  const { setQueryParam, setQueryParams } = useSearchParamUpdater();
   const id = `${title.replace(/\s/, "-").toLowerCase()}-all`;
   const t = useTranslations("Search.accordion");
   const label = `${t("all")} ${title}`;
 
   useEffect(() => {
-    setChecked(isSubset<string>(childOptionValues, currentSelectionValues));
-  }, [childOptionValues, currentSelectionValues]);
+    setChecked(
+      topLevelSelected ||
+        isSubset<string>(childOptionValues, currentSelectionValues),
+    );
+  }, [childOptionValues, currentSelectionValues, topLevelSelected]);
 
   const uncheckOptions = () => {
     if (!currentSelections) {
@@ -83,15 +100,34 @@ export const AllOptionCheckbox = ({
     if (!topLevelQueryParamKey || !topLevelQueryValue) {
       return;
     }
-    setQueryParam(topLevelQueryParamKey, topLevelQueryValue);
+    const newValueTopLevelValue = topLevelQuery
+      ? Array.from(topLevelQuery).concat([topLevelQueryValue]).join(",")
+      : topLevelQueryValue;
+    const newChildValue = difference(
+      currentSelectionValues,
+      childOptionValues,
+    ).join(",");
+    setQueryParams([
+      [topLevelQueryParamKey, newValueTopLevelValue],
+      [queryParamKey, newChildValue],
+    ]);
   };
+
   const uncheckTopLevel = () => {
     if (!topLevelQueryParamKey || !topLevelQueryValue) {
       return;
     }
-    setQueryParam(topLevelQueryParamKey, "");
+    const newChildValue = difference(
+      currentSelectionValues,
+      childOptionValues,
+    ).join(",");
+    setQueryParams([
+      [topLevelQueryParamKey, ""],
+      [queryParamKey, newChildValue],
+    ]);
   };
 
+  // allows for implementing this via a top level query param, or by updating child values directly via child inputs
   const handleCheckChange = () => (checked ? uncheckOptions() : checkOptions());
   const handleTopLevelCheckChange = () =>
     checked ? uncheckTopLevel() : checkTopLevel();

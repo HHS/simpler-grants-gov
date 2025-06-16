@@ -67,6 +67,7 @@ export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
   if (!session || !session.token) {
     return [];
   }
+  console.log("!!!", session.token);
   const ssgToken = {
     "X-SGG-Token": session.token,
   };

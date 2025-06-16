@@ -1,7 +1,7 @@
 "use client";
 
-import { noop } from "lodash";
 import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 import { AllOptionCheckbox } from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
@@ -16,6 +16,7 @@ interface SearchFilterSectionProps {
   topLevelQuery?: Set<string>;
   topLevelQueryParamKey?: string;
   isParentSelected?: (value: string) => boolean;
+  queryParamKey: ValidSearchQueryParam;
 }
 
 const SearchFilterSection = ({
@@ -27,6 +28,7 @@ const SearchFilterSection = ({
   referenceOption,
   topLevelQuery,
   topLevelQueryParamKey,
+  queryParamKey,
   isParentSelected = () => false,
 }: SearchFilterSectionProps) => {
   return (
@@ -35,7 +37,7 @@ const SearchFilterSection = ({
       <div className="padding-y-1">
         <AllOptionCheckbox
           title={option.label}
-          queryParamKey="topLevelAgency"
+          queryParamKey={queryParamKey}
           childOptions={
             referenceOption ? referenceOption.children : option.children
           }

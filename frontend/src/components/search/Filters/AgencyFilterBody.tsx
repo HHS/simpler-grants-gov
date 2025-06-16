@@ -4,6 +4,10 @@ import {
   FilterOption,
   FilterOptionWithChildren,
 } from "src/types/search/searchFilterTypes";
+import {
+  getAgencyParent,
+  getSiblingOptionValues,
+} from "src/utils/search/searchUtils";
 
 import { useContext, useMemo } from "react";
 
@@ -15,7 +19,6 @@ import SearchFilterSection from "src/components/search/SearchFilterAccordion/Sea
 interface AgencyFilterBodyProps extends SearchFilterAccordionProps {
   referenceOptions?: FilterOption[];
   topLevelQuery?: Set<string>;
-  topLevelQueryParamKey?: string;
   isParentSelected?: (value: string) => boolean;
 }
 
@@ -23,14 +26,12 @@ interface AgencyFilterBodyProps extends SearchFilterAccordionProps {
 export function AgencyFilterBody({
   includeAnyOption,
   title,
-  queryParamKey,
   defaultEmptySelection,
   filterOptions,
   query,
   facetCounts,
   referenceOptions,
   topLevelQuery,
-  topLevelQueryParamKey,
   isParentSelected = () => false,
 }: AgencyFilterBodyProps) {
   const { queryTerm } = useContext(QueryContext);
@@ -39,24 +40,24 @@ export function AgencyFilterBody({
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const newParamValue = new Set(query);
     isChecked ? newParamValue.add(value) : newParamValue.delete(value);
-    // handle status filter custom behavior to set param when all options are unselected
-    const updatedParamValue =
-      !newParamValue.size && defaultEmptySelection?.size
-        ? defaultEmptySelection
-        : newParamValue;
-    // if removing a value, and topLevelValue is present, remove them both
-    if (!isChecked && topLevelQuery && isParentSelected(value)) {
-      topLevelQuery.delete(value.split("-")[0]);
-      const paramsToUpdate = [
-        [queryParamKey, Array.from(updatedParamValue).join(",")],
-        [topLevelQueryParamKey, Array.from(topLevelQuery).join(",")],
-      ];
-      if (queryTerm) {
-        paramsToUpdate.push(["query", queryTerm]);
-      }
-      return setQueryParams(paramsToUpdate);
+    // happy path a normal checkbox experience
+    if (isChecked || !topLevelQuery || !isParentSelected(value)) {
+      return updateQueryParams(newParamValue, "agency", queryTerm);
     }
-    updateQueryParams(updatedParamValue, queryParamKey, queryTerm);
+    // handle unchecking a child box when top level parent is selected
+    // need to add children of selected top level, minus the one that has just been removed
+    // since they previously were not present anywhere in the url, but should remain selected
+    const siblingOptions = getSiblingOptionValues(value, filterOptions);
+    // remove top level agency
+    topLevelQuery.delete(getAgencyParent(value));
+    const paramsToUpdate = [
+      ["agency", Array.from(newParamValue).concat(siblingOptions).join(",")],
+      ["topLevelAgency", Array.from(topLevelQuery).join(",")],
+    ];
+    if (queryTerm) {
+      paramsToUpdate.push(["query", queryTerm]);
+    }
+    return setQueryParams(paramsToUpdate);
   };
 
   const isNoneSelected = useMemo(() => query.size === 0, [query]);
@@ -69,7 +70,7 @@ export function AgencyFilterBody({
             <AnyOptionCheckbox
               title={title.toLowerCase()}
               checked={isNoneSelected}
-              queryParamKey={queryParamKey}
+              queryParamKey={"agency"}
               defaultEmptySelection={defaultEmptySelection}
             />
           </li>
@@ -89,7 +90,8 @@ export function AgencyFilterBody({
                 }
                 query={query}
                 topLevelQuery={topLevelQuery}
-                topLevelQueryParamKey={topLevelQueryParamKey}
+                topLevelQueryParamKey={"topLevelAgency"}
+                queryParamKey={"agency"}
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
                 facetCounts={facetCounts}
