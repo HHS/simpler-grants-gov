@@ -117,12 +117,18 @@ export const AllOptionCheckbox = ({
     if (!topLevelQueryParamKey || !topLevelQueryValue) {
       return;
     }
+    topLevelQuery?.delete(topLevelQueryValue);
     const newChildValue = difference(
       currentSelectionValues,
       childOptionValues,
     ).join(",");
     setQueryParams([
-      [topLevelQueryParamKey, ""],
+      [
+        topLevelQueryParamKey,
+        topLevelQuery && topLevelQuery.size
+          ? Array.from(topLevelQuery?.values()).join(",")
+          : "",
+      ],
       [queryParamKey, newChildValue],
     ]);
   };
