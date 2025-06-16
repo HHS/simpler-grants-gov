@@ -188,3 +188,23 @@ export const agenciesToFilterOptions = (
     return acc;
   }, [] as FilterOption[]);
 };
+
+export const getAgencyParent = (agencyCode: string) => agencyCode.split("-")[0];
+
+// for now this assumes that child values will be prefixed with the parent's code (as is true for agencies)
+// a more robust but slower implementation with full traversal can be done later if need be
+export const getSiblingOptionValues = (
+  value: string,
+  options: FilterOption[],
+): string[] => {
+  const parentCode = getAgencyParent(value);
+  const parent = options.find((option) => option.value === parentCode);
+  return parent?.children
+    ? parent.children.reduce((acc, child) => {
+        if (child.value !== value) {
+          acc.push(child.value);
+        }
+        return acc;
+      }, [] as string[])
+    : [];
+};

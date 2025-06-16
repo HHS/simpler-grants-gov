@@ -3,6 +3,7 @@
 import { debounce } from "lodash";
 import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
+import { getAgencyParent } from "src/utils/search/searchUtils";
 
 import { useCallback, useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
@@ -49,7 +50,7 @@ export function AgencyFilterContent({
 
   const isParentAgencySelected = useCallback(
     (subAgencyCode: string): boolean => {
-      return topLevelQuery?.has(subAgencyCode.split("-")[0]);
+      return topLevelQuery?.has(getAgencyParent(subAgencyCode));
     },
     [topLevelQuery],
   );
@@ -75,15 +76,14 @@ export function AgencyFilterContent({
       ) : (
         <AgencyFilterBody
           query={query}
-          queryParamKey={"agency"}
           title={title}
           includeAnyOption={!searchTerm}
           filterOptions={agencySearchResults || allAgencies}
           facetCounts={facetCounts}
           referenceOptions={allAgencies}
           topLevelQuery={topLevelQuery}
-          topLevelQueryParamKey="topLevelAgency"
           isParentSelected={isParentAgencySelected}
+          queryParamKey={"agency"}
         />
       )}
     </>
