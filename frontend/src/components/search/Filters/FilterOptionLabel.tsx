@@ -1,14 +1,7 @@
 import clsx from "clsx";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
-import dynamic from "next/dynamic";
-
-const DynamicTooltipWrapper = dynamic(
-  () => import("src/components/TooltipWrapper"),
-  {
-    ssr: false, // works around bug with Trussworks assigning different random ids on server and client renders
-  },
-);
+import InfoTooltip from "src/components/InfoTooltip";
 
 export function FilterOptionLabel({
   option,
@@ -17,30 +10,26 @@ export function FilterOptionLabel({
   option: FilterOption;
   facetCounts?: { [key: string]: number };
 }) {
-  const OptionLabelText = (
+  return (
     <>
       <span>{option.label}</span>
       {!!facetCounts && (
         <span
           className={clsx("text-base-dark", {
-            "padding-left-05": !option.tooltip,
+            "padding-left-05": true,
           })}
         >
           [{facetCounts[option.value] || 0}]
         </span>
       )}
+      {!!option.tooltip && (
+        <InfoTooltip
+          text={<div className="text-wrap minw-15">{option.tooltip}</div>}
+          title={option.label}
+          position="top"
+          wrapperClasses="margin-left-1 simpler-tooltip" // if we go with this custom implementation we can remove the `minw-15` above
+        />
+      )}
     </>
-  );
-  return option.tooltip ? (
-    <DynamicTooltipWrapper
-      label={<div className="text-wrap">{option.tooltip}</div>}
-      title={option.label}
-      className="usa-button--unstyled"
-      wrapperclasses="simpler-wrap-tooltip"
-    >
-      {OptionLabelText}
-    </DynamicTooltipWrapper>
-  ) : (
-    OptionLabelText
   );
 }

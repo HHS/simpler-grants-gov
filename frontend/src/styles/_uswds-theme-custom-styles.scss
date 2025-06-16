@@ -551,3 +551,9 @@ dl {
     }
   }
 }
+
+.simpler-tooltip {
+  .usa-tooltip__body {
+    min-width: 7.5rem;
+  }
+}
