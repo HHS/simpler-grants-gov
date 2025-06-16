@@ -2449,6 +2449,14 @@ class SamGovEntityFactory(BaseFactory):
     has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
 
+    class Params:
+        has_organization = factory.Trait(
+            organization=factory.RelatedFactory(
+                "tests.src.db.models.factories.OrganizationFactory",
+                factory_related_name="sam_gov_entity",
+            )
+        )
+
 
 class SamGovEntityImportTypeFactory(BaseFactory):
     class Meta:
