@@ -48,6 +48,9 @@ def create_application_attachment(
     # so instead get the content-length from the file on s3 after we upload it.
     file_size_bytes = file_util.get_file_length_bytes(s3_file_location)
 
+    # If we don't do this, we see `Can't attach instance of 'User' to session` errors.
+    user = db_session.merge(user)
+
     # Create the application attachment
     application_attachment = ApplicationAttachment(
         application_attachment_id=application_attachment_id,
@@ -58,6 +61,7 @@ def create_application_attachment(
         file_name=file_util.get_file_name(file_attachment.filename),
         mime_type=file_attachment.mimetype,
         file_size_bytes=file_size_bytes,
+        user=user,
     )
     db_session.add(application_attachment)
 

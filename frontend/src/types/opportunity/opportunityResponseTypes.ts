@@ -90,4 +90,5 @@ export type OpportunityOverview = Pick<
   | "agency_code"
   | "opportunity_assistance_listings"
   | "summary"
+  | "opportunity_status"
 >;

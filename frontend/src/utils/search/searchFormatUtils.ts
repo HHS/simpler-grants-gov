@@ -116,7 +116,7 @@ const backendFilterToQueryParamValue = (
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
-  const { query } = searchInputs;
+  const { query, andOr } = searchInputs;
 
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
@@ -130,6 +130,9 @@ export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
 
   if (query) {
     requestBody.query = query;
+  }
+  if (andOr) {
+    requestBody.query_operator = andOr;
   }
   return requestBody;
 };

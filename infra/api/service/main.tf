@@ -188,7 +188,9 @@ module "service" {
     }
   } : null
 
-  pinpoint_app_id = local.pinpoint_app_id
+  pinpoint_app_id       = local.pinpoint_app_id
+  hosted_zone           = local.network_config.domain_config.hosted_zone
+  ses_configuration_set = local.ses_configuration_set
 
   extra_environment_variables = merge(
     {

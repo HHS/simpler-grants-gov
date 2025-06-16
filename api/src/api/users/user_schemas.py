@@ -1,3 +1,4 @@
+from src.api.application_alpha.application_schemas import SamGovEntitySchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
     SavedOpportunityResponseV1Schema,
@@ -168,3 +169,30 @@ class UserUpdateSavedSearchRequestSchema(Schema):
 
 class UserUpdateSavedSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserOrganizationSchema(Schema):
+    organization_id = fields.String(
+        metadata={
+            "description": "The internal ID of the organization",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    is_organization_owner = fields.Boolean(
+        metadata={
+            "description": "Whether the user is an owner of this organization",
+            "example": True,
+        }
+    )
+    sam_gov_entity = fields.Nested(
+        SamGovEntitySchema,
+        allow_none=True,
+        metadata={"description": "SAM.gov entity information for the organization"},
+    )
+
+
+class UserOrganizationsResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserOrganizationSchema),
+        metadata={"description": "List of organizations the user is associated with"},
+    )

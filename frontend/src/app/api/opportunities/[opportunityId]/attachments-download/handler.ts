@@ -1,11 +1,12 @@
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
 export async function getAttachmentsDownload(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ opportunityId: string }> },
 ): Promise<Response> {
   const { opportunityId } = await params;
@@ -34,11 +35,9 @@ export async function getAttachmentsDownload(
     }
     const blobWriter = new zip.BlobWriter();
     const zipWriter = new zip.ZipWriter(blobWriter);
-    const addPromises = getOpportunity.data.attachments?.map((attachment) => {
-      return zipWriter.add(
-        attachment.file_name,
-        new zip.HttpReader(attachment.download_path),
-      );
+    const zipEntries = attachmentsToZipEntries(getOpportunity.data.attachments);
+    const addPromises = zipEntries.map((entry) => {
+      return zipWriter.add(...entry);
     });
 
     await Promise.all([...addPromises, zipWriter.close()]);

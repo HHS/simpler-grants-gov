@@ -17,8 +17,8 @@ export const statusOptions: FilterOption[] = [
     value: "forecasted",
   },
   {
-    id: "status-posted",
-    label: "Posted",
+    id: "status-open",
+    label: "Open",
     value: "posted",
   },
   {
@@ -186,5 +186,17 @@ export const costSharingOptions: FilterOption[] = [
     id: "cost-sharing-no",
     label: "No",
     value: "false",
+  },
+];
+export const andOrOptions = [
+  {
+    id: "andOr-and",
+    label: "Must include all words (ex. labor AND welfare)",
+    value: "AND",
+  },
+  {
+    id: "andOr-or",
+    label: "May include any words (ex. labor OR welfare)",
+    value: "OR",
   },
 ];

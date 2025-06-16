@@ -114,6 +114,8 @@ data "aws_iam_policy_document" "runtime_logs" {
 }
 
 data "aws_iam_policy_document" "email_access" {
+  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
+
   statement {
     sid       = "SendViaPinpoint"
     actions   = ["mobiletargeting:SendMessages"]
@@ -122,7 +124,12 @@ data "aws_iam_policy_document" "email_access" {
   statement {
     sid       = "SendSESEmail"
     actions   = ["ses:SendEmail"]
-    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"]
+    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.hosted_zone}"]
+  }
+  statement {
+    sid       = "SendSESEmailConfigurationSet"
+    actions   = ["ses:SendEmail"]
+    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${var.ses_configuration_set}"]
   }
 }
 
@@ -139,8 +146,9 @@ resource "aws_iam_policy" "runtime_logs" {
 }
 
 resource "aws_iam_policy" "email_access" {
+  count  = length(var.pinpoint_app_id) > 0 ? 1 : 0
   name   = "${var.service_name}-email-access-role-policy"
-  policy = data.aws_iam_policy_document.email_access.json
+  policy = data.aws_iam_policy_document.email_access[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies" {
@@ -159,5 +167,5 @@ resource "aws_iam_role_policy_attachment" "email_access" {
   count = length(var.pinpoint_app_id) > 0 ? 1 : 0
 
   role       = aws_iam_role.app_service.name
-  policy_arn = aws_iam_policy.email_access.arn
+  policy_arn = aws_iam_policy.email_access[0].arn
 }

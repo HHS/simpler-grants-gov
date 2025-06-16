@@ -5,12 +5,13 @@ from src.api.schemas.response_schema import (
     FileResponseSchema,
     WarningMixinSchema,
 )
-from src.constants.lookup_constants import ApplicationFormStatus
+from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
 
 
 class ApplicationStartRequestSchema(Schema):
     competition_id = fields.UUID(required=True)
     application_name = fields.String(required=False, allow_none=True)
+    organization_id = fields.UUID(required=False, allow_none=True)
 
 
 class ApplicationStartResponseDataSchema(Schema):
@@ -64,6 +65,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
     application_form_status = fields.Enum(
         ApplicationFormStatus,
         metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
     )
 
     is_required = fields.Boolean(
@@ -132,7 +138,7 @@ class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition = fields.Nested(CompetitionAlphaSchema())
     application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
-    application_status = fields.String()
+    application_status = fields.Enum(ApplicationStatus)
     application_name = fields.String()
     users = fields.List(fields.Nested(ApplicationUserSchema()))
     organization = fields.Nested(OrganizationSchema(), allow_none=True)
