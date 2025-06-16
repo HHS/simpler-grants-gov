@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services ## Run all of the init tasks to set up DB, Search, Local Stack, and Mock services from scratch 
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services ## Run all of the init tasks to set up DB, Search, Local Stack, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes

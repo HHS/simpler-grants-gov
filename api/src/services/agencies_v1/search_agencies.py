@@ -68,9 +68,9 @@ def get_search_request(params: AgencySearchParams) -> dict:
         wrapped_query = params.query
         filter_rule = DEFAULT
         # Don't add the prefix indicator if they searched for quoted text anywhere in the search query
-        if wrapped_query.find('"') == -1:
+        if '"' not in wrapped_query:
             # For now, use the prefix indicator. ~ for fuzzy could be better in the future, but is too confusing to the user for now
-            wrapped_query = "" + wrapped_query + "*"
+            wrapped_query = f"{wrapped_query}*"
         builder.simple_query(wrapped_query, filter_rule, SearchQueryOperator.OR)
 
     # Filters
