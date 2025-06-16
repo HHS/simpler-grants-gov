@@ -4,11 +4,11 @@ import { debounce } from "lodash";
 import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
-import { CheckboxFilterBody } from "src/components/search/Filters/CheckboxFilter";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { AgencyFilterBody } from "./AgencyFilterBody";
 import { FilterSearchNoResults } from "./FilterSearchNoResults";
 
 export function AgencyFilterContent({
@@ -16,11 +16,13 @@ export function AgencyFilterContent({
   title,
   allAgencies,
   facetCounts,
+  topLevelQuery,
 }: {
   query: Set<string>;
   title: string;
   allAgencies: FilterOption[];
   facetCounts: { [key: string]: number };
+  topLevelQuery: Set<string>;
 }) {
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
@@ -45,6 +47,13 @@ export function AgencyFilterContent({
     { leading: false, trailing: true },
   );
 
+  const isParentAgencySelected = useCallback(
+    (subAgencyCode: string): boolean => {
+      return topLevelQuery?.has(subAgencyCode.split("-")[0]);
+    },
+    [topLevelQuery],
+  );
+
   return (
     <>
       <div className="position-relative">
@@ -64,7 +73,7 @@ export function AgencyFilterContent({
       {agencySearchResults && !agencySearchResults.length ? (
         <FilterSearchNoResults />
       ) : (
-        <CheckboxFilterBody
+        <AgencyFilterBody
           query={query}
           queryParamKey={"agency"}
           title={title}
@@ -72,6 +81,9 @@ export function AgencyFilterContent({
           filterOptions={agencySearchResults || allAgencies}
           facetCounts={facetCounts}
           referenceOptions={allAgencies}
+          topLevelQuery={topLevelQuery}
+          topLevelQueryParamKey="topLevelAgency"
+          isParentSelected={isParentAgencySelected}
         />
       )}
     </>
