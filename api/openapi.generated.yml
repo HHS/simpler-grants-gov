@@ -1234,6 +1234,53 @@ paths:
       summary: Fetch an application attachment
       security:
       - ApiJwtAuth: []
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an attachment on an application
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationAttachmentUpdateRequest'
+      security:
+      - ApiJwtAuth: []
     delete:
       parameters:
       - in: path
@@ -3772,6 +3819,30 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentGet'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAttachmentUpdateRequest:
+      type: object
+      properties:
+        file_attachment:
+          description: The file to attach to an application
+          type: string
+          format: binary
+      required:
+      - file_attachment
+    ApplicationAttachmentUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentCreate'
         status_code:
           type: integer
           description: The HTTP status code
