@@ -29,6 +29,11 @@ describe("formatSearchRequestBody", () => {
     expect(formatted.query).toEqual("research");
   });
 
+  it("adds andOr to top level of object", () => {
+    const formatted = formatSearchRequestBody(searchFetcherParams);
+    expect(formatted.query_operator).toEqual("OR");
+  });
+
   it("creates object with filters and pagination", () => {
     const formatted = formatSearchRequestBody(searchFetcherParams);
     expect(formatted.pagination).toEqual({
@@ -95,6 +100,17 @@ describe("buildFilters", () => {
     });
     expect(filters.close_date).toEqual({
       end_date_relative: "500",
+    });
+  });
+  it("handles boolean filters", () => {
+    const filters = buildFilters({
+      ...searchFetcherParams,
+      ...{
+        costSharing: new Set(["true"]),
+      },
+    });
+    expect(filters.is_cost_sharing).toEqual({
+      one_of: [true],
     });
   });
 });
@@ -226,6 +242,17 @@ describe("searchToQueryParams", () => {
     });
 
     expect(queryParams.closeDate).toEqual("500");
+  });
+  it("correctly handles boolean filters", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: {
+        ...fakeSavedSearch.filters,
+        is_cost_sharing: { one_of: [true] },
+      },
+    });
+
+    expect(queryParams.costSharing).toEqual("true");
   });
 });
 

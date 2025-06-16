@@ -9,6 +9,7 @@ export interface FilterQueryParamData {
   agency: Set<string>;
   category: Set<string>;
   closeDate: Set<string>;
+  costSharing: Set<string>;
 }
 
 // this is used for UI display so order matters
@@ -25,4 +26,15 @@ export type ValidSearchQueryParam = (typeof validSearchQueryParamKeys)[number];
 
 export type ValidSearchQueryParamData = {
   [k in ValidSearchQueryParam]?: string;
+};
+
+export type QueryContextParams = {
+  queryTerm: string | null | undefined;
+  updateQueryTerm: (term: string) => void;
+  totalPages: string | null | undefined;
+  updateTotalPages: (page: string) => void;
+  totalResults: string;
+  updateTotalResults: (total: string) => void;
+  updateLocalAndOrParam: (value: string) => void;
+  localAndOrParam: string;
 };

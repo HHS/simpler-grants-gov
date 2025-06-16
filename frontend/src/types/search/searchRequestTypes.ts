@@ -7,6 +7,7 @@ import { SortOptions } from "./searchSortTypes";
 
 export type OneOfFilter = { one_of: string[] };
 export type RelativeDateRangeFilter = { end_date_relative: string };
+export type BooleanFilter = { one_of: boolean[] };
 
 export interface SearchFilterRequestBody {
   opportunity_status?: OneOfFilter;
@@ -15,7 +16,10 @@ export interface SearchFilterRequestBody {
   agency?: OneOfFilter;
   funding_category?: OneOfFilter;
   close_date?: RelativeDateRangeFilter;
+  is_cost_sharing?: BooleanFilter;
 }
+
+export type QueryOperator = "AND" | "OR";
 
 export type PaginationOrderBy =
   | "relevancy"
@@ -42,6 +46,7 @@ export type SearchRequestBody = {
   filters?: SearchFilterRequestBody;
   query?: string;
   format?: string;
+  query_operator?: QueryOperator;
 };
 
 export enum SearchFetcherActionType {
@@ -86,6 +91,7 @@ export interface QueryParamData extends FilterQueryParamData {
   page: number;
   sortby: SortOptions | null;
   query?: string | null;
+  andOr?: QueryOperator;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }

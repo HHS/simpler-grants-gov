@@ -97,15 +97,6 @@ data "aws_iam_policy_document" "task_executor" {
       resources = [for secret in var.secrets : secret.valueFrom]
     }
   }
-
-  dynamic "statement" {
-    for_each = length(var.pinpoint_app_id) > 0 ? [1] : []
-    content {
-      sid       = "SendViaPinpoint"
-      actions   = ["mobiletargeting:SendMessages"]
-      resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
-    }
-  }
 }
 
 data "aws_iam_policy_document" "runtime_logs" {
@@ -122,6 +113,27 @@ data "aws_iam_policy_document" "runtime_logs" {
   }
 }
 
+data "aws_iam_policy_document" "email_access" {
+  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
+
+  statement {
+    sid       = "SendViaPinpoint"
+    actions   = ["mobiletargeting:SendMessages"]
+    resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
+  }
+  statement {
+    sid       = "SendSESEmail"
+    actions   = ["ses:SendEmail"]
+    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.hosted_zone}"]
+  }
+  statement {
+    sid       = "SendSESEmailConfigurationSet"
+    actions   = ["ses:SendEmail"]
+    resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${var.ses_configuration_set}"]
+  }
+}
+
+
 resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
   role   = aws_iam_role.task_executor.id
@@ -131,6 +143,12 @@ resource "aws_iam_role_policy" "task_executor" {
 resource "aws_iam_policy" "runtime_logs" {
   name   = "${var.service_name}-task-executor-role-policy"
   policy = data.aws_iam_policy_document.runtime_logs.json
+}
+
+resource "aws_iam_policy" "email_access" {
+  count  = length(var.pinpoint_app_id) > 0 ? 1 : 0
+  name   = "${var.service_name}-email-access-role-policy"
+  policy = data.aws_iam_policy_document.email_access[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies" {
@@ -143,4 +161,11 @@ resource "aws_iam_role_policy_attachment" "extra_policies" {
 resource "aws_iam_role_policy_attachment" "runtime_logs" {
   role       = aws_iam_role.app_service.name
   policy_arn = aws_iam_policy.runtime_logs.arn
+}
+
+resource "aws_iam_role_policy_attachment" "email_access" {
+  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
+
+  role       = aws_iam_role.app_service.name
+  policy_arn = aws_iam_policy.email_access[0].arn
 }

@@ -11,6 +11,7 @@ from src.constants.lookup_constants import ApplicationFormStatus
 class ApplicationStartRequestSchema(Schema):
     competition_id = fields.UUID(required=True)
     application_name = fields.String(required=False, allow_none=True)
+    organization_id = fields.UUID(required=False, allow_none=True)
 
 
 class ApplicationStartResponseDataSchema(Schema):
@@ -64,6 +65,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
     application_form_status = fields.Enum(
         ApplicationFormStatus,
         metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
     )
 
     is_required = fields.Boolean(

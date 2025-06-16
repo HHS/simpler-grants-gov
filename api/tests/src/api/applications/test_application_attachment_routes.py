@@ -166,6 +166,8 @@ def test_application_attachment_get_200(
     assert response_data["file_name"] == application_attachment.file_name
     assert response_data["mime_type"] == application_attachment.mime_type
     assert response_data["file_size_bytes"] == application_attachment.file_size_bytes
+    assert response_data["created_at"] == application_attachment.created_at.isoformat()
+    assert response_data["updated_at"] == application_attachment.created_at.isoformat()
 
     # Verify the download path returned is a presigned URL we can download
     response = requests.get(response_data["download_path"], timeout=5)
