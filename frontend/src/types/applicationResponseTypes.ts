@@ -9,18 +9,18 @@ export interface ApplicationResponseDetail {
 export enum Status {
   IN_PROGRESS = "in_progress",
   SUBMITTED = "submitted",
-  ACCEPTED = "accepted"
+  ACCEPTED = "accepted",
 }
 
 interface SamGovEntity {
-    expiration_date: string;
-    legal_business_name: string;
-    uei: string;
+  expiration_date: string;
+  legal_business_name: string;
+  uei: string;
 }
 
 export interface Oranization {
   organization_id: string;
-  sam_gov_entity: SamGovEntity
+  sam_gov_entity: SamGovEntity;
 }
 
 export interface ApplicationFormDetail {

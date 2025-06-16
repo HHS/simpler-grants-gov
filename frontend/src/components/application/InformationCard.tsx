@@ -29,7 +29,8 @@ export const InformationCard = ({
   // TODO: check this after mvp
   // instructions were to use the first available path
   // this may change
-  const instructionsDownloadPath = applicationDetails.competition.competition_instructions[0].download_path
+  const instructionsDownloadPath =
+    applicationDetails.competition.competition_instructions[0].download_path;
 
   const ApplicantDetails = () => {
     if (hasOrganization) {
@@ -71,9 +72,7 @@ export const InformationCard = ({
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
         <dd>
-          <Link
-            href={instructionsDownloadPath}
-          >
+          <Link href={instructionsDownloadPath}>
             <Button
               type="button"
               data-testid="application-instructions-download"
