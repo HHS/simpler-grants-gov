@@ -89,10 +89,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
+        # Create row_number window function
+        row_number = func.row_number().over(
+            partition_by=OpportunityVersion.opportunity_id,
+            order_by=desc(OpportunityVersion.created_at)
+        ).label("rn")
+
+        # Subquery that assigns row numbers
         latest_versions_subq = (
-            select(OpportunityVersion)
-            .distinct(OpportunityVersion.opportunity_id)
-            .order_by(OpportunityVersion.opportunity_id, desc(OpportunityVersion.created_at))
+            select(OpportunityVersion, row_number)
             .subquery()
         )
 
@@ -108,10 +113,13 @@ class OpportunityNotificationTask(BaseNotificationTask):
         )
 
         results = self.db_session.execute(stmt).all()
+        if not results:
+            logger.info("No user-opportunity tracking records found.")
+            return []
+
         changed_saved_opportunities: dict[UUID, dict] = {}
         user_opportunity_pairs : list = []
         none_versioned_opportunities: list = []
-
         for user_saved_opp, latest_opp_ver in results:
             if latest_opp_ver is None:
                 logger.error(
@@ -124,15 +132,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             if user_saved_opp.last_notified_at < latest_opp_ver.created_at:
                 user_id = user_saved_opp.user_id
                 opp_id = user_saved_opp.opportunity_id
-                if user_id not in changed_saved_opportunities:
-                    changed_saved_opportunities[user_id] = {
-                        "email": user_saved_opp.user.email,
-                        opp_id: {}
-                    }
-
-                changed_saved_opportunities[user_id][opp_id] = {
+                changed_saved_opportunities.setdefault(user_id, {
+                    "email": user_saved_opp.user.email,
+                    "opportunities": {}
+                })["opportunities"][opp_id] = {
                     "latest": latest_opp_ver,
-                    "previous": {}  # To be filled later via _get_last_notified_versions
+                    "previous": {}
                 }
 
                 user_opportunity_pairs.append((user_id, opp_id))
@@ -150,7 +155,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            updated_opps = {k: v for k, v in data.items() if k != "email"}
+            updated_opps = data["opportunities"]
 
             for opp_id, versions in updated_opps.items():
                 versions["previous"] = prior_notified_versions.get((user_id, opp_id))
@@ -162,17 +167,17 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     "Created changed opportunity email notifications",
                     extra={"user_id": user_id, "changed_opportunities_count": len(updated_opp_ids)},
                 )
-            users_email_notifications.append(
-                UserEmailNotification(
-                    user_id=user_id,
-                    user_email=user_email,
-                    subject=subject,
-                    content=message,
-                    notification_reason=NotificationReason.OPPORTUNITY_UPDATES,
-                    notified_object_ids=updated_opp_ids,
-                    is_notified=False,  # Default to False, update on success
+                users_email_notifications.append(
+                    UserEmailNotification(
+                        user_id=user_id,
+                        user_email=user_email,
+                        subject=subject,
+                        content=message,
+                        notification_reason=NotificationReason.OPPORTUNITY_UPDATES,
+                        notified_object_ids=updated_opp_ids,
+                        is_notified=False,  # Default to False, update on success
+                    )
                 )
-            )
 
         logger.info(
             "Collected updated opportunity notifications",
@@ -250,8 +255,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
             field = diff["field"]
             before = diff["before"]
             after = diff["after"]
-
-
 
             # cleanup dates
             if isinstance(before, datetime):
@@ -422,8 +425,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         additional_msg = (
             "<div>"
             "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
-            f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a><br><br>"
-            "</div>"
+            f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            "</div><br>"
         )
         message = intro + all_changes_message + additional_msg + CONTACT_INFO
 
@@ -431,9 +434,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
             "Your saved funding opportunities changed on"
             if  len(changed_opp_ids) > 1
             else "Your saved funding opportunity changed on"
-        )
-        subject += (
-            f"<a href='{self.frontend_base_url}' target='_blank'>{self.frontend_base_url}</a>"
         )
 
         return subject, message, changed_opp_ids
