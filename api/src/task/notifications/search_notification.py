@@ -236,7 +236,7 @@ class SearchNotificationTask(BaseNotificationTask):
         else:
             message += "To unsubscribe from email notifications for a query, delete it from your saved search queries."
 
-        return message
+        return message.replace("\n", "<br/>")
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

@@ -175,7 +175,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         message += PLEASE_CAREFULLY_REVIEW_MSG
         message += CONTACT_INFO
 
-        return message
+        return message.replace("\n", "<br/>")
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

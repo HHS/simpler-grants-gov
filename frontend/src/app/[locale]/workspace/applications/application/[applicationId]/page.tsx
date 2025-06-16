@@ -6,15 +6,14 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { FormDetail } from "src/types/formResponseTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
+import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 export const dynamic = "force-dynamic";
 
@@ -29,32 +28,6 @@ interface ApplicationLandingPageProps {
   params: Promise<{ applicationId: string; locale: string }>;
 }
 
-const FormLinks = ({
-  forms,
-  applicationId,
-}: {
-  forms: [{ form: FormDetail }];
-  applicationId: string;
-}) => {
-  if (forms.length > 0) {
-    return (
-      <ul className="usa-list">
-        {forms.map((form) => {
-          return (
-            <li key={form.form.form_name}>
-              <Link
-                href={`/workspace/applications/application/${applicationId}/form/${form.form.form_id}`}
-              >
-                {form.form.form_name}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-};
-
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
@@ -62,6 +35,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
   const { applicationId } = await params;
   let forms = [];
+  let applicationForms = [];
   let opportunity = {} as OpportunityDetail;
 
   try {
@@ -78,6 +52,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <TopLevelError />;
     }
     forms = response.data.competition.competition_forms;
+    applicationForms = response.data.application_forms;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
       String(opportunityId),
@@ -107,10 +82,11 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       <GridContainer>
         <h1>Application</h1>
         <OpportunityCard opportunityOverview={opportunity} />
-        <legend className="usa-legend">
-          The following is a list of available forms.
-        </legend>
-        <FormLinks forms={forms} applicationId={applicationId} />
+        <ApplicationFormsTable
+          forms={forms}
+          applicationForms={applicationForms}
+          applicationId={applicationId}
+        />
       </GridContainer>
     </>
   );

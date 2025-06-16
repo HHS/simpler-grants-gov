@@ -254,15 +254,25 @@ IMAGE_NAME := $(PROJECT_ROOT)-$(APP_NAME)
 
 GIT_REPO_AVAILABLE := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 
+
+ROOT_REV := $(shell git rev-parse HEAD)
+
 # Generate a unique tag based solely on the git hash.
 # This will be the identifier used for deployment via terraform.
+
+
+ifdef APP_NAME
+	APP_NAME_ARG := ${APP_NAME}
+else
+	APP_NAME_ARG := "."
+endif
 
 ifdef IMAGE_TAG
 else
 	ifdef GIT_REPO_AVAILABLE
-	IMAGE_TAG := $(shell git rev-parse HEAD)
+		IMAGE_TAG := $(shell git log --pretty=format:'%H' -n 1 "${ROOT_REV}" -- "${APP_NAME_ARG}")
 	else
-	IMAGE_TAG := "unknown-dev.$(DATE)"
+		IMAGE_TAG := "unknown-dev.$(DATE)"
 	endif
 endif
 
