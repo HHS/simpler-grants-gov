@@ -240,6 +240,25 @@ export const messages = {
       estimatedAwardDate: "Estimated award date",
       estimatedProjectStartDate: "Estimated project start date",
     },
+    competitionFormTable: {
+      attachment: "Attachment",
+      attachmentUnavailable: "Unavailable",
+      conditionalForms: "Conditionally-Required Forms",
+      conditionalFormsDescription:
+        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you’ll need to complete it and upload any required documents.",
+      downloadInstructions: "Download instructions",
+      form: "Form",
+      instructions: "Instructions",
+      include: "Include with application",
+      requiredForms: " Required Forms",
+      status: "Status",
+      statuses: {
+        not_started: "Not started",
+        in_progress: "In progress",
+        complete: "Complete",
+      },
+      updated: "Last updated",
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",

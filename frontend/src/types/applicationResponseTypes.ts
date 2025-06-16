@@ -25,6 +25,7 @@ export interface Oranization {
 
 export interface ApplicationFormDetail {
   application_form_id: string;
+  application_form_status: "not_started" | "in_progress" | "complete";
   application_id: string;
   application_response: ApplicationResponseDetail;
   form_id: string;

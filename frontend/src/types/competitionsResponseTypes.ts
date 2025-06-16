@@ -9,10 +9,11 @@ export interface CompetitionInstructions {
   file_name: string;
   updated_at: string;
 }
+export type CompetitionForms = [{ form: FormDetail; is_required: boolean }];
 
 export type Competition = {
   closing_date: string;
-  competition_forms: [{ form: FormDetail; is_required: boolean }];
+  competition_forms: CompetitionForms;
   competition_id: string;
   competition_info: string;
   competition_instructions: CompetitionInstructions[];
