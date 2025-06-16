@@ -4,7 +4,7 @@ import { Competition } from "src/types/competitionsResponseTypes";
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "../USWDSIcon";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type CompetitionDetails = { competition: Competition };
 
@@ -25,6 +25,11 @@ export const InformationCard = ({
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
+
+  // TODO: check this after mvp
+  // instructions were to use the first available path
+  // this may change
+  const instructionsDownloadPath = applicationDetails.competition.competition_instructions[0].download_path
 
   const ApplicantDetails = () => {
     if (hasOrganization) {
@@ -67,7 +72,7 @@ export const InformationCard = ({
         </dt>
         <dd>
           <Link
-            href={`${applicationDetails.competition.competition_instructions.map((instrictions) => instrictions.download_path)}`}
+            href={instructionsDownloadPath}
           >
             <Button
               type="button"

@@ -9,7 +9,7 @@ import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFe
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { redirect } from "next/navigation";
-import { GridContainer, Link } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import {
   ApplicationDetailsCardProps,
@@ -41,7 +41,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let applicationForms = [];
   let details = {} as ApplicationDetailsCardProps;
   let forms = [];
-  let applicationForms = [];
   let opportunity = {} as OpportunityDetail;
 
   try {
