@@ -110,6 +110,12 @@ parent_milestone_title=$(pluck_field "$parent_issue" '.milestone.title // empty'
 # Check if the parent issue is in the same repo
 # #######################################################
 
+# Check if parent exists
+if [[ $(pluck_field "$data" ".parent") == "null" ]]; then
+  log "No parent issue found. Exiting."
+  exit 0
+fi
+
 if [[ "$parent_repo" != "$issue_repo" ]]; then
   log "Parent issue is not in the same repo ($issue_repo). Exiting."
   exit 0
