@@ -86,9 +86,21 @@ fi
 # Extract the necessary fields
 # #######################################################
 
-# First pluck the specific project items
+# First check if parent exists
+if [[ $(pluck_field "$data" ".parent") == "null" ]]; then
+  log "No parent issue found. Exiting."
+  exit 0
+fi
+
+# Then pluck the specific project items
 parent_project_item=$(pluck_field "$data" ".parent.projectItems.nodes[] | select(.project.number == $project_number)")
 child_project_item=$(pluck_field "$data" ".projectItems.nodes[] | select(.project.number == $project_number)")
+
+# Check if child project item exists
+if [[ -z "$child_project_item" || "$child_project_item" == "null" ]]; then
+  log "Child issue is not in project $project_number. Exiting."
+  exit 0
+fi
 
 # Extract remaining fields
 parent_deliverable_field_id=$(pluck_field "$parent_project_item" '.deliverable.field.id')
@@ -102,9 +114,9 @@ child_deliverable_option_id=$(pluck_field "$child_project_item" '.deliverable.op
 # Check conditions before updating
 # #######################################################
 
-# Check if parent issue exists
+# Check if parent has project items for the specified project
 if [[ -z "$parent_project_item" || "$parent_project_item" == "null" ]]; then
-  log "No parent item found for project $project_number. Exiting."
+  log "Parent issue is not in project $project_number. Exiting."
   exit 0
 fi
 
@@ -113,7 +125,6 @@ if [[ -z "$parent_deliverable_option_id" || "$parent_deliverable_option_id" == "
   log "Parent issue has no deliverable value. Exiting."
   exit 0
 fi
-
 
 # Check if deliverable values match
 if [[ "$child_deliverable_option_id" == "$parent_deliverable_option_id" ]]; then
