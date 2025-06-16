@@ -47,6 +47,16 @@ resource "aws_wafv2_web_acl" "waf" {
 
           name = "SizeRestrictions_QUERYSTRING"
         }
+
+        dynamic rule_action_override {
+          for_each = startswith(var.service_name, "api-") ? [1] : []
+          content {
+            action_to_use {
+              count {}
+            }
+            name = "CrossSiteScripting_BODY"
+          }
+        }
       }
     }
     visibility_config {
