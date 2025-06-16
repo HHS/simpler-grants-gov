@@ -121,6 +121,7 @@ const AccordionContent = ({
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
                 facetCounts={facetCounts}
+                queryParamKey={queryParamKey}
               />
             ) : (
               <SearchFilterCheckbox

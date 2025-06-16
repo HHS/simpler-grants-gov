@@ -11,10 +11,7 @@ import { Accordion } from "@trussworks/react-uswds";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { RadioButtonFilter } from "./Filters/RadioButtonFilter";
-import {
-  AgencyFilter,
-  AgencyFilterAccordion,
-} from "./SearchFilterAccordion/AgencyFilterAccordion";
+import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
   closeDateOptions,
