@@ -2,7 +2,7 @@ import { Meta } from "@storybook/react";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
-import { CompetitionFormsTable } from "src/components/workspace/CompetitionFormsTable";
+import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 import competitionMock from "./competition.mock.json";
 
 const competitionForms = competitionMock.competition
@@ -10,9 +10,9 @@ const competitionForms = competitionMock.competition
 const applicationForms =
   competitionMock.application_forms as unknown as ApplicationFormDetail[];
 
-const meta: Meta<typeof CompetitionFormsTable> = {
+const meta: Meta<typeof ApplicationFormsTable> = {
   title: "Components/Application/CompetitionFormsTable",
-  component: CompetitionFormsTable,
+  component: ApplicationFormsTable,
   args: {
     forms: competitionForms,
     applicationForms,

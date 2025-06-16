@@ -1,6 +1,6 @@
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
-import { FormDetail, FormInstruction } from "src/types/formResponseTypes";
+import { FormDetail } from "src/types/formResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export const selectForms = ({
+export const selectFormsByRequired = ({
   forms,
   required,
 }: {
@@ -37,7 +37,7 @@ const selectApplicationForm = ({
     : null;
 };
 
-export const CompetitionFormsTable = ({
+export const ApplicationFormsTable = ({
   applicationForms,
   applicationId,
   forms,
@@ -46,14 +46,17 @@ export const CompetitionFormsTable = ({
   applicationId: string;
   forms: CompetitionForms;
 }) => {
-  const requiredForms = selectForms({ forms, required: true });
-  const conditionalRequiredForms = selectForms({ forms, required: false });
+  const requiredForms = selectFormsByRequired({ forms, required: true });
+  const conditionalRequiredForms = selectFormsByRequired({
+    forms,
+    required: false,
+  });
   const t = useTranslations("Application.competitionFormTable");
 
   return (
     <>
       <h3>{t("requiredForms")}</h3>
-      <CompetitionTable
+      <ApplicationTable
         forms={requiredForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
@@ -62,7 +65,7 @@ export const CompetitionFormsTable = ({
         <>
           <h3>{t("conditionalForms")}</h3>
           <p>{t("conditionalFormsDescription")}</p>
-          <CompetitionTable
+          <ApplicationTable
             forms={conditionalRequiredForms}
             applicationForms={applicationForms}
             applicationId={applicationId}
@@ -73,7 +76,7 @@ export const CompetitionFormsTable = ({
   );
 };
 
-const CompetitionTable = ({
+const ApplicationTable = ({
   applicationForms,
   applicationId,
   forms,
@@ -120,12 +123,15 @@ const CompetitionTable = ({
               </Link>
             </td>
             <td data-label={t("instructions")}>
-              {form.form_instruction && (
-                <InstructionsLink
-                  instsruction={form.form_instruction}
-                  text={t("downloadInstructions")}
-                />
-              )}
+              <InstructionsLink
+                downloadPath={
+                  form.form_instruction && form.form_instruction.download_path
+                    ? form.form_instruction.download_path
+                    : null
+                }
+                text={t("downloadInstructions")}
+                unavailableText={t("attachmentUnavailable")}
+              />
             </td>
             <td data-label={t("updated")}>
               <div> -- </div>
@@ -167,19 +173,28 @@ const CompetitionStatus = ({
 };
 
 const InstructionsLink = ({
-  instsruction,
+  downloadPath,
   text,
+  unavailableText,
 }: {
-  instruction: FormInstruction;
+  downloadPath: string | null;
   text: string;
+  unavailableText: string;
 }) => {
   return (
-    <Link
-      className="display-flex flex-align-center font-sans-2xs"
-      href={instsruction.download_path}
-    >
-      <USWDSIcon name="save_alt" className="margin-right-05" />
-      {text}
-    </Link>
+    <>
+      {" "}
+      {downloadPath ? (
+        <Link
+          className="display-flex flex-align-center font-sans-2xs"
+          href={downloadPath}
+        >
+          <USWDSIcon name="save_alt" className="margin-right-05" />
+          {text}
+        </Link>
+      ) : (
+        <>{unavailableText}</>
+      )}
+    </>
   );
 };

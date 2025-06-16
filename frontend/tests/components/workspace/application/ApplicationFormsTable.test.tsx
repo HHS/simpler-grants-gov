@@ -5,7 +5,7 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
-import { CompetitionFormsTable } from "src/components/workspace/CompetitionFormsTable";
+import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
@@ -20,7 +20,7 @@ const applicationId = "12345";
 describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
-      <CompetitionFormsTable
+      <ApplicationFormsTable
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
@@ -32,7 +32,7 @@ describe("CompetitionFormsTable", () => {
   });
   it("Renders without errors", () => {
     render(
-      <CompetitionFormsTable
+      <ApplicationFormsTable
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
@@ -43,7 +43,10 @@ describe("CompetitionFormsTable", () => {
 
     expect(tables[0]).toHaveTextContent("ABC Project Form");
     expect(tables[0]).toHaveTextContent("in_progress");
+    expect(tables[0]).toHaveTextContent("attachmentUnavailable");
+
     expect(tables[1]).toHaveTextContent("DEF Project Form");
     expect(tables[1]).toHaveTextContent("complete");
+    expect(tables[1]).toHaveTextContent("downloadInstructions");
   });
 });
