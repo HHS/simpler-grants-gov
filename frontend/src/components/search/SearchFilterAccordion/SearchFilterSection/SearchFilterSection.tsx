@@ -1,5 +1,6 @@
 "use client";
 
+import { noop } from "lodash";
 import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
 
 import { AllOptionCheckbox } from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
@@ -12,6 +13,9 @@ interface SearchFilterSectionProps {
   query: Set<string>;
   facetCounts?: { [key: string]: number };
   referenceOption?: FilterOptionWithChildren;
+  topLevelQuery?: Set<string>;
+  topLevelQueryParamKey?: string;
+  isParentSelected?: (value: string) => boolean;
 }
 
 const SearchFilterSection = ({
@@ -21,6 +25,9 @@ const SearchFilterSection = ({
   query,
   facetCounts,
   referenceOption,
+  topLevelQuery,
+  topLevelQueryParamKey,
+  isParentSelected = () => false,
 }: SearchFilterSectionProps) => {
   return (
     <>
@@ -28,11 +35,14 @@ const SearchFilterSection = ({
       <div className="padding-y-1">
         <AllOptionCheckbox
           title={option.label}
-          queryParamKey="agency"
+          queryParamKey="topLevelAgency"
           childOptions={
             referenceOption ? referenceOption.children : option.children
           }
           currentSelections={query}
+          topLevelQueryParamKey={topLevelQueryParamKey}
+          topLevelQuery={topLevelQuery}
+          topLevelQueryValue={option.value}
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
           {option.children?.map((child) => (
@@ -43,6 +53,7 @@ const SearchFilterSection = ({
                 updateCheckedOption={updateCheckedOption}
                 accordionTitle={accordionTitle}
                 facetCounts={facetCounts}
+                parentSelected={isParentSelected(option.value)}
               />
             </li>
           ))}
