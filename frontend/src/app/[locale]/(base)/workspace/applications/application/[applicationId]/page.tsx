@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";

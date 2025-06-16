@@ -1,6 +1,6 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import {
   ApiRequestError,
@@ -41,6 +41,7 @@ async function FormPage({ params }: formPageProps) {
   let formData = {} as FormDetail;
   let applicationData = {} as ApplicationDetail;
   const session = await getSession();
+
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session to access form");
   }

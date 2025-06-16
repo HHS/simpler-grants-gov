@@ -17,8 +17,6 @@ import { LayoutProps } from "src/types/generalTypes";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 
-import Layout from "src/components/Layout";
-
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
 export const metadata: Metadata = {
@@ -64,8 +62,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         />
       </head>
       <body>
+        <h1>root layout</h1>
         <NextIntlClientProvider messages={messages}>
-          <Layout locale={locale}>{children}</Layout>
+          {children}
         </NextIntlClientProvider>
         <Script
           id="nr-browser-agent"
