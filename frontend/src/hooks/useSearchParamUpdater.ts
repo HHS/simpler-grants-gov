@@ -61,6 +61,17 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
+  // accepts an array of tuples of type [key, value]
+  const setQueryParams = (updates: string[][], scroll = false) => {
+    updates.forEach((update) => {
+      if (!update[0]) {
+        return;
+      }
+      params.set(update[0], update[1]);
+    });
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
+  };
+
   const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
@@ -81,5 +92,6 @@ export function useSearchParamUpdater() {
     removeQueryParam,
     setQueryParam,
     clearQueryParams,
+    setQueryParams,
   };
 }

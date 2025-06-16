@@ -22,11 +22,17 @@ export const AllOptionCheckbox = ({
   currentSelections,
   childOptions,
   queryParamKey,
+  topLevelQueryParamKey,
+  topLevelQuery,
+  topLevelQueryValue,
 }: {
   title: string;
   currentSelections: Set<string>;
   childOptions: FilterOption[];
   queryParamKey: string;
+  topLevelQueryParamKey?: string;
+  topLevelQuery?: Set<string>;
+  topLevelQueryValue?: string;
 }) => {
   const currentSelectionValues = useMemo(
     () => Array.from(currentSelections.values()),
@@ -37,8 +43,13 @@ export const AllOptionCheckbox = ({
     [childOptions],
   );
 
+  const topLevelSelected = useMemo(() => {
+    return topLevelQuery && topLevelQuery.has(topLevelQueryValue);
+  }, [topLevelQuery, topLevelQueryValue]);
+
   const [checked, setChecked] = useState<boolean>(
-    isSubset<string>(childOptionValues, currentSelectionValues),
+    topLevelSelected ||
+      isSubset<string>(childOptionValues, currentSelectionValues),
   );
   const { setQueryParam } = useSearchParamUpdater();
   const id = `${title.replace(/\s/, "-").toLowerCase()}-all`;
@@ -68,12 +79,31 @@ export const AllOptionCheckbox = ({
     setQueryParam(queryParamKey, newSelectedOptions.join(","));
   };
 
+  const checkTopLevel = () => {
+    if (!topLevelQueryParamKey || !topLevelQueryValue) {
+      return;
+    }
+    setQueryParam(topLevelQueryParamKey, topLevelQueryValue);
+  };
+  const uncheckTopLevel = () => {
+    if (!topLevelQueryParamKey || !topLevelQueryValue) {
+      return;
+    }
+    setQueryParam(topLevelQueryParamKey, "");
+  };
+
+  const handleCheckChange = () => (checked ? uncheckOptions() : checkOptions());
+  const handleTopLevelCheckChange = () =>
+    checked ? uncheckTopLevel() : checkTopLevel();
+
   return (
     <Checkbox
       id={id}
       name={id}
       label={label}
-      onChange={checked ? uncheckOptions : checkOptions}
+      onChange={
+        topLevelQueryParamKey ? handleTopLevelCheckChange : handleCheckChange
+      }
       disabled={false}
       checked={checked}
       value={"all"}
