@@ -116,7 +116,7 @@ const backendFilterToQueryParamValue = (
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
-  const { query, andOr } = searchInputs;
+  const { query, andOr, topLevelAgency } = searchInputs;
 
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
@@ -133,6 +133,11 @@ export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
   }
   if (andOr) {
     requestBody.query_operator = andOr;
+  }
+  if (topLevelAgency && topLevelAgency.size) {
+    requestBody.top_level_agency = Array.from(topLevelAgency.values()).join(
+      ",",
+    );
   }
   return requestBody;
 };

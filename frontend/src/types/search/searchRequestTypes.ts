@@ -47,6 +47,7 @@ export type SearchRequestBody = {
   query?: string;
   format?: string;
   query_operator?: QueryOperator;
+  top_level_agency?: string;
 };
 
 export enum SearchFetcherActionType {
