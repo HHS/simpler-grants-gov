@@ -33,16 +33,15 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
     # because the type checking from the JSON schema should flag the field.
     # TODO - when we figure out how we're handling list fields, we'll
     # want to add something here as well to allow a list of strings.
-    if isinstance(value, str):
-        if value not in application_attachment_ids:
-            context.validation_issues.append(
-                ValidationErrorDetail(
-                    type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
-                    message="Field references application_attachment_id not on the application",
-                    field=build_path_str(path),
-                    value=value,
-                )
+    if isinstance(value, str) and value not in application_attachment_ids:
+        context.validation_issues.append(
+            ValidationErrorDetail(
+                type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+                message="Field references application_attachment_id not on the application",
+                field=build_path_str(path),
+                value=value,
             )
+        )
 
 
 VALIDATION_RULES = {"attachment": validate_attachments}
