@@ -9,10 +9,13 @@ import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFe
 import { FormDetail } from "src/types/formResponseTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
+import { GridContainer, Link } from "@trussworks/react-uswds";
 
+import {
+  ApplicationDetailsCardProps,
+  InformationCard,
+} from "src/components/application/InformationCard";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
 
@@ -61,6 +64,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     return <TopLevelError />;
   }
   const { applicationId } = await params;
+  let applicationForms = [];
+  let details = {} as ApplicationDetailsCardProps;
   let forms = [];
   let opportunity = {} as OpportunityDetail;
 
@@ -77,6 +82,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       );
       return <TopLevelError />;
     }
+    applicationForms = response.data.application_forms;
+    details = response.data;
     forms = response.data.competition.competition_forms;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
@@ -106,6 +113,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       <BetaAlert containerClasses="margin-top-5" />
       <GridContainer>
         <h1>Application</h1>
+        <InformationCard applicationDetails={details} />
         <OpportunityCard opportunityOverview={opportunity} />
         <legend className="usa-legend">
           The following is a list of available forms.

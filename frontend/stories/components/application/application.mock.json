@@ -1,0 +1,143 @@
+{
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "title": "Proposal for Advanced Research",
+    "info": "This program funds advanced research for lunar habitats.",
+    "isOpen": true,
+    "openDate": "2025-06-05",
+    "closeDate": "2025-07-10",
+    "contact": null,
+    "openToApplicants": ["individual", "organization"],
+    "programTitles": ["Space Technology", "Lunar Research Program"],
+    "opportunityId": 42,
+    "application_name": "Proposal for Advanced Research",
+    "application_status": "in_progress",
+    "organization": {
+      "organization_id": "123e4567-e89b-12d3-a456-426614174000",
+      "sam_gov_entity": {
+        "expiration_date": "2025-06-13",
+        "legal_business_name": "Somewhere over the rainbow",
+        "uei": "xyz"
+      }
+    },
+    "competition": {
+      "closing_date": "2025-06-13",
+      "competition_forms": [
+        {
+          "form": {
+            "form_id": "123e4567-e89b-12d3-a456-426614174000",
+            "form_instruction": {
+              "created_at": "2025-06-13T20:17:16.491Z",
+              "download_path": "string",
+              "file_name": "instructions.pdf",
+              "updated_at": "2025-06-13T20:17:16.491Z"
+            },
+            "form_json_schema": {
+              "properties": {
+                "ApplicationNumber": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "title": "Application number",
+                  "type": "number"
+                },
+                "Date": {
+                  "format": "date",
+                  "title": "Date of application ",
+                  "type": "string"
+                },
+                "Description": {
+                  "maxLength": 15,
+                  "minLength": 0,
+                  "title": "Description for application",
+                  "type": "string"
+                },
+                "Title": {
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "title": "Title",
+                  "type": "string"
+                }
+              },
+              "title": "Test form for testing",
+              "type": "object"
+            },
+            "form_name": "ABC Project Form",
+            "form_ui_schema": [
+              {
+                "definition": "/properties/Title",
+                "type": "field"
+              },
+              {
+                "definition": "/properties/Description",
+                "type": "field"
+              },
+              {
+                "definition": "/properties/ApplicationNumber",
+                "type": "field"
+              },
+              {
+                "definition": "/properties/Date",
+                "type": "field"
+              }
+            ]
+          },
+          "is_required": true
+        }
+      ],
+      "competition_id": "123e4567-e89b-12d3-a456-426614174000",
+      "competition_instructions": [
+        {
+          "created_at": "2025-06-13T20:17:16.491Z",
+          "download_path": "https://cdn.example.com/competition-instructions/file.pdf",
+          "file_name": "competition_instructions.pdf",
+          "updated_at": "2025-06-13T20:17:16.491Z"
+        }
+      ],
+      "competition_title": "Proposal for Advanced Research",
+      "contact_info": "Bob Smith\nFakeMail@fake.com",
+      "is_open": true,
+      "open_to_applicants": [
+        "individual"
+      ],
+      "opening_date": "2025-06-13",
+      "opportunity_assistance_listing": {
+        "assistance_listing_number": "43.012",
+        "program_title": "Space Technology"
+      },
+      "opportunity_id": 0
+    },
+
+    "forms": [
+      {
+        "id": "form-abc-001",
+        "name": "ABC Project Form",
+        "instructionFile": "instructions.pdf",
+        "isRequired": true,
+        "fields": [
+          {
+            "name": "Title",
+            "title": "Title",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "Description",
+            "title": "Description for application",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "ApplicationNumber",
+            "title": "Application number",
+            "type": "number",
+            "required": true
+          },
+          {
+            "name": "Date",
+            "title": "Date of application ",
+            "type": "string",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
