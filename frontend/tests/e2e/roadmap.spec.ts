@@ -51,6 +51,6 @@ test("can view the 'View all deliverables on Github'", async ({ page }) => {
   const newTab = await newTabPromise;
   await newTab.waitForLoadState();
   await expect(newTab).toHaveURL(
-    "https://github.com/HHS/simpler-grants-gov/issues/?q=is%3Aissue%20type%3ADeliverable%20",
+    "https://github.com/orgs/HHS/projects/12/views/8",
   );
 });

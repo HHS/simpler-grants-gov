@@ -1,16 +1,9 @@
 "use client";
 
+import { QueryContextParams } from "src/types/search/searchQueryTypes";
+
 import { useSearchParams } from "next/navigation";
 import { createContext, useCallback, useMemo, useState } from "react";
-
-interface QueryContextParams {
-  queryTerm: string | null | undefined;
-  updateQueryTerm: (term: string) => void;
-  totalPages: string | null | undefined;
-  updateTotalPages: (page: string) => void;
-  totalResults: string;
-  updateTotalResults: (total: string) => void;
-}
 
 export const QueryContext = createContext({} as QueryContextParams);
 
@@ -24,6 +17,7 @@ export default function QueryProvider({
   const [queryTerm, setQueryTerm] = useState(defaultTerm);
   const [totalPages, setTotalPages] = useState("na");
   const [totalResults, setTotalResults] = useState("");
+  const [localAndOrParam, setLocalAndOrParam] = useState("");
 
   const updateQueryTerm = useCallback((term: string) => {
     setQueryTerm(term);
@@ -37,6 +31,12 @@ export default function QueryProvider({
     setTotalPages(page);
   }, []);
 
+  // added here rather than in the useSearchParamUpdater hook since this value needs to be
+  // consistent across the app, not just per hook invocation. See https://github.com/HHS/simpler-grants-gov/issues/5276 for more
+  const updateLocalAndOrParam = useCallback((paramValue: string) => {
+    setLocalAndOrParam(paramValue);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       queryTerm,
@@ -45,6 +45,8 @@ export default function QueryProvider({
       updateTotalPages,
       totalResults,
       updateTotalResults,
+      updateLocalAndOrParam,
+      localAndOrParam,
     }),
     [
       queryTerm,
@@ -53,6 +55,8 @@ export default function QueryProvider({
       updateTotalPages,
       totalResults,
       updateTotalResults,
+      updateLocalAndOrParam,
+      localAndOrParam,
     ],
   );
 

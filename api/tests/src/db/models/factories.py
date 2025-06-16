@@ -433,6 +433,15 @@ class OpportunityFactory(BaseFactory):
             )
         )
 
+        has_attachment_with_duplicate_filename = factory.Trait(
+            opportunity_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OpportunityAttachmentFactory",
+                factory_related_name="opportunity",
+                size=2,
+                duplicate_filename=True,
+            )
+        )
+
 
 class OpportunityVersionFactory(BaseFactory):
     class Meta:
@@ -781,6 +790,9 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
+
+    class Params:
+        duplicate_filename = factory.Trait(file_name="duplicate.txt")
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
@@ -1272,6 +1284,9 @@ class ApplicationAttachmentFactory(BaseFactory):
 
     application_id = factory.LazyAttribute(lambda a: a.application.application_id)
     application = factory.SubFactory(ApplicationFactory)
+
+    user_id = factory.LazyAttribute(lambda a: a.user.user_id)
+    user = factory.SubFactory(UserFactory)
 
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name", extension="text")
@@ -2422,6 +2437,8 @@ class SamGovEntityFactory(BaseFactory):
     uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
+    initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")
+    last_update_date = factory.Faker("date_between", start_date="-1y", end_date="today")
     ebiz_poc_email = factory.Faker("email")
     ebiz_poc_first_name = factory.Faker("first_name")
     ebiz_poc_last_name = factory.Faker("last_name")

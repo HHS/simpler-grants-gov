@@ -11,6 +11,7 @@ from src.constants.lookup_constants import ApplicationFormStatus
 class ApplicationStartRequestSchema(Schema):
     competition_id = fields.UUID(required=True)
     application_name = fields.String(required=False, allow_none=True)
+    organization_id = fields.UUID(required=False, allow_none=True)
 
 
 class ApplicationStartResponseDataSchema(Schema):
@@ -66,6 +67,15 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Status indicating how much of a form has been filled out"},
     )
 
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
+    )
+
+    is_required = fields.Boolean(
+        metadata={"description": "Whether this form is required for the application"}
+    )
+
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
@@ -94,6 +104,36 @@ class OrganizationSchema(Schema):
     sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
 
 
+class ApplicationAttachmentNoLinkSchema(Schema):
+    """A schema for an application attachment, but without a file_download URL"""
+
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the application attachment"}
+    )
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the application attachment file",
+            "example": "my_example.pdf",
+        }
+    )
+    mime_type = fields.String(
+        metadata={
+            "description": "The MIME type / content-type of the file",
+            "example": "application/pdf",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={"description": "The size of the attachment in bytes", "example": 12340}
+    )
+
+    created_at = fields.DateTime(
+        metadata={"description": "When the application attachment was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application attachment was last updated"}
+    )
+
+
 class ApplicationGetResponseDataSchema(Schema):
     application_id = fields.UUID()
     competition = fields.Nested(CompetitionAlphaSchema())
@@ -118,6 +158,8 @@ class ApplicationGetResponseDataSchema(Schema):
             },
         }
     )
+
+    application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):

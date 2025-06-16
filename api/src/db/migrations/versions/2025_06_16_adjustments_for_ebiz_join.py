@@ -1,16 +1,16 @@
 """adjustments for ebiz join
 
-Revision ID: 43b9a44fb504
-Revises: 31bb1c1f5262
-Create Date: 2025-06-11 09:25:07.732008
+Revision ID: bf5b294a7b85
+Revises: 889abca6de67
+Create Date: 2025-06-16 10:05:12.178074
 
 """
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "43b9a44fb504"
-down_revision = "31bb1c1f5262"
+revision = "bf5b294a7b85"
+down_revision = "889abca6de67"
 branch_labels = None
 depends_on = None
 

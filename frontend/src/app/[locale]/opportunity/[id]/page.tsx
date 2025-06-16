@@ -160,7 +160,10 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityStatusWidget opportunityData={opportunityData} />
             <OpportunityCTA id={opportunityData.opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />
-            <OpportunityHistory summary={opportunityData.summary} />
+            <OpportunityHistory
+              summary={opportunityData.summary}
+              status={opportunityData.opportunity_status}
+            />
           </div>
         </div>
       </ContentLayout>

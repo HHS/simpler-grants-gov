@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom/extend-expect";
-
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
@@ -73,8 +71,7 @@ describe("CheckboxFilter", () => {
     const updatedQuery = new Set("");
     updatedQuery.add("Cooperative Agreement");
     updatedQuery.add("Grant");
-    // after clicking one of the boxes, the page should rerender
-    // both select all and clear all should be enabled
+
     rerender(
       <CheckboxFilter
         filterOptions={initialFilterOptions}

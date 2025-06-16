@@ -49,8 +49,14 @@ const mockGetOpportunityDetails = jest.fn((params: string): unknown => {
   return returnVal;
 });
 
+const mockAttachmentsToZipEntries = jest.fn();
+
 jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
   getOpportunityDetails: (params: string) => mockGetOpportunityDetails(params),
+}));
+
+jest.mock("src/utils/opportunity/zipUtils", () => ({
+  attachmentsToZipEntries: () => mockAttachmentsToZipEntries() as unknown,
 }));
 
 describe("attachments-download export GET requests", () => {
@@ -65,6 +71,7 @@ describe("attachments-download export GET requests", () => {
   });
 
   it("returns a new response with zip data", async () => {
+    mockAttachmentsToZipEntries.mockReturnValue([]);
     const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
       params: Promise.resolve({
         opportunityId: "43",

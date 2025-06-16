@@ -583,6 +583,44 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/organizations:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Organizations
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -2729,6 +2767,12 @@ components:
           type:
           - string
           - 'null'
+        organization_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
       required:
       - competition_id
     ApplicationStartResponseData:
@@ -3071,6 +3115,53 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SamGovEntity:
+      type: object
+      properties:
+        uei:
+          type: string
+        legal_business_name:
+          type: string
+        expiration_date:
+          type: string
+          format: date
+    UserOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_organization_owner:
+          type: boolean
+          description: Whether the user is an owner of this organization
+          example: true
+        sam_gov_entity:
+          description: SAM.gov entity information for the organization
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntity'
+          - type: 'null'
+    UserOrganizationsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organizations the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserSaveSearchRequest:
       type: object
       properties:
@@ -3147,6 +3238,17 @@ components:
           - complete
           type:
           - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the application form was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application form was last updated
+        is_required:
+          type: boolean
+          description: Whether this form is required for the application
     ApplicationUser:
       type: object
       properties:
@@ -3158,16 +3260,6 @@ components:
           type: string
         is_application_owner:
           type: boolean
-    SamGovEntity:
-      type: object
-      properties:
-        uei:
-          type: string
-        legal_business_name:
-          type: string
-        expiration_date:
-          type: string
-          format: date
     Organization:
       type: object
       properties:
@@ -3182,6 +3274,34 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntity'
           - type: 'null'
+    ApplicationAttachmentNoLink:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The MIME type / content-type of the file
+          example: application/pdf
+        file_size_bytes:
+          type: integer
+          description: The size of the attachment in bytes
+          example: 12340
+        created_at:
+          type: string
+          format: date-time
+          description: When the application attachment was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application attachment was last updated
     ApplicationGetResponseData:
       type: object
       properties:
@@ -3226,6 +3346,12 @@ components:
               type: required
               value: null
           additionalProperties: {}
+        application_attachments:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAttachmentNoLink'
     ApplicationGetResponse:
       type: object
       properties:

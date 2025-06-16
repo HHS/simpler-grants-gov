@@ -9,7 +9,8 @@ import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationForm, Competition
-from src.db.models.user_models import ApplicationUser, User
+from src.db.models.entity_models import Organization
+from src.db.models.user_models import ApplicationUser, OrganizationUser, User
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_competition_open,
@@ -18,8 +19,38 @@ from src.services.applications.application_validation import (
 logger = logging.getLogger(__name__)
 
 
+def _validate_organization_membership(
+    db_session: db.Session, organization_id: UUID, user: User
+) -> Organization:
+    # Fetch the organization
+    organization = db_session.execute(
+        select(Organization)
+        .where(Organization.organization_id == organization_id)
+        .options(selectinload(Organization.organization_users))
+    ).scalar_one_or_none()
+
+    if not organization:
+        raise_flask_error(404, "Organization not found")
+
+    # Check if the user is a member of the organization
+    is_member = db_session.execute(
+        select(OrganizationUser)
+        .where(OrganizationUser.organization_id == organization_id)
+        .where(OrganizationUser.user_id == user.user_id)
+    ).scalar_one_or_none()
+
+    if not is_member:
+        raise_flask_error(403, "User is not a member of the organization")
+
+    return organization
+
+
 def create_application(
-    db_session: db.Session, competition_id: UUID, user: User, application_name: str | None = None
+    db_session: db.Session,
+    competition_id: UUID,
+    user: User,
+    application_name: str | None = None,
+    organization_id: UUID | None = None,
 ) -> Application:
     """
     Create a new application for a competition.
@@ -37,15 +68,21 @@ def create_application(
     # Verify the competition is open
     validate_competition_open(competition, ApplicationAction.START)
 
+    # Validate organization if provided
+    if organization_id is not None:
+        _validate_organization_membership(db_session, organization_id, user)
+
     # Get default application name if not provided
     if application_name is None:
         application_name = competition.opportunity.opportunity_number
+
     # Create a new application
     application = Application(
         application_id=uuid.uuid4(),
         competition_id=competition_id,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
+        organization_id=organization_id,  # Set the organization ID if provided
     )
     db_session.add(application)
 
@@ -67,6 +104,7 @@ def create_application(
         extra={
             "application_id": application.application_id,
             "competition_id": competition_id,
+            "organization_id": organization_id,
         },
     )
 

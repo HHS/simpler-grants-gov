@@ -7,6 +7,7 @@ import {
   saveSearchHandler,
   updateSavedSearchHandler,
 } from "src/app/api/user/saved-searches/handler";
+import { fakeSearchParamDict } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
 
@@ -47,13 +48,7 @@ const fakeRequestForSavedSearch = (
   return {
     json: async () => {
       return Promise.resolve({
-        status: "forecasted,posted,archived,closed",
-        eligibility: "state_governments",
-        query: "simpler",
-        category: "recovery_act",
-        agency: "CPSC",
-        fundingInstrument: "cooperative_agreement",
-        sortby: "closeDateAsc",
+        ...fakeSearchParamDict,
         ...saveSearchOverride,
         name:
           nameOverride === undefined ? "a very special search" : nameOverride,

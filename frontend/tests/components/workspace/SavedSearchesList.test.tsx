@@ -53,6 +53,8 @@ const fakeParamDisplayMapping = {
   category: "category",
   page: "page",
   sortby: "sortby",
+  closeDate: "closeDate",
+  costSharing: "costSharing",
 };
 
 describe("SavedSearchesList", () => {
