@@ -242,6 +242,18 @@ export const messages = {
       },
       updated: "Last updated",
     },
+    attachments: {
+      attachments: 'Attachments',
+      attachmentsInstructions: 'If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.',
+      attachedDocument: 'Attached document',
+      action: 'Action',
+      fileSize: 'File Size',
+      uploadDate: 'Upload date',
+      uploadBy: 'Upload by',
+      delete: 'Delete',
+      download: 'Download',
+      emptyTable: 'No attachments uploaded'
+    }
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",

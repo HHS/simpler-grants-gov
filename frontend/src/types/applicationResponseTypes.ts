@@ -1,6 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
 import { Competition } from "./competitionsResponseTypes";
+import { Attachment } from "./attachmentTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -15,6 +16,7 @@ export interface ApplicationFormDetail {
 }
 
 export interface ApplicationDetail {
+  application_attachments: Array<Attachment>;
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
