@@ -56,31 +56,6 @@ class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSc
     data = fields.Nested(ApplicationFormUpdateResponseDataSchema())
 
 
-class ApplicationFormGetResponseDataSchema(Schema):
-    application_form_id = fields.UUID()
-    application_id = fields.UUID()
-    form_id = fields.UUID()
-    application_response = fields.Dict()
-
-    application_form_status = fields.Enum(
-        ApplicationFormStatus,
-        metadata={"description": "Status indicating how much of a form has been filled out"},
-    )
-
-    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
-    updated_at = fields.DateTime(
-        metadata={"description": "When the application form was last updated"}
-    )
-
-    is_required = fields.Boolean(
-        metadata={"description": "Whether this form is required for the application"}
-    )
-
-
-class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
-    data = fields.Nested(ApplicationFormGetResponseDataSchema())
-
-
 class ApplicationUserSchema(Schema):
     """Schema for users associated with an application"""
 
@@ -132,6 +107,33 @@ class ApplicationAttachmentNoLinkSchema(Schema):
     updated_at = fields.DateTime(
         metadata={"description": "When the application attachment was last updated"}
     )
+
+
+class ApplicationFormGetResponseDataSchema(Schema):
+    application_form_id = fields.UUID()
+    application_id = fields.UUID()
+    form_id = fields.UUID()
+    application_response = fields.Dict()
+
+    application_form_status = fields.Enum(
+        ApplicationFormStatus,
+        metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
+    created_at = fields.DateTime(metadata={"description": "When the application form was created"})
+    updated_at = fields.DateTime(
+        metadata={"description": "When the application form was last updated"}
+    )
+
+    is_required = fields.Boolean(
+        metadata={"description": "Whether this form is required for the application"}
+    )
+
+    application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+
+
+class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())
 
 
 class ApplicationGetResponseDataSchema(Schema):
