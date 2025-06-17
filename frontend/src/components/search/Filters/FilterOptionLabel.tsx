@@ -24,10 +24,10 @@ export function FilterOptionLabel({
       )}
       {!!option.tooltip && (
         <InfoTooltip
-          text={<div className="text-wrap minw-15">{option.tooltip}</div>}
+          text={<div className="text-wrap">{option.tooltip}</div>}
           title={option.label}
           position="top"
-          wrapperClasses="margin-left-1 simpler-tooltip" // if we go with this custom implementation we can remove the `minw-15` above
+          wrapperClasses="margin-left-1 simpler-tooltip"
         />
       )}
     </>
