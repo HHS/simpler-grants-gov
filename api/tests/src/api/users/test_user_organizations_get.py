@@ -22,12 +22,10 @@ class TestUserOrganizationsGet:
 
         # Create SAM.gov entities
         sam_gov_entity_1 = SamGovEntityFactory.create(
-            uei="TEST123456789",
             legal_business_name="Test Organization LLC",
             expiration_date=date(2025, 12, 31),
         )
         sam_gov_entity_2 = SamGovEntityFactory.create(
-            uei="TEST987654321",
             legal_business_name="Another Test Org Inc",
             expiration_date=date(2026, 6, 30),
         )
@@ -60,7 +58,7 @@ class TestUserOrganizationsGet:
         org_data_1 = organizations[0]
         assert org_data_1["organization_id"] == str(org_1.organization_id)
         assert org_data_1["is_organization_owner"] is True
-        assert org_data_1["sam_gov_entity"]["uei"] == "TEST123456789"
+        assert org_data_1["sam_gov_entity"]["uei"] == sam_gov_entity_1.uei
         assert org_data_1["sam_gov_entity"]["legal_business_name"] == "Test Organization LLC"
         assert org_data_1["sam_gov_entity"]["expiration_date"] == "2025-12-31"
 
@@ -68,7 +66,7 @@ class TestUserOrganizationsGet:
         org_data_2 = organizations[1]
         assert org_data_2["organization_id"] == str(org_2.organization_id)
         assert org_data_2["is_organization_owner"] is False
-        assert org_data_2["sam_gov_entity"]["uei"] == "TEST987654321"
+        assert org_data_2["sam_gov_entity"]["uei"] == sam_gov_entity_2.uei
         assert org_data_2["sam_gov_entity"]["legal_business_name"] == "Another Test Org Inc"
         assert org_data_2["sam_gov_entity"]["expiration_date"] == "2026-06-30"
 
