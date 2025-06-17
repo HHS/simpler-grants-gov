@@ -1,0 +1,22 @@
+[{
+  "application_attachment_id": "string",
+  "created_at": "string",
+  "file_name": "Lorem ipsum dolor sit amet",
+  "file_size_bytes": 123456789,
+  "mime_type": "string",
+  "updated_at": "1/9/2025"
+}, {
+  "application_attachment_id": "string",
+  "created_at": "string",
+  "file_name": "consectetur adipiscing elit",
+  "file_size_bytes": 456287913,
+  "mime_type": "string",
+  "updated_at": "5/3/2025"
+},{
+  "application_attachment_id": "string",
+  "created_at": "string",
+  "file_name": "Donec euismod interdum neque",
+  "file_size_bytes": 987654321,
+  "mime_type": "string",
+  "updated_at": "3/19/2025"
+}]

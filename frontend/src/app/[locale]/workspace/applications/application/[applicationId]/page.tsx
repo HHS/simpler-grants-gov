@@ -14,6 +14,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
+import { AttachmentsCard } from "src/components/application/AttachmentsCard";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const { applicationId } = await params;
   let forms = [];
   let applicationForms = [];
+  let attachments = [];
   let opportunity = {} as OpportunityDetail;
 
   try {
@@ -53,6 +55,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     forms = response.data.competition.competition_forms;
     applicationForms = response.data.application_forms;
+    attachments = response.data.application_attachments;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
       String(opportunityId),
@@ -87,6 +90,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           applicationForms={applicationForms}
           applicationId={applicationId}
         />
+        <AttachmentsCard attachments={attachments} />
       </GridContainer>
     </>
   );
