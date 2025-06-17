@@ -88,9 +88,7 @@ def upsert_application_attachment(
     application_attachment.file_size_bytes = file_size_bytes
     application_attachment.user = user
 
-    # Only add to session if it's a new attachment (checking if it already exists in the session)
-    if application_attachment not in db_session:
-        db_session.add(application_attachment)
+    db_session.add(application_attachment)
 
     logger.info(
         "Created/updated application attachment",
