@@ -23,7 +23,6 @@ class CreateOrgsFromSamEntityTask(Task):
 
     def run_task(self) -> None:
         with self.db_session.begin():
-            # TODO - prefetch selectinload
             sam_gov_entities = self.db_session.execute(
                 select(SamGovEntity, LinkExternalUser)
                 .join(LinkExternalUser, SamGovEntity.ebiz_poc_email == LinkExternalUser.email)
@@ -67,7 +66,7 @@ class CreateOrgsFromSamEntityTask(Task):
 
         # If the user is not already a member of the organization, add them
         organization_user = None
-        for org_user in user.organizations:  # TODO - use filter or something
+        for org_user in user.organizations:
             if org_user.organization_id == organization.organization_id:
                 organization_user = org_user
                 break
