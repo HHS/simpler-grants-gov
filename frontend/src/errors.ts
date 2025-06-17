@@ -193,6 +193,9 @@ function convertSearchInputSetsToArrays(
     costSharing: searchInputs.costSharing
       ? Array.from(searchInputs.costSharing)
       : [],
+    topLevelAgency: searchInputs.topLevelAgency
+      ? Array.from(searchInputs.topLevelAgency)
+      : [],
     query: searchInputs.query,
     sortby: searchInputs.sortby,
     page: searchInputs.page,
