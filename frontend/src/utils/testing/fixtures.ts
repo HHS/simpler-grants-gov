@@ -155,6 +155,64 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+export const filterOptionsWithChildren = [
+  {
+    id: "AGNC",
+    label: "Top Level Agency",
+    value: "AGNC",
+    children: [
+      {
+        id: "AGNC-KID",
+        label: "Kid",
+        value: "AGNC-KID",
+      },
+      {
+        id: "AGNC-CHILD",
+        label: "Child",
+        value: "AGNC-CHILD",
+      },
+    ],
+  },
+  {
+    id: "DOC-NIST",
+    label: "National Institute of Standards and Technology",
+    value: "DOC-NIST",
+    children: [
+      {
+        id: "HI",
+        label: "Hello",
+        value: "HI",
+      },
+      {
+        id: "There",
+        label: "Again",
+        value: "There",
+      },
+    ],
+  },
+  {
+    id: "MOCK-NIST",
+    label: "Mational Institute",
+    value: "MOCK-NIST",
+  },
+  {
+    id: "MOCK-TRASH",
+    label: "Mational TRASH",
+    value: "MOCK-TRASH",
+    children: [
+      {
+        id: "TRASH",
+        label: "More TRASH",
+        value: "TRASH",
+      },
+    ],
+  },
+  {
+    id: "FAKE",
+    label: "Completely fake",
+    value: "FAKE",
+  },
+];
 
 export const fakeAttachments = [
   {

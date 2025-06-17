@@ -3,9 +3,8 @@
 import { debounce } from "lodash";
 import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
-import { getAgencyParent } from "src/utils/search/searchUtils";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -48,13 +47,6 @@ export function AgencyFilterContent({
     { leading: false, trailing: true },
   );
 
-  const isParentAgencySelected = useCallback(
-    (subAgencyCode: string): boolean => {
-      return topLevelQuery?.has(getAgencyParent(subAgencyCode));
-    },
-    [topLevelQuery],
-  );
-
   return (
     <>
       <div className="position-relative">
@@ -82,7 +74,6 @@ export function AgencyFilterContent({
           facetCounts={facetCounts}
           referenceOptions={allAgencies}
           topLevelQuery={topLevelQuery}
-          isParentSelected={isParentAgencySelected}
           queryParamKey={"agency"}
         />
       )}
