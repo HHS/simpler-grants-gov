@@ -4,178 +4,236 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
+from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedSearch
-from src.task.notifications.constants import NotificationReason
+from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
+from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.constants import Metrics, NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
-from src.util import datetime_util
+from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
-@pytest.fixture
-def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+def link_user_with_email(user, monkeypatch):
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
 
-@pytest.fixture(autouse=True)
-def clear_data(db_session):
-    """Clear all notification logs"""
-    cascade_delete_from_db_table(db_session, UserNotificationLog)
-    cascade_delete_from_db_table(db_session, Opportunity)
-    cascade_delete_from_db_table(db_session, UserSavedSearch)
+class TestOpportunityNotification:
 
+    @pytest.fixture
+    def email_notification_task(self, db_session, search_client, monkeypatch):
+        monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
+        monkeypatch.setenv("ENABLE_OPPORTUNITY_NOTIFICATIONS", "true")
+        monkeypatch.setenv("ENABLE_SEARCH_NOTIFICATIONS", "false")
+        monkeypatch.setenv("ENABLE_CLOSING_DATE_NOTIFICATIONS", "false")
 
-def test_opportunity_notifications(
-    cli_runner,
-    db_session,
-    search_client,
-    enable_factory_create,
-    user,
-    user_with_email,
-    caplog,
-):
-    """Test that notifications are sent for updated opportunities"""
-    # Create a saved opportunity that needs notification
-    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    saved_opportunity = factories.UserSavedOpportunityFactory.create(
-        user=user,
-        opportunity=opportunity,
-        last_notified_at=opportunity.updated_at - timedelta(days=1),
-    )
-    factories.OpportunityChangeAuditFactory.create(
-        opportunity=opportunity,
-        updated_at=saved_opportunity.last_notified_at + timedelta(minutes=1),
-    )
+        config = EmailNotificationConfig()
+        return EmailNotificationTask(db_session, search_client, config)
 
-    _clear_mock_responses()
+    @pytest.fixture(autouse=True)
+    def clear_data(self, db_session):
+        """Clear all notification logs"""
+        cascade_delete_from_db_table(db_session, UserNotificationLog)
+        cascade_delete_from_db_table(db_session, Opportunity)
+        cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
-    # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
-    task.run()
-    # Verify notification log was created
-    notification_logs = (
-        db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationReason.OPPORTUNITY_UPDATES)
-        .all()
-    )
-    assert len(notification_logs) == 1
-    assert notification_logs[0].user_id == user.user_id
+    @pytest.fixture
+    def user_with_email(self, db_session, user, monkeypatch):
+        return link_user_with_email(user, monkeypatch)
 
-    # Verify the log contains the correct metrics
-    log_records = [
-        r for r in caplog.records if "Successfully delivered notification to user" in r.message
-    ]
-    assert len(log_records) == 1
-    extra = log_records[0].__dict__
-    assert extra["user_id"] == user.user_id
-    assert extra["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+    def test_email_notifications_collection(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        user_with_email,
+        caplog,
+        monkeypatch,
+        email_notification_task,
+    ):
+        """Test that latest opportunity version is collected for each saved opportunity"""
+        # create a different user
+        user_2 = factories.UserFactory.create()
+        user_2 = link_user_with_email(user_2, monkeypatch)
 
+        # Create a saved opportunity that needs notification
+        opp_1 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
+        opp_2 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
+        opp_3 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
 
-def test_last_notified_at_updates(
-    cli_runner, db_session, search_client, enable_factory_create, user, user_with_email
-):
-    """Test that last_notified_at gets updated after sending notifications"""
-    # Create an opportunity that was updated after the last notification
-    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    saved_opp = factories.UserSavedOpportunityFactory.create(
-        user=user,
-        opportunity=opportunity,
-        last_notified_at=opportunity.updated_at - timedelta(days=1),
-    )
-    factories.OpportunityChangeAuditFactory.create(
-        opportunity=opportunity,
-        updated_at=saved_opp.last_notified_at + timedelta(minutes=1),
-    )
-    # Store the original notification time
-    original_notification_time = saved_opp.last_notified_at
+        # create old versions  for opps
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_1,
+            # created_at=saved_opp_3.last_notified_at - timedelta(minutes=5)
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_2,
+            # created_at=saved_opp_2.last_notified_at - timedelta(minutes=5)
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_3,
+            # created_at=saved_opp_3.last_notified_at - timedelta(minutes=5)
+        )
 
-    # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
-    task.run()
+        # User saved opportunity records
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp_1,
+        )
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp_2,
+        )
 
-    # Refresh the saved opportunity from the database
-    db_session.refresh(saved_opp)
+        factories.UserSavedOpportunityFactory.create(
+            user=user_2,
+            opportunity=opp_1,
+        )
 
-    # Verify last_notified_at was updated
-    assert saved_opp.last_notified_at > original_notification_time
-    # Verify last_notified_at is now after the opportunity's updated_at
-    assert saved_opp.last_notified_at > opportunity.updated_at
+        factories.UserSavedOpportunityFactory.create(
+            user=user_2,
+            opportunity=opp_3,
+        )
 
+        # create new versions for opps
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=60)
+        )
+        opp_1_v_2 = factories.OpportunityVersionFactory.create(
+            opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=160)
+        )
+        opp_2_v_1 = factories.OpportunityVersionFactory.create(
+            opportunity=opp_2, created_at=opp_2.created_at + timedelta(minutes=60)
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=60)
+        )
+        opp_3_v_2 = factories.OpportunityVersionFactory.create(
+            opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=80)
+        )
 
-def test_notification_log_creation(
-    cli_runner,
-    db_session,
-    search_client,
-    enable_factory_create,
-    user,
-    user_with_email,
-):
-    """Test that notification logs are created when notifications are sent"""
-    # Create a saved opportunity that needs notification
-    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    summary = factories.OpportunitySummaryFactory.create(
-        opportunity=opportunity,
-        close_date=datetime_util.utcnow() + timedelta(days=21),
-    )
-    factories.CurrentOpportunitySummaryFactory.create(
-        opportunity=opportunity, opportunity_summary=summary
-    )
-    saved_opportunity = factories.UserSavedOpportunityFactory.create(
-        user=user,
-        opportunity=opportunity,
-        last_notified_at=opportunity.updated_at - timedelta(days=1),
-    )
+        _clear_mock_responses()
 
-    factories.OpportunityChangeAuditFactory.create(
-        opportunity=opportunity,
-        updated_at=saved_opportunity.last_notified_at + timedelta(minutes=1),
-    )
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
 
-    # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
-    task.run()
+        results = task._get_latest_opportunity_versions()
 
-    # Verify notification log was created
-    notification_logs = db_session.query(UserNotificationLog).all()
-    assert len(notification_logs) == 1
+        # assert that only the latest version is picked up for each user_saved_opportunity, opportunity version pairs
+        assert len(results) == 4
 
-    log = notification_logs[0]
-    assert log.user_id == user.user_id
-    assert log.notification_reason == NotificationReason.OPPORTUNITY_UPDATES
+        for user_saved_opp, latest_opp_ver in results:
+            opp_id = user_saved_opp.opportunity_id
 
-    assert log.notification_sent is True
+            if opp_id == opp_1.opportunity_id:
+                assert latest_opp_ver == opp_1_v_2
+            elif opp_id == opp_2.opportunity_id:
+                assert latest_opp_ver == opp_2_v_1
+            elif opp_id == opp_3.opportunity_id:
+                assert latest_opp_ver == opp_3_v_2
 
+        # Run the notification task
+        email_notification_task.run()
 
-def test_no_notification_log_when_no_updates(
-    cli_runner,
-    db_session,
-    search_client,
-    enable_factory_create,
-    user,
-    user_with_email,
-):
-    """Test that no notification log is created when there are no updates"""
-    # Create a saved opportunity that doesn't need notification
-    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-    summary = factories.OpportunitySummaryFactory.create(
-        opportunity=opportunity,
-        close_date=datetime_util.utcnow() + timedelta(days=21),
-    )
-    factories.CurrentOpportunitySummaryFactory.create(
-        opportunity=opportunity, opportunity_summary=summary
-    )
-    factories.UserSavedOpportunityFactory.create(
-        user=user,
-        opportunity=opportunity,
-        last_notified_at=opportunity.updated_at + timedelta(minutes=1),  # After the update
-    )
+        # Verify notification log was created
+        notification_logs = (
+            db_session.query(UserNotificationLog)
+            .filter(
+                UserNotificationLog.notification_reason == NotificationReason.OPPORTUNITY_UPDATES
+            )
+            .all()
+        )
+        assert len(notification_logs) == 2
+        assert notification_logs[0].user_id == user.user_id
+        assert notification_logs[1].user_id == user_2.user_id
 
-    # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
-    task.run()
+        # Verify the log contains the correct metrics
+        log_records = [
+            r for r in caplog.records if "Successfully delivered notification to user" in r.message
+        ]
+        assert len(log_records) == 2
+        assert (
+            log_records[0].__dict__["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+        )
 
-    # Verify no notification log was created
-    notification_logs = db_session.query(UserNotificationLog).all()
-    assert len(notification_logs) == 0
+    def test_with_no_user_email_notification(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        email_notification_task,
+    ):
+        """Test that no notification is collected if the user has no linked email address."""
+        # Create a saved opportunity that needs notification
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.OpportunityVersionFactory.create(
+            opportunity=opportunity,
+        )
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opportunity,
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opportunity,
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+
+        results = task.collect_email_notifications()
+
+        assert len(results) == 0
+
+    def test_with_no_prior_version_email_collections(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        email_notification_task,
+    ):
+        """Test that no notification log is created when no prior version exist"""
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opportunity,
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        results = task.collect_email_notifications()
+
+        assert len(results) == 0
+        metrics = task.metrics
+        assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
+
+    def test_no_updates_email_collections(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        email_notification_task,
+    ):
+        """Test that no notification is collected when there are no opportunity updates."""
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        version = factories.OpportunityVersionFactory.create(opportunity=opportunity)
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opportunity,
+            last_notified_at=version.created_at + timedelta(minutes=1),
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+
+        results = task.collect_email_notifications()
+        assert len(results) == 0
