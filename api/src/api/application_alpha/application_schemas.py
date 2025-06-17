@@ -212,3 +212,15 @@ class ApplicationAttachmentGetResponseSchema(AbstractResponseSchema):
 
 class ApplicationAttachmentDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class ApplicationAttachmentUpdateRequestSchema(Schema):
+    file_attachment = fields.File(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The file to attach to an application"},
+    )
+
+
+class ApplicationAttachmentUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationAttachmentCreateSchema())
