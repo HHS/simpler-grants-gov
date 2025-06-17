@@ -1272,6 +1272,53 @@ paths:
       summary: Fetch an application attachment
       security:
       - ApiJwtAuth: []
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an attachment on an application
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationAttachmentUpdateRequest'
+      security:
+      - ApiJwtAuth: []
     delete:
       parameters:
       - in: path
@@ -3212,6 +3259,34 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAttachmentNoLink:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The MIME type / content-type of the file
+          example: application/pdf
+        file_size_bytes:
+          type: integer
+          description: The size of the attachment in bytes
+          example: 12340
+        created_at:
+          type: string
+          format: date-time
+          description: When the application attachment was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application attachment was last updated
     ApplicationFormGetResponseData:
       type: object
       properties:
@@ -3249,6 +3324,12 @@ components:
         is_required:
           type: boolean
           description: Whether this form is required for the application
+        application_attachments:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAttachmentNoLink'
     ApplicationUser:
       type: object
       properties:
@@ -3274,34 +3355,6 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntity'
           - type: 'null'
-    ApplicationAttachmentNoLink:
-      type: object
-      properties:
-        application_attachment_id:
-          type: string
-          format: uuid
-          description: The ID of the application attachment
-          example: 123e4567-e89b-12d3-a456-426614174000
-        file_name:
-          type: string
-          description: The name of the application attachment file
-          example: my_example.pdf
-        mime_type:
-          type: string
-          description: The MIME type / content-type of the file
-          example: application/pdf
-        file_size_bytes:
-          type: integer
-          description: The size of the attachment in bytes
-          example: 12340
-        created_at:
-          type: string
-          format: date-time
-          description: When the application attachment was created
-        updated_at:
-          type: string
-          format: date-time
-          description: When the application attachment was last updated
     ApplicationGetResponseData:
       type: object
       properties:
@@ -3852,6 +3905,30 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentGet'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAttachmentUpdateRequest:
+      type: object
+      properties:
+        file_attachment:
+          description: The file to attach to an application
+          type: string
+          format: binary
+      required:
+      - file_attachment
+    ApplicationAttachmentUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentCreate'
         status_code:
           type: integer
           description: The HTTP status code
