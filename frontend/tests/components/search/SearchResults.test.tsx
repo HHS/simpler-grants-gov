@@ -60,6 +60,7 @@ describe("SearchResults", () => {
           eligibility: new Set(),
           closeDate: new Set(),
           costSharing: new Set(),
+          topLevelAgency: new Set(),
         }}
         loadingMessage={""}
         searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}

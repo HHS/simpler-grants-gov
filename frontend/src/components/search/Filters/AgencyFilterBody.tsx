@@ -9,7 +9,7 @@ import {
   getSiblingOptionValues,
 } from "src/utils/search/searchUtils";
 
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import { SearchFilterAccordionProps } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
@@ -19,29 +19,33 @@ import SearchFilterSection from "src/components/search/SearchFilterAccordion/Sea
 interface AgencyFilterBodyProps extends SearchFilterAccordionProps {
   referenceOptions?: FilterOption[];
   topLevelQuery?: Set<string>;
-  isParentSelected?: (value: string) => boolean;
 }
 
 // can rename to NestedCheckboxFilterBody if we can generalize a bit more
 export function AgencyFilterBody({
   includeAnyOption,
   title,
-  defaultEmptySelection,
   filterOptions,
   query,
   facetCounts,
   referenceOptions,
   topLevelQuery,
-  isParentSelected = () => false,
 }: AgencyFilterBodyProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, setQueryParams } = useSearchParamUpdater();
+
+  const isParentAgencySelected = useCallback(
+    (subAgencyCode: string): boolean => {
+      return topLevelQuery?.has(getAgencyParent(subAgencyCode)) || false;
+    },
+    [topLevelQuery],
+  );
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const newParamValue = new Set(query);
     isChecked ? newParamValue.add(value) : newParamValue.delete(value);
     // happy path a normal checkbox experience
-    if (isChecked || !topLevelQuery || !isParentSelected(value)) {
+    if (isChecked || !topLevelQuery || !isParentAgencySelected(value)) {
       return updateQueryParams(newParamValue, "agency", queryTerm);
     }
     // handle unchecking a child box when top level parent is selected
@@ -71,7 +75,6 @@ export function AgencyFilterBody({
               title={title.toLowerCase()}
               checked={isNoneSelected}
               queryParamKey={"agency"}
-              defaultEmptySelection={defaultEmptySelection}
             />
           </li>
         )}
@@ -95,7 +98,7 @@ export function AgencyFilterBody({
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
                 facetCounts={facetCounts}
-                isParentSelected={isParentSelected}
+                isParentSelected={isParentAgencySelected}
               />
             ) : (
               <SearchFilterCheckbox

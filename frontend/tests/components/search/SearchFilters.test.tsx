@@ -90,6 +90,7 @@ describe("SearchFilters", () => {
       agency: new Set(),
       category: new Set(),
       opportunityStatus: new Set(),
+      topLevelAgency: new Set(),
       searchResultsPromise: Promise.resolve(fakeSearchAPIResponse),
     });
     render(component);
