@@ -1,13 +1,13 @@
 import logging
-import uuid
 from enum import StrEnum
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.db.models.entity_models import Organization, SamGovEntity
-from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
+from src.db.models.entity_models import SamGovEntity
+from src.db.models.user_models import LinkExternalUser, User
 from src.task.task import Task
+from src.util.sam_gov_utils import link_sam_gov_entity_if_not_exists
 
 logger = logging.getLogger(__name__)
 
@@ -37,50 +37,21 @@ class CreateOrgsFromSamEntityTask(Task):
     def link_sam_gov_entity_if_not_exists(self, sam_gov_entity: SamGovEntity, user: User) -> None:
         """Link a sam.gov entity record to the EBIZ POC (owner) through an organization record
 
-        This will potentially do the following:
-        * Create the organization if it does not exist
-        * Add the user to the organization if they aren't already
-        * Mark that UserOrganization record as the owner of the organization
-
-        Each of these steps is done independently, which means the following:
-        * If the EBIZ POC email changes on the sam.gov entity record, a new owner will be added
-        * If that owner was already in the org, they just get a new permission
-        * Any existing owner will NOT be removed
-        * If the organization, and owner are already setup, this will do nothing
+        This is a wrapper around the shared utility function that handles metrics tracking
+        for the task using the specific metric names expected by this task.
         """
         self.increment(self.Metrics.RECORDS_PROCESSED)
-        log_extra = {"sam_gov_entity_id": sam_gov_entity.sam_gov_entity_id, "user_id": user.user_id}
-        logger.info("Processing sam.gov entity record connection to user", extra=log_extra)
 
-        # If an organization does not already exist for the sam.gov entity
-        # create and associate it
-        organization = sam_gov_entity.organization
-        if organization is None:
-            self.increment(self.Metrics.NEW_ORGANIZATION_CREATED_COUNT)
-            organization = Organization(organization_id=uuid.uuid4(), sam_gov_entity=sam_gov_entity)
-            self.db_session.add(organization)
+        def increment_with_task_metrics(metric_name: str) -> None:
+            """Map generic metric names to task-specific ones"""
+            metric_mapping = {
+                "new_organization_created_count": self.Metrics.NEW_ORGANIZATION_CREATED_COUNT,
+                "new_organization_user_created_count": self.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT,
+                "new_organization_owner_count": self.Metrics.NEW_ORGANIZATION_OWNER_COUNT,
+            }
+            if metric_name in metric_mapping:
+                self.increment(metric_mapping[metric_name])
 
-            log_extra["organization_id"] = organization.organization_id
-            logger.info("Created new organization attached to sam.gov entity", extra=log_extra)
-        else:
-            log_extra["organization_id"] = organization.organization_id
-
-        # If the user is not already a member of the organization, add them
-        organization_user = None
-        for org_user in user.organizations:  # TODO - use filter or something
-            if org_user.organization_id == organization.organization_id:
-                organization_user = org_user
-                break
-
-        if organization_user is None:
-            self.increment(self.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT)
-            organization_user = OrganizationUser(organization=organization, user=user)
-            self.db_session.add(organization_user)
-            logger.info("Added user to organization", extra=log_extra)
-
-        # As we know they're the ebiz POC from the initial query,
-        # make them the owner if they aren't already
-        if organization_user.is_organization_owner is not True:
-            self.increment(self.Metrics.NEW_ORGANIZATION_OWNER_COUNT)
-            organization_user.is_organization_owner = True
-            logger.info("Made user an owner of the organization", extra=log_extra)
+        link_sam_gov_entity_if_not_exists(
+            self.db_session, sam_gov_entity, user, increment_with_task_metrics
+        )
