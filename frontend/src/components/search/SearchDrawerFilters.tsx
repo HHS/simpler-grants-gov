@@ -10,9 +10,12 @@ import { Suspense } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
+import { RadioButtonFilter } from "./Filters/RadioButtonFilter";
 import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
+  closeDateOptions,
+  costSharingOptions,
   eligibilityOptions,
   fundingOptions,
   statusOptions,
@@ -26,8 +29,15 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const { eligibility, fundingInstrument, category, status, agency } =
-    searchParams;
+  const {
+    eligibility,
+    fundingInstrument,
+    category,
+    status,
+    agency,
+    closeDate,
+    costSharing,
+  } = searchParams;
 
   const agenciesPromise = Promise.all([
     getAgenciesForFilterOptions(),
@@ -93,6 +103,20 @@ export async function SearchDrawerFilters({
         queryParamKey={"category"}
         title={t("accordion.titles.category")}
         facetCounts={facetCounts?.funding_category || {}}
+      />
+      <RadioButtonFilter
+        filterOptions={closeDateOptions}
+        query={closeDate}
+        queryParamKey={"closeDate"}
+        title={t("accordion.titles.closeDate")}
+        facetCounts={facetCounts?.close_date}
+      />
+      <RadioButtonFilter
+        filterOptions={costSharingOptions}
+        query={costSharing}
+        queryParamKey={"costSharing"}
+        title={t("accordion.titles.costSharing")}
+        facetCounts={facetCounts?.is_cost_sharing}
       />
     </>
   );

@@ -288,3 +288,21 @@ variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
 }
+
+variable "pinpoint_app_id" {
+  type        = string
+  description = "Pinpoint App ID"
+  default     = ""
+}
+
+variable "hosted_zone" {
+  type        = string
+  description = "The domain where SES is set up for emails"
+  default     = null
+}
+
+variable "ses_configuration_set" {
+  type        = string
+  description = "The configuration set (dashed-domain-name) where SES is set up for emails"
+  default     = null
+}

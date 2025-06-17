@@ -3,10 +3,10 @@
 
 * @mdragon # project lead
 
-/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @freddieyebra @joshtonava @mdragon @myduong-navapbc @widal001 # everyone
+/documentation/  @acouch @andycochran @btabaska @chouinar @doug-s-nava @freddieyebra @joshtonava @mdragon @myduong-navapbc @widal001 # everyone
 
-/analytics/               @acouch @coilysiren @freddieyebra @widal001
-/documentation/analytics/ @acouch @coilysiren @freddieyebra @widal001
+/analytics/               @acouch @freddieyebra @widal001
+/documentation/analytics/ @acouch @freddieyebra @widal001
 
 /api/               @chouinar @freddieyebra @mdragon @joshtonava
 /documentation/api/ @chouinar @freddieyebra @mdragon @joshtonava
@@ -14,9 +14,9 @@
 /frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
 /documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
 
-/infra/                    @acouch @coilysiren @mdragon
-/infra/nofos/              @acouch @coilysiren @mdragon @pcraig3
-/documentation/infra/      @acouch @coilysiren @mdragon
-/.github/                  @acouch @coilysiren @mdragon
-/.github/workflows/*nofos* @acouch @coilysiren @mdragon @pcraig3
-/bin/                      @acouch @coilysiren @mdragon
+/infra/                    @acouch @mdragon @joshtonava @chouinar
+/infra/nofos/              @acouch @mdragon @pcraig3 @joshtonava @chouinar
+/documentation/infra/      @acouch @mdragon @joshtonava @chouinar
+/.github/                  @acouch @mdragon @joshtonava @chouinar
+/.github/workflows/*nofos* @acouch @mdragon @pcraig3 @joshtonava @chouinar
+/bin/                      @acouch @mdragon @joshtonava @chouinar

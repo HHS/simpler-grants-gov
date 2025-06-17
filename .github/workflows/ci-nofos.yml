@@ -27,7 +27,7 @@ jobs:
           repository: HHS/simpler-grants-pdf-builder
           ref: ${{ inputs.version || 'main' }}
 
-      - name: Build docker image
+      - name: Build Docker container DEV
         run: make build
 
       - name: Run tests
@@ -36,7 +36,10 @@ jobs:
       - name: Save commit hash to file
         run: git rev-parse HEAD > /tmp/commit-hash.txt
 
-      - name: Save built image to file
+      - name: Build Docker container PROD
+        run: make build IS_PROD_ARG=1
+
+      - name: Save prod container image to file
         run: docker save nofos:latest > /tmp/docker-image.tar
 
       - name: Cache commit hash
@@ -45,7 +48,7 @@ jobs:
           path: /tmp/commit-hash.txt
           key: nofos-commit-${{ github.sha }}-${{ github.run_id }}
 
-      - name: Cache Docker image
+      - name: Cache Docker image PROD
         uses: actions/cache/save@v4
         with:
           path: /tmp/docker-image.tar

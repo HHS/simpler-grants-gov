@@ -35,10 +35,13 @@ export const searchFetcherParams: QueryParamData = {
   agency: new Set(),
   category: new Set(),
   eligibility: new Set(),
+  closeDate: new Set(),
+  costSharing: new Set(),
   query: "research",
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
+  andOr: "OR",
 };
 
 export const arbitrarySearchPagination = {
@@ -102,6 +105,12 @@ export const fakeFacetCounts = {
   },
   funding_category: {
     arbitraryKey: 1,
+  },
+  close_date: {
+    arbitraryKey: 1,
+  },
+  is_cost_sharing: {
+    true: 1,
   },
 };
 
@@ -195,3 +204,14 @@ export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
     agency_id: 1,
   },
 ];
+
+export const fakeSearchParamDict = {
+  status: "forecasted,posted,archived,closed",
+  eligibility: "state_governments",
+  query: "simpler",
+  category: "recovery_act",
+  agency: "CPSC",
+  fundingInstrument: "cooperative_agreement",
+  andOr: "OR",
+  sortby: "closeDateAsc",
+};

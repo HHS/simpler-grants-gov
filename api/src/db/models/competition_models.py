@@ -294,6 +294,11 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
 
+    @property
+    def application_attachments(self) -> list["ApplicationAttachment"]:
+        """Property function to access application attachments"""
+        return self.application.application_attachments
+
 
 class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_attachment"
@@ -304,6 +309,9 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
 
     application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
     application: Mapped[Application] = relationship(Application)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), nullable=False)
+    user: Mapped["User"] = relationship("User")
 
     file_location: Mapped[str]
     file_name: Mapped[str]

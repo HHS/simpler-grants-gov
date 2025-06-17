@@ -22,3 +22,4 @@ output "service_endpoint" {
 output "service_name" {
   value = local.service_config.service_name
 }
+

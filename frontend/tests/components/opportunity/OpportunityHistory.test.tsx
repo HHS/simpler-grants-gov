@@ -25,7 +25,7 @@ const mockSummary = {
 
 describe("OpportunityHistory", () => {
   it("renders history section with dates formatted correctly", () => {
-    render(<OpportunityHistory summary={mockSummary} />);
+    render(<OpportunityHistory status="posted" summary={mockSummary} />);
 
     expect(screen.getByText("history")).toBeInTheDocument();
 
@@ -40,7 +40,7 @@ describe("OpportunityHistory", () => {
   });
 
   it("calls formatDate for date fields", () => {
-    render(<OpportunityHistory summary={mockSummary} />);
+    render(<OpportunityHistory status="posted" summary={mockSummary} />);
 
     // Check that formatDate is called with the right dates
     expect(formatDate).toHaveBeenCalledWith("2024-01-15");
@@ -50,6 +50,7 @@ describe("OpportunityHistory", () => {
   it("displays correct defaults when null values are present", () => {
     render(
       <OpportunityHistory
+        status="posted"
         summary={
           {
             post_date: null,

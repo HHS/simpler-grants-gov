@@ -1,5 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
 import {
   FieldErrors,
@@ -434,10 +435,11 @@ describe("getApplicationResponse", () => {
       {
         application_form_id: "test",
         application_id: "test",
+        application_form_status: "complete",
         application_response: { test: "test" },
         form_id: "test",
       },
-    ];
+    ] as ApplicationFormDetail[];
 
     const result = getApplicationResponse(forms, "test");
 
