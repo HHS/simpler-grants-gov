@@ -16,9 +16,9 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.entity_models import SamGovEntity, SamGovEntityImportType
 from src.db.models.sam_extract_models import SamExtractFile
-from src.task import task_blueprint
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
+from src.task.task_blueprint import task_blueprint
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
@@ -65,11 +65,11 @@ class ProcessSamExtractsTask(Task):
         ENTITY_UPDATED_COUNT = "entity_updated_count"
         ENTITY_NO_OP_COUNT = "entity_no_op_count"
 
-        # TODO - a way of marking whether we processed monthly and/or daily extracts
-        # so we can separate the metrics a bit
+        EXTRACTS_PROCESSED_COUNT = "extracts_processed_count"
+        MONTHLY_EXTRACT_PROCESSED_COUNT = "monthly_extract_processed_count"
+        DAILY_EXTRACT_PROCESSED_COUNT = "daily_extract_processed_count"
 
     def run_task(self) -> None:
-        print("hello")
         with self.db_session.begin():
             # Determine which extracts to process
             extracts_to_process = self.get_extracts_to_process()
@@ -102,7 +102,10 @@ class ProcessSamExtractsTask(Task):
                         sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
                     )
 
-                # TODO - what do we do with delete/expired daily records?
+                # TODO in ticket #4795 - we'll handle deleted/deactivated & expired
+                logger.info(
+                    "Finished loading records to DB for Sam.gov extract", extra=extract_log_extra
+                )
 
                 # Mark extract as processed
                 sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
@@ -122,7 +125,14 @@ class ProcessSamExtractsTask(Task):
     def process_extract(
         self, sam_extract_file: SamExtractFile, extract_log_extra: dict
     ) -> SamGovEntityContainer:
+        """Process an extract file from sam.gov, pulling all entities out of it"""
+
         logger.info("Processing sam.gov extract file", extra=extract_log_extra)
+        self.increment(self.Metrics.EXTRACTS_PROCESSED_COUNT)
+        if sam_extract_file.extract_type == SamGovExtractType.MONTHLY:
+            self.increment(self.Metrics.MONTHLY_EXTRACT_PROCESSED_COUNT)
+        else:
+            self.increment(self.Metrics.DAILY_EXTRACT_PROCESSED_COUNT)
 
         with file_util.open_stream(sam_extract_file.s3_path, mode="rb") as extract_file:
             with zipfile.ZipFile(extract_file) as extract_zip:
@@ -137,15 +147,16 @@ class ProcessSamExtractsTask(Task):
                 return self.process_dat(file_bytes.decode("utf-8"), extract_log_extra)
 
     def process_dat(self, dat_text: str, extract_log_extra: dict) -> SamGovEntityContainer:
-
+        """Process the text of the dat file from the sam.gov extract"""
         container = SamGovEntityContainer()
-
         lines = dat_text.split("\n")
-        # TODO - do something with this regarding validation
-        header_line = lines[0]
-        footer_line = lines[-1]
 
-        # Iterate over everything but the header and footer
+        # We need at least two lines (header/footer) for the file to be valid
+        if len(lines) < 2:
+            raise Exception("Invalid DAT file, doesn't contain any records")
+
+        # The first and last line of the file are a header + footer
+        # with some counts - so skip those and parse the others.
         for line in lines[1:-1]:
             self.increment(self.Metrics.ROWS_PROCESSED_COUNT)
             tokens = line.split("|")
@@ -170,7 +181,7 @@ class ProcessSamExtractsTask(Task):
             1 - Deleted/Deactivated Record - Send UEI(SAM), EFT INDICATOR, CAGE Code, DODAAC, SAM Extract Code, Purpose of Registration
             2 - New Active Record - Send the Complete Record.
             3 - Updated Active Record - Send the Complete Record.
-            4 - Expired Record - Send UEI(SAM), EFT INDICATOR, CAGE Code, DODAAC, SAM Extract Code, Purpose of Registration"
+            4 - Expired Record - Send UEI(SAM), EFT INDICATOR, CAGE Code, DODAAC, SAM Extract Code, Purpose of Registration
             """
             if extract_code == "1":
                 logger.info("Record marked as deleted - skipping parsing of row", extra=log_extra)
@@ -185,8 +196,8 @@ class ProcessSamExtractsTask(Task):
 
             try:
                 logger.info("Processing sam.gov entity record", extra=log_extra)
-                self.increment(self.Metrics.ROWS_CONVERTED_COUNT)
                 sam_gov_entity = build_sam_gov_entity(tokens)
+                self.increment(self.Metrics.ROWS_CONVERTED_COUNT)
                 container.processed_entities.append(sam_gov_entity)
             except ValueError:
                 logger.exception(
@@ -208,6 +219,10 @@ class ProcessSamExtractsTask(Task):
 
         log_extra = {
             "uei": sam_gov_entity.uei,
+            "last_update_date": sam_gov_entity.last_update_date,
+            "last_update_date_in_existing_record": (
+                existing_sam_gov_entity.last_update_date if existing_sam_gov_entity else None
+            ),
         } | extract_log_extra
 
         import_type = (
@@ -260,6 +275,7 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
     registration_expiration_date = get_token_value(
         tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False
     )
+    # NOTE: Email can be null in rare cases
     ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL)
     ebiz_first_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_FIRST_NAME)
     ebiz_last_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_LAST_NAME)
@@ -289,6 +305,11 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
 
 
 def get_token_value(tokens: list[str], index: int, can_be_blank: bool = True) -> str:
+    """Fetch a value from a list of sam.gov entity tokens
+
+    Indexes passed in are decreased by 1 as sam.gov's docs
+    start counting from 1.
+    """
     actual_index = index - 1
 
     if actual_index > len(tokens):
@@ -303,11 +324,19 @@ def get_token_value(tokens: list[str], index: int, can_be_blank: bool = True) ->
 
 
 def convert_date(date_str: str) -> date:
-    # TODO - what if the date is malformed?
+    """Convert a date string to a date object from format YYYYMMDD"""
+    # Note if the text passed in isn't the right format, it will raise a ValueError
     return datetime.strptime(date_str, "%Y%m%d").date()
 
 
 def convert_debt_subject_to_offset(value_str: str) -> bool:
+    """Convert whether the entity has debt subject to offset, details copied from data dictionary
+
+    This flag set to Yes (Y) indicates that the registrant has been determined to have
+    a delinquent obligation owed to the U.S. Federal Government as shown by records at the Department of the Treasury.
+    No (N) means the Treasury Department found no delinquent obligation.
+    A non-entry [-] indicates that the registrant has not yet been verified with the treasury.
+    """
     if value_str == "Y":
         return True
     if value_str == "N":
@@ -315,13 +344,19 @@ def convert_debt_subject_to_offset(value_str: str) -> bool:
     if value_str == "":
         return False
 
-    raise ValueError(f"Convert debt subject to offset has unexpected value: {value_str}")
+    raise ValueError(f"Debt subject to offset has unexpected value: {value_str}")
 
 
 def convert_exclusion_status_flag(value_str: str) -> bool:
+    """Convert the entity exclusion status flag, details copied from extract mapping doc:
+
+    This flag indicates whether the entity has an active exclusion record.
+    If this flag is set to “D”, this will indicate that the registrant has an exclusion record.
+    A null value indicates that this entity does not have an active exclusion record.
+    """
     if value_str == "D":
         return True
-    # TODO - document
+
     return False
 
 

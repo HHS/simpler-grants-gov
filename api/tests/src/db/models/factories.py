@@ -2474,8 +2474,8 @@ class SamExtractFileFactory(BaseFactory):
 
     extract_type = SamGovExtractType.MONTHLY
     extract_date = factory.Faker("date_between", start_date="-6d", end_date="-1d")
-    filename = ""  # TODO
-    s3_path = ""  # TODO
+    filename = factory.Faker("file_name", extension="zip")
+    s3_path = "s3://bucket/key"  # If you want a valid s3 path, pass it in yourself
     processing_status = SamGovProcessingStatus.PENDING
 
 
