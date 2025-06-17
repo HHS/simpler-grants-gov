@@ -37,6 +37,7 @@ export const searchFetcherParams: QueryParamData = {
   eligibility: new Set(),
   closeDate: new Set(),
   costSharing: new Set(),
+  topLevelAgency: new Set(),
   query: "research",
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
