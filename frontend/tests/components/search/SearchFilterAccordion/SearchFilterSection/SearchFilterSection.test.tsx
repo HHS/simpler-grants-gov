@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
@@ -20,6 +21,7 @@ jest.mock(
 const mockSetQueryParam = jest.fn();
 
 const defaultProps = {
+  queryParamKey: "agency" as ValidSearchQueryParam,
   option: {
     id: "1",
     label: "Option 1",
@@ -120,6 +122,9 @@ describe("SearchFilterSection", () => {
         },
       ],
       currentSelections: new Set(""),
+      topLevelQuery: undefined,
+      topLevelQueryParamKey: undefined,
+      topLevelQueryValue: "some value",
     });
   });
 });
