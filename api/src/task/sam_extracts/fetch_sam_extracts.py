@@ -25,7 +25,6 @@ from src.util import datetime_util
 logger = logging.getLogger(__name__)
 
 
-
 @task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
 @ecs_background_task("fetch-sam-extracts")
 @flask_db.with_db_session()
