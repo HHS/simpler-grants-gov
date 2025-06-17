@@ -47,6 +47,7 @@ describe("AgencyFilterContent", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -60,6 +61,7 @@ describe("AgencyFilterContent", () => {
   it("renders the TextInput and CheckboxFilterBody with all agencies by default", () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -74,6 +76,7 @@ describe("AgencyFilterContent", () => {
   it("calls agencySearch when user types in the TextInput", async () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -91,6 +94,7 @@ describe("AgencyFilterContent", () => {
   it("shows search results returned by agencySearch", async () => {
     const { rerender } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -102,6 +106,7 @@ describe("AgencyFilterContent", () => {
 
     rerender(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -121,6 +126,7 @@ describe("AgencyFilterContent", () => {
     mockAgencySearch.mockResolvedValue([]);
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -138,6 +144,7 @@ describe("AgencyFilterContent", () => {
   it("restores all agencies when input is cleared", async () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -165,6 +172,7 @@ describe("AgencyFilterContent", () => {
     mockAgencySearch.mockRejectedValue(new Error("Network error"));
     const { rerender } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -176,6 +184,7 @@ describe("AgencyFilterContent", () => {
 
     rerender(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}

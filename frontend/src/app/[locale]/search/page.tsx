@@ -43,8 +43,15 @@ function Search({ searchParams, params }: SearchPageProps) {
 
   const convertedSearchParams =
     convertSearchParamsToProperTypes(resolvedSearchParams);
-  const { agency, category, eligibility, fundingInstrument, query, status } =
-    convertedSearchParams;
+  const {
+    agency,
+    category,
+    eligibility,
+    fundingInstrument,
+    query,
+    status,
+    topLevelAgency,
+  } = convertedSearchParams;
 
   if (!("page" in resolvedSearchParams)) {
     resolvedSearchParams.page = "1";
@@ -78,6 +85,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                   category={category}
                   fundingInstrument={fundingInstrument}
                   agency={agency}
+                  topLevelAgency={topLevelAgency}
                   searchResultsPromise={searchResultsPromise}
                 />
               </ContentDisplayToggle>

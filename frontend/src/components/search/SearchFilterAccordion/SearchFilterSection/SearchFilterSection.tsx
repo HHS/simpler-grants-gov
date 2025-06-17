@@ -1,6 +1,7 @@
 "use client";
 
 import { FilterOptionWithChildren } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 
 import { AllOptionCheckbox } from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
@@ -12,6 +13,10 @@ interface SearchFilterSectionProps {
   query: Set<string>;
   facetCounts?: { [key: string]: number };
   referenceOption?: FilterOptionWithChildren;
+  topLevelQuery?: Set<string>;
+  topLevelQueryParamKey?: string;
+  isParentSelected?: (value: string) => boolean;
+  queryParamKey: ValidSearchQueryParam;
 }
 
 const SearchFilterSection = ({
@@ -21,6 +26,10 @@ const SearchFilterSection = ({
   query,
   facetCounts,
   referenceOption,
+  topLevelQuery,
+  topLevelQueryParamKey,
+  queryParamKey,
+  isParentSelected = () => false,
 }: SearchFilterSectionProps) => {
   return (
     <>
@@ -28,11 +37,14 @@ const SearchFilterSection = ({
       <div className="padding-y-1">
         <AllOptionCheckbox
           title={option.label}
-          queryParamKey="agency"
+          queryParamKey={queryParamKey}
           childOptions={
             referenceOption ? referenceOption.children : option.children
           }
           currentSelections={query}
+          topLevelQueryParamKey={topLevelQueryParamKey}
+          topLevelQuery={topLevelQuery}
+          topLevelQueryValue={option.value}
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
           {option.children?.map((child) => (
@@ -43,6 +55,7 @@ const SearchFilterSection = ({
                 updateCheckedOption={updateCheckedOption}
                 accordionTitle={accordionTitle}
                 facetCounts={facetCounts}
+                parentSelected={isParentSelected(option.value)}
               />
             </li>
           ))}
