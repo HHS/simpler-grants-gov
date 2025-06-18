@@ -129,6 +129,7 @@ export const messages = {
       agency: "Agency: ",
       assistanceListings: "Assistance Listings: ",
       lastUpdated: "Last Updated: ",
+      versionHistory: "View Version History on Grants.gov",
     },
     description: {
       title: "Description",
