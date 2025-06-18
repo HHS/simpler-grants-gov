@@ -62,7 +62,7 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
         assistanceListings={opportunityData.opportunity_assistance_listings}
         assistanceListingsText={t("assistanceListings")}
       />
-      <div className="tablet-lg:font-sans-2xs display-flex">
+      <div className="tablet-lg:font-sans-2xs display-flex tablet:flex-row flex-column">
         <div className="flex-2">{lastUpdated(opportunityData.updated_at)}</div>
         <div className="flex-3">
           <a
