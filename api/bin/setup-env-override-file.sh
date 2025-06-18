@@ -7,11 +7,17 @@
 # Examples:
 #   ./setup-env-override-file.sh
 #   ./setup-env-override-file.sh --recreate
+#   ./setup-env-override-file.sh --recreate --setup-soap
+#   ./setup-env-override-file.sh --setup-soap
 #
 
 set -o errexit -o pipefail
 
 PROGRAM_NAME=$(basename "$0")
+OVERRIDE_FILE="override.env"
+SOAP_CERT_FOLDER_PATH=$HOME/Downloads/grants_s2s_soap_certs/localsetup/
+APPLICANTS_BASE_CERT_NAME='staging_applicants_soap_api'
+GRANTORS_BASE_CERT_NAME='staging_grantors_soap_api'
 
 CYAN='\033[96m'
 GREEN='\033[92m'
@@ -21,6 +27,7 @@ END='\033[0m'
 USAGE="Usage: $PROGRAM_NAME [OPTION]
 
   --recreate         Recreate the override.env file, fully overwriting any existing file
+  --setup-soap       Setup keys for testing proxy locally against GG training environment
 "
 
 main() {
@@ -30,31 +37,50 @@ main() {
   do
     if [ "$arg" == "--recreate" ]; then
       recreate=1
+    elif [ "$arg" == "--setup-soap" ]; then
+      setup_soap=1
     else
-      echo "$USAGE"
+      echo -e "\nInvalid argument $arg\n\n$USAGE"
       exit 1
     fi
   done
 
-  OVERRIDE_FILE="override.env"
+  # If --recreate not specified and override file exists, dont recreate.
+  # Otherwise, if --recreate specified or override file does not exist, create it.
+  if [ ! $recreate ] && [ -f "$OVERRIDE_FILE" ]; then
+    print_log "override.env already exists, not recreating"
 
-  if [ -f "$OVERRIDE_FILE" ] ; then
-    if [ $recreate ] ; then
-      print_log "Recreating existing override.env file"
-    else
-      print_log "override.env already exists, not recreating"
-      exit 0
+    # If --setup-soap was passed without --recreate, we will append to the
+    # existing override.env file only if the SOAP_AUTH_CONTENT var is not already set.
+    if [ $setup_soap ]; then
+      setup_soap_auth
     fi
+    exit 0
   fi
+
+  print_log "Recreating existing override.env file"
 
   # Delete any key files that may be leftover from a prior run
   cleanup_files
 
+  # Write the new override file.
+  write_override
+
+  # You can add methods to append to override.env here
+
+  # Always append soap auth to override when --recreate specified override created.
+  setup_soap_auth
+
+  # Cleanup all keys generated in this run
+  cleanup_files
+}
+
+write_override() {
   # Generate RSA keys
   # note ssh-keygen generates a different format for
   # the public key so we run it through openssl to fix it
   ssh-keygen -t rsa -b 2048 -m PEM -N '' -f tmp_jwk.key 2>&1 >/dev/null
-  openssl rsa -in tmp_jwk.key -pubout -outform PEM -out tmp_jwk.pub
+  openssl rsa -in tmp_jwk.key -pubout -outform PEM -out tmp_jwk.pub 2>/dev/null
 
   PUBLIC_KEY=`cat tmp_jwk.pub`
   PRIVATE_KEY=`cat tmp_jwk.key`
@@ -95,9 +121,39 @@ EOF
 
 
   print_log "Created new override.env"
+}
 
-  # Cleanup all keys generated in this run
-  cleanup_files
+# This method sets up keys for local testing against the GG S2S SOAP API training environment.
+setup_soap_auth() {
+  if grep -Eq '^SOAP_AUTH_CONTENT[[:space:]]*=[[:space:]]*[^[:space:]]+' $OVERRIDE_FILE; then
+    print_log "SOAP_AUTH_CONTENT already set, skipping appending to $OVERRIDE_FILE"
+    return 0
+  fi
+
+  applicantspub=$SOAP_CERT_FOLDER_PATH$APPLICANTS_BASE_CERT_NAME.crt
+  applicantspk=$SOAP_CERT_FOLDER_PATH$APPLICANTS_BASE_CERT_NAME.key
+  grantorspub=$SOAP_CERT_FOLDER_PATH$GRANTORS_BASE_CERT_NAME.crt
+  grantorspk=$SOAP_CERT_FOLDER_PATH$GRANTORS_BASE_CERT_NAME.key
+
+  for file in $applicantspub $applicantspk $grantorspub $grantorspk; do
+    if [ ! -e "$file" ]; then
+      print_err "Missing $file aborting soap setup. Double check SOAP_CERT_FOLDER_PATH var"
+      return 0
+    fi
+  done
+
+  soap_auth_content=$(printf '{"%s": "%s\n\n%s","%s": "%s\n\n%s"}' \
+  "`openssl x509 -in $applicantspub -noout -fingerprint -sha256 | sed 's/://g' | cut -d'=' -f2 | tr '[:upper:]' '[:lower:]'`" "`cat ${applicantspk}`" "`cat ${applicantspub}`" \
+  "`openssl x509 -in $grantorspub -noout -fingerprint -sha256 | sed 's/://g' | cut -d'=' -f2 | tr '[:upper:]' '[:lower:]'`" "`cat ${grantorspk}`" "`cat ${grantorspub}`")
+
+  print_log "Setting soap proxy auth variables in $OVERRIDE_FILE"
+  cat <<EOF >> $OVERRIDE_FILE
+
+#############################################
+# SOAP Auth for proxying training locally
+#############################################
+SOAP_AUTH_CONTENT=$(printf '%s' "$soap_auth_content" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+EOF
 }
 
 # Cleanup a single file if it exists
@@ -121,6 +177,10 @@ cleanup_files()
 
 print_log() {
   printf "$CYAN%s $GREEN%s: $END%s\\n" "$(date "+%Y-%m-%d %H:%M:%S")" "$PROGRAM_NAME" "$*"
+}
+
+print_err() {
+  printf "$RED%s $RED%s: $END%s\\n" "$(date "+%Y-%m-%d %H:%M:%S")" "$PROGRAM_NAME" "$*"
 }
 
 # Entry point
