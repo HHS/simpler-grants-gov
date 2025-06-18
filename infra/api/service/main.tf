@@ -158,6 +158,8 @@ module "service" {
   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
   hosted_zone_id         = null
 
+  enable_mtls_load_balancer = true
+
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count

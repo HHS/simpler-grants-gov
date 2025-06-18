@@ -306,3 +306,15 @@ variable "ses_configuration_set" {
   description = "The configuration set (dashed-domain-name) where SES is set up for emails"
   default     = null
 }
+
+variable "enable_mtls_load_balancer" {
+  type        = bool
+  description = "Stand up a second twin LB that will support mTLS client certificate auth passthrough"
+  default     = false
+}
+
+variable "mtls_domain_name" {
+  type        = string
+  description = "The fully qualified domain name for the mTLS-enabled load balancer"
+  default     = null
+}
