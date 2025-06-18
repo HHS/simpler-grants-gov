@@ -23,7 +23,6 @@ class CreateOrgsFromSamEntityTask(Task):
 
     def run_task(self) -> None:
         with self.db_session.begin():
-            # TODO - prefetch selectinload
             sam_gov_entities = self.db_session.execute(
                 select(SamGovEntity, LinkExternalUser)
                 .join(LinkExternalUser, SamGovEntity.ebiz_poc_email == LinkExternalUser.email)
@@ -32,9 +31,9 @@ class CreateOrgsFromSamEntityTask(Task):
             )
 
             for sam_gov_entity, link_external_user in sam_gov_entities:
-                self.link_sam_gov_entity_if_not_exists(sam_gov_entity, link_external_user.user)
+                self.process_sam_gov_entity_for_user(sam_gov_entity, link_external_user.user)
 
-    def link_sam_gov_entity_if_not_exists(self, sam_gov_entity: SamGovEntity, user: User) -> None:
+    def process_sam_gov_entity_for_user(self, sam_gov_entity: SamGovEntity, user: User) -> None:
         """Link a sam.gov entity record to the EBIZ POC (owner) through an organization record
 
         This is a wrapper around the shared utility function that handles metrics tracking

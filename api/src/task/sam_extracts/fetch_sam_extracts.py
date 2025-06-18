@@ -6,7 +6,6 @@ from datetime import date, timedelta
 from enum import StrEnum
 
 from botocore.client import BaseClient
-from pydantic import Field
 from sqlalchemy import select
 
 import src.adapters.db as db
@@ -22,15 +21,8 @@ from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util import datetime_util
-from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
-
-
-class SamExtractsConfig(PydanticBaseEnvConfig):
-    """Configuration for SAM extracts fetching task"""
-
-    sam_gov_api_url: str = Field(alias="SAM_GOV_BASE_URL", default="https://api.sam.gov")
 
 
 @task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
@@ -61,7 +53,6 @@ class SamExtractsTask(Task):
         s3_client: BaseClient | None = None,
     ) -> None:
         super().__init__(db_session)
-        self.config = SamExtractsConfig()
         self.s3_config = S3Config()
         self.sam_gov_client = sam_gov_client
         self.s3_client = s3_client or get_s3_client()
