@@ -1,5 +1,5 @@
 from src.services.users.organization_from_ebiz_poc import (
-    find_sam_gov_entity_for_ebiz_poc,
+    find_sam_gov_entities_for_ebiz_poc,
     handle_ebiz_poc_organization_during_login,
 )
 from tests.src.db.models.factories import (
@@ -11,38 +11,40 @@ from tests.src.db.models.factories import (
 )
 
 
-def test_find_sam_gov_entity_for_ebiz_poc_not_found(db_session):
-    """Test that we return None when user is not an ebiz POC"""
+def test_find_sam_gov_entities_for_ebiz_poc_not_found(db_session):
+    """Test that we return empty list when user is not an ebiz POC"""
     # Don't create any SAM.gov entities for this test
-    sam_gov_entity = find_sam_gov_entity_for_ebiz_poc(db_session, "nonexistent@example.com")
+    sam_gov_entities = find_sam_gov_entities_for_ebiz_poc(db_session, "nonexistent@example.com")
 
-    assert sam_gov_entity is None
+    assert sam_gov_entities == []
 
 
-def test_find_sam_gov_entity_for_ebiz_poc_found(db_session, enable_factory_create):
+def test_find_sam_gov_entities_for_ebiz_poc_found(db_session, enable_factory_create):
     """Test that we return the SAM.gov entity when user is an ebiz POC"""
     # Create a SAM.gov entity for the user's email
     sam_gov_entity = SamGovEntityFactory.create(ebiz_poc_email="found@example.com")
 
-    result = find_sam_gov_entity_for_ebiz_poc(db_session, "found@example.com")
+    result = find_sam_gov_entities_for_ebiz_poc(db_session, "found@example.com")
 
-    assert result is not None
-    assert result.ebiz_poc_email == "found@example.com"
-    assert result.sam_gov_entity_id == sam_gov_entity.sam_gov_entity_id
+    assert len(result) == 1
+    assert result[0].ebiz_poc_email == "found@example.com"
+    assert result[0].sam_gov_entity_id == sam_gov_entity.sam_gov_entity_id
 
 
-def test_find_sam_gov_entity_for_ebiz_poc_multiple_entities(db_session, enable_factory_create):
-    """Test that we return the first SAM.gov entity when multiple exist for same email"""
+def test_find_sam_gov_entities_for_ebiz_poc_multiple_entities(db_session, enable_factory_create):
+    """Test that we return all SAM.gov entities when multiple exist for same email"""
     # Create multiple SAM.gov entities with the same ebiz POC email
     first_entity = SamGovEntityFactory.create(ebiz_poc_email="multiple@example.com")
-    SamGovEntityFactory.create(ebiz_poc_email="multiple@example.com")
+    second_entity = SamGovEntityFactory.create(ebiz_poc_email="multiple@example.com")
 
-    result = find_sam_gov_entity_for_ebiz_poc(db_session, "multiple@example.com")
+    result = find_sam_gov_entities_for_ebiz_poc(db_session, "multiple@example.com")
 
-    assert result is not None
-    assert result.ebiz_poc_email == "multiple@example.com"
-    # Should return the first one found (database order)
-    assert result.sam_gov_entity_id == first_entity.sam_gov_entity_id
+    assert len(result) == 2
+    assert all(entity.ebiz_poc_email == "multiple@example.com" for entity in result)
+    # Should return both entities
+    entity_ids = {entity.sam_gov_entity_id for entity in result}
+    assert first_entity.sam_gov_entity_id in entity_ids
+    assert second_entity.sam_gov_entity_id in entity_ids
 
 
 def test_handle_ebiz_poc_organization_during_login_not_ebiz_poc(db_session, enable_factory_create):
@@ -72,9 +74,11 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     result = handle_ebiz_poc_organization_during_login(db_session, user)
 
     assert result is not None
-    assert result.user == user
-    assert result.organization.sam_gov_entity == sam_gov_entity
-    assert result.is_organization_owner is True
+    assert len(result) == 1
+    org_user = result[0]
+    assert org_user.user == user
+    assert org_user.organization.sam_gov_entity == sam_gov_entity
+    assert org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization(
@@ -104,9 +108,11 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization(
     result = handle_ebiz_poc_organization_during_login(db_session, user)
 
     assert result is not None
-    assert result.user == user
-    assert result.organization == organization
-    assert result.is_organization_owner is True
+    assert len(result) == 1
+    org_user = result[0]
+    assert org_user.user == user
+    assert org_user.organization == organization
+    assert org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
@@ -138,8 +144,10 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     result = handle_ebiz_poc_organization_during_login(db_session, user)
 
     assert result is not None
-    assert result == org_user
-    assert result.is_organization_owner is True
+    assert len(result) == 1
+    returned_org_user = result[0]
+    assert returned_org_user == org_user
+    assert returned_org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
@@ -147,16 +155,22 @@ def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
 ):
     """Test that we handle multiple SAM entities for the same email"""
     # Create multiple SAM entities with the same ebiz POC email
-    sam_gov_entity1 = SamGovEntityFactory.create(ebiz_poc_email="multi@example.com")
+    SamGovEntityFactory.create(ebiz_poc_email="multi@example.com")
     SamGovEntityFactory.create(ebiz_poc_email="multi@example.com")
     user = UserFactory.create()
     LinkExternalUserFactory.create(user=user, email="multi@example.com")
 
-    org_user = handle_ebiz_poc_organization_during_login(db_session, user)
+    result = handle_ebiz_poc_organization_during_login(db_session, user)
 
-    # Should use the first entity found and create organization for it
-    assert org_user is not None
-    assert org_user.organization.sam_gov_entity == sam_gov_entity1
+    # Should create organizations for all entities and return all organization users created
+    assert result is not None
+    assert len(result) == 2  # Should return both organization users
+    assert len(user.organizations) == 2  # User should be linked to both organizations
+
+    # All organization users should be marked as owners
+    for org_user in result:
+        assert org_user.user == user
+        assert org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_rollback_on_error(

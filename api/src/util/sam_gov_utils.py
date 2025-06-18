@@ -9,6 +9,11 @@ from src.db.models.user_models import OrganizationUser, User
 logger = logging.getLogger(__name__)
 
 
+# Define a function that does nothing
+def no_op(metric_name: str) -> None:
+    pass
+
+
 def link_sam_gov_entity_if_not_exists(
     db_session: db.Session,
     sam_gov_entity: SamGovEntity,
@@ -37,6 +42,10 @@ def link_sam_gov_entity_if_not_exists(
     Returns:
         The OrganizationUser record that was created or updated
     """
+    # Set the metric function to no-op if None
+    if increment_metric is None:
+        increment_metric = no_op
+
     log_extra = {"sam_gov_entity_id": sam_gov_entity.sam_gov_entity_id, "user_id": user.user_id}
     logger.info("Processing sam.gov entity record connection to user", extra=log_extra)
 
@@ -44,8 +53,7 @@ def link_sam_gov_entity_if_not_exists(
     # create and associate it
     organization = sam_gov_entity.organization
     if organization is None:
-        if increment_metric:
-            increment_metric("new_organization_created_count")
+        increment_metric("new_organization_created_count")
         organization = Organization(organization_id=uuid.uuid4(), sam_gov_entity=sam_gov_entity)
         db_session.add(organization)
 
@@ -62,8 +70,7 @@ def link_sam_gov_entity_if_not_exists(
             break
 
     if organization_user is None:
-        if increment_metric:
-            increment_metric("new_organization_user_created_count")
+        increment_metric("new_organization_user_created_count")
         organization_user = OrganizationUser(organization=organization, user=user)
         db_session.add(organization_user)
         logger.info("Added user to organization", extra=log_extra)
@@ -71,8 +78,7 @@ def link_sam_gov_entity_if_not_exists(
     # As we know they're the ebiz POC from the initial query,
     # make them the owner if they aren't already
     if organization_user.is_organization_owner is not True:
-        if increment_metric:
-            increment_metric("new_organization_owner_count")
+        increment_metric("new_organization_owner_count")
         organization_user.is_organization_owner = True
         logger.info("Made user an owner of the organization", extra=log_extra)
 
