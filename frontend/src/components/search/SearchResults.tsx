@@ -7,11 +7,10 @@ import { Suspense } from "react";
 
 import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import Loading from "src/components/Loading";
-import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
 import { SearchError } from "./SearchError";
 import SearchPagination from "./SearchPagination";
 import SearchResultsHeader from "./SearchResultsHeader";
-import SearchResultsList from "./SearchResultsList";
+import { SearchResultsView } from "./SearchResultsView";
 
 const SearchResultsSkeleton = ({
   sortby,
@@ -77,32 +76,14 @@ const ResolvedSearchResults = async ({
   const totalPages = searchResults.pagination_info?.total_pages;
 
   return (
-    <>
-      <SearchResultsHeader
-        queryTerm={query}
-        sortby={sortby}
-        totalFetchedResults={totalResults}
-      />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton />
-          <SearchPagination
-            totalPages={totalPages}
-            page={page}
-            query={query}
-            totalResults={totalResults}
-          />
-        </div>
-        <SearchResultsList searchResults={searchResults} page={page} />
-        <SearchPagination
-          totalPages={totalPages}
-          page={page}
-          query={query}
-          totalResults={totalResults}
-          scroll={true}
-        />
-      </div>
-    </>
+    <SearchResultsView
+      sortby={sortby}
+      page={page}
+      query={query}
+      totalResults={totalResults}
+      totalPages={totalPages}
+      searchResults={searchResults}
+    />
   );
 };
 
