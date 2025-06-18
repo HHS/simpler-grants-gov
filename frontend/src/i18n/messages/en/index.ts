@@ -480,6 +480,19 @@ export const messages = {
         ],
       },
     },
+    table: {
+      headings: {
+        closeDate: "Close date",
+        status: "Status",
+        title: "Title",
+        agency: "Agency",
+        awardMin: "Award min",
+        awardMax: "Award max",
+      },
+      number: "Number",
+      published: "Published",
+      expectedAwards: "Expected awards",
+    },
     accordion: {
       any: "Any",
       all: "All",
