@@ -127,7 +127,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return users_email_notifications
 
     def _get_latest_opportunity_versions(self) -> Sequence:
-        # Create row_number window function
+        """
+        Retrieve the latest OpportunityVersion for each opportunity saved by users.
+        """
+        # Rank all versions per opportunity_id, by created_at descending
         row_number = (
             func.row_number()
             .over(
@@ -137,11 +140,13 @@ class OpportunityNotificationTask(BaseNotificationTask):
             .label("rn")
         )
 
-        # Subquery that assigns row numbers
+        # Subquery selecting all OpportunityVersions along with their row number rank
         latest_versions_subq = select(OpportunityVersion, row_number).subquery()
 
+        # Map cols in the subquery back to OpportunityVersion model
         latest_opp_version = aliased(OpportunityVersion, latest_versions_subq)
 
+        # Grab latest version for each UserSavedOpportunity
         stmt = (
             select(UserSavedOpportunity, latest_opp_version)
             .options(selectinload(UserSavedOpportunity.user))
@@ -166,41 +171,46 @@ class OpportunityNotificationTask(BaseNotificationTask):
         OpportunityVersion for each that was created before the user's
         last_notified_at timestamp.
         """
-        base_query = (
-            select(
-                OpportunityVersion,
-                UserSavedOpportunity.user_id,
-                func.row_number()
-                .over(
-                    partition_by=(UserSavedOpportunity.user_id, OpportunityVersion.opportunity_id),
-                    order_by=desc(OpportunityVersion.created_at),
-                )
-                .label("rn"),
+        # Rank all versions per (user, opportunity_id) by created_at desc
+        row_number = (
+            func.row_number()
+            .over(
+                partition_by=(UserSavedOpportunity.user_id, OpportunityVersion.opportunity_id),
+                order_by=desc(OpportunityVersion.created_at),
             )
+            .label("rn")
+        )
+        # Subquery selecting all OpportunityVersions joined with UserSavedOpportunity,
+        # filtered by the given user-opportunity pairs, and versions created before last_notified_at
+        subq = (
+            select(OpportunityVersion, UserSavedOpportunity.user_id.label("user_id"), row_number)
             .join(
                 UserSavedOpportunity,
-                OpportunityVersion.opportunity_id == UserSavedOpportunity.opportunity_id,
+                UserSavedOpportunity.opportunity_id == OpportunityVersion.opportunity_id,
             )
             .where(
                 tuple_(UserSavedOpportunity.user_id, UserSavedOpportunity.opportunity_id).in_(
                     user_opportunity_pairs
-                ),
-                OpportunityVersion.created_at <= UserSavedOpportunity.last_notified_at,
+                ),  # Filter for the given pairs
+                OpportunityVersion.created_at
+                < UserSavedOpportunity.last_notified_at,  # Grabs the versions created before the users last notification
             )
+            .subquery()
         )
-        latest_versions_subq = base_query.subquery()
 
-        latest_opp_version = aliased(OpportunityVersion, latest_versions_subq)
+        # Map cols in the subquery back to OpportunityVersion model
+        opp_version_from_subq = aliased(OpportunityVersion, subq)
 
+        # Grabs latest version per (user, opportunity_id) pairs
         stmt = select(
-            latest_versions_subq.c.user_id,
-            latest_versions_subq.c.opportunity_id,
-            latest_opp_version,
-        ).where(latest_versions_subq.c.rn == 1)
+            subq.c.user_id,
+            subq.c.opportunity_id,
+            opp_version_from_subq,
+        ).where(subq.c.rn == 1)
 
-        result = self.db_session.execute(stmt).all()
+        results = self.db_session.execute(stmt).all()
 
-        return {(row.user_id, row.opportunity_id): row[2] for row in result}
+        return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

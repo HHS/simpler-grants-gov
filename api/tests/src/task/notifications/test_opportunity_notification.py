@@ -237,3 +237,51 @@ class TestOpportunityNotification:
 
         results = task.collect_email_notifications()
         assert len(results) == 0
+
+    def test_last_notified_version(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        """
+         Test that `_get_last_notified_versions` correctly returns the most recent
+        OpportunityVersion created *before* each user's `last_notified_at` timestamp for the given opportunity
+        """
+        # create a different user
+        user_2 = factories.UserFactory.create()
+        user_2 = link_user_with_email(user_2, monkeypatch)
+
+        v_1 = factories.OpportunityVersionFactory.create()
+        opp = v_1.opportunity
+
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp,
+            last_notified_at=v_1.created_at + timedelta(minutes=1),
+        )
+        v_2 = factories.OpportunityVersionFactory.create(
+            opportunity=opp, created_at=v_1.created_at + timedelta(minutes=60)
+        )
+        factories.UserSavedOpportunityFactory.create(
+            user=user_2,
+            opportunity=opp,
+            last_notified_at=v_2.created_at + timedelta(minutes=1),
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+
+        results = task._get_last_notified_versions(
+            [
+                (user.user_id, opp.opportunity_id),
+                (user_2.user_id, opp.opportunity_id),
+            ]
+        )
+
+        assert results[user.user_id, opp.opportunity_id] == v_1
+        assert results[user_2.user_id, opp.opportunity_id] == v_2
