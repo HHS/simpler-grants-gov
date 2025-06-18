@@ -64,7 +64,7 @@ def link_sam_gov_entity_if_not_exists(
 
     # If the user is not already a member of the organization, add them
     organization_user = None
-    for org_user in user.organizations:  # TODO - use filter or something
+    for org_user in user.organizations:
         if org_user.organization_id == organization.organization_id:
             organization_user = org_user
             break
