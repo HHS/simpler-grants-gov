@@ -14,7 +14,7 @@ from src.task.notifications.opportunity_notifcation import OpportunityNotificati
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
-def link_user_with_email(user, monkeypatch):
+def link_user_with_email(user):
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -23,7 +23,7 @@ class TestOpportunityNotification:
 
     @pytest.fixture
     def email_notification_task(self, db_session, search_client, monkeypatch):
-        monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
         monkeypatch.setenv("ENABLE_OPPORTUNITY_NOTIFICATIONS", "true")
         monkeypatch.setenv("ENABLE_SEARCH_NOTIFICATIONS", "false")
@@ -41,7 +41,7 @@ class TestOpportunityNotification:
 
     @pytest.fixture
     def user_with_email(self, db_session, user, monkeypatch):
-        return link_user_with_email(user, monkeypatch)
+        return link_user_with_email(user)
 
     def test_email_notifications_collection(
         self,
@@ -58,7 +58,7 @@ class TestOpportunityNotification:
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
         user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2, monkeypatch)
+        user_2 = link_user_with_email(user_2)
 
         # Create a saved opportunity that needs notification
         opp_1 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
@@ -68,15 +68,12 @@ class TestOpportunityNotification:
         # create old versions  for opps
         factories.OpportunityVersionFactory.create(
             opportunity=opp_1,
-            # created_at=saved_opp_3.last_notified_at - timedelta(minutes=5)
         )
         factories.OpportunityVersionFactory.create(
             opportunity=opp_2,
-            # created_at=saved_opp_2.last_notified_at - timedelta(minutes=5)
         )
         factories.OpportunityVersionFactory.create(
             opportunity=opp_3,
-            # created_at=saved_opp_3.last_notified_at - timedelta(minutes=5)
         )
 
         # User saved opportunity records
@@ -88,12 +85,10 @@ class TestOpportunityNotification:
             user=user,
             opportunity=opp_2,
         )
-
         factories.UserSavedOpportunityFactory.create(
             user=user_2,
             opportunity=opp_1,
         )
-
         factories.UserSavedOpportunityFactory.create(
             user=user_2,
             opportunity=opp_3,
@@ -123,7 +118,7 @@ class TestOpportunityNotification:
 
         results = task._get_latest_opportunity_versions()
 
-        # assert that only the latest version is picked up for each user_saved_opportunity, opportunity version pairs
+        # assert that only the latest version is picked up for each user_saved_opportunity
         assert len(results) == 4
 
         for user_saved_opp, latest_opp_ver in results:
@@ -254,7 +249,7 @@ class TestOpportunityNotification:
         """
         # create a different user
         user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2, monkeypatch)
+        user_2 = link_user_with_email(user_2)
 
         v_1 = factories.OpportunityVersionFactory.create()
         opp = v_1.opportunity

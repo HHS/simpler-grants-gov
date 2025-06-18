@@ -17,8 +17,8 @@ export const statusOptions: FilterOption[] = [
     value: "forecasted",
   },
   {
-    id: "status-posted",
-    label: "Posted",
+    id: "status-open",
+    label: "Open",
     value: "posted",
   },
   {
@@ -151,4 +151,52 @@ export const categoryOptions: FilterOption[] = [
     value: "affordable_care_act",
   },
   { id: "category-other", label: "Other", value: "other" },
+];
+
+export const closeDateOptions: FilterOption[] = [
+  {
+    id: "close-date-7",
+    label: "Next 7 days",
+    value: "7",
+  },
+  {
+    id: "close-date-30",
+    label: "Next 30 days",
+    value: "30",
+  },
+  {
+    id: "close-date-90",
+    label: "Next 90 days",
+    value: "90",
+  },
+  {
+    id: "close-date-120",
+    label: "Next 120 days",
+    value: "120",
+  },
+];
+
+export const costSharingOptions: FilterOption[] = [
+  {
+    id: "cost-sharing-yes",
+    label: "Yes",
+    value: "true",
+  },
+  {
+    id: "cost-sharing-no",
+    label: "No",
+    value: "false",
+  },
+];
+export const andOrOptions = [
+  {
+    id: "andOr-and",
+    label: "Must include all words (ex. labor AND welfare)",
+    value: "AND",
+  },
+  {
+    id: "andOr-or",
+    label: "May include any words (ex. labor OR welfare)",
+    value: "OR",
+  },
 ];

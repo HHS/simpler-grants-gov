@@ -21,6 +21,7 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 type OpportunityListingProps = {
@@ -131,8 +132,15 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
-        <div className="padding-y-3">
+        <div className="padding-y-3 display-flex">
           <OpportunitySaveUserControl />
+          {opportunityData.competitions &&
+            opportunityData.opportunity_title && (
+              <OpportunityCompetitionStart
+                opportunityTitle={opportunityData.opportunity_title}
+                competitions={opportunityData.competitions}
+              />
+            )}
         </div>
         <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
@@ -152,7 +160,10 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityStatusWidget opportunityData={opportunityData} />
             <OpportunityCTA id={opportunityData.opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />
-            <OpportunityHistory summary={opportunityData.summary} />
+            <OpportunityHistory
+              summary={opportunityData.summary}
+              status={opportunityData.opportunity_status}
+            />
           </div>
         </div>
       </ContentLayout>

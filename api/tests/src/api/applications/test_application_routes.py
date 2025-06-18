@@ -1,15 +1,17 @@
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
 
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import ApplicationFormStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
+    ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
@@ -17,6 +19,10 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
+    OrganizationFactory,
+    OrganizationUserFactory,
+    SamGovEntityFactory,
+    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -732,6 +738,8 @@ def test_application_form_get_success(
     assert response.json["data"]["application_id"] == str(application_form.application_id)
     assert response.json["data"]["form_id"] == str(application_form.form_id)
     assert response.json["data"]["application_response"] == {"name": "John Doe"}
+    # Verify application_attachments field exists (empty list in this case)
+    assert response.json["data"]["application_attachments"] == []
 
 
 def test_application_form_get_application_not_found(
@@ -789,6 +797,70 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
     assert response.status_code == 401
 
 
+def test_application_form_get_with_attachments(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    # Create an application form
+    application_form = ApplicationFormFactory.create(
+        application_response={"name": "John Doe"},
+    )
+
+    # Create attachments for the application
+    attachment1 = ApplicationAttachmentFactory.create(
+        application=application_form.application, file_name="my_file_a.txt"
+    )
+    attachment2 = ApplicationAttachmentFactory.create(
+        application=application_form.application, file_name="my_file_b.pdf"
+    )
+
+    CompetitionFormFactory.create(
+        competition=application_form.application.competition,
+        form=application_form.form,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application_form.application)
+
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify basic application form data
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["data"]["application_id"] == str(application_form.application_id)
+    assert response.json["data"]["form_id"] == str(application_form.form_id)
+    assert response.json["data"]["application_response"] == {"name": "John Doe"}
+
+    # Verify application attachments are included
+    resp_application_attachments = response.json["data"]["application_attachments"]
+    assert len(resp_application_attachments) == 2
+
+    # Sort by file name which we set above so attachment1 is always first
+    resp_application_attachments.sort(key=lambda a: a["file_name"])
+
+    assert resp_application_attachments[0]["application_attachment_id"] == str(
+        attachment1.application_attachment_id
+    )
+    assert resp_application_attachments[0]["file_name"] == attachment1.file_name
+    assert resp_application_attachments[0]["mime_type"] == attachment1.mime_type
+    assert resp_application_attachments[0]["file_size_bytes"] == attachment1.file_size_bytes
+    assert resp_application_attachments[0]["created_at"] == attachment1.created_at.isoformat()
+    assert resp_application_attachments[0]["updated_at"] == attachment1.updated_at.isoformat()
+
+    assert resp_application_attachments[1]["application_attachment_id"] == str(
+        attachment2.application_attachment_id
+    )
+    assert resp_application_attachments[1]["file_name"] == attachment2.file_name
+    assert resp_application_attachments[1]["mime_type"] == attachment2.mime_type
+    assert resp_application_attachments[1]["file_size_bytes"] == attachment2.file_size_bytes
+    assert resp_application_attachments[1]["created_at"] == attachment2.created_at.isoformat()
+    assert resp_application_attachments[1]["updated_at"] == attachment2.updated_at.isoformat()
+
+
 def test_application_get_success(client, enable_factory_create, db_session, user, user_auth_token):
     application = ApplicationFactory.create(with_forms=True)
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
@@ -818,7 +890,56 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "form_id": str(application_form.form_id),
             "application_response": application_form.application_response,
             "application_form_status": ApplicationFormStatus.IN_PROGRESS,
+            "created_at": application_form.created_at.isoformat(),
+            "updated_at": application_form.updated_at.isoformat(),
+            "is_required": True,
+            "application_attachments": [],
         }
+
+
+def test_application_get_with_attachments(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    attachment1 = ApplicationAttachmentFactory.create(
+        application=application, file_name="my_file_a.txt"
+    )
+    attachment2 = ApplicationAttachmentFactory.create(
+        application=application, file_name="my_file_b.pdf"
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    resp_application_attachments = response.json["data"]["application_attachments"]
+    assert len(resp_application_attachments) == 2
+
+    # Sort by file name which we set above so attachment1 is always first
+    resp_application_attachments.sort(key=lambda a: a["file_name"])
+
+    assert resp_application_attachments[0]["application_attachment_id"] == str(
+        attachment1.application_attachment_id
+    )
+    assert resp_application_attachments[0]["file_name"] == attachment1.file_name
+    assert resp_application_attachments[0]["mime_type"] == attachment1.mime_type
+    assert resp_application_attachments[0]["file_size_bytes"] == attachment1.file_size_bytes
+    assert resp_application_attachments[0]["created_at"] == attachment1.created_at.isoformat()
+    assert resp_application_attachments[0]["updated_at"] == attachment1.updated_at.isoformat()
+
+    assert resp_application_attachments[1]["application_attachment_id"] == str(
+        attachment2.application_attachment_id
+    )
+    assert resp_application_attachments[1]["file_name"] == attachment2.file_name
+    assert resp_application_attachments[1]["mime_type"] == attachment2.mime_type
+    assert resp_application_attachments[1]["file_size_bytes"] == attachment2.file_size_bytes
+    assert resp_application_attachments[1]["created_at"] == attachment2.created_at.isoformat()
+    assert resp_application_attachments[1]["updated_at"] == attachment2.updated_at.isoformat()
 
 
 def test_application_get_success_with_validation_issues(
@@ -1280,7 +1401,7 @@ def test_application_submit_forbidden_not_in_progress(
 def test_application_start_associates_user(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test that application creation associates the user from the token session with the application"""
+    """Test that application creation associates the user from the token session with the application and marks them as owner"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -1306,7 +1427,7 @@ def test_application_start_associates_user(
     assert application is not None
     assert str(application.competition_id) == competition_id
 
-    # Verify user is associated with the application
+    # Verify user is associated with the application and marked as owner
     application_user = db_session.execute(
         select(ApplicationUser).where(
             ApplicationUser.application_id == application_id,
@@ -1317,6 +1438,7 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
+    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
@@ -1604,3 +1726,407 @@ def test_application_get_includes_application_name_and_users(
     assert len(response.json["data"]["users"]) == 1
     assert response.json["data"]["users"][0]["user_id"] == str(user.user_id)
     assert response.json["data"]["users"][0]["email"] == user.email
+
+
+def test_application_get_includes_organization_with_sam_gov_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes organization with SAM.gov entity data"""
+    # Create a SAM.gov entity with test data
+    sam_gov_entity = SamGovEntityFactory.create(
+        uei="TEST123456789",
+        legal_business_name="Test Organization LLC",
+        expiration_date=date(2025, 12, 31),
+    )
+
+    # Create an organization linked to the SAM.gov entity
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+
+    # Create an application with the organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application with Organization",
+        organization=organization,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization is included
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is not None
+    assert response.json["data"]["organization"]["organization_id"] == str(
+        organization.organization_id
+    )
+
+    # Check that sam_gov_entity is included with the required fields
+    sam_gov_data = response.json["data"]["organization"]["sam_gov_entity"]
+    assert sam_gov_data is not None
+    assert sam_gov_data["uei"] == "TEST123456789"
+    assert sam_gov_data["legal_business_name"] == "Test Organization LLC"
+    assert sam_gov_data["expiration_date"] == "2025-12-31"
+
+
+def test_application_get_includes_organization_without_sam_gov_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response includes organization without SAM.gov entity data"""
+    # Create an organization without a SAM.gov entity
+    organization = OrganizationFactory.create(sam_gov_entity=None)
+
+    # Create an application with the organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application with Organization",
+        organization=organization,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization is included but sam_gov_entity is null
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is not None
+    assert response.json["data"]["organization"]["organization_id"] == str(
+        organization.organization_id
+    )
+    assert response.json["data"]["organization"]["sam_gov_entity"] is None
+
+
+def test_application_get_without_organization(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application GET response handles null organization correctly"""
+    # Create an application without an organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        application_name="Test Application without Organization",
+        organization=None,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Check that organization field is present but null
+    assert "organization" in response.json["data"]
+    assert response.json["data"]["organization"] is None
+
+
+def test_application_start_with_organization_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successful creation of an application with an organization"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with the organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert str(application.organization_id) == organization_id
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_with_organization_and_custom_name(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation with organization and custom name"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    custom_name = "My Custom Application"
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+        "application_name": custom_name,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with the organization and custom name
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert str(application.organization_id) == organization_id
+    assert application.application_name == custom_name
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_organization_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization doesn't exist"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    nonexistent_organization_id = str(uuid.uuid4())  # Random UUID that doesn't exist
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": nonexistent_organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 404
+    assert "Organization not found" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_user_not_organization_member(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when user is not a member of the organization"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization but DON'T associate user with it
+    organization = OrganizationFactory.create()
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 403
+    assert "User is not a member of the organization" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_without_organization_still_works(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application creation still works without organization_id (backward compatibility)"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        # No organization_id provided
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created without organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.organization_id is None
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_with_null_organization_id(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application creation works with explicit null organization_id"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": None,  # Explicitly set to null
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created without organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert application.organization_id is None
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_invalid_organization_id_format(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails with invalid organization_id format"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": "invalid-uuid-format",  # Invalid UUID format
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert "validation error" in response.json["message"].lower()
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_membership_validation_works_with_multiple_users(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that organization membership validation works correctly with multiple users"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization
+    organization = OrganizationFactory.create()
+
+    # Create two users - one is member, one is not
+    user_member = user  # This user will be a member
+    user_non_member = UserFactory.create()
+
+    # Associate only the first user with the organization
+    OrganizationUserFactory.create(organization=organization, user=user_member)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    # Test with member user - should succeed
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Test with non-member user - should fail
+    non_member_token, _ = create_jwt_for_user(user_non_member, db_session)
+    db_session.commit()
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": non_member_token}
+    )
+
+    assert response.status_code == 403
+    assert "User is not a member of the organization" in response.json["message"]

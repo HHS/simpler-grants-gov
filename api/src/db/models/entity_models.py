@@ -24,7 +24,9 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     uei: Mapped[str] = mapped_column(index=True)
     legal_business_name: Mapped[str]
     expiration_date: Mapped[date]
-    ebiz_poc_email: Mapped[str]
+    initial_registration_date: Mapped[date]
+    last_update_date: Mapped[date]
+    ebiz_poc_email: Mapped[str] = mapped_column(index=True)
     ebiz_poc_first_name: Mapped[str]
     ebiz_poc_last_name: Mapped[str]
     has_debt_subject_to_offset: Mapped[bool | None]
@@ -35,8 +37,8 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     import_records: Mapped[list["SamGovEntityImportType"]] = relationship(
         back_populates="sam_gov_entity", cascade="all, delete-orphan"
     )
-    organizations: Mapped[list["Organization"]] = relationship(
-        back_populates="sam_gov_entity",
+    organization: Mapped["Organization | None"] = relationship(
+        back_populates="sam_gov_entity", uselist=False
     )
 
 
@@ -67,12 +69,12 @@ class Organization(ApiSchemaTable, TimestampMixin):
 
     organization_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     sam_gov_entity_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(SamGovEntity.sam_gov_entity_id), nullable=True
+        UUID, ForeignKey(SamGovEntity.sam_gov_entity_id), nullable=True, unique=True
     )
 
     # Relationships
     sam_gov_entity: Mapped[SamGovEntity | None] = relationship(
-        SamGovEntity, back_populates="organizations"
+        SamGovEntity, back_populates="organization"
     )
 
     organization_users: Mapped[list["OrganizationUser"]] = relationship(

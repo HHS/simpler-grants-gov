@@ -21,7 +21,7 @@ from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTU
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -376,7 +376,9 @@ Award range: $1,000,000-$112,500,000
 Expected awards: 40
 Cost sharing: Yes
 
-To unsubscribe from email notifications for this query, delete it from your saved search queries."""
+To unsubscribe from email notifications for this query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
 
     assert email_content.strip() == expected_single.strip()
 
@@ -445,7 +447,9 @@ Award range: $50,000-$500,000
 Expected awards: 10
 Cost sharing: No
 
-To unsubscribe from email notifications for this query, delete it from your saved search queries."""
+To unsubscribe from email notifications for this query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
 
     assert email_content.strip() == expected_content.strip()
 
@@ -549,6 +553,8 @@ Award range: $1-$30,000
 Expected awards: --
 Cost sharing: No
 
-To unsubscribe from email notifications for a query, delete it from your saved search queries."""
+To unsubscribe from email notifications for a query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
 
     assert email_content.strip() == expected_single.strip()

@@ -1,11 +1,10 @@
-import { Summary } from "src/types/opportunity/opportunityResponseTypes";
+import {
+  OpportunityStatus,
+  Summary,
+} from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-
-type Props = {
-  summary: Summary;
-};
 
 const formatHistoryDate = (date: string | null) => {
   return date === null ? "--" : formatDate(date);
@@ -29,7 +28,13 @@ export const OpportunityHistoryItem = ({
   );
 };
 
-const OpportunityHistory = ({ summary }: Props) => {
+const OpportunityHistory = ({
+  summary,
+  status,
+}: {
+  summary: Summary;
+  status: OpportunityStatus;
+}) => {
   const t = useTranslations("OpportunityListing.history");
 
   return (
@@ -42,7 +47,9 @@ const OpportunityHistory = ({ summary }: Props) => {
         }
       />
       <OpportunityHistoryItem
-        title={t("postedDate")}
+        title={
+          status === "forecasted" ? t("forecastPostedDate") : t("postedDate")
+        }
         content={formatHistoryDate(summary.post_date)}
       />
       <OpportunityHistoryItem
