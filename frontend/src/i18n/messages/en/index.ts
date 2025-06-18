@@ -119,6 +119,9 @@ export const messages = {
       description:
         "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
+      login: "Login to start the application",
+      loggedOut:
+        "You must be logged in to proceed. Please login and start your application again.",
       name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",

@@ -39,40 +39,64 @@ export const LoginModal = ({
       titleText={titleText}
       className="text-wrap"
     >
-      <>
-        <p>{helpText}</p>
-        <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
-        <ModalFooter>
-          <ButtonGroup>
-            <a
-              href={LOGIN_URL}
-              key="login-link"
-              className="usa-button"
-              onClick={() => {
-                const startURL = `${location.pathname}${location.search}`;
-                if (startURL !== "") {
-                  SessionStorage.setItem("login-redirect", startURL);
-                }
-              }}
-            >
-              {buttonText}
-              <USWDSIcon
-                className="usa-icon margin-right-05 margin-left-neg-05"
-                name="launch"
-                key="login-gov-link-icon"
-              />
-            </a>
-            <ModalToggleButton
-              modalRef={modalRef}
-              closer
-              unstyled
-              className="padding-105 text-center"
-            >
-              {closeText}
-            </ModalToggleButton>
-          </ButtonGroup>
-        </ModalFooter>
-      </>
+      <LoginModalBody
+        buttonText={buttonText}
+        closeText={closeText}
+        descriptionText={descriptionText}
+        helpText={helpText}
+        modalRef={modalRef}
+      />
     </SimplerModal>
+  );
+};
+
+export const LoginModalBody = ({
+  buttonText,
+  closeText,
+  descriptionText,
+  helpText,
+  modalRef,
+}: {
+  buttonText: string;
+  closeText: string;
+  descriptionText: string;
+  helpText: string;
+  modalRef: RefObject<ModalRef | null>;
+}) => {
+  return (
+    <>
+      <p>{helpText}</p>
+      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+      <ModalFooter>
+        <ButtonGroup>
+          <a
+            href={LOGIN_URL}
+            key="login-link"
+            className="usa-button"
+            onClick={() => {
+              const startURL = `${location.pathname}${location.search}`;
+              if (startURL !== "") {
+                SessionStorage.setItem("login-redirect", startURL);
+              }
+            }}
+          >
+            {buttonText}
+            <USWDSIcon
+              className="usa-icon margin-right-05 margin-left-neg-05"
+              name="launch"
+              key="login-gov-link-icon"
+            />
+          </a>
+          <ModalToggleButton
+            modalRef={modalRef}
+            closer
+            unstyled
+            className="padding-105 text-center"
+          >
+            {closeText}
+          </ModalToggleButton>
+        </ButtonGroup>
+      </ModalFooter>
+    </>
   );
 };

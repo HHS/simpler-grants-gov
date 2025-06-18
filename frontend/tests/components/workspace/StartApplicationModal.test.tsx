@@ -245,4 +245,17 @@ describe("StartApplicationModal", () => {
       );
     });
   });
+  it("displays login message if user not logged in", () => {
+    mockUseUser.mockImplementation(() => ({}) as { user: { token: string } });
+    render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    expect(screen.queryAllByTestId("modalWindow")[0]).toHaveTextContent(
+      "startAppplicationModal.login",
+    );
+  });
 });
