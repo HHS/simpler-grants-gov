@@ -68,6 +68,7 @@ const CompetitionStartFormIndividiual = ({
             onClick={onSubmit}
             type="button"
             data-testid="competition-start-individual-save"
+            disabled={!!loading}
           >
             {loading
               ? "loading..."

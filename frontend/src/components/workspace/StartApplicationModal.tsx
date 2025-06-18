@@ -36,7 +36,6 @@ const StartApplicationModal = ({
 
   const handleSubmit = useCallback(() => {
     if (!token) {
-      setValidationError(t("startAppplicationModal.loggedOut"));
       return;
     }
     if (validationError) {
@@ -53,11 +52,13 @@ const StartApplicationModal = ({
         router.push(`/workspace/applications/application/${applicationId}`);
       })
       .catch((error) => {
-        setError(t("startAppplicationModal.error"));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.cause === "401") {
+          setError(t("startAppplicationModal.loggedOut"));
+        } else {
+          setError(t("startAppplicationModal.error"));
+        }
         console.error(error);
-      })
-      .finally(() => {
-        setLoading(false);
       });
   }, [competitionId, router, savedSearchName, t, token, validationError]);
 
