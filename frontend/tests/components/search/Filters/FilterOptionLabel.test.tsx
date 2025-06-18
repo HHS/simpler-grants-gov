@@ -60,7 +60,7 @@ describe("FilterOptionLabel", () => {
         }}
       />,
     );
-    const trigger = await screen.findByText("this label");
+    const trigger = await screen.findByTestId("triggerElement");
     expect(trigger).toBeInTheDocument();
     const tooltip = await screen.findByTestId("tooltipBody");
     expect(tooltip).toHaveAttribute("aria-hidden", "true");

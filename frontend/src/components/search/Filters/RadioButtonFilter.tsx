@@ -6,7 +6,7 @@ import { useMemo } from "react";
 
 import {
   BasicSearchFilterAccordion,
-  SearchFilterAccordionProps,
+  SearchFilterProps,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import { SearchFilterRadio } from "src/components/search/SearchFilterRadio";
 
@@ -14,11 +14,11 @@ export function RadioButtonFilter({
   query,
   queryParamKey,
   title,
-  wrapForScroll = true,
   includeAnyOption = true,
   filterOptions,
   facetCounts,
-}: SearchFilterAccordionProps) {
+  contentClassName,
+}: SearchFilterProps) {
   const { setQueryParam } = useSearchParamUpdater();
 
   const toggleRadioSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,9 +32,9 @@ export function RadioButtonFilter({
       query={query}
       queryParamKey={queryParamKey}
       title={title}
-      wrapForScroll={wrapForScroll}
       expanded={!!query.size}
       className="width-100 padding-right-5"
+      contentClassName={contentClassName}
     >
       <div data-testid={`${title}-filter`}>
         <ul className="usa-list usa-list--unstyled">

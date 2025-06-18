@@ -1,8 +1,8 @@
 import clsx from "clsx";
 
-import dynamic from "next/dynamic";
 import { forwardRef, ReactNode } from "react";
 
+import { DynamicTooltipWrapper } from "./TooltipWrapper";
 import { USWDSIcon } from "./USWDSIcon";
 
 export interface InfoTooltipProps {
@@ -12,13 +12,6 @@ export interface InfoTooltipProps {
   wrapperClasses?: string;
   title?: string;
 }
-
-const DynamicTooltipWrapper = dynamic(
-  () => import("src/components/TooltipWrapper"),
-  {
-    ssr: false, // works around bug with Trussworks assigning different random ids on server and client renders
-  },
-);
 
 const InfoTooltip = ({
   text,
