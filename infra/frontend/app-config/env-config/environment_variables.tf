@@ -103,6 +103,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-search-drawer-on"
     },
+    FEATURE_SEARCH_TABLE_ON = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-table-on"
+    },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
