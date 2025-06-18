@@ -50,14 +50,6 @@ def handle_ebiz_poc_organization_during_login(
     organization_users = []
     for sam_gov_entity in sam_gov_entities:
         org_user = link_sam_gov_entity_if_not_exists(db_session, sam_gov_entity, user)
-        logger.info(
-            "User is ebiz POC, linking to organization",
-            extra={
-                "user_id": str(user.user_id),
-                "sam_gov_entity_id": str(sam_gov_entity.sam_gov_entity_id),
-                "organization_id": str(org_user.organization_id),
-            },
-        )
         organization_users.append(org_user)
 
     return organization_users
