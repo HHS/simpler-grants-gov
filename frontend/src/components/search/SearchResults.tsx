@@ -6,36 +6,8 @@ import {
 import { Suspense } from "react";
 
 import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
-import Loading from "src/components/Loading";
 import { SearchError } from "./SearchError";
-import SearchPagination from "./SearchPagination";
-import SearchResultsHeader from "./SearchResultsHeader";
-import { SearchResultsView } from "./SearchResultsView";
-
-const SearchResultsSkeleton = ({
-  sortby,
-  page,
-  query,
-  loadingMessage,
-}: {
-  sortby: string | null;
-  page: number;
-  query?: string | null;
-  loadingMessage: string;
-}) => {
-  return (
-    <>
-      <SearchResultsHeader sortby={sortby} />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <SearchPagination loading={true} page={page} query={query} />
-        </div>
-        <Loading message={loadingMessage} />
-        <SearchPagination loading={true} page={page} query={query} />
-      </div>
-    </>
-  );
-};
+import { SearchResultsSkeleton, SearchResultsView } from "./SearchResultsView";
 
 const ResolvedSearchResults = async ({
   sortby,
