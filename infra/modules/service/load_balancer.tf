@@ -126,7 +126,7 @@ resource "aws_lb_listener_rule" "app_https_forward" {
   }
 }
 
-# these get referenced from the service/main file so we want two distinct onces for easier referencing by app_tg vs mtls_tg names
+# these get referenced from the service/main file so we want two distinct ones for easier referencing by app_tg vs mtls_tg names
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
   # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
