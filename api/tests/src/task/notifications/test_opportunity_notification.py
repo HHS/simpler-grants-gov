@@ -1,14 +1,19 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import (
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+    OpportunityStatus,
+)
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import Metrics, NotificationReason
+from src.task.notifications.constants import Metrics, NotificationReason, OpportunityVersionChange
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -93,6 +98,10 @@ class TestOpportunityNotification:
             user=user_2,
             opportunity=opp_3,
         )
+
+        opp_1.category = OpportunityCategory.CONTINUATION
+        opp_2.category = OpportunityCategory.CONTINUATION
+        opp_3.category = OpportunityCategory.CONTINUATION
 
         # create new versions for opps
         factories.OpportunityVersionFactory.create(
@@ -280,3 +289,239 @@ class TestOpportunityNotification:
 
         assert results[user.user_id, opp.opportunity_id] == v_1
         assert results[user_2.user_id, opp.opportunity_id] == v_2
+
+    def test_build_opportunity_status_content(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        # Create opp and first version
+        opp = factories.OpportunityFactory.create(is_posted_summary=True)
+        opp_p = factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Update opp and create second version
+        opp.current_opportunity_summary.opportunity_status = OpportunityStatus.CLOSED
+        opp_l = factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_sections(
+            OpportunityVersionChange(
+                opportunity_id=opp.opportunity_id,
+                previous=opp_p,
+                latest=opp_l,
+            )
+        )
+
+        expected = '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br>'
+
+        assert res == expected
+
+    def test_build_important_dates_content(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        # Create opp and first version
+        opp = factories.OpportunityFactory.create(is_forecasted_summary=True)
+
+        opp_summary = opp.current_opportunity_summary.opportunity_summary
+        opp_summary.close_date = date(2025, 7, 19)
+        opp_summary.forecasted_award_date = date(2025, 10, 10)
+        opp_summary.forecasted_project_start_date = date(2025, 5, 5)
+        opp_summary.fiscal_year = 2025
+
+        opp_p = factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Update opp and create second version
+        opp.current_opportunity_summary.opportunity_summary.close_date += timedelta(days=10)
+        opp.current_opportunity_summary.opportunity_summary.forecasted_award_date += timedelta(
+            days=1
+        )
+        opp.current_opportunity_summary.opportunity_summary.forecasted_project_start_date += (
+            timedelta(days=2)
+        )
+        opp.current_opportunity_summary.opportunity_summary.fiscal_year += 1
+
+        opp_l = factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_sections(
+            OpportunityVersionChange(
+                opportunity_id=opp.opportunity_id, previous=opp_p, latest=opp_l
+            )
+        )
+        expected = '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The application due date changed from July 19, 2025 to July 29, 2025.<br><p style="margin-left: 40px;">•  The estimated award date changed from October 10, 2025 to October 11, 2025.<br><p style="margin-left: 40px;">•  The estimated project start date changed from May 5, 2025 to May 7, 2025.<br><p style="margin-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br>'
+
+        assert res == expected
+
+    def test_build_award_dates_content(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        # Create opp and first version
+        opp = factories.OpportunityFactory.create()
+        opp_summary = opp.current_opportunity_summary.opportunity_summary
+
+        opp_summary.estimated_total_program_funding = 300000
+        opp_summary.expected_number_of_awards = 10
+        opp_summary.award_floor = 10000
+        opp_summary.award_ceiling = 300000
+
+        opp_p = factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        # Update opp and create second version
+        opp_summary.estimated_total_program_funding -= 50000
+        opp_summary.expected_number_of_awards -= 1
+        opp_summary.award_floor += 15000
+        opp_summary.award_ceiling -= 50000
+
+        opp_l = factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_sections(
+            OpportunityVersionChange(
+                opportunity_id=opp.opportunity_id, previous=opp_p, latest=opp_l
+            )
+        )
+        expected = '<p style="margin-left: 20px;">Awards details</p><p style="margin-left: 40px;">•  Program funding changed from 300000 to 250000.<br><p style="margin-left: 40px;">•  The number of expected awards changed from 10 to 9.<br><p style="margin-left: 40px;">•  The award minimum changed from 10000 to 25000.<br><p style="margin-left: 40px;">•  The award maximum changed from 300000 to 250000.<br>'
+
+        assert res == expected
+
+    def test_build_categorization_content(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        # Create opp and first version
+        opp = factories.OpportunityFactory.create()
+        opp_summary = opp.current_opportunity_summary.opportunity_summary
+
+        opp_summary.is_cost_sharing = True
+        opp_summary.funding_instruments = [FundingInstrument.OTHER]
+        opp.category = OpportunityCategory.DISCRETIONARY
+        opp.category_explanation = None
+        opp_summary.funding_categories = [
+            FundingCategory.OTHER,
+            FundingCategory.OPPORTUNITY_ZONE_BENEFITS,
+        ]
+        opp_summary.funding_category_description = "i am a description"
+
+        opp_p = factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        # Update opp and create second version
+        opp_summary.is_cost_sharing = False
+        opp_summary.funding_instruments = [FundingInstrument.GRANT]
+        opp.category = OpportunityCategory.OTHER
+        opp.category_explanation = "i am an explanation"
+        opp_summary.funding_categories = [FundingCategory.ARTS]
+        opp_summary.funding_category_description = None
+
+        opp_l = factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_sections(
+            OpportunityVersionChange(
+                opportunity_id=opp.opportunity_id, previous=opp_p, latest=opp_l
+            )
+        )
+        expected = '<p style="margin-left: 20px;">Categorization</p><p style="margin-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br><p style="margin-left: 40px;">•  The funding instrument type has changed from Other to Grant.<br><p style="margin-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br><p style="margin-left: 40px;">•  Opportunity category explanation has changed from None to I am an explanation.<br><p style="margin-left: 40px;">•  The category of funding activity has changed from Other, Opportunity_zone_benefits to Arts.<br>'
+
+        assert res == expected
+
+    def test_build_notification_content(
+        self,
+        cli_runner,
+        db_session,
+        search_client,
+        enable_factory_create,
+        user,
+        monkeypatch,
+        email_notification_task,
+    ):
+        # Create opp and first version
+        opp = factories.OpportunityFactory.create(is_posted_summary=True)
+        opp.opportunity_title = "Opal 2025 award"
+        opp_summary = opp.current_opportunity_summary.opportunity_summary
+
+        opp_summary.close_date = date(2025, 7, 19)
+        opp_summary.forecasted_award_date = date(2025, 10, 10)
+        opp_summary.forecasted_project_start_date = date(2025, 5, 5)
+
+        opp_summary.fiscal_year = 2025
+        opp_summary.estimated_total_program_funding = 300000
+        opp_summary.expected_number_of_awards = 10
+        opp_summary.award_floor = 10000
+        opp_summary.award_ceiling = 300000
+
+        opp_summary.is_cost_sharing = True
+        opp_summary.funding_instruments = [FundingInstrument.OTHER]
+        opp.category = OpportunityCategory.DISCRETIONARY
+        opp.category_explanation = None
+        opp_summary.funding_categories = [
+            FundingCategory.OTHER,
+            FundingCategory.OPPORTUNITY_ZONE_BENEFITS,
+        ]
+        opp_summary.funding_category_description = "i am a description"
+
+        opp_p = factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        opp.current_opportunity_summary.opportunity_status = OpportunityStatus.CLOSED
+
+        opp.current_opportunity_summary.opportunity_summary.close_date += timedelta(days=10)
+        opp.current_opportunity_summary.opportunity_summary.forecasted_award_date += timedelta(
+            days=1
+        )
+        opp.current_opportunity_summary.opportunity_summary.forecasted_project_start_date += (
+            timedelta(days=2)
+        )
+        opp.current_opportunity_summary.opportunity_summary.fiscal_year += 1
+
+        opp_summary.estimated_total_program_funding -= 50000
+        opp_summary.expected_number_of_awards -= 1
+        opp_summary.award_floor += 15000
+        opp_summary.award_ceiling -= 50000
+
+        opp_summary.is_cost_sharing = False
+        opp_summary.funding_instruments = [FundingInstrument.GRANT]
+        opp.category = OpportunityCategory.OTHER
+        opp.category_explanation = "i am an explanation"
+        opp_summary.funding_categories = [FundingCategory.ARTS]
+        opp_summary.funding_category_description = None
+
+        opp_l = factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_notification_content(
+            [
+                OpportunityVersionChange(
+                    opportunity_id=opp.opportunity_id, previous=opp_p, latest=opp_l
+                )
+            ]
+        )
+
+        expected = f'The following funding opportunity recently changed:<br><br><div>1. <a href=\'None/opportunity/{opp.opportunity_id}\' target=\'_blank\'>Opal 2025 award</a><br><br>Here’s what changed:</div><p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br><br><p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The application due date changed from July 19, 2025 to July 29, 2025.<br><p style="margin-left: 40px;">•  The estimated award date changed from October 10, 2025 to October 11, 2025.<br><p style="margin-left: 40px;">•  The estimated project start date changed from May 5, 2025 to May 7, 2025.<br><p style="margin-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br><p style="margin-left: 20px;">Awards details</p><p style="margin-left: 40px;">•  Program funding changed from 300000 to 250000.<br><p style="margin-left: 40px;">•  The number of expected awards changed from 10 to 9.<br><p style="margin-left: 40px;">•  The award minimum changed from 10000 to 25000.<br><p style="margin-left: 40px;">•  The award maximum changed from 300000 to 250000.<br><br><p style="margin-left: 20px;">Categorization</p><p style="margin-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br><p style="margin-left: 40px;">•  The funding instrument type has changed from Other to Grant.<br><p style="margin-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br><p style="margin-left: 40px;">•  Opportunity category explanation has changed from None to I am an explanation.<br><p style="margin-left: 40px;">•  The category of funding activity has changed from Other, Opportunity_zone_benefits to Arts.<br><br><br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href=\'None\' target=\'_blank\' style=\'color:blue;\'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href=\'mailto:support@grants.gov\'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>'
+
+        assert res.message == expected
+        assert res.subject == ""
+        assert res.updated_opportunity_ids == 1
