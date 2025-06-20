@@ -25,7 +25,7 @@ SF424_v4_0 = Form(
             "ContactPerson",
             "PhoneNumber",
             "Email",
-            "ApplicantTypeCode1",
+            "ApplicantTypeCode",
             "AgencyName",
             "FundingOpportunityNumber",
             "FundingOpportunityTitle",
@@ -53,15 +53,38 @@ SF424_v4_0 = Form(
         # Conditional validation rules for SF424
         # TODO - go through .dat and see what I'm missing
         "allOf": [
-            # If ApplicationType is Revision, RevisionType is required
+            # If ApplicationType is Revision, RevisionType + FederalAwardIdentifier are required
             {
                 "if": {"properties": {"ApplicationType": {"const": "Revision"}}},
-                "then": {"required": ["RevisionType"]},
+                "then": {"required": ["RevisionType", "FederalAwardIdentifier"]},
+            },
+            # If ApplicationType is Continuation, FederalAwardIdentifier is required
+            {
+                "if": {"properties": {"ApplicationType": {"const": "Continuation"}}},
+                "then": {"required": ["FederalAwardIdentifier"]},
             },
             # If RevisionType is E, RevisionOtherSpecify becomes required
             {
-                "if": {"properties": {"RevisionType": {"const": "E: Other (specify)"}}},
+                "if": {
+                    "properties": {"RevisionType": {"const": "E: Other (specify)"}},
+                    "required": ["RevisionType"] # Only run rule if RevisionType is set
+                },
                 "then": {"required": ["RevisionOtherSpecify"]},
+            },
+            # If DelinquentFederalDebt is True, DebtExplanation is required
+            {
+                "if": {"properties": {"DelinquentFederalDebt": {"const": True}}},
+                "then": {"required": ["DebtExplanation"]},
+            },
+            # If StateReview is option A, StateReviewAvailableDate is required
+            {
+                "if": {"properties": {"StateReview": {"const": "a. This application was made available to the State under the Executive Order 12372 Process for review on"}}},
+                "then": {"required": ["StateReviewAvailableDate"]},
+            },
+            # If one of the ApplicantTypeCode values is X: Other, then ApplicantTypeOtherSpecify is required
+            {
+                "if": {"properties": {"ApplicantTypeCode": {"const": "X: Other (specify)"}}}, # TODO - test this?
+                "then": {"required": ["ApplicantTypeOtherSpecify"]},
             },
         ],
         "properties": {
@@ -424,7 +447,6 @@ SF424_v4_0 = Form(
                 ],
             },
             "StateReviewAvailableDate": {
-                # TODO - optionally required if state review is A
                 "type": "string",
                 "title": "State Review Date",
                 "description": "Enter the date in the format MM/DD/YYYY.",
@@ -438,7 +460,6 @@ SF424_v4_0 = Form(
                 "description": "A selection is required.",
             },
             "DebtExplanation": {
-                # Required if delinquent is True
                 # TODO - attachment ID validation allOf
                 "type": "string",
                 "format": "uuid",
@@ -501,6 +522,14 @@ SF424_v4_0 = Form(
                     "City",
                     "Country",
                 ],
+                # Conditional validation rules for an address field
+                "allOf": [
+                    # If country is United States, State and ZipCode are required
+                    {
+                        "if": {"properties": {"Country": {"const": "USA: UNITED STATES"}}},
+                        "then": {"required": ["State", "ZipCode"]},
+                    },
+                ],
                 "properties": {
                     "Street1": {
                         "type": "string",
@@ -531,8 +560,9 @@ SF424_v4_0 = Form(
                         "maxLength": 30,
                     },
                     "State": {
-                        "$ref": "#/$defs/StateCode"
-                        # TODO - required if country is US
+                        "allOf": [{"$ref": "#/$defs/StateCode"}],
+                        "title": "State",
+                        "description": "Enter the State.",
                     },
                     "Province": {
                         "type": "string",
@@ -540,14 +570,13 @@ SF424_v4_0 = Form(
                         "description": "Enter the Province.",
                         "minLength": 1,
                         "maxLength": 30,
-                        # TODO optionally required
+                        # Note that grants.gov would hide this if the country isn't USA, but it isn't required even then
                     },
                     "Country": {"$ref": "#/$defs/CountryCode"},
                     "ZipCode": {
                         "type": "string",
                         "title": "Zip / Postal Code",
                         "description": "Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United States.",
-                        # TODO optionally required + has format if country is US
                     },
                 },
             },
@@ -595,7 +624,6 @@ SF424_v4_0 = Form(
                         "description": "Select the Suffix from the provided list or enter a new Suffix not provided on the list.",
                         "minLength": 1,
                         "maxLength": 10,
-                        # TODO - The existing system has a drop down + option for a custom value, do we care yet?
                     },
                     "Title": {
                         # TODO - this isn't in this part of the model of the SF424, but is in the global lib
@@ -778,7 +806,6 @@ SF424_v4_0 = Form(
                     "ECU: ECUADOR",
                     "EGY: EGYPT",
                     "SLV: EL SALVADOR",
-                    # TODO - why are these in here?
                     "XAZ: ENTITY 1",
                     "XCR: ENTITY 2",
                     "XCY: ENTITY 3",
