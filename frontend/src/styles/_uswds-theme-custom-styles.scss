@@ -558,3 +558,12 @@ dl {
     font-size: font-size("body", "3xs");
   }
 }
+
+.simpler-responsive-table {
+  thead {
+    @include at-media("tablet-lg") {
+      display: table-header-group;
+    }
+    display: none;
+  }
+}
