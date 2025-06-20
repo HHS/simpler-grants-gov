@@ -32,7 +32,7 @@ const StartApplicationModal = ({
   const [savedSearchName, setSavedSearchName] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
-  const token = user && user.token ? user.token : null;
+  const token = user?.token || null;
 
   const handleSubmit = useCallback(() => {
     if (!token) {
@@ -42,7 +42,7 @@ const StartApplicationModal = ({
       setValidationError(undefined);
     }
     if (!savedSearchName) {
-      setValidationError(t("startAppplicationModal.validationError"));
+      setValidationError(t("startApplicationModal.validationError"));
       return;
     }
     setLoading(true);
@@ -54,9 +54,9 @@ const StartApplicationModal = ({
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.cause === "401") {
-          setError(t("startAppplicationModal.loggedOut"));
+          setError(t("startApplicationModal.loggedOut"));
         } else {
-          setError(t("startAppplicationModal.error"));
+          setError(t("startApplicationModal.error"));
         }
         console.error(error);
       });
@@ -90,8 +90,8 @@ const StartApplicationModal = ({
         modalId={modalId}
         titleText={
           token
-            ? t("startAppplicationModal.title")
-            : t("startAppplicationModal.login")
+            ? t("startApplicationModal.title")
+            : t("startApplicationModal.login")
         }
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();

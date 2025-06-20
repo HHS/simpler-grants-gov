@@ -115,7 +115,7 @@ describe("StartApplicationModal", () => {
     );
 
     const closeButton = await screen.findByText(
-      "startAppplicationModal.cancelButtonText",
+      "startApplicationModal.cancelButtonText",
     );
     act(() => closeButton.click());
 
@@ -161,7 +161,7 @@ describe("StartApplicationModal", () => {
     );
 
     const validationError = await screen.findByText(
-      "startAppplicationModal.validationError",
+      "startApplicationModal.validationError",
     );
 
     expect(validationError).toBeInTheDocument();
@@ -201,7 +201,46 @@ describe("StartApplicationModal", () => {
       />,
     );
 
-    const error = await screen.findByText("startAppplicationModal.error");
+    const error = await screen.findByText("startApplicationModal.error");
+
+    expect(error).toBeInTheDocument();
+  });
+  it("displays an login error if API 401", async () => {
+    fetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
+    const { rerender } = render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const toggle = await screen.findByTestId(
+      "open-start-application-modal-button",
+    );
+    act(() => toggle.click());
+
+    rerender(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const saveButton = await screen.findByTestId(
+      "competition-start-individual-save",
+    );
+    const input = await screen.findByTestId("textInput");
+    fireEvent.change(input, { target: { value: "new application" } });
+    act(() => saveButton.click());
+
+    rerender(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const error = await screen.findByText("startApplicationModal.loggedOut");
 
     expect(error).toBeInTheDocument();
   });
@@ -255,7 +294,7 @@ describe("StartApplicationModal", () => {
     );
 
     expect(screen.queryAllByTestId("modalWindow")[0]).toHaveTextContent(
-      "startAppplicationModal.login",
+      "startApplicationModal.login",
     );
   });
 });
