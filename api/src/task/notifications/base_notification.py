@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseNotificationTask(Task):
-    Metrics = constants.Metrics
+    Metrics = constants.Metrics  # type: ignore[assignment]
 
     def __init__(
         self,

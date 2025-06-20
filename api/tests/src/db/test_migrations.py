@@ -1,4 +1,4 @@
-import logging  # noqa: B1
+import logging
 import uuid
 
 import alembic.command as command
