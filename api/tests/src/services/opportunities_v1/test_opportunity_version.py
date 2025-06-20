@@ -1,11 +1,21 @@
+import pytest
+
 from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.opportunity_models import OpportunityVersion
+from src.db.models.agency_models import Agency
+from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
+
+
+@pytest.fixture(autouse=True)
+def clear_data(db_session):
+    cascade_delete_from_db_table(db_session, Agency)
+    cascade_delete_from_db_table(db_session, Opportunity)
 
 
 def test_save_opportunity_version(db_session, enable_factory_create):
@@ -42,6 +52,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
                 "assistance_listing_number": opp_al.assistance_listing_number,
             }
         ],
+        "attachments": [],
     }
 
     # Save opportunity into opportunity_version table
