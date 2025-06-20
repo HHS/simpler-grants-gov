@@ -24,7 +24,7 @@ const statusCheckboxes = {
   "status-closed": "closed",
 };
 const fundingInstrumentCheckboxes = {
-  "funding-instrument-cooperative_agreement": "cooperative_agreement",
+  "funding-instrument-other": "other",
   "funding-instrument-grant": "grant",
 };
 

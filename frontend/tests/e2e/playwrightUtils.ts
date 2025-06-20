@@ -43,7 +43,13 @@ export async function waitForURLContainsQueryParamValue(
 
     return actualValue === queryParamValue;
   };
-  await waitForURLChange(page, changeCheck, timeout);
+  try {
+    await waitForURLChange(page, changeCheck, timeout);
+  } catch (_e) {
+    throw new Error(
+      `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,
+    );
+  }
 }
 
 export async function waitForUrl(

@@ -38,6 +38,8 @@ export const fundingOptions: FilterOption[] = [
     id: "funding-instrument-cooperative_agreement",
     label: "Cooperative Agreement",
     value: "cooperative_agreement",
+    tooltip:
+      "Involves active agency participation in a project, while grants provide funds and oversight without direct involvement.",
   },
   {
     id: "funding-instrument-grant",
@@ -48,6 +50,8 @@ export const fundingOptions: FilterOption[] = [
     id: "funding-instrument-procurement_contract",
     label: "Procurement Contract ",
     value: "procurement_contract",
+    tooltip:
+      "Allows the government to purchase goods and services for its benefit, while grants provide financial support to advance a public purpose.",
   },
   {
     id: "funding-instrument-other",

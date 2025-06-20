@@ -3,6 +3,12 @@ import userEvent from "@testing-library/user-event";
 
 import InfoTooltip from "src/components/InfoTooltip";
 
+jest.mock("src/components/TooltipWrapper", () => ({
+  DynamicTooltipWrapper: (props: unknown) =>
+    // eslint-disable-next-line
+    jest.requireActual("src/components/TooltipWrapper").TooltipWrapper(props),
+}));
+
 describe("InfoTooltip", () => {
   it("renders with default props", () => {
     render(<InfoTooltip text="Test tooltip" />);

@@ -59,7 +59,7 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  await checkBox.isEnabled();
+  await expect(checkBox).toBeEnabled();
   await checkBox.click();
 }
 
