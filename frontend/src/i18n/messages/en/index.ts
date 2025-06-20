@@ -489,9 +489,16 @@ export const messages = {
         awardMin: "Award min",
         awardMax: "Award max",
       },
+      statuses: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        archived: "Archived",
+        closed: "Closed",
+      },
       number: "Number",
       published: "Published",
       expectedAwards: "Expected awards",
+      tbd: "TBD",
     },
     accordion: {
       any: "Any",

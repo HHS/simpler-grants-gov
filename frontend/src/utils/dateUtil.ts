@@ -20,6 +20,11 @@ export function formatDate(dateStr: string | null): string {
   return dayjs(dateStr).format("LL");
 }
 
+// "2025-01-15" -> "Jan 15, 2025"
+export const toShortMonthDate = (unformattedDate: string): string => {
+  return dayjs(unformattedDate).format("MMM D, YYYY");
+};
+
 export const getConfiguredDayJs = () => dayjs;
 
 export const isExpired = (expiration?: number) =>
