@@ -38,10 +38,20 @@ const SearchResultsLegacySkeleton = ({
       <SearchResultsHeader sortby={sortby} />
       <div className="search-results-content">
         <div className="tablet-lg:display-flex">
-          <SearchPagination loading={true} page={page} query={query} />
+          <SearchPagination
+            loading={true}
+            page={page}
+            query={query}
+            className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
+          />
         </div>
         <Loading message={loadingMessage} />
-        <SearchPagination loading={true} page={page} query={query} />
+        <SearchPagination
+          loading={true}
+          page={page}
+          query={query}
+          className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
+        />
       </div>
     </>
   );
@@ -83,6 +93,7 @@ const SearchResultsListView = ({
             page={page}
             query={query}
             totalResults={totalResults}
+            className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
           />
         </div>
         <SearchResultsList searchResults={searchResults} page={page} />
