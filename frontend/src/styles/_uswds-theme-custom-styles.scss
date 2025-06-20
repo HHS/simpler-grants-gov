@@ -551,3 +551,11 @@ dl {
     }
   }
 }
+.simpler-responsive-table {
+  thead {
+    @include at-media("tablet-lg") {
+      display: table-header-group;
+    }
+    display: none;
+  }
+}
