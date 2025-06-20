@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
+import { LoginModalBody } from "src/components/LoginModal";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import CompetitionStartFormIndividiual from "src/components/workspace/CompetitionStartFormIndividiual";
@@ -25,36 +26,41 @@ const StartApplicationModal = ({
   const { user } = useUser();
   const router = useRouter();
   const t = useTranslations("OpportunityListing");
+  const headerTranslation = useTranslations("HeaderLoginModal");
   const modalId = "start-application";
   const [validationError, setValidationError] = useState<string>();
   const [savedSearchName, setSavedSearchName] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
+  const token = user?.token || null;
 
   const handleSubmit = useCallback(() => {
-    if (!user?.token) return;
-
+    if (!token) {
+      return;
+    }
     if (validationError) {
       setValidationError(undefined);
     }
     if (!savedSearchName) {
-      setValidationError(t("startAppplicationModal.validationError"));
+      setValidationError(t("startApplicationModal.validationError"));
       return;
     }
     setLoading(true);
-    startApplication(competitionId, savedSearchName, user.token)
+    startApplication(competitionId, savedSearchName, token)
       .then((data) => {
         const { applicationId } = data;
         router.push(`/workspace/applications/application/${applicationId}`);
       })
       .catch((error) => {
-        setError(t("startAppplicationModal.error"));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.cause === "401") {
+          setError(t("startApplicationModal.loggedOut"));
+        } else {
+          setError(t("startApplicationModal.error"));
+        }
         console.error(error);
-      })
-      .finally(() => {
-        setLoading(false);
       });
-  }, [competitionId, router, savedSearchName, t, user, validationError]);
+  }, [competitionId, router, savedSearchName, t, token, validationError]);
 
   const onClose = useCallback(() => {
     setError("");
@@ -82,22 +88,36 @@ const StartApplicationModal = ({
         modalRef={modalRef}
         className="text-wrap"
         modalId={modalId}
-        titleText={t("startAppplicationModal.title")}
+        titleText={
+          token
+            ? t("startApplicationModal.title")
+            : t("startApplicationModal.login")
+        }
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
         onClose={onClose}
       >
-        <CompetitionStartFormIndividiual
-          opportunityTitle={opportunityTitle}
-          loading={loading}
-          error={error}
-          onClose={onClose}
-          onSubmit={handleSubmit}
-          onChange={onChange}
-          modalRef={modalRef}
-          validationError={validationError}
-        />
+        {token ? (
+          <CompetitionStartFormIndividiual
+            opportunityTitle={opportunityTitle}
+            loading={loading}
+            error={error}
+            onClose={onClose}
+            onSubmit={handleSubmit}
+            onChange={onChange}
+            modalRef={modalRef}
+            validationError={validationError}
+          />
+        ) : (
+          <LoginModalBody
+            helpText={headerTranslation("help")}
+            buttonText={headerTranslation("button")}
+            closeText={headerTranslation("close")}
+            descriptionText={headerTranslation("description")}
+            modalRef={modalRef}
+          />
+        )}
       </SimplerModal>
     </div>
   );

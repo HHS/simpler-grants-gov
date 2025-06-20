@@ -1,7 +1,6 @@
 "use client";
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useUser } from "src/services/auth/useUser";
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import StartApplicationModal from "src/components/workspace/StartApplicationModal";
@@ -13,15 +12,10 @@ export const OpportunityCompetitionStart = ({
   competitions: [Competition];
   opportunityTitle: string;
 }) => {
-  const { user } = useUser();
   const { checkFeatureFlag } = useFeatureFlags();
   const openCompetitions = selectOpenCompetitions({ competitions });
 
-  if (
-    !openCompetitions.length ||
-    !user?.token ||
-    checkFeatureFlag("applyFormPrototypeOff")
-  ) {
+  if (!openCompetitions.length || checkFeatureFlag("applyFormPrototypeOff")) {
     return <></>;
   } else {
     return (
