@@ -34,7 +34,9 @@ export const SearchResultsControls = ({
         <h3 className={gridRowClasses.join(" ")}>
           {t("resultsHeader.message", { count: totalResults })}
         </h3>
-        <ExportSearchResultsButton />
+        <div className="tablet:display-block display-none">
+          <ExportSearchResultsButton />
+        </div>
       </div>
       <div className="flex-1 text-right">
         <SearchPagination
@@ -42,9 +44,9 @@ export const SearchResultsControls = ({
           page={page}
           query={query}
           totalResults={totalResults}
-          paginationClassName="flex-justify-end"
+          paginationClassName="flex-justify-start tablet:flex-justify-end border-top-0"
         />
-        <div className="tablet-lg:grid-col-auto">
+        <div className="tablet:display-block display-none">
           <SearchSortBy sortby={sortby} queryTerm={query} />
         </div>
       </div>
