@@ -27,6 +27,9 @@ ignore:
   # Last checked: May 20th, 2025
   - vulnerability: CVE-2025-4516
 
+  # This is a vulnerability in html.parser.HTMLParser which we don't use
+  - vulnerability: CVE-2025-6069
+
   # Tornado has a vulnerability in it, but we don't use this library.
   # This is one way you can run a gunicorn workers, but we don't.
   # We don't even pull this package in ourselves, so we likely need
