@@ -62,6 +62,8 @@ export default function SearchPagination({
   // is the source of truth
   const pageCount = totalPages || Number(totalPagesFromQuery);
 
+  console.log("!!!", pageCount, totalResults);
+
   return (
     <div
       className={

@@ -77,7 +77,7 @@ const SearchResultsListView = ({
       />
       <div className="search-results-content">
         <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton />
+          <ExportSearchResultsButton className="desktop:grid-col-4 desktop:display-flex flex-align-self-center" />
           <SearchPagination
             totalPages={totalPages}
             page={page}
@@ -113,7 +113,7 @@ const SearchResultsTableView = ({
         page={page}
         query={query}
         totalResults={totalResults}
-        totalPaages={totalPages}
+        totalPages={totalPages}
       />
       <SearchResultsTable searchResults={searchResults.data} />
     </>

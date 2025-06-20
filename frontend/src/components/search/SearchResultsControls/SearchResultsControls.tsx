@@ -30,19 +30,23 @@ export const SearchResultsControls = ({
 
   return (
     <div className="grid-row">
-      <h2 className={gridRowClasses.join(" ")}>
-        {t("resultsHeader.message", { count: totalResults })}
-      </h2>
-      <div className="tablet-lg:grid-col-auto">
-        <SearchSortBy sortby={sortby} queryTerm={query} />
+      <div className="flex-1">
+        <h2 className={gridRowClasses.join(" ")}>
+          {t("resultsHeader.message", { count: totalResults })}
+        </h2>
+        <ExportSearchResultsButton />
       </div>
-      <ExportSearchResultsButton />
-      <SearchPagination
-        totalPages={totalPages}
-        page={page}
-        query={query}
-        totalResults={totalResults}
-      />
+      <div className="flex-1">
+        <div className="tablet-lg:grid-col-auto">
+          <SearchSortBy sortby={sortby} queryTerm={query} />
+        </div>
+        <SearchPagination
+          totalPages={totalPages}
+          page={page}
+          query={query}
+          totalResults={totalResults}
+        />
+      </div>
     </div>
   );
 };
