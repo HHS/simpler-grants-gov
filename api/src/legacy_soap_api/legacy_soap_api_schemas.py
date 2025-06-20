@@ -1,6 +1,14 @@
 from pydantic import BaseModel, ConfigDict
 
 
+class SOAPClientCertificateNotConfigured(Exception):
+    pass
+
+
+class SOAPClientCertificateParsingError(Exception):
+    pass
+
+
 class SOAPRequest(BaseModel):
     data: bytes
     full_path: str

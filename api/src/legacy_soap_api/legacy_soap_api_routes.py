@@ -4,6 +4,7 @@ from flask import request
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, get_soap_auth
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
@@ -21,6 +22,7 @@ def simpler_soap_applicants_api(db_session: db.Session) -> tuple:
     logger.info("applicants soap request received")
     client = SimplerApplicantsS2SClient(
         db_session=db_session,
+        auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
         soap_request=SOAPRequest(
             method="POST",
             full_path=request.full_path,
@@ -44,6 +46,7 @@ def simpler_soap_grantors_api(db_session: db.Session) -> tuple:
     logger.info("grantors soap request received")
     client = SimplerGrantorsS2SClient(
         db_session=db_session,
+        auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
         soap_request=SOAPRequest(
             method="POST",
             full_path=request.full_path,
