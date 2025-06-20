@@ -29,23 +29,24 @@ export const SearchResultsControls = ({
   const t = useTranslations("Search");
 
   return (
-    <div className="grid-row">
+    <div className="grid-row padding-top-4">
       <div className="flex-1">
-        <h2 className={gridRowClasses.join(" ")}>
+        <h3 className={gridRowClasses.join(" ")}>
           {t("resultsHeader.message", { count: totalResults })}
-        </h2>
+        </h3>
         <ExportSearchResultsButton />
       </div>
-      <div className="flex-1">
-        <div className="tablet-lg:grid-col-auto">
-          <SearchSortBy sortby={sortby} queryTerm={query} />
-        </div>
+      <div className="flex-1 text-right">
         <SearchPagination
           totalPages={totalPages}
           page={page}
           query={query}
           totalResults={totalResults}
+          paginationClassName="flex-justify-end"
         />
+        <div className="tablet-lg:grid-col-auto">
+          <SearchSortBy sortby={sortby} queryTerm={query} />
+        </div>
       </div>
     </div>
   );

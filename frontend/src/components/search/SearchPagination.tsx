@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 
@@ -18,6 +19,8 @@ interface SearchPaginationProps {
   scroll?: boolean;
   totalResults?: string;
   loading?: boolean;
+  className?: string;
+  paginationClassName?: string;
 }
 
 const MAX_SLOTS = 7;
@@ -32,6 +35,8 @@ export default function SearchPagination({
   scroll = false,
   totalResults = "",
   loading = false,
+  className,
+  paginationClassName,
 }: SearchPaginationProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const {
@@ -62,17 +67,15 @@ export default function SearchPagination({
   // is the source of truth
   const pageCount = totalPages || Number(totalPagesFromQuery);
 
-  console.log("!!!", pageCount, totalResults);
-
   return (
-    <div
-      className={
-        "desktop:grid-col-fill desktop:display-flex flex-justify-center"
-      }
-    >
+    <div className={className}>
       {totalResults !== "0" && pageCount > 0 && (
         <Pagination
-          className={`grants-pagination padding-top-2 border-top-1px border-base tablet-lg:padding-top-0 tablet-lg:border-top-0 ${loading ? "disabled" : ""}`}
+          className={clsx(
+            "grants-pagination padding-top-2 border-top-1px border-base tablet-lg:padding-top-0 tablet-lg:border-top-0",
+            { disabled: loading },
+            paginationClassName,
+          )}
           aria-disabled={loading}
           pathname="/search"
           totalPages={pageCount}

@@ -44,22 +44,22 @@ export const SearchResultsTable = ({
     <Table>
       <thead>
         <tr>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.closeDate")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.status")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.title")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.agency")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.awardMin")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
+          <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
             {t("headings.awardMax")}
           </th>
         </tr>
