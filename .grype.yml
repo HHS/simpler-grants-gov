@@ -28,6 +28,7 @@ ignore:
   - vulnerability: CVE-2025-4516
 
   # This is a vulnerability in html.parser.HTMLParser which we don't use
+  # Last checked: June 20th, 2025
   - vulnerability: CVE-2025-6069
 
   # Tornado has a vulnerability in it, but we don't use this library.
