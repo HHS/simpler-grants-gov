@@ -331,16 +331,6 @@ class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    application_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Application.application_id), nullable=False, index=True
-    )
-    application: Mapped[Application] = relationship(Application)
-
-    form_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Form.form_id), nullable=False, index=True
-    )
-    form: Mapped[Form] = relationship(Form)
-
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
     is_valid: Mapped[bool] = mapped_column(nullable=False, default=True)
 
