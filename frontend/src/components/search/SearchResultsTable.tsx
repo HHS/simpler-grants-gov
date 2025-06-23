@@ -106,38 +106,6 @@ export const toSearchResultsTableRow = (
   ];
 };
 
-export const SearchResultsTable = ({
-  searchResults,
-}: {
-  searchResults: SearchResponseData;
-}) => {
-  const t = useTranslations("Search.table");
-  const headerContent: TableCellData[] = [
-    { cellData: t("headings.closeDate") },
-    { cellData: t("headings.status") },
-    { cellData: t("headings.title") },
-    { cellData: t("headings.agency") },
-    { cellData: t("headings.awardMin") },
-    { cellData: t("headings.awardMax") },
-  ];
-  const tableRowData = searchResults.map(toSearchResultsTableRow);
-  // const tableRowDataWithResponsiveHeaderCells = tableRowData.map(
-  //   (resultData, i) => {
-  //     console.log("###", resultData, headerContent[i]);
-  //     resultData.unshift({
-  //       cellData: headerContent[i].cellData,
-  //     });
-  //     return resultData;
-  //   },
-  // );
-  return (
-    <TableWithResponsiveHeader
-      headerContent={headerContent}
-      tableRowData={tableRowData}
-    />
-  );
-};
-
 const TableWithResponsiveHeader = ({
   headerContent,
   tableRowData,
@@ -171,13 +139,17 @@ const TableWithResponsiveHeader = ({
 
   const dataRows = tableRowData.map((tableRow, i) => {
     return (
-      <tr key={`responsiveTableRow-${i}`}>
+      <tr
+        key={`responsiveTableRow-${i}`}
+        className="border-base-lighter border-x border-y-05 tablet-lg:border-0"
+      >
         {tableRow.map((tableCell, j) => {
           return (
             <td
               key={`responsiveTableCell-${i}-${j}`}
               className={clsx(
                 "tablet-lg:display-table-cell",
+                "border-base-lighter",
                 tableCell.className,
                 {
                   "display-none": tableCell.hideWhenStacked,
@@ -186,10 +158,10 @@ const TableWithResponsiveHeader = ({
               )}
             >
               <div className="display-flex">
-                <div className="tablet-lg:display-none flex-1">
+                <div className="tablet-lg:display-none flex-1 text-bold">
                   {headerContent[j].cellData}
                 </div>
-                <div className="flex-3">{tableCell.cellData}</div>
+                <div className="flex-2 tablet:flex-3">{tableCell.cellData}</div>
               </div>
             </td>
           );
@@ -199,7 +171,7 @@ const TableWithResponsiveHeader = ({
   });
 
   return (
-    <Table className="simpler-responsive-table">
+    <Table className="simpler-responsive-table width-full tablet-lg:width-auto border-base-lighter tablet-lg:border-0">
       <thead>
         <tr>
           {[<DummyTableHeaderCell key="dummyTableHeaderCell" />].concat(
@@ -209,6 +181,38 @@ const TableWithResponsiveHeader = ({
       </thead>
       <tbody>{dataRows}</tbody>
     </Table>
+  );
+};
+
+export const SearchResultsTable = ({
+  searchResults,
+}: {
+  searchResults: SearchResponseData;
+}) => {
+  const t = useTranslations("Search.table");
+  const headerContent: TableCellData[] = [
+    { cellData: t("headings.closeDate") },
+    { cellData: t("headings.status") },
+    { cellData: t("headings.title") },
+    { cellData: t("headings.agency") },
+    { cellData: t("headings.awardMin") },
+    { cellData: t("headings.awardMax") },
+  ];
+  const tableRowData = searchResults.map(toSearchResultsTableRow);
+  // const tableRowDataWithResponsiveHeaderCells = tableRowData.map(
+  //   (resultData, i) => {
+  //     console.log("###", resultData, headerContent[i]);
+  //     resultData.unshift({
+  //       cellData: headerContent[i].cellData,
+  //     });
+  //     return resultData;
+  //   },
+  // );
+  return (
+    <TableWithResponsiveHeader
+      headerContent={headerContent}
+      tableRowData={tableRowData}
+    />
   );
 };
 

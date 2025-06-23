@@ -566,4 +566,17 @@ dl {
     }
     display: none;
   }
+  tbody {
+    td {
+      word-wrap: anywhere;
+    }
+    tr:nth-child(2n) {
+      td {
+        background-color: color(gray-warm-2);
+        @include at-media("tablet-lg") {
+          background-color: white;
+        }
+      }
+    }
+  }
 }
