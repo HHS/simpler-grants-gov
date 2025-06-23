@@ -1,3 +1,4 @@
+from datetime import datetime, date
 import logging
 from typing import Sequence
 from uuid import UUID
@@ -342,6 +343,22 @@ class OpportunityNotificationTask(BaseNotificationTask):
             updated_opportunity_ids=updated_opp_ids,
         )
 
+    def _normalize_date_field(self, value: date | int | None) -> str | int:
+        if isinstance(value, date):
+            return value.strftime("%B %-d, %Y")
+        return value
+
+    def _build_important_dates_content(self, imp_dates_change: dict) -> str:
+        important_section = SECTION_STYLING.format("Important dates")
+        for field, change in imp_dates_change.items():
+            before = self._normalize_date_field(change["before"])
+            after = self._normalize_date_field(change["after"])
+
+            important_section += (
+                f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return important_section
+
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
         assert opp_change.previous is not None
@@ -355,6 +372,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         sections = []
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
+
 
         if not sections:
             logger.info(
