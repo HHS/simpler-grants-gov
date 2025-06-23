@@ -413,7 +413,7 @@ def test_application_form_update_success_update(
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
@@ -992,7 +992,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_a_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -1010,7 +1010,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_b_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -1069,7 +1069,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
