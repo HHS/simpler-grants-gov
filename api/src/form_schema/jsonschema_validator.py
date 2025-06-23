@@ -1,4 +1,5 @@
 import logging
+import typing
 
 import jsonschema
 
@@ -6,6 +7,34 @@ from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import Form
 
 logger = logging.getLogger(__name__)
+
+
+def _required(
+    validator: jsonschema.Draft202012Validator,
+    required: typing.Any,
+    instance: typing.Any,
+    _: typing.Any,
+) -> typing.Generator[jsonschema.ValidationError]:
+    """Handle a required field in the JSON schema validation
+
+    This is an almost exact copy of the base implementation,
+    but we add the field to the path so that we know what
+    field is missing in the path.
+    """
+
+    if not validator.is_type(instance, "object"):
+        return
+
+    for field_name in required:
+        if field_name not in instance:
+            yield jsonschema.ValidationError(
+                f"{field_name!r} is a required property", path=[field_name]
+            )
+
+
+OUR_VALIDATOR = jsonschema.validators.extend(
+    validator=jsonschema.Draft202012Validator, validators={"required": _required}
+)
 
 
 def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
@@ -25,12 +54,12 @@ def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
     # Validate that the schema passed in is actually valid
     # as an invalid schema can produce unknown results
     try:
-        jsonschema.Draft202012Validator.check_schema(json_schema)
+        OUR_VALIDATOR.check_schema(json_schema)
     except jsonschema.exceptions.SchemaError:
         logger.exception("Invalid json schema found, cannot validate")
         raise
 
-    validator = jsonschema.Draft202012Validator(
+    validator = OUR_VALIDATOR(
         json_schema, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER
     )
 
