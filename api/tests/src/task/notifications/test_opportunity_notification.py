@@ -55,8 +55,7 @@ class TestOpportunityNotification:
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
 
-        diff_user = factories.LinkExternalUserFactory.create(email="test@example.com")
-        user_2 = diff_user.user
+        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         # Create a saved opportunity that needs notification
         opp_1 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
