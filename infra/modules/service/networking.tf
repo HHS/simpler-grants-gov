@@ -25,6 +25,8 @@ resource "aws_security_group" "alb" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    # TODO(https://github.com/HHS/simpler-grants-gov/issues/5415) Restrict outbound traffic
+    # checkov:skip=CKV_AWS_382:Work on restricting outgoing traffic once integrations are more finalized
   }
 }
 
