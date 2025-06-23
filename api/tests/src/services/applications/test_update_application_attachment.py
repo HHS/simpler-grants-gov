@@ -177,3 +177,35 @@ def test_update_application_attachment_with_real_file(enable_factory_create, db_
     # If the file path changed, old file should be deleted
     if old_file_location != updated_attachment.file_location:
         assert file_util.file_exists(old_file_location) is False
+
+
+def test_update_application_no_filename(enable_factory_create, db_session, s3_config):
+    """Test successful update of an application attachment."""
+    user = UserFactory.create()
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Create existing attachment
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    # Mock file for updating
+    mock_file = MagicMock(spec=FileStorage)
+    mock_file.filename = None
+    mock_file.mimetype = "application/pdf"
+    mock_file.save = MagicMock()
+
+    form_and_files_data = {"file_attachment": mock_file}
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
+        update_application_attachment(
+            db_session,
+            application.application_id,
+            existing_attachment.application_attachment_id,
+            user,
+            form_and_files_data,
+        )
+
+    assert excinfo.value.status_code == 422
+    assert "Invalid file name, cannot parse" in excinfo.value.message
