@@ -41,7 +41,7 @@ const CompetitionStartFormIndividiual = ({
           {opportunityTitle}
         </p>
         <p className="font-sans-3xs">
-          {t("startAppplicationModal.requiredText")}
+          {t("startApplicationModal.requiredText")}
         </p>
         <Label
           id={`label-for-name`}
@@ -49,9 +49,9 @@ const CompetitionStartFormIndividiual = ({
           htmlFor="application-name"
           className="font-sans-2xs"
         >
-          {t("startAppplicationModal.name")}
+          {t("startApplicationModal.name")}
           <span>
-            <br /> {t("startAppplicationModal.description")}
+            <br /> {t("startApplicationModal.description")}
           </span>
         </Label>
         {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
@@ -68,10 +68,9 @@ const CompetitionStartFormIndividiual = ({
             onClick={onSubmit}
             type="button"
             data-testid="competition-start-individual-save"
+            disabled={!!loading}
           >
-            {loading
-              ? "loading..."
-              : t("startAppplicationModal.saveButtonText")}
+            {loading ? "loading..." : t("startApplicationModal.saveButtonText")}
           </Button>
           <ModalToggleButton
             modalRef={modalRef}
@@ -80,7 +79,7 @@ const CompetitionStartFormIndividiual = ({
             className="padding-105 text-center"
             onClick={onClose}
           >
-            {t("startAppplicationModal.cancelButtonText")}
+            {t("startApplicationModal.cancelButtonText")}
           </ModalToggleButton>
         </ModalFooter>
       </FormGroup>
