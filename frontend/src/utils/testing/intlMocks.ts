@@ -1,7 +1,13 @@
 import { TFn } from "src/types/intl";
 
-export function mockUseTranslations(translationKey: string) {
-  return translationKey;
+export function mockUseTranslations(
+  translationKey: string,
+  options?: { [key: string]: string },
+) {
+  if (!options?.count) {
+    return translationKey;
+  }
+  return `${translationKey} ${Object.values(options).join(",")}`;
 }
 
 mockUseTranslations.rich = (translationKey: string) => translationKey;
