@@ -63,17 +63,19 @@ const TitleDisplay = ({
           {opportunity.opportunity_title}
         </a>
       </div>
-      <div className="font-sans-xs">
+      <div className="display-none tablet-lg:display-block font-sans-xs">
         <span className="text-bold">{t("number")}:</span>{" "}
         {opportunity.opportunity_number}
       </div>
       {saved && (
-        <div className="margin-y-1 bg-base-lightest padding-x-2 display-inline-block">
-          <USWDSIcon
-            name="star"
-            className="text-accent-warm-dark button-icon-md padding-right-05"
-          />
-          {t("saved")}
+        <div className="margin-top-2 display-none tablet-lg:display-inline-block">
+          <span className="padding-x-105 padding-y-2px bg-base-lighter display-flex flex-align-center font-sans-2xs radius-sm">
+            <USWDSIcon
+              name="star"
+              className="text-accent-warm-dark button-icon-md padding-right-05"
+            />
+            {t("saved")}
+          </span>
         </div>
       )}
     </>
