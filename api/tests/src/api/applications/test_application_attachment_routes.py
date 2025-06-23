@@ -1,4 +1,5 @@
 import uuid
+from io import BytesIO
 from pathlib import Path
 
 import pytest
@@ -334,6 +335,43 @@ def test_application_attachment_update_422_not_a_file(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
         headers={"X-SGG-Token": user_auth_token},
         data={"file_attachment": "not-a-file"},
+    )
+
+    assert response.status_code == 422
+    assert response.json["message"] == "Validation error"
+    assert response.json["errors"] == [
+        {
+            "field": "file_attachment",
+            "message": "Not a valid file.",
+            "type": "invalid",
+            "value": None,
+        }
+    ]
+
+
+def test_application_attachment_update_422_bad_type(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    """If we pass a non-file stream in, Werkzeug can handle it
+    but our API libraries don't, verify that fails gracefully
+    """
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+
+    # Create an existing attachment first
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": BytesIO(b"not-a-file")},
     )
 
     assert response.status_code == 422
