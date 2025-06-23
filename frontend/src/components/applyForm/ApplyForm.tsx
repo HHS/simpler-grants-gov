@@ -41,6 +41,8 @@ const ApplyForm = ({
   const { formData, errorMessage, successMessage, validationErrors } =
     formState;
 
+    console.log(validationErrors)
+
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];

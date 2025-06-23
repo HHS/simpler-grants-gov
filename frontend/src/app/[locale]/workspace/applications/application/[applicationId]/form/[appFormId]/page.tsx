@@ -11,7 +11,10 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  FormValidationWarnings,
+} from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
@@ -33,53 +36,55 @@ export function generateMetadata() {
 }
 
 interface formPageProps {
-  params: Promise<{ formId: string; applicationId: string; locale: string }>;
+  params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
 }
 
 async function FormPage({ params }: formPageProps) {
-  const { applicationId, formId } = await params;
-  let formData = {} as FormDetail;
+  const { applicationId, appFormId } = await params;
   let applicationData = {} as ApplicationDetail;
-  const session = await getSession();
+  let formValidationWarnings = [] as unknown as FormValidationWarnings;
+  let formId = "";
+  let formData: FormDetail | null;
+  const session = await getSession(); 
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session to access form");
   }
 
   try {
-    const response = await getFormDetails(formId);
-    if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving form details for formID (${formId})`,
-        response,
-      );
-      return <TopLevelError />;
-    }
-    formData = response.data;
-  } catch (e) {
-    console.error(
-      `Error retrieving application details for formId ${formId}:`,
-      e,
-    );
-    if (parseErrorStatus(e as ApiRequestError) === 404) {
-      return <NotFound />;
-    }
-    return <TopLevelError />;
-  }
-
-  try {
     const response = await getApplicationDetails(applicationId, session.token);
+    console.log("applicationData", response);
     if (response.status_code !== 200) {
       console.error(
-        `Error retrieving form details for applicationID (${applicationId}), formID (${formId})`,
+        `Error retrieving form details for applicationID (${applicationId}), appFormId (${appFormId})`,
         response,
       );
       return <TopLevelError />;
     }
     applicationData = response.data;
+    formId = applicationData.application_forms?.find(
+      (form) => form.application_form_id === appFormId,
+    )?.form_id || ""; 
+    if (!formId) {
+      console.error(
+        `No form found for applicationID (${applicationId}), appFormId (${appFormId})`,
+      );
+      return <TopLevelError />;
+    }
+    formData = applicationData.competition.competition_forms.find(
+      (form) => form.form.form_id === formId,
+    )?.form || null;
+    if (!formData) {
+      console.error(
+        `No form data found for applicationID (${applicationId}), appFormId (${appFormId}), formId (${formId})`,
+      );
+      return <TopLevelError />;
+    }
+    formValidationWarnings = applicationData.form_validation_warnings?.[appFormId];
+    console.log("formValidationWarnings", formValidationWarnings, appFormId, formId);
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
-        `Error retrieving application details for applicationID (${applicationId}), formId ${formId}:`,
+        `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
         e,
       );
       return <NotFound />;

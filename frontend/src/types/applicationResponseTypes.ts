@@ -31,12 +31,22 @@ export interface ApplicationFormDetail {
   form_id: string;
 }
 
+export interface FormValidationWarnings {
+  [applicationId: string]: {
+    field: string;
+    message: string;
+    type: string;
+    value: string;
+  };
+}
+
 export interface ApplicationDetail {
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
   application_status: string;
   competition: Competition;
+  form_validation_warnings?: FormValidationWarnings;
   organization: Oranization;
   users: {
     email: string;
