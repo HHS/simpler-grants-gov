@@ -162,6 +162,8 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "Federal Award Identifier",
             "description": "For new applications leave blank. For a continuation or revision to an existing award, enter the previously assigned Federal award identifier number. If a changed/corrected application, enter the Federal Identifier in accordance with agency instructions.",
+            "minLength": 1,
+            "maxLength": 25,
         },
         "StateReceiveDate": {
             # A user will never fill this in, it's just on the form for agencies to use
@@ -238,11 +240,9 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the daytime Telephone Number.",
         },
         "Fax": {
-            "type": "string",
+            "allOf": [{"$ref": "#/$defs/PhoneNumber"}],
             "title": "Fax Number",
             "description": "Enter the Fax Number.",
-            "minLength": 1,
-            "maxLength": 25,
         },
         "Email": {
             "type": "string",
@@ -625,11 +625,10 @@ FORM_JSON_SCHEMA = {
             # to avoid any floating point rounding issues.
             "type": "string",
             # Pattern here effectively says:
-            # * Must start with a digit 1-9 (no negative, no currency symbol, no leading 0s)
-            # * Then any number of digits
-            # * A decimal point
-            # * Then exactly 2 digits
-            "pattern": r"^[1-9]\d*([.]\d{2})?$",
+            # * Any number of digits
+            # * An optional decimal point
+            # * Then exactly 2 digits - if there was a decimal
+            "pattern": r"^\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },
