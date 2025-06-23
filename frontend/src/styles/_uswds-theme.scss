@@ -18,6 +18,7 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
+  $flex-direction-settings: (responsive: true),
   // Layout & grid settings
   $flex-settings: (
       output: true,
