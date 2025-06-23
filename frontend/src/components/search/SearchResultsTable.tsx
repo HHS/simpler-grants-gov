@@ -15,7 +15,8 @@ import { Table } from "@trussworks/react-uswds";
 
 type TableCellData = {
   cellData: ReactNode;
-  hideWhenStacked?: boolean;
+  stackOrder: number;
+  // hideWhenStacked?: boolean;
   className?: string;
 };
 
@@ -57,9 +58,11 @@ export const toSearchResultsTableRow = (
       cellData: result.summary.close_date
         ? toShortMonthDate(result.summary.close_date)
         : t("tbd"),
+      stackOrder: 2,
     },
     {
       cellData: <SearchTableStatusDisplay status={result.opportunity_status} />,
+      stackOrder: 1,
     },
     {
       cellData: (
@@ -75,6 +78,7 @@ export const toSearchResultsTableRow = (
           </div>
         </>
       ),
+      stackOrder: 0,
     },
     {
       cellData: (
@@ -92,16 +96,19 @@ export const toSearchResultsTableRow = (
           </div>
         </>
       ),
+      stackOrder: -1, // hidden
     },
     {
       cellData: isNil(result.summary.award_floor)
         ? "$--"
         : formatCurrency(result.summary.award_floor),
+      stackOrder: 3,
     },
     {
       cellData: isNil(result.summary.award_ceiling)
         ? "$--"
         : formatCurrency(result.summary.award_ceiling),
+      stackOrder: 4,
     },
   ];
 };
@@ -150,10 +157,12 @@ const TableWithResponsiveHeader = ({
               className={clsx(
                 "tablet-lg:display-table-cell",
                 "border-base-lighter",
+                `order-${tableCell.stackOrder}`,
+                `tablet-lg:order-${j}`,
                 tableCell.className,
                 {
-                  "display-none": tableCell.hideWhenStacked,
-                  "display-block": !tableCell.hideWhenStacked,
+                  "display-none": tableCell.stackOrder < 0,
+                  "display-block": tableCell.stackOrder > -1,
                 },
               )}
             >

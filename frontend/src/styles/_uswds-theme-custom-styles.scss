@@ -566,6 +566,13 @@ dl {
     }
     display: none;
   }
+  tr {
+    @include at-media("tablet-lg") {
+      display: table-row;
+    }
+    display: flex;
+    flex-direction: column;
+  }
   tbody {
     td {
       word-wrap: anywhere;
