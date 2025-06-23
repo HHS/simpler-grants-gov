@@ -224,8 +224,7 @@ class TestOpportunityNotification:
     ):
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
-        user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2)
+        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         # Create a saved opportunity that needs notification
         opp_1 = factories.OpportunityFactory.create(is_posted_summary=True)
