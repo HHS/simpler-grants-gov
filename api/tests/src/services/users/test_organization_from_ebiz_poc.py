@@ -65,7 +65,6 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     sam_gov_entity = SamGovEntityFactory.create(
         ebiz_poc_email="creates@example.com",
         legal_business_name="New Org",
-        uei="ABC123456789",
     )
 
     user = UserFactory.create()
