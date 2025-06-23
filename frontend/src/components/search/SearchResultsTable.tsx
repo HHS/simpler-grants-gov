@@ -25,7 +25,7 @@ const statusColorClasses = {
   archived: "bg-base-lightest",
 };
 
-export const SearchTableStatusDisplay = ({
+const SearchTableStatusDisplay = ({
   status,
 }: {
   status: OpportunityStatus;
@@ -89,7 +89,7 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
       <div className="margin-bottom-1">{opportunity.agency_name}</div>
       <div className="font-sans-xs">
         <span className="text-bold">{t("published")}</span>:{" "}
-        {opportunity.summary.post_date}
+        {toShortMonthDate(opportunity.summary.post_date || "")}
       </div>
       <div className="font-sans-xs">
         {t("expectedAwards")}:{" "}
@@ -101,7 +101,7 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
   );
 };
 
-export const toSearchResultsTableRow = (
+const toSearchResultsTableRow = (
   result: BaseOpportunity,
   saved: boolean,
 ): TableCellData[] => {

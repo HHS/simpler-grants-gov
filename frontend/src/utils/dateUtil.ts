@@ -22,7 +22,8 @@ export function formatDate(dateStr: string | null): string {
 
 // "2025-01-15" -> "Jan 15, 2025"
 export const toShortMonthDate = (unformattedDate: string): string => {
-  return dayjs(unformattedDate).format("MMM D, YYYY");
+  const dateInstance = dayjs(unformattedDate);
+  return dateInstance.isValid() ? dateInstance.format("MMM D, YYYY") : "";
 };
 
 export const getConfiguredDayJs = () => dayjs;
