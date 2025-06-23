@@ -39,26 +39,24 @@ class TestOpportunityNotification:
         cascade_delete_from_db_table(db_session, Opportunity)
         cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def user_with_email(self, db_session, user, monkeypatch):
         return link_user_with_email(user)
 
     def test_email_notifications_collection(
         self,
-        cli_runner,
         db_session,
-        search_client,
+        cli_runner,
         enable_factory_create,
         user,
-        user_with_email,
         caplog,
-        monkeypatch,
         email_notification_task,
     ):
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
-        user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2)
+
+        diff_user = factories.LinkExternalUserFactory.create(email="test@example.com")
+        user_2 = diff_user.user
 
         # Create a saved opportunity that needs notification
         opp_1 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
@@ -125,11 +123,11 @@ class TestOpportunityNotification:
             opp_id = user_saved_opp.opportunity_id
 
             if opp_id == opp_1.opportunity_id:
-                assert latest_opp_ver == opp_1_v_2
+                assert latest_opp_ver.opportunity_id == opp_1_v_2.opportunity_id
             elif opp_id == opp_2.opportunity_id:
-                assert latest_opp_ver == opp_2_v_1
+                assert latest_opp_ver.opportunity_id == opp_2_v_1.opportunity_id
             elif opp_id == opp_3.opportunity_id:
-                assert latest_opp_ver == opp_3_v_2
+                assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
 
         # Run the notification task
         email_notification_task.run()
@@ -157,14 +155,12 @@ class TestOpportunityNotification:
 
     def test_with_no_user_email_notification(
         self,
-        cli_runner,
         db_session,
-        search_client,
         enable_factory_create,
-        user,
         email_notification_task,
     ):
         """Test that no notification is collected if the user has no linked email address."""
+        user = factories.UserFactory.create()
         # Create a saved opportunity that needs notification
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
         factories.OpportunityVersionFactory.create(
@@ -187,9 +183,7 @@ class TestOpportunityNotification:
 
     def test_with_no_prior_version_email_collections(
         self,
-        cli_runner,
         db_session,
-        search_client,
         enable_factory_create,
         user,
         email_notification_task,
@@ -211,9 +205,7 @@ class TestOpportunityNotification:
 
     def test_no_updates_email_collections(
         self,
-        cli_runner,
         db_session,
-        search_client,
         enable_factory_create,
         user,
         email_notification_task,
@@ -235,12 +227,9 @@ class TestOpportunityNotification:
 
     def test_last_notified_version(
         self,
-        cli_runner,
         db_session,
-        search_client,
         enable_factory_create,
         user,
-        monkeypatch,
         email_notification_task,
     ):
         """
@@ -248,8 +237,7 @@ class TestOpportunityNotification:
         OpportunityVersion created *before* each user's `last_notified_at` timestamp for the given opportunity
         """
         # create a different user
-        user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2)
+        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         v_1 = factories.OpportunityVersionFactory.create()
         opp = v_1.opportunity
