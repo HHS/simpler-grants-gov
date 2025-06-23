@@ -1,8 +1,8 @@
 """add rule schema column
 
 Revision ID: 05bb2e440f27
-Revises: bf5b294a7b85
-Create Date: 2025-06-17 15:19:34.693516
+Revises: a10c4a8ecd42
+Create Date: 2025-06-23 15:19:34.693516
 
 """
 
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "05bb2e440f27"
-down_revision = "bf5b294a7b85"
+down_revision = "a10c4a8ecd42"
 branch_labels = None
 depends_on = None
 

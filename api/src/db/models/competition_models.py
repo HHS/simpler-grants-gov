@@ -326,6 +326,17 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
         return pre_sign_file_location(self.file_location)
 
 
+class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "short_lived_internal_token"
+
+    short_lived_internal_token_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    is_valid: Mapped[bool] = mapped_column(nullable=False, default=True)
+
+
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_competition_open_to_applicant"
 
