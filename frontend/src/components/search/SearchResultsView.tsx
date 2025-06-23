@@ -57,12 +57,7 @@ const SearchResultsLegacySkeleton = ({
   );
 };
 
-const SearchResultsTableSkeleton = ({
-  sortby,
-  page,
-  query,
-  loadingMessage,
-}: SearchResultsSkeletonProps) => {
+const SearchResultsTableSkeleton = () => {
   return (
     <>
       <div>Loading the table...</div>

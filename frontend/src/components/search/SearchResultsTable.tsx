@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { isNil } from "lodash";
+import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import {
   BaseOpportunity,
   OpportunityStatus,
@@ -15,6 +16,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const statusColorClasses = {
   posted: "bg-accent-warm-light",
@@ -46,7 +48,13 @@ const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
   return <>{closeDate ? toShortMonthDate(closeDate) : t("tbd")}</>;
 };
 
-const TitleDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
+const TitleDisplay = ({
+  opportunity,
+  saved,
+}: {
+  opportunity: BaseOpportunity;
+  saved: boolean;
+}) => {
   const t = useTranslations("Search.table");
   return (
     <>
@@ -59,6 +67,15 @@ const TitleDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
         <span className="text-bold">{t("number")}:</span>{" "}
         {opportunity.opportunity_number}
       </div>
+      {saved && (
+        <div className="margin-y-1 bg-base-lightest padding-x-2 display-inline-block">
+          <USWDSIcon
+            name="star"
+            className="text-accent-warm-dark button-icon-md padding-right-05"
+          />
+          {t("saved")}
+        </div>
+      )}
     </>
   );
 };
@@ -84,6 +101,7 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
 
 export const toSearchResultsTableRow = (
   result: BaseOpportunity,
+  saved: boolean,
 ): TableCellData[] => {
   return [
     {
@@ -97,7 +115,7 @@ export const toSearchResultsTableRow = (
       stackOrder: 1,
     },
     {
-      cellData: <TitleDisplay opportunity={result} />,
+      cellData: <TitleDisplay opportunity={result} saved={saved} />,
       stackOrder: 0,
     },
     {
@@ -119,12 +137,18 @@ export const toSearchResultsTableRow = (
   ];
 };
 
-export const SearchResultsTable = ({
+export const SearchResultsTable = async ({
   searchResults,
 }: {
   searchResults: SearchResponseData;
 }) => {
   const t = useTranslations("Search.table");
+
+  const savedOpportunities = await fetchSavedOpportunities();
+  const savedOpportunityIds = savedOpportunities.map(
+    (opportunity) => opportunity.opportunity_id,
+  );
+
   const headerContent: TableCellData[] = [
     { cellData: t("headings.closeDate") },
     { cellData: t("headings.status") },
@@ -133,7 +157,12 @@ export const SearchResultsTable = ({
     { cellData: t("headings.awardMin") },
     { cellData: t("headings.awardMax") },
   ];
-  const tableRowData = searchResults.map(toSearchResultsTableRow);
+  const tableRowData = searchResults.map((result) =>
+    toSearchResultsTableRow(
+      result,
+      savedOpportunityIds.includes(result.opportunity_id),
+    ),
+  );
   return (
     <TableWithResponsiveHeader
       headerContent={headerContent}
