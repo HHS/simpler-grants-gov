@@ -81,6 +81,7 @@ class OpportunityFilters(BaseModel):
     funding_applicant_type: StrSearchFilter | None = None
     opportunity_status: StrSearchFilter | None = None
     agency: StrSearchFilter | None = None
+    top_level_agency: StrSearchFilter | None = None
     assistance_listing_number: StrSearchFilter | None = None
 
     is_cost_sharing: BoolSearchFilter | None = None
@@ -105,7 +106,6 @@ class SearchOpportunityParams(BaseModel):
     query_operator: str = Field(default=SearchQueryOperator.AND)
     filters: OpportunityFilters | None = Field(default=None)
     experimental: Experimental = Field(default=Experimental())
-    top_level_agency: str | None = Field(default=None)
 
 
 def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]]:
@@ -146,7 +146,7 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
 
 def _add_top_level_agency_prefix(
     builder: search.SearchQueryBuilder,
-    top_level_agency: str,
+    top_level_agency: StrSearchFilter,
     filters: OpportunityFilters | None = None,
 ) -> None:
     """
@@ -158,7 +158,11 @@ def _add_top_level_agency_prefix(
 
     """
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
-    builder.filter_should_prefix("agency_code.keyword", f"{top_level_agency}-")
+    if top_level_agency.one_of:
+        builder.filter_should_prefix(
+            "agency_code.keyword", [f"{agency}-" for agency in top_level_agency.one_of]
+        )
+    # Remove from filter
 
     # If specific sub-agency codes are also provided, add them to the should clause
     if filters and filters.agency:
@@ -182,15 +186,16 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     # Sorting
     builder.sort_by(_get_sort_by(params.pagination))
-
     # Query
     if params.query:
         filter_rule = FILTER_RULE_MAPPING.get(params.experimental.scoring_rule, DEFAULT)
         builder.simple_query(params.query, filter_rule, params.query_operator)
 
     # Filter Prefix
-    if params.top_level_agency:
-        _add_top_level_agency_prefix(builder, params.top_level_agency, params.filters)
+    if params.filters and params.filters.top_level_agency:
+        _add_top_level_agency_prefix(builder, params.filters.top_level_agency, params.filters)
+        # remove top level agency from filter
+        params.filters.top_level_agency = None
 
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
