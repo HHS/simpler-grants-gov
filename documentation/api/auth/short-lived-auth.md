@@ -88,33 +88,6 @@ def parse_jwt_for_internal_token(
 
 ## Usage Examples
 
-### Protecting an Endpoint
-
-```python
-from src.auth.internal_jwt_auth import internal_jwt_auth
-from src.adapters.db import flask_db
-from src.api import response
-
-@example_blueprint.get("/internal-endpoint")
-@example_blueprint.auth_required(internal_jwt_auth)
-@flask_db.with_db_session()
-def protected_endpoint(db_session: db.Session) -> response.ApiResponse:
-    # Access the authenticated token
-    token: ShortLivedInternalToken = internal_jwt_auth.current_user
-    
-    # Use token information
-    token_id = token.short_lived_internal_token_id
-    expires_at = token.expires_at
-    
-    return response.ApiResponse(
-        message="Access granted",
-        data={
-            "token_id": str(token_id),
-            "expires_at": expires_at.isoformat()
-        }
-    )
-```
-
 ### Creating Tokens for Internal Services
 
 ```python
