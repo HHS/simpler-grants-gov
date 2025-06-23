@@ -3,6 +3,9 @@
 #-----------------------
 
 resource "aws_security_group" "alb" {
+  # TODO(https://github.com/HHS/simpler-grants-gov/issues/5415) Restrict outbound traffic
+  # checkov:skip=CKV_AWS_382:Work on restricting outgoing traffic once integrations are more finalized
+
   # Specify name_prefix instead of name because when a change requires creating a new
   # security group, sometimes the change requires the new security group to be created
   # before the old one is destroyed. In this situation, the new one needs a unique name
@@ -25,8 +28,6 @@ resource "aws_security_group" "alb" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    # TODO(https://github.com/HHS/simpler-grants-gov/issues/5415) Restrict outbound traffic
-    # checkov:skip=CKV_AWS_382:Work on restricting outgoing traffic once integrations are more finalized
   }
 }
 
