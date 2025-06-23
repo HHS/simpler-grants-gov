@@ -61,7 +61,7 @@ def create_jwt_for_internal_token(
     logger.info(
         "Created internal JWT token",
         extra={
-            "auth.token_id": str(token_id),
+            "auth.short_lived_internal_token_id": str(token_id),
         },
     )
 
@@ -143,7 +143,9 @@ def decode_internal_token(db_session: db.Session, token: str) -> ShortLivedInter
 
         add_extra_data_to_current_request_logs(
             {
-                "auth.token_id": str(short_lived_token.short_lived_internal_token_id),
+                "auth.short_lived_internal_token_id": str(
+                    short_lived_token.short_lived_internal_token_id
+                ),
             }
         )
         logger.info("Internal JWT Authentication Successful")

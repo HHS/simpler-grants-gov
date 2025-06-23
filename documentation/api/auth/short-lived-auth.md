@@ -11,6 +11,7 @@ The Short-Lived Internal Token Authentication system provides a secure way to au
 - **Reusable across forms**: Single token can be used for all forms within an application
 - **JWT-based**: Uses industry-standard JWT tokens with RS256 signing
 - **Revocable**: Tokens can be invalidated at any time via database flag
+- **Distinguished logging**: Uses `auth.short_lived_internal_token_id` for New Relic tracking
 
 ## Technical Implementation
 
