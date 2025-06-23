@@ -16,6 +16,7 @@ jest.mock("next-intl", () => ({
 }));
 
 const mockOpportunityData: OpportunityDetail = {
+  opportunity_id: 1,
   opportunity_title: "Test Opportunity",
   agency_name: "Test Agency",
   opportunity_assistance_listings: [
@@ -76,5 +77,17 @@ describe("OpportunityIntro", () => {
     render(<OpportunityIntro opportunityData={opportunityDataWithoutDate} />);
 
     expect(screen.getByText("Last updated: --")).toBeInTheDocument();
+  });
+  it("includes `Version History` link to legacy opportunity page", () => {
+    render(<OpportunityIntro opportunityData={mockOpportunityData} />);
+
+    const versionHistoryLink = screen.getByRole("link", {
+      name: "versionHistory",
+    });
+    expect(versionHistoryLink).toBeInTheDocument();
+    expect(versionHistoryLink).toHaveAttribute(
+      "href",
+      "https://www.grants.gov/search-results-detail/1",
+    );
   });
 });

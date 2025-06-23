@@ -18,7 +18,7 @@ class DummyConnectionInfo:
 
 
 def test_verify_ssl(caplog):
-    caplog.set_level(logging.INFO)  # noqa: B1
+    caplog.set_level(logging.INFO)
 
     conn_info = DummyConnectionInfo(True)
     verify_ssl(conn_info)
@@ -28,7 +28,7 @@ def test_verify_ssl(caplog):
 
 
 def test_verify_ssl_not_in_use(caplog):
-    caplog.set_level(logging.INFO)  # noqa: B1
+    caplog.set_level(logging.INFO)
 
     conn_info = DummyConnectionInfo(False)
     verify_ssl(conn_info)
