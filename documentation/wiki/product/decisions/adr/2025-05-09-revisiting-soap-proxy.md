@@ -29,6 +29,7 @@ We had previously documented our [plan for supporting SOAP API consumers while S
 6. [Move the proxy to a lower level so we can inject ourselves in the TLS negotiation and set up a co-negotiated channel that lets us proceed with proxying](#move-the-proxy-to-a-lower-level-so-we-can-inject-ourselves-in-the-tls-negotiation-and-set-up-a-co-negotiated-channel-that-lets-us-proceed-with-proxying)
 7. [Allow SOAP callers to supply us with their private keys](#allow-soap-callers-to-supply-us-with-their-private-keys)
 8. [Create parallel certificates for the Proxy/Router to use to represent every SOAP caller](#create-parallel-certificates-for-the-proxyrouter-to-use-to-represent-every-soap-caller)
+9. [Sign our own certificates with Serial Numbers to match client's](#sign-our-own-certificates-with-serial-numbers-to-match-clients)
 
 ## Detailed Plans for Leading Options
 
@@ -140,6 +141,16 @@ For every existing S2S Certificate registered with the system, obtain and regist
 - **Cons**
   - Significant management overhead dealing with certificate acquisition, configuration, permissions, renewals, etc.
   - Any mis-linking of certificates or permissions causes Agencies or Applicants to get someone else's data from the API
+
+### Sign our own certificates with Serial Numbers to match client's
+
+Whenever we see an incoming certificate we've never seen before, create our own self-signed certificate with a matching Serial Number. Using that certificate will cause S2S SOAP to think we're the original caller, and we can initialize mTLS because we have the private key.
+
+- **Pros**
+  - Allows us to still provide the SOAP Proxy functionality
+  - Avoids private key management/mis-linking of some other potential options
+- **Cons**
+  - Security implications of self signed certificates
 
 ## Detailed Plans
 
