@@ -54,7 +54,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
 
 
 class TransformOracleDataTask(Task):
-    Metrics = transform_constants.Metrics
+    Metrics = transform_constants.Metrics  # type: ignore[assignment]
 
     def __init__(
         self,

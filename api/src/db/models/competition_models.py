@@ -292,6 +292,11 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
 
+    @property
+    def application_attachments(self) -> list["ApplicationAttachment"]:
+        """Property function to access application attachments"""
+        return self.application.application_attachments
+
 
 class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_attachment"
