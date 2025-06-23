@@ -195,6 +195,8 @@ class Form(ApiSchemaTable, TimestampMixin):
         FormInstruction, cascade="all, delete-orphan", single_parent=True
     )
 
+    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
+
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_form"
@@ -292,6 +294,11 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
 
+    @property
+    def application_attachments(self) -> list["ApplicationAttachment"]:
+        """Property function to access application attachments"""
+        return self.application.application_attachments
+
 
 class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_attachment"
@@ -317,6 +324,17 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
         # NOTE: These attachments will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         return pre_sign_file_location(self.file_location)
+
+
+class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "short_lived_internal_token"
+
+    short_lived_internal_token_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    is_valid: Mapped[bool] = mapped_column(nullable=False, default=True)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):

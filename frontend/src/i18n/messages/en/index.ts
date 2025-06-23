@@ -114,11 +114,14 @@ export const messages = {
       title: "Sign in to save this opportunity",
     },
     startApplicationButtonText: "Start new application",
-    startAppplicationModal: {
+    startApplicationModal: {
       cancelButtonText: "Cancel",
       description:
         "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
+      login: "Sign in to work on the application",
+      loggedOut:
+        "You must be logged in to proceed. Please login and start your application again.",
       name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",
@@ -129,6 +132,7 @@ export const messages = {
       agency: "Agency: ",
       assistanceListings: "Assistance Listings: ",
       lastUpdated: "Last Updated: ",
+      versionHistory: "View version history on Grants.gov",
     },
     description: {
       title: "Description",
@@ -222,6 +226,25 @@ export const messages = {
       awardMinimum: "Award minimum",
       estimatedAwardDate: "Estimated award date",
       estimatedProjectStartDate: "Estimated project start date",
+    },
+    competitionFormTable: {
+      attachment: "Attachment",
+      attachmentUnavailable: "Unavailable",
+      conditionalForms: "Conditionally-Required Forms",
+      conditionalFormsDescription:
+        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you’ll need to complete it and upload any required documents.",
+      downloadInstructions: "Download instructions",
+      form: "Form",
+      instructions: "Instructions",
+      include: "Include with application",
+      requiredForms: " Required Forms",
+      status: "Status",
+      statuses: {
+        not_started: "Not started",
+        in_progress: "In progress",
+        complete: "Complete",
+      },
+      updated: "Last updated",
     },
   },
   Index: {

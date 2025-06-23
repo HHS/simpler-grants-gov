@@ -72,7 +72,7 @@ class SamGovClient(BaseSamGovClient):
 
         return {
             "Content-Type": "application/json",
-            "Accept": "application/json",
+            "Accept": "application/zip",
             "x-api-key": self.api_key,
         }
 

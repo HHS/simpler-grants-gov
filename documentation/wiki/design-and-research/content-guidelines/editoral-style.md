@@ -10,7 +10,7 @@ description: >-
 
 We follow a few trusted external style resources to ensure our content is clear, consistent, and user-centered:
 
-* [**HHS Web Style Guide**](https://www.hhs.gov/web/policies-and-standards/web-style-guide/index.html): Our primary reference, which adopts **AP style** with specific exceptions tailored to federal websites.
+* [**HHS Web Style Guide**](https://www.hhs.gov/web/policies-and-standards/web-style-guide/index.html): Our primary reference, which adopts **AP style** with specific exceptions.
 * [**U.S. Web Design System (USWDS)**](https://designsystem.digital.gov/design-principles/): We follow USWDS guidance for content within design components, such as using **sentence case** for buttons and form elements.
 * [**PlainLanguage.gov**](https://www.plainlanguage.gov/): These federal plain language guidelines serve as our foundation for writing in a way that’s clear, concise, and accessible to all users.
 
@@ -26,27 +26,28 @@ Using contractions (like _we're', it's' or you'll_) helps our writing sound more
 
 ### Capitalization
 
-Simpler.Grants.gov uses sentence case in most cases. Sentence case makes content easier to scan and digest, especially in long text. It also aligns with how many people naturally speak and write, making it feel more conversational. In contrast, excessive use of title case can engender formality, making our product look stiff and unwelcoming.\
+**Simpler.Grants.gov uses sentence case in most cases.** Sentence case makes content easier to scan and digest, especially in long text. It also aligns with how many people naturally speak and write, making it feel more conversational. In contrast, excessive use of title case can engender formality, making our product look stiff and unwelcoming.\
 \
-Sentence case examples
+**Sentence case examples**
 
-* H2 and lower
+* H3 subheadings and lower
+* Body text
 * Column headers
 * Labels and other UI components
 * Progress indicator labels
 * Modal titles
 * Buttons (per [USWDS](https://designsystem.digital.gov/components/button/))
 
-Title case examples
+**Title case examples**
 
-* Page titles
-* H1 headings
+* Page titles and H1 headings
+* H2 page section headings
 * The subject line for Simpler.Grants.gov newsletters
-  * It follows a format where "\[Month] Updates" uses title case, while the latter portion after the pipe symbol uses sentence case. Example: "May Updates | Building momentum with every release"
+  * The subject line follows a template where "\[Month] Updates" uses title case, while the latter portion after the pipe symbol uses sentence case. Example: "May Updates | Building momentum with every release"
 
-Uppercase examples
+**Uppercase examples**
 
-* Opportunity statuses. Examples: CLOSING, OPEN.&#x20;
+* Opportunity status, only when the status is a single word, and benefits from emphasis on the Search results page. Examples: CLOSING, OPEN.&#x20;
 
 ## Coming soon
 
