@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from typing import Sequence
 from uuid import UUID
 
@@ -135,7 +134,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
 
         users_email_notifications: list[UserEmailNotification] = []
-
         for user_changed_opp in changed_saved_opportunities:
             user_id = user_changed_opp.user_id
             user_email = user_changed_opp.email
@@ -227,7 +225,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _get_last_notified_versions(
         self, user_opportunity_pairs: list
-    ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
+    ) -> dict[tuple[UUID, int], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
         OpportunityVersion for each that was created before the user's
@@ -280,14 +278,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
             for diff in diffs
         }
 
-    def _normalize_date_field(self, value: str | int) -> str | int:
-        if isinstance(value, str):
-            return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
-        return value
-
-    def _normalize_bool_field(self, value: bool) -> str:
-        return "Yes" if value else "No"
-
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -300,53 +290,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
-    def _build_important_dates_content(self, imp_dates_change: dict) -> str:
-        important_section = SECTION_STYLING.format("Important dates")
-        for field, change in imp_dates_change.items():
-            before = self._normalize_date_field(change["before"])
-            after = self._normalize_date_field(change["after"])
-
-            important_section += (
-                f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
-            )
-        return important_section
-
-    def _build_award_fields_content(self, award_change: dict) -> str:
-        award_section = SECTION_STYLING.format("Awards details")
-        for field, change in award_change.items():
-            award_section += f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {change["before"]} to {change["after"]}.<br>"
-        return award_section
-
-    def _build_categorization_fields_content(self, category_change: dict) -> str:
-        category_section = SECTION_STYLING.format("Categorization")
-        for field, change in category_change.items():
-            before = change["before"]
-            after = change["after"]
-            if field == "is_cost_sharing":
-                before = self._normalize_bool_field(before)
-                after = self._normalize_bool_field(after)
-            elif field == "category_explanation" or field == "funding_category_description":
-                if not after:
-                    continue
-                before = before.capitalize() if before else before
-                after = after.capitalize()
-            elif field in ["funding_instruments", "funding_categories"]:
-                before = ", ".join([value.capitalize() for value in before])
-                after = ", ".join([value.capitalize() for value in after])
-            elif field == "category":
-                before = before.capitalize()
-                after = after.capitalize()
-            category_section += (
-                f"{BULLET_POINTS_STYLING} {CATEGORIZATION_FIELDS[field]} {before} to {after}.<br>"
-            )
-        return category_section
-
     def _build_notification_content(
         self, updated_opportunities: list[OpportunityVersionChange]
     ) -> UserOpportunityUpdateContent | None:
 
         closing_msg = (
-            "<br><br>"
             "<div>"
             "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
             f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
@@ -355,16 +303,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         all_sections = ""
         updated_opp_ids = []
+        opp_numb = 0
         # Get sections statement
-        for ind, opp in enumerate(updated_opportunities):
+        for opp in updated_opportunities:
             opp_id = opp.opportunity_id
             sections = self._build_sections(opp)
             if not sections:
                 continue
             assert opp.previous is not None
+            opp_numb += 1
             all_sections += (
                 "<div>"
-                f"{ind + 1}. <a href='{self.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_numb}. <a href='{self.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
@@ -383,8 +333,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             "Your saved funding opportunities changed on "
             if updated_opp_count > 1
             else "Your saved funding opportunity changed on "
-            f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
         )
+        subject += f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+
         return UserOpportunityUpdateContent(
             subject=subject,
             message=intro + all_sections + closing_msg,
@@ -402,20 +353,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         # Transform diffs
         changes = self._flatten_and_extract_field_changes(diffs)
         sections = []
-
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
-
-        if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
-            sections.append(self._build_important_dates_content(important_date_diffs))
-
-        if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
-            sections.append(self._build_award_fields_content(award_fields_diffs))
-
-        if categorization_fields_diffs := {
-            k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
-        }:
-            sections.append(self._build_categorization_fields_content(categorization_fields_diffs))
 
         if not sections:
             logger.info(

@@ -34,7 +34,7 @@ class UserEmailNotification:
 
 @dataclass
 class OpportunityVersionChange:
-    opportunity_id: UUID
+    opportunity_id: int
     latest: OpportunityVersion
     previous: OpportunityVersion | None
 
