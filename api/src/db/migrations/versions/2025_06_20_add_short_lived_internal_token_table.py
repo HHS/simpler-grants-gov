@@ -40,6 +40,7 @@ def upgrade():
         ),
         schema="api",
     )
+    # ### end Alembic commands ###
 
 
 def downgrade():
