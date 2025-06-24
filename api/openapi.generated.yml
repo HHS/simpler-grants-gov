@@ -2757,6 +2757,14 @@ components:
             DOC: 3
           additionalProperties:
             type: integer
+        is_cost_sharing:
+          type: object
+          description: The counts of is_cost_sharing values in the full response
+          example:
+            'true': 1
+            'false': 3
+          additionalProperties:
+            type: integer
     OpportunitySearchResponseV1:
       type: object
       properties:
