@@ -390,6 +390,12 @@ class OpportunitySearchFilterV1Schema(Schema):
         DateSearchSchemaBuilder("CloseDateFilterV1Schema").with_date_range().build()
     )
 
+    top_level_agency = fields.Nested(
+        StrSearchSchemaBuilder("TopLevelAgencyOppSearchFilterV1Schema")
+        .with_one_of(example="USAID", minimum_length=2)
+        .build()
+    )
+
 
 class OpportunityFacetV1Schema(Schema):
     opportunity_status = fields.Dict(
@@ -467,12 +473,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
-    top_level_agency = fields.String(
-        metadata={
-            "description": "Top level agency for querying against database for it's sub_agencies",
-        },
-        validate=[validators.Length(min=2)],
-    )
+
     experimental = fields.Nested(ExperimentalV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(
@@ -553,3 +554,16 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+
+
+class OpportunityVersionAttachmentSchema(Schema):
+    attachment_id = fields.Integer(
+        metadata={"description": "The attachment id associated with the opportunity"}
+    )
+
+
+class OpportunityVersionSchema(OpportunityV1Schema):
+    opportunity_attachments = fields.List(
+        fields.Nested(OpportunityVersionAttachmentSchema),
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
