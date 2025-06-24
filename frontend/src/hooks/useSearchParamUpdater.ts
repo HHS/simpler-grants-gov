@@ -62,13 +62,14 @@ export function useSearchParamUpdater() {
   };
 
   // accepts an array of tuples of type [key, value]
-  const setQueryParams = (updates: string[][], scroll = false) => {
-    updates.forEach((update) => {
-      if (!update[0]) {
-        return;
-      }
-      params.set(update[0], update[1]);
+  const setQueryParams = (
+    updates: ValidSearchQueryParamData,
+    scroll = false,
+  ) => {
+    Object.entries(updates).forEach(([queryParamKey, queryParamValue]) => {
+      params.set(queryParamKey, queryParamValue);
     });
+
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
