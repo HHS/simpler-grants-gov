@@ -107,10 +107,10 @@ export const AllOptionCheckbox = ({
       currentSelectionValues,
       childOptionValues,
     ).join(",");
-    setQueryParams([
-      [topLevelQueryParamKey, newValueTopLevelValue],
-      [queryParamKey, newChildValue],
-    ]);
+    setQueryParams({
+      [topLevelQueryParamKey]: newValueTopLevelValue,
+      [queryParamKey]: newChildValue,
+    });
   };
 
   const uncheckTopLevel = () => {
@@ -122,15 +122,13 @@ export const AllOptionCheckbox = ({
       currentSelectionValues,
       childOptionValues,
     ).join(",");
-    setQueryParams([
-      [
-        topLevelQueryParamKey,
+    setQueryParams({
+      [topLevelQueryParamKey]:
         topLevelQuery && topLevelQuery.size
           ? Array.from(topLevelQuery?.values()).join(",")
           : "",
-      ],
-      [queryParamKey, newChildValue],
-    ]);
+      [queryParamKey]: newChildValue,
+    });
   };
 
   // allows for implementing this via a top level query param, or by updating child values directly via child inputs

@@ -4,6 +4,7 @@ import {
   FilterOption,
   FilterOptionWithChildren,
 } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   getAgencyParent,
   getSiblingOptionValues,
@@ -54,12 +55,12 @@ export function AgencyFilterBody({
     const siblingOptions = getSiblingOptionValues(value, filterOptions);
     // remove top level agency
     topLevelQuery.delete(getAgencyParent(value));
-    const paramsToUpdate = [
-      ["agency", Array.from(newParamValue).concat(siblingOptions).join(",")],
-      ["topLevelAgency", Array.from(topLevelQuery).join(",")],
-    ];
+    const paramsToUpdate = {
+      agency: Array.from(newParamValue).concat(siblingOptions).join(","),
+      topLevelAgency: Array.from(topLevelQuery).join(","),
+    } as ValidSearchQueryParamData;
     if (queryTerm) {
-      paramsToUpdate.push(["query", queryTerm]);
+      paramsToUpdate.query = queryTerm;
     }
     return setQueryParams(paramsToUpdate);
   };
@@ -77,7 +78,8 @@ export function AgencyFilterBody({
             <AnyOptionCheckbox
               title={title.toLowerCase()}
               checked={isNoneSelected}
-              queryParamKey={"agency"}
+              queryParamKey="agency"
+              topLevelQueryParamKey="topLevelAgency"
             />
           </li>
         )}
@@ -96,8 +98,8 @@ export function AgencyFilterBody({
                 }
                 query={query}
                 topLevelQuery={topLevelQuery}
-                topLevelQueryParamKey={"topLevelAgency"}
-                queryParamKey={"agency"}
+                topLevelQueryParamKey="topLevelAgency"
+                queryParamKey="agency"
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
                 facetCounts={facetCounts}
