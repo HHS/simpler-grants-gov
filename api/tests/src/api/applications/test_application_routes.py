@@ -413,7 +413,7 @@ def test_application_form_update_success_update(
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
@@ -992,7 +992,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_a_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -1010,7 +1010,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_b_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -1069,7 +1069,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
@@ -1734,7 +1734,6 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     """Test that application GET response includes organization with SAM.gov entity data"""
     # Create a SAM.gov entity with test data
     sam_gov_entity = SamGovEntityFactory.create(
-        uei="TEST123456789",
         legal_business_name="Test Organization LLC",
         expiration_date=date(2025, 12, 31),
     )
@@ -1770,7 +1769,7 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     # Check that sam_gov_entity is included with the required fields
     sam_gov_data = response.json["data"]["organization"]["sam_gov_entity"]
     assert sam_gov_data is not None
-    assert sam_gov_data["uei"] == "TEST123456789"
+    assert sam_gov_data["uei"] == sam_gov_entity.uei
     assert sam_gov_data["legal_business_name"] == "Test Organization LLC"
     assert sam_gov_data["expiration_date"] == "2025-12-31"
 

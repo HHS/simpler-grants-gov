@@ -84,6 +84,11 @@ locals {
       secret_store_name = "/api/${var.environment}/domain-verification-content"
     }
 
+    SOAP_AUTH_CONTENT = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-auth-content"
+    }
+
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"
