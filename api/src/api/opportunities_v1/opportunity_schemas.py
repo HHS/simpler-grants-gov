@@ -564,6 +564,6 @@ class OpportunityVersionAttachmentSchema(Schema):
 class OpportunityVersionSchema(OpportunityV1Schema):
     opportunity_attachments = fields.List(
         fields.Nested(OpportunityVersionAttachmentSchema),
-        attribute="opportunity_attachments",
         metadata={"description": "List of attachments associated with the opportunity"},
     )
+g
