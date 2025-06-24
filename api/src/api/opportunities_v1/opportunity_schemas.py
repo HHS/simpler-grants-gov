@@ -488,6 +488,8 @@ class OpportunitySearchRequestV1Schema(Schema):
                 "agency_code",
                 "agency_name",
                 "top_level_agency_name",
+                "award_floor",
+                "award_ceiling",
             ],
             default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "descending"}],
         ),
