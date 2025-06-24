@@ -28,6 +28,24 @@ IF_THEN_FORM = FormFactory.build(
     }
 )
 
+NESTED_REQUIRED = FormFactory.build(
+    form_json_schema={
+        "type": "object",
+        "properties": {
+            "nested": {
+                "type": "object",
+                "properties": {
+                    "nested_field": {"type": "string"},
+                    "nested_field2": {"type": "string"},
+                },
+                "required": ["nested_field", "nested_field2"],
+            },
+            "other_field": {"type": "string"},
+        },
+        "required": ["other_field"],
+    }
+)
+
 
 @pytest.mark.parametrize(
     "data,expected_issues",
@@ -39,7 +57,7 @@ IF_THEN_FORM = FormFactory.build(
             {},
             [
                 ValidationErrorDetail(
-                    message="'StrField' is a required property", type="required", field="$"
+                    message="'StrField' is a required property", type="required", field="$.StrField"
                 )
             ],
         ),
@@ -137,3 +155,24 @@ def test_validate_json_schema_for_form_if_then(data, expected_issues):
 def test_validate_json_schema_for_invalid_schema():
     with pytest.raises(jsonschema.exceptions.SchemaError, match="Failed validating"):
         validate_json_schema({}, {"properties": ["hello"]})
+
+
+def test_validate_json_schema_required_path():
+    validation_issues = validate_json_schema_for_form({"nested": {}}, NESTED_REQUIRED)
+    assert len(validation_issues) == 3
+
+    assert set(validation_issues) == {
+        ValidationErrorDetail(
+            type="required",
+            message="'nested_field' is a required property",
+            field="$.nested.nested_field",
+        ),
+        ValidationErrorDetail(
+            type="required",
+            message="'nested_field2' is a required property",
+            field="$.nested.nested_field2",
+        ),
+        ValidationErrorDetail(
+            type="required", message="'other_field' is a required property", field="$.other_field"
+        ),
+    }
