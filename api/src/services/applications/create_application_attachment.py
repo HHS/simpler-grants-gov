@@ -7,6 +7,7 @@ from werkzeug.datastructures import FileStorage
 import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
+from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
@@ -43,6 +44,11 @@ def upsert_application_attachment(
     # Mimetype is set if the user specifies it when uploading the file which
     # if it's done via a standard HTML file box would include it.
     file_attachment: FileStorage = cast(FileStorage, form_and_files_data.get("file_attachment"))
+
+    # This should only ever happen if someone had a filename that Werkzeug could
+    # not parse or interpreted as a file stream.
+    if file_attachment.filename is None:
+        raise_flask_error(422, "Invalid file name, cannot parse")
 
     # secure_filename makes the file safe in path operations and removes non-ascii characters
     secure_file_name = file_util.get_secure_file_name(file_attachment.filename)

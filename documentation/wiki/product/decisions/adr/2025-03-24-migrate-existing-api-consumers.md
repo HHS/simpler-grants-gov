@@ -1,6 +1,6 @@
 # Migrate Existing API Consumers
 
-- **Status:** Active
+- **Status:** Superseded By [Revisiting SOAP Proxy](../../decisions/adr/2025-05-09-revisiting-soap-proxy.md)
 - **Last Modified:** 2025-04-23
 - **Related Issue:** [#4199](https://github.com/HHS/simpler-grants-gov/issues/4199)
 - **Deciders:** Julius, Lucas
