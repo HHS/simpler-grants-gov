@@ -47,7 +47,7 @@ export function SearchVersionTwo({
       <QueryProvider>
         <div className="grid-container">
           <div className="desktop:display-flex desktop:margin-bottom-2">
-            <div className="flex-6">
+            <div className="flex-6 flex-align-self-end">
               <SearchBar
                 tableView={true}
                 queryTermFromParent={convertedSearchParams.query}
