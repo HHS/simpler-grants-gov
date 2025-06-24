@@ -10,7 +10,6 @@ import {
 import { JSX } from "react";
 
 import {
-  FieldErrors,
   FormValidationWarning,
   UiSchema,
   UiSchemaField,
@@ -29,16 +28,13 @@ export function buildFormTreeRecursive({
   formData,
   schema,
   uiSchema,
-  warnings,
 }: {
-  warnings: FormValidationWarning[];
-  errors: FieldErrors;
+  errors: FormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
 }) {
   let acc: JSX.Element[] = [];
-  console.log(errors, warnings);
 
   const buildFormTree = (
     uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
@@ -64,7 +60,7 @@ export function buildFormTreeRecursive({
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
-            warnings,
+            errors,
             formData,
           });
           if (field) {
@@ -89,7 +85,7 @@ export function buildFormTreeRecursive({
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
-              warnings,
+              errors,
               formData,
             });
           }
@@ -165,15 +161,15 @@ const widgetComponents: Record<
 };
 
 export const buildField = ({
-  uiFieldObject,
+  errors,
   formSchema,
   formData,
-  warnings,
+  uiFieldObject,
 }: {
-  uiFieldObject: UiSchemaField;
+  errors: FormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
-  warnings: FormValidationWarning[];
+  uiFieldObject: UiSchemaField;
 }) => {
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
@@ -181,7 +177,7 @@ export const buildField = ({
     ? definition.split("/")[definition.split("/").length - 1]
     : (schema?.title ?? "untitled").replace(" ", "-");
 
-  const rawErrors = formatFieldWarnings(warnings, name);
+  const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
   const value = get(formData, name) as string | number | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 

@@ -10,16 +10,14 @@ import {
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
-import {
-  ApplicationDetail,
-  FormValidationWarnings,
-} from "src/types/applicationResponseTypes";
+import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
+import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BetaAlert from "src/components/BetaAlert";
@@ -41,7 +39,7 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   let applicationData = {} as ApplicationDetail;
-  let formValidationWarnings: FormValidationWarnings | [];
+  let formValidationWarnings: FormValidationWarning[] | null;
   let formId = "";
   let formData: FormDetail | null;
   const session = await getSession();
@@ -83,7 +81,7 @@ async function FormPage({ params }: formPageProps) {
     formValidationWarnings =
       (applicationData.form_validation_warnings?.[
         appFormId
-      ] as unknown as FormValidationWarnings) || [];
+      ] as unknown as FormValidationWarning[]) || null;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -124,20 +122,7 @@ async function FormPage({ params }: formPageProps) {
     <>
       <BetaAlert containerClasses="margin-top-5" />
       <GridContainer>
-        <h1>Form demo for &quot;{form_name}&quot; form</h1>
-        <legend className="usa-legend">
-          The following is a demo of the apply forms.
-        </legend>
-        <p>
-          Required fields are marked with an asterisk (
-          <abbr
-            title="required"
-            className="usa-hint usa-hint--required text-no-underline"
-          >
-            *
-          </abbr>
-          ).
-        </p>
+        <h1>{form_name}</h1>
         <ApplyForm
           validationWarnings={formValidationWarnings}
           savedFormData={application_response}
