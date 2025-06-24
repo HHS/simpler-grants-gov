@@ -567,5 +567,5 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-        # import pdb; pdb.set_trace()
+
         assert res == expected_html
