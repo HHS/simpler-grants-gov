@@ -44,7 +44,7 @@ export const TableWithResponsiveHeader = ({
     return (
       <tr
         key={`responsiveTableRow-${i}`}
-        className="border-base-lighter border-x border-y-05 tablet-lg:border-0"
+        className="border-base border-x border-y tablet-lg:border-0"
       >
         {tableRow.map((tableCell, j) => {
           const stackOrder = tableCell.stackOrder || 0;
@@ -53,7 +53,7 @@ export const TableWithResponsiveHeader = ({
               key={`responsiveTableCell-${i}-${j}`}
               className={clsx(
                 "tablet-lg:display-table-cell",
-                "border-base-lighter",
+                "border-base",
                 `order-${stackOrder}`,
                 `tablet-lg:order-${j}`,
                 tableCell.className,
@@ -85,7 +85,7 @@ export const TableWithResponsiveHeader = ({
   });
 
   return (
-    <Table className="simpler-responsive-table width-full tablet-lg:width-auto border-base-lighter tablet-lg:border-0">
+    <Table className="simpler-responsive-table width-full tablet-lg:width-auto border-base tablet-lg:border-0">
       <thead>
         <tr>{headerNodes}</tr>
       </thead>
