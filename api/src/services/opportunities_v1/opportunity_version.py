@@ -4,13 +4,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.util.dict_util import diff_nested_dicts
 
 logger = logging.getLogger(__name__)
 
-SCHEMA = OpportunityV1Schema()
+SCHEMA = OpportunityVersionSchema()
 
 
 def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> bool:
