@@ -327,7 +327,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         all_sections = ""
         updated_opp_ids = []
-        opp_numb = 0
+        opp_count = 1
         # Get sections statement
         for opp in updated_opportunities:
             opp_id = opp.opportunity_id
@@ -335,14 +335,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
             if not sections:
                 continue
             assert opp.previous is not None
-            opp_numb += 1
             all_sections += (
                 "<div>"
-                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
 
+            opp_count += 1
             updated_opp_ids.append(opp_id)
 
         if not all_sections:

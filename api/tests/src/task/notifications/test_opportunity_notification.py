@@ -431,7 +431,7 @@ class TestOpportunityNotification:
         "diff_dict,expected_dict",
         [
             (
-                # qSingle field with nested name
+                # Single field with nested name
                 [{"field": "a.b", "before": "new", "after": "old"}],
                 {"b": {"before": "new", "after": "old"}},
             ),
