@@ -67,7 +67,7 @@ const ApplyForm = ({
         noValidate
       >
         <div className="display-flex flex-justify">
-          <p>
+          <div>
             A red asterisk (
             <abbr
               title="required"
@@ -76,7 +76,7 @@ const ApplyForm = ({
               *
             </abbr>
             ) indicates a required field.
-          </p>
+          </div>
           <Button
             data-testid="apply-form-save"
             type="submit"

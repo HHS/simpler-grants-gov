@@ -9,17 +9,18 @@ import {
 import { fetchApplicationWithMethod } from "./fetchers";
 
 export const handleStartApplication = async (
-  competitionID: string,
   applicationName: string,
+  competitionID: string,
   token: string,
 ): Promise<ApplicationStartApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
+
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
     additionalHeaders: ssgToken,
-    body: { competition_id: competitionID, name: applicationName },
+    body: { competition_id: competitionID, application_name: applicationName },
   });
 
   return (await response.json()) as ApplicationStartApiResponse;

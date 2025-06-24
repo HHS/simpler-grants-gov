@@ -127,7 +127,7 @@ describe("ApplyForm", () => {
     expect(screen.getAllByRole("option").length).toBe(2);
     expect(screen.getByText("test select option")).toBeInTheDocument();
 
-    const button = screen.getByTestId("apply-form-submit");
+    const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
   });
 

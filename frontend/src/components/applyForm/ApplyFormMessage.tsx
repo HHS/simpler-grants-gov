@@ -21,14 +21,26 @@ export const ApplyFormMessage = ({
     );
   } else if (validationWarnings && validationWarnings.length > 0) {
     return (
-      <Alert heading={"Form was saved"} headingLevel="h2" type="warning">
-        This form has {validationWarnings.length} errors.
+      <Alert
+        heading={"Form was saved"}
+        headingLevel="h2"
+        type="warning"
+        validation
+      >
+        Correct the following errors before submitting your application.
+        <ul>
+          {validationWarnings.map((warning, index) => (
+            <li key={index}>
+              <a href={warning.field.replace("$.", "#")}>{warning.message}</a>
+            </li>
+          ))}
+        </ul>
       </Alert>
     );
   } else {
     return (
-      <Alert heading={"Form saved"} headingLevel="h3" type="success">
-        Form saved.
+      <Alert heading={"Form was saved"} headingLevel="h3" type="success">
+        No errors were detected.
       </Alert>
     );
   }

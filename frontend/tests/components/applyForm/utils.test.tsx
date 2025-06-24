@@ -119,11 +119,11 @@ describe("shapeFormData", () => {
       tasks: [
         {
           title: "Submit form",
-          done: "false",
+          done: false,
         },
         {
           title: "Start form",
-          done: "true",
+          done: true,
         },
       ],
       todos: ["email", "write"],

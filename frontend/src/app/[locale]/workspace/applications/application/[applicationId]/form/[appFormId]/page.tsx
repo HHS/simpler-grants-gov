@@ -20,7 +20,7 @@ import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
-import BetaAlert from "src/components/BetaAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -120,7 +120,7 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
-      <BetaAlert containerClasses="margin-top-5" />
+    <Breadcrumbs breadcrumbList={[{title: "home", path: "/"}, {title: applicationData.application_name, path: `/workspace/applications/application/${applicationData.application_id}`}, {title: "Form", path: `/workspace/applications/application/${applicationData.application_id}/form/${applicationId}`}]} />
       <GridContainer>
         <h1>{form_name}</h1>
         <ApplyForm

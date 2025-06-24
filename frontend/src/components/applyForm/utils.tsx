@@ -346,6 +346,20 @@ export const shapeFormData = <T extends object>(
                 )
               : item,
           );
+        } else if (
+          typeof schema.properties[key] !== "boolean" &&
+          schema.properties[key].type === "boolean" &&
+          typeof data === "object"
+        ) {
+          // if the schema is a boolean, we need to check if the data has a value
+          if (data[key] === "true" || data[key] === true) {
+            result[key] = true;
+          } else if (data[key] === "false" || data[key] === false) {
+            result[key] = false;
+          } else {
+            result[key] = undefined; // or some default value
+          }
+          // if the array is flat, just return the values
         } else {
           if (data[key]) {
             result[key] = data[key];
