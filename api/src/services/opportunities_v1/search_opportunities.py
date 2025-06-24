@@ -145,9 +145,7 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
 
 
 def _add_top_level_agency_prefix(
-    builder: search.SearchQueryBuilder,
-    top_level_agency: StrSearchFilter,
-    filters: OpportunityFilters | None = None,
+    builder: search.SearchQueryBuilder, filters: OpportunityFilters
 ) -> None:
     """
     Adds an OR-based agency filter using a `should` clause:
@@ -158,16 +156,14 @@ def _add_top_level_agency_prefix(
 
     """
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
-    if top_level_agency.one_of:
+    if filters.top_level_agency and filters.top_level_agency.one_of:
         builder.filter_should_prefix(
-            "agency_code.keyword", [f"{agency}-" for agency in top_level_agency.one_of]
+            "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]
         )
-    # Remove from filter
 
     # If specific sub-agency codes are also provided, add them to the should clause
-    if filters and filters.agency:
-        if filters.agency.one_of:
-            builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
+    if filters.agency and filters.agency.one_of:
+        builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
 
         # Clear it so this field isn't added again as a hard filter
         filters.agency = None
@@ -193,7 +189,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     # Filter Prefix
     if params.filters and params.filters.top_level_agency:
-        _add_top_level_agency_prefix(builder, params.filters.top_level_agency, params.filters)
+        _add_top_level_agency_prefix(builder, params.filters)
         # remove top level agency from filter
         params.filters.top_level_agency = None
 
