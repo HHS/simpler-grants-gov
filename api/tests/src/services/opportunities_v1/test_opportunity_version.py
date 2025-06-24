@@ -79,7 +79,7 @@ def test_save_opportunity_version_with_attachments(db_session, enable_factory_cr
     ]
 
     # Save opportunity into opportunity_version table
-    save_opportunity_version(db_session, attachment_1.opportunity)
+    save_opportunity_version(db_session, opp)
 
     # Verify Record created
     saved_opp_version = db_session.query(OpportunityVersion).all()
