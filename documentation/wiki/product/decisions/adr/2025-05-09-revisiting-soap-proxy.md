@@ -43,13 +43,14 @@ Given the [detailed plans](#detailed-plans-for-leading-options), the recommendat
 
 ### Positive Consequences
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- Allows us to move forward with a drop-in replacement for existing S2S Consumers.
+- Allows us to continue developing and testing while another team does the work to accomplish that drop-in ability.
+- The method we spike out for testing could be adopted to support actual callers if Plan A doesn't work out or the timeline isn't compatible with the project goals
 
 ### Negative Consequences
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+- We do a little extra work, compared to a world where we could just force through Plan A on a compatible timeline.
+- If Plan A doesn't work out, we won't have a drop-in replacement.
 
 ## Pros and Cons of the Options
 
@@ -184,8 +185,3 @@ Whenever we see an incoming certificate we've never seen before, create our own 
 - **Simpler changes**
   - Moderate change for UI/BE to allow for authenticated users to upload the client certificate and private key that will be used on their behalf when making proxy calls to the existing SOAP API
   - Minor change to lookup and utilize the private key that's associated with the caller's client certificate
-
-## Links
-
-- \[{Link name}]\(link to external resource)
-- ...
