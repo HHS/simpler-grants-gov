@@ -63,7 +63,7 @@ export const TableWithResponsiveHeader = ({
                 },
               )}
             >
-              <div className="display-flex">
+              <div className="display-flex flex-align-center">
                 <div
                   className="tablet-lg:display-none flex-1 text-bold"
                   data-testid={`responsive-header-${i}-${j}`}

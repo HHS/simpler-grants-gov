@@ -579,7 +579,7 @@ dl {
     }
     tr:nth-child(2n) {
       td {
-        background-color: color(gray-warm-2);
+        background-color: color(gray-warm-5);
         @include at-media("tablet-lg") {
           background-color: white;
         }
