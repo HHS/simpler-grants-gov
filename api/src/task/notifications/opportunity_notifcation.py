@@ -10,7 +10,6 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Sch
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
-from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
     Metrics,
@@ -103,7 +102,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 "Created changed opportunity email notifications",
                 extra={"user_id": user_id, "changed_opportunities_count": len(updated_opps)},
             )
-
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,

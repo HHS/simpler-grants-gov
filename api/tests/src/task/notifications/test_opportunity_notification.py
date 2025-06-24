@@ -8,6 +8,7 @@ from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.constants import Metrics, NotificationReason
+from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
 
@@ -17,10 +18,9 @@ def link_user_with_email(user):
     return user
 
 
-
 class TestOpportunityNotification:
     @pytest.fixture
-    def set_env_var_for_email_notification_config(self,monkeypatch):
+    def set_env_var_for_email_notification_config(self, monkeypatch):
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
@@ -39,10 +39,11 @@ class TestOpportunityNotification:
         self,
         db_session,
         cli_runner,
+        search_client,
         enable_factory_create,
         user,
         caplog,
-            set_env_var_for_email_notification_config
+        set_env_var_for_email_notification_config,
     ):
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
@@ -121,7 +122,8 @@ class TestOpportunityNotification:
                 assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
 
         # Run the notification task
-        OpportunityNotificationTask(db_session=db_session)
+        task = EmailNotificationTask(db_session, search_client)
+        task.run()
 
         # Verify notification log was created
         notification_logs = (
@@ -139,16 +141,20 @@ class TestOpportunityNotification:
         log_records = [
             r for r in caplog.records if "Successfully delivered notification to user" in r.message
         ]
-        assert len(log_records) == 2
+
         assert (
-            log_records[0].__dict__["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+            len(
+                [
+                    log
+                    for log in log_records
+                    if log.__dict__["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+                ]
+            )
+            == 2
         )
 
     def test_with_no_user_email_notification(
-        self,
-        db_session,
-        enable_factory_create,
-            set_env_var_for_email_notification_config
+        self, db_session, enable_factory_create, set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected if the user has no linked email address."""
         user = factories.UserFactory.create()
@@ -173,11 +179,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_with_no_prior_version_email_collections(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-            set_env_var_for_email_notification_config
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification log is created when no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -195,11 +197,7 @@ class TestOpportunityNotification:
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_no_updates_email_collections(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-            set_env_var_for_email_notification_config
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected when there are no opportunity updates."""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -217,12 +215,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_last_notified_version(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-            set_env_var_for_email_notification_config
-
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """
          Test that `_get_last_notified_versions` correctly returns the most recent
