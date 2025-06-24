@@ -413,7 +413,7 @@ def test_application_form_update_success_update(
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
@@ -738,6 +738,8 @@ def test_application_form_get_success(
     assert response.json["data"]["application_id"] == str(application_form.application_id)
     assert response.json["data"]["form_id"] == str(application_form.form_id)
     assert response.json["data"]["application_response"] == {"name": "John Doe"}
+    # Verify application_attachments field exists (empty list in this case)
+    assert response.json["data"]["application_attachments"] == []
 
 
 def test_application_form_get_application_not_found(
@@ -795,6 +797,70 @@ def test_application_form_get_unauthorized(client, enable_factory_create, db_ses
     assert response.status_code == 401
 
 
+def test_application_form_get_with_attachments(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    # Create an application form
+    application_form = ApplicationFormFactory.create(
+        application_response={"name": "John Doe"},
+    )
+
+    # Create attachments for the application
+    attachment1 = ApplicationAttachmentFactory.create(
+        application=application_form.application, file_name="my_file_a.txt"
+    )
+    attachment2 = ApplicationAttachmentFactory.create(
+        application=application_form.application, file_name="my_file_b.pdf"
+    )
+
+    CompetitionFormFactory.create(
+        competition=application_form.application.competition,
+        form=application_form.form,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application_form.application)
+
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify basic application form data
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["data"]["application_id"] == str(application_form.application_id)
+    assert response.json["data"]["form_id"] == str(application_form.form_id)
+    assert response.json["data"]["application_response"] == {"name": "John Doe"}
+
+    # Verify application attachments are included
+    resp_application_attachments = response.json["data"]["application_attachments"]
+    assert len(resp_application_attachments) == 2
+
+    # Sort by file name which we set above so attachment1 is always first
+    resp_application_attachments.sort(key=lambda a: a["file_name"])
+
+    assert resp_application_attachments[0]["application_attachment_id"] == str(
+        attachment1.application_attachment_id
+    )
+    assert resp_application_attachments[0]["file_name"] == attachment1.file_name
+    assert resp_application_attachments[0]["mime_type"] == attachment1.mime_type
+    assert resp_application_attachments[0]["file_size_bytes"] == attachment1.file_size_bytes
+    assert resp_application_attachments[0]["created_at"] == attachment1.created_at.isoformat()
+    assert resp_application_attachments[0]["updated_at"] == attachment1.updated_at.isoformat()
+
+    assert resp_application_attachments[1]["application_attachment_id"] == str(
+        attachment2.application_attachment_id
+    )
+    assert resp_application_attachments[1]["file_name"] == attachment2.file_name
+    assert resp_application_attachments[1]["mime_type"] == attachment2.mime_type
+    assert resp_application_attachments[1]["file_size_bytes"] == attachment2.file_size_bytes
+    assert resp_application_attachments[1]["created_at"] == attachment2.created_at.isoformat()
+    assert resp_application_attachments[1]["updated_at"] == attachment2.updated_at.isoformat()
+
+
 def test_application_get_success(client, enable_factory_create, db_session, user, user_auth_token):
     application = ApplicationFactory.create(with_forms=True)
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
@@ -827,6 +893,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "created_at": application_form.created_at.isoformat(),
             "updated_at": application_form.updated_at.isoformat(),
             "is_required": True,
+            "application_attachments": [],
         }
 
 
@@ -925,7 +992,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_a_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -943,7 +1010,7 @@ def test_application_get_success_with_validation_issues(
     ]
     assert form_b_warnings == [
         {
-            "field": "$",
+            "field": "$.name",
             "message": "'name' is a required property",
             "type": "required",
             "value": None,
@@ -1002,7 +1069,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
             {},
             [
                 {
-                    "field": "$",
+                    "field": "$.name",
                     "message": "'name' is a required property",
                     "type": "required",
                     "value": None,
@@ -1667,7 +1734,6 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     """Test that application GET response includes organization with SAM.gov entity data"""
     # Create a SAM.gov entity with test data
     sam_gov_entity = SamGovEntityFactory.create(
-        uei="TEST123456789",
         legal_business_name="Test Organization LLC",
         expiration_date=date(2025, 12, 31),
     )
@@ -1703,7 +1769,7 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     # Check that sam_gov_entity is included with the required fields
     sam_gov_data = response.json["data"]["organization"]["sam_gov_entity"]
     assert sam_gov_data is not None
-    assert sam_gov_data["uei"] == "TEST123456789"
+    assert sam_gov_data["uei"] == sam_gov_entity.uei
     assert sam_gov_data["legal_business_name"] == "Test Organization LLC"
     assert sam_gov_data["expiration_date"] == "2025-12-31"
 

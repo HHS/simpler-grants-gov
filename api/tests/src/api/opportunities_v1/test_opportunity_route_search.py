@@ -58,7 +58,6 @@ def call_search_and_validate(client, api_auth_token, search_request, expected_re
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
     validate_search_response(resp, expected_results)
-
     search_request["format"] = "csv"
     resp = client.post(
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -603,6 +602,28 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
             ),
+            # Award Floor
+            (
+                get_search_request(
+                    page_size=3,
+                    page_offset=1,
+                    sort_order=[
+                        {"order_by": "award_floor", "sort_direction": SortDirection.DESCENDING}
+                    ],
+                ),
+                [DOC_MANUFACTURING, NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+            ),
+            # Award Ceiling
+            (
+                get_search_request(
+                    page_size=3,
+                    page_offset=1,
+                    sort_order=[
+                        {"order_by": "award_ceiling", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                ),
+                [DOC_SPACE_COAST, DOS_DIGITAL_LITERACY, LOC_TEACHING],
+            ),
         ],
         ids=search_scenario_id_fnc,
     )
@@ -930,7 +951,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"start_date_relative": -2214}),
+                get_search_request(close_date={"start_date_relative": -2314}),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
@@ -944,7 +965,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(close_date={"end_date_relative": -2214}),
+                get_search_request(close_date={"end_date_relative": -2314}),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (

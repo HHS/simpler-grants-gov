@@ -1,4 +1,5 @@
 import uuid
+from io import BytesIO
 from pathlib import Path
 
 import pytest
@@ -237,6 +238,269 @@ def test_application_attachment_get_403_not_the_owner(
 
     assert response.status_code == 403
     assert response.json["message"] == "Unauthorized"
+
+
+##########################################
+# Update application attachment tests
+##########################################
+
+
+@pytest.mark.parametrize(
+    "file_name,expected_mimetype",
+    [
+        ("pdf_file.pdf", "application/pdf"),
+        ("text_file.txt", "text/plain"),
+        ("spaces in file name.txt", "text/plain"),
+    ],
+)
+def test_application_attachment_update_200(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+    file_name,
+    expected_mimetype,
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+
+    # Create an existing attachment first
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / file_name).open("rb")},
+    )
+
+    assert response.status_code == 200
+
+    application_attachment_id = response.json["data"]["application_attachment_id"]
+    assert application_attachment_id == str(existing_attachment.application_attachment_id)
+
+    # Refresh the attachment from the database
+    db_session.refresh(existing_attachment)
+
+    assert existing_attachment.file_name == file_name
+    assert existing_attachment.mime_type == expected_mimetype
+    assert existing_attachment.file_size_bytes > 0
+    assert file_util.file_exists(existing_attachment.file_location) is True
+
+
+def test_application_attachment_update_404_application_not_found(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application_id = uuid.uuid4()
+    application_attachment_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/attachments/{application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 404
+    assert response.json["message"] == f"Application with ID {application_id} not found"
+
+
+def test_application_attachment_update_404_attachment_not_found(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    attachment_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 404
+    assert response.json["message"] == f"Application attachment with ID {attachment_id} not found"
+
+
+def test_application_attachment_update_422_not_a_file(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    existing_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": "not-a-file"},
+    )
+
+    assert response.status_code == 422
+    assert response.json["message"] == "Validation error"
+    assert response.json["errors"] == [
+        {
+            "field": "file_attachment",
+            "message": "Not a valid file.",
+            "type": "invalid",
+            "value": None,
+        }
+    ]
+
+
+def test_application_attachment_update_422_bad_type(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    """If we pass a non-file stream in, Werkzeug can handle it
+    but our API libraries don't, verify that fails gracefully
+    """
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+
+    # Create an existing attachment first
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": BytesIO(b"not-a-file")},
+    )
+
+    assert response.status_code == 422
+    assert response.json["message"] == "Validation error"
+    assert response.json["errors"] == [
+        {
+            "field": "file_attachment",
+            "message": "Not a valid file.",
+            "type": "invalid",
+            "value": None,
+        }
+    ]
+
+
+def test_application_attachment_update_401_invalid_token(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    existing_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": "not-a-token"},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 401
+    assert response.json["message"] == "Unable to process token"
+
+
+def test_application_attachment_update_403_not_the_owner(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application)  # There is an owner, it's someone else
+    existing_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Unauthorized"
+
+
+def test_application_attachment_update_deletes_old_file_different_name(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    """Test that updating an attachment with different filename deletes the old file"""
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+
+    # Create attachment with initial file
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt", file_contents="old file contents"
+    )
+    old_file_location = existing_attachment.file_location
+
+    # Verify old file exists
+    assert file_util.file_exists(old_file_location) is True
+
+    # Update with new file
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
+    )
+
+    assert response.status_code == 200
+
+    # Refresh the attachment from the database
+    db_session.refresh(existing_attachment)
+
+    # Verify new file exists
+    assert file_util.file_exists(existing_attachment.file_location) is True
+    assert existing_attachment.file_name == "pdf_file.pdf"
+
+    # Verify old file was deleted (since filename changed, path would be different)
+    # Only check if the paths are actually different
+    if old_file_location != existing_attachment.file_location:
+        assert file_util.file_exists(old_file_location) is False
+
+
+def test_application_attachment_update_same_filename_overwrites(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    """Test that updating an attachment with same filename updates the attachment"""
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+
+    # Create attachment with initial file
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="text_file.txt", file_contents="old content"
+    )
+    old_file_location = existing_attachment.file_location
+
+    # Update with new file with same name
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 200
+
+    # Refresh the attachment from the database
+    db_session.refresh(existing_attachment)
+
+    # Verify file still exists and was updated
+    assert file_util.file_exists(existing_attachment.file_location) is True
+    assert existing_attachment.file_name == "text_file.txt"
+
+    # The old file should be deleted since the path changed
+    # (factory creates in public bucket, update service uses draft bucket)
+    if old_file_location != existing_attachment.file_location:
+        assert file_util.file_exists(old_file_location) is False
 
 
 ##########################################

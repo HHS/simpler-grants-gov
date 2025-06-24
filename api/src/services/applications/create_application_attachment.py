@@ -7,7 +7,8 @@ from werkzeug.datastructures import FileStorage
 import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
-from src.db.models.competition_models import ApplicationAttachment
+from src.api.route_utils import raise_flask_error
+from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
 
@@ -20,14 +21,46 @@ def create_application_attachment(
     # Fetch the application - handles checking if application exists & user can access
     application = get_application(db_session, application_id, user)
 
+    return upsert_application_attachment(
+        db_session=db_session,
+        application_id=application_id,
+        user=user,
+        form_and_files_data=form_and_files_data,
+        application=application,
+        application_attachment=None,
+    )
+
+
+def upsert_application_attachment(
+    db_session: db.Session,
+    application_id: uuid.UUID,
+    user: User,
+    form_and_files_data: dict,
+    application: Application,
+    application_attachment: ApplicationAttachment | None = None,
+) -> ApplicationAttachment:
+    """Create or update an application attachment."""
     # This uses a werkzeug FileStorage object for managing the file operations
     # Mimetype is set if the user specifies it when uploading the file which
     # if it's done via a standard HTML file box would include it.
     file_attachment: FileStorage = cast(FileStorage, form_and_files_data.get("file_attachment"))
 
+    # This should only ever happen if someone had a filename that Werkzeug could
+    # not parse or interpreted as a file stream.
+    if file_attachment.filename is None:
+        raise_flask_error(422, "Invalid file name, cannot parse")
+
     # secure_filename makes the file safe in path operations and removes non-ascii characters
     secure_file_name = file_util.get_secure_file_name(file_attachment.filename)
-    application_attachment_id = uuid.uuid4()
+
+    # For new attachments, generate a new ID. For updates, use the existing ID.
+    if application_attachment is None:
+        application_attachment_id = uuid.uuid4()
+        application_attachment = ApplicationAttachment(
+            application_attachment_id=application_attachment_id
+        )
+    else:
+        application_attachment_id = application_attachment.application_attachment_id
 
     # Build the s3 path
     s3_file_location = build_s3_application_attachment_path(
@@ -51,22 +84,20 @@ def create_application_attachment(
     # If we don't do this, we see `Can't attach instance of 'User' to session` errors.
     user = db_session.merge(user)
 
-    # Create the application attachment
-    application_attachment = ApplicationAttachment(
-        application_attachment_id=application_attachment_id,
-        application=application,
-        file_location=s3_file_location,
-        # In the file_name column we store the users actual file name unmodified
-        # so when we display it on the UI it matches whatever they uploaded.
-        file_name=file_util.get_file_name(file_attachment.filename),
-        mime_type=file_attachment.mimetype,
-        file_size_bytes=file_size_bytes,
-        user=user,
-    )
+    # Set or update the application attachment properties
+    application_attachment.application = application
+    application_attachment.file_location = s3_file_location
+    # In the file_name column we store the users actual file name unmodified
+    # so when we display it on the UI it matches whatever they uploaded.
+    application_attachment.file_name = file_util.get_file_name(file_attachment.filename)
+    application_attachment.mime_type = file_attachment.mimetype
+    application_attachment.file_size_bytes = file_size_bytes
+    application_attachment.user = user
+
     db_session.add(application_attachment)
 
     logger.info(
-        "Created application attachment",
+        "Created/updated application attachment",
         extra={"application_attachment_id": application_attachment_id},
     )
     return application_attachment
