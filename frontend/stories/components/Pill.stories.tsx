@@ -10,7 +10,8 @@ export default meta;
 
 export const Default = {
   args: {
-    label: "Pill",
+    label: "All Department of Agriculture",
+    // eslint-disable-next-line
     onClose: () => console.log("close pill!"),
   },
 };
