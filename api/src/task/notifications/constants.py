@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from uuid import UUID
 
+from src.db.models.opportunity_models import OpportunityVersion
+
 
 class NotificationReason(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
@@ -16,6 +18,7 @@ class Metrics(StrEnum):
     SEARCHES_TRACKED = "searches_tracked"
     NOTIFICATIONS_SENT = "notifications_sent"
     FAILED_TO_SEND = "failed_to_send"
+    VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
 
 
 @dataclass
@@ -27,3 +30,17 @@ class UserEmailNotification:
     content: str
     notified_object_ids: list
     is_notified: bool
+
+
+@dataclass
+class OpportunityVersionChange:
+    opportunity_id: UUID
+    latest: OpportunityVersion
+    previous: OpportunityVersion | None
+
+
+@dataclass
+class ChangedSavedOpportunity:
+    user_id: UUID
+    email: str
+    opportunities: list[OpportunityVersionChange]
