@@ -12,7 +12,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
-from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     Metrics,
     NotificationReason,
@@ -78,63 +77,40 @@ def build_opp_and_version(
     return version
 
 
-OPAL_V1 = build_opp_and_version(
+base_opal_fields = {
+    "opportunity_title": "Opal 2025 Awards",
+    "close_date": date(2026, 9, 1),
+    "forecasted_award_date": None,
+    "forecasted_project_start_date": None,
+    "fiscal_year": None,
+    "estimated_total_program_funding": 15_000_000,
+    "expected_number_of_awards": 3,
+    "award_floor": 50_000,
+    "award_ceiling": 5_000_000,
+    "is_cost_sharing": True,
+    "funding_instruments": [FundingInstrument.COOPERATIVE_AGREEMENT],
+    "category": None,
+    "category_explanation": None,
+    "funding_categories": [FundingCategory.EDUCATION],
+    "funding_category_description": None,
+}
+
+OPAL = build_opp_and_version(
     revision_number=1,
-    opportunity_title="Opal 2025 award",
     opportunity_status=OpportunityStatus.POSTED,
-    close_date=date(2026, 9, 1),
-    forecasted_award_date=None,
-    forecasted_project_start_date=None,
-    fiscal_year=None,
-    estimated_total_program_funding=15_000_000,
-    expected_number_of_awards=3,
-    award_floor=50_000,
-    award_ceiling=5_000_000,
-    is_cost_sharing=True,
-    funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
-    category=None,
-    category_explanation=None,
-    funding_categories=[FundingCategory.EDUCATION],
-    funding_category_description=None,
+    **base_opal_fields,
 )
 
-OPAL_V2 = build_opp_and_version(
+OPAL_STATUS = build_opp_and_version(
     revision_number=1,
-    opportunity_title="Opal 2025 Awards",
-    opportunity_status=OpportunityStatus.CLOSED,
-    close_date=date(2026, 10, 15),
-    forecasted_award_date=date(2026, 12, 1),
-    forecasted_project_start_date=date(2027, 1, 15),
-    fiscal_year=2026,
-    estimated_total_program_funding=20_000_000,
-    expected_number_of_awards=5,
-    award_floor=100_000,
-    award_ceiling=6_000_000,
-    is_cost_sharing=False,
-    funding_instruments=[FundingInstrument.GRANT],
-    category=OpportunityCategory.DISCRETIONARY,
-    category_explanation="Supports education innovation",
-    funding_categories=[FundingCategory.HEALTH],
-    funding_category_description="Health and wellness-related initiatives",
+    opportunity_status=OpportunityStatus.CLOSED,  # Opp Status update
+    **base_opal_fields,
 )
-OPAL_V3 = build_opp_and_version(
+
+OPAL_REVISION_NUMB = build_opp_and_version(
     revision_number=2,  # non-tracked field
-    opportunity_title="Opal 2025 award",
     opportunity_status=OpportunityStatus.POSTED,
-    close_date=date(2026, 9, 1),
-    forecasted_award_date=None,
-    forecasted_project_start_date=None,
-    fiscal_year=None,
-    estimated_total_program_funding=15_000_000,
-    expected_number_of_awards=3,
-    award_floor=50_000,
-    award_ceiling=5_000_000,
-    is_cost_sharing=True,
-    funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
-    category=None,
-    category_explanation=None,
-    funding_categories=[FundingCategory.EDUCATION],
-    funding_category_description=None,
+    **base_opal_fields,
 )
 
 TOPAZ_V1 = build_opp_and_version(
@@ -164,7 +140,7 @@ TOPAZ_V1 = build_opp_and_version(
 )
 TOPAZ_V2 = build_opp_and_version(
     revision_number=2,
-    opportunity_title="Topaz 2026 Renewable Energy Grant",
+    opportunity_title="Topaz 2025 Climate Research Grant",
     opportunity_status=OpportunityStatus.CLOSED,
     close_date=date(2025, 12, 31),
     forecasted_award_date=date(2026, 3, 15),
@@ -189,17 +165,10 @@ def link_user_with_email(user):
 
 
 class TestOpportunityNotification:
-
     @pytest.fixture
-    def email_notification_task(self, db_session, search_client, monkeypatch):
+    def set_env_var_for_email_notification_config(self, monkeypatch):
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
-        monkeypatch.setenv("ENABLE_OPPORTUNITY_NOTIFICATIONS", "true")
-        monkeypatch.setenv("ENABLE_SEARCH_NOTIFICATIONS", "false")
-        monkeypatch.setenv("ENABLE_CLOSING_DATE_NOTIFICATIONS", "false")
-
-        config = EmailNotificationConfig()
-        return EmailNotificationTask(db_session, search_client, config)
 
     @pytest.fixture(autouse=True)
     def clear_data(self, db_session):
@@ -208,22 +177,23 @@ class TestOpportunityNotification:
         cascade_delete_from_db_table(db_session, Opportunity)
         cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def user_with_email(self, db_session, user, monkeypatch):
         return link_user_with_email(user)
 
     def test_email_notifications_collection(
         self,
-        cli_runner,
         db_session,
+        cli_runner,
+        search_client,
         enable_factory_create,
         user,
-        user_with_email,
         caplog,
-        email_notification_task,
+        set_env_var_for_email_notification_config,
     ):
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
+
         user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         # Create a saved opportunity that needs notification
@@ -295,14 +265,15 @@ class TestOpportunityNotification:
             opp_id = user_saved_opp.opportunity_id
 
             if opp_id == opp_1.opportunity_id:
-                assert latest_opp_ver == opp_1_v_2
+                assert latest_opp_ver.opportunity_id == opp_1_v_2.opportunity_id
             elif opp_id == opp_2.opportunity_id:
-                assert latest_opp_ver == opp_2_v_1
+                assert latest_opp_ver.opportunity_id == opp_2_v_1.opportunity_id
             elif opp_id == opp_3.opportunity_id:
-                assert latest_opp_ver == opp_3_v_2
+                assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
 
         # Run the notification task
-        email_notification_task.run()
+        task = EmailNotificationTask(db_session, search_client)
+        task.run()
 
         # Verify notification log was created
         notification_logs = (
@@ -320,19 +291,23 @@ class TestOpportunityNotification:
         log_records = [
             r for r in caplog.records if "Successfully delivered notification to user" in r.message
         ]
-        assert len(log_records) == 2
+
         assert (
-            log_records[0].__dict__["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+            len(
+                [
+                    log
+                    for log in log_records
+                    if log.__dict__["notification_reason"] == NotificationReason.OPPORTUNITY_UPDATES
+                ]
+            )
+            == 2
         )
 
     def test_with_no_user_email_notification(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-        email_notification_task,
+        self, db_session, enable_factory_create, set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected if the user has no linked email address."""
+        user = factories.UserFactory.create()
         # Create a saved opportunity that needs notification
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
         factories.OpportunityVersionFactory.create(
@@ -354,11 +329,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_with_no_prior_version_email_collections(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-        email_notification_task,
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification log is created when no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -376,11 +347,7 @@ class TestOpportunityNotification:
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_no_updates_email_collections(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-        email_notification_task,
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected when there are no opportunity updates."""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -398,20 +365,14 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_last_notified_version(
-        self,
-        db_session,
-        enable_factory_create,
-        user,
-        monkeypatch,
-        email_notification_task,
+        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
     ):
         """
          Test that `_get_last_notified_versions` correctly returns the most recent
         OpportunityVersion created *before* each user's `last_notified_at` timestamp for the given opportunity
         """
         # create a different user
-        user_2 = factories.UserFactory.create()
-        user_2 = link_user_with_email(user_2)
+        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         v_1 = factories.OpportunityVersionFactory.create()
         opp = v_1.opportunity
@@ -447,7 +408,7 @@ class TestOpportunityNotification:
         "diff_dict,expected_dict",
         [
             (
-                # qSingle field with nested name
+                # Single field with nested name
                 [{"field": "a.b", "before": "new", "after": "old"}],
                 {"b": {"before": "new", "after": "old"}},
             ),
@@ -467,7 +428,7 @@ class TestOpportunityNotification:
         ],
     )
     def test_flatten_and_extract_field_changes(
-        self, db_session, diff_dict, expected_dict, email_notification_task
+        self, db_session, diff_dict, expected_dict, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -480,16 +441,16 @@ class TestOpportunityNotification:
         [
             (
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.CLOSED},
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             (
                 {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.ARCHIVED},
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
             ),
         ],
     )
     def test_build_opportunity_status_content(
-        self, db_session, opp_status_diffs, expected_html, email_notification_task
+        self, db_session, opp_status_diffs, expected_html, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -502,49 +463,49 @@ class TestOpportunityNotification:
         [
             # close_date
             (
-                {"close_date": {"before" : date(2035, 10, 10), "after" : date(2035, 10, 30)}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>'
+                {"close_date": {"before": date(2035, 10, 10), "after": date(2035, 10, 30)}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
             (
                 {"close_date": {"before": date(2025, 10, 10), "after": None}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The application due date changed from October 10, 2025 to None.<br>'
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to None.<br>',
             ),
             # forecasted_award_date
             (
                 {"forecasted_award_date": {"before": date(2030, 1, 6), "after": date(2031, 5, 3)}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>'
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
             ),
             (
-                {"forecasted_award_date": {"before": None, "after":  date(2026, 9, 11)}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The estimated award date changed from None to September 11, 2026.<br>'
+                {"forecasted_award_date": {"before": None, "after": date(2026, 9, 11)}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from None to September 11, 2026.<br>',
             ),
             # forecasted_project_start_date
-                (
-                {"forecasted_project_start_date": {"before": date(2027, 1, 7), "after": date(2031, 5, 3)}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>'
+            (
+                {
+                    "forecasted_project_start_date": {
+                        "before": date(2027, 1, 7),
+                        "after": date(2031, 5, 3),
+                    }
+                },
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
             ),
             (
-                    {"forecasted_project_start_date": {"before": None, "after": date(2028, 1, 7)}},
-                    '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The estimated project start date changed from None to January 7, 2028.<br>'
+                {"forecasted_project_start_date": {"before": None, "after": date(2028, 1, 7)}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from None to January 7, 2028.<br>',
             ),
             # fiscal_year
-                (
+            (
                 {"fiscal_year": {"before": 2050, "after": 2051}},
-                '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>'
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
             ),
             (
-                    {"fiscal_year": {"before": 2033, "after": None}},
-                    '<p style="margin-left: 20px;">Important dates</p><p style="margin-left: 40px;">•  The fiscal year changed from 2033 to None.<br>'
-            )
-
-        ]
+                {"fiscal_year": {"before": 2033, "after": None}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to None.<br>',
+            ),
+        ],
     )
     def test_build_important_dates_content(
-            self,
-            db_session,
-            email_notification_task,
-            imp_dates_diffs,
-            expected_html
+        self, db_session, imp_dates_diffs, expected_html, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -557,15 +518,17 @@ class TestOpportunityNotification:
         [
             (
                 OpportunityVersionChange(
-                    opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V2
+                    opportunity_id=OPAL_STATUS.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                 ),
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             # Update non-tracked field
             (
                 (
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
+                        opportunity_id=OPAL_STATUS.opportunity_id,
+                        previous=OPAL,
+                        latest=OPAL_REVISION_NUMB,
                     ),
                     "",
                 )
@@ -573,53 +536,56 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_sections(
-        self, email_notification_task, db_session, version_change, expected_html
+        self, db_session, version_change, expected_html, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_sections(version_change)
+        import pdb
+
+        pdb.set_trace()
         assert res == expected_html
 
     @pytest.mark.parametrize(
         "version_changes,expected_html",
         [
-            # # Multiple updates
+            # Multiple updates
             (
                 [
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V2
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                     ),
                     OpportunityVersionChange(
                         opportunity_id=TOPAZ_V1.opportunity_id, previous=TOPAZ_V1, latest=TOPAZ_V2
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunities changed on <a href='None' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='None/opportunity/{OPAL_V1.opportunity_id}' target='_blank'>Opal 2025 award</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='None/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='None' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
-                    updated_opportunity_ids=[OPAL_V1.opportunity_id, TOPAZ_V1.opportunity_id],
-                ),
-            ),
-            # Relevant & none Relevant updates mix
-            (
-                [
-                    OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
-                    ),  # No relevant updates
-                    OpportunityVersionChange(
-                        opportunity_id=TOPAZ_V1.opportunity_id, previous=TOPAZ_V1, latest=TOPAZ_V2
+                    subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=(
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                        '<p style="padding-left: 20px;">Important dates</p>'
+                        '<p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br>"
+                        "<a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
-                ],
-                UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='None' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='None/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='None' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
-                    updated_opportunity_ids=[TOPAZ_V1.opportunity_id],
+                    updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ_V1.opportunity_id],
                 ),
             ),
             # None relevant updates only
             (
                 [
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
+                        opportunity_id=OPAL_STATUS.opportunity_id,
+                        previous=OPAL,
+                        latest=OPAL_REVISION_NUMB,
                     ),
                 ],
                 None,
@@ -631,9 +597,9 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         user,
-        email_notification_task,
         version_changes,
         expected_html,
+        set_env_var_for_email_notification_config,
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)

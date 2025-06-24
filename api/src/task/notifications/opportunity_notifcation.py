@@ -1,5 +1,5 @@
-from datetime import datetime, date
 import logging
+from datetime import datetime
 from typing import Sequence
 from uuid import UUID
 
@@ -75,15 +75,13 @@ OPPORTUNITY_STATUS_MAP = {
     OpportunityStatus.POSTED: "Open",
 }
 
-SECTION_STYLING = '<p style="margin-left: 20px;">{}</p>'
-BULLET_POINTS_STYLING = '<p style="margin-left: 40px;">• '
+SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
+BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
-    def __init__(self, db_session: db.Session, frontend_base_url: str | None = None):
+    def __init__(self, db_session: db.Session):
         super().__init__(db_session)
-        self.frontend_base_url = frontend_base_url
-        self.opportunity_content: dict[UUID, str] = {}
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
@@ -291,61 +289,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
-    def _build_notification_content(
-        self, updated_opportunities: list[OpportunityVersionChange]
-    ) -> UserOpportunityUpdateContent | None:
-
-        closing_msg = (
-            "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
-            f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-            "</div>"
-        ) + CONTACT_INFO
-
-        all_sections = ""
-        updated_opp_ids = []
-        opp_numb = 0
-        # Get sections statement
-        for opp in updated_opportunities:
-            opp_id = opp.opportunity_id
-            sections = self._build_sections(opp)
-            if not sections:
-                continue
-            assert opp.previous is not None
-            opp_numb += 1
-            all_sections += (
-                "<div>"
-                f"{opp_numb}. <a href='{self.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
-                "Here’s what changed:"
-                "</div>"
-            ) + sections
-
-            updated_opp_ids.append(opp_id)
-
-        if not all_sections:
-            return None
-        updated_opp_count = len(updated_opp_ids)
-        intro = (
-            "The following funding opportunities recently changed:<br><br>"
-            if updated_opp_count > 1
-            else "The following funding opportunity recently changed:<br><br>"
-        )
-        subject = (
-            "Your saved funding opportunities changed on "
-            if updated_opp_count > 1
-            else "Your saved funding opportunity changed on "
-        )
-        subject += f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
-
-        return UserOpportunityUpdateContent(
-            subject=subject,
-            message=intro + all_sections + closing_msg,
-            updated_opportunity_ids=updated_opp_ids,
-        )
-
-    def _normalize_date_field(self, value: date | int | None) -> str | int:
-        if isinstance(value, date):
-            return value.strftime("%B %-d, %Y")
+    def _normalize_date_field(self, value: str | int | None) -> str | int:
+        if isinstance(value, str):
+            return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
         return value
 
     def _build_important_dates_content(self, imp_dates_change: dict) -> str:
@@ -372,7 +318,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         sections = []
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
-
+        if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
+            sections.append(self._build_important_dates_content(important_date_diffs))
 
         if not sections:
             logger.info(
@@ -383,6 +330,58 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 },
             )
         return "<br>".join(sections)
+
+    def _build_notification_content(
+        self, updated_opportunities: list[OpportunityVersionChange]
+    ) -> UserOpportunityUpdateContent | None:
+
+        closing_msg = (
+            "<div>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            "</div>"
+        ) + CONTACT_INFO
+
+        all_sections = ""
+        updated_opp_ids = []
+        opp_numb = 0
+        # Get sections statement
+        for opp in updated_opportunities:
+            opp_id = opp.opportunity_id
+            sections = self._build_sections(opp)
+            if not sections:
+                continue
+            assert opp.previous is not None
+            opp_numb += 1
+            all_sections += (
+                "<div>"
+                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                "Here’s what changed:"
+                "</div>"
+            ) + sections
+
+            updated_opp_ids.append(opp_id)
+
+        if not all_sections:
+            return None
+        updated_opp_count = len(updated_opp_ids)
+        intro = (
+            "The following funding opportunities recently changed:<br><br>"
+            if updated_opp_count > 1
+            else "The following funding opportunity recently changed:<br><br>"
+        )
+        subject = (
+            "Your saved funding opportunities changed on "
+            if updated_opp_count > 1
+            else "Your saved funding opportunity changed on "
+        )
+        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+
+        return UserOpportunityUpdateContent(
+            subject=subject,
+            message=intro + all_sections + closing_msg,
+            updated_opportunity_ids=updated_opp_ids,
+        )
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:
