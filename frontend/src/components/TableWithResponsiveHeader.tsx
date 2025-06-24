@@ -64,10 +64,18 @@ export const TableWithResponsiveHeader = ({
               )}
             >
               <div className="display-flex">
-                <div className="tablet-lg:display-none flex-1 text-bold">
+                <div
+                  className="tablet-lg:display-none flex-1 text-bold"
+                  data-testid={`responsive-header-${i}-${j}`}
+                >
                   {headerContent[j].cellData}
                 </div>
-                <div className="flex-2 tablet:flex-3">{tableCell.cellData}</div>
+                <div
+                  className="flex-2 tablet:flex-3"
+                  data-testid={`responsive-data-${i}-${j}`}
+                >
+                  {tableCell.cellData}
+                </div>
               </div>
             </td>
           );

@@ -15,7 +15,7 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   fetchSavedOpportunities: () => mockFetchSavedOpportunities() as unknown,
 }));
 
-// this does not test responsive aspects of the component, that should be done in e2e tests
+// this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("SearchResultsTable", () => {
   beforeEach(() =>
