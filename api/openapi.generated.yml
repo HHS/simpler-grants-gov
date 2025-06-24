@@ -1229,6 +1229,8 @@ paths:
       summary: Get an application form by ID
       security:
       - ApiJwtAuth: []
+      - ApiKeyAuth: []
+      - InternalApiJwtAuth: []
   /alpha/applications/{application_id}/attachments/{application_attachment_id}:
     get:
       parameters:
