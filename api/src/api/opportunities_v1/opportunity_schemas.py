@@ -436,6 +436,14 @@ class OpportunityFacetV1Schema(Schema):
             "example": {"USAID": 4, "DOC": 3},
         },
     )
+    is_cost_sharing = fields.Dict(
+        keys=fields.Boolean(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of is_cost_sharing values in the full response",
+            "example": {"true": 1, "false": 3},
+        },
+    )
 
 
 class ExperimentalV1Schema(Schema):
