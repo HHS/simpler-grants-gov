@@ -68,8 +68,8 @@ const TitleDisplay = ({
         {opportunity.opportunity_number}
       </div>
       {saved && (
-        <div className="margin-top-2 display-none tablet-lg:display-inline-block">
-          <span className="padding-x-105 padding-y-2px bg-base-lighter display-flex flex-align-center font-sans-2xs radius-sm">
+        <div className="margin-top-2 display-inline-block">
+          <span className="display-flex flex-align-center font-sans-2xs">
             <USWDSIcon
               name="star"
               className="text-accent-warm-dark button-icon-md padding-right-05"
