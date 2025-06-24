@@ -556,13 +556,13 @@ class SavedOpportunityResponseV1Schema(Schema):
 
 
 class OpportunityVersionAttachmentSchema(Schema):
-    attachment_id = fields.String(
+    attachment_id = fields.Integer(
         metadata={"description": "The attachment id associated with the opportunity"}
     )
 
 
 class OpportunityVersionSchema(OpportunityV1Schema):
-    attachments = fields.List(
+    opportunity_attachments = fields.List(
         fields.Nested(OpportunityVersionAttachmentSchema),
         attribute="opportunity_attachments",
         metadata={"description": "List of attachments associated with the opportunity"},
