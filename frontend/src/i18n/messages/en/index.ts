@@ -221,7 +221,7 @@ export const messages = {
       statusAccepted: "Accepted",
       uei: "UEI",
       renewal: "Renewal",
-      closeDate: "Close Date",
+      closeDate: "Close date",
       closed: "Closed",
       status: "Status",
     },
