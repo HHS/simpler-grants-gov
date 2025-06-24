@@ -86,12 +86,12 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
   const t = useTranslations("Search.table");
   return (
     <>
-      <div className="margin-bottom-1">{opportunity.agency_name}</div>
-      <div className="font-sans-xs">
+      <div className="tablet-lg:margin-bottom-1">{opportunity.agency_name}</div>
+      <div className="font-sans-xs display-none tablet-lg:display-block">
         <span className="text-bold">{t("published")}</span>:{" "}
         {toShortMonthDate(opportunity.summary.post_date || "")}
       </div>
-      <div className="font-sans-xs">
+      <div className="font-sans-xs display-none tablet-lg:display-block">
         {t("expectedAwards")}:{" "}
         {isNil(opportunity.summary.expected_number_of_awards)
           ? "--"
@@ -122,19 +122,19 @@ const toSearchResultsTableRow = (
     },
     {
       cellData: <AgencyDisplay opportunity={result} />,
-      stackOrder: -1, // hidden
+      stackOrder: 3,
     },
     {
       cellData: isNil(result.summary.award_floor)
         ? "$--"
         : formatCurrency(result.summary.award_floor),
-      stackOrder: 3,
+      stackOrder: 4,
     },
     {
       cellData: isNil(result.summary.award_ceiling)
         ? "$--"
         : formatCurrency(result.summary.award_ceiling),
-      stackOrder: 4,
+      stackOrder: 5,
     },
   ];
 };
