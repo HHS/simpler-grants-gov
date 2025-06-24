@@ -17,13 +17,26 @@ from src.services.applications.get_application import get_application
 
 
 def get_application_form(
-    db_session: db.Session, application_id: UUID, app_form_id: UUID, user: User
+    db_session: db.Session, application_id: UUID, app_form_id: UUID, user: User | None = None
 ) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
     """
-    Get an application form by ID, checking if the user has access to it.
+    Get an application form by ID, optionally checking if the user has access to it.
+
+    If user is None (for internal JWT tokens), access checks are bypassed.
     """
-    # Get the application
-    application = get_application(db_session, application_id, user)
+    if user is not None:
+        # Regular user access - get the application with user access checks
+        application = get_application(db_session, application_id, user)
+    else:
+        # Internal JWT access - get the application without user access checks
+        application_result = db_session.execute(
+            select(Application).where(Application.application_id == application_id)
+        ).scalar_one_or_none()
+
+        if application_result is None:
+            raise_flask_error(404, f"Application with ID {application_id} not found")
+
+        application = application_result
 
     # Get the application form with eagerly loaded application and its attachments
     application_form = db_session.execute(
@@ -42,8 +55,9 @@ def get_application_form(
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
-    # Check if the user has access to the application
-    check_user_application_access(application, user)
+    # Check if the user has access to the application (only for regular users)
+    if user is not None:
+        check_user_application_access(application, user)
 
     # Get a list of validation warnings (also sets form status)
     warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
