@@ -11,6 +11,7 @@ import { JSX } from "react";
 
 import {
   FieldErrors,
+  FormValidationWarning,
   UiSchema,
   UiSchemaField,
   UswdsWidgetProps,
@@ -28,13 +29,16 @@ export function buildFormTreeRecursive({
   formData,
   schema,
   uiSchema,
+  warnings,
 }: {
+  warnings: FormValidationWarning[];
   errors: FieldErrors;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
 }) {
   let acc: JSX.Element[] = [];
+  console.log(errors, warnings);
 
   const buildFormTree = (
     uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
@@ -60,7 +64,7 @@ export function buildFormTreeRecursive({
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
-            errors,
+            warnings,
             formData,
           });
           if (field) {
@@ -85,7 +89,7 @@ export function buildFormTreeRecursive({
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
-              errors,
+              warnings,
               formData,
             });
           }
@@ -163,13 +167,13 @@ const widgetComponents: Record<
 export const buildField = ({
   uiFieldObject,
   formSchema,
-  errors,
   formData,
+  warnings,
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
-  errors: FieldErrors;
   formData: object;
+  warnings: FormValidationWarning[];
 }) => {
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
@@ -177,7 +181,7 @@ export const buildField = ({
     ? definition.split("/")[definition.split("/").length - 1]
     : (schema?.title ?? "untitled").replace(" ", "-");
 
-  const rawErrors = formatFieldErrors(errors, definition, name);
+  const rawErrors = formatFieldWarnings(warnings, name);
   const value = get(formData, name) as string | number | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
@@ -211,25 +215,17 @@ export const buildField = ({
   });
 };
 
-const formatFieldErrors = (
-  errors: FieldErrors,
-  definition: string | undefined,
+const formatFieldWarnings = (
+  warnings: FormValidationWarning[],
   name: string,
 ) => {
-  const errorsforField = filter(
-    errors,
-    (error) =>
-      definition === `/properties${error.instancePath}` ||
-      name === error.params?.missingProperty,
+  const warningsforField = filter(
+    warnings,
+    (warning) => `$.${name}` === warning.field,
   );
-  return errorsforField
-    .map((error) => {
-      if (definition === `/properties${error.instancePath}`) {
-        return error.message;
-      }
-      return "This required field cannot be blank";
-    })
-    .filter((error): error is string => error !== undefined);
+  return warningsforField.map((warning) => {
+    return warning.message;
+  });
 };
 
 export function getFieldsForNav(

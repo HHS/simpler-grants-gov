@@ -10,7 +10,6 @@ import {
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
-import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import {
   ApplicationDetail,
   FormValidationWarnings,
@@ -42,17 +41,17 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   let applicationData = {} as ApplicationDetail;
-  let formValidationWarnings = [] as unknown as FormValidationWarnings;
+  let formValidationWarnings: FormValidationWarnings | [];
   let formId = "";
   let formData: FormDetail | null;
-  const session = await getSession(); 
+  const session = await getSession();
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session to access form");
   }
 
   try {
     const response = await getApplicationDetails(applicationId, session.token);
-    console.log("applicationData", response);
+
     if (response.status_code !== 200) {
       console.error(
         `Error retrieving form details for applicationID (${applicationId}), appFormId (${appFormId})`,
@@ -61,26 +60,30 @@ async function FormPage({ params }: formPageProps) {
       return <TopLevelError />;
     }
     applicationData = response.data;
-    formId = applicationData.application_forms?.find(
-      (form) => form.application_form_id === appFormId,
-    )?.form_id || ""; 
+    formId =
+      applicationData.application_forms?.find(
+        (form) => form.application_form_id === appFormId,
+      )?.form_id || "";
     if (!formId) {
       console.error(
         `No form found for applicationID (${applicationId}), appFormId (${appFormId})`,
       );
       return <TopLevelError />;
     }
-    formData = applicationData.competition.competition_forms.find(
-      (form) => form.form.form_id === formId,
-    )?.form || null;
+    formData =
+      applicationData.competition.competition_forms.find(
+        (form) => form.form.form_id === formId,
+      )?.form || null;
     if (!formData) {
       console.error(
         `No form data found for applicationID (${applicationId}), appFormId (${appFormId}), formId (${formId})`,
       );
       return <TopLevelError />;
     }
-    formValidationWarnings = applicationData.form_validation_warnings?.[appFormId];
-    console.log("formValidationWarnings", formValidationWarnings, appFormId, formId);
+    formValidationWarnings =
+      (applicationData.form_validation_warnings?.[
+        appFormId
+      ] as unknown as FormValidationWarnings) || [];
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -136,6 +139,7 @@ async function FormPage({ params }: formPageProps) {
           ).
         </p>
         <ApplyForm
+          validationWarnings={formValidationWarnings}
           savedFormData={application_response}
           formSchema={formSchema}
           uiSchema={form_ui_schema}

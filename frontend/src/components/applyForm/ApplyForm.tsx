@@ -11,7 +11,7 @@ import { handleFormAction } from "./actions";
 import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
-import { UiSchema } from "./types";
+import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
@@ -19,6 +19,7 @@ const ApplyForm = ({
   formId,
   formSchema,
   savedFormData,
+  validationWarnings,
   uiSchema,
 }: {
   applicationId: string;
@@ -26,6 +27,7 @@ const ApplyForm = ({
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
+  validationWarnings: FormValidationWarning[];
 }) => {
   const { pending } = useFormStatus();
 
@@ -41,13 +43,12 @@ const ApplyForm = ({
   const { formData, errorMessage, successMessage, validationErrors } =
     formState;
 
-    console.log(validationErrors)
-
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
   try {
     fields = buildFormTreeRecursive({
+      warnings: validationWarnings,
       errors: validationErrors,
       formData: formObject,
       schema: formSchema,
