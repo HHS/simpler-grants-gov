@@ -107,8 +107,6 @@ class TransformCompetition(AbstractTransformSubTask):
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError("Competition references opportunity that doesn't exist")
-        elif opportunity_assistance_listing_id is None:
-            raise ValueError("Could not find matching opportunity assistance listing")
         else:
             # insert/update
             # To avoid incrementing metrics for records we fail to transform, record
