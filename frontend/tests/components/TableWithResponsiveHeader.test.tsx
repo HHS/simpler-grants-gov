@@ -1,38 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import {
+  fakeResponsiveTableHeaders,
+  fakeResponsiveTableRows,
+} from "src/utils/testing/fixtures";
 
 import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
-
-const fakeHeaders = [
-  { cellData: "hi" },
-  { cellData: "a heading" },
-  { cellData: "table header cell" },
-];
-const fakeRows = [
-  [
-    { cellData: "hi from row one", stackOrder: 1 },
-    { cellData: "i am column two", stackOrder: 0 },
-    { cellData: "some data", stackOrder: -1 },
-  ],
-  [
-    { cellData: "hi from row two", stackOrder: 1 },
-    { cellData: "still column two", stackOrder: 0 },
-    { cellData: "some more data", stackOrder: -1 },
-  ],
-  [
-    { cellData: "hi from row three", stackOrder: 1 },
-    { cellData: "column two", stackOrder: 0 },
-    { cellData: "even more data", stackOrder: -1 },
-  ],
-];
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("TableWithResponsiveHeader", () => {
   it("passes accessibility test", async () => {
     const component = TableWithResponsiveHeader({
-      headerContent: fakeHeaders,
-      tableRowData: fakeRows,
+      headerContent: fakeResponsiveTableHeaders,
+      tableRowData: fakeResponsiveTableRows,
     });
     const { container } = render(component);
     const results = await axe(container);
@@ -40,8 +21,8 @@ describe("TableWithResponsiveHeader", () => {
   });
   it.skip("matches snapshot", () => {
     const component = TableWithResponsiveHeader({
-      headerContent: fakeHeaders,
-      tableRowData: fakeRows,
+      headerContent: fakeResponsiveTableHeaders,
+      tableRowData: fakeResponsiveTableRows,
     });
     const { container } = render(component);
     expect(container).toMatchSnapshot();
@@ -49,8 +30,8 @@ describe("TableWithResponsiveHeader", () => {
   it("displays header content in table header", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
@@ -67,8 +48,8 @@ describe("TableWithResponsiveHeader", () => {
   it("displays header content (hidden) in table body", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
@@ -92,8 +73,8 @@ describe("TableWithResponsiveHeader", () => {
   it("displays table content in table body rows", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
@@ -130,8 +111,8 @@ describe("TableWithResponsiveHeader", () => {
   it("hides content with negative stack order", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
@@ -148,8 +129,8 @@ describe("TableWithResponsiveHeader", () => {
   it("applies stack order when present", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
@@ -163,8 +144,10 @@ describe("TableWithResponsiveHeader", () => {
   it("does not render if all table rows do not have the same number of items as the headers", () => {
     render(
       <TableWithResponsiveHeader
-        headerContent={fakeHeaders.concat([{ cellData: "superfluous" }])}
-        tableRowData={fakeRows}
+        headerContent={fakeResponsiveTableHeaders.concat([
+          { cellData: "superfluous" },
+        ])}
+        tableRowData={fakeResponsiveTableRows}
       />,
     );
 
