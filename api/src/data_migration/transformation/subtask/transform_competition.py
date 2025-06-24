@@ -1,6 +1,7 @@
 import logging
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -41,16 +42,27 @@ class TransformCompetition(AbstractTransformSubTask):
 
                 if opportunity_cfda:
                     opportunity_id = opportunity_cfda.opportunity_id
-                    opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
 
                     # Make sure the opportunity exists in our target table
                     opportunity = self.db_session.execute(
-                        select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
+                        select(Opportunity)
+                        .where(Opportunity.opportunity_id == opportunity_id)
+                        .options(selectinload(Opportunity.opportunity_assistance_listings))
                     ).scalar_one_or_none()
 
                     if not opportunity:
                         opportunity_id = None
                         opportunity_assistance_listing_id = None
+                    else:
+                        for assistance_listing in opportunity.opportunity_assistance_listings:
+                            if (
+                                assistance_listing.opportunity_assistance_listing_id
+                                == opportunity_cfda.opp_cfda_id
+                            ):
+                                opportunity_assistance_listing_id = (
+                                    opportunity_assistance_listing_id
+                                )
+                                break
 
                 self.process_competition(
                     source_competition,
@@ -95,6 +107,8 @@ class TransformCompetition(AbstractTransformSubTask):
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError("Competition references opportunity that doesn't exist")
+        elif opportunity_assistance_listing_id is None:
+            raise ValueError("Could not find matching opportunity assistance listing")
         else:
             # insert/update
             # To avoid incrementing metrics for records we fail to transform, record
