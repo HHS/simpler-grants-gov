@@ -10,6 +10,7 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Sch
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
     Metrics,
@@ -25,10 +26,8 @@ SCHEMA = OpportunityVersionV1Schema()
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
-    def __init__(self, db_session: db.Session, frontend_base_url: str | None = None):
+    def __init__(self, db_session: db.Session):
         super().__init__(db_session)
-        self.frontend_base_url = frontend_base_url
-        self.opportunity_content: dict[UUID, str] = {}
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
@@ -59,11 +58,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     opportunity_id=opp_id, latest=latest_opp_ver, previous=None  # will update later
                 )
 
+                saved_opp_exists = False
                 for entry in changed_saved_opportunities:
                     if entry.user_id == user_id:
                         entry.opportunities.append(version_change)
+                        saved_opp_exists = True
                         break
-                else:
+
+                if not saved_opp_exists:
                     changed_saved_opportunities.append(
                         ChangedSavedOpportunity(
                             user_id=user_id,

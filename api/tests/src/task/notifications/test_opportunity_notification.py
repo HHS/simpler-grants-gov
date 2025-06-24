@@ -7,9 +7,7 @@ from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
-from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import Metrics, NotificationReason
-from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
 
@@ -19,18 +17,12 @@ def link_user_with_email(user):
     return user
 
 
-class TestOpportunityNotification:
 
+class TestOpportunityNotification:
     @pytest.fixture
-    def email_notification_task(self, db_session, search_client, monkeypatch):
+    def set_env_var_for_email_notification_config(self,monkeypatch):
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
-        monkeypatch.setenv("ENABLE_OPPORTUNITY_NOTIFICATIONS", "true")
-        monkeypatch.setenv("ENABLE_SEARCH_NOTIFICATIONS", "false")
-        monkeypatch.setenv("ENABLE_CLOSING_DATE_NOTIFICATIONS", "false")
-
-        config = EmailNotificationConfig()
-        return EmailNotificationTask(db_session, search_client, config)
 
     @pytest.fixture(autouse=True)
     def clear_data(self, db_session):
@@ -50,7 +42,7 @@ class TestOpportunityNotification:
         enable_factory_create,
         user,
         caplog,
-        email_notification_task,
+            set_env_var_for_email_notification_config
     ):
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
@@ -129,7 +121,7 @@ class TestOpportunityNotification:
                 assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
 
         # Run the notification task
-        email_notification_task.run()
+        OpportunityNotificationTask(db_session=db_session)
 
         # Verify notification log was created
         notification_logs = (
@@ -156,7 +148,7 @@ class TestOpportunityNotification:
         self,
         db_session,
         enable_factory_create,
-        email_notification_task,
+            set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected if the user has no linked email address."""
         user = factories.UserFactory.create()
@@ -185,7 +177,7 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         user,
-        email_notification_task,
+            set_env_var_for_email_notification_config
     ):
         """Test that no notification log is created when no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -207,7 +199,7 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         user,
-        email_notification_task,
+            set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected when there are no opportunity updates."""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -229,7 +221,8 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         user,
-        email_notification_task,
+            set_env_var_for_email_notification_config
+
     ):
         """
          Test that `_get_last_notified_versions` correctly returns the most recent
