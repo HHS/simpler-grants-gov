@@ -43,8 +43,6 @@ endif
 
 FLASK_CMD := $(PY_RUN_CMD) flask
 
-SETUP_OVERRIDE_ENV_CMD=./bin/setup-env-override-file.sh
-
 # Docker user configuration
 # This logic is to avoid issues with permissions and mounting local volumes,
 # which should be owned by the same UID for Linux distros. Mac OS can use root,
@@ -87,7 +85,7 @@ setup-local:
 	poetry install --no-root --all-extras --with dev
 
 setup-env-override-file:
-	$(SETUP_OVERRIDE_ENV_CMD) $(args)
+	./bin/setup-env-override-file.sh $(args)
 
 ##################################################
 # API Build & Run
@@ -357,5 +355,7 @@ init-mock-soap-services: start-mock-soap-services ## Initialize the applicants s
 start-mock-soap-services: ## start applicants soap api
 	docker compose up --detach mock-applicants-soap-api
 
+# To specify the path of where the downloaded certificates are run the command as follows:
+#   make setup-soap-proxy cert_dir="~/certs/dir/"
 setup-soap-proxy:
-	$(SETUP_OVERRIDE_ENV_CMD) --setup-soap
+	./bin/setup-soap.sh $(cert_dir)
