@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
-from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
+from src.db.models.user_models import UserSavedOpportunity, UserNotificationLog
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
@@ -60,9 +60,12 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
                     and_(
-                        UserOpportunityNotificationLog.user_id == UserSavedOpportunity.user_id,
-                        UserOpportunityNotificationLog.opportunity_id
+                        UserNotificationLog.user_id == UserSavedOpportunity.user_id,
+                        UserNotificationLog.opportunity_id
                         == UserSavedOpportunity.opportunity_id,
+                        UserNotificationLog.created_at >= two_weeks_from_now,
+                        UserNotificationLog.notification_reason == NotificationReason.CLOSING_DATE_REMINDER,
+                        UserNotificationLog.notification_sent == True
                     )
                 ),
             )
@@ -190,21 +193,4 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
                     )
                     .values(last_notified_at=datetime_util.utcnow())
-                )
-
-                # Create notification log entry
-                for opp_id in opportunity_ids:
-                    opp_notification_log = UserOpportunityNotificationLog(
-                        user_id=user_id,
-                        opportunity_id=opp_id,
-                    )
-                    self.db_session.add(opp_notification_log)
-
-                logger.info(
-                    "Updated notification log",
-                    extra={
-                        "user_id": user_id,
-                        "opportunity_ids": opportunity_ids,
-                        "notification_reason": user_notification.notification_reason,
-                    },
                 )
