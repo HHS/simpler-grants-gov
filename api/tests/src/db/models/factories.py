@@ -31,7 +31,7 @@ import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -56,7 +56,7 @@ from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
-SCHEMA = OpportunityVersionSchema()
+SCHEMA = OpportunityV1Schema()
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
