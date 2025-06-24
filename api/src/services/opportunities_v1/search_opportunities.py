@@ -145,21 +145,26 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
 
 
 def _add_top_level_agency_prefix(
-    builder: search.SearchQueryBuilder, filters: OpportunityFilters
+    builder: search.SearchQueryBuilder, filters: OpportunityFilters | None
 ) -> None:
     """
-    Adds an OR-based agency filter using a `should` clause:
+    If top_level_agency is provided it adds an OR-based agency filter using a `should` clause:
       - Matches agencies whose code starts with the given top-level prefix.
       - Also includes specific agency codes from filters agency (if provided).
 
-    Clears filters agency to prevent duplication in other filters.
-
+    Clears filters top_level_agency and agency to prevent duplication in other filters.
     """
+
+    if not filters or not (filters.top_level_agency and filters.top_level_agency.one_of):
+        return
+
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
-    if filters.top_level_agency and filters.top_level_agency.one_of:
-        builder.filter_should_prefix(
-            "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]
-        )
+    builder.filter_should_prefix(
+        "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]
+    )
+
+    # remove top level agency from filter
+    filters.top_level_agency = None
 
     # If specific sub-agency codes are also provided, add them to the should clause
     if filters.agency and filters.agency.one_of:
@@ -188,10 +193,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
         builder.simple_query(params.query, filter_rule, params.query_operator)
 
     # Filter Prefix
-    if params.filters and params.filters.top_level_agency:
-        _add_top_level_agency_prefix(builder, params.filters)
-        # remove top level agency from filter
-        params.filters.top_level_agency = None
+    _add_top_level_agency_prefix(builder, params.filters)
 
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
