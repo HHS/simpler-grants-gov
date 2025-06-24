@@ -28,7 +28,6 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
 
     if opportunity.is_draft:
         return False
-
     # Fetch latest opportunity version stored
     latest_opp_version = (
         db_session.execute(
