@@ -74,8 +74,8 @@ OPPORTUNITY_STATUS_MAP = {
     OpportunityStatus.POSTED: "Open",
 }
 
-SECTION_STYLING = '<p style="margin-left: 20px;">{}</p>'
-BULLET_POINTS_STYLING = '<p style="margin-left: 40px;">• '
+SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
+BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -290,58 +290,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
-    def _build_notification_content(
-        self, updated_opportunities: list[OpportunityVersionChange]
-    ) -> UserOpportunityUpdateContent | None:
-
-        closing_msg = (
-            "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
-            f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-            "</div>"
-        ) + CONTACT_INFO
-
-        all_sections = ""
-        updated_opp_ids = []
-        opp_numb = 0
-        # Get sections statement
-        for opp in updated_opportunities:
-            opp_id = opp.opportunity_id
-            sections = self._build_sections(opp)
-            if not sections:
-                continue
-            assert opp.previous is not None
-            opp_numb += 1
-            all_sections += (
-                "<div>"
-                f"{opp_numb}. <a href='{self.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
-                "Here’s what changed:"
-                "</div>"
-            ) + sections
-
-            updated_opp_ids.append(opp_id)
-
-        if not all_sections:
-            return None
-        updated_opp_count = len(updated_opp_ids)
-        intro = (
-            "The following funding opportunities recently changed:<br><br>"
-            if updated_opp_count > 1
-            else "The following funding opportunity recently changed:<br><br>"
-        )
-        subject = (
-            "Your saved funding opportunities changed on "
-            if updated_opp_count > 1
-            else "Your saved funding opportunity changed on "
-        )
-        subject += f"<a href='{self.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
-
-        return UserOpportunityUpdateContent(
-            subject=subject,
-            message=intro + all_sections + closing_msg,
-            updated_opportunity_ids=updated_opp_ids,
-        )
-
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
         assert opp_change.previous is not None
@@ -366,91 +314,57 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return "<br>".join(sections)
 
-    def _get_latest_opportunity_versions(self) -> Sequence:
-        """
-        Retrieve the latest OpportunityVersion for each opportunity saved by users.
-        """
-        # Rank all versions per opportunity_id, by created_at descending
-        row_number = (
-            func.row_number()
-            .over(
-                partition_by=OpportunityVersion.opportunity_id,
-                order_by=desc(OpportunityVersion.created_at),
-            )
-            .label("rn")
+    def _build_notification_content(
+        self, updated_opportunities: list[OpportunityVersionChange]
+    ) -> UserOpportunityUpdateContent | None:
+
+        closing_msg = (
+            "<div>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            "</div>"
+        ) + CONTACT_INFO
+
+        all_sections = ""
+        updated_opp_ids = []
+        opp_numb = 0
+        # Get sections statement
+        for opp in updated_opportunities:
+            opp_id = opp.opportunity_id
+            sections = self._build_sections(opp)
+            if not sections:
+                continue
+            assert opp.previous is not None
+            opp_numb += 1
+            all_sections += (
+                "<div>"
+                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                "Here’s what changed:"
+                "</div>"
+            ) + sections
+
+            updated_opp_ids.append(opp_id)
+
+        if not all_sections:
+            return None
+        updated_opp_count = len(updated_opp_ids)
+        intro = (
+            "The following funding opportunities recently changed:<br><br>"
+            if updated_opp_count > 1
+            else "The following funding opportunity recently changed:<br><br>"
         )
-
-        # Subquery selecting all OpportunityVersions along with their row number rank
-        latest_versions_subq = select(OpportunityVersion, row_number).subquery()
-
-        # Map cols in the subquery back to OpportunityVersion model
-        latest_opp_version = aliased(OpportunityVersion, latest_versions_subq)
-
-        # Grab latest version for each UserSavedOpportunity
-        stmt = (
-            select(UserSavedOpportunity, latest_opp_version)
-            .options(selectinload(UserSavedOpportunity.user))
-            .outerjoin(
-                latest_opp_version,
-                and_(
-                    UserSavedOpportunity.opportunity_id == latest_opp_version.opportunity_id,
-                    latest_versions_subq.c.rn == 1,
-                ),
-            )
+        subject = (
+            "Your saved funding opportunities changed on "
+            if updated_opp_count > 1
+            else "Your saved funding opportunity changed on "
         )
+        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
 
-        results = self.db_session.execute(stmt).all()
-
-        return results
-
-    def _get_last_notified_versions(
-        self, user_opportunity_pairs: list
-    ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
-        """
-        Given (user_id, opportunity_id) pairs, return the most recent
-        OpportunityVersion for each that was created before the user's
-        last_notified_at timestamp.
-        """
-        # Rank all versions per (user, opportunity_id) by created_at desc
-        row_number = (
-            func.row_number()
-            .over(
-                partition_by=(UserSavedOpportunity.user_id, OpportunityVersion.opportunity_id),
-                order_by=desc(OpportunityVersion.created_at),
-            )
-            .label("rn")
+        return UserOpportunityUpdateContent(
+            subject=subject,
+            message=intro + all_sections + closing_msg,
+            updated_opportunity_ids=updated_opp_ids,
         )
-        # Subquery selecting all OpportunityVersions joined with UserSavedOpportunity,
-        # filtered by the given user-opportunity pairs, and versions created before last_notified_at
-        subq = (
-            select(OpportunityVersion, UserSavedOpportunity.user_id.label("user_id"), row_number)
-            .join(
-                UserSavedOpportunity,
-                UserSavedOpportunity.opportunity_id == OpportunityVersion.opportunity_id,
-            )
-            .where(
-                tuple_(UserSavedOpportunity.user_id, UserSavedOpportunity.opportunity_id).in_(
-                    user_opportunity_pairs
-                ),  # Filter for the given pairs
-                OpportunityVersion.created_at
-                < UserSavedOpportunity.last_notified_at,  # Grabs the versions created before the users last notification
-            )
-            .subquery()
-        )
-
-        # Map cols in the subquery back to OpportunityVersion model
-        opp_version_from_subq = aliased(OpportunityVersion, subq)
-
-        # Grabs latest version per (user, opportunity_id) pairs
-        stmt = select(
-            subq.c.user_id,
-            subq.c.opportunity_id,
-            opp_version_from_subq,  # OpportunityVersion object
-        ).where(subq.c.rn == 1)
-
-        results = self.db_session.execute(stmt).all()
-
-        return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

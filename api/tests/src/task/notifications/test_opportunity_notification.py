@@ -4,10 +4,6 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
-from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
-from src.task.notifications.constants import Metrics, NotificationReason
 from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
@@ -16,7 +12,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
-from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     Metrics,
     NotificationReason,
@@ -186,6 +181,7 @@ TOPAZ_V2 = build_opp_and_version(
     funding_category_description="Accelerates early-stage renewable energy technology adoption",  # New description
 )
 
+
 def link_user_with_email(user):
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
@@ -224,9 +220,9 @@ class TestOpportunityNotification:
         user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
 
         # Create a saved opportunity that needs notification
-        opp_1 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
-        opp_2 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
-        opp_3 = factories.OpportunityFactory.create(category=OpportunityCategory.OTHER)
+        opp_1 = factories.OpportunityFactory.create(is_posted_summary=True)
+        opp_2 = factories.OpportunityFactory.create(is_posted_summary=True)
+        opp_3 = factories.OpportunityFactory.create(is_posted_summary=True)
 
         # create old versions  for opps
         factories.OpportunityVersionFactory.create(
@@ -256,6 +252,10 @@ class TestOpportunityNotification:
             user=user_2,
             opportunity=opp_3,
         )
+
+        opp_1.current_opportunity_summary.opportunity_status = OpportunityStatus.CLOSED
+        opp_2.current_opportunity_summary.opportunity_status = OpportunityStatus.ARCHIVED
+        opp_3.current_opportunity_summary.opportunity_status = OpportunityStatus.FORECASTED
 
         # create new versions for opps
         factories.OpportunityVersionFactory.create(
@@ -427,7 +427,7 @@ class TestOpportunityNotification:
         assert results[user.user_id, opp.opportunity_id] == v_1
         assert results[user_2.user_id, opp.opportunity_id] == v_2
 
- @pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         "diff_dict,expected_dict",
         [
             (
@@ -451,7 +451,7 @@ class TestOpportunityNotification:
         ],
     )
     def test_flatten_and_extract_field_changes(
-        self, db_session, diff_dict, expected_dict, email_notification_task
+        self, db_session, diff_dict, expected_dict, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -464,16 +464,16 @@ class TestOpportunityNotification:
         [
             (
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.CLOSED},
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             (
                 {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.ARCHIVED},
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
             ),
         ],
     )
     def test_build_opportunity_status_content(
-        self, db_session, opp_status_diffs, expected_html, email_notification_task
+        self, db_session, opp_status_diffs, expected_html, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -488,7 +488,7 @@ class TestOpportunityNotification:
                 OpportunityVersionChange(
                     opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V2
                 ),
-                '<p style="margin-left: 20px;">Status</p><p style="margin-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             # Update non-tracked field
             (
@@ -502,7 +502,7 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_sections(
-        self, email_notification_task, db_session, version_change, expected_html
+        self, db_session, version_change, expected_html, set_env_var_for_email_notification_config
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
@@ -523,8 +523,8 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunities changed on <a href='None' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='None/opportunity/{OPAL_V1.opportunity_id}' target='_blank'>Opal 2025 award</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='None/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='None' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
+                    subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL_V1.opportunity_id}' target='_blank'>Opal 2025 award</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='http://testhost:3000/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
                     updated_opportunity_ids=[OPAL_V1.opportunity_id, TOPAZ_V1.opportunity_id],
                 ),
             ),
@@ -539,8 +539,8 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='None' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='None/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"margin-left: 20px;\">Status</p><p style=\"margin-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='None' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
+                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
                     updated_opportunity_ids=[TOPAZ_V1.opportunity_id],
                 ),
             ),
@@ -555,18 +555,17 @@ class TestOpportunityNotification:
             ),
         ],
     )
-
     def test_build_notification_content(
         self,
         db_session,
         enable_factory_create,
         user,
-        email_notification_task,
         version_changes,
         expected_html,
+        set_env_var_for_email_notification_config,
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-
+        # import pdb; pdb.set_trace()
         assert res == expected_html
