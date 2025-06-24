@@ -1560,6 +1560,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "funding_instrument",
             "funding_category",
             "opportunity_status",
+            "is_cost_sharing",
         }
 
     @pytest.mark.parametrize(

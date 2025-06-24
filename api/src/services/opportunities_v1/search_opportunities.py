@@ -142,6 +142,10 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms(
         "agency", _adjust_field_name("agency_code", OPP_REQUEST_FIELD_NAME_MAPPING), size=1000
     )
+    builder.aggregation_terms(
+        "is_cost_sharing",
+        _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
+    )
 
 
 def _add_top_level_agency_prefix(
