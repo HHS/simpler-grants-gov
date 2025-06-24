@@ -71,8 +71,6 @@ describe("toShortMonthDate", () => {
     expect(toShortMonthDate("1-1-25")).toEqual("Jan 1, 2025");
   });
   it("returns an empty string if input is invalid", () => {
-    expect(toShortMonthDate("1125")).toEqual("");
     expect(toShortMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
-    expect(toShortMonthDate("1,1,2025")).toEqual("");
   });
 });

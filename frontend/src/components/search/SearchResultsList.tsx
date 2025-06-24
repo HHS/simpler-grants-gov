@@ -13,26 +13,12 @@ interface ServerPageProps {
   page: number;
 }
 
-const NoResults = async () => {
-  const t = await getTranslations("Search.resultsListFetch");
-  return (
-    <div>
-      <h2>{t("noResultsTitle")}</h2>
-      <ul>
-        <li>{t("noResultsBody.0")}</li>
-        <li>{t("noResultsBody.1")}</li>
-        <li>{t("noResultsBody.2")}</li>
-        <li>{t("noResultsBody.3")}</li>
-      </ul>
-    </div>
-  );
-};
-
 export default async function SearchResultsList({
   searchResults,
   page,
 }: ServerPageProps) {
   const t = await getTranslations("Search");
+
   const savedOpportunities = await fetchSavedOpportunities();
   const savedOpportunityIds = savedOpportunities.map(
     (opportunity) => opportunity.opportunity_id,
@@ -42,7 +28,17 @@ export default async function SearchResultsList({
   }
 
   if (searchResults.data.length === 0) {
-    return <NoResults />;
+    return (
+      <div>
+        <h2>{t("resultsListFetch.noResultsTitle")}</h2>
+        <ul>
+          <li>{t("resultsListFetch.noResultsBody.0")}</li>
+          <li>{t("resultsListFetch.noResultsBody.1")}</li>
+          <li>{t("resultsListFetch.noResultsBody.2")}</li>
+          <li>{t("resultsListFetch.noResultsBody.3")}</li>
+        </ul>
+      </div>
+    );
   }
 
   return (
