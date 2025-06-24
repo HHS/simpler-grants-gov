@@ -553,3 +553,16 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+
+
+class OpportunityVersionAttachmentSchema(Schema):
+    attachment_id = fields.Integer(
+        metadata={"description": "The attachment id associated with the opportunity"}
+    )
+
+
+class OpportunityVersionSchema(OpportunityV1Schema):
+    opportunity_attachments = fields.List(
+        fields.Nested(OpportunityVersionAttachmentSchema),
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
