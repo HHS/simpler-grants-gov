@@ -68,6 +68,7 @@ export async function AgencyFilter({
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
       facetCounts={facetCounts}
+      contentClassName="maxh-mobile-lg overflow-auto position-relative"
     />
   );
 }
