@@ -566,4 +566,3 @@ class OpportunityVersionSchema(OpportunityV1Schema):
         fields.Nested(OpportunityVersionAttachmentSchema),
         metadata={"description": "List of attachments associated with the opportunity"},
     )
-g
