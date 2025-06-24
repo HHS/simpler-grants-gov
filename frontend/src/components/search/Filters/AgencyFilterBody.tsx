@@ -64,7 +64,10 @@ export function AgencyFilterBody({
     return setQueryParams(paramsToUpdate);
   };
 
-  const isNoneSelected = useMemo(() => query.size === 0, [query]);
+  const isNoneSelected = useMemo(
+    () => !query.size && !topLevelQuery?.size,
+    [query, topLevelQuery],
+  );
 
   return (
     <div data-testid={`${title}-filter`}>

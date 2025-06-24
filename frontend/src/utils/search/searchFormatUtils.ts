@@ -63,6 +63,11 @@ const filterConfigurations = [
     backendName: "is_cost_sharing",
     dataType: "boolean",
   },
+  {
+    frontendName: "topLevelAgency",
+    backendName: "top_level_agency",
+    dataType: "oneOf",
+  },
 ] as const;
 
 const toOneOfFilter = (data: Set<string>): OneOfFilter => {
@@ -116,7 +121,7 @@ const backendFilterToQueryParamValue = (
 
 // transforms raw query param data into structured search object format that the API needs
 export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
-  const { query, andOr, topLevelAgency } = searchInputs;
+  const { query, andOr } = searchInputs;
 
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
@@ -133,11 +138,6 @@ export const formatSearchRequestBody = (searchInputs: QueryParamData) => {
   }
   if (andOr) {
     requestBody.query_operator = andOr;
-  }
-  if (topLevelAgency && topLevelAgency.size) {
-    requestBody.top_level_agency = Array.from(topLevelAgency.values()).join(
-      ",",
-    );
   }
   return requestBody;
 };
