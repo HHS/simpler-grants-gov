@@ -102,6 +102,7 @@ def setup_cfda(
     return source_cfda
 
 
+# TODO: Clean this up
 def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
