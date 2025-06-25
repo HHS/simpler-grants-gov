@@ -86,7 +86,9 @@ def _build_competitions(db_session: db.Session) -> None:
 
     logger.info("Creating an opportunity setup like our pilot")
     pilot_competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="Local Pilot-equivalent Opportunity", competition_forms=[], with_instruction=True
+        opportunity__opportunity_title="Local Pilot-equivalent Opportunity",
+        competition_forms=[],
+        with_instruction=True,
     )
 
     # Create/update the sf424 form if it doesn't already exist
