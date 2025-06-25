@@ -80,13 +80,18 @@ def test_get_nested_value(json_data, path, expected_value):
 
 
 @pytest.mark.parametrize(
-    "path,expected_str",
+    "path,index,expected_str",
     [
-        (["path", "to", "field"], "$.path.to.field"),
-        (["my_field"], "$.my_field"),
-        ([], "$"),
-        (["a", "b", "c", "d", "e"], "$.a.b.c.d.e"),
+        (["path", "to", "field"], None, "$.path.to.field"),
+        (["my_field"], None, "$.my_field"),
+        ([], None, "$"),
+        (["a", "b", "c", "d", "e"], None, "$.a.b.c.d.e"),
+        # With an index
+        (["path", "to", "field"], 4, "$.path.to.field[4]"),
+        (["my_field"], 0, "$.my_field[0]"),
+        (["hello", "darkness", "my", "old", "friend"], 12, "$.hello.darkness.my.old.friend[12]"),
+        (["a", "b", "c", "d", "e", "f"], 6, "$.a.b.c.d.e.f[6]"),
     ],
 )
-def test_build_path_str(path, expected_str):
-    assert build_path_str(path) == expected_str
+def test_build_path_str(path, index, expected_str):
+    assert build_path_str(path, index=index) == expected_str

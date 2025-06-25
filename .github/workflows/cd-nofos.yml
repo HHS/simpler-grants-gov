@@ -18,7 +18,6 @@ on:
         type: choice
         options:
           - dev
-          - staging
           - prod
       version:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"

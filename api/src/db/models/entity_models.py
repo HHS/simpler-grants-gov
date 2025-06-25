@@ -33,6 +33,9 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     has_exclusion_status: Mapped[bool | None]
     eft_indicator: Mapped[str | None]
 
+    is_inactive: Mapped[bool | None] = mapped_column(default=False)
+    inactivated_at: Mapped[date | None]
+
     # Relationships
     import_records: Mapped[list["SamGovEntityImportType"]] = relationship(
         back_populates="sam_gov_entity", cascade="all, delete-orphan"
