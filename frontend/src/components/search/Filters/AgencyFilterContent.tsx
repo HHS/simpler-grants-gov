@@ -74,7 +74,7 @@ export function AgencyFilterContent({
           facetCounts={facetCounts}
           referenceOptions={allAgencies}
           topLevelQuery={topLevelQuery}
-          queryParamKey={"agency"}
+          queryParamKey={"agency"} // this is unused, but here to satisfy prop types
         />
       )}
     </>

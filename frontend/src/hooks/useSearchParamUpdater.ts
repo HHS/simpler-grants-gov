@@ -61,7 +61,6 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
-  // accepts an array of tuples of type [key, value]
   const setQueryParams = (
     updates: ValidSearchQueryParamData,
     scroll = false,

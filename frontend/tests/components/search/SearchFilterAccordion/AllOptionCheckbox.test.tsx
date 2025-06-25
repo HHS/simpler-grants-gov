@@ -175,10 +175,10 @@ describe("AllOptionCheckbox", () => {
       expect(checkbox).not.toBeChecked();
 
       await userEvent.click(checkbox);
-      expect(mockSetQueryParams).toHaveBeenCalledWith([
-        ["topLevelAgency", "anything,something"],
-        ["agency", "hello"],
-      ]);
+      expect(mockSetQueryParams).toHaveBeenCalledWith({
+        topLevelAgency: "anything,something",
+        agency: "hello",
+      });
     });
     it("responds correctly to un-check", async () => {
       // eslint-disable-next-line
@@ -198,10 +198,10 @@ describe("AllOptionCheckbox", () => {
       expect(checkbox).toBeChecked();
 
       await userEvent.click(checkbox);
-      expect(mockSetQueryParams).toHaveBeenCalledWith([
-        ["topLevelAgency", "anything"],
-        ["agency", "hello"],
-      ]);
+      expect(mockSetQueryParams).toHaveBeenCalledWith({
+        topLevelAgency: "anything",
+        agency: "hello",
+      });
     });
   });
 });

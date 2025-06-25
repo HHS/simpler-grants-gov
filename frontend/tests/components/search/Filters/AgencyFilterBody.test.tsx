@@ -121,10 +121,10 @@ describe("AgencyFilterBody", () => {
 
     expect(mockUpdateQueryParams).not.toHaveBeenCalled();
 
-    expect(mockSetQueryParams).toHaveBeenCalledWith([
-      ["agency", "AGNC-CHILD"],
-      ["topLevelAgency", ""],
-      ["query", "query term"],
-    ]);
+    expect(mockSetQueryParams).toHaveBeenCalledWith({
+      agency: "AGNC-CHILD",
+      topLevelAgency: "",
+      query: "query term",
+    });
   });
 });
