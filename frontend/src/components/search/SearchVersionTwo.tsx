@@ -74,6 +74,7 @@ export function SearchVersionTwo({
             </div>
           </div>
           <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
+          <FilterPillPanel searchParams={convertedSearchParams} />
           <SearchResults
             searchParams={convertedSearchParams}
             loadingMessage={t("loading")}

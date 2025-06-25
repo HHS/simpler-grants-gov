@@ -3,7 +3,10 @@ import { OptionalStringDict } from "src/types/generalTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
+  FilterPillLabelData,
+  FrontendFilterNames,
   RelevantAgencyRecord,
+  searchFilterNames,
 } from "src/types/search/searchFilterTypes";
 import { QuerySetParam } from "src/types/search/searchQueryTypes";
 import {
@@ -12,6 +15,8 @@ import {
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
 import { SortOptions } from "src/types/search/searchSortTypes";
+
+import { allFilterOptions } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,
@@ -207,4 +212,67 @@ export const getSiblingOptionValues = (
         return acc;
       }, [] as string[])
     : [];
+};
+
+// look up filter option label based on filter option value
+export const getFilterOptionLabel = (
+  queryParamKey: FrontendFilterNames,
+  value: string,
+) => {
+  const option = allFilterOptions[queryParamKey].find(
+    (option) => option.value === value,
+  );
+  if (!option) {
+    console.error(`Pill label not found for ${queryParamKey}:${value}`);
+    return "";
+  }
+  return option.label;
+};
+
+// return the correct pill label for a given query key and value
+// TODO: build in translation for prefixes
+// Since this is outside of a component we'd need to add interpolation markers and translate downstream
+export const formatPillLabel = (
+  queryParamKey: FrontendFilterNames,
+  value: string,
+): string => {
+  switch (queryParamKey) {
+    case "costSharing":
+      return `Cost sharing: ${value}`;
+    case "closeDate":
+      return `Closing in less than ${value} days`;
+    default:
+      return getFilterOption(queryParamKey, value);
+  }
+};
+
+// return all pill labels for a given query param key
+export const formatPillLabelValues = (
+  queryParamKey: FrontendFilterNames,
+  queryParamValues: Set<string>,
+): FilterPillLabelData[] => {
+  if (!queryParamValues.size) {
+    return [];
+  }
+  return Array.from(queryParamValues).map((value) => ({
+    label: formatPillLabel(queryParamKey, value),
+    queryParamKey,
+    queryParamValue: value,
+  }));
+};
+
+// return pill label objects for all query params
+export const formatPillLabels = (
+  searchParams: QueryParamData,
+): FilterPillLabelData[] => {
+  return Object.entries(searchParams).reduce((acc, [key, value]) => {
+    if (!(key in searchFilterNames)) {
+      return acc;
+    }
+    const pillLabels = formatPillLabelValues(
+      key as FrontendFilterNames,
+      value as Set<string>,
+    );
+    return acc.concat(pillLabels);
+  }, [] as FilterPillLabelData[]);
 };

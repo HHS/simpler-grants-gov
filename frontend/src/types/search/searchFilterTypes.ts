@@ -41,3 +41,9 @@ export interface RelevantAgencyRecord {
   agency_name: string;
   top_level_agency: null | RelevantAgencyRecord;
 }
+
+export type FilterPillLabelData = {
+  label: string;
+  queryParamKey: FrontendFilterNames;
+  queryParamValue: string;
+};
