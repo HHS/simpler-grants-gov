@@ -256,7 +256,7 @@ def test_validate_forms_invalid_responses(
     assert set(form_a_validation_issues) == {
         ValidationErrorDetail(type="type", message="{} is not of type 'string'", field="$.str_a"),
         ValidationErrorDetail(
-            type="required", message="'int_a' is a required property", field="$.obj_a"
+            type="required", message="'int_a' is a required property", field="$.obj_a.int_a"
         ),
     }
 

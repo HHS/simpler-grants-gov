@@ -61,6 +61,7 @@ export default async function SearchFilters({
         queryParamKey="fundingInstrument"
         title={t("accordion.titles.funding")}
         facetCounts={facetCounts?.funding_instrument || {}}
+        contentClassName="overflow-visible"
       />
       <SearchFilterAccordion
         filterOptions={eligibilityOptions}

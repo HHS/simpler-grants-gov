@@ -14,10 +14,13 @@ import { SaveSearchModal } from "./SaveSearchModal";
 import { SaveSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
-const TooltipWrapper = dynamic(() => import("src/components/TooltipWrapper"), {
-  ssr: false,
-  loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
-});
+const DynamicTooltipWrapper = dynamic(
+  () => import("src/components/TooltipWrapper"),
+  {
+    ssr: false,
+    loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,
+  },
+);
 
 const SaveSearchTooltip = ({
   text,
@@ -27,14 +30,14 @@ const SaveSearchTooltip = ({
   title: string;
 }) => {
   return (
-    <TooltipWrapper
+    <DynamicTooltipWrapper
       className="margin-left-1 usa-button--unstyled"
       label={<div className="width-card-lg text-wrap">{text}</div>}
       position="top"
       title={title}
     >
       <USWDSIcon className="text-secondary-darker" name="info_outline" />
-    </TooltipWrapper>
+    </DynamicTooltipWrapper>
   );
 };
 

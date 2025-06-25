@@ -2191,6 +2191,16 @@ components:
           - 'null'
           minimum: -1000000
           maximum: 1000000
+    TopLevelAgencyOppSearchFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 2
+            example: USAID
     OpportunitySearchFilterV1:
       type: object
       properties:
@@ -2246,6 +2256,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/CloseDateFilterV1'
+        top_level_agency:
+          type:
+          - object
+          $ref: '#/components/schemas/TopLevelAgencyOppSearchFilterV1'
     ExperimentalV1:
       type: object
       properties:
@@ -2275,6 +2289,8 @@ components:
           - agency_code
           - agency_name
           - top_level_agency_name
+          - award_floor
+          - award_ceiling
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
@@ -2338,10 +2354,6 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunitySearchFilterV1'
-        top_level_agency:
-          type: string
-          minLength: 2
-          description: Top level agency for querying against database for it's sub_agencies
         experimental:
           type:
           - object
@@ -2743,6 +2755,14 @@ components:
           example:
             USAID: 4
             DOC: 3
+          additionalProperties:
+            type: integer
+        is_cost_sharing:
+          type: object
+          description: The counts of is_cost_sharing values in the full response
+          example:
+            'true': 1
+            'false': 3
           additionalProperties:
             type: integer
     OpportunitySearchResponseV1:
@@ -3955,4 +3975,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

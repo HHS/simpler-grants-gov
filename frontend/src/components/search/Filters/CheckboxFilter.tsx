@@ -12,12 +12,12 @@ import { useContext, useMemo } from "react";
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import {
   BasicSearchFilterAccordion,
-  SearchFilterAccordionProps,
+  SearchFilterProps,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 
-interface CheckboxFilterBodyProps extends SearchFilterAccordionProps {
+interface CheckboxFilterBodyProps extends SearchFilterProps {
   referenceOptions?: FilterOption[];
 }
 
@@ -98,18 +98,18 @@ export function CheckboxFilter({
   query,
   queryParamKey,
   title,
-  wrapForScroll = true,
+  contentClassName,
   defaultEmptySelection,
   includeAnyOption = true,
   filterOptions,
   facetCounts,
-}: SearchFilterAccordionProps) {
+}: SearchFilterProps) {
   return (
     <BasicSearchFilterAccordion
       query={query}
       queryParamKey={queryParamKey}
       title={title}
-      wrapForScroll={wrapForScroll}
+      contentClassName={contentClassName}
       expanded={!!query.size}
       className="width-100 padding-right-5"
     >

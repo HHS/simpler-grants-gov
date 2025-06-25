@@ -13,7 +13,6 @@ def test_ebiz_poc_organization_during_login_creates_organization(enable_factory_
     sam_gov_entity = SamGovEntityFactory.create(
         ebiz_poc_email="integration_creates@example.com",
         legal_business_name="Test Organization",
-        uei="ABC123456789",
     )
     user = UserFactory.create()
     LinkExternalUserFactory.create(user=user, email="integration_creates@example.com")

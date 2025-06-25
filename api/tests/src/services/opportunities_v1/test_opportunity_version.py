@@ -8,6 +8,7 @@ from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAssistanceListingFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
 )
 
@@ -52,7 +53,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
                 "assistance_listing_number": opp_al.assistance_listing_number,
             }
         ],
-        "attachments": [],
+        "opportunity_attachments": [],
     }
 
     # Save opportunity into opportunity_version table
@@ -64,6 +65,28 @@ def test_save_opportunity_version(db_session, enable_factory_create):
     assert len(saved_opp_version) == 1
     assert saved_opp_version[0].opportunity_id == opp.opportunity_id
     assert saved_opp_version[0].opportunity_data == expected
+
+
+def test_save_opportunity_version_with_attachments(db_session, enable_factory_create):
+    # Setup Opportunity
+    attachment_1 = OpportunityAttachmentFactory.create()
+    opp = attachment_1.opportunity
+    attachment_2 = OpportunityAttachmentFactory.create(opportunity=opp)
+
+    expected = [
+        {"attachment_id": attachment_1.attachment_id},
+        {"attachment_id": attachment_2.attachment_id},
+    ]
+
+    # Save opportunity into opportunity_version table
+    save_opportunity_version(db_session, opp)
+
+    # Verify Record created
+    saved_opp_version = db_session.query(OpportunityVersion).all()
+
+    assert len(saved_opp_version) == 1
+    assert saved_opp_version[0].opportunity_id == opp.opportunity_id
+    assert saved_opp_version[0].opportunity_data["opportunity_attachments"] == expected
 
 
 def test_save_opportunity_version_draft(db_session, enable_factory_create):

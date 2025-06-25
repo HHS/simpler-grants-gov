@@ -112,11 +112,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     opportunity_id=opp_id, latest=latest_opp_ver, previous=None  # will update later
                 )
 
+                saved_opp_exists = False
                 for entry in changed_saved_opportunities:
                     if entry.user_id == user_id:
                         entry.opportunities.append(version_change)
+                        saved_opp_exists = True
                         break
-                else:
+
+                if not saved_opp_exists:
                     changed_saved_opportunities.append(
                         ChangedSavedOpportunity(
                             user_id=user_id,
@@ -133,6 +136,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
 
         users_email_notifications: list[UserEmailNotification] = []
+
         for user_changed_opp in changed_saved_opportunities:
             user_id = user_changed_opp.user_id
             user_email = user_changed_opp.email
@@ -264,7 +268,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         stmt = select(
             subq.c.user_id,
             subq.c.opportunity_id,
-            opp_version_from_subq,
+            opp_version_from_subq,  # OpportunityVersion object
         ).where(subq.c.rn == 1)
 
         results = self.db_session.execute(stmt).all()
@@ -285,8 +289,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         after = OPPORTUNITY_STATUS_MAP.get(after, after.capitalize())
 
         return (
-            SECTION_STYLING.format("Status")
-            + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
+                SECTION_STYLING.format("Status")
+                + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
     def _normalize_date_field(self, value: str | int | None) -> str | int:
@@ -332,15 +336,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return "<br>".join(sections)
 
     def _build_notification_content(
-        self, updated_opportunities: list[OpportunityVersionChange]
+            self, updated_opportunities: list[OpportunityVersionChange]
     ) -> UserOpportunityUpdateContent | None:
 
         closing_msg = (
-            "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-            "</div>"
-        ) + CONTACT_INFO
+                          "<div>"
+                          "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+                          f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+                          "</div>"
+                      ) + CONTACT_INFO
 
         all_sections = ""
         updated_opp_ids = []
@@ -354,11 +358,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
             assert opp.previous is not None
             opp_numb += 1
             all_sections += (
-                "<div>"
-                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
-                "Here’s what changed:"
-                "</div>"
-            ) + sections
+                                "<div>"
+                                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                                "Here’s what changed:"
+                                "</div>"
+                            ) + sections
 
             updated_opp_ids.append(opp_id)
 
