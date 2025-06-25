@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # This is a script to run setup for doing development on the simpler soap api.
-# The certificates must be downloaded from OnePassword and then unzipped.
+# The certificates must be downloaded from the Grants.gov S2S SOAP API Certificates resource
+# in OnePassword under the Eng Shared space and then unzipped.
 # The path of that unzipped file must be passed to this script and defaults to
 # the ~/Downloads folder.
 #
