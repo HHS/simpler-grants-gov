@@ -47,7 +47,7 @@ class ExtractIndex:
 class SamGovEntityContainer:
     processed_entities: list[SamGovEntity] = field(default_factory=list)
 
-    deleted_ueis: list[str] = field(default_factory=list)
+    deactivated_ueis: list[str] = field(default_factory=list)
     expired_ueis: list[str] = field(default_factory=list)
 
 
@@ -56,7 +56,7 @@ class ProcessSamExtractsTask(Task):
     class Metrics(StrEnum):
 
         ROWS_PROCESSED_COUNT = "rows_processed_count"
-        DELETED_ROWS_COUNT = "deleted_rows_count"
+        DEACTIVATED_ROWS_COUNT = "deactivated_rows_count"
         EXPIRED_ROWS_COUNT = "expired_rows_count"
         ROWS_CONVERTED_COUNT = "rows_converted_count"
         ENTITY_ERROR_COUNT = "entity_error_count"
@@ -64,6 +64,14 @@ class ProcessSamExtractsTask(Task):
         ENTITY_INSERTED_COUNT = "entity_inserted_count"
         ENTITY_UPDATED_COUNT = "entity_updated_count"
         ENTITY_NO_OP_COUNT = "entity_no_op_count"
+
+        ENTITY_DEACTIVATED_COUNT = "entity_deactivated_count"
+        ENTITY_DEACTIVATED_MISSING_COUNT = "entity_deactivated_missing_count"
+        ALREADY_DEACTIVATED_COUNT = "already_deactivated_count"
+
+        ENTITY_EXPIRED_COUNT = "entity_expired_count"
+        ENTITY_EXPIRED_MISSING_COUNT = "entity_expired_missing_count"
+        ENTITY_EXPIRED_MISMATCH_COUNT = "entity_expired_mismatch_count"
 
         EXTRACTS_PROCESSED_COUNT = "extracts_processed_count"
         MONTHLY_EXTRACT_PROCESSED_COUNT = "monthly_extract_processed_count"
@@ -97,12 +105,22 @@ class ProcessSamExtractsTask(Task):
                 for entity in all_entities:
                     entity_map[entity.uei] = entity
 
+                # Process updated/new sam.gov entity records
                 for sam_gov_entity in sam_gov_entity_container.processed_entities:
                     self.load_sam_gov_entity_to_db(
                         sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
                     )
 
-                # TODO in ticket #4795 - we'll handle deleted/deactivated & expired
+                # Handle deactivated sam.gov entity records
+                for uei in sam_gov_entity_container.deactivated_ueis:
+                    self.handle_deactivated_entity(
+                        uei, entity_map, sam_extract_file, extract_log_extra
+                    )
+
+                # Handle expired sam.gov entity records
+                for uei in sam_gov_entity_container.expired_ueis:
+                    self.handle_expired_entity(uei, entity_map, sam_extract_file, extract_log_extra)
+
                 logger.info(
                     "Finished loading records to DB for Sam.gov extract", extra=extract_log_extra
                 )
@@ -184,9 +202,11 @@ class ProcessSamExtractsTask(Task):
             4 - Expired Record - Send UEI(SAM), EFT INDICATOR, CAGE Code, DODAAC, SAM Extract Code, Purpose of Registration
             """
             if extract_code == "1":
-                logger.info("Record marked as deleted - skipping parsing of row", extra=log_extra)
-                self.increment(self.Metrics.DELETED_ROWS_COUNT)
-                container.deleted_ueis.append(uei)
+                logger.info(
+                    "Record marked as deactivated - skipping parsing of row", extra=log_extra
+                )
+                self.increment(self.Metrics.DEACTIVATED_ROWS_COUNT)
+                container.deactivated_ueis.append(uei)
                 continue
             if extract_code == "4":
                 logger.info("Record marked as expired - skipping parsing of row", extra=log_extra)
@@ -266,6 +286,87 @@ class ProcessSamExtractsTask(Task):
             logger.info("No update necessary for sam.gov entity", extra=log_extra)
             self.increment(self.Metrics.ENTITY_NO_OP_COUNT)
 
+    def handle_deactivated_entity(
+        self,
+        uei: str,
+        entity_map: dict[str, SamGovEntity],
+        sam_extract_file: SamExtractFile,
+        extract_log_extra: dict,
+    ) -> None:
+        """Handle marking deleted/deactivated records in the DB"""
+        existing_sam_gov_entity = entity_map.get(uei, None)
+
+        log_extra = {"uei": uei} | extract_log_extra
+
+        # If we don't have the entity, do nothing. In theory
+        # this could happen if a record was created and deleted
+        # in the same day, so don't think it's a major issue?
+        if not existing_sam_gov_entity:
+            self.increment(self.Metrics.ENTITY_DEACTIVATED_MISSING_COUNT)
+            logger.info("Unknown UEI marked as deactivated", extra=log_extra)
+            return
+
+        # If it's already marked inactive, do nothing
+        if existing_sam_gov_entity.is_inactive:
+            self.increment(self.Metrics.ALREADY_DEACTIVATED_COUNT)
+            logger.info("UEI is already deactivated", extra=log_extra)
+            return
+
+        # Otherwise we need to mark the entity as inactive
+        self.increment(self.Metrics.ENTITY_DEACTIVATED_COUNT)
+        logger.info("Deactivating sam.gov entity record", extra=log_extra)
+        existing_sam_gov_entity.is_inactive = True
+        existing_sam_gov_entity.inactivated_at = sam_extract_file.extract_date
+
+        import_type = (
+            SamGovImportType.MONTHLY_EXTRACT
+            if sam_extract_file.extract_type == SamGovExtractType.MONTHLY
+            else SamGovImportType.DAILY_EXTRACT
+        )
+
+        import_log_record = SamGovEntityImportType(
+            sam_gov_entity=existing_sam_gov_entity,
+            sam_gov_import_type=import_type,
+        )
+        self.db_session.add(import_log_record)
+
+    def handle_expired_entity(
+        self,
+        uei: str,
+        entity_map: dict[str, SamGovEntity],
+        sam_extract_file: SamExtractFile,
+        extract_log_extra: dict,
+    ) -> None:
+        """Handle expired entities
+
+        At this time we do nothing beyond logging
+        as our assumption is that we would have reached the
+        expiration date by the time this happens.
+        """
+        existing_sam_gov_entity = entity_map.get(uei, None)
+
+        log_extra = {"uei": uei} | extract_log_extra
+
+        if not existing_sam_gov_entity:
+            self.increment(self.Metrics.ENTITY_EXPIRED_MISSING_COUNT)
+            logger.info("Unknown UEI marked as expired", extra=log_extra)
+            return
+
+        # We aren't sure if this is possible, but if an entity is marked as expired
+        # it should have already reached the date from the extract, if not log a warning
+        # as it probably means our assumption here is wrong.
+        if existing_sam_gov_entity.expiration_date > sam_extract_file.extract_date:
+            self.increment(self.Metrics.ENTITY_EXPIRED_MISMATCH_COUNT)
+            logger.warning(
+                "Sam.gov entity marked as expired, but our expiration date has not been reached",
+                extra=log_extra | {"expiration_date": existing_sam_gov_entity.expiration_date},
+            )
+            return
+
+        # If it's just expired, we'll note it, but do nothing for now
+        self.increment(self.Metrics.ENTITY_EXPIRED_COUNT)
+        logger.info("Sam.gov entity is marked as expired", extra=log_extra)
+
 
 def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
     uei = get_token_value(tokens, ExtractIndex.UEI, can_be_blank=False)
@@ -299,6 +400,10 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
         has_debt_subject_to_offset=convert_debt_subject_to_offset(debt_subject_to_offset),
         has_exclusion_status=convert_exclusion_status_flag(exclusion_status_flag),
         eft_indicator=entity_eft_indicator if entity_eft_indicator else None,
+        # Not sure if it's possible, but if something is inactive in our system
+        # we want to set it back to active when we merge this record in.
+        is_inactive=False,
+        inactivated_at=None,
     )
 
     return sam_gov_entity
