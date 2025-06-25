@@ -52,7 +52,6 @@ ELIGIBILITY_FIELDS = {
     "applicant_eligibility_description": "Additional information was",
 }
 GRANTOR_CONTACT_INFORMATION_FIELDS = {
-    "agency_name": "The updated grantor’s name is",  # we dont have this
     "agency_email_address": "The updated email address is",
     "agency_contact_description": "New description:",
 }
@@ -285,7 +284,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
-    def _normalize_date_field(self, value: str | int | None) -> str | int:
+    def _normalize_date_field(self, value: str | int | None) -> str | int | None:
         if isinstance(value, str):
             return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
         return value
