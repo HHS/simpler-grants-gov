@@ -5,6 +5,7 @@ import {
   FilterOption,
   FilterPillLabelData,
   FrontendFilterNames,
+  HardcodedFrontendFilterNames,
   RelevantAgencyRecord,
   searchFilterNames,
 } from "src/types/search/searchFilterTypes";
@@ -216,14 +217,12 @@ export const getSiblingOptionValues = (
 
 // look up filter option label based on filter option value
 export const getFilterOptionLabel = (
-  queryParamKey: FrontendFilterNames,
   value: string,
+  options: FilterOption[],
 ) => {
-  const option = allFilterOptions[queryParamKey].find(
-    (option) => option.value === value,
-  );
+  const option = options.find((option) => option.value === value);
   if (!option) {
-    console.error(`Pill label not found for ${queryParamKey}:${value}`);
+    console.error(`Pill label not found for ${value}`);
     return "";
   }
   return option.label;
@@ -235,6 +234,7 @@ export const getFilterOptionLabel = (
 export const formatPillLabel = (
   queryParamKey: FrontendFilterNames,
   value: string,
+  options: FilterOption[],
 ): string => {
   switch (queryParamKey) {
     case "costSharing":
@@ -242,37 +242,33 @@ export const formatPillLabel = (
     case "closeDate":
       return `Closing in less than ${value} days`;
     default:
-      return getFilterOption(queryParamKey, value);
+      return getFilterOptionLabel(value, options);
   }
-};
-
-// return all pill labels for a given query param key
-export const formatPillLabelValues = (
-  queryParamKey: FrontendFilterNames,
-  queryParamValues: Set<string>,
-): FilterPillLabelData[] => {
-  if (!queryParamValues.size) {
-    return [];
-  }
-  return Array.from(queryParamValues).map((value) => ({
-    label: formatPillLabel(queryParamKey, value),
-    queryParamKey,
-    queryParamValue: value,
-  }));
 };
 
 // return pill label objects for all query params
 export const formatPillLabels = (
   searchParams: QueryParamData,
+  agencyOptions: FilterOption[],
 ): FilterPillLabelData[] => {
-  return Object.entries(searchParams).reduce((acc, [key, value]) => {
-    if (!(key in searchFilterNames)) {
-      return acc;
-    }
-    const pillLabels = formatPillLabelValues(
-      key as FrontendFilterNames,
-      value as Set<string>,
-    );
-    return acc.concat(pillLabels);
-  }, [] as FilterPillLabelData[]);
+  return Object.entries(searchParams).reduce(
+    (acc: FilterPillLabelData[], [key, values]: [string, Set<string>]) => {
+      if (!searchFilterNames.includes(key) || !values.size) {
+        return acc;
+      }
+
+      const queryParamKey = key as FrontendFilterNames;
+      const availableOptions =
+        key === "agency"
+          ? agencyOptions
+          : allFilterOptions[key as HardcodedFrontendFilterNames];
+      const pillLabels = Array.from(values).map((value) => ({
+        label: formatPillLabel(queryParamKey, value, availableOptions),
+        queryParamKey,
+        queryParamValue: value,
+      }));
+      return acc.concat(pillLabels);
+    },
+    [],
+  );
 };
