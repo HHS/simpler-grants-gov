@@ -241,7 +241,10 @@ class SearchNotificationTask(BaseNotificationTask):
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:
-            if user_notification.is_notified:
+            if (
+                user_notification.is_notified
+                or self.notification_config.reset_emails_without_sending
+            ):
                 self.db_session.execute(
                     update(UserSavedSearch)
                     .where(
@@ -249,12 +252,15 @@ class SearchNotificationTask(BaseNotificationTask):
                     )
                     .values(last_notified_at=datetime_util.utcnow())
                 )
-                logger.info(
-                    "Updated notification log",
-                    extra={
-                        "user_id": user_notification.user_id,
-                        "search_ids": user_notification.notified_object_ids,
-                        "notification_reason": user_notification.notification_reason,
-                    },
-                )
-                self.increment(Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids))
+                if not self.notification_config.reset_emails_without_sending:
+                    logger.info(
+                        "Updated notification log",
+                        extra={
+                            "user_id": user_notification.user_id,
+                            "search_ids": user_notification.notified_object_ids,
+                            "notification_reason": user_notification.notification_reason,
+                        },
+                    )
+                    self.increment(
+                        Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
+                    )
