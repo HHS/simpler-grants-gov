@@ -1,13 +1,18 @@
 from typing import Any
 
 
-def build_path_str(path: list[str]) -> str:
+def build_path_str(path: list[str], index: int | None = None) -> str:
     """Build a path string for validation issues
 
     We prepend $. on the front to mimic the format of
     the JSON Schema validation
     """
-    return ".".join(["$"] + path)
+    path_str = ".".join(["$"] + path)
+
+    if index is not None:
+        path_str += f"[{index}]"
+
+    return path_str
 
 
 def get_nested_value(data: dict, path: list[str]) -> Any:
