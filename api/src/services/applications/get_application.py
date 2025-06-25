@@ -10,6 +10,7 @@ from src.db.models.competition_models import Application, ApplicationForm, Compe
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_validation import (
+    ApplicationAction,
     get_application_form_errors,
     is_form_required,
 )
@@ -59,7 +60,9 @@ def get_application_with_warnings(
     application = get_application(db_session, application_id, user)
 
     # See what validation issues remain on the application's forms
-    form_warnings, form_warning_map = get_application_form_errors(application)
+    form_warnings, form_warning_map = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
 
     # Attach the form warning map to the application so it appears
     # in the response object

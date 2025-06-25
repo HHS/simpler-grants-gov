@@ -35,6 +35,15 @@ SIMPLE_JSON_SCHEMA = {
     "required": ["name"],
 }
 
+SIMPLE_ATTACHMENT_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "attachment_field": {"type": "string", "format": "uuid"},
+    },
+}
+
+SIMPLE_ATTACHMENT_RULE_SCHEMA = {"attachment_field": {"gg_validation": {"rule": "attachment"}}}
+
 
 def test_application_start_success(
     client, enable_factory_create, db_session, user, user_auth_token
@@ -478,6 +487,59 @@ def test_application_form_update_with_validation_warnings(
     assert response.json["message"] == "Success"
     assert response.json["data"]["application_form_status"] == expected_form_status
     assert response.json["warnings"] == expected_warnings
+
+    # Verify application form was updated in the database
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == application_response
+
+
+def test_application_form_update_with_rule_validation_issues(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    application = ApplicationFactory.create()
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_response = {"attachment_field": "90b413f3-b0f3-4aed-9f30-c109991db0fc"}
+    request_data = {"application_response": application_response}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_status"] == ApplicationFormStatus.IN_PROGRESS
+    assert response.json["warnings"] == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "90b413f3-b0f3-4aed-9f30-c109991db0fc",
+        }
+    ]
 
     # Verify application form was updated in the database
     db_session.refresh(existing_application_form)
@@ -1032,6 +1094,95 @@ def test_application_get_success_with_validation_issues(
     )
 
 
+def test_application_get_success_with_rule_validation_issue(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    # Create a competition with two forms
+    form_a = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+    form_b = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+    competition = CompetitionFactory.create(competition_forms=[])
+    competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
+    competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
+
+    # Create an application with two app forms, one partially filled out, one not started
+    application = ApplicationFactory.create(competition=competition)
+    application_form_a = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"attachment_field": "b6b58969-499c-438c-b6ca-19c416b198f9"},
+    )
+    application_form_b = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_b,
+        application_response={"attachment_field": "43fc2b03-6025-41be-81ee-d8b339189530"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    assert len(response.json["warnings"]) == 2
+    for warning in response.json["warnings"]:
+        assert warning["field"] == "application_form_id"
+        assert warning["message"] == "The application form has outstanding errors."
+        assert warning["type"] == "application_form_validation"
+        assert warning["value"] in {
+            str(application_form_a.application_form_id),
+            str(application_form_b.application_form_id),
+        }
+
+    form_a_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_a.application_form_id)
+    ]
+    assert form_a_warnings == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "b6b58969-499c-438c-b6ca-19c416b198f9",
+        }
+    ]
+
+    form_b_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_b.application_form_id)
+    ]
+    assert form_b_warnings == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "43fc2b03-6025-41be-81ee-d8b339189530",
+        }
+    ]
+
+    # Validate the application form statuses are as expected
+    application_form_statuses = {
+        app_form["application_form_id"]: app_form["application_form_status"]
+        for app_form in response.json["data"]["application_forms"]
+    }
+    assert (
+        application_form_statuses[str(application_form_a.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+    assert (
+        application_form_statuses[str(application_form_b.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+
+
 def test_application_get_application_not_found(
     client, enable_factory_create, db_session, user_auth_token
 ):
@@ -1137,6 +1288,58 @@ def test_application_form_get_with_validation_warnings(
     assert response.json["data"]["application_response"] == application_response
     assert response.json["data"]["application_form_status"] == expected_form_status
     assert response.json["warnings"] == expected_warnings
+
+
+def test_application_form_get_with_rule_validation_issue(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    # Create a form with our test schema
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    # Create application with the form
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with the test response data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"attachment_field": "0296eed1-b358-4920-9185-08709ab12e60"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Make the GET request
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Verify response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["warnings"] == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "0296eed1-b358-4920-9185-08709ab12e60",
+        }
+    ]
+    assert response.json["data"]["application_form_status"] == ApplicationFormStatus.IN_PROGRESS
 
 
 def test_application_form_get_with_invalid_schema(
@@ -1265,6 +1468,70 @@ def test_application_submit_validation_issues(
                     "message": "5 is not of type 'string'",
                     "type": "type",
                     "value": None,
+                }
+            ]
+        }
+    }
+
+    assert response.json["errors"] == [
+        {
+            "field": "application_form_id",
+            "message": "The application form has outstanding errors.",
+            "type": "application_form_validation",
+            "value": str(application_form.application_form_id),
+        }
+    ]
+
+
+def test_application_submit_rule_validation_issue(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    # Create a form with our test schema
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    # Create application with the form
+    competition = CompetitionFactory.create(competition_forms=[])
+    application = ApplicationFactory.create(competition=competition)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with the test response data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"attachment_field": "30092ec9-9553-4eb2-a6be-dac919df6867"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 422
+    assert response.json["message"] == "The application has issues in its form responses."
+
+    assert response.json["data"] == {
+        "form_validation_errors": {
+            str(application_form.application_form_id): [
+                {
+                    "field": "$.attachment_field",
+                    "message": "Field references application_attachment_id not on the application",
+                    "type": "unknown_application_attachment",
+                    "value": "30092ec9-9553-4eb2-a6be-dac919df6867",
                 }
             ]
         }
