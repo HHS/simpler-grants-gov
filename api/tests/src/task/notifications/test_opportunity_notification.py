@@ -466,34 +466,34 @@ class TestOpportunityNotification:
         [
             # close_date
             (
-                {"close_date": {"before": date(2035, 10, 10), "after": date(2035, 10, 30)}},
+                {"close_date": {"before": "2035-10-10", "after": "2035-10-30"}},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
             (
-                {"close_date": {"before": date(2025, 10, 10), "after": None}},
+                {"close_date": {"before": "2025-10-10", "after": None}},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to None.<br>',
             ),
             # forecasted_award_date
             (
-                {"forecasted_award_date": {"before": date(2030, 1, 6), "after": date(2031, 5, 3)}},
+                {"forecasted_award_date": {"before": "2030-1-6", "after": "2031-5-3"}},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
             ),
             (
-                {"forecasted_award_date": {"before": None, "after": date(2026, 9, 11)}},
+                {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from None to September 11, 2026.<br>',
             ),
             # forecasted_project_start_date
             (
                 {
                     "forecasted_project_start_date": {
-                        "before": date(2027, 1, 7),
-                        "after": date(2031, 5, 3),
+                        "before": "2027-1-7",
+                        "after": "2031-5-3",
                     }
                 },
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
             ),
             (
-                {"forecasted_project_start_date": {"before": None, "after": date(2028, 1, 7)}},
+                {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from None to January 7, 2028.<br>',
             ),
             # fiscal_year
