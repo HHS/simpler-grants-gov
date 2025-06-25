@@ -77,94 +77,75 @@ def build_opp_and_version(
     return version
 
 
-OPAL_V1 = build_opp_and_version(
+base_opal_fields = {
+    "opportunity_title": "Opal 2025 Awards",
+    "close_date": date(2026, 9, 1),
+    "forecasted_award_date": None,
+    "forecasted_project_start_date": None,
+    "fiscal_year": None,
+    "estimated_total_program_funding": 15_000_000,
+    "expected_number_of_awards": 3,
+    "award_floor": 50_000,
+    "award_ceiling": 5_000_000,
+    "is_cost_sharing": True,
+    "funding_instruments": [FundingInstrument.COOPERATIVE_AGREEMENT],
+    "category": None,
+    "category_explanation": None,
+    "funding_categories": [FundingCategory.EDUCATION],
+    "funding_category_description": None,
+}
+
+OPAL = build_opp_and_version(
     revision_number=1,
-    opportunity_title="Opal 2025 award",
     opportunity_status=OpportunityStatus.POSTED,
-    close_date=date(2026, 9, 1),
-    forecasted_award_date=None,
-    forecasted_project_start_date=None,
-    fiscal_year=None,
-    estimated_total_program_funding=15_000_000,
-    expected_number_of_awards=3,
-    award_floor=50_000,
-    award_ceiling=5_000_000,
-    is_cost_sharing=True,
-    funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
-    category=None,
-    category_explanation=None,
-    funding_categories=[FundingCategory.EDUCATION],
-    funding_category_description=None,
+    **base_opal_fields,
 )
 
-OPAL_V2 = build_opp_and_version(
+OPAL_STATUS = build_opp_and_version(
     revision_number=1,
-    opportunity_title="Opal 2025 Awards",
-    opportunity_status=OpportunityStatus.CLOSED,
-    close_date=date(2026, 10, 15),
-    forecasted_award_date=date(2026, 12, 1),
-    forecasted_project_start_date=date(2027, 1, 15),
-    fiscal_year=2026,
-    estimated_total_program_funding=20_000_000,
-    expected_number_of_awards=5,
-    award_floor=100_000,
-    award_ceiling=6_000_000,
-    is_cost_sharing=False,
-    funding_instruments=[FundingInstrument.GRANT],
-    category=OpportunityCategory.DISCRETIONARY,
-    category_explanation="Supports education innovation",
-    funding_categories=[FundingCategory.HEALTH],
-    funding_category_description="Health and wellness-related initiatives",
-)
-OPAL_V3 = build_opp_and_version(
-    revision_number=2,  # non-tracked field
-    opportunity_title="Opal 2025 award",
-    opportunity_status=OpportunityStatus.POSTED,
-    close_date=date(2026, 9, 1),
-    forecasted_award_date=None,
-    forecasted_project_start_date=None,
-    fiscal_year=None,
-    estimated_total_program_funding=15_000_000,
-    expected_number_of_awards=3,
-    award_floor=50_000,
-    award_ceiling=5_000_000,
-    is_cost_sharing=True,
-    funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
-    category=None,
-    category_explanation=None,
-    funding_categories=[FundingCategory.EDUCATION],
-    funding_category_description=None,
+    opportunity_status=OpportunityStatus.CLOSED,  # Opp Status update
+    **base_opal_fields,
 )
 
-TOPAZ_V1 = build_opp_and_version(
-    revision_number=0,
-    opportunity_title="Topaz 2025 Climate Research Grant",
+OPAL_REVISION_NUMB = build_opp_and_version(
+    revision_number=2,  # non-tracked field update
+    opportunity_status=OpportunityStatus.POSTED,
+    **base_opal_fields,
+)
+
+base_topaz_fields = {
+    "revision_number": 1,
+    "opportunity_title": "Topaz 2025 Climate Research Grant",
+    "forecasted_award_date": None,
+    "close_date": date(2025, 11, 30),
+    "forecasted_project_start_date": None,
+    "fiscal_year": None,
+    "estimated_total_program_funding": 15_000_000,
+    "expected_number_of_awards": 3,
+    "award_floor": 50_000,
+    "award_ceiling": 5_000_000,
+    "is_cost_sharing": True,
+    "funding_instruments": [FundingInstrument.COOPERATIVE_AGREEMENT],
+    "category": None,
+    "category_explanation": None,
+    "funding_categories": [FundingCategory.EDUCATION],
+    "funding_category_description": None,
+}
+
+TOPAZ = build_opp_and_version(
     opportunity_status=OpportunityStatus.FORECASTED,
-    close_date=date(2025, 11, 30),
-    forecasted_award_date=date(2026, 2, 1),
-    forecasted_project_start_date=date(2026, 4, 15),
-    fiscal_year=2025,
-    estimated_total_program_funding=10_000_000,
-    expected_number_of_awards=7,
-    award_floor=100_000,
-    award_ceiling=2_500_000,
-    is_cost_sharing=True,
-    funding_instruments=[
-        FundingInstrument.GRANT,
-        FundingInstrument.COOPERATIVE_AGREEMENT,
-    ],
-    category=OpportunityCategory.MANDATORY,
-    category_explanation="Required under federal climate initiative mandate",
-    funding_categories=[
-        FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
-        FundingCategory.ENVIRONMENT,
-    ],
-    funding_category_description="Supports research in climate modeling and adaptation",
+    **base_topaz_fields,
 )
-TOPAZ_V2 = build_opp_and_version(
-    revision_number=2,
-    opportunity_title="Topaz 2026 Renewable Energy Grant",
+
+TOPAZ_STATUS = build_opp_and_version(
     opportunity_status=OpportunityStatus.CLOSED,
+    **base_topaz_fields,
+)
+
+TOPAZ_ALL = build_opp_and_version(
+    revision_number=2,
+    opportunity_title="Topaz 2025 Climate Research Grant",
+    opportunity_status=OpportunityStatus.POSTED,
     close_date=date(2025, 12, 31),
     forecasted_award_date=date(2026, 3, 15),
     forecasted_project_start_date=date(2026, 5, 1),
@@ -176,15 +157,10 @@ TOPAZ_V2 = build_opp_and_version(
     is_cost_sharing=False,
     funding_instruments=[FundingInstrument.GRANT],
     category=OpportunityCategory.DISCRETIONARY,
-    category_explanation="Focus on clean energy startups and demonstration projects",  # New explanation
+    category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
-    funding_category_description="Accelerates early-stage renewable energy technology adoption",  # New description
+    funding_category_description="Accelerates early-stage renewable energy technology adoption",
 )
-
-
-def link_user_with_email(user):
-    factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
-    return user
 
 
 class TestOpportunityNotification:
@@ -201,15 +177,14 @@ class TestOpportunityNotification:
         cascade_delete_from_db_table(db_session, UserSavedOpportunity)
 
     @pytest.fixture(autouse=True)
-    def user_with_email(self, db_session, user, monkeypatch):
-        return link_user_with_email(user)
+    def user_with_email(self, db_session, user):
+        return factories.LinkExternalUserFactory.create(user=user, email="test@example.com").user
 
     def test_email_notifications_collection(
         self,
         db_session,
         cli_runner,
         search_client,
-        enable_factory_create,
         user,
         caplog,
         set_env_var_for_email_notification_config,
@@ -217,7 +192,7 @@ class TestOpportunityNotification:
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
 
-        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
+        user_2 = factories.LinkExternalUserFactory.create().user
 
         # Create a saved opportunity that needs notification
         opp_1 = factories.OpportunityFactory.create(is_posted_summary=True)
@@ -327,17 +302,17 @@ class TestOpportunityNotification:
         )
 
     def test_with_no_user_email_notification(
-        self, db_session, enable_factory_create, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        set_env_var_for_email_notification_config,
     ):
         """Test that no notification is collected if the user has no linked email address."""
-        user = factories.UserFactory.create()
         # Create a saved opportunity that needs notification
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
         factories.OpportunityVersionFactory.create(
             opportunity=opportunity,
         )
         factories.UserSavedOpportunityFactory.create(
-            user=user,
             opportunity=opportunity,
         )
         factories.OpportunityVersionFactory.create(
@@ -352,7 +327,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_with_no_prior_version_email_collections(
-        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification log is created when no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -370,7 +345,7 @@ class TestOpportunityNotification:
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_no_updates_email_collections(
-        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config
     ):
         """Test that no notification is collected when there are no opportunity updates."""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -388,7 +363,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_last_notified_version(
-        self, db_session, enable_factory_create, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config
     ):
         """
          Test that `_get_last_notified_versions` correctly returns the most recent
@@ -484,9 +459,10 @@ class TestOpportunityNotification:
     @pytest.mark.parametrize(
         "version_change,expected_html",
         [
+            # Status update
             (
                 OpportunityVersionChange(
-                    opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V2
+                    opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                 ),
                 '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
@@ -494,7 +470,7 @@ class TestOpportunityNotification:
             (
                 (
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
                     ),
                     "",
                 )
@@ -512,43 +488,43 @@ class TestOpportunityNotification:
     @pytest.mark.parametrize(
         "version_changes,expected_html",
         [
-            # # Multiple updates
+            # # Multiple opps updates
             (
                 [
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V2
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                     ),
                     OpportunityVersionChange(
-                        opportunity_id=TOPAZ_V1.opportunity_id, previous=TOPAZ_V1, latest=TOPAZ_V2
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
                     ),
                 ],
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL_V1.opportunity_id}' target='_blank'>Opal 2025 award</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='http://testhost:3000/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
-                    updated_opportunity_ids=[OPAL_V1.opportunity_id, TOPAZ_V1.opportunity_id],
+                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
+                    updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
                 ),
             ),
             # Relevant & none Relevant updates mix
             (
-                [
+                [  # No relevant updates
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
-                    ),  # No relevant updates
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
+                    ),
                     OpportunityVersionChange(
-                        opportunity_id=TOPAZ_V1.opportunity_id, previous=TOPAZ_V1, latest=TOPAZ_V2
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
                     ),
                 ],
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ_V1.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
-                    updated_opportunity_ids=[TOPAZ_V1.opportunity_id],
+                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
+                    updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
             ),
             # None relevant updates only
             (
                 [
                     OpportunityVersionChange(
-                        opportunity_id=OPAL_V1.opportunity_id, previous=OPAL_V1, latest=OPAL_V3
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
                     ),
                 ],
                 None,
@@ -558,7 +534,6 @@ class TestOpportunityNotification:
     def test_build_notification_content(
         self,
         db_session,
-        enable_factory_create,
         user,
         version_changes,
         expected_html,
@@ -567,5 +542,4 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-
         assert res == expected_html
