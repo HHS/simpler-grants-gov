@@ -19,6 +19,7 @@ class Metrics(StrEnum):
     NOTIFICATIONS_SENT = "notifications_sent"
     FAILED_TO_SEND = "failed_to_send"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
+    NOTIFICATIONS_RESET = "notifications_reset"
 
 
 @dataclass
