@@ -322,6 +322,9 @@ help: ## Prints the help documentation and info about each command
 	awk -F':.*?## ' '{printf "\033[36m%s\033[0m\t%s\n", $$1, $$2}' | \
 	column -t -s "$$(printf '\t')"
 	@echo ""
+	@$(MAKE) dump-env
+
+dump-env:
 	@echo "APP_NAME=$(APP_NAME)"
 	@echo "ENVIRONMENT=$(ENVIRONMENT)"
 	@echo "IMAGE_NAME=$(IMAGE_NAME)"
