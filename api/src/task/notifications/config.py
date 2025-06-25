@@ -13,3 +13,4 @@ class EmailNotificationConfig(PydanticBaseEnvConfig):
         default=True, alias="ENABLE_OPPORTUNITY_NOTIFICATIONS"
     )
     enable_search_notifications: bool = Field(default=True, alias="ENABLE_SEARCH_NOTIFICATIONS")
+    reset_emails_without_sending: bool = Field(default=True, alias="RESET_EMAILS_WITHOUT_SENDING")
