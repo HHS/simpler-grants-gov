@@ -56,7 +56,7 @@ jwt_or_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_key_auth)
 # * Internal JWT auth
 #
 # This is specifically for application endpoints that need to support internal services
-jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_key_auth, internal_jwt_auth)
+jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, internal_jwt_auth)
 
 
 # Helper function to format security schemes for OpenAPI
