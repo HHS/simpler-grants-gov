@@ -18,6 +18,7 @@ import {
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
+import { AttachmentsCard } from "src/components/application/AttachmentsCard";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
   const { applicationId } = await params;
   let applicationForms = [];
+  let attachments = [];
   let details = {} as ApplicationDetailsCardProps;
   let forms = [];
   let opportunity = {} as OpportunityDetail;
@@ -60,6 +62,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     details = response.data;
     forms = response.data.competition.competition_forms;
     applicationForms = response.data.application_forms;
+    attachments = response.data.application_attachments;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
       String(opportunityId),
@@ -95,6 +98,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           applicationForms={applicationForms}
           applicationId={applicationId}
         />
+        <AttachmentsCard attachments={attachments} />
       </GridContainer>
     </>
   );
