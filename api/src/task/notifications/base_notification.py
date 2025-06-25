@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseNotificationTask(Task):
-    Metrics = constants.Metrics
+    Metrics = constants.Metrics  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -43,7 +43,6 @@ class BaseNotificationTask(Task):
 
     def send_notifications(self, notifications: list[UserEmailNotification]) -> None:
         """Send collected notifications to users"""
-
         for user_notification in notifications:
             trace_id = str(uuid.uuid4())
             logger.info(

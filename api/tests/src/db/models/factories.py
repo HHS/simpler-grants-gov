@@ -26,11 +26,12 @@ import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
+import src.db.models.sam_extract_models as sam_extract_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -45,7 +46,9 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovExtractType,
     SamGovImportType,
+    SamGovProcessingStatus,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -53,7 +56,7 @@ from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
-SCHEMA = OpportunityV1Schema()
+SCHEMA = OpportunityVersionSchema()
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -2463,6 +2466,17 @@ class SamGovEntityImportTypeFactory(BaseFactory):
     sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
     sam_gov_entity_id = factory.LazyAttribute(lambda o: o.sam_gov_entity.sam_gov_entity_id)
     sam_gov_import_type = factory.fuzzy.FuzzyChoice(SamGovImportType)
+
+
+class SamExtractFileFactory(BaseFactory):
+    class Meta:
+        model = sam_extract_models.SamExtractFile
+
+    extract_type = SamGovExtractType.MONTHLY
+    extract_date = factory.Faker("date_between", start_date="-6d", end_date="-1d")
+    filename = factory.Faker("file_name", extension="zip")
+    s3_path = "s3://bucket/key"  # If you want a valid s3 path, pass it in yourself
+    processing_status = SamGovProcessingStatus.PENDING
 
 
 class OrganizationFactory(BaseFactory):

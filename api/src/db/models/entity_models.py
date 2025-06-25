@@ -21,7 +21,7 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "sam_gov_entity"
 
     sam_gov_entity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    uei: Mapped[str] = mapped_column(index=True)
+    uei: Mapped[str] = mapped_column(index=True, unique=True)
     legal_business_name: Mapped[str]
     expiration_date: Mapped[date]
     initial_registration_date: Mapped[date]
@@ -32,6 +32,9 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     has_debt_subject_to_offset: Mapped[bool | None]
     has_exclusion_status: Mapped[bool | None]
     eft_indicator: Mapped[str | None]
+
+    is_inactive: Mapped[bool | None] = mapped_column(default=False)
+    inactivated_at: Mapped[date | None]
 
     # Relationships
     import_records: Mapped[list["SamGovEntityImportType"]] = relationship(
