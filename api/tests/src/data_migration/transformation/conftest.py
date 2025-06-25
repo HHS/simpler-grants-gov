@@ -107,7 +107,7 @@ def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
-    opportunity: Opportunity | None,
+    opportunity: Opportunity | None = None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     is_existing_current_opportunity_summary: bool = False,
@@ -320,8 +320,8 @@ def setup_agency(
 
 def setup_opportunity_attachment(
     create_existing: bool,
-    opportunity: Opportunity,
     config: S3Config,
+    opportunity: Opportunity | None = None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     source_values: dict | None = None,
@@ -331,7 +331,6 @@ def setup_opportunity_attachment(
 
     synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
         opportunity=None,
-        opportunity_id=opportunity.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         **source_values,
