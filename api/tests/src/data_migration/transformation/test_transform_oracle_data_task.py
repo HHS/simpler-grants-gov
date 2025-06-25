@@ -56,20 +56,31 @@ class TestTransformFullRunTask(BaseTestClass):
             create_existing=False, source_values={"owningagency": "INSERTAGENCY-ABC"}
         )
 
-        cfda1 = setup_cfda(create_existing=False, opportunity=opportunity)
-        cfda2 = setup_cfda(create_existing=False, opportunity=opportunity)
+        cfda1 = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": opportunity.opportunity_id}
+        )
+        cfda2 = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": opportunity.opportunity_id}
+        )
 
         # Attachments
         attachment1 = setup_opportunity_attachment(
-            create_existing=False, opportunity=opportunity, config=s3_config
+            create_existing=False,
+            config=s3_config,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
         attachment2 = setup_opportunity_attachment(
-            create_existing=False, opportunity=opportunity, config=s3_config
+            create_existing=False,
+            config=s3_config,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
 
         ### Forecast
         forecast = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=None, opportunity=opportunity
+            create_existing=False,
+            is_forecast=True,
+            revision_number=None,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesForecastFactory(forecast=forecast, at_id="01")
         # This is a duplicate record (same at_id, but will have a different at_frcst_id), verifying we handle duplicates
@@ -86,7 +97,10 @@ class TestTransformFullRunTask(BaseTestClass):
 
         ### Synopsis (has some invalid values)
         synopsis = setup_synopsis_forecast(
-            create_existing=False, is_forecast=False, revision_number=None, opportunity=opportunity
+            create_existing=False,
+            is_forecast=False,
+            revision_number=None,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="06")
         f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="07")
@@ -105,7 +119,7 @@ class TestTransformFullRunTask(BaseTestClass):
 
         created_opportunity: Opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+            .filter(Opportunity.legacy_opportunity_id == opportunity.opportunity_id)
             .one_or_none()
         )
 
@@ -116,7 +130,7 @@ class TestTransformFullRunTask(BaseTestClass):
         assert created_opportunity is not None
         validate_opportunity(db_session, opportunity)
         assert {
-            al.opportunity_assistance_listing_id
+            al.legacy_opportunity_assistance_listing_id
             for al in created_opportunity.opportunity_assistance_listings
         } == {cfda1.opp_cfda_id, cfda2.opp_cfda_id}
 
@@ -174,18 +188,28 @@ class TestTransformFullRunTask(BaseTestClass):
             no_current_summary=True, opportunity_assistance_listings=[], agency_code="UPDATEAGENCY"
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[]
+            opportunity_id=existing_opportunity.legacy_opportunity_id, cfdas=[]
         )
 
         # Attachments
         attachment_insert = setup_opportunity_attachment(
-            create_existing=False, opportunity=existing_opportunity, config=s3_config
+            create_existing=False,
+            opportunity=existing_opportunity,
+            config=s3_config,
+            source_values={"opportunity_id": existing_opportunity.legacy_opportunity_id},
         )
         attachment_update = setup_opportunity_attachment(
-            create_existing=True, opportunity=existing_opportunity, config=s3_config
+            create_existing=True,
+            opportunity=existing_opportunity,
+            config=s3_config,
+            source_values={"opportunity_id": existing_opportunity.legacy_opportunity_id},
         )
         attachment_delete = setup_opportunity_attachment(
-            create_existing=True, opportunity=existing_opportunity, config=s3_config, is_delete=True
+            create_existing=True,
+            opportunity=existing_opportunity,
+            config=s3_config,
+            is_delete=True,
+            source_values={"opportunity_id": existing_opportunity.legacy_opportunity_id},
         )
 
         cfda_insert = setup_cfda(create_existing=False, opportunity=existing_opportunity)
@@ -371,14 +395,14 @@ class TestTransformFullRunTask(BaseTestClass):
 
         updated_opportunity: Opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+            .filter(Opportunity.legacy_opportunity_id == opportunity.opportunity_id)
             .one_or_none()
         )
 
         assert updated_opportunity is not None
         validate_opportunity(db_session, opportunity)
         assert {
-            al.opportunity_assistance_listing_id
+            al.legacy_opportunity_assistance_listing_id
             for al in updated_opportunity.opportunity_assistance_listings
         } == {cfda_insert.opp_cfda_id, cfda_update.opp_cfda_id}
 
@@ -437,13 +461,17 @@ class TestTransformFullRunTask(BaseTestClass):
             opportunity_attachments=[],
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True
+            opportunity_id=existing_opportunity.legacy_opportunity_id, cfdas=[], is_deleted=True
         )
 
         cfda = setup_cfda(create_existing=True, is_delete=True, opportunity=existing_opportunity)
 
         attachment = setup_opportunity_attachment(
-            create_existing=True, opportunity=existing_opportunity, config=s3_config, is_delete=True
+            create_existing=True,
+            opportunity=existing_opportunity,
+            config=s3_config,
+            is_delete=True,
+            source_values={"opportunity_id": existing_opportunity.legacy_opportunity_id},
         )
 
         ### Forecast - has several children that will be deleted
@@ -546,7 +574,9 @@ class TestTransformFullRunTask(BaseTestClass):
             no_current_summary=True, opportunity_assistance_listings=[]
         )
         opportunity = f.StagingTopportunityFactory(
-            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], already_transformed=True
+            opportunity_id=existing_opportunity.legacy_opportunity_id,
+            cfdas=[],
+            already_transformed=True,
         )
 
         summary_synopsis = f.OpportunitySummaryFactory(
