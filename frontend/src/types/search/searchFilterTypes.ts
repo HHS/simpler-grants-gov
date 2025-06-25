@@ -20,6 +20,10 @@ export const searchFilterNames = [
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
 export type BackendFilterNames = (typeof backendFilterNames)[number];
+export type HardcodedFrontendFilterNames = Exclude<
+  FrontendFilterNames,
+  "agency"
+>;
 
 export interface FilterOption {
   children?: FilterOption[];

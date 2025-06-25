@@ -1,5 +1,5 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import {
   QueryParamData,
   SearchAPIResponse,
@@ -24,9 +24,11 @@ import {
 export async function SearchDrawerFilters({
   searchParams,
   searchResultsPromise,
+  agencyListPromise,
 }: {
   searchParams: QueryParamData;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  agencyListPromise: Promise<FilterOption[]>;
 }) {
   const t = useTranslations("Search");
   const {
@@ -40,7 +42,7 @@ export async function SearchDrawerFilters({
   } = searchParams;
 
   const agenciesPromise = Promise.all([
-    getAgenciesForFilterOptions(),
+    agencyListPromise,
     searchResultsPromise,
   ]);
 
