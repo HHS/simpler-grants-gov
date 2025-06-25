@@ -66,7 +66,11 @@ def test_search_notifications_cli(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+            OPPORTUNITIES[2].opportunity_id,
+        ],
     )
 
     notification_logs_count = (
@@ -126,11 +130,21 @@ def test_search_notifications_cli(
 
 
 def test_collect_notifications_cli(
-    cli_runner, db_session, enable_factory_create, user, user_with_email, caplog
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    user,
+    user_with_email,
+    caplog,
+    clear_notification_logs,
 ):
     """Simple test that verifies we can invoke the notification task via CLI"""
     # Create a saved opportunity that needs notification
-    opportunity = factories.OpportunityFactory.create()
+    opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+    factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        close_date=datetime_util.utcnow() + timedelta(days=21),  # 3 weeks out
+    )
     saved_opportunity = factories.UserSavedOpportunityFactory.create(
         user=user,
         opportunity=opportunity,
@@ -281,7 +295,11 @@ def test_combined_notifications_cli(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+            OPPORTUNITIES[2].opportunity_id,
+        ],
     )
 
     result = cli_runner.invoke(args=["task", "generate-notifications"])
@@ -341,7 +359,11 @@ def test_grouped_search_queries_cli(
         search_query=same_search_query,
         name="User 1 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+            OPPORTUNITIES[2].opportunity_id,
+        ],
     )
 
     saved_search2 = factories.UserSavedSearchFactory.create(
@@ -349,7 +371,11 @@ def test_grouped_search_queries_cli(
         search_query=same_search_query,
         name="User 2 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[4, 5, 6],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[3].opportunity_id,
+            OPPORTUNITIES[4].opportunity_id,
+            OPPORTUNITIES[5].opportunity_id,
+        ],
     )
 
     result = cli_runner.invoke(args=["task", "generate-notifications"])
@@ -394,13 +420,15 @@ def test_search_notifications_on_index_change(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],  # Initial results
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+        ],  # Initial results
     )
 
     # Update the search index with new data that will change the results
     schema = OpportunityV1Schema()
     new_opportunity = factories.OpportunityFactory.create(
-        opportunity_id=999,
         opportunity_title="New Test Opportunity",
     )
     factories.OpportunitySummaryFactory.build(
@@ -427,7 +455,9 @@ def test_search_notifications_on_index_change(
 
     # Verify the saved search was updated with new results
     db_session.refresh(saved_search)
-    assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+    assert (
+        new_opportunity.opportunity_id in saved_search.searched_opportunity_ids
+    )  # New opportunity should be in results
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
@@ -457,7 +487,10 @@ def test_pagination_params_are_stripped_from_search_query(
         },
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+        ],
     )
 
     params = _strip_pagination_params(saved_search.search_query)
