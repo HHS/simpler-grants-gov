@@ -94,7 +94,6 @@ describe("FeatureFlagsManager", () => {
         expires: expect.any(Date) as jest.Expect,
         name: FEATURE_FLAGS_KEY,
         value: JSON.stringify({
-          ...DEFAULT_FEATURE_FLAGS,
           ...expectedFeatureFlags,
         }),
       });
@@ -118,9 +117,7 @@ describe("FeatureFlagsManager", () => {
         expires: expect.any(Date) as jest.Expect,
         name: FEATURE_FLAGS_KEY,
         value: JSON.stringify({
-          feature1: true, // from default
           feature2: true, // from query param
-          feature3: false, // from env var
         }),
       });
     });
@@ -131,23 +128,28 @@ describe("FeatureFlagsManager", () => {
         {},
       );
       const mockSet = jest.fn();
-      jest
-        .spyOn(NextResponse.prototype, "cookies", "get")
-        .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
+      const mockDelete = jest.fn();
+      jest.spyOn(NextResponse.prototype, "cookies", "get").mockReturnValue({
+        set: mockSet,
+        delete: mockDelete,
+      } as object as NextResponse["cookies"]);
 
       const featureFlagsManager = new FeatureFlagsManager({
         feature3: "false",
       });
       featureFlagsManager.middleware(request, NextResponse.next());
-      expect(mockSet).toHaveBeenCalledWith({
-        expires: expect.any(Date) as jest.Expect,
-        name: FEATURE_FLAGS_KEY,
-        value: JSON.stringify({
-          feature1: true, // from default
-          feature2: false, // from default
-          feature3: false, // from env var
-        }),
-      });
+      // expect(mockSet).toHaveBeenCalledWith({
+      //   expires: expect.any(Date) as jest.Expect,
+      //   name: FEATURE_FLAGS_KEY,
+      //   value: JSON.stringify({
+      //     feature1: true, // from default
+      //     feature2: false, // from default
+      //     feature3: false, // from env var
+      //   }),
+      // });
+
+      expect(mockDelete).toHaveBeenCalledWith({ name: FEATURE_FLAGS_KEY });
+      expect(mockSet).not.toHaveBeenCalled();
     });
   });
 
