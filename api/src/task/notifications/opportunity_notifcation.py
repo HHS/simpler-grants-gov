@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Sequence
+from typing import Sequence, cast
 from uuid import UUID
 
 from sqlalchemy import and_, desc, func, select, tuple_, update
@@ -136,7 +136,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
 
         users_email_notifications: list[UserEmailNotification] = []
-
         for user_changed_opp in changed_saved_opportunities:
             user_id = user_changed_opp.user_id
             user_email = user_changed_opp.email
@@ -164,7 +163,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     "changed_opportunities_count": len(user_content.updated_opportunity_ids),
                 },
             )
-
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
@@ -275,12 +273,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
-        return {
-            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
-            for diff in diffs
-        }
-
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -289,8 +281,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         after = OPPORTUNITY_STATUS_MAP.get(after, after.capitalize())
 
         return (
-                SECTION_STYLING.format("Status")
-                + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
+            SECTION_STYLING.format("Status")
+            + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
     def _normalize_date_field(self, value: str | int | None) -> str | int:
@@ -309,13 +301,17 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return important_section
 
+    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
+        return {
+            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
+            for diff in diffs
+        }
+
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
-        assert opp_change.previous is not None
+        previous = cast(OpportunityVersion, opp_change.previous)
 
-        diffs = diff_nested_dicts(
-            opp_change.previous.opportunity_data, opp_change.latest.opportunity_data
-        )
+        diffs = diff_nested_dicts(previous.opportunity_data, opp_change.latest.opportunity_data)
 
         # Transform diffs
         changes = self._flatten_and_extract_field_changes(diffs)
@@ -336,34 +332,34 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return "<br>".join(sections)
 
     def _build_notification_content(
-            self, updated_opportunities: list[OpportunityVersionChange]
+        self, updated_opportunities: list[OpportunityVersionChange]
     ) -> UserOpportunityUpdateContent | None:
 
         closing_msg = (
-                          "<div>"
-                          "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
-                          f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-                          "</div>"
-                      ) + CONTACT_INFO
+            "<div>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            "</div>"
+        ) + CONTACT_INFO
 
         all_sections = ""
         updated_opp_ids = []
-        opp_numb = 0
+        opp_count = 1
         # Get sections statement
         for opp in updated_opportunities:
             opp_id = opp.opportunity_id
             sections = self._build_sections(opp)
             if not sections:
                 continue
-            assert opp.previous is not None
-            opp_numb += 1
-            all_sections += (
-                                "<div>"
-                                f"{opp_numb}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
-                                "Here’s what changed:"
-                                "</div>"
-                            ) + sections
 
+            all_sections += (
+                "<div>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
+                "Here’s what changed:"
+                "</div>"
+            ) + sections
+
+            opp_count += 1
             updated_opp_ids.append(opp_id)
 
         if not all_sections:
