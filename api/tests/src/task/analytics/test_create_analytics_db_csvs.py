@@ -48,8 +48,8 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
 
         # Validate the opportunity file
         csv_opps = validate_file(task.config.file_path + "/opportunity.csv", len(opportunities))
-        opportunity_ids = set([o.opportunity_id for o in opportunities])
-        csv_opportunity_ids = set([int(record["opportunity_id"]) for record in csv_opps])
+        opportunity_ids = set([str(o.opportunity_id) for o in opportunities])
+        csv_opportunity_ids = set([record["opportunity_id"] for record in csv_opps])
         assert opportunity_ids == csv_opportunity_ids
 
         # Validate the current opportunity file
@@ -63,11 +63,14 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
             len(current_opportunity_summaries),
         )
         current_summary_ids = set(
-            [(o.opportunity_id, o.opportunity_summary_id) for o in current_opportunity_summaries]
+            [
+                (str(o.opportunity_id), str(o.opportunity_summary_id))
+                for o in current_opportunity_summaries
+            ]
         )
         csv_current_summary_ids = set(
             [
-                (int(record["opportunity_id"]), int(record["opportunity_summary_id"]))
+                (record["opportunity_id"], record["opportunity_summary_id"])
                 for record in csv_current_summaries
             ]
         )
@@ -78,8 +81,10 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         csv_summaries = validate_file(
             task.config.file_path + "/opportunity_summary.csv", len(opportunity_summaries)
         )
-        opportunity_summary_ids = set([o.opportunity_summary_id for o in opportunity_summaries])
+        opportunity_summary_ids = set(
+            [str(o.opportunity_summary_id) for o in opportunity_summaries]
+        )
         csv_opportunity_summary_ids = set(
-            [int(record["opportunity_summary_id"]) for record in csv_summaries]
+            [record["opportunity_summary_id"] for record in csv_summaries]
         )
         assert opportunity_summary_ids == csv_opportunity_summary_ids
