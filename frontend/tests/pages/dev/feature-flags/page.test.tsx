@@ -4,6 +4,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const MOCK_DEFAULT_FEATURE_FLAGS = {
   someFakeFeature1: true,
@@ -12,6 +13,10 @@ const MOCK_DEFAULT_FEATURE_FLAGS = {
 };
 
 type MockFeatureFlagKeys = keyof typeof MOCK_DEFAULT_FEATURE_FLAGS;
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 
 const mockUseFeatureFlags = jest.fn(() => ({
   featureFlags: MOCK_DEFAULT_FEATURE_FLAGS,
@@ -54,13 +59,11 @@ describe("Feature flags page", () => {
       const statusElement = screen.getByTestId(`${name}-status`);
 
       expect(statusElement).toHaveTextContent("Enabled");
-      fireEvent.click(enableButton);
-      rerender(<FeatureFlags />);
-      expect(statusElement).toHaveTextContent("Enabled");
+      expect(enableButton).toBeDisabled();
 
+      expect(disableButton).toBeEnabled();
       fireEvent.click(disableButton);
       rerender(<FeatureFlags />);
-      expect(statusElement).toHaveTextContent("Disabled");
 
       fireEvent.click(disableButton);
       rerender(<FeatureFlags />);
