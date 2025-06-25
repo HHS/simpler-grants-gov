@@ -27,6 +27,7 @@ export interface FilterOption {
   isChecked?: boolean;
   label: string;
   value: string;
+  tooltip?: string;
 }
 
 export interface FilterOptionWithChildren extends FilterOption {

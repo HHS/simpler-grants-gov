@@ -1,3 +1,4 @@
+import logging
 import zipfile
 from datetime import date
 
@@ -47,6 +48,24 @@ def build_sam_extract_row(
 
     # Every row is | separated, with "!end" tacked onto the end
     return "|".join(raw_data) + "!end"
+
+
+def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "1"):
+    return build_sam_extract_row(
+        uei=uei,
+        extract_code=extract_code,
+        # All of the below won't be set for deactivated/expired rows
+        legal_business_name="",
+        registration_expiration_date="",
+        ebiz_poc_email="",
+        ebiz_first_name="",
+        ebiz_last_name="",
+        debt_subject_to_offset="",
+        exclusion_status_flag="",
+        entity_eft_indicator="",
+        initial_registration_date="",
+        last_update_date="",
+    )
 
 
 def build_sam_extract_contents(rows):
@@ -130,35 +149,16 @@ class TestProcessSamExtracts:
         # These next two rows error due to malformed data
         row5 = build_sam_extract_row(uei="EEE555", registration_expiration_date="not-a-date")
         row6 = build_sam_extract_row(uei="FFF666", legal_business_name="")
-        # TODO - in a follow-up PR we'll handle deleted/expired records,
-        #  just verifying now they don't do anything
-        row7 = build_sam_extract_row(
+
+        # This record is marked as deactivated
+        row7 = build_sam_extract_row_deactivated_or_expired(
             uei="GGG777",
             extract_code="1",
-            legal_business_name="",
-            registration_expiration_date="",
-            ebiz_poc_email="",
-            ebiz_first_name="",
-            ebiz_last_name="",
-            debt_subject_to_offset="",
-            exclusion_status_flag="",
-            entity_eft_indicator="",
-            initial_registration_date="",
-            last_update_date="",
         )
-        row8 = build_sam_extract_row(
+        # This record is marked as expired, which will mostly no-op
+        row8 = build_sam_extract_row_deactivated_or_expired(
             uei="HHH888",
             extract_code="4",
-            legal_business_name="",
-            registration_expiration_date="",
-            ebiz_poc_email="",
-            ebiz_first_name="",
-            ebiz_last_name="",
-            debt_subject_to_offset="",
-            exclusion_status_flag="",
-            entity_eft_indicator="1234",
-            initial_registration_date="",
-            last_update_date="",
         )
 
         rows = [row1, row2, row3, row4, row5, row6, row7, row8]
@@ -166,7 +166,7 @@ class TestProcessSamExtracts:
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1234.zip"
         make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
 
-        SamExtractFileFactory.create(s3_path=s3_path)
+        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 1, 1))
         # Other extract files aren't picked up as they're not pending
         SamExtractFileFactory.create_batch(
             size=3, processing_status=SamGovProcessingStatus.COMPLETED
@@ -179,11 +179,16 @@ class TestProcessSamExtracts:
         SamGovEntityFactory.create(uei="CCC333", last_update_date=date(2020, 1, 1))
         SamGovEntityFactory.create(uei="DDD444", last_update_date=date(2020, 1, 1))
 
+        SamGovEntityFactory.create(uei="GGG777", last_update_date=date(2020, 1, 1))
+        SamGovEntityFactory.create(
+            uei="HHH888", last_update_date=date(2020, 1, 1), expiration_date=date(2023, 1, 1)
+        )
+
         task = ProcessSamExtractsTask(db_session)
         task.run()
 
         sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
-        assert len(sam_gov_entities) == 4
+        assert len(sam_gov_entities) == 6
         sam_gov_entities.sort(key=lambda e: e.uei)
 
         entity1 = sam_gov_entities[0]
@@ -235,16 +240,37 @@ class TestProcessSamExtracts:
         assert entity4.last_update_date == date(2020, 1, 1)
         assert len(entity4.import_records) == 0
 
+        # This record was made inactive
+        entity5 = sam_gov_entities[4]
+        assert entity5.uei == "GGG777"
+        assert entity5.is_inactive is True
+        assert entity5.inactivated_at is not None
+        assert entity5.last_update_date == date(2020, 1, 1)  # This was not updated
+        assert len(entity5.import_records) == 1
+
+        entity6 = sam_gov_entities[5]
+        assert entity6.uei == "HHH888"
+        assert entity6.last_update_date == date(2020, 1, 1)  # This was not updated
+        assert len(entity6.import_records) == 0
+
         metrics = task.metrics
         assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 8
         assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 4
-        assert metrics[task.Metrics.DELETED_ROWS_COUNT] == 1
+        assert metrics[task.Metrics.DEACTIVATED_ROWS_COUNT] == 1
         assert metrics[task.Metrics.EXPIRED_ROWS_COUNT] == 1
         assert metrics[task.Metrics.ENTITY_ERROR_COUNT] == 2
 
         assert metrics[task.Metrics.ENTITY_INSERTED_COUNT] == 1
         assert metrics[task.Metrics.ENTITY_UPDATED_COUNT] == 2
         assert metrics[task.Metrics.ENTITY_NO_OP_COUNT] == 1
+
+        assert metrics[task.Metrics.ENTITY_DEACTIVATED_COUNT] == 1
+        assert metrics[task.Metrics.ENTITY_DEACTIVATED_MISSING_COUNT] == 0
+        assert metrics[task.Metrics.ALREADY_DEACTIVATED_COUNT] == 0
+
+        assert metrics[task.Metrics.ENTITY_EXPIRED_COUNT] == 1
+        assert metrics[task.Metrics.ENTITY_EXPIRED_MISSING_COUNT] == 0
+        assert metrics[task.Metrics.ENTITY_EXPIRED_MISMATCH_COUNT] == 0
 
         assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 1
 
@@ -334,7 +360,7 @@ class TestProcessSamExtracts:
         metrics = task.metrics
         assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 7
         assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 7
-        assert metrics[task.Metrics.DELETED_ROWS_COUNT] == 0
+        assert metrics[task.Metrics.DEACTIVATED_ROWS_COUNT] == 0
         assert metrics[task.Metrics.EXPIRED_ROWS_COUNT] == 0
 
         assert metrics[task.Metrics.ENTITY_INSERTED_COUNT] == 3
@@ -342,6 +368,121 @@ class TestProcessSamExtracts:
         assert metrics[task.Metrics.ENTITY_NO_OP_COUNT] == 1
 
         assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 3
+
+    def test_run_task_deactivated_records(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
+    ):
+        """Test run_task with all deactivated records"""
+        caplog.set_level(logging.INFO)
+        row1_missing_existing = build_sam_extract_row_deactivated_or_expired("DEACTIVATED1", "1")
+        row2_already_deactivated = build_sam_extract_row_deactivated_or_expired("DEACTIVATED2", "1")
+        row3_currently_activated = build_sam_extract_row_deactivated_or_expired("DEACTIVATED3", "1")
+        rows = [row1_missing_existing, row2_already_deactivated, row3_currently_activated]
+
+        s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_1234.zip"
+        make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
+        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 6, 1))
+
+        SamGovEntityFactory.create(
+            uei="DEACTIVATED2", is_inactive=True, inactivated_at=date(2022, 2, 2)
+        )
+        SamGovEntityFactory.create(uei="DEACTIVATED3")
+
+        task = ProcessSamExtractsTask(db_session)
+        task.run()
+
+        sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
+        assert len(sam_gov_entities) == 2
+        sam_gov_entities.sort(key=lambda e: e.uei)
+
+        # For the first record, verify we saw it and logged a message
+        record = next(
+            record
+            for record in caplog.records
+            if record.message == "Unknown UEI marked as deactivated"
+        )
+        assert record.uei == "DEACTIVATED1"
+
+        already_deactivated_entity = sam_gov_entities[0]
+        assert already_deactivated_entity.uei == "DEACTIVATED2"
+        assert already_deactivated_entity.is_inactive is True
+        assert already_deactivated_entity.inactivated_at == date(2022, 2, 2)
+        assert len(already_deactivated_entity.import_records) == 0
+
+        newly_deactivated_entity = sam_gov_entities[1]
+        assert newly_deactivated_entity.uei == "DEACTIVATED3"
+        assert newly_deactivated_entity.is_inactive is True
+        assert newly_deactivated_entity.inactivated_at == date(2025, 6, 1)
+        assert len(newly_deactivated_entity.import_records) == 1
+
+        metrics = task.metrics
+        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 3
+        assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 0
+        assert metrics[task.Metrics.DEACTIVATED_ROWS_COUNT] == 3
+
+        assert metrics[task.Metrics.ENTITY_DEACTIVATED_COUNT] == 1
+        assert metrics[task.Metrics.ENTITY_DEACTIVATED_MISSING_COUNT] == 1
+        assert metrics[task.Metrics.ALREADY_DEACTIVATED_COUNT] == 1
+
+        assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 1
+
+    def test_run_task_expired_records(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
+    ):
+        """Test run_task with all deactivated records"""
+        caplog.set_level(logging.INFO)
+        row1_missing_existing = build_sam_extract_row_deactivated_or_expired("EXPIRED1", "4")
+        row2_already_expired = build_sam_extract_row_deactivated_or_expired("EXPIRED2", "4")
+        row3_currently_expired = build_sam_extract_row_deactivated_or_expired("EXPIRED3", "4")
+        rows = [row1_missing_existing, row2_already_expired, row3_currently_expired]
+
+        s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_12345678.zip"
+        make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
+        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 6, 1))
+
+        SamGovEntityFactory.create(uei="EXPIRED2", expiration_date=date(2026, 1, 1))
+        SamGovEntityFactory.create(uei="EXPIRED3", expiration_date=date(2025, 6, 1))
+
+        task = ProcessSamExtractsTask(db_session)
+        task.run()
+
+        sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
+        assert len(sam_gov_entities) == 2
+        sam_gov_entities.sort(key=lambda e: e.uei)
+
+        # For the first record, verify we saw it and logged a message
+        record = next(
+            record for record in caplog.records if record.message == "Unknown UEI marked as expired"
+        )
+        assert record.uei == "EXPIRED1"
+
+        # The second record logged a different message
+        record = next(
+            record
+            for record in caplog.records
+            if record.message
+            == "Sam.gov entity marked as expired, but our expiration date has not been reached"
+        )
+        assert record.uei == "EXPIRED2"
+
+        # The third record logged yet another message
+        record = next(
+            record
+            for record in caplog.records
+            if record.message == "Sam.gov entity is marked as expired"
+        )
+        assert record.uei == "EXPIRED3"
+
+        metrics = task.metrics
+        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 3
+        assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 0
+        assert metrics[task.Metrics.EXPIRED_ROWS_COUNT] == 3
+
+        assert metrics[task.Metrics.ENTITY_EXPIRED_COUNT] == 1
+        assert metrics[task.Metrics.ENTITY_EXPIRED_MISSING_COUNT] == 1
+        assert metrics[task.Metrics.ENTITY_EXPIRED_MISMATCH_COUNT] == 1
+
+        assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 1
 
     def test_run_task_not_a_zip(self, db_session, enable_factory_create, mock_s3_bucket):
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_12345678.zip"
