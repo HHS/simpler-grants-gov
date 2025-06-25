@@ -1,3 +1,4 @@
+import logging
 from datetime import date, timedelta
 
 import pytest
@@ -183,12 +184,13 @@ class TestOpportunityNotification:
     def test_email_notifications_collection(
         self,
         db_session,
-        cli_runner,
         search_client,
         user,
         caplog,
         set_env_var_for_email_notification_config,
     ):
+        caplog.set_level(logging.INFO)
+
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
 
@@ -486,9 +488,9 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
-        "version_changes,expected_html",
+        "version_changes,expected",
         [
-            # # Multiple opps updates
+            # Multiple opps updates
             (
                 [
                     OpportunityVersionChange(
@@ -534,12 +536,11 @@ class TestOpportunityNotification:
     def test_build_notification_content(
         self,
         db_session,
-        user,
         version_changes,
-        expected_html,
+        expected,
         set_env_var_for_email_notification_config,
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-        assert res == expected_html
+        assert res == expected

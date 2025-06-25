@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from typing import Sequence, cast
 from uuid import UUID
 
 from sqlalchemy import and_, desc, func, select, tuple_, update
@@ -292,11 +292,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
-        assert opp_change.previous is not None
+        previous = cast(OpportunityVersion, opp_change.previous)
 
-        diffs = diff_nested_dicts(
-            opp_change.previous.opportunity_data, opp_change.latest.opportunity_data
-        )
+        diffs = diff_nested_dicts(previous.opportunity_data, opp_change.latest.opportunity_data)
 
         # Transform diffs
         changes = self._flatten_and_extract_field_changes(diffs)
@@ -334,10 +332,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections = self._build_sections(opp)
             if not sections:
                 continue
-            assert opp.previous is not None
+
             all_sections += (
                 "<div>"
-                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.previous.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
