@@ -77,7 +77,6 @@ jwt_or_key_security_schemes = _get_security_requirement(
 jwt_key_or_internal_security_schemes = _get_security_requirement(
     [
         api_jwt_auth.security_scheme_name,
-        api_key_auth.security_scheme_name,
         internal_jwt_auth.security_scheme_name,
     ]
 )
