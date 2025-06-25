@@ -1,3 +1,5 @@
+import logging
+
 import freezegun
 import pytest
 
@@ -89,7 +91,9 @@ def test_process_rule_schema_flat(enable_factory_create):
         "date_field": {"gg_post_population": {"rule": "current_date"}},
         "signature_field": {"gg_post_population": {"rule": "signature"}},
         "attachment_id_field": {"gg_validation": {"rule": "attachment"}},
+        "attachment_id_list_field": {"gg_validation": {"rule": "attachment"}},
         "missing_attachment_id_field": {"gg_validation": {"rule": "attachment"}},
+        "missing_attachment_id_list_field": {"gg_validation": {"rule": "attachment"}},
     }
 
     context = setup_context(
@@ -99,13 +103,25 @@ def test_process_rule_schema_flat(enable_factory_create):
             "date_field": "2020-01-01",
             "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
             "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "attachment_id_list_field": [
+                "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+                "b27b22d0-0dfe-4e85-a509-045e6a447824",
+            ],
+            "missing_attachment_id_list_field": [
+                "464ac16b-adcc-41d8-aac1-0b0875b8de80",
+                "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+                "1d532d43-ac3f-4b28-bdaa-b5afa04640c1",
+            ],
         },
         rule_schema=rule_schema,
         opportunity_number="123-ABC-XYZ",
         opportunity_title="Research into advanced research techniques",
         agency_name="Advanced Research Agency",
         user_email="mynewmail@example.com",
-        attachment_ids=["d97253ea-d512-4aa8-b3dc-bf75834e1e90"],
+        attachment_ids=[
+            "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "b27b22d0-0dfe-4e85-a509-045e6a447824",
+        ],
     )
 
     process_rule_schema_for_context(context)
@@ -117,6 +133,15 @@ def test_process_rule_schema_flat(enable_factory_create):
         "date_field": "2020-01-01",
         "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
         "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+        "attachment_id_list_field": [
+            "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "b27b22d0-0dfe-4e85-a509-045e6a447824",
+        ],
+        "missing_attachment_id_list_field": [
+            "464ac16b-adcc-41d8-aac1-0b0875b8de80",
+            "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "1d532d43-ac3f-4b28-bdaa-b5afa04640c1",
+        ],
     }
     # The json data is modified with the new fields populated
     assert context.json_data == {
@@ -129,15 +154,38 @@ def test_process_rule_schema_flat(enable_factory_create):
         "signature_field": "mynewmail@example.com",
         "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
         "attachment_id_field": "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+        "attachment_id_list_field": [
+            "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "b27b22d0-0dfe-4e85-a509-045e6a447824",
+        ],
+        "missing_attachment_id_list_field": [
+            "464ac16b-adcc-41d8-aac1-0b0875b8de80",
+            "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
+            "1d532d43-ac3f-4b28-bdaa-b5afa04640c1",
+        ],
     }
 
-    assert len(context.validation_issues) == 1
-    assert context.validation_issues[0] == ValidationErrorDetail(
-        type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
-        message="Field references application_attachment_id not on the application",
-        field="$.missing_attachment_id_field",
-        value="2d0f9c59-8af4-4d08-8443-63bf5f888a15",
-    )
+    assert len(context.validation_issues) == 3
+    assert context.validation_issues == [
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.missing_attachment_id_field",
+            value="2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+        ),
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.missing_attachment_id_list_field[0]",
+            value="464ac16b-adcc-41d8-aac1-0b0875b8de80",
+        ),
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.missing_attachment_id_list_field[2]",
+            value="1d532d43-ac3f-4b28-bdaa-b5afa04640c1",
+        ),
+    ]
 
 
 @freezegun.freeze_time("2025-01-15 12:00:00", tz_offset=0)
@@ -150,6 +198,8 @@ def test_process_rule_schema_nested(enable_factory_create):
         "nested": {
             "opp_title_field": {"gg_pre_population": {"rule": "opportunity_title"}},
             "missing_attachment_id_field": {"gg_validation": {"rule": "attachment"}},
+            "attachment_id_list_field": {"gg_validation": {"rule": "attachment"}},
+            "missing_attachment_id_list_field": {"gg_validation": {"rule": "attachment"}},
             "inner_nested": {
                 "agency_name_field": {"gg_pre_population": {"rule": "agency_name"}},
                 "date_field": {"gg_post_population": {"rule": "current_date"}},
@@ -166,6 +216,15 @@ def test_process_rule_schema_nested(enable_factory_create):
             "nested": {
                 "another_nested_field": "X",
                 "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+                "attachment_id_list_field": [
+                    "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                    "ff94643c-e032-4b7e-8c19-228d9d771a50",
+                ],
+                "missing_attachment_id_list_field": [
+                    "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                    "0c19062d-4115-4c9e-89d8-57c49e9f3770",
+                    "e11d9e8b-959d-4898-b9d0-9a91496876b3",
+                ],
             },
             "attachment_id_field": "9f71990c-1914-4e93-85d1-f2af3c7c1455",
         },
@@ -174,7 +233,10 @@ def test_process_rule_schema_nested(enable_factory_create):
         opportunity_title="My opportunity title",
         agency_name="My example agency",
         user_email="mymail@example.com",
-        attachment_ids=["9f71990c-1914-4e93-85d1-f2af3c7c1455"],
+        attachment_ids=[
+            "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+            "ff94643c-e032-4b7e-8c19-228d9d771a50",
+        ],
     )
 
     process_rule_schema_for_context(context)
@@ -186,6 +248,15 @@ def test_process_rule_schema_nested(enable_factory_create):
         "nested": {
             "another_nested_field": "X",
             "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+            "attachment_id_list_field": [
+                "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                "ff94643c-e032-4b7e-8c19-228d9d771a50",
+            ],
+            "missing_attachment_id_list_field": [
+                "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                "0c19062d-4115-4c9e-89d8-57c49e9f3770",
+                "e11d9e8b-959d-4898-b9d0-9a91496876b3",
+            ],
         },
         "attachment_id_field": "9f71990c-1914-4e93-85d1-f2af3c7c1455",
     }
@@ -197,19 +268,42 @@ def test_process_rule_schema_nested(enable_factory_create):
             "opp_title_field": "My opportunity title",
             "another_nested_field": "X",
             "missing_attachment_id_field": "2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+            "attachment_id_list_field": [
+                "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                "ff94643c-e032-4b7e-8c19-228d9d771a50",
+            ],
+            "missing_attachment_id_list_field": [
+                "9f71990c-1914-4e93-85d1-f2af3c7c1455",
+                "0c19062d-4115-4c9e-89d8-57c49e9f3770",
+                "e11d9e8b-959d-4898-b9d0-9a91496876b3",
+            ],
             "inner_nested": {"agency_name_field": "My example agency", "date_field": "2025-01-15"},
         },
         "signature_field": "mymail@example.com",
         "attachment_id_field": "9f71990c-1914-4e93-85d1-f2af3c7c1455",
     }
 
-    assert len(context.validation_issues) == 1
-    assert context.validation_issues[0] == ValidationErrorDetail(
-        type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
-        message="Field references application_attachment_id not on the application",
-        field="$.nested.missing_attachment_id_field",
-        value="2d0f9c59-8af4-4d08-8443-63bf5f888a15",
-    )
+    assert len(context.validation_issues) == 3
+    assert context.validation_issues == [
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.nested.missing_attachment_id_field",
+            value="2d0f9c59-8af4-4d08-8443-63bf5f888a15",
+        ),
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.nested.missing_attachment_id_list_field[1]",
+            value="0c19062d-4115-4c9e-89d8-57c49e9f3770",
+        ),
+        ValidationErrorDetail(
+            type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+            message="Field references application_attachment_id not on the application",
+            field="$.nested.missing_attachment_id_list_field[2]",
+            value="e11d9e8b-959d-4898-b9d0-9a91496876b3",
+        ),
+    ]
 
 
 def test_process_null_rule_schema(enable_factory_create):
@@ -333,6 +427,7 @@ def test_bad_rule_schema_at_top_level_population(enable_factory_create, caplog):
 
 
 def test_bad_rule_schema_at_top_level_validation(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
     rule_schema = {"gg_validation": {"rule": "attachment"}}
     context = setup_context({}, rule_schema=rule_schema)
     process_rule_schema_for_context(context)
@@ -342,5 +437,5 @@ def test_bad_rule_schema_at_top_level_validation(enable_factory_create, caplog):
     assert context.json_data == {}
     assert context.validation_issues == []
 
-    # This ends up not logging any warnings+
-    assert [] == caplog.messages
+    # Verify we logged a message for an unexpected type
+    assert "Unexpected type found when validating attachment ID: dict" in caplog.messages

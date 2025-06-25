@@ -1,4 +1,5 @@
 import logging
+import typing
 
 from src.api.response import ValidationErrorDetail
 from src.form_schema.rule_processing.json_rule_context import JsonRuleContext
@@ -6,6 +7,42 @@ from src.form_schema.rule_processing.json_rule_util import build_path_str, get_n
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
+
+
+def _validate_attachment_value(
+    context: JsonRuleContext,
+    application_attachment_ids: list[str],
+    value: typing.Any,
+    path: list[str],
+    index: int | None = None,
+) -> None:
+    """Helper function for validating attachment value"""
+
+    # If the attachment ID isn't an expected type
+    # then the JSON schema type validation itself
+    # should fail anyways, but log a message just
+    # in case we need to investigate.
+    if not isinstance(value, str):
+        logger.info(
+            f"Unexpected type found when validating attachment ID: {type(value).__name__}",
+            extra={
+                "application_form_id": context.application_form.application_form_id,
+                "path": build_path_str(path, index=index),
+            },
+        )
+        return
+
+    # If the value isn't in the attachment ID list
+    # then add a validation error.
+    if value not in application_attachment_ids:
+        context.validation_issues.append(
+            ValidationErrorDetail(
+                type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
+                message="Field references application_attachment_id not on the application",
+                field=build_path_str(path, index=index),
+                value=value,
+            )
+        )
 
 
 def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) -> None:
@@ -29,18 +66,25 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
     if value is None:
         return
 
-    # If the value isn't a string, we can skip doing any checks
-    # because the type checking from the JSON schema should flag the field.
-    # TODO - when we figure out how we're handling list fields, we'll
-    # want to add something here as well to allow a list of strings.
-    if isinstance(value, str) and value not in application_attachment_ids:
-        context.validation_issues.append(
-            ValidationErrorDetail(
-                type=ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT,
-                message="Field references application_attachment_id not on the application",
-                field=build_path_str(path),
-                value=value,
+    # If the value we're validating is a list
+    # we need to check each value individually
+    if isinstance(value, list):
+        for index, v in enumerate(value):
+            _validate_attachment_value(
+                context=context,
+                application_attachment_ids=application_attachment_ids,
+                value=v,
+                path=path,
+                index=index,
             )
+    else:
+        # Otherwise we just need to check the value itself
+        _validate_attachment_value(
+            context=context,
+            application_attachment_ids=application_attachment_ids,
+            value=value,
+            path=path,
+            index=None,
         )
 
 
