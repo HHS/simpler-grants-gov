@@ -6,7 +6,6 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
 from typing import Iterator, Sequence
-import uuid
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -241,7 +240,7 @@ class LoadOpportunitiesToIndex(Task):
         # Fetch the opportunity IDs of opportunities we would expect to be in the index
         opportunity_ids_we_want_in_search: set[uuid.UUID] = set(
             self.db_session.execute(
-                select(Opportunity.legacy_opportunity_id)
+                select(Opportunity.opportunity_id)
                 .join(CurrentOpportunitySummary)
                 .join(Agency, Opportunity.agency_code == Agency.agency_code, isouter=True)
                 .where(
@@ -334,7 +333,9 @@ class LoadOpportunitiesToIndex(Task):
             include_scores=False,
         ):
             for record in response.records:
-                opportunity_ids.add(record["opportunity_id"])
+                opportunity_ids.add(
+                    uuid.UUID(record["opportunity_id"])
+                )  # TODO: Or should we consider this set to be a set of strings?
 
         return opportunity_ids
 
