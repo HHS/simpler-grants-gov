@@ -31,6 +31,7 @@ export async function AgencyFilterAccordion({
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
+      contentClassName="maxh-mobile-lg overflow-auto position-relative"
     >
       <AgencyFilterContent
         query={query}

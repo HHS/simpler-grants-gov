@@ -150,9 +150,9 @@ export function SearchFilterAccordion({
   query,
   facetCounts,
   defaultEmptySelection,
+  contentClassName,
   includeAnyOption = true,
-  wrapForScroll = false,
-}: SearchFilterAccordionProps) {
+}: SearchFilterProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
@@ -170,9 +170,10 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: wrapForScroll
-        ? "maxh-mobile-lg overflow-auto position-relative"
-        : "",
+      className: clsx(
+        "maxh-mobile-lg overflow-auto position-relative",
+        contentClassName,
+      ),
     },
   ];
 

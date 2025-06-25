@@ -132,7 +132,7 @@ describe("SearchFilterAccordion", () => {
     });
     expect(anyCheckbox).toBeInTheDocument();
   });
-  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+  it("ensures the component contents scroll", () => {
     render(
       <SearchFilterAccordion
         filterOptions={initialFilterOptions}
@@ -140,7 +140,6 @@ describe("SearchFilterAccordion", () => {
         queryParamKey={queryParamKey}
         query={new Set("")}
         facetCounts={fakeFacetCounts}
-        wrapForScroll={true}
       />,
     );
 
