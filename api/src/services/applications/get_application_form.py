@@ -12,7 +12,6 @@ from src.services.applications.application_validation import (
     is_form_required,
     validate_application_form,
 )
-from src.services.applications.auth_utils import check_user_application_access
 from src.services.applications.get_application import get_application
 
 
@@ -24,19 +23,11 @@ def get_application_form(
 
     If user is None (for internal JWT tokens), access checks are bypassed.
     """
-    if user is not None:
-        # Regular user access - get the application with user access checks
-        application = get_application(db_session, application_id, user)
-    else:
-        # Internal JWT access - get the application without user access checks
-        application_result = db_session.execute(
-            select(Application).where(Application.application_id == application_id)
-        ).scalar_one_or_none()
+    # Determine if this is an internal user request (user is None)
+    is_internal_user = user is None
 
-        if application_result is None:
-            raise_flask_error(404, f"Application with ID {application_id} not found")
-
-        application = application_result
+    # Ensure the application exists and user has access (if not internal)
+    get_application(db_session, application_id, user, is_internal_user)
 
     # Get the application form with eagerly loaded application and its attachments
     application_form = db_session.execute(
@@ -54,10 +45,6 @@ def get_application_form(
 
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
-
-    # Check if the user has access to the application (only for regular users)
-    if user is not None:
-        check_user_application_access(application, user)
 
     # Get a list of validation warnings (also sets form status)
     warnings: list[ValidationErrorDetail] = validate_application_form(application_form)

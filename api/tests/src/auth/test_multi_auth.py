@@ -125,15 +125,13 @@ def test_internal_multi_auth_with_user_jwt(mini_app, enable_factory_create, db_s
 
 
 def test_internal_multi_auth_with_api_key(mini_app, api_auth_token):
-    """Test that the internal multi-auth works with API key tokens"""
+    """Test that the internal multi-auth rejects API key tokens (security requirement)"""
     resp = mini_app.test_client().get(
         "/dummy_internal_auth_endpoint", headers={"X-Auth": api_auth_token}
     )
-    assert resp.status_code == 200
-    assert resp.json["auth_type"] == AuthType.API_KEY_AUTH
-    assert resp.json["user_id"] is None
-    assert resp.json["username"] == "auth_token_0"
-    assert resp.json["token_id"] is None
+    # API keys should not be accepted for internal multi-auth endpoints for security reasons
+    assert resp.status_code == 401
+    assert resp.json["message"] == "Unable to process token"
 
 
 def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, db_session):
