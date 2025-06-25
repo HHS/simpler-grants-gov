@@ -208,6 +208,23 @@ export const messages = {
     genericErrorCta: "Please try refreshing the page.",
   },
   Application: {
+    information: {
+      applicant: "Applicant",
+      applicantTypeIndividual: "Individual",
+      applicationDownloadInstructions: "Download application instructions",
+      applicationDownloadInstructionsLabel: "Instructions",
+      specialInstructionsLabel: "Special instructions",
+      specialInstructions: "No longer accepting applications",
+      statusLabel: "Status",
+      statusInProgress: "In progress",
+      statusSubmitted: "Submitted",
+      statusAccepted: "Accepted",
+      uei: "UEI",
+      renewal: "Renewal",
+      closeDate: "Close date",
+      closed: "Closed",
+      status: "Status",
+    },
     opportunityOverview: {
       opportunity: "Opportunity",
       name: "Name",
