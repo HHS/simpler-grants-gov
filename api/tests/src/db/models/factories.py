@@ -994,6 +994,8 @@ class CompetitionFactory(BaseFactory):
         unique=True,
     )
 
+    is_simpler_grants_enabled = True
+
     class Params:
         with_instruction = factory.Trait(
             competition_instructions=factory.RelatedFactoryList(
