@@ -265,7 +265,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         stmt = select(
             subq.c.user_id,
             subq.c.opportunity_id,
-            opp_version_from_subq,
+            opp_version_from_subq, # OpportunityVersion object
         ).where(subq.c.rn == 1)
 
         results = self.db_session.execute(stmt).all()
