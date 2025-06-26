@@ -76,6 +76,7 @@ OPPORTUNITY_STATUS_MAP = {
 
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
+NOT_SPECIFIED = "not specified"
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -272,15 +273,23 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _format_currency(self, value: int | None) -> str | None:
-        if not value:
-            return None
-        return f"${int(value):,}"
+    def _format_currency(self, value: int | str) -> str:
+        if isinstance(value, int):
+            return f"${int(value):,}"
+        return value
 
     def _build_award_fields_content(self, award_change: dict) -> str:
         award_section = SECTION_STYLING.format("Awards details")
         for field, change in award_change.items():
-            award_section += f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {self._format_currency(change["before"])} to {self._format_currency(change["after"])}.<br>"
+            before = change["before"] if change["before"] else NOT_SPECIFIED
+            after = change["after"] if change["after"] else NOT_SPECIFIED
+            if field != "expected_number_of_awards":
+                before = self._format_currency(before)
+                after = self._format_currency(after)
+
+            award_section += (
+                f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {before} to {after}.<br>"
+            )
         return award_section
 
     def _build_opportunity_status_content(self, status_change: dict) -> str:

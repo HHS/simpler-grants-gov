@@ -463,11 +463,11 @@ class TestOpportunityNotification:
         [  # estimated_total_program_funding only
             (
                 {"estimated_total_program_funding": {"before": 500_000, "after": None}},
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from 500000 to None.<br>',
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $500,000 to not specified.<br>',
             ),
             (
-                {"expected_number_of_awards": {"before": None, "after": 100_000}},
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The number of expected awards changed from None to 100000.<br>',
+                {"expected_number_of_awards": {"before": None, "after": 3}},
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br>',
             ),
             # multiple award fields
             (
@@ -475,7 +475,7 @@ class TestOpportunityNotification:
                     "award_floor": {"before": 500_000, "after": 200_000},
                     "award_ceiling": {"before": 1_000_000, "after": 500_000},
                 },
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The award minimum changed from 500000 to 200000.<br><p style="padding-left: 40px;">•  The award maximum changed from 1000000 to 500000.<br>',
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The award minimum changed from $500,000 to $200,000.<br><p style="padding-left: 40px;">•  The award maximum changed from $1,000,000 to $500,000.<br>',
             ),
         ],
     )
@@ -537,7 +537,7 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
                         f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                        '<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
@@ -557,11 +557,11 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
                     message=(
-                            f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                            '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                            '<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>'
-                            "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                            "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
                     updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
@@ -585,15 +585,15 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
                     message=(
-                            f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                            '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Open.<br><br>'
-                            '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from 15000000 to 12000000.<br>'
-                            '<p style="padding-left: 40px;">•  The number of expected awards changed from 3 to 5.<br>'
-                            '<p style="padding-left: 40px;">•  The award minimum changed from 50000 to 200000.<br>'
-                            '<p style="padding-left: 40px;">•  The award maximum changed from 5000000 to 3000000.<br>'
-                            '<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>'
-                            "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                            "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Open.<br><br>'
+                        '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $15,000,000 to $12,000,000.<br>'
+                        '<p style="padding-left: 40px;">•  The number of expected awards changed from 3 to 5.<br>'
+                        '<p style="padding-left: 40px;">•  The award minimum changed from $50,000 to $200,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $5,000,000 to $3,000,000.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
                     updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
