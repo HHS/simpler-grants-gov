@@ -22,6 +22,16 @@ jest.mock("js-cookie", () => ({
   set: (...args: unknown[]) => mockSetCookie(...args) as unknown,
 }));
 
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(() => "/test") as jest.Mock<string>,
+  useRouter() {
+    return {
+      prefetch: () => null,
+      push: () => true,
+    };
+  },
+}));
+
 describe("useFeatureFlags", () => {
   afterEach(() => {
     jest.resetAllMocks();
