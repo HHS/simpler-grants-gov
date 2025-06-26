@@ -65,6 +65,7 @@ export function requesterForEndpoint({
         headers,
         method,
         next: nextOptions,
+        signal: AbortSignal.timeout(4000),
       });
     } catch (e) {
       // API most likely down, but also possibly an error setting up or sending a request
