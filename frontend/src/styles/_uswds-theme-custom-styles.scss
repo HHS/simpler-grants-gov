@@ -525,6 +525,9 @@ button.usa-pagination__button.usa-button {
   .usa-modal__content {
     height: 100%;
   }
+  .usa-radio__input {
+    width: 0;
+  }
 }
 
 // make modal close "X" use normal style rather than simpler button styline
