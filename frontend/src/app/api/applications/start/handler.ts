@@ -12,7 +12,7 @@ export const startApplicationHandler = async (request: Request) => {
       competitionId: string;
       applicationName: string;
     };
-    
+
     const response = await handleStartApplication(
       applicationName,
       competitionId,

@@ -16,7 +16,6 @@ import {
   InformationCard,
 } from "src/components/application/InformationCard";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
-
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 export const dynamic = "force-dynamic";
