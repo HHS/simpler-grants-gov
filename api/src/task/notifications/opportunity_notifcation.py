@@ -272,11 +272,16 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
-        return {
-            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
-            for diff in diffs
-        }
+    def _format_currency(self, value: int | None) -> str | None:
+        if not value:
+            return None
+        return f"${int(value):,}"
+
+    def _build_award_fields_content(self, award_change: dict) -> str:
+        award_section = SECTION_STYLING.format("Awards details")
+        for field, change in award_change.items():
+            award_section += f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {self._format_currency(change["before"])} to {self._format_currency(change["after"])}.<br>"
+        return award_section
 
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
@@ -290,6 +295,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
 
+    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
+        return {
+            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
+            for diff in diffs
+        }
+
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
         previous = cast(OpportunityVersion, opp_change.previous)
@@ -301,6 +312,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         sections = []
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
+        if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
+            sections.append(self._build_award_fields_content(award_fields_diffs))
 
         if not sections:
             logger.info(
