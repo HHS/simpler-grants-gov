@@ -85,10 +85,11 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId=""
-        savedFormData={{ name: "myself" }}
-        formSchema={formSchema}
-        uiSchema={uiSchema}
         formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
       />,
     );
 
@@ -137,10 +138,11 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId="test"
-        savedFormData={{}}
-        formSchema={formSchema}
-        uiSchema={uiSchema}
         formId="test"
+        formSchema={formSchema}
+        savedFormData={{}}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
       />,
     );
 
@@ -166,10 +168,11 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId="test"
-        savedFormData={{}}
+        formId="test"
         formSchema={{}}
         uiSchema={uiSchema}
-        formId="test"
+        savedFormData={{}}
+        validationWarnings={[]}
       />,
     );
     const alert = screen.getByTestId("alert");
@@ -186,6 +189,7 @@ describe("ApplyForm", () => {
         formSchema={{ arbitrayField: "arbirtrary value" }}
         uiSchema={uiSchema}
         formId="test"
+        validationWarnings={[]}
       />,
     );
 
@@ -202,6 +206,7 @@ describe("ApplyForm", () => {
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
+        validationWarnings={[]}
       />,
     );
 
