@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from typing import Sequence, cast
 from uuid import UUID
 
 from sqlalchemy import and_, desc, func, select, tuple_, update
@@ -7,6 +7,7 @@ from sqlalchemy.orm import aliased, selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
@@ -16,12 +17,65 @@ from src.task.notifications.constants import (
     NotificationReason,
     OpportunityVersionChange,
     UserEmailNotification,
+    UserOpportunityUpdateContent,
 )
 from src.util import datetime_util
+from src.util.dict_util import diff_nested_dicts
 
 logger = logging.getLogger(__name__)
 
 SCHEMA = OpportunityVersionV1Schema()
+
+IMPORTANT_DATE_FIELDS = {
+    "close_date": "The application due date changed from",
+    "forecasted_award_date": "The estimated award date changed from",
+    "forecasted_project_start_date": "The estimated project start date changed from",
+    "fiscal_year": "The fiscal year changed from",
+}
+AWARD_FIELDS = {
+    "estimated_total_program_funding": "Program funding changed from",
+    "expected_number_of_awards": "The number of expected awards changed from",
+    "award_floor": "The award minimum changed from",
+    "award_ceiling": "The award maximum changed from",
+}
+CATEGORIZATION_FIELDS = {
+    "is_cost_sharing": "Cost sharing or matching requirement has changed from",
+    "funding_instruments": "The funding instrument type has changed from",
+    "category": "The opportunity category has changed from",
+    "category_explanation": "Opportunity category explanation has changed from",
+    "funding_categories": "The category of funding activity has changed from",
+    "funding_category_description": "The funding activity category explanation has been changed from",
+}
+ELIGIBILITY_FIELDS = {
+    "applicant_types": "eligibility criteria include:",
+    "applicant_eligibility_description": "Additional information was",
+}
+GRANTOR_CONTACT_INFORMATION_FIELDS = {
+    "agency_name": "The updated grantor’s name is",  # we dont have this
+    "agency_email_address": "The updated email address is",
+    "agency_contact_description": "New description:",
+}
+DOCUMENTS_FIELDS = {
+    "attachments": "One or more new documents were ",
+    "additional_info_url": "A link to additional information was",
+}
+CONTACT_INFO = (
+    "<div>"
+    "If you have questions, please contact the Grants.gov Support Center:<br><br>"
+    "<a href='mailto:support@grants.gov'>support@grants.gov</a><br>"
+    "1-800-518-4726<br>"
+    "24 hours a day, 7 days a week<br>"
+    "Closed on federal holidays"
+    "</div>"
+)
+
+
+OPPORTUNITY_STATUS_MAP = {
+    OpportunityStatus.POSTED: "Open",
+}
+
+SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
+BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -81,7 +135,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
 
         users_email_notifications: list[UserEmailNotification] = []
-
         for user_changed_opp in changed_saved_opportunities:
             user_id = user_changed_opp.user_id
             user_email = user_changed_opp.email
@@ -96,20 +149,27 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
 
-            message = f"You have updates to {len(updated_opps)} saved opportunities"
+            user_content = self._build_notification_content(updated_opps)
+
+            if not user_content:
+                logger.info("No relevant notifications found for user", extra={"user_id": user_id})
+                return users_email_notifications
 
             logger.info(
                 "Created changed opportunity email notifications",
-                extra={"user_id": user_id, "changed_opportunities_count": len(updated_opps)},
+                extra={
+                    "user_id": user_id,
+                    "changed_opportunities_count": len(user_content.updated_opportunity_ids),
+                },
             )
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
                     user_email=user_email,
-                    subject="Updates to Your Saved Opportunities",
-                    content=message,
+                    subject=user_content.subject,
+                    content=user_content.message,
                     notification_reason=NotificationReason.OPPORTUNITY_UPDATES,
-                    notified_object_ids=[],
+                    notified_object_ids=user_content.updated_opportunity_ids,
                     is_notified=False,  # Default to False, update on success
                 )
             )
@@ -165,7 +225,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _get_last_notified_versions(
         self, user_opportunity_pairs: list
-    ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
+    ) -> dict[tuple[UUID, int], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
         OpportunityVersion for each that was created before the user's
@@ -211,6 +271,98 @@ class OpportunityNotificationTask(BaseNotificationTask):
         results = self.db_session.execute(stmt).all()
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
+
+    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
+        return {
+            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
+            for diff in diffs
+        }
+
+    def _build_opportunity_status_content(self, status_change: dict) -> str:
+        before = status_change["before"]
+        after = status_change["after"]
+
+        before = OPPORTUNITY_STATUS_MAP.get(before, before.capitalize())
+        after = OPPORTUNITY_STATUS_MAP.get(after, after.capitalize())
+
+        return (
+            SECTION_STYLING.format("Status")
+            + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
+        )
+
+    def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
+        # Get diff between latest and previous version
+        previous = cast(OpportunityVersion, opp_change.previous)
+
+        diffs = diff_nested_dicts(previous.opportunity_data, opp_change.latest.opportunity_data)
+
+        # Transform diffs
+        changes = self._flatten_and_extract_field_changes(diffs)
+        sections = []
+        if "opportunity_status" in changes:
+            sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
+
+        if not sections:
+            logger.info(
+                "Opportunity has changes, but none are in fields that trigger user notifications",
+                extra={
+                    "opportunity_id": opp_change.opportunity_id,
+                    "ignored_fields": changes.keys(),
+                },
+            )
+        return "<br>".join(sections)
+
+    def _build_notification_content(
+        self, updated_opportunities: list[OpportunityVersionChange]
+    ) -> UserOpportunityUpdateContent | None:
+
+        closing_msg = (
+            "<div>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            "</div>"
+        ) + CONTACT_INFO
+
+        all_sections = ""
+        updated_opp_ids = []
+        opp_count = 1
+        # Get sections statement
+        for opp in updated_opportunities:
+            opp_id = opp.opportunity_id
+            sections = self._build_sections(opp)
+            if not sections:
+                continue
+
+            all_sections += (
+                "<div>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
+                "Here’s what changed:"
+                "</div>"
+            ) + sections
+
+            opp_count += 1
+            updated_opp_ids.append(opp_id)
+
+        if not all_sections:
+            return None
+        updated_opp_count = len(updated_opp_ids)
+        intro = (
+            "The following funding opportunities recently changed:<br><br>"
+            if updated_opp_count > 1
+            else "The following funding opportunity recently changed:<br><br>"
+        )
+        subject = (
+            "Your saved funding opportunities changed on "
+            if updated_opp_count > 1
+            else "Your saved funding opportunity changed on "
+        )
+        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+
+        return UserOpportunityUpdateContent(
+            subject=subject,
+            message=intro + all_sections + closing_msg,
+            updated_opportunity_ids=updated_opp_ids,
+        )
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

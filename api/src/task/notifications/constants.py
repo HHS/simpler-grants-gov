@@ -34,7 +34,7 @@ class UserEmailNotification:
 
 @dataclass
 class OpportunityVersionChange:
-    opportunity_id: UUID
+    opportunity_id: int
     latest: OpportunityVersion
     previous: OpportunityVersion | None
 
@@ -44,3 +44,10 @@ class ChangedSavedOpportunity:
     user_id: UUID
     email: str
     opportunities: list[OpportunityVersionChange]
+
+
+@dataclass()
+class UserOpportunityUpdateContent:
+    subject: str
+    message: str
+    updated_opportunity_ids: list
