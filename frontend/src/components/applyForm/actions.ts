@@ -11,7 +11,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 import { shapeFormData } from "./utils";
 
 type applyFormErrors = {
-  errorMessage: string;
+  error: boolean;
   submitted: boolean;
 };
 type applyFormResponse = {
@@ -29,7 +29,7 @@ export async function handleFormAction(
   if (!session || !session.token) {
     return {
       applicationId,
-      errorMessage: "Error submitting form. User not authenticated.",
+      error: true,
       formData,
       formId,
       submitted: true,
@@ -40,7 +40,7 @@ export async function handleFormAction(
   if (!formSchema) {
     return {
       applicationId,
-      errorMessage: "Error submitting form",
+      error: true,
       formData,
       formId,
       submitted: true,
@@ -51,16 +51,11 @@ export async function handleFormAction(
     formSchema,
   );
 
-  const saveSuccess = await handleSave(
-    applicationFormData,
-    applicationId,
-    formId,
-    session.token,
-  );
+  const saveSuccess = false;
   if (saveSuccess) {
     return {
       applicationId,
-      errorMessage: "",
+      error: false,
       formData: applicationFormData,
       formId,
       submitted: true,
@@ -68,7 +63,7 @@ export async function handleFormAction(
   } else {
     return {
       applicationId,
-      errorMessage: "Error saving the form",
+      error: true,
       formData,
       formId,
       submitted: true,

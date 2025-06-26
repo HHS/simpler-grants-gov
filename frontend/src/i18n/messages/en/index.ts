@@ -263,6 +263,11 @@ export const messages = {
       },
       updated: "Last updated",
     },
+    applyForm: {
+      errorTitle: "This form could not be saved",
+      errorMessage:
+        "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",

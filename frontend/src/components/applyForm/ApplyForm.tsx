@@ -32,13 +32,13 @@ const ApplyForm = ({
 
   const [formState, formAction] = useActionState(handleFormAction, {
     applicationId,
-    errorMessage: "",
+    error: false,
     formId,
     formData: new FormData(),
     submitted: false,
   });
 
-  const { formData, errorMessage, submitted } = formState;
+  const { formData, error, submitted } = formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
@@ -80,7 +80,6 @@ const ApplyForm = ({
           <Button
             data-testid="apply-form-save"
             type="submit"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             name="apply-form-button"
             className="margin-top-0"
             value="save"
@@ -92,7 +91,7 @@ const ApplyForm = ({
           <FormGroup className="order-2 width-full">
             <ApplyFormMessage
               submitted={submitted}
-              errorMessage={errorMessage}
+              error={error}
               validationWarnings={validationWarnings}
             />
             {fields}

@@ -1,21 +1,29 @@
+import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
 import { FormValidationWarning } from "./types";
 
 export const ApplyFormMessage = ({
-  errorMessage,
+  error,
   validationWarnings,
   submitted,
 }: {
-  errorMessage: string;
+  error: boolean;
   validationWarnings: FormValidationWarning[] | null;
   submitted: boolean;
 }) => {
+  const t = useTranslations("Application.applyForm");
+  const errorMessage = t.rich("errorMessage", {
+    "email-link": (content) => (
+      <a href="mailto:simpler@grants.gov">{content}</a>
+    ),
+    p: (content) => <p>{content}</p>,
+  });
   if (!submitted) {
     return <></>;
-  } else if (errorMessage && errorMessage.length > 0) {
+  } else if (error) {
     return (
-      <Alert heading={"Error saving form"} headingLevel="h2" type="error">
+      <Alert heading={t("errorTitle")} headingLevel="h2" type="error">
         {errorMessage}
       </Alert>
     );
