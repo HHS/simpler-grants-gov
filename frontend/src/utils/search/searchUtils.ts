@@ -1,4 +1,7 @@
-import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import {
+  SEARCH_DEFAULT_VALUES,
+  SEARCH_NO_STATUS_VALUE,
+} from "src/constants/search";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
@@ -89,7 +92,7 @@ export function convertSearchParamsToProperTypes(
 // and to reset that status params none if status=none is set
 function paramToSet(param: QuerySetParam, type?: string): Set<string> {
   if (!param && type === "status") {
-    return new Set(["forecasted", "posted"]);
+    return new Set(SEARCH_DEFAULT_VALUES);
   }
 
   if (!param || (type === "status" && param === SEARCH_NO_STATUS_VALUE)) {
