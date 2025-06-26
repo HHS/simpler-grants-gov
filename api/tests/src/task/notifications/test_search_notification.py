@@ -247,13 +247,16 @@ def test_search_notifications_on_index_change(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],  # Initial results
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+        ],  # Initial results
     )
 
     # Update the search index with new data that will change the results
     schema = OpportunityV1Schema()
     new_opportunity = factories.OpportunityFactory.create(
-        opportunity_id=999, opportunity_title="New Test Opportunity", no_current_summary=True
+        legacy_opportunity_id=999, opportunity_title="New Test Opportunity", no_current_summary=True
     )
     summary = factories.OpportunitySummaryFactory.build(
         opportunity=new_opportunity,
@@ -283,7 +286,9 @@ def test_search_notifications_on_index_change(
 
     # Verify the saved search was updated with new results
     db_session.refresh(saved_search)
-    assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+    assert (
+        new_opportunity.opportunity_id in saved_search.searched_opportunity_ids
+    )  # New opportunity should be in results
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed

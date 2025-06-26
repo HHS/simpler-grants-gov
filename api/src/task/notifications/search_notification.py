@@ -62,7 +62,12 @@ class SearchNotificationTask(BaseNotificationTask):
         updated_saved_searches: dict[UUID, list[UserSavedSearch]] = {}
 
         for searches in query_map.values():
-            current_results = search_opportunities_id(self.search_client, searches[0].search_query)
+            current_results_str = search_opportunities_id(
+                self.search_client, searches[0].search_query
+            )
+            # Convert string UUIDs to UUID objects for database compatibility
+            current_results = [UUID(uuid_str) for uuid_str in current_results_str]
+
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids or [])
                 # Find NEW opportunities (in current but not in previous)
