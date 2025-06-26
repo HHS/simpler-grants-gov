@@ -1,7 +1,7 @@
 """add is_simpler_grants_enabled to competition table
 
 Revision ID: b5946cdc3859
-Revises: cdae57cdf87c
+Revises: 9439bffdbc52
 Create Date: 2025-06-25 15:33:17.619598
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "b5946cdc3859"
-down_revision = "cdae57cdf87c"
+down_revision = "9439bffdbc52"
 branch_labels = None
 depends_on = None
 
