@@ -1,18 +1,18 @@
 import { readError } from "src/errors";
-import { searchAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import { searchAndFlattenAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 
 import { NextRequest } from "next/server";
 
 export async function searchForAgencies(request: NextRequest) {
   const { keyword } = (await request.json()) as { keyword: string | undefined };
 
-  let agencySearchResults: FilterOption[] = [];
+  let agencySearchResults: RelevantAgencyRecord[] = [];
   try {
     if (!keyword) {
       throw new Error("No agency search keyword provided");
     }
-    agencySearchResults = await searchAgenciesForFilterOptions(keyword);
+    agencySearchResults = await searchAndFlattenAgencies(keyword);
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
     console.error(e);
