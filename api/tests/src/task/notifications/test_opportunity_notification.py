@@ -471,7 +471,7 @@ class TestOpportunityNotification:
             ),
             (
                 {"close_date": {"before": "2025-10-10", "after": None}},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to None.<br>',
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
             ),
             # forecasted_award_date
             (
@@ -480,7 +480,7 @@ class TestOpportunityNotification:
             ),
             (
                 {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from None to September 11, 2026.<br>',
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
             ),
             # forecasted_project_start_date
             (
@@ -494,7 +494,7 @@ class TestOpportunityNotification:
             ),
             (
                 {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from None to January 7, 2028.<br>',
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
             ),
             # fiscal_year
             (
@@ -503,7 +503,7 @@ class TestOpportunityNotification:
             ),
             (
                 {"fiscal_year": {"before": 2033, "after": None}},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to None.<br>',
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
             ),
         ],
     )

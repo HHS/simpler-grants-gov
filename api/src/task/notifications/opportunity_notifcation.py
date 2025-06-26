@@ -76,6 +76,7 @@ OPPORTUNITY_STATUS_MAP = {
 
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
+NOT_SPECIFIED = "not specified"  # If None value display this string
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -287,6 +288,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
     def _normalize_date_field(self, value: str | int | None) -> str | int | None:
         if isinstance(value, str):
             return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
+        elif not value:
+            return NOT_SPECIFIED
         return value
 
     def _build_important_dates_content(self, imp_dates_change: dict) -> str:
