@@ -50,6 +50,10 @@ class TransformCompetition(AbstractTransformSubTask):
                         .options(selectinload(Opportunity.opportunity_assistance_listings))
                     ).scalar_one_or_none()
 
+                    # In order to know which opportunity to connect the competition to, we reference the CFDA record
+                    # which links the two tables in the Oracle DB. We cannot use our assistance listing number table as
+                    # we skip transforming opportunity assistance listings with null program title which only existed
+                    # for the purposes of connecting the tables.
                     if opportunity:
                         for assistance_listing in opportunity.opportunity_assistance_listings:
                             if (
@@ -58,7 +62,7 @@ class TransformCompetition(AbstractTransformSubTask):
                             ):
                                 opportunity_id = opportunity.opportunity_id
                                 opportunity_assistance_listing_id = (
-                                    opportunity_assistance_listing_id
+                                    assistance_listing.opportunity_assistance_listing_id
                                 )
                                 break
 

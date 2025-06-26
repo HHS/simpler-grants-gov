@@ -104,7 +104,9 @@ class TestTransformCompetition(BaseTransformTestClass):
         transform_competition.run_subtask()
 
         # Validate the results
-        validate_competition(db_session, cfda_opp_listing_only_in_staging)
+        validate_competition(
+            db_session, cfda_opp_listing_only_in_staging, expect_assistance_listing=False
+        )
         validate_competition(db_session, basic_insert)
         validate_competition(db_session, insert_with_null_fields)
         validate_competition(db_session, basic_update)
