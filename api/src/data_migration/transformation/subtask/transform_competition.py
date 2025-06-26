@@ -46,19 +46,17 @@ class TransformCompetition(AbstractTransformSubTask):
                     # Make sure the opportunity exists in our target table
                     opportunity = self.db_session.execute(
                         select(Opportunity)
-                        .where(Opportunity.opportunity_id == opportunity_id)
+                        .where(Opportunity.opportunity_id == opportunity_cfda.opportunity_id)
                         .options(selectinload(Opportunity.opportunity_assistance_listings))
                     ).scalar_one_or_none()
 
-                    if not opportunity:
-                        opportunity_id = None
-                        opportunity_assistance_listing_id = None
-                    else:
+                    if opportunity:
                         for assistance_listing in opportunity.opportunity_assistance_listings:
                             if (
                                 assistance_listing.opportunity_assistance_listing_id
                                 == opportunity_cfda.opp_cfda_id
                             ):
+                                opportunity_id = opportunity.opportunity_id
                                 opportunity_assistance_listing_id = (
                                     opportunity_assistance_listing_id
                                 )

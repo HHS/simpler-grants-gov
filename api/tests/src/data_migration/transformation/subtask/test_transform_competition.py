@@ -214,3 +214,38 @@ class TestTransformCompetition(BaseTransformTestClass):
                 opportunity.opportunity_id,
                 opportunity_assistance_listing.opportunity_assistance_listing_id,
             )
+
+    def test_process_competition_without_cfda_assistance_listing_match(
+        self, db_session, transform_competition
+    ):
+        """
+        This test excerises the use case for when an assistance listing record exists only in the staging schema
+        and not in the api schema and is associated to an opportunity that exists in both staging and api schemas.
+        """
+
+        cfda_opp_id_in_staging_only = 10
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+        f.StagingTopportunityCfdaFactory.create(
+            opp_cfda_id=cfda_opp_id_in_staging_only,
+            opportunity_id=opportunity.opportunity_id,
+            opportunity=None,
+        )
+
+        competition = setup_competition(
+            db_session,
+            create_existing=False,
+            opportunity=opportunity,
+            opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
+        )
+
+        transform_competition.run_subtask()
+
+        validate_competition(db_session, competition)
+        assert db_session.query(Competition).count() == 1
+        assert db_session.query(Opportunity).count() == 1
+
+        # We expect to not have an associated OpportunityAssistanceListing entry.
+        assert db_session.query(OpportunityAssistanceListing).count() == 0
+
+        metrics = transform_competition.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 1
