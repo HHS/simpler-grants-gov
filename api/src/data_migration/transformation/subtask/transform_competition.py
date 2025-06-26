@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from sqlalchemy import select
 
@@ -9,7 +10,7 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
     AbstractTransformSubTask,
 )
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.db.models.staging.competition import Tcompetition
 from src.db.models.staging.opportunity import TopportunityCfda
 
@@ -40,13 +41,28 @@ class TransformCompetition(AbstractTransformSubTask):
                 opportunity_assistance_listing_id = None
 
                 if opportunity_cfda:
-                    opportunity_id = opportunity_cfda.opportunity_id
-                    opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
 
                     # Make sure the opportunity exists in our target table
                     opportunity = self.db_session.execute(
-                        select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
+                        select(Opportunity).where(
+                            Opportunity.legacy_opportunity_id == opportunity_cfda.opportunity_id
+                        )
                     ).scalar_one_or_none()
+
+                    opportunity_id = opportunity.opportunity_id if opportunity else None
+
+                    opportunity_assistance_listing = self.db_session.execute(
+                        select(OpportunityAssistanceListing).where(
+                            OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
+                            == opportunity_cfda.opp_cfda_id
+                        )
+                    ).scalar_one_or_none()
+
+                    opportunity_assistance_listing_id = (
+                        opportunity_assistance_listing.opportunity_assistance_listing_id
+                        if opportunity_assistance_listing
+                        else None
+                    )
 
                     if not opportunity:
                         opportunity_id = None
@@ -73,7 +89,7 @@ class TransformCompetition(AbstractTransformSubTask):
         source_competition: Tcompetition,
         target_competition: Competition | None,
         opportunity_id: int | None,
-        opportunity_assistance_listing_id: int | None,
+        opportunity_assistance_listing_id: uuid.UUID | None,
     ) -> None:
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,
@@ -128,8 +144,8 @@ class TransformCompetition(AbstractTransformSubTask):
 def transform_competition(
     source_competition: Tcompetition,
     existing_competition: Competition | None,
-    opportunity_id: int,
-    opportunity_assistance_listing_id: int | None = None,
+    opportunity_id: uuid.UUID,
+    opportunity_assistance_listing_id: uuid.UUID | None = None,
 ) -> Competition:
     """Transform a legacy competition record into the new format."""
     log_extra = {"competition_id": source_competition.comp_id}
