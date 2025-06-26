@@ -30,12 +30,12 @@ export const ApplyFormMessage = ({
   } else if (validationWarnings && validationWarnings.length > 0) {
     return (
       <Alert
-        heading={"Form was saved"}
+        heading={t("savedTitle")}
         headingLevel="h2"
         type="warning"
         validation
       >
-        Correct the following errors before submitting your application.
+        {t("validationMessage")}
         <ul>
           {validationWarnings.map((warning, index) => (
             <li key={index}>
@@ -47,8 +47,8 @@ export const ApplyFormMessage = ({
     );
   } else {
     return (
-      <Alert heading={"Form was saved"} headingLevel="h3" type="success">
-        No errors were detected.
+      <Alert heading={t("savedTitle")} headingLevel="h3" type="success">
+        {t("savedMessage")}
       </Alert>
     );
   }

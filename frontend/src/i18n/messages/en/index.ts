@@ -267,6 +267,11 @@ export const messages = {
       errorTitle: "This form could not be saved",
       errorMessage:
         "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+      savedMessage: "No errors were detected.",
+      savedTitle: "Form was saved",
+      validationMessage:
+        "Correct the following errors before submitting your application.",
+      required: "A red asterisk <abr>*</abr> indicates a required field.",
     },
   },
   Index: {

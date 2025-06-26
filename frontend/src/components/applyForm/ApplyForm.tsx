@@ -4,6 +4,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
+import { useTranslations } from "next-intl";
 import { JSX, useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
@@ -29,6 +30,17 @@ const ApplyForm = ({
   validationWarnings: FormValidationWarning[] | null;
 }) => {
   const { pending } = useFormStatus();
+  const t = useTranslations("Application.applyForm");
+  const required = t.rich("required", {
+    abr: (content) => (
+      <abbr
+        title="required"
+        className="usa-hint usa-hint--required text-no-underline"
+      >
+        {content}
+      </abbr>
+    ),
+  });
 
   const [formState, formAction] = useActionState(handleFormAction, {
     applicationId,
@@ -67,16 +79,7 @@ const ApplyForm = ({
         noValidate
       >
         <div className="display-flex flex-justify">
-          <div>
-            A red asterisk (
-            <abbr
-              title="required"
-              className="usa-hint usa-hint--required text-no-underline"
-            >
-              *
-            </abbr>
-            ) indicates a required field.
-          </div>
+          <div>{required}</div>
           <Button
             data-testid="apply-form-save"
             type="submit"

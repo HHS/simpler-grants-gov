@@ -51,7 +51,12 @@ export async function handleFormAction(
     formSchema,
   );
 
-  const saveSuccess = false;
+  const saveSuccess = await handleSave(
+    applicationFormData,
+    applicationId,
+    formId,
+    session.token,
+  );
   if (saveSuccess) {
     return {
       applicationId,
