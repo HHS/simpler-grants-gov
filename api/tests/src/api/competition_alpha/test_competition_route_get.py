@@ -200,9 +200,6 @@ def test_competition_get_200_is_simpler_grants_enabled_false(
 ):
     """Test that competitions with is_simpler_grants_enabled=False are not open"""
     competition = CompetitionFactory.create(
-        opening_date=date(2025, 1, 1),
-        closing_date=date(2025, 12, 31),
-        grace_period=10,
         is_simpler_grants_enabled=False,
     )
 
@@ -222,9 +219,6 @@ def test_competition_get_200_is_simpler_grants_enabled_null(
 ):
     """Test that competitions with is_simpler_grants_enabled=None are not open"""
     competition = CompetitionFactory.create(
-        opening_date=date(2025, 1, 1),
-        closing_date=date(2025, 12, 31),
-        grace_period=10,
         is_simpler_grants_enabled=None,
     )
 
