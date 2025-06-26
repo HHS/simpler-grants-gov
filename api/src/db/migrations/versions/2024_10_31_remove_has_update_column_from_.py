@@ -17,7 +17,7 @@ depends_on = None
 
 
 create_old_trigger_function = """
-CREATE OR REPLACE FUNCTION update_opportunity_search_queue()
+CREATE OR REPLACE FUNCTION api.update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
     opp_id bigint;
@@ -49,7 +49,7 @@ $$ LANGUAGE plpgsql;
 """
 
 create_trigger_function = """
-CREATE OR REPLACE FUNCTION update_opportunity_search_queue()
+CREATE OR REPLACE FUNCTION api.update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
     opp_id bigint;
