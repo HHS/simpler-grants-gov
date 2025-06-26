@@ -290,6 +290,8 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
 
     application_response: Mapped[dict] = mapped_column(JSONB)
 
+    is_included_in_submission: Mapped[bool | None]
+
     @property
     def form(self) -> Form:
         """Property function for slightly easier access to the actual form object"""
