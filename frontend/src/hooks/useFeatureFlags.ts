@@ -1,17 +1,11 @@
 "use client";
 
-import Cookies from "js-cookie";
 import { isBoolean } from "lodash";
-import {
-  defaultFeatureFlags,
-  FeatureFlags,
-} from "src/constants/defaultFeatureFlags";
-import {
-  FEATURE_FLAGS_KEY,
-  getCookieExpiration,
-} from "src/services/featureFlags/featureFlagHelpers";
+import { FeatureFlags } from "src/constants/defaultFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
 
-import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 /**
  * Allows client components to access feature flags by
@@ -24,19 +18,12 @@ export function useFeatureFlags(): {
   checkFeatureFlag: (flagName: string) => boolean;
   featureFlags: FeatureFlags;
 } {
-  const [featureFlags, setFeatureFlags] =
-    useState<FeatureFlags>(defaultFeatureFlags);
-
-  // a workaround, as setting this in default state value results in hydration error
-  useEffect(() => {
-    const flagsFromCookie = JSON.parse(
-      Cookies.get(FEATURE_FLAGS_KEY) || "{}",
-    ) as FeatureFlags;
-    setFeatureFlags(flagsFromCookie);
-  }, []);
+  const userContext = useUser();
+  const pathname = usePathname() || "";
+  const router = useRouter();
 
   // Note that values set in cookies will be persistent per browser session unless explicitly overwritten
-  const setFeatureFlag = useCallback(
+  /*   const setFeatureFlag = useCallback(
     (flagName: string, value: boolean) => {
       const newFlags = {
         ...featureFlags,
@@ -48,23 +35,28 @@ export function useFeatureFlags(): {
       });
     },
     [featureFlags, setFeatureFlags],
-  );
+  ); */
+  const setFeatureFlag = (flagName: string, value: boolean) => {
+    const params = new URLSearchParams();
+    params.set("_ff", `${flagName}:${value ? "true" : "false"}`);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const checkFeatureFlag = useCallback(
     (flagName: string): boolean => {
-      const value = featureFlags[flagName];
+      const value = userContext.featureFlags[flagName];
       if (!isBoolean(value)) {
         console.error("Unknown or misconfigured feature flag: ", flagName);
         return false;
       }
       return value;
     },
-    [featureFlags],
+    [userContext.featureFlags],
   );
 
   return {
     setFeatureFlag,
     checkFeatureFlag,
-    featureFlags,
+    featureFlags: userContext.featureFlags,
   };
 }
