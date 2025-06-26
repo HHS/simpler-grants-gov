@@ -82,6 +82,7 @@ class OpportunityFilters(BaseModel):
     funding_applicant_type: StrSearchFilter | None = None
     opportunity_status: StrSearchFilter | None = None
     agency: StrSearchFilter | None = None
+    top_level_agency: StrSearchFilter | None = None
     assistance_listing_number: StrSearchFilter | None = None
 
     is_cost_sharing: BoolSearchFilter | None = None
@@ -142,6 +143,40 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms(
         "agency", _adjust_field_name("agency_code", OPP_REQUEST_FIELD_NAME_MAPPING), size=1000
     )
+    builder.aggregation_terms(
+        "is_cost_sharing",
+        _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
+    )
+
+
+def _add_top_level_agency_prefix(
+    builder: search.SearchQueryBuilder, filters: OpportunityFilters | None
+) -> None:
+    """
+    If top_level_agency is provided it adds an OR-based agency filter using a `should` clause:
+      - Matches agencies whose code starts with the given top-level prefix.
+      - Also includes specific agency codes from filters agency (if provided).
+
+    Clears filters top_level_agency and agency to prevent duplication in other filters.
+    """
+
+    if not filters or not (filters.top_level_agency and filters.top_level_agency.one_of):
+        return
+
+    # Add a prefix match on the top-level agency code (e.g. "DOS-")
+    builder.filter_should_prefix(
+        "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]
+    )
+
+    # remove top level agency from filter
+    filters.top_level_agency = None
+
+    # If specific sub-agency codes are also provided, add them to the should clause
+    if filters.agency and filters.agency.one_of:
+        builder.filter_should_terms("agency_code.keyword", filters.agency.one_of)
+
+        # Clear it so this field isn't added again as a hard filter
+        filters.agency = None
 
 
 def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
@@ -157,11 +192,13 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     # Sorting
     builder.sort_by(_get_sort_by(params.pagination))
-
     # Query
     if params.query:
         filter_rule = FILTER_RULE_MAPPING.get(params.experimental.scoring_rule, DEFAULT)
         builder.simple_query(params.query, filter_rule, params.query_operator)
+
+    # Filter Prefix
+    _add_top_level_agency_prefix(builder, params.filters)
 
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)

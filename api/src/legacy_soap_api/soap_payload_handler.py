@@ -13,40 +13,52 @@ XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 
 
 class SoapPayload:
-    def __init__(self, soap_payload_str: str, force_list_attributes: list | None = None) -> None:
-        self.payload = soap_payload_str
-        self.keymap: dict[str, dict[str, set]] = defaultdict(
-            lambda: {"original_keys": set(), "namespaces": set()}
+    def __init__(
+        self,
+        soap_payload: str | dict,
+        force_list_attributes: tuple | None = None,
+        keymap: dict[str, dict[str, set]] | None = None,
+        operation_name: str | None = None,
+    ) -> None:
+        self.payload = soap_payload
+        self.force_list_attributes = force_list_attributes if force_list_attributes else tuple()
+        self.keymap: dict[str, dict[str, set]] = (
+            keymap if keymap else defaultdict(lambda: {"original_keys": set(), "namespaces": set()})
         )
-        self.force_list_attributes = force_list_attributes if force_list_attributes else []
+        self._operation_name = operation_name
 
         # Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags and preserve the content before and after the envelope.
         self.pre_envelope = ""
-        self.envelope = None
+        self.envelope = ""
         self.post_envelope = ""
-        if match := re.search(ENVELOPE_REGEX, self.payload, re.DOTALL):
-            start, end = match.span()
-            self.pre_envelope = self.payload[:start]
-            self.envelope = self.payload[start:end]
-            self.post_envelope = self.payload[end:]
+        if isinstance(self.payload, str):
+            if match := re.search(ENVELOPE_REGEX, self.payload, re.DOTALL):
+                start, end = match.span()
+                self.pre_envelope = self.payload[:start]
+                self.envelope = self.payload[start:end]
+                self.post_envelope = self.payload[end:]
+        elif isinstance(self.payload, dict):
+            self.update_envelope_from_dict(self.payload)
 
     @property
-    def operation_name(self) -> str | None:
+    def operation_name(self) -> str:
         """Get operation name
 
         Get the SOAP operation name. Every valid SOAP request Body should
         have the global SOAP envelope namespace.
         """
         if not self.envelope:
-            return None
+            return ""
+        if self._operation_name:
+            return self._operation_name
         try:
             root = DET.fromstring(self.envelope)
             body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
             if body is not None and len(body) > 0:
                 return body[0].tag.split("}")[-1]
-            return None
+            return ""
         except ElementTree.ParseError:
-            return None
+            return ""
 
     def update_envelope_from_dict(self, envelope: dict) -> None:
         self.envelope = (

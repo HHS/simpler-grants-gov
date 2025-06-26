@@ -45,7 +45,7 @@ You can fix them on CLI by:
 1. Finding the job (via Github Action or otherwise) where the deployment failed. If you aren't sure, then it was probably in a Github Action. You can find a list of failing actions here: https://github.com/HHS/simpler-grants-gov/actions
 2. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
 3. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
-4. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`), and cd into the folder identified above
+4. Open up your terminal, [setup AWS](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`), and cd into the folder identified above
 5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
 6. Run `terraform force-unlock -force <LOCK_ID>` where `<LOCK_ID>` is the value of `ID` in your state lock message.
 7. Re-run your deploy job
@@ -122,7 +122,8 @@ notable constraint of OpenSearch, relative to ECS and the Database.
 
 We manage several secret values that need to be rotated yearly.
 
-### Application Certificates
+### Application SSL Certificates
+🚨🚨🚨 - Unclear how a cert rotation works with terraform pointing to a certificate in ACM by domain name. Leave a little extra time until we figure that out and document better below.
 
 #### Application Certificates: Part 1: Generate A Cert
 
@@ -147,17 +148,16 @@ You will get a zip file back from HHS containing the certificate. Inside the zip
 openssl x509 -inform DER \
     -in api_simpler_grants_gov.cer \
     -out api_simpler_grants_gov.pem # the file extensions here are functionally arbitrary
-
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
-    --private-key fileb://api_simpler_grants_gov.key
 ```
 
-For plain text certs, that would look like:
-
+Alternatively, if you get an error (or it's a p7b file), you might need to run:
 ```bash
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.cer \  # again, the file extensions here are functionally arbitrary
-    --private-key fileb://api_simpler_grants_gov.key
+openssl pkcs7 -inform DER -print-certs \
+    -in nofos_simpler_grants_gov_chain.p7b \
+    -out nofos_simpler_grants_gov_chain.pem
 ```
+
+Once you have plain text certs, you need to split it into the chain and the main cert. The main cert is the first certificate in the file, and the chain is the remaining (likely 2 certificates). So split it into a certificate.pem and certificate_chain.pem.
 
 Later on (eg. during part 3), you might get the following error:
 
@@ -194,7 +194,23 @@ aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
 In summary, Inspect which certs are binary, which are plain text, and decrypt them as needed. Then import the file with multiple certs into `--certificate-chain`.
 
 #### Application Certificates: Part 3: Attach to Load Balancer
+##### 1. Update the Service to use HTTPS
+See https://github.com/HHS/simpler-grants-gov/pull/5261 for an example of committing this change
 
+##### 2. Via Terraform
+[Set up your console for AWS Credentials](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up)
+```bash
+cd infra/<app name>/service
+terraform init -backend-config <env name>.s3.tfbackend
+terraform apply
+```
+##### 3. Test HTTPS access
+Hit the service at the domain name with https://
+
+#### 4. Merge the PR to main
+Otherwise the next deploy from main will tear back down HTTPS
+
+##### (Depreciated: Via the AWS Console)
 This is the last step where the cert actually starts being used. Login to the AWS console and open up this page:
 
 https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancers:v=3

@@ -18,6 +18,7 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
+  $flex-direction-settings: (responsive: true),
   // Layout & grid settings
   $flex-settings: (
       output: true,
@@ -39,9 +40,10 @@ in the form $setting: value,
   $max-width-settings: (responsive: true),
   $right-settings: (responsive: true),
   $theme-banner-max-width: "desktop-lg",
-  $theme-column-gap-desktop: 6,
   $theme-column-gap-md: 4,
   $theme-column-gap-lg: 6,
+  $theme-column-gap-mobile: 4,
+  $theme-column-gap-desktop: 6,
   $theme-grid-container-max-width: "desktop-lg",
   $theme-footer-max-width: "desktop-lg",
   $theme-header-max-width: "desktop-lg",
@@ -62,6 +64,10 @@ in the form $setting: value,
   $top-settings: (responsive: true),
   $z-index-settings: (responsive: true),
   // Typography settings
+  $theme-style-body-element: true,
+  $theme-global-paragraph-styles: true,
+  $theme-global-link-styles: true,
+  $theme-global-content-styles: true,
   $theme-font-type-sans: "public-sans",
   $theme-typeface-tokens: (
     newsreader: (
@@ -71,19 +77,35 @@ in the form $setting: value,
     )
   ),
   $theme-font-type-serif: "newsreader",
-  $theme-global-link-styles: true,
-  $theme-body-font-size: "md",
-  $theme-type-scale-3xs: 2,
+  // Type scale
+  $theme-type-scale-3xs: 1,
   $theme-type-scale-2xs: 3,
   $theme-type-scale-xs: 4,
   $theme-type-scale-sm: 5,
-  $theme-type-scale-md: 6,
+  $theme-type-scale-md: 7,
   $theme-type-scale-lg: 9,
   $theme-type-scale-xl: 12,
   $theme-type-scale-2xl: 15,
   $theme-type-scale-3xl: 17,
   $theme-font-role-heading: "sans",
   $theme-lead-font-family: "body",
+  // Headings
+  $theme-h1-font-size: "2xl",
+  $theme-h2-font-size: "xl",
+  $theme-h3-font-size: "lg",
+  $theme-h4-font-size: "md",
+  $theme-h5-font-size: "sm",
+  $theme-h6-font-size: "xs",
+  $theme-heading-line-height: 2,
+  // Paragraphs
+  $theme-text-measure-narrow: 4,
+  $theme-text-measure: 6,
+  $theme-text-measure-wide: none,
+
+  // Breadcrumbs
+  $theme-breadcrumb-font-size: 3xs,
+  $theme-breadcrumb-padding-bottom: 3,
+  $theme-breadcrumb-padding-top: 3,
 
   // Color settings
   $background-color-palettes: (

@@ -24,7 +24,7 @@ export default async function SearchResultsList({
     (opportunity) => opportunity.opportunity_id,
   );
   if (searchResults.status_code !== 200) {
-    return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
+    return <ServerErrorAlert callToAction={t("genericErrorCta")} />;
   }
 
   if (searchResults.data.length === 0) {

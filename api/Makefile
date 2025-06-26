@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services
+init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services ## Run all of the init tasks to set up DB, Search, Local Stack, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -115,8 +115,7 @@ stop:
 
 check: format-check lint db-check-migrations test
 
-remake-backend: volume-recreate db-seed-local populate-search-opportunities ## Completely recreate API services, load data into the DB and search index
-
+remake-backend: volume-recreate db-seed-local populate-search-opportunities populate-search-agencies ## Completely recreate API services, load data into the DB and search index
 ##################################################
 # DB & migrations
 ##################################################
@@ -297,11 +296,19 @@ setup-foreign-tables:
 seed-local-legacy-tables:
 	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
 
+##################################################
+# Tasks/Jobs
+##################################################
+
 populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
 populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-agency-data $(args)
+
+run-generate-notifications: ## Send email notifications
+	$(FLASK_CMD) generate-notifications $(args)
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################

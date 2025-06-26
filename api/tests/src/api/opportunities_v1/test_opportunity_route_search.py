@@ -17,6 +17,7 @@ from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
+    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -57,7 +58,6 @@ def call_search_and_validate(client, api_auth_token, search_request, expected_re
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
     validate_search_response(resp, expected_results)
-
     search_request["format"] = "csv"
     resp = client.post(
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -614,6 +614,28 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
             ),
+            # Award Floor
+            (
+                get_search_request(
+                    page_size=3,
+                    page_offset=1,
+                    sort_order=[
+                        {"order_by": "award_floor", "sort_direction": SortDirection.DESCENDING}
+                    ],
+                ),
+                [DOC_MANUFACTURING, NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+            ),
+            # Award Ceiling
+            (
+                get_search_request(
+                    page_size=3,
+                    page_offset=1,
+                    sort_order=[
+                        {"order_by": "award_ceiling", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                ),
+                [DOC_SPACE_COAST, DOS_DIGITAL_LITERACY, LOC_TEACHING],
+            ),
         ],
         ids=search_scenario_id_fnc,
     )
@@ -941,7 +963,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"start_date_relative": -2214}),
+                get_search_request(close_date={"start_date_relative": -2314}),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
@@ -955,7 +977,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(close_date={"end_date_relative": -2214}),
+                get_search_request(close_date={"end_date_relative": -2314}),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
@@ -1550,6 +1572,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "funding_instrument",
             "funding_category",
             "opportunity_status",
+            "is_cost_sharing",
         }
 
     @pytest.mark.parametrize(
@@ -1603,3 +1626,51 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert len(data) == 1
 
         assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
+
+    def test_search_top_level_agency_200(
+        self,
+        client,
+        db_session,
+        enable_factory_create,
+        api_auth_token,
+    ):
+        # setup-data
+        doc = AgencyFactory.create(agency_code="DOC")
+        AgencyFactory.create(
+            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
+        )
+
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(top_level_agency_one_of=["DOC", "DOS"]),
+            headers={"X-Auth": api_auth_token},
+        )
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert len(data) == 3
+        assert [opp["opportunity_id"] for opp in data] == [
+            opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
+        ]
+
+    def test_search_top_level_agency_and_sub_agencies_200(
+        self, client, db_session, enable_factory_create, api_auth_token
+    ):
+        # setup-data
+        dos = AgencyFactory.create(agency_code="DOS")
+        AgencyFactory.create(
+            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=dos.agency_id
+        )
+
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(top_level_agency_one_of=["DOS"], agency_one_of=["DOC-EDA"]),
+            headers={"X-Auth": api_auth_token},
+        )
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert len(data) == 3
+        assert [opp["opportunity_id"] for opp in data] == [
+            opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
+        ]

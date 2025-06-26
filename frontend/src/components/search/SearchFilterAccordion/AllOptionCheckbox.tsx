@@ -33,7 +33,7 @@ export const AllOptionCheckbox = ({
     [currentSelections],
   );
   const childOptionValues = useMemo(
-    () => childOptions.map(({ value }) => value),
+    () => (childOptions ? childOptions.map(({ value }) => value) : []),
     [childOptions],
   );
 

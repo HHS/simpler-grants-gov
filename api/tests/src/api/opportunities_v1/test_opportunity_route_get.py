@@ -3,12 +3,14 @@ import uuid
 import pytest
 import requests
 
+import src.util.file_util as file_util
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,
 )
 from tests.src.db.models.factories import (
     AgencyFactory,
+    CompetitionFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAttachmentFactory,
     OpportunityFactory,
@@ -153,7 +155,9 @@ def test_get_opportunity_with_agency_200_legacy(client, api_auth_token, enable_f
 def test_get_opportunity_s3_endpoint_url_200(
     client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch_session
 ):
-    monkeypatch_session.delenv("CDN_URL", raising=False)
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
     object_name = "test_file_1.txt"
@@ -252,6 +256,9 @@ def test_get_opportunity_404_not_found_is_draft_legacy(
 def test_get_opportunity_returns_cdn_urls(
     client, api_auth_token, monkeypatch_session, enable_factory_create, db_session, mock_s3_bucket
 ):
+    # Reset the global _s3_config to ensure a fresh config is created
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+
     monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
     """Test that S3 file locations are converted to CDN URLs in the response"""
     # Create an opportunity with a specific attachment
@@ -309,3 +316,27 @@ def test_get_opportunity_returns_cdn_urls_legacy(
 
     assert attachment["download_path"].startswith("https://cdn.")
     assert "s3://" not in attachment["download_path"]
+
+
+def test_get_opportunity_with_competitions_200(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    # Create an opportunity with a competition
+    opportunity = OpportunityFactory.create()
+    competition = CompetitionFactory.create(opportunity=opportunity)
+    db_session.commit()
+
+    # Make the GET request
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    # Check the response
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+
+    # Validate the competitions data is included
+    assert "competitions" in response_data
+    assert len(response_data["competitions"]) == 1
+    assert response_data["competitions"][0]["competition_id"] == str(competition.competition_id)
+    assert response_data["competitions"][0]["opportunity_id"] == str(opportunity.opportunity_id)

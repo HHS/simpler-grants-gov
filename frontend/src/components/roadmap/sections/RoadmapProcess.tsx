@@ -39,14 +39,15 @@ export default function RoadmapProcess() {
 
   return (
     <RoadmapPageSection className={"bg-white"} title={t("title")}>
-      <p className="margin-0 tablet-lg:margin-bottom-2 line-height-sans-4 tablet:font-sans-md">
-        {t("sectionSummary")}
-      </p>
+      <p>{t("sectionSummary")}</p>
       {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
-        <div className="grid-row" key={`roadmap-process-row-${sectionRoadIdx}`}>
+        <div
+          className="grid-row grid-gap"
+          key={`roadmap-process-row-${sectionRoadIdx}`}
+        >
           {sectionRow.map((sectionRowItem) => (
             <div
-              className="grid-col-12 tablet-lg:grid-col-6 tablet-lg:padding-right-5"
+              className="tablet:grid-col-6"
               key={`roadmap-process-${sectionRowItem.title}`}
             >
               <RoadmapProcessSectionContent {...sectionRowItem} />
@@ -64,14 +65,12 @@ const RoadmapProcessSectionContent = ({
   iconName,
 }: RoadmapProcessSectionContentProps) => {
   return (
-    <div className="margin-top-2">
-      {iconName && <USWDSIcon className="usa-icon" name={iconName} />}
-      <h3 className="font-sans-sm margin-0 margin-top-1 tablet:font-sans-md">
-        {title}
-      </h3>
-      <p className="font-sans-xs margin-top-1 margin-bottom-0 line-height-sans-4">
-        {content}
-      </p>
+    <div className="margin-top-4">
+      {iconName && (
+        <USWDSIcon className="usa-icon--size-4 text-middle" name={iconName} />
+      )}
+      <h3 className="margin-top-2">{title}</h3>
+      <p>{content}</p>
     </div>
   );
 };

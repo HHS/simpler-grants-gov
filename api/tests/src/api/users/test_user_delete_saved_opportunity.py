@@ -150,3 +150,21 @@ def test_user_delete_other_users_saved_opportunity_legacy(
     assert saved_opportunity.user_id == other_user.user_id
     assert saved_opportunity.opportunity_id == opportunity.opportunity_id
     assert not saved_opportunity.is_deleted
+
+
+def test_user_delete_saved_opportunity_unauthorized(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    # Create another user and save an opportunity for them
+    other_user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+    UserSavedOpportunityFactory(user=other_user, opportunity=opportunity)
+
+    # Try to delete someone else's saved opp using their user_id
+    response = client.delete(
+        f"/v1/users/{other_user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"

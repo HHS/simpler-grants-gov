@@ -14,6 +14,7 @@ from src.auth.auth_errors import JwtValidationError
 from src.auth.login_gov_jwt_auth import get_login_gov_client_assertion, validate_token
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, LoginGovState, User
+from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
 from src.util.string_utils import is_valid_uuid
 
 logger = logging.getLogger(__name__)
@@ -141,7 +142,7 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
         # We only support login.gov right now, so this does nothing, but let's
         # be explicit just in case.
         .where(LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV)
-        .options(selectinload("*"))
+        .options(selectinload(LinkExternalUser.user))
     ).scalar()
 
     is_user_new = external_user is None
@@ -157,6 +158,11 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
     # prior to us trying to work with the user further.
     # NOTE: This doesn't commit yet - but effectively moves the cache from memory to the DB transaction
     db_session.flush()
+
+    # Check if the user is an ebiz POC and create/link their organization
+    # Only do this for new users
+    if is_user_new:
+        handle_ebiz_poc_organization_during_login(db_session, external_user.user)
 
     token, user_token_session = create_jwt_for_user(
         external_user.user, db_session, email=external_user.email

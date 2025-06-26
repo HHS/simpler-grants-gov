@@ -25,22 +25,22 @@ const mockSummary = {
 
 describe("OpportunityHistory", () => {
   it("renders history section with dates formatted correctly", () => {
-    render(<OpportunityHistory summary={mockSummary} />);
+    render(<OpportunityHistory status="posted" summary={mockSummary} />);
 
     expect(screen.getByText("history")).toBeInTheDocument();
 
     expect(screen.getByText("version:")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
 
-    expect(screen.getByText("posted_date:")).toBeInTheDocument();
+    expect(screen.getByText("postedDate:")).toBeInTheDocument();
     expect(screen.getByText("2024-01-15")).toBeInTheDocument();
 
-    expect(screen.getByText("archive_date:")).toBeInTheDocument();
+    expect(screen.getByText("archiveDate:")).toBeInTheDocument();
     expect(screen.getByText("2024-12-31")).toBeInTheDocument();
   });
 
   it("calls formatDate for date fields", () => {
-    render(<OpportunityHistory summary={mockSummary} />);
+    render(<OpportunityHistory status="posted" summary={mockSummary} />);
 
     // Check that formatDate is called with the right dates
     expect(formatDate).toHaveBeenCalledWith("2024-01-15");
@@ -50,6 +50,7 @@ describe("OpportunityHistory", () => {
   it("displays correct defaults when null values are present", () => {
     render(
       <OpportunityHistory
+        status="posted"
         summary={
           {
             post_date: null,
@@ -65,9 +66,9 @@ describe("OpportunityHistory", () => {
 
     const secondHeading = screen.getByText("version:");
     expect(secondHeading.nextSibling).toHaveTextContent("--");
-    const thirdHeading = screen.getByText("posted_date:");
+    const thirdHeading = screen.getByText("postedDate:");
     expect(thirdHeading.nextSibling).toHaveTextContent("--");
-    const fifthHeading = screen.getByText("archive_date:");
+    const fifthHeading = screen.getByText("archiveDate:");
     expect(fifthHeading.nextSibling).toHaveTextContent("--");
   });
 });

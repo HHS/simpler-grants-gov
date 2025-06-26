@@ -24,7 +24,7 @@ const statusCheckboxes = {
   "status-closed": "closed",
 };
 const fundingInstrumentCheckboxes = {
-  "funding-instrument-cooperative_agreement": "cooperative_agreement",
+  "funding-instrument-other": "other",
   "funding-instrument-grant": "grant",
 };
 
@@ -78,9 +78,10 @@ test.describe("Search page tests", () => {
 
     await clickAccordionWithTitle(page, "Agency");
     const firstSubAgency = page
-      .locator("#opportunity-filter-agency > ul > li ul input")
+      .locator("div[data-testid='Agency-filter'] > ul > li ul input")
       .first();
 
+    await expect(firstSubAgency).toHaveAttribute("id");
     const agencyId = await firstSubAgency.getAttribute("id");
     expect(agencyId).toBeTruthy();
     if (!agencyId) {
@@ -203,7 +204,7 @@ test.describe("Search page tests", () => {
     // check all 4 boxes
     const statusCheckboxes = {
       "status-forecasted": "forecasted",
-      "status-posted": "posted",
+      "status-open": "posted",
       "status-closed": "closed",
       "status-archived": "archived",
     };

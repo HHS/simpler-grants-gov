@@ -55,7 +55,7 @@ describe("subscribeEmailAction", () => {
       testFormData,
     );
     expect(testErrorAlreadySubscribed.errorMessage).toBe(
-      "Subscribe.errors.already_subscribed",
+      "Subscribe.errors.alreadySubscribed",
     );
     expect(testErrorAlreadySubscribed.validationErrors).toEqual({});
 
@@ -77,7 +77,7 @@ describe("subscribeEmailAction", () => {
     try {
       await subscribeEmailAction(t, testFormData);
     } finally {
-      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenCalledTimes(2);
     }
 
     // Test valid response
@@ -96,7 +96,7 @@ describe("subscribeEmailAction", () => {
     testFormData.set("email", "this is no good as an email address");
     const testInvalidResponse = await subscribeEmailAction(t, testFormData);
     const invalidEmail = {
-      email: ["Subscribe.errors.invalid_email"],
+      email: ["Subscribe.errors.invalidEmail"],
     };
     expect(testInvalidResponse.errorMessage).toBe("");
     expect(testInvalidResponse.validationErrors).toStrictEqual(invalidEmail);

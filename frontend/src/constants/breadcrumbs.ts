@@ -14,9 +14,9 @@ const UNSUBSCRIBE: Breadcrumb = {
   title: "Unsubscribe",
   path: "/subscribe/unsubscribe/",
 };
-const SAVED_GRANTS: Breadcrumb = {
-  title: "Saved grants",
-  path: "/saved-grants/",
+const SAVED_OPPORTUNITIES: Breadcrumb = {
+  title: "Saved opportunities",
+  path: "/saved-opportunities/",
 };
 
 const SAVED_SEARCHES: Breadcrumb = {
@@ -37,5 +37,8 @@ export const UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
 ];
 export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
 export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];
-export const SAVED_GRANTS_CRUMBS: BreadcrumbList = [HOME, SAVED_GRANTS];
+export const SAVED_OPPORTUNITIES_CRUMBS: BreadcrumbList = [
+  HOME,
+  SAVED_OPPORTUNITIES,
+];
 export const SAVED_SEARCHES_CRUMBS: BreadcrumbList = [HOME, SAVED_SEARCHES];

@@ -1,6 +1,9 @@
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import {
+  FilterOption,
+  RelevantAgencyRecord,
+} from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   PaginationOrderBy,
@@ -32,10 +35,13 @@ export const searchFetcherParams: QueryParamData = {
   agency: new Set(),
   category: new Set(),
   eligibility: new Set(),
+  closeDate: new Set(),
+  costSharing: new Set(),
   query: "research",
   sortby: "opportunityNumberAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
+  andOr: "OR",
 };
 
 export const arbitrarySearchPagination = {
@@ -100,6 +106,12 @@ export const fakeFacetCounts = {
   funding_category: {
     arbitraryKey: 1,
   },
+  close_date: {
+    arbitraryKey: 1,
+  },
+  is_cost_sharing: {
+    true: 1,
+  },
 };
 
 export const fakeSearchAPIResponse: SearchAPIResponse = {
@@ -142,3 +154,64 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
+export const fakeAttachments = [
+  {
+    created_at: "2007-11-02T15:23:09+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25293/YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_description: "Announcement",
+    file_name: "YLP_Algeria_RFGP_09-28-07_EDITED.doc",
+    file_size_bytes: 111616,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:09+00:00",
+  },
+  {
+    created_at: "2007-11-02T15:23:10+00:00",
+    download_path:
+      "https://d3t9pc32v5noin.cloudfront.net/opportunities/40009/attachments/25294/YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_description: "Mandatory POGI",
+    file_name: "YLP_Algeria_POGI_09-26-07_EDITED.doc",
+    file_size_bytes: 122880,
+    mime_type: "application/msword",
+    updated_at: "2007-11-02T15:23:10+00:00",
+  },
+];
+
+export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
+  {
+    agency_code: "DOCNIST",
+    agency_name: "National Institute of Standards and Technology",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKNIST",
+    agency_name: "Mational Institute",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCKTRASH",
+    agency_name: "Mational TRASH",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+  {
+    agency_code: "FAKEORG",
+    agency_name: "Completely fake",
+    top_level_agency: null,
+    agency_id: 1,
+  },
+];
+
+export const fakeSearchParamDict = {
+  status: "forecasted,posted,archived,closed",
+  eligibility: "state_governments",
+  query: "simpler",
+  category: "recovery_act",
+  agency: "CPSC",
+  fundingInstrument: "cooperative_agreement",
+  andOr: "OR",
+  sortby: "closeDateAsc",
+};

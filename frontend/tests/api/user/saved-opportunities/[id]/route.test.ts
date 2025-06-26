@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/user/saved-opportunities/[id]/route";
+import { getSavedOpportunityHandler } from "src/app/api/user/saved-opportunities/[id]/handler";
 
 const getSessionMock = jest.fn();
 
@@ -27,9 +27,12 @@ describe("GET request", () => {
       token: "fakeToken",
     }));
 
-    const response = await GET(new Request("http://simpler.grants.gov"), {
-      params: Promise.resolve({ id: "1" }),
-    });
+    const response = await getSavedOpportunityHandler(
+      new Request("http://simpler.grants.gov"),
+      {
+        params: Promise.resolve({ id: "1" }),
+      },
+    );
     const json = (await response.json()) as { opportunity_id: number };
     expect(response.status).toBe(200);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
@@ -42,9 +45,12 @@ describe("GET request", () => {
       token: "",
     }));
 
-    const response = await GET(new Request("http://simpler.grants.gov"), {
-      params: Promise.resolve({ id: "1" }),
-    });
+    const response = await getSavedOpportunityHandler(
+      new Request("http://simpler.grants.gov"),
+      {
+        params: Promise.resolve({ id: "1" }),
+      },
+    );
     expect(response.status).toBe(401);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
@@ -54,9 +60,12 @@ describe("GET request", () => {
       token: "fakeToken",
     }));
 
-    const response = await GET(new Request("http://simpler.grants.gov"), {
-      params: Promise.resolve({ id: "" }),
-    });
+    const response = await getSavedOpportunityHandler(
+      new Request("http://simpler.grants.gov"),
+      {
+        params: Promise.resolve({ id: "" }),
+      },
+    );
     const json = (await response.json()) as null;
     expect(response.status).toBe(200);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);

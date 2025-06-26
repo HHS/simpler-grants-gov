@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, and_
+from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
@@ -10,6 +10,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
+from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import LkExternalUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
@@ -45,6 +46,10 @@ class User(ApiSchemaTable, TimestampMixin):
         "ApplicationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
+    organizations: Mapped[list["OrganizationUser"]] = relationship(
+        "OrganizationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
+    )
+
     @property
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
@@ -69,7 +74,7 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
 
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(index=True)
 
 
 class UserTokenSession(ApiSchemaTable, TimestampMixin):
@@ -186,5 +191,35 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey("api.user.user_id"), primary_key=True
     )
 
+    is_application_owner: Mapped[bool | None]
+
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")
+
+
+class OrganizationUser(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "organization_user"
+
+    __table_args__ = (
+        # A user can only be in an organization once
+        UniqueConstraint("organization_id", "user_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    organization_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    is_organization_owner: Mapped[bool]
+
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id), index=True
+    )
+    organization: Mapped[Organization] = relationship(
+        Organization, back_populates="organization_users", uselist=False
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User, back_populates="organizations", uselist=False)

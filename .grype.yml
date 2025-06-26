@@ -19,15 +19,25 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # These vulnerabilities should be fixed in the next version of Debian
-  # Doing installs directly on them in our Dockerfile doesn't seem to
-  # pick up the changes, so we'll have to wait until the base images
-  # of our Docker images are updated, usually around the start of the month
+  # This is a vulnerability in python when using bytes.decode("unicode_escape", error="ignore|replace")
+  # We don't use this anywhere, and I can't find any uses of decode
+  # in this manner in any library we use (but won't guarantee there are zero).
+  # A fix hasn't been backported to python 3.13 yet.
   #
-  # Last checked: March 17th, 2025
-  - vulnerability: CVE-2025-0395
-  - vulnerability: CVE-2025-1094
-  - vulnerability: CVE-2024-38428
+  # Last checked: May 20th, 2025
+  - vulnerability: CVE-2025-4516
+
+  # This is a vulnerability in html.parser.HTMLParser which we don't use
+  # Last checked: June 20th, 2025
+  - vulnerability: CVE-2025-6069
+
+  # Tornado has a vulnerability in it, but we don't use this library.
+  # This is one way you can run a gunicorn workers, but we don't.
+  # We don't even pull this package in ourselves, so we likely need
+  # an upstream library (gunicorn itself?) to update.
+  #
+  # Last checked: May 20th, 2025
+  - vulnerability: GHSA-7cx3-6m66-7c5m
 
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly

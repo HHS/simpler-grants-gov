@@ -75,7 +75,10 @@ module "prod_config" {
 
     # grants.gov services/applications URI.
     GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
-    ENABLE_SOAP_API = 0
+    ENABLE_SOAP_API = 1
+
+    # Sam.gov
+    SAM_GOV_BASE_URL = "https://api.sam.gov"
   }
   instance_cpu    = 1024
   instance_memory = 4096

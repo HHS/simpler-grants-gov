@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
-    app_id: str = Field(alias="PINPOINT_APP_ID")
+    app_id: str = Field(alias="AWS_PINPOINT_APP_ID")
     frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
 

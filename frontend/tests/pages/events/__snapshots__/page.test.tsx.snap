@@ -3,7 +3,7 @@
 exports[`Events renders Events page unchanged 1`] = `
 <div>
   <div
-    class="events-hero bg-primary-darkest text-white padding-left-6 padding-y-2"
+    class="text-white bg-primary-darkest padding-top-4 tablet:padding-y-6"
     data-testid="events-hero"
   >
     <div
@@ -11,87 +11,90 @@ exports[`Events renders Events page unchanged 1`] = `
       data-testid="gridContainer"
     >
       <div
-        class="grid-row grid-gap-3 margin-top-6"
+        class="grid-row grid-gap"
         data-testid="grid"
       >
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-fill"
           data-testid="grid"
         >
           <h1
-            class="tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2 text-balance"
+            class="desktop-lg:font-sans-3xl"
           >
             header
           </h1>
           <p
-            class="usa-intro font-sans-md tablet:font-sans-lg line-height-sans-4 text-balance"
+            class="text-balance font-sans-md tablet:font-sans-lg margin-bottom-4 tablet:margin-bottom-0"
           >
             pageDescription
           </p>
         </div>
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-6 tablet-lg:grid-col-auto"
           data-testid="grid"
         >
-          <img
-            alt="events-img"
-            class="height-auto position-relative padding-top-2 padding-bottom-4"
-            data-nimg="1"
-            decoding="async"
-            height="40"
-            loading="lazy"
-            src="/_next/image?url=%2Fimg.jpg&w=96&q=75"
-            srcset="/_next/image?url=%2Fimg.jpg&w=48&q=75 1x, /_next/image?url=%2Fimg.jpg&w=96&q=75 2x"
-            style="color: transparent;"
-            width="40"
-          />
+          <div
+            class="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0"
+            data-testid="grid"
+          >
+            <img
+              alt="events-img"
+              class="minh-full width-full"
+              data-nimg="1"
+              decoding="async"
+              height="320"
+              loading="lazy"
+              src="/_next/image?url=%2Fimg.jpg&w=1080&q=75"
+              srcset="/_next/image?url=%2Fimg.jpg&w=640&q=75 1x, /_next/image?url=%2Fimg.jpg&w=1080&q=75 2x"
+              style="color: transparent; object-fit: cover;"
+              width="450"
+            />
+          </div>
         </div>
       </div>
     </div>
   </div>
   <div
-    class="grid-container padding-4"
+    class="grid-container padding-y-4 tablet-lg:padding-y-6"
     data-testid="events-upcoming-content"
   >
     <div
-      class="grid-row grid-gap-md"
+      class="grid-row grid-gap"
       data-testid="grid"
     >
       <div
-        class="tablet:grid-col-3"
+        class="tablet:grid-col-4"
         data-testid="grid"
       >
-        <h1
-          class="margin-left-6"
-        >
+        <h2>
           title
-        </h1>
+        </h2>
       </div>
       <div
-        class="tablet:grid-col-9 padding-x-6"
+        class="tablet:grid-col-8"
         data-testid="grid"
       >
-        <span
+        <h3>
+          header
+        </h3>
+        <p
           class="font-sans-md"
         >
           startDate
-        </span>
-        <h2>
-          header
-        </h2>
-        <p
-          class="font-sans-md line-height-sans-4"
-        >
+        </p>
+        <p>
           description
         </p>
-        <a
-          class="font-sans-md"
-          href="https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          link
-        </a>
+        <p>
+          <a
+            class="font-sans-md"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            link
+          </a>
+        </p>
       </div>
     </div>
   </div>
@@ -99,20 +102,20 @@ exports[`Events renders Events page unchanged 1`] = `
     class="bg-base-lightest"
   >
     <div
-      class="grid-container padding-x-4"
+      class="grid-container padding-y-4 tablet-lg:padding-y-6"
       data-testid="events-demo-content"
     >
       <div
-        class="grid-row grid-gap-md padding-6"
+        class="grid-row grid-gap"
         data-testid="grid"
       >
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-5"
           data-testid="grid"
         >
           <img
             alt="events-img"
-            class="height-auto position-relative padding-right-6 padding-top-3"
+            class="height-auto position-relative"
             data-nimg="1"
             decoding="async"
             height="40"
@@ -124,7 +127,7 @@ exports[`Events renders Events page unchanged 1`] = `
           />
         </div>
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-7"
           data-testid="grid"
         >
           <div
@@ -144,59 +147,57 @@ exports[`Events renders Events page unchanged 1`] = `
             >
               description
             </p>
-            <h3
-              class="padding-top-2"
-            >
+            <h3>
               watch
             </h3>
-            <a
-              class="font-sans-md line-height-sans-4"
-              href="https://vimeo.com/1050177794/278fa78e0b?share=copy"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              watchLink
-            </a>
+            <p>
+              <a
+                class="font-sans-md line-height-sans-4"
+                href="https://vimeo.com/1050177794/278fa78e0b?share=copy"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                watchLink
+              </a>
+            </p>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="grid-container padding-x-4 bg-base-lightest"
+      class="grid-container padding-y-4 tablet-lg:padding-y-6"
       data-testid="events-coding-content"
     >
       <div
-        class="grid-row grid-gap-6 padding-6"
+        class="grid-row grid-gap"
         data-testid="grid"
       >
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-7"
           data-testid="grid"
         >
           <h2>
             title
           </h2>
-          <p
-            class="font-sans-md line-height-sans-4"
-          >
+          <p>
             descriptionP1
           </p>
-          <p
-            class="font-sans-md line-height-sans-4"
-          >
+          <p>
             descriptionP2
           </p>
-          <a
-            class="font-sans-md line-height-sans-4"
-            href="https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            link
-          </a>
+          <p>
+            <a
+              class="font-sans-md line-height-sans-4"
+              href="https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              link
+            </a>
+          </p>
         </div>
         <div
-          class="tablet:grid-col"
+          class="tablet:grid-col-5"
           data-testid="grid"
         >
           <img

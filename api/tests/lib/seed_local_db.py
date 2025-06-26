@@ -29,6 +29,9 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(
             size=5, is_posted_summary=True, has_attachments=True
         )
+        factories.OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, has_attachment_with_duplicate_filename=True
+        )
         factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
         factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
         factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)

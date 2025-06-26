@@ -27,15 +27,17 @@ import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
+import src.db.models.sam_extract_models as sam_extract_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -45,7 +47,9 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    SamGovExtractType,
     SamGovImportType,
+    SamGovProcessingStatus,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -53,7 +57,7 @@ from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
-SCHEMA = OpportunityV1Schema()
+SCHEMA = OpportunityVersionSchema()
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -434,6 +438,15 @@ class OpportunityFactory(BaseFactory):
             )
         )
 
+        has_attachment_with_duplicate_filename = factory.Trait(
+            opportunity_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OpportunityAttachmentFactory",
+                factory_related_name="opportunity",
+                size=2,
+                duplicate_filename=True,
+            )
+        )
+
 
 class OpportunityVersionFactory(BaseFactory):
     class Meta:
@@ -803,6 +816,8 @@ class OpportunityAttachmentFactory(BaseFactory):
     attachment_id = Generators.UuidObj
 
     legacy_attachment_id = factory.Sequence(lambda n: n)
+    class Params:
+        duplicate_filename = factory.Trait(file_name="duplicate.txt")
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
@@ -976,9 +991,7 @@ class CompetitionFactory(BaseFactory):
     competition_title = sometimes_none(factory.Faker("sentence"))
 
     opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.opening_date)
-    )
+    closing_date = factory.Faker("date_between", start_date="+1d", end_date="+3w")
 
     grace_period = factory.Faker("random_int", min=1, max=10)
     contact_info = sometimes_none(factory.Faker("agency_contact_description"))
@@ -986,6 +999,10 @@ class CompetitionFactory(BaseFactory):
     created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+    )
+
+    opportunity_assistance_listing = factory.SubFactory(
+        OpportunityAssistanceListingFactory, opportunity=factory.SelfAttribute("..opportunity")
     )
 
     competition_forms = factory.RelatedFactoryList(
@@ -1001,6 +1018,15 @@ class CompetitionFactory(BaseFactory):
         unique=True,
     )
 
+    class Params:
+        with_instruction = factory.Trait(
+            competition_instructions=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.CompetitionInstructionFactory",
+                factory_related_name="competition",
+                size=1,
+            )
+        )
+
 
 class CompetitionInstructionFactory(BaseFactory):
     class Meta:
@@ -1009,7 +1035,81 @@ class CompetitionInstructionFactory(BaseFactory):
     competition_instruction_id = Generators.UuidObj
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-    file_location = "file_location"
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/competitions/{o.competition_id}/instructions/{o.competition_instruction_id}/{o.file_name}"
+    )
+    file_name = factory.Faker("file_name", extension="pdf")
+
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't use file contents for build strategy
+        return super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        instruction = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(instruction.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your instruction file to {instruction.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return instruction
+
+
+class FormInstructionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.FormInstruction
+
+    form_instruction_id = Generators.UuidObj
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/form-instructions/{o.form_instruction_id}/{o.file_name}"
+    )
+    file_name = factory.Faker("file_name", extension="pdf")
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        # Extract file_contents from kwargs
+        file_contents = kwargs.pop("file_contents")
+        obj = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(obj.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your form instruction to {obj.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return obj
 
 
 class CompetitionAssistanceListingFactory(BaseFactory):
@@ -1050,6 +1150,7 @@ class FormFactory(BaseFactory):
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
+    form_instruction = None  # By default no instruction, use with_instruction trait for this
 
     form_json_schema = {
         "type": "object",
@@ -1119,12 +1220,20 @@ class FormFactory(BaseFactory):
         },
     ]
 
+    class Params:
+        with_instruction = factory.Trait(
+            form_instruction=factory.SubFactory(FormInstructionFactory),
+            form_instruction_id=factory.LazyAttribute(
+                lambda o: o.form_instruction.form_instruction_id if o.form_instruction else None
+            ),
+        )
+
 
 class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
-    competition = factory.SubFactory(CompetitionFactory)
+    competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
     form = factory.SubFactory(FormFactory)
@@ -1147,6 +1256,9 @@ class ApplicationFactory(BaseFactory):
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
+    application_status = ApplicationStatus.IN_PROGRESS
+    application_name = factory.Faker("sentence", nb_words=3)
+
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
@@ -1154,11 +1266,23 @@ class ApplicationFactory(BaseFactory):
 
     class Params:
         with_forms = factory.Trait(
+            # If we want forms created, we'll make a competition without any forms
+            # which will get added by the CompetitionForm factory below
+            competition=factory.SubFactory(CompetitionFactory, competition_forms=[]),
             application_forms=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.ApplicationFormFactory",
                 factory_related_name="application",
                 size=lambda: random.randint(1, 3),
-            )
+                # This SelfAttribute gets the competition we just made above
+                competition_form=factory.SubFactory(
+                    CompetitionFormFactory,
+                    competition=factory.SelfAttribute("..application.competition"),
+                ),
+            ),
+        )
+
+        with_organization = factory.Trait(
+            organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
         )
 
 
@@ -1166,15 +1290,70 @@ class ApplicationFormFactory(BaseFactory):
     class Meta:
         model = competition_models.ApplicationForm
 
+    application_form_id = Generators.UuidObj
+
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
 
-    form = factory.SubFactory(FormFactory)
-    form_id = factory.LazyAttribute(lambda o: o.form.form_id)
+    competition_form = factory.SubFactory(CompetitionFormFactory)
+    competition_form_id = factory.LazyAttribute(lambda o: o.competition_form.competition_form_id)
 
     application_response = factory.LazyFunction(
         lambda: {"name": fake.name(), "email": fake.email(), "description": fake.paragraph()}
     )
+
+
+class ApplicationAttachmentFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationAttachment
+
+    application_attachment_id = Generators.UuidObj
+
+    application_id = factory.LazyAttribute(lambda a: a.application.application_id)
+    application = factory.SubFactory(ApplicationFactory)
+
+    user_id = factory.LazyAttribute(lambda a: a.user.user_id)
+    user = factory.SubFactory(UserFactory)
+
+    mime_type = factory.Faker("mime_type")
+    file_name = factory.Faker("file_name", extension="text")
+
+    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
+
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+    # NOTE: If you want the file to properly get written to s3 for tests/locally
+    # make sure the bucket actually exists
+    file_location = factory.LazyAttribute(
+        lambda a: f"s3://local-mock-public-bucket/applications/{a.application_id}/attachments/{fake.uuid4()}/{a.file_name}"
+    )
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        attachment = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(attachment.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your attachment to {attachment.file_location}.
+
+                    Does this location exist? If you are running in unit tests, make sure
+                    `enable_factory_create` is pulled in as a fixture to your test.
+
+                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    """
+            ) from e
+
+        return attachment
 
 
 ###################
@@ -2285,12 +2464,22 @@ class SamGovEntityFactory(BaseFactory):
     uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
+    initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")
+    last_update_date = factory.Faker("date_between", start_date="-1y", end_date="today")
     ebiz_poc_email = factory.Faker("email")
     ebiz_poc_first_name = factory.Faker("first_name")
     ebiz_poc_last_name = factory.Faker("last_name")
     has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+
+    class Params:
+        has_organization = factory.Trait(
+            organization=factory.RelatedFactory(
+                "tests.src.db.models.factories.OrganizationFactory",
+                factory_related_name="sam_gov_entity",
+            )
+        )
 
 
 class SamGovEntityImportTypeFactory(BaseFactory):
@@ -2303,12 +2492,50 @@ class SamGovEntityImportTypeFactory(BaseFactory):
     sam_gov_import_type = factory.fuzzy.FuzzyChoice(SamGovImportType)
 
 
+class SamExtractFileFactory(BaseFactory):
+    class Meta:
+        model = sam_extract_models.SamExtractFile
+
+    extract_type = SamGovExtractType.MONTHLY
+    extract_date = factory.Faker("date_between", start_date="-6d", end_date="-1d")
+    filename = factory.Faker("file_name", extension="zip")
+    s3_path = "s3://bucket/key"  # If you want a valid s3 path, pass it in yourself
+    processing_status = SamGovProcessingStatus.PENDING
+
+
 class OrganizationFactory(BaseFactory):
     class Meta:
         model = entity_models.Organization
 
     organization_id = Generators.UuidObj
-    sam_gov_entity = sometimes_none(factory.SubFactory(SamGovEntityFactory), none_chance=0.2)
+    sam_gov_entity = factory.SubFactory(SamGovEntityFactory)
     sam_gov_entity_id = factory.LazyAttribute(
         lambda o: o.sam_gov_entity.sam_gov_entity_id if o.sam_gov_entity else None
     )
+
+    class Params:
+        no_sam_gov_entity = factory.Trait(sam_gov_entity=None)
+
+
+class OrganizationUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.OrganizationUser
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    is_organization_owner = True
+
+
+class ApplicationUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.ApplicationUser
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)

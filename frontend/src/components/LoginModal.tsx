@@ -1,19 +1,17 @@
 "use-client";
 
-import { useIsSSR } from "src/hooks/useIsSSR";
 import SessionStorage from "src/services/auth/sessionStorage";
 
 import { RefObject } from "react";
 import {
   ButtonGroup,
-  Modal,
   ModalFooter,
-  ModalHeading,
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { SimplerModal } from "./SimplerModal";
 
 export const LOGIN_URL = "/api/auth/login";
 
@@ -34,22 +32,41 @@ export const LoginModal = ({
   closeText: string;
   modalId: string;
 }) => {
-  const isSSR = useIsSSR();
   return (
-    <Modal
-      ref={modalRef}
-      forceAction
+    <SimplerModal
+      modalId={modalId}
+      modalRef={modalRef}
+      titleText={titleText}
       className="text-wrap"
-      aria-labelledby={`${modalId}-heading`}
-      aria-describedby={`${modalId}-description`}
-      id={modalId}
-      renderToPortal={!isSSR}
     >
-      <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
-      <div className="usa-prose">
-        <p>{helpText}</p>
-        <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
-      </div>
+      <LoginModalBody
+        buttonText={buttonText}
+        closeText={closeText}
+        descriptionText={descriptionText}
+        helpText={helpText}
+        modalRef={modalRef}
+      />
+    </SimplerModal>
+  );
+};
+
+export const LoginModalBody = ({
+  buttonText,
+  closeText,
+  descriptionText,
+  helpText,
+  modalRef,
+}: {
+  buttonText: string;
+  closeText: string;
+  descriptionText: string;
+  helpText: string;
+  modalRef: RefObject<ModalRef | null>;
+}) => {
+  return (
+    <>
+      <p>{helpText}</p>
+      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
           <a
@@ -80,6 +97,6 @@ export const LoginModal = ({
           </ModalToggleButton>
         </ButtonGroup>
       </ModalFooter>
-    </Modal>
+    </>
   );
 };
