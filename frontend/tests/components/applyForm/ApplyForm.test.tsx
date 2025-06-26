@@ -1,9 +1,13 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 const mockHandleFormAction = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
@@ -115,7 +119,7 @@ describe("ApplyForm", () => {
     expect(dobField).toHaveAttribute("type", "date");
 
     const nav = screen.getByTestId("InPageNavigation");
-    expect(nav).toHaveTextContent("On this form");
+    expect(nav).toHaveTextContent("Sections in this form");
 
     const textareaField = screen.getByTestId("textarea");
     expect(textareaField).toBeInTheDocument();
@@ -132,7 +136,7 @@ describe("ApplyForm", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("calls handleFormAction action on submit", () => {
+  it("calls handleFormAction action on save", () => {
     mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
@@ -146,17 +150,16 @@ describe("ApplyForm", () => {
       />,
     );
 
-    const button = screen.getByTestId("apply-form-submit");
+    const button = screen.getByTestId("apply-form-save");
     button.click();
 
     expect(mockHandleFormAction).toHaveBeenCalledWith(
       {
         applicationId: "test",
-        errorMessage: "",
+        error: false,
         formData: new FormData(),
         formId: "test",
-        successMessage: "",
-        validationErrors: [],
+        submitted: false,
       },
 
       expect.any(FormData),
