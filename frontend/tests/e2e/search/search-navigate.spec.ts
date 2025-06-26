@@ -21,5 +21,5 @@ test("should navigate from index to search page", async ({
 
   // Verify that the 'forecasted' and 'posted' are checked
   await expectCheckboxIDIsChecked(page, "#status-forecasted");
-  await expectCheckboxIDIsChecked(page, "#status-posted");
+  await expectCheckboxIDIsChecked(page, "#status-open");
 });

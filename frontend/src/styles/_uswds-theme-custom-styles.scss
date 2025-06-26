@@ -35,8 +35,18 @@ i.e.
 
 // Typography
 // prevent orphaned words in short blocks of text
-.text-balance {
+.text-balance,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   text-wrap: balance;
+}
+// no USWDS setting; can't pass `.measure-none` to Truss component
+.usa-alert__text {
+  max-width: none;
 }
 
 // Button
@@ -488,8 +498,63 @@ button.usa-pagination__button.usa-button {
 
 // Tables
 .usa-table {
+  table-layout: fixed;
+
   &.overflow-wrap {
-    max-width: 0; // magic to prevent tables that are nested inside of a flex element from blowing out
     overflow-wrap: break-word;
+  }
+}
+
+// Accordions
+.usa-accordion__heading {
+  border-bottom: 2px solid color(gray-warm-30);
+}
+
+// changes the modal into a drawer
+#search-filter-drawer {
+  text-align: right;
+  .usa-modal-overlay {
+    padding: 0;
+    overflow: hidden;
+  }
+  .usa-modal__main {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  .usa-modal__content {
+    height: 100%;
+  }
+}
+
+// make modal close "X" use normal style rather than simpler button styline
+.usa-modal__close {
+  background-color: color("transparent");
+  border-bottom: none;
+  color: color("gray-warm-90");
+
+  &:hover {
+    background-color: color("transparent");
+    border-bottom: none;
+    color: color("gray-60");
+  }
+}
+
+// Definition Lists
+dl {
+  dt {
+    display: inline;
+
+    & ~ dd {
+      display: inline;
+      margin-left: 0;
+    }
+  }
+}
+
+.simpler-tooltip {
+  .usa-tooltip__body {
+    min-width: 12rem;
+    font-size: font-size("body", "3xs");
   }
 }

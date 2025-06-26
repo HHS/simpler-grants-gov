@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
@@ -12,6 +13,7 @@ from src.api.schemas.search_schema import (
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
+from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -216,23 +218,6 @@ class OpportunitySummaryV1Schema(Schema):
     )
 
 
-class OpportunityAssistanceListingV1Schema(Schema):
-    program_title = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "Space Technology",
-        },
-    )
-    assistance_listing_number = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The assistance listing number, see https://sam.gov/content/assistance-listings for more detail",
-            "example": "43.012",
-        },
-    )
-
-
 class OpportunityV1Schema(Schema):
     opportunity_id = fields.UUID(
         metadata={"description": "The internal ID of the opportunity"},
@@ -335,6 +320,11 @@ class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
         metadata={"description": "List of attachments associated with the opportunity"},
     )
 
+    competitions = fields.List(
+        fields.Nested(CompetitionAlphaSchema),
+        metadata={"description": "List of competitions associated with the opportunity"},
+    )
+
 
 class OpportunitySearchFilterV1Schema(Schema):
     funding_instrument = fields.Nested(
@@ -404,6 +394,12 @@ class OpportunitySearchFilterV1Schema(Schema):
         DateSearchSchemaBuilder("CloseDateFilterV1Schema").with_date_range().build()
     )
 
+    top_level_agency = fields.Nested(
+        StrSearchSchemaBuilder("TopLevelAgencyOppSearchFilterV1Schema")
+        .with_one_of(example="USAID", minimum_length=2)
+        .build()
+    )
+
 
 class OpportunityFacetV1Schema(Schema):
     opportunity_status = fields.Dict(
@@ -450,6 +446,14 @@ class OpportunityFacetV1Schema(Schema):
             "example": {"USAID": 4, "DOC": 3},
         },
     )
+    is_cost_sharing = fields.Dict(
+        keys=fields.Boolean(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of is_cost_sharing values in the full response",
+            "example": {"true": 1, "false": 3},
+        },
+    )
 
 
 class ExperimentalV1Schema(Schema):
@@ -481,6 +485,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
+
     experimental = fields.Nested(ExperimentalV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(
@@ -495,6 +500,8 @@ class OpportunitySearchRequestV1Schema(Schema):
                 "agency_code",
                 "agency_name",
                 "top_level_agency_name",
+                "award_floor",
+                "award_ceiling",
             ],
             default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "descending"}],
         ),
@@ -557,3 +564,16 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+
+
+class OpportunityVersionAttachmentSchema(Schema):
+    attachment_id = fields.Integer(
+        metadata={"description": "The attachment id associated with the opportunity"}
+    )
+
+
+class OpportunityVersionSchema(OpportunityV1Schema):
+    opportunity_attachments = fields.List(
+        fields.Nested(OpportunityVersionAttachmentSchema),
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )

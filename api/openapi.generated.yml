@@ -202,10 +202,13 @@ paths:
                     page_offset: 1
                     page_size: 25
               example2:
-                summary: Filter by active agency
+                summary: Filter by open/forecasted agency
                 value:
                   filters:
-                    has_active_opportunity:
+                    has_open_opportunity:
+                      one_of:
+                      - 'False'
+                    has_forecasted_opportunity:
                       one_of:
                       - 'False'
                   pagination:
@@ -532,6 +535,44 @@ paths:
       summary: Form Get
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/organizations:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Organizations
+      security:
+      - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -613,6 +654,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Save Search
@@ -653,6 +700,54 @@ paths:
       tags:
       - Application Alpha
       summary: Get an application by ID
+      security:
+      - ApiJwtAuth: []
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Application Alpha
+      summary: Update an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationUpdateRequest'
       security:
       - ApiJwtAuth: []
   /alpha/competitions/{competition_id}:
@@ -721,6 +816,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Save Opportunity
@@ -764,6 +865,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Get Saved Searches
@@ -887,6 +994,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Get Saved Opportunities
@@ -895,6 +1008,49 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
+      security:
+      - ApiJwtAuth: []
+  /alpha/applications/{application_id}/attachments:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentCreateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Create an attachment on an application
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
@@ -935,6 +1091,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Update Saved Search
@@ -976,6 +1138,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Delete Saved Search
@@ -1061,6 +1229,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
       tags:
       - User v1 - Internal Only
       summary: User Delete Saved Opportunity
@@ -1140,6 +1314,133 @@ paths:
       summary: Get an application form by ID
       security:
       - ApiJwtAuth: []
+      - InternalApiJwtAuth: []
+  /alpha/applications/{application_id}/attachments/{application_attachment_id}:
+    get:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity
+      tags:
+      - Application Alpha
+      summary: Fetch an application attachment
+      security:
+      - ApiJwtAuth: []
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update an attachment on an application
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationAttachmentUpdateRequest'
+      security:
+      - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: application_attachment_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttachmentDeleteResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Delete an application attachment
+      security:
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -1197,6 +1498,10 @@ components:
           type: string
           description: The field that failed
           example: summary.summary_description
+        value:
+          type: string
+          description: The value that failed
+          example: invalid string
     ErrorResponse:
       type: object
       properties:
@@ -1537,6 +1842,15 @@ components:
           items:
             type: boolean
             example: true
+    OpportunityStatusesFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            example: archived
     IsTestAgencyFilterV1:
       type: object
       properties:
@@ -1554,6 +1868,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/HasActiveOpportunityFilterV1'
+        opportunity_statuses:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityStatusesFilterV1'
         is_test_agency:
           type:
           - object
@@ -1658,15 +1976,23 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyV1'
           - type: 'null'
-        has_active_opportunity:
-          type: boolean
-          description: Indicates if the agency is linked to an opportunity that is
-            currently active.
-          example: false
         is_test_agency:
           type: boolean
           description: Indicates if the agency is a test agency.
           example: false
+        opportunity_statuses:
+          type: array
+          description: List of opportunity statuses the agency is linked with.
+          example:
+          - posted
+          items:
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
         created_at:
           type: string
           format: date-time
@@ -1951,6 +2277,16 @@ components:
           - 'null'
           minimum: -1000000
           maximum: 1000000
+    TopLevelAgencyOppSearchFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 2
+            example: USAID
     OpportunitySearchFilterV1:
       type: object
       properties:
@@ -2006,6 +2342,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/CloseDateFilterV1'
+        top_level_agency:
+          type:
+          - object
+          $ref: '#/components/schemas/TopLevelAgencyOppSearchFilterV1'
     ExperimentalV1:
       type: object
       properties:
@@ -2035,6 +2375,8 @@ components:
           - agency_code
           - agency_name
           - top_level_agency_name
+          - award_floor
+          - award_ceiling
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
@@ -2506,6 +2848,14 @@ components:
             DOC: 3
           additionalProperties:
             type: integer
+        is_cost_sharing:
+          type: object
+          description: The counts of is_cost_sharing values in the full response
+          example:
+            'true': 1
+            'false': 3
+          additionalProperties:
+            type: integer
     OpportunitySearchResponseV1:
       type: object
       properties:
@@ -2571,6 +2921,16 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        application_name:
+          type:
+          - string
+          - 'null'
+        organization_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
       required:
       - competition_id
     ApplicationStartResponseData:
@@ -2595,6 +2955,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    FormInstruction:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: The name of the form instruction file
+          example: instructions.pdf
+        download_path:
+          type: string
+          description: The download URL for the form instruction file
+        created_at:
+          type: string
+          format: date-time
+          description: The timestamp when the form instruction was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The timestamp when the form instruction was last updated
     FormAlpha:
       type: object
       properties:
@@ -2645,6 +3023,14 @@ components:
             definition: /properties/ApplicationNumber
           - type: field
             definition: /properties/Date
+        form_instruction:
+          description: The instruction file for the form, if available
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/FormInstruction'
+          - type: 'null'
     FormResponseAlpha:
       type: object
       properties:
@@ -2656,6 +3042,53 @@ components:
           type:
           - object
           $ref: '#/components/schemas/FormAlpha'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SamGovEntity:
+      type: object
+      properties:
+        uei:
+          type: string
+        legal_business_name:
+          type: string
+        expiration_date:
+          type: string
+          format: date
+    UserOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_organization_owner:
+          type: boolean
+          description: Whether the user is an owner of this organization
+          example: true
+        sam_gov_entity:
+          description: SAM.gov entity information for the organization
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntity'
+          - type: 'null'
+    UserOrganizationsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organizations the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2690,6 +3123,96 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
+    CompetitionFormAlpha:
+      type: object
+      properties:
+        is_required:
+          type: boolean
+          description: Whether the form is required for all applications to the competition
+        form:
+          type:
+          - object
+          $ref: '#/components/schemas/FormAlpha'
+    CompetitionInstructionAlpha:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: The name of the instruction file
+          example: competition_instructions.pdf
+        download_path:
+          type: string
+          description: The URL to download the instruction file
+          example: https://cdn.example.com/competition-instructions/file.pdf
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time when the instruction was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time when the instruction was last updated
+    CompetitionAlpha:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The opportunity ID that the competition is associated with
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_forms:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionFormAlpha'
+        competition_instructions:
+          type: array
+          description: List of instruction files associated with this competition
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionInstructionAlpha'
+        competition_title:
+          type: string
+          description: The title of the competition
+          example: Proposal for Advanced Research
+        opening_date:
+          type: string
+          format: date
+          description: The opening date of the competition, the first day applications
+            are accepted
+        closing_date:
+          type: string
+          format: date
+          description: The closing date of the competition, the last day applications
+            are accepted
+        contact_info:
+          type: string
+          description: Contact info getting assistance with the competition
+          example: 'Bob Smith
+
+            FakeMail@fake.com'
+        opportunity_assistance_listing:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        open_to_applicants:
+          type: array
+          items:
+            enum:
+            - individual
+            - organization
+            type:
+            - string
+        is_open:
+          type: boolean
+          description: Whether the competition is open and accepting applications
     OpportunityWithAttachmentsV1:
       type: object
       properties:
@@ -2782,6 +3305,13 @@ components:
             type:
             - object
             $ref: '#/components/schemas/OpportunityAttachmentV1'
+        competitions:
+          type: array
+          description: List of competitions associated with the opportunity
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/CompetitionAlpha'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -2847,6 +3377,34 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAttachmentNoLink:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The MIME type / content-type of the file
+          example: application/pdf
+        file_size_bytes:
+          type: integer
+          description: The size of the attachment in bytes
+          example: 12340
+        created_at:
+          type: string
+          format: date-time
+          description: When the application attachment was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application attachment was last updated
     ApplicationFormGetResponseData:
       type: object
       properties:
@@ -2865,6 +3423,56 @@ components:
         application_response:
           type: object
           additionalProperties: {}
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the application form was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the application form was last updated
+        is_required:
+          type: boolean
+          description: Whether this form is required for the application
+        application_attachments:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAttachmentNoLink'
+    ApplicationUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+        is_application_owner:
+          type: boolean
+    Organization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sam_gov_entity:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntity'
+          - type: 'null'
     ApplicationGetResponseData:
       type: object
       properties:
@@ -2872,16 +3480,54 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        competition_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+        competition:
+          type:
+          - object
+          $ref: '#/components/schemas/CompetitionAlpha'
         application_forms:
           type: array
           items:
             type:
             - object
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        application_status:
+          enum:
+          - in_progress
+          - submitted
+          - accepted
+          type:
+          - string
+        application_name:
+          type: string
+        users:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationUser'
+        organization:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Organization'
+          - type: 'null'
+        form_validation_warnings:
+          type: object
+          description: Specific form validation issues
+          example:
+            123e4567-e89b-12d3-a456-426614174000:
+            - field: $
+              message: '''name'' is a required property'
+              type: required
+              value: null
+          additionalProperties: {}
+        application_attachments:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAttachmentNoLink'
     ApplicationGetResponse:
       type: object
       properties:
@@ -2905,35 +3551,43 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    CompetitionFormAlpha:
+    ApplicationUpdateRequest:
       type: object
       properties:
-        is_required:
-          type: boolean
-          description: Whether the form is required for all applications to the competition
-        form:
+        application_name:
+          type: string
+      required:
+      - application_name
+    ApplicationUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
           type:
           - object
-          $ref: '#/components/schemas/FormAlpha'
-    CompetitionAlpha:
-      type: object
-      properties:
-        competition_id:
-          type: string
-          format: uuid
-          description: The competition ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-        opportunity_id:
-          type: string
-          format: uuid
-          description: The opportunity ID that the competition is associated with
-          example: 123e4567-e89b-12d3-a456-426614174000
-        competition_forms:
-          type: array
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/CompetitionFormAlpha'
+          $ref: '#/components/schemas/ApplicationUpdateResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     CompetitionResponseAlpha:
       type: object
       properties:
@@ -3183,6 +3837,38 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAttachmentCreateRequest:
+      type: object
+      properties:
+        file_attachment:
+          description: The file to attach to an application
+          type: string
+          format: binary
+      required:
+      - file_attachment
+    ApplicationAttachmentCreate:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the uploaded application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+    ApplicationAttachmentCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserUpdateSavedSearchRequest:
       type: object
       properties:
@@ -3233,6 +3919,14 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -3290,6 +3984,89 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAttachmentGet:
+      type: object
+      properties:
+        download_path:
+          type: string
+          description: The file's download path
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the uploaded application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the application attachment file
+          example: my_example.pdf
+        mime_type:
+          type: string
+          description: The mime type / content type of the file
+          example: application/pdf
+    ApplicationAttachmentGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentGet'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAttachmentUpdateRequest:
+      type: object
+      properties:
+        file_attachment:
+          description: The file to attach to an application
+          type: string
+          format: binary
+      required:
+      - file_attachment
+    ApplicationAttachmentUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAttachmentDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
@@ -3299,4 +4076,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

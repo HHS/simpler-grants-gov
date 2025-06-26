@@ -10,6 +10,9 @@ locals {
     AWS_PINPOINT_SENDER_EMAIL = local.notifications_config.sender_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
+  pinpoint_app_id        = module.notifications[0].app_id
+  ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
+
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary

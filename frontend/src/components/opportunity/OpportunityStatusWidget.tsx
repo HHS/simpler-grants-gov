@@ -38,8 +38,8 @@ const CloseDateDescriptionDisplay = ({
     <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
       <p className="line-height-sans-5">{preSplit}...</p>
       <ContentDisplayToggle
-        showCallToAction={t("show_description")}
-        hideCallToAction={t("hide_summary_description")}
+        showCallToAction={t("showDescription")}
+        hideCallToAction={t("hideSummaryDescription")}
         positionButtonBelowContent={false}
       >
         <p className="line-height-sans-5">{postSplit}</p>
@@ -49,7 +49,7 @@ const CloseDateDescriptionDisplay = ({
 };
 
 const OpportunityStatusWidget = ({ opportunityData }: Props) => {
-  const t = useTranslations("OpportunityListing.status_widget");
+  const t = useTranslations("OpportunityListing.statusWidget");
 
   const opportunityStatus = opportunityData.opportunity_status;
   const opportunityCloseDate = opportunityData.summary.close_date;
@@ -63,7 +63,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
     switch (status) {
       case "archived":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("archived")}</strong>
               <span>{formatDate(archiveDate) || "--"}</span>
@@ -72,7 +72,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         );
       case "closed":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("closed")}</strong>
               <span>{formatDate(closeDate) || "--"}</span>
@@ -114,7 +114,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
   };
 
   return (
-    <div className="usa-prose" data-testid="opportunity-status-widget">
+    <div data-testid="opportunity-status-widget">
       {statusTagFormatter(
         opportunityStatus,
         opportunityCloseDate,

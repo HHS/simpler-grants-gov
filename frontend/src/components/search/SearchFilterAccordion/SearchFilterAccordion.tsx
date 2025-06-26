@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 import {
@@ -24,10 +25,22 @@ export interface AccordionItemProps {
   className?: string;
 }
 
-export interface SearchAccordionContentProps {
+export interface CommonSearchFilterAccordionProps {
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
+}
+
+export interface BasicSearchFilterAccordionProps
+  extends CommonSearchFilterAccordionProps {
+  className?: string;
+  contentClassName?: string;
+  expanded?: boolean;
+  children: React.ReactNode;
+}
+
+export interface SearchAccordionContentProps
+  extends CommonSearchFilterAccordionProps {
   filterOptions: FilterOption[];
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;
@@ -37,6 +50,10 @@ export interface SearchAccordionContentProps {
 export interface SearchFilterAccordionProps
   extends SearchAccordionContentProps {
   wrapForScroll?: boolean;
+}
+
+export interface SearchFilterProps extends SearchAccordionContentProps {
+  contentClassName?: string;
 }
 
 const AccordionTitle = ({
@@ -125,6 +142,7 @@ const AccordionContent = ({
   );
 };
 
+// current prod implementation, assumes all filters will be checkbox based
 export function SearchFilterAccordion({
   filterOptions,
   title,
@@ -132,9 +150,9 @@ export function SearchFilterAccordion({
   query,
   facetCounts,
   defaultEmptySelection,
+  contentClassName,
   includeAnyOption = true,
-  wrapForScroll = false,
-}: SearchFilterAccordionProps) {
+}: SearchFilterProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
@@ -152,9 +170,10 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: wrapForScroll
-        ? "maxh-mobile-lg overflow-auto position-relative"
-        : "",
+      className: clsx(
+        "maxh-mobile-lg overflow-auto position-relative",
+        contentClassName,
+      ),
     },
   ];
 
@@ -164,6 +183,37 @@ export function SearchFilterAccordion({
       items={accordionOptions}
       multiselectable={true}
       className="margin-top-4"
+    />
+  );
+}
+
+// new implementation, flexible to take whatever content it gets fed, not just checkboxes
+export function BasicSearchFilterAccordion({
+  children,
+  title,
+  queryParamKey,
+  query,
+  className,
+  contentClassName,
+  expanded = false,
+}: BasicSearchFilterAccordionProps) {
+  const accordionOptions: AccordionItemProps[] = [
+    {
+      title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
+      content: children,
+      expanded,
+      id: `opportunity-filter-${queryParamKey as string}`,
+      headingLevel: "h2",
+      className: contentClassName || "",
+    },
+  ];
+
+  return (
+    <Accordion
+      bordered={true}
+      items={accordionOptions}
+      multiselectable={true}
+      className={clsx("margin-top-4", className)}
     />
   );
 }

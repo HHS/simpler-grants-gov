@@ -2,15 +2,44 @@ import { omit } from "lodash";
 import { eligibilityTypes } from "src/constants/opportunity";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
+// Note that these labels are not translated currently
+// To translate them we would want to list the translation key in the label
+// And have the translation system consume that key wherever the value is needed
+
 export const eligibilityOptions: FilterOption[] = eligibilityTypes.map((type) =>
   omit(type, "group"),
 );
+
+export const statusOptions: FilterOption[] = [
+  {
+    id: "status-forecasted",
+    label: "Forecasted",
+    value: "forecasted",
+  },
+  {
+    id: "status-open",
+    label: "Open",
+    value: "posted",
+  },
+  {
+    id: "status-closed",
+    label: "Closed",
+    value: "closed",
+  },
+  {
+    id: "status-archived",
+    label: "Archived",
+    value: "archived",
+  },
+];
 
 export const fundingOptions: FilterOption[] = [
   {
     id: "funding-instrument-cooperative_agreement",
     label: "Cooperative Agreement",
     value: "cooperative_agreement",
+    tooltip:
+      "Involves active agency participation in a project, while grants provide funds and oversight without direct involvement.",
   },
   {
     id: "funding-instrument-grant",
@@ -21,6 +50,8 @@ export const fundingOptions: FilterOption[] = [
     id: "funding-instrument-procurement_contract",
     label: "Procurement Contract ",
     value: "procurement_contract",
+    tooltip:
+      "Allows the government to purchase goods and services for its benefit, while grants provide financial support to advance a public purpose.",
   },
   {
     id: "funding-instrument-other",
@@ -124,4 +155,52 @@ export const categoryOptions: FilterOption[] = [
     value: "affordable_care_act",
   },
   { id: "category-other", label: "Other", value: "other" },
+];
+
+export const closeDateOptions: FilterOption[] = [
+  {
+    id: "close-date-7",
+    label: "Next 7 days",
+    value: "7",
+  },
+  {
+    id: "close-date-30",
+    label: "Next 30 days",
+    value: "30",
+  },
+  {
+    id: "close-date-90",
+    label: "Next 90 days",
+    value: "90",
+  },
+  {
+    id: "close-date-120",
+    label: "Next 120 days",
+    value: "120",
+  },
+];
+
+export const costSharingOptions: FilterOption[] = [
+  {
+    id: "cost-sharing-yes",
+    label: "Yes",
+    value: "true",
+  },
+  {
+    id: "cost-sharing-no",
+    label: "No",
+    value: "false",
+  },
+];
+export const andOrOptions = [
+  {
+    id: "andOr-and",
+    label: "Must include all words (ex. labor AND welfare)",
+    value: "AND",
+  },
+  {
+    id: "andOr-or",
+    label: "May include any words (ex. labor OR welfare)",
+    value: "OR",
+  },
 ];

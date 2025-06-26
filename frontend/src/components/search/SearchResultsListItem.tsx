@@ -60,7 +60,7 @@ export default function SearchResultsListItem({
                 </Link>
               </h2>
             </div>
-            <div className="font-body-xs display-flex flex-wrap">
+            <div className="font-sans-xs display-flex flex-wrap">
               <SearchResultListItemStatus
                 archiveDate={opportunity?.summary?.archive_date}
                 archivedString={t("resultsListItem.status.archived")}
@@ -73,7 +73,11 @@ export default function SearchResultsListItem({
               <span
                 className={`${metadataBorderClasses} tablet:order-0 order-2`}
               >
-                <strong>{t("resultsListItem.summary.posted")}</strong>
+                <strong>
+                  {opportunity.opportunity_status === "forecasted"
+                    ? t("resultsListItem.summary.forecasted")
+                    : t("resultsListItem.summary.posted")}
+                </strong>
                 {opportunity?.summary?.post_date
                   ? formatDate(opportunity?.summary?.post_date)
                   : "--"}
@@ -89,23 +93,23 @@ export default function SearchResultsListItem({
               )}
               <div className="width-full tablet:width-auto" />
             </div>
-            <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
+            <div className="grid-col tablet:order-2 overflow-hidden font-sans-xs">
               <span className={metadataBorderClasses}>
                 <strong>{t("resultsListItem.summary.agency")}</strong>
                 {getAgencyDisplayName(opportunity)}
               </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
-              <strong>{t("resultsListItem.opportunity_number")}</strong>
+              <strong>{t("resultsListItem.opportunityNumber")}</strong>
               {opportunity?.opportunity_number}
             </div>
           </div>
         </div>
         <div className="desktop:grid-col-auto">
-          <div className="overflow-hidden font-body-xs">
+          <div className="overflow-hidden font-sans-xs">
             {/* TODO: Better way to format as a dollar amounts */}
             <span className="desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
-              <strong>{t("resultsListItem.award_ceiling")}</strong>
+              <strong>{t("resultsListItem.awardCeiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
               </span>

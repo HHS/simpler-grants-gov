@@ -7,9 +7,10 @@ from src.adapters import search
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
+from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
-from src.search.search_models import BoolSearchFilter
+from src.search.search_models import BoolSearchFilter, StrSearchFilter
 from src.services.agencies_v1.experimental_constant import DEFAULT
 from src.services.opportunities_v1.search_opportunities import _adjust_field_name
 from src.services.service_utils import _add_search_filters
@@ -26,6 +27,7 @@ AGENCY_REQUEST_FIELD_NAME_MAPPING = {
 
 class AgencySearchFilters(BaseModel):
     has_active_opportunity: BoolSearchFilter | None = None
+    opportunity_statuses: StrSearchFilter | None = None
     is_test_agency: BoolSearchFilter | None = None
 
 
@@ -63,11 +65,21 @@ def get_search_request(params: AgencySearchParams) -> dict:
 
     # Query
     if params.query:
+        wrapped_query = params.query
         filter_rule = DEFAULT
-        builder.simple_query(params.query, filter_rule, SearchQueryOperator.OR)
+        # Don't add the prefix indicator if they searched for quoted text anywhere in the search query
+        if '"' not in wrapped_query:
+            # For now, use the prefix indicator. ~ for fuzzy could be better in the future, but is too confusing to the user for now
+            wrapped_query = f"{wrapped_query}*"
+        builder.simple_query(wrapped_query, filter_rule, SearchQueryOperator.OR)
 
     # Filters
     if params.filters:
+        value = params.filters.has_active_opportunity
+        if value and value.one_of and True in value.one_of:
+            params.filters.opportunity_statuses = StrSearchFilter(
+                one_of=[OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+            )
         _add_search_filters(builder, AGENCY_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
     return builder.build()
@@ -91,7 +103,6 @@ def _search_agencies(
 def search_agencies(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> Tuple[Sequence[dict], PaginationInfo]:
-
     params = AgencySearchParams.model_validate(raw_search_params)
     response = _search_agencies(search_client, params)
     pagination_info = PaginationInfo.from_search_response(params.pagination, response)

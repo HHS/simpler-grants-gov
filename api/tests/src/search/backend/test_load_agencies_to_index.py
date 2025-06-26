@@ -1,5 +1,6 @@
 import pytest
 
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
@@ -32,7 +33,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         enable_factory_create,
     ):
         # Create Agencies to load into the search index
-        agencies = [AgencyFactory.create(agency_code="DOD")]
+        agencies = [AgencyFactory.create(agency_code="LOADAGENCY1")]
         agencies.extend(AgencyFactory.create_batch(size=5, top_level_agency=agencies[0]))
 
         load_agencies_to_index.run()
@@ -60,7 +61,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
             agencies
         )
 
-    def test_load_agencies_is_active(
+    def test_load_agencies_with_status(
         self,
         db_session,
         search_client,
@@ -69,11 +70,21 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         enable_factory_create,
     ):
         # Setup data
-        hhs = AgencyFactory.create(agency_name="HHS")
-        usda = AgencyFactory.create(agency_name="USDA")
+        posted_agency = AgencyFactory.create(agency_name="POSTED_AGENCY")
+        closed_agency = AgencyFactory.create(agency_name="CLOSED_AGENCY")
+        forecasted_agency = AgencyFactory.create(agency_name="FORECASTED_AGENCY")
+        archived_agency = AgencyFactory.create(agency_name="ARCHIVED_AGENCY")
 
-        OpportunityFactory.create(agency_code=hhs.agency_code)  # POSTED
-        OpportunityFactory.create(agency_code=usda.agency_code, is_closed_summary=True)  # CLOSED
+        OpportunityFactory.create(agency_code=posted_agency.agency_code)  # POSTED
+        OpportunityFactory.create(
+            agency_code=closed_agency.agency_code, is_closed_summary=True
+        )  # CLOSED
+        OpportunityFactory.create(
+            agency_code=forecasted_agency.agency_code, is_forecasted_summary=True
+        )  # FORECASTED
+        OpportunityFactory.create(
+            agency_code=archived_agency.agency_code, is_archived_non_forecast_summary=True
+        )  # ARCHIVED
 
         load_agencies_to_index.index_name = (
             load_agencies_to_index.index_name + "-active-status-data"
@@ -83,10 +94,24 @@ class TestLoadAgenciesToIndex(BaseTestClass):
 
         resp = search_client.search(agency_index_alias, {"size": 50})
 
-        assert resp.total_records == 2
+        assert resp.total_records == 4
 
-        hhs_agency = next(agency for agency in resp.records if agency["agency_name"] == "HHS")
-        usda_agency = next(agency for agency in resp.records if agency["agency_name"] == "USDA")
+        posted_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "POSTED_AGENCY"
+        )
+        closed_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "CLOSED_AGENCY"
+        )
+        forecasted_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "FORECASTED_AGENCY"
+        )
+        archived_agency_resp = next(
+            agency for agency in resp.records if agency["agency_name"] == "ARCHIVED_AGENCY"
+        )
 
-        assert hhs_agency["has_active_opportunity"]
-        assert not usda_agency["has_active_opportunity"]
+        assert posted_agency_resp["opportunity_statuses"] == [OpportunityStatus.POSTED.value]
+        assert closed_agency_resp["opportunity_statuses"] == [OpportunityStatus.CLOSED.value]
+        assert forecasted_agency_resp["opportunity_statuses"] == [
+            OpportunityStatus.FORECASTED.value
+        ]
+        assert archived_agency_resp["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]

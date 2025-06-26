@@ -4,6 +4,8 @@ export const backendFilterNames = [
   "applicant_type",
   "agency",
   "funding_category",
+  "close_date",
+  "is_cost_sharing",
 ] as const;
 
 export const searchFilterNames = [
@@ -12,6 +14,8 @@ export const searchFilterNames = [
   "eligibility",
   "agency",
   "category",
+  "closeDate",
+  "costSharing",
 ] as const;
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
@@ -23,8 +27,16 @@ export interface FilterOption {
   isChecked?: boolean;
   label: string;
   value: string;
+  tooltip?: string;
 }
 
 export interface FilterOptionWithChildren extends FilterOption {
   children: FilterOption[];
+}
+
+export interface RelevantAgencyRecord {
+  agency_code: string;
+  agency_id: number;
+  agency_name: string;
+  top_level_agency: null | RelevantAgencyRecord;
 }

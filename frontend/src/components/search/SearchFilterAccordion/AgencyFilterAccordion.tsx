@@ -1,37 +1,75 @@
 import { FilterOption } from "src/types/search/searchFilterTypes";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
+import { CheckboxFilter } from "src/components/search/Filters/CheckboxFilter";
+import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
-// functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
-// with prefetched options we have a synchronous render
-// with a Promise we have an async render with Suspense
 export async function AgencyFilterAccordion({
   query,
   agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agencyOptionsPromise: Promise<FilterOption[]>;
+  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
 }) {
   const t = useTranslations("Search");
 
-  let agencies: FilterOption[];
+  let allAgencies: FilterOption[] = [];
+  let facetCounts: { [key: string]: number } = {};
   try {
-    agencies = await agencyOptionsPromise;
+    let searchResults: SearchAPIResponse;
+    [allAgencies, searchResults] = await agencyOptionsPromise;
+    facetCounts = searchResults.facet_counts.agency;
   } catch (e) {
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
-    agencies = [];
   }
   return (
-    <SearchFilterAccordion
+    <BasicSearchFilterAccordion
+      query={query}
+      queryParamKey={"agency"}
+      title={t("accordion.titles.agency")}
+      contentClassName="maxh-mobile-lg overflow-auto position-relative"
+    >
+      <AgencyFilterContent
+        query={query}
+        title={t("accordion.titles.agency")}
+        allAgencies={allAgencies}
+        facetCounts={facetCounts}
+      />
+    </BasicSearchFilterAccordion>
+  );
+}
+
+export async function AgencyFilter({
+  query,
+  agencyOptionsPromise,
+}: {
+  query: Set<string>;
+  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
+}) {
+  const t = useTranslations("Search");
+
+  let agencies: FilterOption[] = [];
+  let facetCounts: { [key: string]: number } = {};
+  try {
+    let searchResults: SearchAPIResponse;
+    [agencies, searchResults] = await agencyOptionsPromise;
+    facetCounts = searchResults.facet_counts.agency;
+  } catch (e) {
+    // Come back to this to show the user an error
+    console.error("Unable to fetch agencies for filter list", e);
+  }
+  return (
+    <CheckboxFilter
       filterOptions={agencies}
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}
-      wrapForScroll={true}
-      // agency filters will not show facet counts
+      facetCounts={facetCounts}
+      contentClassName="maxh-mobile-lg overflow-auto position-relative"
     />
   );
 }

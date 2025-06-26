@@ -39,6 +39,37 @@ root
 
 See [development.md](../documentation/api/development.md) for installation and development instructions.
 
+## Running jobs/tasks
+
+### Locally
+
+```bash
+make run-generate-notifications
+# executes poetry run flask task generate-notifications
+
+# more generically, you can construct poetry run flask calls with make cmd
+make cmd args="data-migration setup-foreign-tables"
+make cmd args="data-migration load-transform --no-load --transform --no-set-current"
+make cmd args="task create-analytics-db-csvs"
+```
+
+Poetry CLI commands are of the form `<task group> <task name> <any other params>`. So in the above, data-migration is the task group for the first two, but then the task name is setup-foreign-tables and load-transform
+
+### In AWS
+
+1. Ensure your [SSO login](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
+2. Setup your terraform environment
+
+   ```bash
+   bin/terraform-init infra/api/service <env>
+   ```
+
+3. Run the job
+
+   ```bash
+   bin/run-command api <env> '["poetry", "run", "flask", "task", "generate-notifications"]'
+   ```
+
 ## Technical Information
 
 * [API Technical Overview](../documentation/api/technical-overview.md)

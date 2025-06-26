@@ -134,7 +134,7 @@ class TestAgenciesRoutes(BaseTestClass):
         # HHS
         OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
         OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
-        OpportunityFactory.create(agency_code=doi_hhs.agency_code)
+        OpportunityFactory.create(agency_code=doi_hhs.agency_code)  # POSTED
 
         # CREES
         OpportunityFactory.create(agency_code=usda_crees.agency_code, is_closed_summary=True)
@@ -156,13 +156,33 @@ class TestAgenciesRoutes(BaseTestClass):
 
         response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
         assert response.status_code == 200
-        data = response.json["data"]
+        data_active = response.json["data"]
 
         # only agency associated with opportunity of posted/forecast status is returned and the respective top_level_agencies
-        assert len(data) == 4
+        assert len(data_active) == 4
 
-        assert set([agency["agency_code"] for agency in data]) == set(
+        assert set([agency["agency_code"] for agency in data_active]) == set(
             [opp.agency_code for opp in [doi_hhs, usda_crees, hhs, usda]]
+        )
+
+        # Make request
+        payload = {
+            "filters": {"active": "False"},
+            "pagination": {
+                "page_size": 10,
+                "page_offset": 1,
+            },
+        }
+
+        response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
+        assert response.status_code == 200
+        data_inactive = response.json["data"]
+
+        # ensure all agencies returned
+        assert len(data_inactive) == 6
+
+        assert set([agency["agency_code"] for agency in data_inactive]) == set(
+            [opp.agency_code for opp in [dod_darpa, usda_crees, darpa, usda, hhs, doi_hhs]]
         )
 
     def test_agencies_active_no_duplicate(

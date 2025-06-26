@@ -146,6 +146,17 @@ class CompetitionOpenToApplicant(StrEnum):
     ORGANIZATION = "organization"
 
 
+class SamGovExtractType(StrEnum):
+    MONTHLY = "monthly"
+    DAILY = "daily"
+
+
+class SamGovProcessingStatus(StrEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class SamGovImportType(StrEnum):
     MONTHLY_EXTRACT = "monthly_extract"
     DAILY_EXTRACT = "daily_extract"
@@ -156,3 +167,9 @@ class ApplicationStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     SUBMITTED = "submitted"
     ACCEPTED = "accepted"
+
+
+class ApplicationFormStatus(StrEnum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"

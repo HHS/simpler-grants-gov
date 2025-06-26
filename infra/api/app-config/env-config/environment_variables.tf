@@ -29,6 +29,9 @@ locals {
     # grants.gov services/applications URI.
     GRANTS_GOV_URI  = "https://trainingws.grants.gov:443"
     ENABLE_SOAP_API = 0
+
+    # Sam.gov
+    SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
   }
 
   # Configuration for secrets
@@ -79,6 +82,16 @@ locals {
     DOMAIN_VERIFICATION_CONTENT = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/domain-verification-content"
+    }
+
+    SOAP_AUTH_CONTENT = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-auth-content"
+    }
+
+    SAM_GOV_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/sam-gov-api-key"
     }
   }
 }

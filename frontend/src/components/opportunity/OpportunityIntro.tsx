@@ -2,8 +2,11 @@ import {
   OpportunityAssistanceListing,
   OpportunityDetail,
 } from "src/types/opportunity/opportunityResponseTypes";
+import { legacyOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
 
 import { useTranslations } from "next-intl";
+
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type Props = {
   opportunityData: OpportunityDetail;
@@ -39,7 +42,7 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
   const agencyName = opportunityData.agency_name || "--";
 
   const lastUpdated = (timestamp: string) => {
-    if (!timestamp) return `${t("last_updated")} --`;
+    if (!timestamp) return `${t("lastUpdated")} --`;
     else {
       const date = new Date(timestamp);
       const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -48,21 +51,30 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
         day: "numeric",
       }).format(date);
 
-      return `${t("last_updated")} ${formattedDate}`;
+      return `${t("lastUpdated")} ${formattedDate}`;
     }
   };
 
   return (
     <>
-      <div className="usa-prose">
-        <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg margin-top-0">{`${t("agency")} ${agencyName}`}</p>
-        <AssistanceListingsDisplay
-          assistanceListings={opportunityData.opportunity_assistance_listings}
-          assistanceListingsText={t("assistance_listings")}
-        />
-        <p className="tablet-lg:font-sans-2xs">
-          {lastUpdated(opportunityData.updated_at)}
-        </p>
+      <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg margin-top-0">{`${t("agency")} ${agencyName}`}</p>
+      <AssistanceListingsDisplay
+        assistanceListings={opportunityData.opportunity_assistance_listings}
+        assistanceListingsText={t("assistanceListings")}
+      />
+      <div className="tablet-lg:font-sans-2xs display-flex tablet:flex-row flex-column">
+        <div className="flex-2">{lastUpdated(opportunityData.updated_at)}</div>
+        <div className="flex-3">
+          <a
+            className="usa-button usa-button--unstyled"
+            href={legacyOpportunityUrl(opportunityData.opportunity_id)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("versionHistory")}
+            <USWDSIcon name="launch" />
+          </a>
+        </div>
       </div>
     </>
   );

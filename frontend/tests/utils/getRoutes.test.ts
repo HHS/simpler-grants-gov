@@ -11,17 +11,13 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/events",
-      "/formPrototype/[applicationId]/form/[formId]",
-      "/formPrototype/[applicationId]",
-      "/formPrototype",
-      "/formPrototype/success",
       "/health",
       "/login",
       "/maintenance",
       "/opportunity/1",
       "/",
       "/roadmap",
-      "/saved-grants",
+      "/saved-opportunities",
       "/saved-search-queries",
       "/search",
       "/subscribe/confirmation",
@@ -29,6 +25,9 @@ describe("getNextRoutes", () => {
       "/subscribe/unsubscribe",
       "/unauthenticated",
       "/vision",
+      "/workspace/applications/application/[applicationId]/form/[formId]",
+      "/workspace/applications/application/[applicationId]/form/[formId]/success",
+      "/workspace/applications/application/[applicationId]",
     ]);
   });
 });

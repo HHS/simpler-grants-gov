@@ -19,13 +19,14 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
+import { SearchVersionTwo } from "src/components/search/SearchVersionTwo";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Search.title"),
-    description: t("Search.meta_description"),
+    description: t("Search.metaDescription"),
   };
   return meta;
 }
@@ -84,7 +85,6 @@ function Search({ searchParams, params }: SearchPageProps) {
             <div className="tablet:grid-col-8">
               <SearchResults
                 searchParams={convertedSearchParams}
-                query={query}
                 loadingMessage={t("loading")}
                 searchResultsPromise={searchResultsPromise}
               ></SearchResults>
@@ -97,8 +97,10 @@ function Search({ searchParams, params }: SearchPageProps) {
 }
 
 // Exports page behind both feature flags
-export default withFeatureFlag<SearchPageProps, never>(
-  Search,
-  "searchOff",
-  () => redirect("/maintenance"),
+export default withFeatureFlag<SearchPageProps, React.ReactNode>(
+  withFeatureFlag<SearchPageProps, never>(Search, "searchOff", () =>
+    redirect("/maintenance"),
+  ),
+  "searchDrawerOn",
+  (props) => <SearchVersionTwo {...props} />,
 );

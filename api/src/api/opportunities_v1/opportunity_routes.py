@@ -197,7 +197,6 @@ def opportunity_search(
     opportunities, aggregations, pagination_info = search_opportunities(
         search_client, search_params
     )
-
     add_extra_data_to_current_request_logs(
         {
             "response.pagination.total_pages": pagination_info.total_pages,

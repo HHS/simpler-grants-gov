@@ -8,6 +8,7 @@ import {
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
+  searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -65,10 +66,10 @@ export function requesterForEndpoint({
         method,
         next: nextOptions,
       });
-    } catch (error) {
+    } catch (e) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
-      throw fetchErrorToNetworkError(error);
+      throw fetchErrorToNetworkError(e);
     }
 
     if (
@@ -122,3 +123,5 @@ export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
 export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
+
+export const searchAgencies = requesterForEndpoint(searchAgenciesEndpoint);
