@@ -567,7 +567,7 @@ class SavedOpportunityResponseV1Schema(Schema):
 
 
 class OpportunityVersionAttachmentSchema(Schema):
-    attachment_id = fields.Integer(
+    attachment_id = fields.UUID(
         metadata={"description": "The attachment id associated with the opportunity"}
     )
 
