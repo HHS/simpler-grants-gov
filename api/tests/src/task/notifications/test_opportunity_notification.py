@@ -117,20 +117,23 @@ OPAL_REVISION_NUMB = build_opp_and_version(
 base_topaz_fields = {
     "revision_number": 1,
     "opportunity_title": "Topaz 2025 Climate Research Grant",
-    "forecasted_award_date": None,
+    "forecasted_award_date": date(2026, 2, 1),
     "close_date": date(2025, 11, 30),
-    "forecasted_project_start_date": None,
-    "fiscal_year": None,
-    "estimated_total_program_funding": 15_000_000,
-    "expected_number_of_awards": 3,
-    "award_floor": 50_000,
-    "award_ceiling": 5_000_000,
+    "forecasted_project_start_date": date(2026, 4, 15),
+    "fiscal_year": 2025,
+    "estimated_total_program_funding": 10_000_000,
+    "expected_number_of_awards": 7,
+    "award_floor": 100_000,
+    "award_ceiling": 2_500_000,
     "is_cost_sharing": True,
-    "funding_instruments": [FundingInstrument.COOPERATIVE_AGREEMENT],
-    "category": None,
-    "category_explanation": None,
-    "funding_categories": [FundingCategory.EDUCATION],
-    "funding_category_description": None,
+    "funding_instruments": [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT],
+    "category": OpportunityCategory.MANDATORY,
+    "category_explanation": "Required under federal climate initiative mandate",
+    "funding_categories": [
+        FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
+        FundingCategory.ENVIRONMENT,
+    ],
+    "funding_category_description": "Supports research in climate modeling and adaptation",
 }
 
 TOPAZ = build_opp_and_version(
@@ -146,7 +149,7 @@ TOPAZ_STATUS = build_opp_and_version(
 TOPAZ_ALL = build_opp_and_version(
     revision_number=2,
     opportunity_title="Topaz 2025 Climate Research Grant",
-    opportunity_status=OpportunityStatus.POSTED,
+    opportunity_status=OpportunityStatus.CLOSED,
     close_date=date(2025, 12, 31),
     forecasted_award_date=date(2026, 3, 15),
     forecasted_project_start_date=date(2026, 5, 1),
@@ -459,6 +462,61 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "imp_dates_diffs,expected_html",
+        [
+            # close_date
+            (
+                {"close_date": {"before": "2035-10-10", "after": "2035-10-30"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
+            ),
+            (
+                {"close_date": {"before": "2025-10-10", "after": None}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
+            ),
+            # forecasted_award_date
+            (
+                {"forecasted_award_date": {"before": "2030-1-6", "after": "2031-5-3"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
+            ),
+            (
+                {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
+            ),
+            # forecasted_project_start_date
+            (
+                {
+                    "forecasted_project_start_date": {
+                        "before": "2027-1-7",
+                        "after": "2031-5-3",
+                    }
+                },
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
+            ),
+            (
+                {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
+            ),
+            # fiscal_year
+            (
+                {"fiscal_year": {"before": 2050, "after": 2051}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
+            ),
+            (
+                {"fiscal_year": {"before": 2033, "after": None}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
+            ),
+        ],
+    )
+    def test_build_important_dates_content(
+        self, db_session, imp_dates_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_important_dates_content(imp_dates_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -490,43 +548,43 @@ class TestOpportunityNotification:
     @pytest.mark.parametrize(
         "version_changes,expected",
         [
-            # Multiple opps updates
+            # Multiple updates
             (
                 [
                     OpportunityVersionChange(
                         opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                     ),
                     OpportunityVersionChange(
-                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_ALL
                     ),
                 ],
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Open to Closed.<br><div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
+                    message=(
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                        '<p style="padding-left: 20px;">Important dates</p>'
+                        '<p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br>"
+                        "<a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                    ),
                     updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
-                ),
-            ),
-            # Relevant & none Relevant updates mix
-            (
-                [  # No relevant updates
-                    OpportunityVersionChange(
-                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
-                    ),
-                    OpportunityVersionChange(
-                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
-                    ),
-                ],
-                UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div><p style=\"padding-left: 20px;\">Status</p><p style=\"padding-left: 40px;\">•  The status changed from Forecasted to Closed.<br><div><strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br><a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div><div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>",
-                    updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
             ),
             # None relevant updates only
             (
                 [
                     OpportunityVersionChange(
-                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
+                        opportunity_id=OPAL_STATUS.opportunity_id,
+                        previous=OPAL,
+                        latest=OPAL_REVISION_NUMB,
                     ),
                 ],
                 None,
