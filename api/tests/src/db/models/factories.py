@@ -816,6 +816,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     attachment_id = Generators.UuidObj
 
     legacy_attachment_id = factory.Sequence(lambda n: n)
+
     class Params:
         duplicate_filename = factory.Trait(file_name="duplicate.txt")
 
@@ -965,7 +966,7 @@ class UserSavedSearchFactory(BaseFactory):
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
     searched_opportunity_ids = factory.LazyAttribute(
-        lambda _: [uuid.uuid4() for __ in random.randrange(1, 1000)]
+        lambda _: [uuid.uuid4() for __ in range(random.randint(1, 1000))]
     )
 
 
