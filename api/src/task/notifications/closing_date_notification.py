@@ -1,8 +1,7 @@
 import logging
-from datetime import timedelta
 from uuid import UUID
 
-from sqlalchemy import and_, exists, select, update
+from sqlalchemy import and_, exists, select, text, update
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
@@ -40,7 +39,6 @@ class ClosingDateNotificationTask(BaseNotificationTask):
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
-        two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
 
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
@@ -54,8 +52,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
-                    OpportunitySummary.close_date <= two_weeks_from_now,
-                    OpportunitySummary.close_date >= datetime_util.utcnow(),
+                    OpportunitySummary.close_date <= text("now() + INTERVAL '14 day'"),
+                    OpportunitySummary.close_date >= text("now()"),
                 ),
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
@@ -63,7 +61,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         UserOpportunityNotificationLog.user_id == UserSavedOpportunity.user_id,
                         UserOpportunityNotificationLog.opportunity_id
                         == UserSavedOpportunity.opportunity_id,
-                        UserOpportunityNotificationLog.created_at <= two_weeks_from_now,
+                        UserOpportunityNotificationLog.created_at
+                        >= OpportunitySummary.close_date - text("INTERVAL '14 DAY'"),
                         # TODO Add this to the table
                         # UserOpportunityNotificationLog.notification_reason
                         # == NotificationReason.CLOSING_DATE_REMINDER
