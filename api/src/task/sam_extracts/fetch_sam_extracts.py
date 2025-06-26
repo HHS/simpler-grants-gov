@@ -9,36 +9,19 @@ from botocore.client import BaseClient
 from sqlalchemy import select
 
 import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 from src.adapters.aws import S3Config
 from src.adapters.aws.s3_adapter import get_s3_client
 from src.adapters.sam_gov.client import BaseSamGovClient
-from src.adapters.sam_gov.factory import create_sam_gov_client
 from src.adapters.sam_gov.models import SamExtractRequest
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
-from src.task.task_blueprint import task_blueprint
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
 
-@task_blueprint.cli.command("fetch-sam-extracts", help="Fetch SAM.gov daily and monthly extracts")
-@ecs_background_task("fetch-sam-extracts")
-@flask_db.with_db_session()
-def run_fetch_sam_extracts_task(db_session: db.Session) -> None:
-    """Run the SAM.gov extracts fetching task"""
-    # Create the SAM.gov client using the factory
-    sam_gov_client = create_sam_gov_client()
-
-    # Initialize and run the task
-    task = SamExtractsTask(db_session, sam_gov_client)
-    task.run()
-
-
-class SamExtractsTask(Task):
+class FetchSamExtractsTask(Task):
     """Task that runs daily to fetch SAM.gov extract files"""
 
     class Metrics(StrEnum):

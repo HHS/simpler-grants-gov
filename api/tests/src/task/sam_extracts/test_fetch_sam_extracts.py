@@ -12,7 +12,7 @@ from src.adapters.sam_gov.models import SamExtractResponse
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.sam_extracts.fetch_sam_extracts import (
-    SamExtractsTask,
+    FetchSamExtractsTask,
     get_first_sunday_of_month,
     get_monthly_extract_date,
 )
@@ -57,7 +57,7 @@ class TestSamExtractsTask(BaseTestClass):
         monkeypatch.setenv("DRAFT_FILES_BUCKET", mock_s3_bucket)
         monkeypatch.setenv("SAM_GOV_BASE_URL", "https://api.sam.gov")
 
-        task = SamExtractsTask(db_session, mock_sam_gov_client)
+        task = FetchSamExtractsTask(db_session, mock_sam_gov_client)
         # Add mock for increment method to track metric calls
         task.increment = MagicMock()
         return task
@@ -68,7 +68,7 @@ class TestSamExtractsTask(BaseTestClass):
         monkeypatch.setenv("DRAFT_FILES_BUCKET", mock_s3_bucket)
         monkeypatch.setenv("SAM_GOV_BASE_URL", "https://api.sam.gov")
 
-        task = SamExtractsTask(db_session, mock_sam_gov_client)
+        task = FetchSamExtractsTask(db_session, mock_sam_gov_client)
 
         # Verify the task has the expected attributes
         assert task.db_session == db_session
