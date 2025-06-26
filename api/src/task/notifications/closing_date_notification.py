@@ -55,7 +55,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
                     OpportunitySummary.close_date <= two_weeks_from_now,
-                    OpportunitySummary.close_date >= datetime_util.utcnow(),
+                    OpportunitySummary.close_date >= datetime_util.get_now_us_eastern_date(),
                 ),
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
