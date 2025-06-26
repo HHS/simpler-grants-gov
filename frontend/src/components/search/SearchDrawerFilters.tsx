@@ -7,7 +7,7 @@ import {
   fundingOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import {
   QueryParamData,
   SearchAPIResponse,
@@ -29,7 +29,7 @@ export async function SearchDrawerFilters({
 }: {
   searchParams: QueryParamData;
   searchResultsPromise: Promise<SearchAPIResponse>;
-  agencyListPromise: Promise<FilterOption[]>;
+  agencyListPromise: Promise<RelevantAgencyRecord[]>;
 }) {
   const t = useTranslations("Search");
   const {

@@ -1,6 +1,9 @@
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { formatPillLabels } from "src/utils/search/searchUtils";
+import {
+  agenciesToSortedFilterOptions,
+  formatPillLabels,
+} from "src/utils/search/searchUtils";
 
 import { PillList } from "./PillList";
 
@@ -9,14 +12,15 @@ export async function FilterPillPanel({
   agencyListPromise,
 }: {
   searchParams: QueryParamData;
-  agencyListPromise: Promise<FilterOption[]>;
+  agencyListPromise: Promise<RelevantAgencyRecord[]>;
 }) {
-  let agencyOptions;
+  let agencies;
   try {
-    agencyOptions = await agencyListPromise; // TODO: this needs to be a flat list. Do we have that available?
+    agencies = await agencyListPromise; // TODO: this needs to be a flat list. Do we have that available?
   } catch (e) {
     console.error("Unable to fetch agency options for pills");
   }
+  const agencyOptions = agenciesToSortedFilterOptions(agencies || []);
   const pillLabelData = formatPillLabels(searchParams, agencyOptions || []);
   return (
     <div>

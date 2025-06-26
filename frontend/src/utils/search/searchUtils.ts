@@ -41,7 +41,7 @@ export const sortFilterOptions = (
 };
 
 // finds human readable agency name by agency code in list of agency filter options
-// agency options will come in pre-flattened
+
 export const getAgencyDisplayName = (opportunity: BaseOpportunity): string => {
   if (
     opportunity.top_level_agency_name &&
@@ -131,6 +131,8 @@ export const paramsToFormattedQuery = (params: URLSearchParams): string => {
   return `?${decodeURIComponent(params.toString())}`;
 };
 
+// picks top level agencies off of individual sub agency records and moves them to
+// the top level in order to provide a full flattened list of top level and sub agencies
 export const flattenAgencies = (agencies: RelevantAgencyRecord[]) => {
   return agencies.reduce((allAgencies, agency) => {
     const agenciesToAdd = [agency];
@@ -151,12 +153,9 @@ const isTopLevelAgency = (agency: RelevantAgencyRecord) => {
   return !agency.agency_code.includes("-");
 };
 
-// translates API response containing flat list of agencies into nested filter options
-export const agenciesToFilterOptions = (
-  agencies: RelevantAgencyRecord[],
-): FilterOption[] => {
+export const floatTopLevelAgencies = (agencies: RelevantAgencyRecord[]) => {
   // this should put all parent agencies at the top of the list to make it simpler to nest
-  const agenciesWithTopLevelAgenciesFloated = agencies.sort((a, b) => {
+  return agencies.sort((a, b) => {
     // when the agency code does not contain a dash we know we're dealing with a top level agency
     if (isTopLevelAgency(a) && !isTopLevelAgency(b)) {
       return -1;
@@ -166,13 +165,22 @@ export const agenciesToFilterOptions = (
     }
     return 0;
   });
+};
 
+export const agencyToFilterOption = (
+  agency: RelevantAgencyRecord,
+): FilterOption => ({
+  id: agency.agency_code,
+  label: agency.agency_name,
+  value: agency.agency_code,
+});
+
+// translates API response containing flat list of agencies into nested filter options
+export const agenciesToNestedAgencyOptions = (
+  agenciesWithTopLevelAgenciesFloated: RelevantAgencyRecord[],
+): FilterOption[] => {
   return agenciesWithTopLevelAgenciesFloated.reduce((acc, rawAgency) => {
-    const agencyOption = {
-      id: rawAgency.agency_code,
-      label: rawAgency.agency_name,
-      value: rawAgency.agency_code,
-    };
+    const agencyOption = agencyToFilterOption(rawAgency);
     if (isTopLevelAgency(rawAgency)) {
       return [...acc, agencyOption];
     }
@@ -215,6 +223,40 @@ export const getSiblingOptionValues = (
     : [];
 };
 
+export const agenciesToSortedAndNestedFilterOptions = (
+  agencies: RelevantAgencyRecord[],
+) => {
+  try {
+    return sortFilterOptions(agenciesToNestedAgencyOptions(agencies));
+  } catch (e) {
+    console.error("Unable to sort, convert and nest agency filter options", e);
+    return [];
+  }
+};
+
+export const agenciesToSortedFilterOptions = (
+  agencies: RelevantAgencyRecord[],
+) => {
+  try {
+    return sortFilterOptions(agencies.map(agencyToFilterOption));
+  } catch (e) {
+    console.error("Unable to sort and convert agency filter options", e);
+    return [];
+  }
+};
+
+// // pass in a list of options to choose from, get back a function that will
+// // find the label for an option with a given value
+// export const getFilterOptionLabelFrom =
+//   (optionOptions: FilterOption[]) => (value: string) => {
+//     const option = optionOptions.find((option) => option.value === value);
+//     if (!option) {
+//       console.error(`Pill label not found for ${value}`);
+//       return "";
+//     }
+//     return option.label;
+//   };
+
 // look up filter option label based on filter option value
 export const getFilterOptionLabel = (
   value: string,
@@ -253,7 +295,10 @@ export const formatPillLabels = (
 ): FilterPillLabelData[] => {
   return Object.entries(searchParams).reduce(
     (acc: FilterPillLabelData[], [key, values]: [string, Set<string>]) => {
-      if (!searchFilterNames.includes(key) || !values.size) {
+      if (
+        !searchFilterNames.includes(key as FrontendFilterNames) ||
+        !values.size
+      ) {
         return acc;
       }
 
