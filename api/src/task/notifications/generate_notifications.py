@@ -37,7 +37,7 @@ class GenerateNotificationsConfig(PydanticBaseEnvConfig):
 
 
 CONTACT_INFO = (
-    '<a href="mailto:support@grants.gov">supoort@grants.gov</a>\n'
+    '<a href="mailto:support@grants.gov">support@grants.gov</a>\n'
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
