@@ -9,6 +9,7 @@ from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -33,8 +34,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         self,
         db_session: db.Session,
         frontend_base_url: str | None = None,
+        notification_config: EmailNotificationConfig | None = None,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, notification_config)
 
         self.frontend_base_url = frontend_base_url
 
