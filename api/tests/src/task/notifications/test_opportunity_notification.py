@@ -462,6 +462,61 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "imp_dates_diffs,expected_html",
+        [
+            # close_date
+            (
+                {"close_date": {"before": "2035-10-10", "after": "2035-10-30"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
+            ),
+            (
+                {"close_date": {"before": "2025-10-10", "after": None}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
+            ),
+            # forecasted_award_date
+            (
+                {"forecasted_award_date": {"before": "2030-1-6", "after": "2031-5-3"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
+            ),
+            (
+                {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
+            ),
+            # forecasted_project_start_date
+            (
+                {
+                    "forecasted_project_start_date": {
+                        "before": "2027-1-7",
+                        "after": "2031-5-3",
+                    }
+                },
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
+            ),
+            (
+                {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
+            ),
+            # fiscal_year
+            (
+                {"fiscal_year": {"before": 2050, "after": 2051}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
+            ),
+            (
+                {"fiscal_year": {"before": 2033, "after": None}},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
+            ),
+        ],
+    )
+    def test_build_important_dates_content(
+        self, db_session, imp_dates_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_important_dates_content(imp_dates_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "category_diff,expected_html",
         [
             (
@@ -651,5 +706,4 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-
         assert res == expected

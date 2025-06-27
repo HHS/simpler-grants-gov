@@ -1,5 +1,4 @@
 import logging
-from dataclasses import field
 from datetime import datetime
 from typing import Sequence, cast
 from uuid import UUID
@@ -53,7 +52,6 @@ ELIGIBILITY_FIELDS = {
     "applicant_eligibility_description": "Additional information was",
 }
 GRANTOR_CONTACT_INFORMATION_FIELDS = {
-    "agency_name": "The updated grantor’s name is",  # we dont have this
     "agency_email_address": "The updated email address is",
     "agency_contact_description": "New description:",
 }
@@ -78,7 +76,8 @@ OPPORTUNITY_STATUS_MAP = {
 
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
-NOT_SPECIFIED = "not specified"
+NOT_SPECIFIED = "not specified"  # If None value display this string
+
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session):
@@ -274,12 +273,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
-        return {
-            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
-            for diff in diffs
-        }
-
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
             return NOT_SPECIFIED
@@ -358,6 +351,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             SECTION_STYLING.format("Status")
             + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
         )
+
+    def _flatten_and_extract_field_changes(self, diffs: list) -> dict:
+        return {
+            diff["field"].split(".")[-1]: {"before": diff["before"], "after": diff["after"]}
+            for diff in diffs
+        }
 
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version

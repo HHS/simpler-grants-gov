@@ -30,6 +30,8 @@ RUN apt-get update \
         libtasn1-6 \
         libgnutls30 \
         systemd \
+        libxml2 \
+        libicu72 \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -fr /var/lib/apt/lists/* \
