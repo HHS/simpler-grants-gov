@@ -104,14 +104,19 @@ def is_empty_str(value: str | None) -> bool:
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
-    log_extra = {"opportunity_id": source_opportunity.opportunity_id}
+    log_extra = {
+        "legacy_opportunity_id": source_opportunity.opportunity_id,
+        "opportunity_id": existing_opportunity.opportunity_id if existing_opportunity else None,
+    }
 
     if existing_opportunity is None:
         logger.info("Creating new opportunity record", extra=log_extra)
 
     # We always create a new opportunity record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
-    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+    target_opportunity = Opportunity(legacy_opportunity_id=source_opportunity.opportunity_id)
+    if existing_opportunity:
+        target_opportunity.opportunity_id = existing_opportunity.opportunity_id
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle
@@ -174,6 +179,7 @@ def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
     existing_assistance_listing: OpportunityAssistanceListing | None,
+    opportunity: Opportunity,
 ) -> OpportunityAssistanceListing:
     log_extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
 
@@ -183,9 +189,14 @@ def transform_assistance_listing(
     # We always create a new assistance listing record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
     target_assistance_listing = OpportunityAssistanceListing(
-        opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
-        opportunity_id=source_assistance_listing.opportunity_id,
+        legacy_opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
+        opportunity_id=opportunity.opportunity_id,
     )
+
+    if existing_assistance_listing:
+        target_assistance_listing.opportunity_assistance_listing_id = (
+            existing_assistance_listing.opportunity_assistance_listing_id
+        )
 
     target_assistance_listing.assistance_listing_number = source_assistance_listing.cfdanumber
     target_assistance_listing.program_title = source_assistance_listing.programtitle
@@ -198,7 +209,9 @@ def transform_assistance_listing(
 
 
 def transform_opportunity_summary(
-    source_summary: SourceSummary, incoming_summary: OpportunitySummary | None
+    source_summary: SourceSummary,
+    incoming_summary: OpportunitySummary | None,
+    opportunity: Opportunity | None,
 ) -> OpportunitySummary:
     log_extra = get_log_extra_summary(source_summary)
 
@@ -207,15 +220,19 @@ def transform_opportunity_summary(
         # These values are a part of a unique key for identifying across tables, we don't
         # ever want to modify them once created
         target_summary = OpportunitySummary(
-            opportunity_id=source_summary.opportunity_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
         )
+        if opportunity:
+            target_summary.opportunity_id = opportunity.opportunity_id
     else:
         # We create a new summary object and merge it outside this function
         # that way if any modifications occur on the object and then it errors
         # they aren't actually applied
         target_summary = OpportunitySummary(
-            opportunity_summary_id=incoming_summary.opportunity_summary_id
+            opportunity_id=incoming_summary.opportunity_id,
+            opportunity_summary_id=incoming_summary.opportunity_summary_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
         )
 
     # Fields in all 4 source tables

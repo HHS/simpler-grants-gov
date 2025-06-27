@@ -19,7 +19,7 @@ def setup_opportunity_search_index_queue_trigger_function(
             f"""
             CREATE OR REPLACE TRIGGER {table}_queue_trigger
             AFTER INSERT OR UPDATE ON api.{table}
-            FOR EACH ROW EXECUTE FUNCTION update_opportunity_search_queue();
+            FOR EACH ROW EXECUTE FUNCTION api.update_opportunity_search_queue();
         """
         )
 
@@ -32,4 +32,4 @@ def remove_opportunity_search_index_queue_trigger_function(
         op.execute(f"DROP TRIGGER IF EXISTS {table}_queue_trigger ON api.{table};")
 
     # Drop the trigger function
-    op.execute("DROP FUNCTION IF EXISTS update_opportunity_search_queue();")
+    op.execute("DROP FUNCTION IF EXISTS api.update_opportunity_search_queue();")

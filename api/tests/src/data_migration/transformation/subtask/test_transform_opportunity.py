@@ -108,7 +108,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
         source_opportunity = setup_opportunity(create_existing=False, is_delete=True)
 
         target_opportunity = OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id, opportunity_attachments=[]
+            legacy_opportunity_id=source_opportunity.opportunity_id, opportunity_attachments=[]
         )
 
         attachments = []
@@ -142,7 +142,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
         )
 
         target_opportunity = OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id,
+            legacy_opportunity_id=source_opportunity.opportunity_id,
             is_draft=True,
             opportunity_attachments=[],
         )

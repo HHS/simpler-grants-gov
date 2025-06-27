@@ -21,7 +21,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tsynopsis,
             OpportunitySummary,
             [
-                Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id,
+                Tsynopsis.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(False),
             ],
         )
@@ -32,7 +32,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tforecast,
             OpportunitySummary,
             [
-                Tforecast.opportunity_id == OpportunitySummary.opportunity_id,
+                Tforecast.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(True),
             ],
         )
@@ -88,7 +88,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
 
             logger.info("Transforming and upserting opportunity summary", extra=extra)
             transformed_opportunity_summary = transform_util.transform_opportunity_summary(
-                source_summary, target_summary
+                source_summary, target_summary, opportunity
             )
 
             if is_insert:

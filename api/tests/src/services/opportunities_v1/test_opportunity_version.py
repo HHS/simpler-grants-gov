@@ -75,8 +75,8 @@ def test_save_opportunity_version_with_attachments(db_session, enable_factory_cr
     attachment_2 = OpportunityAttachmentFactory.create(opportunity=opp)
 
     expected = [
-        {"attachment_id": attachment_1.attachment_id},
-        {"attachment_id": attachment_2.attachment_id},
+        {"attachment_id": str(attachment_1.attachment_id)},
+        {"attachment_id": str(attachment_2.attachment_id)},
     ]
 
     # Save opportunity into opportunity_version table

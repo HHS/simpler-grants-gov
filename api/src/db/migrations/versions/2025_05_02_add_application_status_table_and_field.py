@@ -1,7 +1,7 @@
 """Add application status table and field
 
 Revision ID: 462b5b67c0ea
-Revises: 7962ce400424
+Revises: 3b0705202c54
 Create Date: 2025-05-02 17:17:28.799500
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "462b5b67c0ea"
-down_revision = "7962ce400424"
+down_revision = "3b0705202c54"
 branch_labels = None
 depends_on = None
 

@@ -36,7 +36,7 @@ def test_get_s3_attachment_path(is_draft, opportunity_id, attachment_id, file_na
         PUBLIC_FILES_BUCKET="s3://test-public-bucket", DRAFT_FILES_BUCKET="s3://test-draft-bucket"
     )
 
-    opp = OpportunityFactory.build(opportunity_id=opportunity_id, is_draft=is_draft)
+    opp = OpportunityFactory.build(legacy_opportunity_id=opportunity_id, is_draft=is_draft)
 
     assert (
         attachment_util.get_s3_attachment_path(file_name, attachment_id, opp, config)
