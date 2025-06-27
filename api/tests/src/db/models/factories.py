@@ -987,12 +987,12 @@ class CompetitionFactory(BaseFactory):
         size=lambda: random.randint(1, 2),
     )
 
-    open_to_applicants = factory.Faker(
-        "random_elements",
-        length=random.randint(1, 2),
-        elements=[a for a in CompetitionOpenToApplicant],
-        unique=True,
-    )
+    # Default to allowing both individual and organization applicants
+    # This can be overridden in tests by setting it explicitly
+    open_to_applicants = [
+        CompetitionOpenToApplicant.INDIVIDUAL,
+        CompetitionOpenToApplicant.ORGANIZATION,
+    ]
 
     is_simpler_grants_enabled = True
 
