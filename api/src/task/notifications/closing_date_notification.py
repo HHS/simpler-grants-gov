@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 CONTACT_INFO = (
     "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-    "mailto:support@grants.gov\n"
+    '<a href="mailto:support@grants.gov">support@grants.gov</a>\n'
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"
