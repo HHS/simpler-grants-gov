@@ -981,7 +981,10 @@ def setup_competition(
 
 
 def validate_competition(
-    db_session, source_competition: staging.competition.Tcompetition, expect_in_db: bool = True
+    db_session,
+    source_competition: staging.competition.Tcompetition,
+    expect_in_db: bool = True,
+    expect_assistance_listing: bool = True,
 ) -> None:
     """Validate that a competition was transformed correctly."""
     competition = (
@@ -993,6 +996,11 @@ def validate_competition(
     if not expect_in_db:
         assert competition is None
         return
+
+    if expect_assistance_listing:
+        assert competition.opportunity_assistance_listing_id is not None
+    else:
+        assert competition.opportunity_assistance_listing_id is None
 
     assert competition is not None
     assert competition.public_competition_id == source_competition.competitionid

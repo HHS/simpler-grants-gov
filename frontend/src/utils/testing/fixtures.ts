@@ -215,3 +215,26 @@ export const fakeSearchParamDict = {
   andOr: "OR",
   sortby: "closeDateAsc",
 };
+
+export const fakeResponsiveTableHeaders = [
+  { cellData: "hi" },
+  { cellData: "a heading" },
+  { cellData: "table header cell" },
+];
+export const fakeResponsiveTableRows = [
+  [
+    { cellData: "hi from row one", stackOrder: 1 },
+    { cellData: "i am column two", stackOrder: 0 },
+    { cellData: "some data", stackOrder: -1 },
+  ],
+  [
+    { cellData: "hi from row two", stackOrder: 1 },
+    { cellData: "still column two", stackOrder: 0 },
+    { cellData: "some more data", stackOrder: -1 },
+  ],
+  [
+    { cellData: "hi from row three", stackOrder: 1 },
+    { cellData: "column two", stackOrder: 0 },
+    { cellData: "even more data", stackOrder: -1 },
+  ],
+];
