@@ -20,6 +20,7 @@ import {
   fundingOptions,
   statusOptions,
 } from "./SearchFilterAccordion/SearchFilterOptions";
+import SearchSortBy from "./SearchSortBy";
 
 export async function SearchDrawerFilters({
   searchParams,
@@ -37,6 +38,8 @@ export async function SearchDrawerFilters({
     agency,
     closeDate,
     costSharing,
+    sortby,
+    query,
   } = searchParams;
 
   const agenciesPromise = Promise.all([
@@ -55,6 +58,9 @@ export async function SearchDrawerFilters({
 
   return (
     <>
+      <div className="display-block tablet:display-none">
+        <SearchSortBy sortby={sortby} queryTerm={query} />
+      </div>
       <CheckboxFilter
         filterOptions={statusOptions}
         query={status}
