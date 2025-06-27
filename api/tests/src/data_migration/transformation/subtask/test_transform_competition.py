@@ -97,7 +97,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=opportunity,
-            opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
+            legacy_opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
         )
 
         # Test case where opportunity_id found through cfda listing but the opportunity
@@ -113,7 +113,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=None,
-            opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
         )
 
         # Run the transformation
