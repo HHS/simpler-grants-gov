@@ -11,7 +11,7 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
     AbstractTransformSubTask,
 )
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.competition import Tcompetition
 from src.db.models.staging.opportunity import TopportunityCfda
 
@@ -52,19 +52,6 @@ class TransformCompetition(AbstractTransformSubTask):
 
                     opportunity_id = opportunity.opportunity_id if opportunity else None
 
-                    opportunity_assistance_listing = self.db_session.execute(
-                        select(OpportunityAssistanceListing).where(
-                            OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
-                            == opportunity_cfda.opp_cfda_id
-                        )
-                    ).scalar_one_or_none()
-
-                    opportunity_assistance_listing_id = (
-                        opportunity_assistance_listing.opportunity_assistance_listing_id
-                        if opportunity_assistance_listing
-                        else None
-                    )
-
                     # If we found opportunity_id through cfda listing and the opportunity is not
                     # found associated to that id, this denotes an orphaned competition. This case
                     # will be indicated in the competition.transform_notes with 'orphaned_competition'.
@@ -78,7 +65,7 @@ class TransformCompetition(AbstractTransformSubTask):
                         # for the purposes of connecting the tables.
                         for assistance_listing in opportunity.opportunity_assistance_listings:
                             if (
-                                assistance_listing.opportunity_assistance_listing_id
+                                assistance_listing.legacy_opportunity_assistance_listing_id
                                 == opportunity_cfda.opp_cfda_id
                             ):
                                 opportunity_id = opportunity.opportunity_id
