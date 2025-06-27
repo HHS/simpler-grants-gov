@@ -46,7 +46,7 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   searchAgencies: (arg: unknown): unknown => mockSearchAgencies(arg),
 }));
 
-jest.mock("src/utils/search/searchUtils", () => ({
+jest.mock("src/utils/search/filterUtils", () => ({
   sortFilterOptions: (arg: unknown): unknown => mockSortFilterOptions(arg),
   agenciesToFilterOptions: (arg: unknown): unknown =>
     mockAgenciesToFilterOptions(arg),

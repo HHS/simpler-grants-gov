@@ -3,7 +3,7 @@ import { QueryParamData } from "src/types/search/searchRequestTypes";
 import {
   agenciesToSortedFilterOptions,
   formatPillLabels,
-} from "src/utils/search/searchUtils";
+} from "src/utils/search/filterUtils";
 
 import { PillList } from "./PillList";
 

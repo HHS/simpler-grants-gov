@@ -6,7 +6,7 @@ import {
   searchAgencies,
 } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
-import { flattenAgencies } from "src/utils/search/searchUtils";
+import { flattenAgencies } from "src/utils/search/filterUtils";
 
 // would have called this getAgencies, but technically it's a POST
 export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
