@@ -90,10 +90,23 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session, create_existing=True, is_delete=True, opportunity=opportunity
         )
 
+        # Test case where cfda listing exists in staging but not api schema
+        # and we are still able to associate competition to oppportunity.
+        cfda_opp_id_in_staging_only = 10111
+        cfda_opp_listing_only_in_staging = setup_competition(
+            db_session,
+            create_existing=False,
+            opportunity=opportunity,
+            opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
+        )
+
         # Run the transformation
         transform_competition.run_subtask()
 
         # Validate the results
+        validate_competition(
+            db_session, cfda_opp_listing_only_in_staging, expect_assistance_listing=False
+        )
         validate_competition(db_session, basic_insert)
         validate_competition(db_session, insert_with_null_fields)
         validate_competition(db_session, basic_update)
@@ -101,8 +114,8 @@ class TestTransformCompetition(BaseTransformTestClass):
 
         # Check the metrics
         metrics = transform_competition.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 1
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
