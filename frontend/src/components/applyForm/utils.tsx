@@ -10,7 +10,7 @@ import {
 import { JSX } from "react";
 
 import {
-  FieldErrors,
+  FormValidationWarning,
   UiSchema,
   UiSchemaField,
   UswdsWidgetProps,
@@ -29,7 +29,7 @@ export function buildFormTreeRecursive({
   schema,
   uiSchema,
 }: {
-  errors: FieldErrors;
+  errors: FormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
@@ -161,15 +161,15 @@ const widgetComponents: Record<
 };
 
 export const buildField = ({
-  uiFieldObject,
-  formSchema,
   errors,
+  formSchema,
   formData,
+  uiFieldObject,
 }: {
-  uiFieldObject: UiSchemaField;
+  errors: FormValidationWarning[] | null;
   formSchema: RJSFSchema;
-  errors: FieldErrors;
   formData: object;
+  uiFieldObject: UiSchemaField;
 }) => {
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
@@ -177,7 +177,7 @@ export const buildField = ({
     ? definition.split("/")[definition.split("/").length - 1]
     : (schema?.title ?? "untitled").replace(" ", "-");
 
-  const rawErrors = formatFieldErrors(errors, definition, name);
+  const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
   const value = get(formData, name) as string | number | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
@@ -211,25 +211,17 @@ export const buildField = ({
   });
 };
 
-const formatFieldErrors = (
-  errors: FieldErrors,
-  definition: string | undefined,
+const formatFieldWarnings = (
+  warnings: FormValidationWarning[],
   name: string,
 ) => {
-  const errorsforField = filter(
-    errors,
-    (error) =>
-      definition === `/properties${error.instancePath}` ||
-      name === error.params?.missingProperty,
+  const warningsforField = filter(
+    warnings,
+    (warning) => `$.${name}` === warning.field,
   );
-  return errorsforField
-    .map((error) => {
-      if (definition === `/properties${error.instancePath}`) {
-        return error.message;
-      }
-      return "This required field cannot be blank";
-    })
-    .filter((error): error is string => error !== undefined);
+  return warningsforField.map((warning) => {
+    return warning.message;
+  });
 };
 
 export function getFieldsForNav(
@@ -354,6 +346,20 @@ export const shapeFormData = <T extends object>(
                 )
               : item,
           );
+        } else if (
+          typeof schema.properties[key] !== "boolean" &&
+          schema.properties[key].type === "boolean" &&
+          typeof data === "object"
+        ) {
+          // if the schema is a boolean, we need to check if the data has a value
+          if (data[key] === "true" || data[key] === true) {
+            result[key] = true;
+          } else if (data[key] === "false" || data[key] === false) {
+            result[key] = false;
+          } else {
+            result[key] = undefined; // or some default value
+          }
+          // if the array is flat, just return the values
         } else {
           if (data[key]) {
             result[key] = data[key];

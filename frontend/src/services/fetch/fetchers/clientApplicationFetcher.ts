@@ -20,10 +20,11 @@ export const startApplication = async (
       competitionId,
     }),
   });
+
   if (res.ok && res.status === 200) {
     return (await res.json()) as ClientApplicationStartResponse;
   } else {
-    throw new Error(`Error sssssss application: ${res.status}`, {
+    throw new Error(`Error starting application: ${res.status}`, {
       cause: `${res.status}`,
     });
   }

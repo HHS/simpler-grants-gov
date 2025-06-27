@@ -41,6 +41,13 @@ export type FieldErrors = ErrorObject<
   unknown
 >[];
 
+export type FormValidationWarning = {
+  field: string;
+  message: string;
+  type: string;
+  value: string;
+};
+
 export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
 
 export type UiSchemaField = {
