@@ -1,5 +1,6 @@
-import { FilterOption } from "src/types/search/searchFilterTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
+import { agenciesToNestedFilterOptions } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 
@@ -12,11 +13,11 @@ export async function AgencyFilterAccordion({
   agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
+  agencyOptionsPromise: Promise<[RelevantAgencyRecord[], SearchAPIResponse]>;
 }) {
   const t = useTranslations("Search");
 
-  let allAgencies: FilterOption[] = [];
+  let allAgencies: RelevantAgencyRecord[] = [];
   let facetCounts: { [key: string]: number } = {};
   try {
     let searchResults: SearchAPIResponse;
@@ -26,6 +27,9 @@ export async function AgencyFilterAccordion({
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
   }
+
+  const agencyOptions = agenciesToNestedFilterOptions(allAgencies);
+
   return (
     <BasicSearchFilterAccordion
       query={query}
@@ -36,7 +40,7 @@ export async function AgencyFilterAccordion({
       <AgencyFilterContent
         query={query}
         title={t("accordion.titles.agency")}
-        allAgencies={allAgencies}
+        allAgencies={agencyOptions}
         facetCounts={facetCounts}
       />
     </BasicSearchFilterAccordion>
@@ -48,11 +52,11 @@ export async function AgencyFilter({
   agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agencyOptionsPromise: Promise<[FilterOption[], SearchAPIResponse]>;
+  agencyOptionsPromise: Promise<[RelevantAgencyRecord[], SearchAPIResponse]>;
 }) {
   const t = useTranslations("Search");
 
-  let agencies: FilterOption[] = [];
+  let agencies: RelevantAgencyRecord[] = [];
   let facetCounts: { [key: string]: number } = {};
   try {
     let searchResults: SearchAPIResponse;
@@ -62,9 +66,12 @@ export async function AgencyFilter({
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
   }
+
+  const agencyOptions = agenciesToNestedFilterOptions(agencies);
+
   return (
     <CheckboxFilter
-      filterOptions={agencies}
+      filterOptions={agencyOptions}
       query={query}
       queryParamKey={"agency"}
       title={t("accordion.titles.agency")}

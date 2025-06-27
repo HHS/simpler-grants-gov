@@ -1,4 +1,5 @@
 import { environment } from "src/constants/environments";
+import { obtainAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
@@ -6,14 +7,17 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { use } from "react";
+import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
+import { Pill } from "../Pill";
 import { AndOrPanel } from "./AndOrPanel";
+import { FilterPillPanel } from "./FilterPillPanel";
+import { PillList } from "./PillList";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -37,6 +41,7 @@ export function SearchVersionTwo({
   }
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
+  const agencyListPromise = obtainAgencies();
 
   return (
     <>
@@ -65,6 +70,7 @@ export function SearchVersionTwo({
                   <SearchDrawerFilters
                     searchParams={convertedSearchParams}
                     searchResultsPromise={searchResultsPromise}
+                    agencyListPromise={agencyListPromise}
                   />
                 </DrawerUnit>
               </div>
@@ -74,6 +80,29 @@ export function SearchVersionTwo({
             </div>
           </div>
           <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
+          <Suspense
+            fallback={
+              <div className="display-flex">
+                <div className="flex-1 flex-align-self-center">Loading...</div>
+                <div className="opacity-0 flex-1">
+                  <PillList
+                    pills={[
+                      {
+                        label: "",
+                        queryParamKey: "status",
+                        queryParamValue: "",
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            }
+          >
+            <FilterPillPanel
+              searchParams={convertedSearchParams}
+              agencyListPromise={agencyListPromise}
+            />
+          </Suspense>
           <SearchResults
             searchParams={convertedSearchParams}
             loadingMessage={t("loading")}

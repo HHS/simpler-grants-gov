@@ -25,7 +25,7 @@ export function AgencyFilterContent({
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
   const [searchTerm, setSearchTerm] = useState<string>();
-  const searchForAgencies = debounce(
+  const debouncedSearchForAgencies = debounce(
     (agencySearchTerm: string) => {
       setSearchTerm(agencySearchTerm);
       if (!agencySearchTerm) {
@@ -54,7 +54,7 @@ export function AgencyFilterContent({
           id="AgencySearch"
           title="Agency Search"
           aria-label="Agency Search"
-          onChange={(e) => searchForAgencies(e.target.value)}
+          onChange={(e) => debouncedSearchForAgencies(e.target.value)}
         />
         <USWDSIcon
           name="search"
