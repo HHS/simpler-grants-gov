@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import {
+  fakeAgencyResponseData,
   fakeSearchAPIResponse,
-  filterOptionsWithChildren,
 } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
@@ -31,7 +31,7 @@ describe("AgencyFilterAccordion", () => {
     const component = await AgencyFilterAccordion({
       topLevelQuery: new Set(),
       agencyOptionsPromise: Promise.resolve([
-        filterOptionsWithChildren,
+        fakeAgencyResponseData,
         fakeSearchAPIResponse,
       ]),
       query: new Set(),
@@ -46,7 +46,7 @@ describe("AgencyFilterAccordion", () => {
     const component = await AgencyFilterAccordion({
       topLevelQuery: new Set(),
       agencyOptionsPromise: Promise.resolve([
-        filterOptionsWithChildren,
+        fakeAgencyResponseData,
         fakeSearchAPIResponse,
       ]),
       query: new Set(),

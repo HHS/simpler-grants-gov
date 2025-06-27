@@ -1,5 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import {
+  fakeAgencyResponseData,
   fakeSearchAPIResponse,
   searchFetcherParams,
 } from "src/utils/testing/fixtures";
@@ -41,6 +42,7 @@ describe("SearchDrawerFilters", () => {
     const component = await SearchDrawerFilters({
       searchParams: searchFetcherParams,
       searchResultsPromise: Promise.resolve(fakeSearchAPIResponse),
+      agencyListPromise: Promise.resolve(fakeAgencyResponseData),
     });
     render(component);
 
@@ -51,6 +53,7 @@ describe("SearchDrawerFilters", () => {
     const component = await SearchDrawerFilters({
       searchParams: searchFetcherParams,
       searchResultsPromise: Promise.resolve(fakeSearchAPIResponse),
+      agencyListPromise: Promise.resolve(fakeAgencyResponseData),
     });
 
     // eslint-disable-next-line testing-library/no-unnecessary-act

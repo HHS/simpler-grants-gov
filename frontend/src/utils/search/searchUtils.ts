@@ -179,7 +179,7 @@ export const agencyToFilterOption = (
 });
 
 // translates API response containing flat list of agencies into nested filter options
-export const agenciesToNestedAgencyOptions = (
+export const agenciesToNestedFilterOptions = (
   agenciesWithTopLevelAgenciesFloated: RelevantAgencyRecord[],
 ): FilterOption[] => {
   return agenciesWithTopLevelAgenciesFloated.reduce((acc, rawAgency) => {
@@ -230,7 +230,7 @@ export const agenciesToSortedAndNestedFilterOptions = (
   agencies: RelevantAgencyRecord[],
 ) => {
   try {
-    return sortFilterOptions(agenciesToNestedAgencyOptions(agencies));
+    return sortFilterOptions(agenciesToNestedFilterOptions(agencies));
   } catch (e) {
     console.error("Unable to sort, convert and nest agency filter options", e);
     return [];
@@ -247,18 +247,6 @@ export const agenciesToSortedFilterOptions = (
     return [];
   }
 };
-
-// // pass in a list of options to choose from, get back a function that will
-// // find the label for an option with a given value
-// export const getFilterOptionLabelFrom =
-//   (optionOptions: FilterOption[]) => (value: string) => {
-//     const option = optionOptions.find((option) => option.value === value);
-//     if (!option) {
-//       console.error(`Pill label not found for ${value}`);
-//       return "";
-//     }
-//     return option.label;
-//   };
 
 // look up filter option label based on filter option value
 export const getFilterOptionLabel = (
@@ -285,7 +273,7 @@ export const formatPillLabel = (
     case "costSharing":
       return `Cost sharing: ${getFilterOptionLabel(value, options)}`;
     case "closeDate":
-      return `Closing in less than ${value} days`;
+      return `Closing within ${value} days`;
     default:
       return getFilterOptionLabel(value, options);
   }
