@@ -230,7 +230,6 @@ def test_grouped_search_queries_cli(
     assert saved_search2.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
 
-# TODO: Fix this test
 def test_search_notifications_on_index_change(
     cli_runner,
     db_session,
