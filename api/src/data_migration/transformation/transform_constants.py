@@ -25,6 +25,7 @@ from src.db.models.staging.synopsis import (
 ORPHANED_CFDA = "orphaned_cfda"
 ORPHANED_HISTORICAL_RECORD = "orphaned_historical_record"
 ORPHANED_DELETE_RECORD = "orphaned_delete_record"
+ORPHANED_COMPETITION = "orphaned_competition"
 
 OPPORTUNITY = "opportunity"
 ASSISTANCE_LISTING = "assistance_listing"
