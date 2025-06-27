@@ -1,11 +1,11 @@
 # Writing standards
 
-### Indicating required and optional fields
+Our writing standards ensure that content across Simpler.Grants.gov is clear, consistent, and user-centered. These guidelines help teams write and structure content in a way that supports usability and reflects how users naturally read and interact with our product.
 
-Clearly communicating whether form fields are required or optional helps users complete forms with confidence and reduces input errors. Use the following standards to ensure consistency and clarity across all form interfaces:
+Writing standards in this guide include:
 
-When all fields are required: State `All fields as required.` as helper text. Do not use asterisks to indicate required fields.
+* **Editorial style** – Guidance on grammar, tone, pronoun use, and writing mechanics, as well as alignment with trusted external style guides.
+* **Content patterns** – Standards for how to structure and present common content types, including form instructions, field labels, and heading capitalization.
+* **Terminology usage** – Key vocabulary decisions based on user research, ensuring we use language that resonates with and is easily understood by our audiences.
 
-When all fields are optional: State `All fields are optional.` as helper text.&#x20;
-
-When there is a mix of required and optional fields: State `A red asterisk`` `<mark style="color:red;">`(*)`</mark>` ``indicates a required field.` Then, apply the red asterisk after the label for any required fields.
+Use these standards to create content that is consistent, accessible, and aligned with user expectations.

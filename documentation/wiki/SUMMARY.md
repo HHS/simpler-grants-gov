@@ -121,7 +121,7 @@
 * [Content guidelines](design-and-research/content-guidelines/README.md)
   * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
   * [Writing standards](design-and-research/content-guidelines/writing-standards/README.md)
-    * [Editorial style](design-and-research/content-guidelines/writing-standards/editoral-style.md)
+    * [Editorial style](design-and-research/content-guidelines/editoral-style.md)
     * [Content patterns](design-and-research/content-guidelines/writing-standards/content-patterns.md)
   * [Terminology usage](design-and-research/content-guidelines/terminology-usage.md)
 * [User research](design-and-research/user-research/README.md)
