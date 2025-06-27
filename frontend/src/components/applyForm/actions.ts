@@ -10,18 +10,16 @@ import { FormDetail } from "src/types/formResponseTypes";
 
 import { shapeFormData } from "./utils";
 
-type applyFormErrors = {
-  error: boolean;
-  submitted: boolean;
-};
-type applyFormResponse = {
+type ApplyFormResponse = {
   applicationId: string;
+  error: boolean;
   formData: object;
   formId: string;
+  submitted: boolean;
 };
 
 export async function handleFormAction(
-  _prevState: applyFormResponse & applyFormErrors,
+  _prevState: ApplyFormResponse,
   formData: FormData,
 ) {
   const { formId, applicationId } = _prevState;
