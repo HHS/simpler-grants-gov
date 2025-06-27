@@ -1,5 +1,4 @@
 import {
-  ApplicationDetail,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationResponseDetail,
@@ -39,16 +38,6 @@ export const getApplicationDetails = async (
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;
-};
-
-export const selectFormValidationWarnings = ({
-  application,
-  applicationId,
-}: {
-  application: ApplicationDetail;
-  applicationId: string;
-}) => {
-  return application.form_validation_warnings?.[applicationId] || [];
 };
 
 export const getApplicationFormDetails = async (
