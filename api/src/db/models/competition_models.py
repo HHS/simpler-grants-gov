@@ -66,7 +66,7 @@ class Competition(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkCompetitionOpenToApplicant(competition_open_to_applicant=obj),
     )
     is_electronic_required: Mapped[bool | None]
-    expected_application_count: Mapped[int | None] =  mapped_column(BigInteger)
+    expected_application_count: Mapped[int | None] = mapped_column(BigInteger)
     expected_application_size_mb: Mapped[int | None] = mapped_column(BigInteger)
     is_multi_package: Mapped[bool | None]
     agency_download_url: Mapped[str | None]
