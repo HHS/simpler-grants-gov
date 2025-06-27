@@ -1,5 +1,10 @@
 import { identity } from "lodash";
-import { formatDate, isExpired, isExpiring } from "src/utils/dateUtil";
+import {
+  formatDate,
+  isExpired,
+  isExpiring,
+  toShortMonthDate,
+} from "src/utils/dateUtil";
 
 jest.mock("src/constants/auth", () => ({
   clientTokenRefreshInterval: 1000,
@@ -55,5 +60,17 @@ describe("isExpired", () => {
   });
   it("returns false if expiration is in the future", () => {
     expect(isExpired(Date.now() + 1)).toEqual(false);
+  });
+});
+
+describe("toShortMonthDate", () => {
+  it("converts dates to the `short month` format", () => {
+    expect(toShortMonthDate("2025-01-25")).toEqual("Jan 25, 2025");
+    expect(toShortMonthDate("01-25-2025")).toEqual("Jan 25, 2025");
+    expect(toShortMonthDate("1-1-2025")).toEqual("Jan 1, 2025");
+    expect(toShortMonthDate("1-1-25")).toEqual("Jan 1, 2025");
+  });
+  it("returns an empty string if input is invalid", () => {
+    expect(toShortMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
   });
 });

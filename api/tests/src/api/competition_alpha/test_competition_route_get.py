@@ -193,6 +193,100 @@ def test_competition_get_200_is_open(
     assert response_competition["is_open"] == expected_is_open
 
 
+def test_competition_get_200_is_simpler_grants_enabled_false(
+    client,
+    api_auth_token,
+    enable_factory_create,
+):
+    """Test that competitions with is_simpler_grants_enabled=False are not open"""
+    competition = CompetitionFactory.create(
+        is_simpler_grants_enabled=False,
+    )
+
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+    assert response_competition["is_open"] is False
+
+
+def test_competition_get_200_is_simpler_grants_enabled_null(
+    client,
+    api_auth_token,
+    enable_factory_create,
+):
+    """Test that competitions with is_simpler_grants_enabled=None are not open"""
+    competition = CompetitionFactory.create(
+        is_simpler_grants_enabled=None,
+    )
+
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+    assert response_competition["is_open"] is False
+
+
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
+    client,
+    api_auth_token,
+    enable_factory_create,
+):
+    """Test that competitions with is_simpler_grants_enabled=True still respect date checks"""
+    # Competition that would be open date-wise but simpler grants disabled
+    competition_disabled = CompetitionFactory.create(
+        opening_date=date(2025, 1, 1),
+        closing_date=date(2025, 12, 31),
+        grace_period=10,
+        is_simpler_grants_enabled=False,
+    )
+
+    # Competition that is enabled and within dates
+    competition_enabled_open = CompetitionFactory.create(
+        opening_date=date(2025, 1, 1),
+        closing_date=date(2025, 12, 31),
+        grace_period=10,
+        is_simpler_grants_enabled=True,
+    )
+
+    # Competition that is enabled but outside dates
+    competition_enabled_closed = CompetitionFactory.create(
+        opening_date=date(2025, 1, 16),  # Opens tomorrow
+        closing_date=date(2025, 12, 31),
+        grace_period=10,
+        is_simpler_grants_enabled=True,
+    )
+
+    # Test disabled competition
+    resp = client.get(
+        f"/alpha/competitions/{competition_disabled.competition_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["is_open"] is False
+
+    # Test enabled and open competition
+    resp = client.get(
+        f"/alpha/competitions/{competition_enabled_open.competition_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["is_open"] is True
+
+    # Test enabled but closed competition
+    resp = client.get(
+        f"/alpha/competitions/{competition_enabled_closed.competition_id}",
+        headers={"X-Auth": api_auth_token},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["is_open"] is False
+
+
 def test_competition_get_404_not_found(client, api_auth_token):
     competition_id = uuid.uuid4()
     resp = client.get(f"/alpha/competitions/{competition_id}", headers={"X-Auth": api_auth_token})
