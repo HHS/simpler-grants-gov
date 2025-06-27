@@ -88,7 +88,7 @@ class TransformCompetition(AbstractTransformSubTask):
         self,
         source_competition: Tcompetition,
         target_competition: Competition | None,
-        opportunity_id: int | None,
+        opportunity_id: uuid.UUID | None,
         opportunity_assistance_listing_id: uuid.UUID | None,
     ) -> None:
         self.increment(
