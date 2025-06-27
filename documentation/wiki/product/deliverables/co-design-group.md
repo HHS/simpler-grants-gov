@@ -5,7 +5,7 @@ description: >-
   grant experience
 ---
 
-# 🏁 Co-Design Group planning
+# Co-Design Group planning
 
 ## Summary details
 

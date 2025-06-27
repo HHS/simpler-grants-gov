@@ -1,6 +1,6 @@
 # Table of contents
 
-* [👋 Welcome](README.md)
+* [Welcome](README.md)
 
 ## GET INVOLVED
 
@@ -31,11 +31,11 @@
 
 * [Roadmap](product/product-roadmap.md)
 * [Deliverables](product/deliverables/README.md)
-  * [🏁 Static site soft launch](product/deliverables/static-site-soft-launch.md)
-  * [🏁 Static site public launch](product/deliverables/static-site-public-launch.md)
-  * [🏁 GET Opportunities](product/deliverables/get-opportunities.md)
-  * [🏁 Open source onboarding](product/deliverables/open-source-onboarding.md)
-  * [🏁 Co-Design Group planning](product/deliverables/co-design-group.md)
+  * [Static site soft launch](product/deliverables/static-site-soft-launch.md)
+  * [Static site public launch](product/deliverables/static-site-public-launch.md)
+  * [GET Opportunities](product/deliverables/get-opportunities.md)
+  * [Open source onboarding](product/deliverables/open-source-onboarding.md)
+  * [Co-Design Group planning](product/deliverables/co-design-group.md)
 * [Decisions](product/decisions/README.md)
   * [ADR Template](product/decisions/template.md)
   * [ADRs](product/decisions/adr/README.md)
@@ -120,7 +120,9 @@
   * [Photos and illustrations](design-and-research/brand-guidelines/photos-and-illustrations.md)
 * [Content guidelines](design-and-research/content-guidelines/README.md)
   * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
-  * [Editoral style](design-and-research/content-guidelines/editoral-style.md)
+  * [Writing standards](design-and-research/content-guidelines/writing-standards/README.md)
+    * [Editorial style](design-and-research/content-guidelines/writing-standards/editoral-style.md)
+    * [Content patterns](design-and-research/content-guidelines/writing-standards/content-patterns.md)
   * [Terminology usage](design-and-research/content-guidelines/terminology-usage.md)
 * [User research](design-and-research/user-research/README.md)
   * [Grants.gov archetypes](design-and-research/user-research/grants.gov-archetypes.md)
