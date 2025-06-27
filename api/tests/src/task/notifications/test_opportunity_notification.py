@@ -79,7 +79,7 @@ def build_opp_and_version(
 
 
 base_opal_fields = {
-     "opportunity_title": "Opal 2025 Awards",
+    "opportunity_title": "Opal 2025 Awards",
     "close_date": date(2026, 9, 1),
     "forecasted_award_date": None,
     "forecasted_project_start_date": None,
@@ -115,7 +115,7 @@ OPAL_REVISION_NUMB = build_opp_and_version(
 )
 
 base_topaz_fields = {
-     "revision_number": 1,
+    "revision_number": 1,
     "opportunity_title": "Topaz 2025 Climate Research Grant",
     "forecasted_award_date": date(2026, 2, 1),
     "close_date": date(2025, 11, 30),
@@ -520,58 +520,93 @@ class TestOpportunityNotification:
         "category_diff,expected_html",
         [
             (
-                    {"is_cost_sharing": {"before": True, "after": None }},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
+                {"is_cost_sharing": {"before": True, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
             ),
             (
-                    {"funding_instruments": {"before": [FundingInstrument.GRANT], "after": [FundingInstrument.OTHER]}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
+                {
+                    "funding_instruments": {
+                        "before": [FundingInstrument.GRANT],
+                        "after": [FundingInstrument.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
             ),
             (
-                    {"category": {"before": OpportunityCategory.OTHER, "after": None}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+                {"category": {"before": OpportunityCategory.OTHER, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
             ),
             (
-                    {"category_explanation": {"before": None, "after": "to be determined"}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+                {"category_explanation": {"before": None, "after": "to be determined"}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
             ),
             # Skip category_explanation if Category changes from Other to any other category or none
             (
-                    {"category" : {"before": OpportunityCategory.OTHER, "after": OpportunityCategory.MANDATORY}, "category_explanation": {"before": "to be determined", "after": None}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>'
+                {
+                    "category": {
+                        "before": OpportunityCategory.OTHER,
+                        "after": OpportunityCategory.MANDATORY,
+                    },
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
             ),
             (
-                    {"category": {"before": OpportunityCategory.OTHER, "after": None},
-                     "category_explanation": {"before": "to be determined", "after": None}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>'
+                {
+                    "category": {"before": OpportunityCategory.OTHER, "after": None},
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
             ),
             (
-                    {"category": {"before": OpportunityCategory.DISCRETIONARY, "after": OpportunityCategory.OTHER},
-                     "category_explanation": {"before": None, "after": "To be determined"}},
-                    '<p style="padding-left: 20px;">Categorization</p>'
-                    '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
-                    '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>'
+                {
+                    "category": {
+                        "before": OpportunityCategory.DISCRETIONARY,
+                        "after": OpportunityCategory.OTHER,
+                    },
+                    "category_explanation": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
+                '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
             ),
             (
-                    {"funding_categories": {"before": [FundingCategory.EDUCATION], "after": [FundingCategory.OTHER]}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.EDUCATION],
+                        "after": [FundingCategory.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>',
             ),
             # Skip category_explanation if funding_categories changes from Other to any other category or none
             (
-                    {"funding_categories" : {"before": [FundingCategory.OTHER], "after": [FundingCategory.ENERGY]}, "funding_category_description": {"before": "to be determined", "after": None}},
-                    '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>'
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.OTHER],
+                        "after": [FundingCategory.ENERGY],
+                    },
+                    "funding_category_description": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
             ),
             (
-                    {"funding_categories": {"before": [FundingCategory.EDUCATION], "after": [FundingCategory.OTHER]},
-                     "funding_category_description": {"before": None, "after": "To be determined"}},
-                    '<p style="padding-left: 20px;">Categorization</p>'
-                    '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
-                    '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>'
-            )
-
-        ]
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.EDUCATION],
+                        "after": [FundingCategory.OTHER],
+                    },
+                    "funding_category_description": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
+                '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
+            ),
+        ],
     )
-    def test_build_categorization_fields_content(self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config):
+    def test_build_categorization_fields_content(
+        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
+    ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_categorization_fields_content(category_diff)
@@ -611,88 +646,86 @@ class TestOpportunityNotification:
         [
             # Multiple updates
             (
-                    [
-                        OpportunityVersionChange(
-                            opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
-                        ),
-                        OpportunityVersionChange(
-                            opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
-                        ),
-                    ],
-                    UserOpportunityUpdateContent(
-                        subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                        message=(
-                                f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
-                                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
-                                f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                                "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
-                        ),
-                        updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
+                [
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                     ),
+                    OpportunityVersionChange(
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
+                    ),
+                ],
+                UserOpportunityUpdateContent(
+                    subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=(
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                    ),
+                    updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
+                ),
             ),
             # Relevant & none Relevant updates mix
             (
-                    [  # No relevant updates
-                        OpportunityVersionChange(
-                            opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
-                        ),
-                        OpportunityVersionChange(
-                            opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
-                        ),
-                    ],
-                    UserOpportunityUpdateContent(
-                        subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                        message=(
-                                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                                "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
-                        ),
-                        updated_opportunity_ids=[TOPAZ.opportunity_id],
+                [  # No relevant updates
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
                     ),
+                    OpportunityVersionChange(
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_STATUS
+                    ),
+                ],
+                UserOpportunityUpdateContent(
+                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=(
+                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                    ),
+                    updated_opportunity_ids=[TOPAZ.opportunity_id],
+                ),
             ),
             # None relevant updates only
             (
-                    [
-                        OpportunityVersionChange(
-                            opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
-                        ),
-                    ],
-                    None,
+                [
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
+                    ),
+                ],
+                None,
             ),
             # All changes
             (
-                    [
-                        OpportunityVersionChange(
-                            opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_ALL
-                        )
-                    ],
-                    UserOpportunityUpdateContent(
-                        subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                        message=(
-                                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
-                                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
-                                '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
-                                '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
-                                '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
-                                '<p style="padding-left: 20px;">Categorization</p>'
-                                '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
-                                '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
-                                '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br>'
-                                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                                "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
-
-
-                        ),
-                        updated_opportunity_ids=[TOPAZ.opportunity_id],
+                [
+                    OpportunityVersionChange(
+                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_ALL
+                    )
+                ],
+                UserOpportunityUpdateContent(
+                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    message=(
+                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                        '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
+                        '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
+                        '<p style="padding-left: 20px;">Categorization</p>'
+                        '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
+                        '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br>'
+                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
+                    updated_opportunity_ids=[TOPAZ.opportunity_id],
+                ),
             ),
         ],
     )

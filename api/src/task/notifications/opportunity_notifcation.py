@@ -8,7 +8,7 @@ from sqlalchemy.orm import aliased, selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
-from src.constants.lookup_constants import OpportunityStatus, OpportunityCategory, FundingCategory
+from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
@@ -280,18 +280,23 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _skip_category_explanation(self, category_change: dict, field_name: str) -> bool:
         change = category_change.get(field_name)
-        if change and (change["before"] == OpportunityCategory.OTHER or OpportunityCategory.OTHER != change["after"]):
+        if change and (
+            change["before"] == OpportunityCategory.OTHER
+            or OpportunityCategory.OTHER != change["after"]
+        ):
             return True
         return False
 
     def _skip_funding_category_description(self, category_change: dict, field_name: str) -> bool:
         change = category_change.get(field_name)
-        if change and (FundingCategory.OTHER in change["before"] or FundingCategory.OTHER not in change["after"]):
+        if change and (
+            FundingCategory.OTHER in change["before"]
+            or FundingCategory.OTHER not in change["after"]
+        ):
             return True
         return False
 
     def _build_categorization_fields_content(self, category_change: dict) -> str:
-        skip_category_explanation : bool = False
         category_section = SECTION_STYLING.format("Categorization")
         for field, change in category_change.items():
             before = change["before"]
@@ -319,7 +324,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 before = before.capitalize() if before else NOT_SPECIFIED
                 after = after.capitalize() if after else NOT_SPECIFIED
 
-
             category_section += (
                 f"{BULLET_POINTS_STYLING} {CATEGORIZATION_FIELDS[field]} {before} to {after}.<br>"
             )
@@ -331,6 +335,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         elif not value:
             return NOT_SPECIFIED
         return value
+
     def _build_important_dates_content(self, imp_dates_change: dict) -> str:
         important_section = SECTION_STYLING.format("Important dates")
         for field, change in imp_dates_change.items():
@@ -340,6 +345,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
             )
         return important_section
+
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
