@@ -119,7 +119,7 @@ describe("ApplyForm", () => {
     expect(dobField).toHaveAttribute("type", "date");
 
     const nav = screen.getByTestId("InPageNavigation");
-    expect(nav).toHaveTextContent("Sections in this form");
+    expect(nav).toHaveTextContent("navTitle");
 
     const textareaField = screen.getByTestId("textarea");
     expect(textareaField).toBeInTheDocument();
