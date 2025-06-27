@@ -2,8 +2,10 @@ import React, { useMemo } from "react";
 
 const ApplyFormNav = ({
   fields,
+  title,
 }: {
   fields: { href: string; text: string }[];
+  title: string;
 }) => {
   const Links = useMemo(
     () =>
@@ -20,12 +22,12 @@ const ApplyFormNav = ({
     fields.length > 0 && (
       <aside
         className="usa-in-page-nav width-mobile-lg maxw-none order-1 margin-left-0 desktop:margin-right-10"
-        aria-label="Sections in this form"
+        aria-label={title}
         data-testid="InPageNavigation"
       >
         <nav className="usa-in-page-nav__nav">
           <h4 className="usa-in-page-nav__heading" tabIndex={0}>
-            Sections in this form
+            {title}
           </h4>
           <ul className="usa-in-page-nav__list">{Links}</ul>
         </nav>

@@ -99,7 +99,7 @@ const ApplyForm = ({
             />
             {fields}
           </FormGroup>
-          <ApplyFormNav fields={navFields} />
+          <ApplyFormNav title={t("navTitle")} fields={navFields} />
         </div>
       </form>
     </>
