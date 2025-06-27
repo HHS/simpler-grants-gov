@@ -83,7 +83,9 @@ def update_application_form(
         db_session.add(application_form)
 
     # Get a list of validation warnings (also sets form status)
-    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
+    warnings: list[ValidationErrorDetail] = validate_application_form(
+        application_form, ApplicationAction.MODIFY
+    )
 
     logger.info(
         "Updated application form response",

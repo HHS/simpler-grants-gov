@@ -6,6 +6,8 @@ from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
+from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -15,6 +17,47 @@ class ApplicationAction(StrEnum):
     START = "start"
     SUBMIT = "submit"
     MODIFY = "modify"
+    GET = "get"
+
+
+START_JSON_RULE_CONFIG = JsonRuleConfig(
+    # When starting an application, we only do pre-population
+    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_post_population=False,
+    do_field_validation=False,
+)
+
+GET_JSON_RULE_CONFIG = JsonRuleConfig(
+    # When fetching an application, we only do field validation
+    # as fetching shouldn't ever modify the values
+    do_pre_population=False,
+    do_post_population=False,
+    do_field_validation=True,
+)
+
+UPDATE_JSON_RULE_CONFIG = JsonRuleConfig(
+    # When updating, we do pre-population + validate. If a user
+    # changed any values, we want to make sure any pre-populated fields
+    # stay as the automatically generated ones.
+    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_post_population=False,
+    do_field_validation=True,
+)
+
+SUBMISSION_JSON_RULE_CONFIG = JsonRuleConfig(
+    # During submission, we do post-population (the only place we ever do)
+    # and field validation
+    do_pre_population=False,
+    do_post_population=False,  # TODO - when we enable post-population, flip this to True
+    do_field_validation=True,
+)
+
+ACTION_RULE_CONFIG_MAP = {
+    ApplicationAction.START: START_JSON_RULE_CONFIG,
+    ApplicationAction.GET: GET_JSON_RULE_CONFIG,
+    ApplicationAction.MODIFY: UPDATE_JSON_RULE_CONFIG,
+    ApplicationAction.SUBMIT: SUBMISSION_JSON_RULE_CONFIG,
+}
 
 
 def get_missing_app_form_errors(application: Application) -> list[ValidationErrorDetail]:
@@ -53,7 +96,7 @@ def is_form_required(application_form: ApplicationForm) -> bool:
 
 
 def get_application_form_errors(
-    application: Application,
+    application: Application, action: ApplicationAction
 ) -> tuple[list[ValidationErrorDetail], dict[str, list[ValidationErrorDetail]]]:
     """Get the application form errors from required form + JSON Schema validation"""
 
@@ -72,7 +115,7 @@ def get_application_form_errors(
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:
         form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
-            application_form
+            application_form, action
         )
 
         is_app_form_required = is_form_required(application_form)
@@ -109,10 +152,30 @@ def get_application_form_errors(
     return form_errors, form_error_map
 
 
-def validate_application_form(application_form: ApplicationForm) -> list[ValidationErrorDetail]:
+def _get_json_rule_config_for_action(action: ApplicationAction) -> JsonRuleConfig:
+    config = ACTION_RULE_CONFIG_MAP.get(action, None)
+    if config is None:
+        raise Exception(
+            f"Action {action} does not have a configured JsonRuleConfig - cannot validate."
+        )
+
+    return config
+
+
+def validate_application_form(
+    application_form: ApplicationForm, action: ApplicationAction
+) -> list[ValidationErrorDetail]:
     """Validate an application form, and set the current application form status"""
-    form_validation_errors: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_form.application_response, application_form.form
+    form_validation_errors: list[ValidationErrorDetail] = []
+
+    context = JsonRuleContext(application_form, config=_get_json_rule_config_for_action(action))
+    process_rule_schema_for_context(context)
+    form_validation_errors.extend(context.validation_issues)
+
+    # TODO pre/post-populate should update the value here
+
+    form_validation_errors.extend(
+        validate_json_schema_for_form(application_form.application_response, application_form.form)
     )
 
     # If there are no issues, we consider the form complete
@@ -130,10 +193,10 @@ def validate_application_form(application_form: ApplicationForm) -> list[Validat
     return form_validation_errors
 
 
-def validate_forms(application: Application) -> None:
+def validate_forms(application: Application, action: ApplicationAction) -> None:
     """Validate the forms for an application."""
 
-    form_errors, form_error_map = get_application_form_errors(application)
+    form_errors, form_error_map = get_application_form_errors(application, action)
 
     if len(form_errors) > 0:
         detail = {}

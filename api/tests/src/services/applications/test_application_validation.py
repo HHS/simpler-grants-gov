@@ -126,8 +126,11 @@ def test_validate_form_all_valid(
         application_response=VALID_FORM_C_RESPONSE,
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
+    # TODO - add attachment stuff
 
-    validation_errors, error_detail = get_application_form_errors(application)
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
     assert len(validation_errors) == 0
     assert len(error_detail) == 0
 
@@ -151,7 +154,9 @@ def test_validate_form_all_valid_not_started_optional_form(
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
-    validation_errors, error_detail = get_application_form_errors(application)
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
     assert len(validation_errors) == 0
     assert len(error_detail) == 0
 
@@ -162,7 +167,9 @@ def test_validate_forms_missing_all_forms(
     # Add no forms, which will complain about all of them
     application = ApplicationFactory.build(competition=competition, application_forms=[])
 
-    validation_errors, error_detail = get_application_form_errors(application)
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
 
     # All forms missing
     assert len(validation_errors) == 3
@@ -204,7 +211,9 @@ def test_validate_forms_not_started_all_forms(
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
-    validation_errors, error_detail = get_application_form_errors(application)
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
 
     # All forms missing
     assert len(validation_errors) == 2
@@ -241,7 +250,9 @@ def test_validate_forms_invalid_responses(
 
     app_form_ids = [app_form.application_form_id for app_form in application.application_forms]
 
-    validation_errors, error_detail = get_application_form_errors(application)
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
 
     assert len(validation_errors) == 3
     for validation_error in validation_errors:

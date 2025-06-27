@@ -9,6 +9,7 @@ from src.db.models.competition_models import Application, ApplicationForm
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import ValidationErrorDetail
 from src.services.applications.application_validation import (
+    ApplicationAction,
     is_form_required,
     validate_application_form,
 )
@@ -47,7 +48,9 @@ def get_application_form(
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
     # Get a list of validation warnings (also sets form status)
-    warnings: list[ValidationErrorDetail] = validate_application_form(application_form)
+    warnings: list[ValidationErrorDetail] = validate_application_form(
+        application_form, ApplicationAction.GET
+    )
 
     # Set the is_required field on the application form object
     application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
