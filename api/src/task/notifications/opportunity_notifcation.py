@@ -273,6 +273,31 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _build_eligibility_content(self, eligibility_change: dict) -> str:
+        eligibility_section = SECTION_STYLING.format("Eligibility")
+        for field, change in eligibility_change.items():
+            before = change["before"]
+            after = change["after"]
+
+            if field == "applicant_types":
+                added = sorted(set(after) - set(before), key=lambda x: x.value)
+                removed = sorted(set(before) - set(after), key=lambda x: x.value)
+                stmt = ELIGIBILITY_FIELDS["applicant_types"]
+                if added:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} {[e_type.value.capitalize() for e_type in added]}.<br>"
+                if removed:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} {[e_type.value.capitalize() for e_type in removed]}.<br>"
+
+            if field == "applicant_eligibility_description":
+                stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
+                if not before and after:
+                    eligibility_section += f"{stmt} added.<br>"
+                elif before and not after:
+                    eligibility_section += f"{stmt} deleted.<br>"
+                else:
+                    eligibility_section += f"{stmt} changed.<br>"
+        return eligibility_section
+
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
             return NOT_SPECIFIED
@@ -402,6 +427,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
         }:
             sections.append(self._build_categorization_fields_content(categorization_fields_diffs))
+        if eligibility_fields_diffs := {k: changes[k] for k in ELIGIBILITY_FIELDS if k in changes}:
+            sections.append(self._build_eligibility_content(eligibility_fields_diffs))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",

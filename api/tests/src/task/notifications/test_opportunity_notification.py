@@ -6,6 +6,7 @@ import pytest
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.constants.lookup_constants import (
+    ApplicantType,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -42,6 +43,8 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    applicant_types: list[ApplicantType],
+    applicant_eligibility_description: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -65,6 +68,8 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        applicant_types=applicant_types,
+        applicant_eligibility_description=applicant_eligibility_description,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -94,6 +99,8 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "applicant_types": [ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+    "applicant_eligibility_description": "Not yet determined",
 }
 
 OPAL = build_opp_and_version(
@@ -134,6 +141,8 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "applicant_types": [ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES],
+    "applicant_eligibility_description": "No income",
 }
 
 TOPAZ = build_opp_and_version(
@@ -164,6 +173,8 @@ TOPAZ_ALL = build_opp_and_version(
     category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
     funding_category_description="Accelerates early-stage renewable energy technology adoption",
+    applicant_types=[ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+    applicant_eligibility_description="Charter Schools only",
 )
 
 
@@ -643,6 +654,59 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "eligibility_diffs,expected_html",
+        [
+            # Removed and Added type
+            (
+                {
+                    "applicant_types": {
+                        "before": [
+                            ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                            ApplicantType.OTHER,
+                        ],
+                        "after": [ApplicantType.STATE_GOVERNMENTS],
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p>'
+                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['State_governments'].<br>"
+                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Other', 'Public_and_state_institutions_of_higher_education'].<br>",
+            ),
+            # Add
+            (
+                {"applicant_eligibility_description": {"before": None, "after": "not decided"}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was added.<br>',
+            ),
+            # Update
+            (
+                {
+                    "applicant_eligibility_description": {
+                        "before": "business and personal ",
+                        "after": "business only",
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was changed.<br>',
+            ),
+            # Delete
+            (
+                {"applicant_eligibility_description": {"before": "Business", "after": None}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+            ),
+        ],
+    )
+    def test_build_eligibility_content(
+        self,
+        db_session,
+        eligibility_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_eligibility_content(eligibility_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -753,7 +817,11 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                         '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
                         '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br><br>'
+                        '<p style="padding-left: 20px;">Eligibility</p>'
+                        "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public_and_state_institutions_of_higher_education'].<br>"
+                        "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public_and_indian_housing_authorities'].<br>"
+                        '<p style="padding-left: 40px;">•  Additional information was changed.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
