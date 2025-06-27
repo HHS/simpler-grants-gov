@@ -360,7 +360,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         closing_msg = (
             "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
             f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
