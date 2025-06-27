@@ -13,7 +13,7 @@ export const OpportunityCompetitionStart = ({
   opportunityTitle: string;
 }) => {
   const { checkFeatureFlag } = useFeatureFlags();
-  const openCompetitions = competitions.reduce<Competition[]>(
+  const openCompetitions = competitions.filter(({ is_open }) => is_open);
     (acc, competition) => {
       if (competition.is_open) {
         acc.push(competition);
