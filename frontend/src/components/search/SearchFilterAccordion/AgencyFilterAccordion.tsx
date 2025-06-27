@@ -1,6 +1,6 @@
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
-import { agenciesToNestedFilterOptions } from "src/utils/search/searchUtils";
+import { agenciesToNestedFilterOptions } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 
