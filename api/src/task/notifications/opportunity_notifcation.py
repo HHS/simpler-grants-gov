@@ -1,4 +1,5 @@
 import logging
+from dataclasses import field
 from typing import Sequence, cast
 from uuid import UUID
 
@@ -7,7 +8,7 @@ from sqlalchemy.orm import aliased, selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import OpportunityStatus, OpportunityCategory, FundingCategory
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
@@ -76,7 +77,7 @@ OPPORTUNITY_STATUS_MAP = {
 
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
-
+NOT_SPECIFIED = "not specified"
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session):
@@ -278,6 +279,58 @@ class OpportunityNotificationTask(BaseNotificationTask):
             for diff in diffs
         }
 
+    def _normalize_bool_field(self, value: bool | None) -> str:
+        if value is None:
+            return NOT_SPECIFIED
+        return "Yes" if value else "No"
+
+    def _skip_category_explanation(self, category_change: dict, field_name: str) -> bool:
+        change = category_change.get(field_name)
+        if change and (change["before"] == OpportunityCategory.OTHER or OpportunityCategory.OTHER != change["after"]):
+            return True
+        return False
+
+    def _skip_funding_category_description(self, category_change: dict, field_name: str) -> bool:
+        change = category_change.get(field_name)
+        if change and (FundingCategory.OTHER in change["before"] or FundingCategory.OTHER not in change["after"]):
+            return True
+        return False
+
+    def _build_categorization_fields_content(self, category_change: dict) -> str:
+        skip_category_explanation : bool = False
+        category_section = SECTION_STYLING.format("Categorization")
+        for field, change in category_change.items():
+            before = change["before"]
+            after = change["after"]
+            if field == "is_cost_sharing":
+                before = self._normalize_bool_field(before)
+                after = self._normalize_bool_field(after)
+            elif field in ["funding_instruments", "funding_categories"]:
+                before = ", ".join([value.capitalize() for value in before])
+                after = ", ".join([value.capitalize() for value in after])
+            elif field == "category":
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+
+            elif field == "category_explanation":
+                # If category changes from Other to Any other field do not show category explanation as it is only relevant to OpportunityCategory.Other
+                if self._skip_category_explanation(category_change, "category"):
+                    continue
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+            elif field == "funding_category_description":
+                # If funding_categories changes from Other to Any other field do not show funding category description as it is only relevant to funding_categories.Other
+                if self._skip_funding_category_description(category_change, "funding_categories"):
+                    continue
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+
+
+            category_section += (
+                f"{BULLET_POINTS_STYLING} {CATEGORIZATION_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return category_section
+
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -301,7 +354,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
         sections = []
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
-
+        if categorization_fields_diffs := {
+            k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
+        }:
+            sections.append(self._build_categorization_fields_content(categorization_fields_diffs))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
@@ -318,7 +374,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         closing_msg = (
             "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
             f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
