@@ -65,6 +65,9 @@ class TransformCompetition(AbstractTransformSubTask):
                         else None
                     )
 
+                    # If we found opportunity_id through cfda listing and the opportunity is not
+                    # found associated to that id, this denotes an orphaned competition. This case
+                    # will be indicated in the competition.transform_notes with 'orphaned_competition'.
                     if not opportunity:
                         opportunity_id = None
                         opportunity_assistance_listing_id = None
