@@ -273,6 +273,25 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _format_currency(self, value: int | str) -> str:
+        if isinstance(value, int):
+            return f"${value:,}"
+        return value
+
+    def _build_award_fields_content(self, award_change: dict) -> str:
+        award_section = SECTION_STYLING.format("Awards details")
+        for field, change in award_change.items():
+            before = change["before"] if change["before"] else NOT_SPECIFIED
+            after = change["after"] if change["after"] else NOT_SPECIFIED
+            if field != "expected_number_of_awards":
+                before = self._format_currency(before)
+                after = self._format_currency(after)
+
+            award_section += (
+                f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return award_section
+
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -322,6 +341,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
         if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
             sections.append(self._build_important_dates_content(important_date_diffs))
+        if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
+            sections.append(self._build_award_fields_content(award_fields_diffs))
 
         if not sections:
             logger.info(
@@ -339,7 +360,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         closing_msg = (
             "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong> <br><br>"
+            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
             f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
