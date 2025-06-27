@@ -1,7 +1,7 @@
 """Remove Opportunity and Related Tables
 
 Revision ID: 837231ccdc25
-Revises: 9439bffdbc52
+Revises: 1012e0cb7c7c
 Create Date: 2025-06-27 14:45:55.753884
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "837231ccdc25"
-down_revision = "9439bffdbc52"
+down_revision = "1012e0cb7c7c"
 branch_labels = None
 depends_on = None
 
