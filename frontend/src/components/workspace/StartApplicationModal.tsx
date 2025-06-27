@@ -29,7 +29,7 @@ const StartApplicationModal = ({
   const headerTranslation = useTranslations("HeaderLoginModal");
   const modalId = "start-application";
   const [validationError, setValidationError] = useState<string>();
-  const [savedApplicationName, setSavedSearchName] = useState<string>();
+  const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
   const token = user?.token || null;
@@ -66,11 +66,11 @@ const StartApplicationModal = ({
     setError("");
     setLoading(false);
     setValidationError(undefined);
-    setSavedSearchName("");
+    setSavedApplicationName("");
   }, []);
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSavedSearchName(e.target.value);
+    setSavedApplicationName(e.target.value);
   }, []);
 
   return (
