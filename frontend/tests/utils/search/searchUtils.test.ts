@@ -6,7 +6,7 @@ import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes"
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
 import {
-  agenciesToFilterOptions,
+  agenciesToNestedFilterOptions,
   areSetsEqual,
   convertSearchParamsToProperTypes,
   getAgencyDisplayName,
@@ -233,9 +233,9 @@ describe("paramsToFormattedQuery", () => {
   });
 });
 
-describe("agenciesToFilterOptions", () => {
+describe("agenciesToNestedFilterOptions", () => {
   it("converts a simple list of top level agencies to filter options", () => {
-    expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
+    expect(agenciesToNestedFilterOptions(fakeAgencyResponseData)).toEqual([
       {
         id: "DOCNIST",
         label: "National Institute of Standards and Technology",
@@ -319,7 +319,7 @@ describe("agenciesToFilterOptions", () => {
         agency_id: 1,
       },
     ];
-    expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
+    expect(agenciesToNestedFilterOptions(fakeAgencyResponseData)).toEqual([
       {
         id: "DOCNIST",
         label: "National Institute of Standards and Technology",

@@ -1,8 +1,7 @@
 import {
-  getAgenciesForFilterOptions,
   obtainAgencies,
   performAgencySearch,
-  searchAgenciesForFilterOptions,
+  searchAndFlattenAgencies,
 } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
@@ -106,7 +105,7 @@ describe("performAgencySearch", () => {
   });
 });
 
-describe("searchAgenciesForFilterOptions", () => {
+describe("searchAndFlattenAgencies", () => {
   beforeEach(() => {
     mockFetchAgencies.mockResolvedValue(fakeResponse);
     mockSearchAgencies.mockResolvedValue(fakeResponse);
@@ -117,7 +116,7 @@ describe("searchAgenciesForFilterOptions", () => {
     jest.resetAllMocks();
   });
   it("calls fetch, flattens, transforms, and sorts", async () => {
-    await searchAgenciesForFilterOptions("anything");
+    await searchAndFlattenAgencies("anything");
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
         pagination: {
@@ -142,41 +141,41 @@ describe("searchAgenciesForFilterOptions", () => {
   });
 });
 
-describe("getAgenciesForFilterOptions", () => {
-  beforeEach(() => {
-    mockFetchAgencies.mockResolvedValue(fakeResponse);
-    mockSearchAgencies.mockResolvedValue(fakeResponse);
-    mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-    mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
-  });
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-  it("calls fetch, transforms, and sorts", async () => {
-    await getAgenciesForFilterOptions();
+// describe("getAgenciesForFilterOptions", () => {
+//   beforeEach(() => {
+//     mockFetchAgencies.mockResolvedValue(fakeResponse);
+//     mockSearchAgencies.mockResolvedValue(fakeResponse);
+//     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
+//     mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
+//   });
+//   afterEach(() => {
+//     jest.resetAllMocks();
+//   });
+//   it("calls fetch, transforms, and sorts", async () => {
+//     await getAgenciesForFilterOptions();
 
-    expect(mockFetchAgencies).toHaveBeenCalledWith({
-      body: {
-        pagination: {
-          page_offset: 1,
-          page_size: 1500, // 969 agencies in prod as of 3/7/25
-          sort_order: [
-            {
-              order_by: "created_at",
-              sort_direction: "ascending",
-            },
-          ],
-        },
-        filters: { active: true },
-      },
-      nextOptions: {
-        revalidate: 604800,
-      },
-    });
-    expect(mockAgenciesToFilterOptions).toHaveBeenCalledWith(
-      fakeAgencyResponseData,
-    );
+//     expect(mockFetchAgencies).toHaveBeenCalledWith({
+//       body: {
+//         pagination: {
+//           page_offset: 1,
+//           page_size: 1500, // 969 agencies in prod as of 3/7/25
+//           sort_order: [
+//             {
+//               order_by: "created_at",
+//               sort_direction: "ascending",
+//             },
+//           ],
+//         },
+//         filters: { active: true },
+//       },
+//       nextOptions: {
+//         revalidate: 604800,
+//       },
+//     });
+//     expect(mockAgenciesToFilterOptions).toHaveBeenCalledWith(
+//       fakeAgencyResponseData,
+//     );
 
-    expect(mockSortFilterOptions).toHaveBeenCalledWith(fakeSortedOptions);
-  });
-});
+//     expect(mockSortFilterOptions).toHaveBeenCalledWith(fakeSortedOptions);
+//   });
+// });

@@ -1,9 +1,6 @@
 import { omit } from "lodash";
 import { eligibilityTypes } from "src/constants/opportunity";
-import {
-  FilterOption,
-  FrontendFilterNames,
-} from "src/types/search/searchFilterTypes";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 
 // Note that these labels are not translated currently
 // To translate them we would want to list the translation key in the label
@@ -208,7 +205,6 @@ export const andOrOptions = [
   },
 ];
 
-// export const allFilterOptions: { [key: FrontendFilterNames]: FilterOption[] } =
 export const allFilterOptions = {
   status: statusOptions,
   eligibility: eligibilityOptions,

@@ -1,6 +1,6 @@
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
-import { agenciesToNestedAgencyOptions } from "src/utils/search/searchUtils";
+import { agenciesToNestedFilterOptions } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 
@@ -28,7 +28,7 @@ export async function AgencyFilterAccordion({
     console.error("Unable to fetch agencies for filter list", e);
   }
 
-  const agencyOptions = agenciesToNestedAgencyOptions(allAgencies);
+  const agencyOptions = agenciesToNestedFilterOptions(allAgencies);
 
   return (
     <BasicSearchFilterAccordion
@@ -67,7 +67,7 @@ export async function AgencyFilter({
     console.error("Unable to fetch agencies for filter list", e);
   }
 
-  const agencyOptions = agenciesToNestedAgencyOptions(agencies);
+  const agencyOptions = agenciesToNestedFilterOptions(agencies);
 
   return (
     <CheckboxFilter

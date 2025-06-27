@@ -17,10 +17,9 @@ export function PillList({ pills }: { pills: FilterPillLabelData[] }) {
             >
               <Pill
                 label={label}
-                onClose={() => {
-                  console.log("!!! close", queryParamKey, queryParamValue);
-                  removeQueryParamValue(queryParamKey, queryParamValue);
-                }}
+                onClose={() =>
+                  removeQueryParamValue(queryParamKey, queryParamValue)
+                }
               />
             </div>
           ))
