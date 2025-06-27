@@ -283,7 +283,7 @@ export const formatPillLabel = (
 ): string => {
   switch (queryParamKey) {
     case "costSharing":
-      return `Cost sharing: ${value}`;
+      return `Cost sharing: ${getFilterOptionLabel(value, options)}`;
     case "closeDate":
       return `Closing in less than ${value} days`;
     default:
