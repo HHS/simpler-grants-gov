@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
@@ -45,6 +45,32 @@ def _validate_organization_membership(
     return organization
 
 
+def _validate_applicant_type(competition: Competition, organization_id: UUID | None) -> None:
+    """
+    Validate that the applicant type (individual or organization) is allowed for this competition.
+    """
+    # Determine if applying as an organization or individual
+    is_applying_as_organization = organization_id is not None
+
+    # Get the allowed applicant types for this competition
+    allowed_applicant_types = competition.open_to_applicants
+
+    if is_applying_as_organization:
+        # Check if organization applications are allowed
+        if CompetitionOpenToApplicant.ORGANIZATION not in allowed_applicant_types:
+            raise_flask_error(
+                422,
+                "This competition does not allow organization applications",
+            )
+    else:
+        # Check if individual applications are allowed
+        if CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types:
+            raise_flask_error(
+                422,
+                "This competition does not allow individual applications",
+            )
+
+
 def create_application(
     db_session: db.Session,
     competition_id: UUID,
@@ -67,6 +93,9 @@ def create_application(
 
     # Verify the competition is open
     validate_competition_open(competition, ApplicationAction.START)
+
+    # Validate applicant type is allowed for this competition
+    _validate_applicant_type(competition, organization_id)
 
     # Validate organization if provided
     if organization_id is not None:
