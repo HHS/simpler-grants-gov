@@ -29,13 +29,15 @@ export const AnyOptionCheckbox = ({
   checked,
   defaultEmptySelection,
   queryParamKey,
+  topLevelQueryParamKey,
 }: {
   title: string;
   checked: boolean;
   defaultEmptySelection?: Set<string>;
   queryParamKey: string;
+  topLevelQueryParamKey?: string;
 }) => {
-  const { setQueryParam } = useSearchParamUpdater();
+  const { setQueryParam, setQueryParams } = useSearchParamUpdater();
   const id = `${title.replace(/\s/, "-").toLowerCase()}-any`;
   const t = useTranslations("Search.accordion");
   const label = `${t("any")} ${title}`;
@@ -44,6 +46,13 @@ export const AnyOptionCheckbox = ({
     const clearedSelections = defaultEmptySelection?.size
       ? Array.from(defaultEmptySelection).join(",")
       : "";
+    if (topLevelQueryParamKey) {
+      setQueryParams({
+        [queryParamKey]: clearedSelections,
+        [topLevelQueryParamKey]: "",
+      });
+      return;
+    }
     setQueryParam(queryParamKey, clearedSelections);
   };
 

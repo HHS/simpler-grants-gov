@@ -10,6 +10,8 @@ import {
   areSetsEqual,
   convertSearchParamsToProperTypes,
   getAgencyDisplayName,
+  getAgencyParent,
+  getSiblingOptionValues,
   paramsToFormattedQuery,
   paramToDateRange,
   sortFilterOptions,
@@ -17,6 +19,7 @@ import {
 import {
   fakeAgencyResponseData,
   fakeSearchParamDict,
+  initialFilterOptions,
 } from "src/utils/testing/fixtures";
 
 describe("sortFilterOptions", () => {
@@ -396,10 +399,57 @@ describe("convertSearchParamsToProperTypes", () => {
       category: new Set([fakeSearchParamDict.category]),
       closeDate: new Set(["7"]),
       costSharing: new Set(),
+      topLevelAgency: new Set(),
       andOr: fakeSearchParamDict.andOr,
       sortby: fakeSearchParamDict.sortby,
       page: 1,
       actionType: SearchFetcherActionType.InitialLoad,
     });
+  });
+});
+
+describe("getAgencyParent", () => {
+  it("returns the pre dash part of the agency code", () => {
+    expect(getAgencyParent("PREFIX-SUFFIX")).toEqual("PREFIX");
+  });
+  it("does not break if there is no dash", () => {
+    expect(getAgencyParent("WHATEVER")).toEqual("WHATEVER");
+  });
+  it("works with multiple dashes", () => {
+    expect(getAgencyParent("HI-THERE-HOW-ARE-YOU")).toEqual("HI");
+  });
+});
+
+describe("getSiblingOptionValues", () => {
+  it("returns an empty array if parent is not found or has no children", () => {
+    expect(getSiblingOptionValues("no-children", [])).toEqual([]);
+    expect(getSiblingOptionValues("no-children", initialFilterOptions)).toEqual(
+      [],
+    );
+    expect(
+      getSiblingOptionValues("no-children", [
+        { value: "no", id: "no", label: "no" },
+      ]),
+    ).toEqual([]);
+  });
+  it("returns all siblings but not the target node", () => {
+    expect(
+      getSiblingOptionValues("parent-target", [
+        {
+          value: "parent",
+          id: "parent",
+          label: "parent",
+          children: [
+            { value: "parent-target", id: "target", label: "target" },
+            { value: "parent-sibling", id: "sibling", label: "sibling" },
+            {
+              value: "parent-another-sibling",
+              id: "another-sibling",
+              label: "another-sibling",
+            },
+          ],
+        },
+      ]),
+    ).toEqual(["parent-sibling", "parent-another-sibling"]);
   });
 });

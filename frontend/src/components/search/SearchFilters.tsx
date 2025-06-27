@@ -21,6 +21,7 @@ export default async function SearchFilters({
   agency,
   category,
   opportunityStatus,
+  topLevelAgency,
   searchResultsPromise,
 }: {
   fundingInstrument: Set<string>;
@@ -28,6 +29,7 @@ export default async function SearchFilters({
   agency: Set<string>;
   category: Set<string>;
   opportunityStatus: Set<string>;
+  topLevelAgency: Set<string>;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
@@ -84,6 +86,7 @@ export default async function SearchFilters({
         <AgencyFilterAccordion
           query={agency}
           agencyOptionsPromise={agenciesPromise}
+          topLevelQuery={topLevelAgency}
         />
       </Suspense>
       <SearchFilterAccordion

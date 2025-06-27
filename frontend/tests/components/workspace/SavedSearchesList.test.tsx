@@ -55,6 +55,7 @@ const fakeParamDisplayMapping = {
   sortby: "sortby",
   closeDate: "closeDate",
   costSharing: "costSharing",
+  topLevelAgency: "topLevelAgency",
 };
 
 describe("SavedSearchesList", () => {

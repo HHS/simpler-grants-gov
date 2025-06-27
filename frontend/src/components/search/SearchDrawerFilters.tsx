@@ -11,7 +11,7 @@ import { Accordion } from "@trussworks/react-uswds";
 
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { RadioButtonFilter } from "./Filters/RadioButtonFilter";
-import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
+import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 import {
   categoryOptions,
   closeDateOptions,
@@ -37,6 +37,7 @@ export async function SearchDrawerFilters({
     agency,
     closeDate,
     costSharing,
+    topLevelAgency,
   } = searchParams;
 
   const agenciesPromise = Promise.all([
@@ -97,7 +98,12 @@ export async function SearchDrawerFilters({
           />
         }
       >
-        <AgencyFilter query={agency} agencyOptionsPromise={agenciesPromise} />
+        <AgencyFilterAccordion
+          query={agency}
+          agencyOptionsPromise={agenciesPromise}
+          topLevelQuery={topLevelAgency}
+          className="width-100 padding-right-5"
+        />
       </Suspense>
       <CheckboxFilter
         filterOptions={categoryOptions}
