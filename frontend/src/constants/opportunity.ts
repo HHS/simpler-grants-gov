@@ -113,12 +113,3 @@ export const eligbilityValueToGroup = eligibilityTypes.reduce(
   },
   {} as { [key: string]: string },
 );
-
-// represents a map of { value: label }
-export const eligibilityValueToLabel = eligibilityTypes.reduce(
-  (mapping, { label, value }) => {
-    mapping[value] = label;
-    return mapping;
-  },
-  {} as { [key: string]: string },
-);
