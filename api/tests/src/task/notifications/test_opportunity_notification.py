@@ -625,7 +625,7 @@ class TestOpportunityNotification:
                                 '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
                                 '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
                                 '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
-                                '<br><br><p style="padding-left: 20px;">Categorization</p>'
+                                '<p style="padding-left: 20px;">Categorization</p>'
                                 '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                                 '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
                                 '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
@@ -633,8 +633,6 @@ class TestOpportunityNotification:
                                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                                 "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
-                                'The following funding opportunity recently changed:<br><br><div>1. <a href=\'http://testhost:3000/opportunity/4\' target=\'_blank\'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>'
-                                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.'
 
 
                         ),
@@ -653,5 +651,5 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
-        import pdb;pdb.set_trace()
+
         assert res == expected

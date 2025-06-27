@@ -1,5 +1,6 @@
 import logging
 from dataclasses import field
+from datetime import datetime
 from typing import Sequence, cast
 from uuid import UUID
 
@@ -331,6 +332,21 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return category_section
 
+    def _normalize_date_field(self, value: str | int | None) -> str | int | None:
+        if isinstance(value, str):
+            return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
+        elif not value:
+            return NOT_SPECIFIED
+        return value
+    def _build_important_dates_content(self, imp_dates_change: dict) -> str:
+        important_section = SECTION_STYLING.format("Important dates")
+        for field, change in imp_dates_change.items():
+            before = self._normalize_date_field(change["before"])
+            after = self._normalize_date_field(change["after"])
+            important_section += (
+                f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return important_section
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -354,6 +370,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
         sections = []
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
+        if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
+            sections.append(self._build_important_dates_content(important_date_diffs))
         if categorization_fields_diffs := {
             k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
         }:
