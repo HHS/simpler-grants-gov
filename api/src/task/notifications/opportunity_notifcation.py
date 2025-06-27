@@ -329,6 +329,25 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return category_section
 
+    def _format_currency(self, value: int | str) -> str:
+        if isinstance(value, int):
+            return f"${value:,}"
+        return value
+
+    def _build_award_fields_content(self, award_change: dict) -> str:
+        award_section = SECTION_STYLING.format("Awards details")
+        for field, change in award_change.items():
+            before = change["before"] if change["before"] else NOT_SPECIFIED
+            after = change["after"] if change["after"] else NOT_SPECIFIED
+            if field != "expected_number_of_awards":
+                before = self._format_currency(before)
+                after = self._format_currency(after)
+
+            award_section += (
+                f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return award_section
+
     def _normalize_date_field(self, value: str | int | None) -> str | int | None:
         if isinstance(value, str):
             return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
@@ -377,6 +396,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
         if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
             sections.append(self._build_important_dates_content(important_date_diffs))
+        if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
+            sections.append(self._build_award_fields_content(award_fields_diffs))
         if categorization_fields_diffs := {
             k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
         }:

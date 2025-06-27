@@ -517,6 +517,36 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "award_diffs,expected_html",
+        [  # estimated_total_program_funding only
+            (
+                {"estimated_total_program_funding": {"before": 500_000, "after": None}},
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $500,000 to not specified.<br>',
+            ),
+            (
+                {"expected_number_of_awards": {"before": None, "after": 3}},
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br>',
+            ),
+            # multiple award fields
+            (
+                {
+                    "award_floor": {"before": 500_000, "after": 200_000},
+                    "award_ceiling": {"before": 1_000_000, "after": 500_000},
+                },
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The award minimum changed from $500,000 to $200,000.<br><p style="padding-left: 40px;">•  The award maximum changed from $1,000,000 to $500,000.<br>',
+            ),
+        ],
+    )
+    def test_build_award_fields_content(
+        self, db_session, award_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_award_fields_content(award_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "category_diff,expected_html",
         [
             (
@@ -715,6 +745,10 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
                         '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
                         '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
+                        '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
+                        '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
+                        '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
                         '<p style="padding-left: 20px;">Categorization</p>'
                         '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                         '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
