@@ -1,8 +1,8 @@
 """Recreate Opportunity and related tables to use UUIDs
 
-Revision ID: 49d8aab5fe7b
+Revision ID: 4fe76320503b
 Revises: 837231ccdc25
-Create Date: 2025-06-27 16:55:16.881192
+Create Date: 2025-06-27 19:21:31.154458
 
 """
 
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 from src.db.migrations.utils import setup_opportunity_search_index_queue_trigger_function
 
 # revision identifiers, used by Alembic.
-revision = "49d8aab5fe7b"
+revision = "4fe76320503b"
 down_revision = "837231ccdc25"
 branch_labels = None
 depends_on = None
@@ -447,6 +447,7 @@ def upgrade():
         sa.Column("agency_download_url", sa.Text(), nullable=True),
         sa.Column("is_legacy_workspace_compatible", sa.Boolean(), nullable=True),
         sa.Column("can_send_mail", sa.Boolean(), nullable=True),
+        sa.Column("is_simpler_grants_enabled", sa.Boolean(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -964,6 +965,7 @@ def upgrade():
         sa.Column("application_id", sa.UUID(), nullable=False),
         sa.Column("competition_form_id", sa.UUID(), nullable=False),
         sa.Column("application_response", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("is_included_in_submission", sa.Boolean(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
