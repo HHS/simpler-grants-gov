@@ -97,6 +97,8 @@ services:
         required: true
       - path: ./override.env
         required: false
+      - path: ./soap-api.env
+        required: false
     ports:
       - 8080:8080
     volumes:
