@@ -28,6 +28,7 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
       revalidate: 604800,
     },
   });
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
   return data;
 };
