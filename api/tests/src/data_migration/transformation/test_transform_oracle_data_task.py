@@ -73,7 +73,10 @@ class TestTransformFullRunTask(BaseTestClass):
 
         ### Forecast
         forecast = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=None, opportunity=opportunity
+            create_existing=False,
+            is_forecast=True,
+            revision_number=None,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesForecastFactory(forecast=forecast, at_id="01")
         # This is a duplicate record (same at_id, but will have a different at_frcst_id), verifying we handle duplicates
@@ -90,7 +93,10 @@ class TestTransformFullRunTask(BaseTestClass):
 
         ### Synopsis (has some invalid values)
         synopsis = setup_synopsis_forecast(
-            create_existing=False, is_forecast=False, revision_number=None, opportunity=opportunity
+            create_existing=False,
+            is_forecast=False,
+            revision_number=None,
+            source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="06")
         f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="07")

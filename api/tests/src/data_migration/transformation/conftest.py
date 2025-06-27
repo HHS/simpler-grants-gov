@@ -102,12 +102,11 @@ def setup_cfda(
     return source_cfda
 
 
-# TODO: Clean this up
 def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
-    opportunity: Opportunity | staging.opportunity.Topportunity | None,
+    opportunity: Opportunity | None = None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     is_existing_current_opportunity_summary: bool = False,
@@ -132,8 +131,6 @@ def setup_synopsis_forecast(
 
     if isinstance(opportunity, Opportunity):
         source_values["opportunity_id"] = opportunity.legacy_opportunity_id
-    elif isinstance(opportunity, staging.opportunity.Topportunity):
-        source_values["opportunity_id"] = opportunity.opportunity_id
 
     source_summary = factory_cls.create(
         **source_values,
