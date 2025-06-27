@@ -5,11 +5,9 @@ import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 
 export default function WorkspaceLayout({ children }: LayoutProps) {
   return (
-    <>
-      <AuthenticationGate>
-        <BetaAlert containerClasses="margin-bottom-5" />
-        {children}
-      </AuthenticationGate>
-    </>
+    <AuthenticationGate>
+      <BetaAlert containerClasses="margin-bottom-5" />
+      {children}
+    </AuthenticationGate>
   );
 }
