@@ -275,7 +275,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _format_currency(self, value: int | str) -> str:
         if isinstance(value, int):
-            return f"${int(value):,}"
+            return f"${value:,}"
         return value
 
     def _build_award_fields_content(self, award_change: dict) -> str:
