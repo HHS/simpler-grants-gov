@@ -1,11 +1,11 @@
 "use client";
 
+import { andOrOptions } from "src/constants/searchFilterOptions";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 
 import { useCallback, useContext } from "react";
 
-import { andOrOptions } from "./SearchFilterAccordion/SearchFilterOptions";
 import { SearchFilterRadio } from "./SearchFilterRadio";
 
 export function AndOrPanel({ hasSearchTerm }: { hasSearchTerm: boolean }) {
