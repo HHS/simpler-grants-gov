@@ -10,6 +10,7 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedSearch
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.generate_notifications import NotificationConstants
@@ -18,10 +19,14 @@ from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
+notification_config = None
+
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
     monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+    notification_config = EmailNotificationConfig()
+    notification_config.reset_emails_without_sending = False
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -92,7 +97,9 @@ def test_search_notifications_cli(
 
     _clear_mock_responses()
 
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
 
     assert result.exit_code == 0
 
@@ -191,7 +198,9 @@ def test_grouped_search_queries_cli(
         searched_opportunity_ids=[4, 5, 6],
     )
 
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
 
     assert result.exit_code == 0
 
@@ -252,7 +261,7 @@ def test_search_notifications_on_index_change(
     search_client.bulk_upsert(setup_opensearch_data, [json_record], "opportunity_id")
 
     # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
+    task = EmailNotificationTask(db_session, search_client, notification_config)
     task.run()
 
     # Verify notification log was created due to changed results
@@ -269,10 +278,12 @@ def test_search_notifications_on_index_change(
     # Verify the saved search was updated with new results
     db_session.refresh(saved_search)
     assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+
+    print(saved_search.last_notified_at)
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
-    task_rerun = EmailNotificationTask(db_session, search_client)
+    task_rerun = EmailNotificationTask(db_session, search_client, notification_config)
     task_rerun.run()
 
     notification_logs = (
@@ -347,7 +358,9 @@ def test_search_notification_email_format_single_opportunity(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
@@ -425,7 +438,9 @@ def test_search_notification_email_format_no_close_date(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
@@ -516,7 +531,9 @@ def test_search_notification_email_format_multiple_opportunities(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
