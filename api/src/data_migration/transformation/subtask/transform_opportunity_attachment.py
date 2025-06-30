@@ -54,6 +54,7 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             # to avoid running out of memory.
             batch_size=self.attachment_config.transform_opportunity_attachment_batch_size,
             limit=self.attachment_config.transform_opportunity_attachment_batch_size,
+            order_by=TsynopsisAttachment.created_at.desc(),
         )
 
         records_processed = self.process_opportunity_attachment_group(records)
@@ -243,5 +244,7 @@ def write_file(
     if source_attachment.file_lob is None:
         raise ValueError("Attachment is null, cannot copy")
 
-    with file_util.open_stream(destination_attachment.file_location, "wb") as outfile:
+    with file_util.open_stream(
+        destination_attachment.file_location, "wb", content_type=destination_attachment.mime_type
+    ) as outfile:
         outfile.write(source_attachment.file_lob)

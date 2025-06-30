@@ -82,6 +82,7 @@ class TestTransformCompetition(BaseTransformTestClass):
                 "graceperiod": 20,
                 # Test changing is_wrkspc_compatible value
                 "is_wrkspc_compatible": "N",
+                "expected_appl_num": 4356435643,
             },
         )
 
@@ -100,12 +101,34 @@ class TestTransformCompetition(BaseTransformTestClass):
             opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
         )
 
+        # Test case where opportunity_id found through cfda listing but the opportunity
+        # does not exist for that id.
+        non_existent_opportunity_cfda_listing_opp_cfda_id = 123456
+        non_existent_opportunity_id = 19929292
+        f.StagingTopportunityCfdaFactory.create(
+            opp_cfda_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
+            opportunity_id=non_existent_opportunity_id,
+            opportunity=None,
+        )
+        competition_with_no_opportunity = setup_competition(
+            db_session,
+            create_existing=False,
+            opportunity=None,
+            opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
+        )
+
         # Run the transformation
         transform_competition.run_subtask()
 
         # Validate the results
         validate_competition(
             db_session, cfda_opp_listing_only_in_staging, expect_assistance_listing=False
+        )
+        validate_competition(
+            db_session,
+            competition_with_no_opportunity,
+            expect_assistance_listing=False,
+            expect_in_db=False,
         )
         validate_competition(db_session, basic_insert)
         validate_competition(db_session, insert_with_null_fields)
@@ -114,10 +137,11 @@ class TestTransformCompetition(BaseTransformTestClass):
 
         # Check the metrics
         metrics = transform_competition.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 5
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 6
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_ORPHANED] == 1
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
 
     def test_form_family_mapping(self):

@@ -2,7 +2,7 @@
 description: Deploy a static site with information about the Simpler.Grants.gov initiative.
 ---
 
-# 🏁 Static site public launch
+# Static site public launch
 
 ## Summary details
 
