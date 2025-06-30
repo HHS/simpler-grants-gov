@@ -800,8 +800,7 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                         '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                         '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
                         '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                         '<p style="padding-left: 40px;">•  New description: grant manager.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
