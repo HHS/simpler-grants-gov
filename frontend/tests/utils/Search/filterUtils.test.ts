@@ -18,13 +18,6 @@ import {
   searchFetcherParams,
 } from "src/utils/testing/fixtures";
 
-// jest.mock(
-//   "src/components/search/SearchFilterAccordion/SearchFilterOptions",
-//   () => ({
-//     allFilterOptions: initialFilterOptions,
-//   }),
-// );
-
 describe("sortFilterOptions", () => {
   it("alphabetically sorts top level and child options by label", () => {
     expect(

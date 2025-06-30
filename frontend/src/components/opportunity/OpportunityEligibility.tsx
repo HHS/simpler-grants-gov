@@ -1,8 +1,7 @@
 import { upperFirst } from "lodash";
 import { eligbilityValueToGroup } from "src/constants/opportunity";
+import { eligibilityOptions } from "src/constants/searchFilterOptions";
 import { getFilterOptionLabel } from "src/utils/search/filterUtils";
-
-import { eligibilityOptions } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 
 export const applicantTypesToGroups = (applicantTypes: string[]) =>
   applicantTypes.reduce(
