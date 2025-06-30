@@ -42,6 +42,7 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    summary_description: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -65,6 +66,7 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        summary_description=summary_description,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -94,6 +96,7 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "summary_description": None,
 }
 
 OPAL = build_opp_and_version(
@@ -134,6 +137,7 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "summary_description": "Summary",
 }
 
 TOPAZ = build_opp_and_version(
@@ -164,6 +168,7 @@ TOPAZ_ALL = build_opp_and_version(
     category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
     funding_category_description="Accelerates early-stage renewable energy technology adoption",
+    summary_description="Climate research in mars",
 )
 
 
@@ -547,6 +552,30 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "description_diffs,expected_html",
+        [
+            ({"before": "testing", "after": None}, ""),
+            (
+                {
+                    "before": "testing",
+                    "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a><br>'
+            )]
+    )
+    def test_build_description_fields_content(
+        self,
+        db_session,
+        description_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_description_fields_content(description_diffs, 1)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -652,7 +681,8 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                         '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                         '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                        '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> Climate research in mars<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"

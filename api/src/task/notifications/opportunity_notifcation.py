@@ -77,6 +77,7 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
+TRUNCATION_THRESHOLD = 250
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -273,6 +274,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+        after = description_change["after"]
+        if after:
+            description_section = SECTION_STYLING.format("Description")
+            if len(after) > TRUNCATION_THRESHOLD:
+                after += f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+            description_section += (
+                f"{BULLET_POINTS_STYLING} <i>New Description:</i> {after}<br>"
+            )
+            return description_section
+        return ""
+
     def _format_currency(self, value: int | str) -> str:
         if isinstance(value, int):
             return f"${value:,}"
@@ -343,14 +356,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_important_dates_content(important_date_diffs))
         if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
             sections.append(self._build_award_fields_content(award_fields_diffs))
-
-        if not sections:
-            logger.info(
-                "Opportunity has changes, but none are in fields that trigger user notifications",
-                extra={
-                    "opportunity_id": opp_change.opportunity_id,
-                    "ignored_fields": changes.keys(),
-                },
+        if "summary_description" in changes:
+            sections.append(
+                self._build_description_fields_content(
+                    changes["summary_description"], opp_change.opportunity_id
+                )
             )
         return "<br>".join(sections)
 
