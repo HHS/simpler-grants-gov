@@ -577,10 +577,10 @@ class TestOpportunityNotification:
                 {
                     "agency_contact_description": {
                         "before": None,
-                        "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199. Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
+                        "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.\n Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
                     }
                 },
-                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199. Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding ....<br>',
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
             ),
         ],
     )
@@ -590,6 +590,7 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_grantor_contact_fields_content(contact_diffs)
+        assert res == expected_html
         assert res == expected_html
 
     @pytest.mark.parametrize(

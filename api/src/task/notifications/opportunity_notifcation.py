@@ -298,11 +298,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in contact_change.items():
             after = change["after"] if change["after"] else NOT_SPECIFIED
             if len(after) > TRUNCATION_THRESHOLD:
-                after = after[: TRUNCATION_THRESHOLD - 3] + "..."
+                after = after[: TRUNCATION_THRESHOLD - 3] + ".."
 
-            contact_section += (
-                f"{BULLET_POINTS_STYLING} {GRANTOR_CONTACT_INFORMATION_FIELDS[field]} {after}.<br>"
-            )
+            contact_section += f"{BULLET_POINTS_STYLING} {GRANTOR_CONTACT_INFORMATION_FIELDS[field]} {after.replace("\n", "<br>")}.<br>"
         return contact_section
 
     def _build_opportunity_status_content(self, status_change: dict) -> str:
