@@ -159,7 +159,7 @@ describe("ApplyForm", () => {
         error: false,
         formData: new FormData(),
         formId: "test",
-        submitted: false,
+        saved: false,
       },
 
       expect.any(FormData),
@@ -227,7 +227,7 @@ describe("ApplyForm", () => {
       error: true,
       formData: new FormData(),
       formId: "test",
-      submitted: true,
+      saved: true,
     });
 
     render(
@@ -266,7 +266,7 @@ describe("ApplyForm", () => {
       error: false,
       formData: new FormData(),
       formId: "test",
-      submitted: true,
+      saved: true,
     });
 
     render(
@@ -309,7 +309,7 @@ describe("ApplyForm", () => {
       error: false,
       formData: new FormData(),
       formId: "test",
-      submitted: true,
+      saved: true,
     });
 
     render(
