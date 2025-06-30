@@ -267,6 +267,13 @@ class Application(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    application_submissions: Mapped[list["ApplicationSubmission"]] = relationship(
+        "ApplicationSubmission",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list["User"]:
         """Return the list of User objects associated with this application"""
@@ -344,7 +351,7 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
     application_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Application.application_id), nullable=False
     )
-    application: Mapped[Application] = relationship(Application, single_parent=True)
+    application: Mapped[Application] = relationship(Application, back_populates="application_submissions")
 
     file_location: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
