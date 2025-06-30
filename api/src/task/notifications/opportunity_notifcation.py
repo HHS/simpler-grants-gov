@@ -296,6 +296,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             return True
         return False
 
+    def _format_slug(self, slug: str) -> str:
+        return slug.replace("_", " ").capitalize()
+
     def _build_categorization_fields_content(self, category_change: dict) -> str:
         category_section = SECTION_STYLING.format("Categorization")
         for field, change in category_change.items():
@@ -305,12 +308,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 before = self._normalize_bool_field(before)
                 after = self._normalize_bool_field(after)
             elif field in ["funding_instruments", "funding_categories"]:
-                before = ", ".join([value.capitalize() for value in before])
-                after = ", ".join([value.capitalize() for value in after])
+                before = ", ".join([self._format_slug(value) for value in before])
+                after = ", ".join([self._format_slug(value) for value in after])
             elif field == "category":
                 before = before.capitalize() if before else NOT_SPECIFIED
                 after = after.capitalize() if after else NOT_SPECIFIED
-
             elif field == "category_explanation":
                 # If category changes from Other to Any other field do not show category explanation as it is only relevant to OpportunityCategory.Other
                 if self._skip_category_explanation(category_change, "category"):

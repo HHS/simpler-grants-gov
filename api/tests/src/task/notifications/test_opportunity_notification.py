@@ -603,11 +603,11 @@ class TestOpportunityNotification:
             (
                 {
                     "funding_categories": {
-                        "before": [FundingCategory.EDUCATION],
+                        "before": [FundingCategory.OPPORTUNITY_ZONE_BENEFITS],
                         "after": [FundingCategory.OTHER],
                     }
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>',
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Opportunity zone benefits to Other.<br>',
             ),
             # Skip category_explanation if funding_categories changes from Other to any other category or none
             (
@@ -751,9 +751,9 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
                         '<p style="padding-left: 20px;">Categorization</p>'
                         '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
-                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
+                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                         '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
