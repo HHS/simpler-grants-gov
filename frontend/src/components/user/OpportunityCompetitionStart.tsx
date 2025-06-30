@@ -14,14 +14,6 @@ export const OpportunityCompetitionStart = ({
 }) => {
   const { checkFeatureFlag } = useFeatureFlags();
   const openCompetitions = competitions.filter(({ is_open }) => is_open);
-    (acc, competition) => {
-      if (competition.is_open) {
-        acc.push(competition);
-      }
-      return acc;
-    },
-    [],
-  );
 
   if (!openCompetitions.length || checkFeatureFlag("applyFormPrototypeOff")) {
     return <></>;
