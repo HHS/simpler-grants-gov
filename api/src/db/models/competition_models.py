@@ -351,7 +351,9 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
     application_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Application.application_id), nullable=False
     )
-    application: Mapped[Application] = relationship(Application, back_populates="application_submissions")
+    application: Mapped[Application] = relationship(
+        Application, back_populates="application_submissions"
+    )
 
     file_location: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
