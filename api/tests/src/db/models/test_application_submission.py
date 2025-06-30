@@ -1,5 +1,6 @@
 import uuid
 
+import src.util.file_util as file_util
 from tests.src.db.models.factories import ApplicationSubmissionFactory
 
 
@@ -55,7 +56,6 @@ def test_application_submission_relationships(enable_factory_create, db_session)
 
 def test_application_submission_file_creation(enable_factory_create, db_session, s3_config):
     """Test that the factory creates a file on S3"""
-    import src.util.file_util as file_util
 
     submission = ApplicationSubmissionFactory.create()
 
