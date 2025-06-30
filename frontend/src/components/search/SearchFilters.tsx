@@ -1,4 +1,10 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import {
+  categoryOptions,
+  eligibilityOptions,
+  fundingOptions,
+  statusOptions,
+} from "src/constants/searchFilterOptions";
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
@@ -6,12 +12,6 @@ import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import {
-  categoryOptions,
-  eligibilityOptions,
-  fundingOptions,
-  statusOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 
