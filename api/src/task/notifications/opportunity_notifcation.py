@@ -280,9 +280,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
             description_section = SECTION_STYLING.format("Description")
             if len(after) > TRUNCATION_THRESHOLD:
                 after += f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
-            description_section += (
-                f"{BULLET_POINTS_STYLING} <i>New Description:</i> {after}<br>"
-            )
+            description_section += f"{BULLET_POINTS_STYLING} <i>New Description:</i> {after}<br>"
             return description_section
         return ""
 

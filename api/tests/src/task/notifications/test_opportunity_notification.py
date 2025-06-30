@@ -656,8 +656,9 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a><br>'
-            )]
+                "<p style=\"padding-left: 20px;\">Description</p><p style=\"padding-left: 40px;\">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.<a href='http://testhost:3000/opportunity/1' style='color:blue;'>...Read full description</a><br>",
+            ),
+        ],
     )
     def test_build_description_fields_content(
         self,
