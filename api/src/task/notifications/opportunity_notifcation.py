@@ -273,6 +273,64 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _normalize_bool_field(self, value: bool | None) -> str:
+        if value is None:
+            return NOT_SPECIFIED
+        return "Yes" if value else "No"
+
+    def _skip_category_explanation(self, category_change: dict, field_name: str) -> bool:
+        change = category_change.get(field_name)
+        if change and (
+            change["before"] == OpportunityCategory.OTHER
+            or OpportunityCategory.OTHER != change["after"]
+        ):
+            return True
+        return False
+
+    def _skip_funding_category_description(self, category_change: dict, field_name: str) -> bool:
+        change = category_change.get(field_name)
+        if change and (
+            FundingCategory.OTHER in change["before"]
+            or FundingCategory.OTHER not in change["after"]
+        ):
+            return True
+        return False
+
+    def _format_slug(self, slug: str) -> str:
+        return slug.replace("_", " ").capitalize()
+
+    def _build_categorization_fields_content(self, category_change: dict) -> str:
+        category_section = SECTION_STYLING.format("Categorization")
+        for field, change in category_change.items():
+            before = change["before"]
+            after = change["after"]
+            if field == "is_cost_sharing":
+                before = self._normalize_bool_field(before)
+                after = self._normalize_bool_field(after)
+            elif field in ["funding_instruments", "funding_categories"]:
+                before = ", ".join([self._format_slug(value) for value in before])
+                after = ", ".join([self._format_slug(value) for value in after])
+            elif field == "category":
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+            elif field == "category_explanation":
+                # If category changes from Other to Any other field do not show category explanation as it is only relevant to OpportunityCategory.Other
+                if self._skip_category_explanation(category_change, "category"):
+                    continue
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+            elif field == "funding_category_description":
+                # If funding_categories changes from Other to Any other field do not show funding category description as it is only relevant to funding_categories.Other
+                if self._skip_funding_category_description(category_change, "funding_categories"):
+                    continue
+                before = before.capitalize() if before else NOT_SPECIFIED
+                after = after.capitalize() if after else NOT_SPECIFIED
+
+            category_section += (
+                f"{BULLET_POINTS_STYLING} {CATEGORIZATION_FIELDS[field]} {before} to {after}.<br>"
+            )
+        return category_section
+
     def _build_eligibility_content(self, eligibility_change: dict) -> str:
         eligibility_section = SECTION_STYLING.format("Eligibility")
         for field, change in eligibility_change.items():
@@ -423,6 +481,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_important_dates_content(important_date_diffs))
         if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
             sections.append(self._build_award_fields_content(award_fields_diffs))
+        if categorization_fields_diffs := {
+            k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
+        }:
+            sections.append(self._build_categorization_fields_content(categorization_fields_diffs))
         if categorization_fields_diffs := {
             k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
         }:
