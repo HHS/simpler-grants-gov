@@ -14,7 +14,6 @@ import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
-import { Pill } from "../Pill";
 import { AndOrPanel } from "./AndOrPanel";
 import { FilterPillPanel } from "./FilterPillPanel";
 import { PillList } from "./PillList";

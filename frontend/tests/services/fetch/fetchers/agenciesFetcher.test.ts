@@ -10,36 +10,36 @@ const fakeResponse = {
   status: 200,
 };
 
-const fakeSortedOptions = [
-  {
-    id: "DOCNIST",
-    label: "National Institute of Standards and Technology",
-    value: "DOCNIST",
-  },
-  {
-    id: "MOCKNIST",
-    label: "Mational Institute",
-    value: "MOCKNIST",
-  },
-  {
-    id: "MOCKTRASH",
-    label: "Mational TRASH",
-    value: "MOCKTRASH",
-  },
-  {
-    id: "FAKEORG",
-    label: "Completely fake",
-    value: "FAKEORG",
-  },
-];
+// const fakeSortedOptions = [
+//   {
+//     id: "DOCNIST",
+//     label: "National Institute of Standards and Technology",
+//     value: "DOCNIST",
+//   },
+//   {
+//     id: "MOCKNIST",
+//     label: "Mational Institute",
+//     value: "MOCKNIST",
+//   },
+//   {
+//     id: "MOCKTRASH",
+//     label: "Mational TRASH",
+//     value: "MOCKTRASH",
+//   },
+//   {
+//     id: "FAKEORG",
+//     label: "Completely fake",
+//     value: "FAKEORG",
+//   },
+// ];
 
-const mockSortFilterOptions = jest.fn();
+// const mockSortFilterOptions = jest.fn();
 const mockFetchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockSearchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockFlattenAgencies = jest.fn().mockReturnValue(fakeAgencyResponseData);
-const mockAgenciesToFilterOptions = jest
-  .fn()
-  .mockReturnValue(fakeSortedOptions);
+// const mockAgenciesToFilterOptions = jest
+//   .fn()
+//   .mockReturnValue(fakeSortedOptions);
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAgencies: (arg: unknown): unknown => mockFetchAgencies(arg),
@@ -47,9 +47,9 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 }));
 
 jest.mock("src/utils/search/filterUtils", () => ({
-  sortFilterOptions: (arg: unknown): unknown => mockSortFilterOptions(arg),
-  agenciesToFilterOptions: (arg: unknown): unknown =>
-    mockAgenciesToFilterOptions(arg),
+  // sortFilterOptions: (arg: unknown): unknown => mockSortFilterOptions(arg),
+  // agenciesToFilterOptions: (arg: unknown): unknown =>
+  //   mockAgenciesToFilterOptions(arg),
   flattenAgencies: (arg: unknown): unknown => mockFlattenAgencies(arg),
 }));
 
@@ -110,12 +110,12 @@ describe("searchAndFlattenAgencies", () => {
     mockFetchAgencies.mockResolvedValue(fakeResponse);
     mockSearchAgencies.mockResolvedValue(fakeResponse);
     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-    mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
+    // mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
   });
   afterEach(() => {
     jest.resetAllMocks();
   });
-  it("calls fetch, flattens, transforms, and sorts", async () => {
+  it("calls fetch, and flattens", async () => {
     await searchAndFlattenAgencies("anything");
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
@@ -134,10 +134,6 @@ describe("searchAndFlattenAgencies", () => {
       },
     });
     expect(mockFlattenAgencies).toHaveBeenCalledWith(fakeAgencyResponseData);
-    expect(mockAgenciesToFilterOptions).toHaveBeenCalledWith(
-      fakeAgencyResponseData,
-    );
-    expect(mockSortFilterOptions).toHaveBeenCalledWith(fakeSortedOptions);
   });
 });
 

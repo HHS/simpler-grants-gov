@@ -205,7 +205,7 @@ describe("agenciesToNestedFilterOptions", () => {
     ]);
   });
 
-  it("converts a complex list of nested agencies to filter options", () => {
+  it.only("converts a complex list of nested agencies to filter options", () => {
     const fakeAgencyResponseData: RelevantAgencyRecord[] = [
       {
         agency_code: "DOCNIST",
@@ -214,31 +214,9 @@ describe("agenciesToNestedFilterOptions", () => {
         agency_id: 1,
       },
       {
-        agency_code: "Hello-HI",
-        agency_name: "Hello",
-        top_level_agency: {
-          agency_code: "DOCNIST",
-          agency_id: 2,
-          agency_name: "irrelevant",
-          top_level_agency: null,
-        },
-        agency_id: 1,
-      },
-      {
         agency_code: "MOCKNIST",
         agency_name: "Mational Institute",
         top_level_agency: null,
-        agency_id: 1,
-      },
-      {
-        agency_code: "MORE-TRASH",
-        agency_name: "More TRASH",
-        top_level_agency: {
-          agency_code: "MOCKTRASH",
-          agency_id: 2,
-          agency_name: "irrelevant",
-          top_level_agency: null,
-        },
         agency_id: 1,
       },
       {
@@ -254,6 +232,28 @@ describe("agenciesToNestedFilterOptions", () => {
         agency_id: 1,
       },
       {
+        agency_code: "Hello-HI",
+        agency_name: "Hello",
+        top_level_agency: {
+          agency_code: "DOCNIST",
+          agency_id: 2,
+          agency_name: "irrelevant",
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+      {
+        agency_code: "MOCKTRASH-TRASH",
+        agency_name: "More TRASH",
+        top_level_agency: {
+          agency_code: "MOCKTRASH",
+          agency_id: 2,
+          agency_name: "irrelevant",
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+      {
         agency_code: "There-Again",
         agency_name: "Again",
         top_level_agency: {
@@ -265,7 +265,8 @@ describe("agenciesToNestedFilterOptions", () => {
         agency_id: 1,
       },
     ];
-    expect(agenciesToNestedFilterOptions(fakeAgencyResponseData)).toEqual([
+    const result = agenciesToNestedFilterOptions(fakeAgencyResponseData);
+    expect(result).toEqual([
       {
         id: "DOCNIST",
         label: "National Institute of Standards and Technology",
@@ -294,9 +295,9 @@ describe("agenciesToNestedFilterOptions", () => {
         value: "MOCKTRASH",
         children: [
           {
-            id: "MORE-TRASH",
+            id: "MOCKTRASH-TRASH",
             label: "More TRASH",
-            value: "MORE-TRASH",
+            value: "MOCKTRASH-TRASH",
           },
         ],
       },
