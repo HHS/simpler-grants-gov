@@ -1,9 +1,14 @@
+import uuid
 import zipfile
+from pathlib import Path
 from typing import Sequence
 
 from src.adapters.aws import S3Config
+from src.adapters.db import flask_db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationAttachment
+from src.task import task_blueprint
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from enum import StrEnum
 from sqlalchemy import select
@@ -19,13 +24,25 @@ class SubmissionContainer:
     application: Application
     submission_zip: zipfile.ZipFile
 
-
-
     manifest_text: str = ""
+
+    file_names_in_zip: list[str] = field(default_factory=list)
+
+    def get_file_name_in_zip(self, file_name: str) -> str:
+        if file_name not in self.file_names_in_zip:
+            self.file_names_in_zip.append(file_name)
+            return file_name
+
+        # If the file name is already in the ZIP, rename
+        # it to something with a UUID on it
+        file_path = Path(file_name)
+        file_name = file_path.stem + f"-{uuid.uuid4()}" + file_path.suffix
+        self.file_names_in_zip.append(file_name)
+        return file_name
 
 class CreateApplicationSubmissionTask(Task):
 
-    def __init__(self, db_session: db.Session, s3_config: S3Config):
+    def __init__(self, db_session: db.Session, s3_config: S3Config | None = None):
         super().__init__(db_session)
         if s3_config is None:
             s3_config = S3Config()
@@ -41,6 +58,7 @@ class CreateApplicationSubmissionTask(Task):
             self.process_application(application)
 
     def fetch_applications(self) -> Sequence[Application]:
+        # TODO - fetch more
         return self.db_session.scalars(select(Application).where(Application.application_status == ApplicationStatus.SUBMITTED)).all()
 
     def process_application(self, application: Application) -> None:
@@ -62,8 +80,11 @@ class CreateApplicationSubmissionTask(Task):
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         for application_attachment in submission.application.application_attachments:
             with file_util.open_stream(application_attachment.file_location, "rb") as attachment_file:
-                # TODO - file name stuff
-                submission.submission_zip.write(attachment_file, arcname=application_attachment.file_name)
+
+                # Handle duplicate file names in zip
+
+                with submission.submission_zip.open(application_attachment.file_name, "w") as file_in_zip:
+                    file_in_zip.write(attachment_file.read())
 
 
 def build_s3_application_submission_path(s3_config: S3Config, application: Application) -> str:
@@ -78,3 +99,25 @@ def build_s3_application_submission_path(s3_config: S3Config, application: Appli
         #str() # TODO - submission ID should be here
         "submission-123.zip" # TODO - actual name from something
     )
+
+def adjust_file_name_for_dupes(file_name: str) -> str:
+    """We make certain files aren't duplicate
+    by adjusting the filename to include a random UUID
+
+    For example "my_file.txt" becomes "my_file-11c70823-3277-4f23-96b8-aef946e97b83.txt
+    """
+
+    file_path = Path(file_name)
+
+    return file_path.stem + f"-{uuid.uuid4()}" + file_path.suffix
+
+
+
+@task_blueprint.cli.command(
+    "create-application-submission",
+    help="Create application submissions for all submitted apps",
+)
+@flask_db.with_db_session()
+@ecs_background_task(task_name="create-application-submission")
+def create_application_submission(db_session: db.Session) -> None:
+    CreateApplicationSubmissionTask(db_session).run()
