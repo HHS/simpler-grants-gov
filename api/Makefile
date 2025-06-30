@@ -354,3 +354,8 @@ init-mock-soap-services: start-mock-soap-services ## Initialize the applicants s
 
 start-mock-soap-services: ## start applicants soap api
 	docker compose up --detach mock-applicants-soap-api
+
+# To specify the path of where the downloaded certificates are run the command as follows:
+#   make setup-soap-proxy cert_dir="~/certs/dir/"
+setup-soap-proxy:
+	./bin/setup-soap.sh $(cert_dir)
