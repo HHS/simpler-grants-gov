@@ -926,15 +926,6 @@ def setup_competition(
             open_to_applicants.add(CompetitionOpenToApplicant.INDIVIDUAL)
             open_to_applicants.add(CompetitionOpenToApplicant.ORGANIZATION)
 
-        opportunity_assistance_listing = (
-            db_session.query(OpportunityAssistanceListing)
-            .filter(
-                OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
-                == legacy_opportunity_assistance_listing_id
-            )
-            .one_or_none()
-        )
-
         competition_record = Competition(
             legacy_competition_id=competition.comp_id,
             public_competition_id=competition.competitionid,
@@ -947,11 +938,9 @@ def setup_competition(
             form_family=form_family,
             opportunity=opportunity,
             opportunity_id=opportunity.opportunity_id if opportunity else None,
+            # TODO https://github.com/HHS/simpler-grants-gov/issues/5522
             # opportunity_assistance_listing_id=(
-            #     opportunity_assistance_listing.opportunity_assistance_listing_id
-            #     if opportunity_assistance_listing
-            #     else competition.opportunity_assistance_listing_id
-            #     # DO I Need this??
+            #     opportunity_assistance_listing_id or competition.opp_cfda_id
             # ),
             is_electronic_required=(
                 competition.electronic_required == "Y" if competition.electronic_required else None
