@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
@@ -208,13 +209,15 @@ def transform_opportunity_attachment(
     if source_attachment.file_lob_size is None:
         raise ValueError("Opportunity attachment does not have a file size, cannot process.")
 
+    attachment_id = uuid.uuid4()
     file_location = attachment_util.get_s3_attachment_path(
-        file_name, source_attachment.syn_att_id, opportunity, s3_config
+        file_name, attachment_id, opportunity, s3_config
     )
 
     # We always create a new record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
     target_attachment = OpportunityAttachment(
+        attachment_id=attachment_id,
         legacy_attachment_id=source_attachment.syn_att_id,
         opportunity_id=opportunity.opportunity_id,
         # Note we calculate the file location here, but haven't yet done anything
