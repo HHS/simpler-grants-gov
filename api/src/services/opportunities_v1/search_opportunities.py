@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
@@ -248,11 +249,13 @@ def search_opportunities(
     return records, response.aggregations, pagination_info
 
 
-def search_opportunities_id(search_client: search.SearchClient, search_query: dict) -> list:
+def search_opportunities_id(
+    search_client: search.SearchClient, search_query: dict
+) -> list[uuid.UUID]:
     # Override pagination when calling opensearch
     updated_search_query = search_query | STATIC_PAGINATION
     search_params = SearchOpportunityParams.model_validate(updated_search_query)
 
     response = _search_opportunities(search_client, search_params, includes=["opportunity_id"])
 
-    return [opp["opportunity_id"] for opp in response.records]
+    return [uuid.UUID(opp["opportunity_id"]) for opp in response.records]
