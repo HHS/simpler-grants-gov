@@ -1,11 +1,5 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
-import { useUser } from "src/services/auth/useUser";
-
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Button,
   ModalFooter,
@@ -13,11 +7,16 @@ import {
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
+import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { useClientFetch } from "src/hooks/useClientFetch";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useUser } from "src/services/auth/useUser";
 
 function SuccessContent({
   modalRef,
@@ -37,7 +36,6 @@ function SuccessContent({
           modalRef={modalRef}
           closer
           unstyled
-          className="padding-105 text-center"
           onClick={onClose}
         >
           {t("closeText")}
@@ -164,7 +162,6 @@ export function DeleteSavedSearchModal({
                     modalRef={modalRef}
                     closer
                     unstyled
-                    className="padding-105 text-center"
                     onClick={onClose}
                   >
                     {t("cancelText")}
