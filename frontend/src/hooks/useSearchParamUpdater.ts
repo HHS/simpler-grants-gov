@@ -96,6 +96,9 @@ export function useSearchParamUpdater() {
   ) => {
     const paramToEdit = searchParams.get(queryParamKey);
     const defaultValues = defaultFilterValues[queryParamKey];
+    // if no param value is present but default values are, we can remove a default value
+    // that is in place though not explicitly set in the query params
+    // ex. removing forecasted status from default /search state
     if (!paramToEdit && !defaultValues) {
       return;
     }

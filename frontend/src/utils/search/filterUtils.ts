@@ -107,7 +107,8 @@ export const agenciesToSortedAndNestedFilterOptions = (
   agencies: RelevantAgencyRecord[],
 ) => {
   try {
-    return sortFilterOptions(agenciesToNestedFilterOptions(agencies));
+    const floated = floatTopLevelAgencies(agencies);
+    return sortFilterOptions(agenciesToNestedFilterOptions(floated));
   } catch (e) {
     console.error("Unable to sort, convert and nest agency filter options", e);
     return [];

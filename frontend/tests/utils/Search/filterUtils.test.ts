@@ -2,10 +2,28 @@ import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes"
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import {
   agenciesToNestedFilterOptions,
+  agencyToFilterOption,
+  flattenAgencies,
+  floatTopLevelAgencies,
+  formatPillLabel,
+  formatPillLabels,
   getAgencyDisplayName,
+  getFilterOptionLabel,
   sortFilterOptions,
 } from "src/utils/search/filterUtils";
-import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
+import {
+  fakeAgencyResponseData,
+  fakeAgencyResponseDataWithTopLevel,
+  initialFilterOptions,
+  searchFetcherParams,
+} from "src/utils/testing/fixtures";
+
+// jest.mock(
+//   "src/components/search/SearchFilterAccordion/SearchFilterOptions",
+//   () => ({
+//     allFilterOptions: initialFilterOptions,
+//   }),
+// );
 
 describe("sortFilterOptions", () => {
   it("alphabetically sorts top level and child options by label", () => {
@@ -205,7 +223,7 @@ describe("agenciesToNestedFilterOptions", () => {
     ]);
   });
 
-  it.only("converts a complex list of nested agencies to filter options", () => {
+  it("converts a complex list of nested agencies to filter options", () => {
     const fakeAgencyResponseData: RelevantAgencyRecord[] = [
       {
         agency_code: "DOCNIST",
@@ -305,6 +323,254 @@ describe("agenciesToNestedFilterOptions", () => {
         id: "FAKEORG",
         label: "Completely fake",
         value: "FAKEORG",
+      },
+    ]);
+  });
+});
+
+describe("flattenAgencies", () => {
+  it("flattens a list of sub agencies to include top level agencies on the same level", () => {
+    expect(flattenAgencies(fakeAgencyResponseDataWithTopLevel)).toEqual([
+      {
+        agency_code: "DOC-DOCNIST",
+        agency_name: "National Institute of Standards and Technology",
+        top_level_agency: {
+          agency_code: "DOC",
+          agency_name: "Detroit Optical Company",
+          agency_id: 11,
+          top_level_agency: null,
+        },
+        agency_id: 1,
+      },
+      {
+        agency_code: "DOC",
+        agency_name: "Detroit Optical Company",
+        agency_id: 11,
+        top_level_agency: null,
+      },
+      {
+        agency_code: "MOCK-NIST",
+        agency_name: "Mational Institute",
+        top_level_agency: {
+          agency_code: "MOCK",
+          agency_name: "A mock",
+          agency_id: 12,
+          top_level_agency: null,
+        },
+        agency_id: 2,
+      },
+      {
+        agency_code: "MOCK",
+        agency_name: "A mock",
+        agency_id: 12,
+        top_level_agency: null,
+      },
+      {
+        agency_code: "MOCKTRASH",
+        agency_name: "Mational TRASH",
+        top_level_agency: {
+          agency_code: "MOCK",
+          agency_name: "A mock",
+          agency_id: 12,
+          top_level_agency: null,
+        },
+        agency_id: 3,
+      },
+      {
+        agency_code: "FAKEORG",
+        agency_name: "Completely fake",
+        top_level_agency: null,
+        agency_id: 4,
+      },
+    ]);
+  });
+});
+
+describe("floatTopLevelAgencies", () => {
+  it("floats top level agencies to the top of a list of agencies", () => {
+    expect(
+      floatTopLevelAgencies([
+        {
+          agency_code: "FAKE",
+          agency_name: "National Institute of Standards and Technology",
+          top_level_agency: null,
+          agency_id: 1,
+        },
+        {
+          agency_code: "MOCK-TRASH",
+          agency_name: "Mational TRASH",
+          top_level_agency: {
+            agency_code: "MOCK",
+            agency_name: "Mational Institute",
+            top_level_agency: null,
+            agency_id: 5,
+          },
+          agency_id: 2,
+        },
+        {
+          agency_code: "MOCK",
+          agency_name: "Mational Institute",
+          top_level_agency: null,
+          agency_id: 5,
+        },
+        {
+          agency_code: "FAKE-ORG",
+          agency_name: "Completely fake",
+          top_level_agency: {
+            agency_code: "FAKE",
+            agency_name: "National Institute of Standards and Technology",
+            top_level_agency: null,
+            agency_id: 1,
+          },
+          agency_id: 4,
+        },
+      ]),
+    ).toEqual([
+      {
+        agency_code: "FAKE",
+        agency_name: "National Institute of Standards and Technology",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "MOCK",
+        agency_name: "Mational Institute",
+        top_level_agency: null,
+        agency_id: 5,
+      },
+      {
+        agency_code: "MOCK-TRASH",
+        agency_name: "Mational TRASH",
+        top_level_agency: {
+          agency_code: "MOCK",
+          agency_name: "Mational Institute",
+          top_level_agency: null,
+          agency_id: 5,
+        },
+        agency_id: 2,
+      },
+      {
+        agency_code: "FAKE-ORG",
+        agency_name: "Completely fake",
+        top_level_agency: {
+          agency_code: "FAKE",
+          agency_name: "National Institute of Standards and Technology",
+          top_level_agency: null,
+          agency_id: 1,
+        },
+        agency_id: 4,
+      },
+    ]);
+  });
+});
+
+describe("agencyToFilterOption", () => {
+  it("translates an agency record into a filter option", () => {
+    expect(
+      agencyToFilterOption({
+        agency_code: "FAKE-ORG",
+        agency_name: "Completely fake",
+        top_level_agency: {
+          agency_code: "FAKE",
+          agency_name: "National Institute of Standards and Technology",
+          top_level_agency: null,
+          agency_id: 1,
+        },
+        agency_id: 4,
+      }),
+    ).toEqual({ id: "FAKE-ORG", label: "Completely fake", value: "FAKE-ORG" });
+  });
+});
+
+describe("getFilterOptionLabel", () => {
+  it("returns an empty string if option value not found in supplied list", () => {
+    expect(getFilterOptionLabel("special-value", initialFilterOptions)).toEqual(
+      "",
+    );
+  });
+  it("returns the option label from list", () => {
+    expect(
+      getFilterOptionLabel(
+        "special-value",
+        initialFilterOptions.concat([
+          {
+            value: "special-value",
+            id: "special-value",
+            label: "Special label",
+          },
+        ]),
+      ),
+    ).toEqual("Special label");
+  });
+});
+
+describe("formatPillLabel", () => {
+  it("returns correct label for cost sharing", () => {
+    expect(
+      formatPillLabel("costSharing", "yes", [
+        { value: "yes", label: "sure", id: "yes" },
+      ]),
+    ).toEqual("Cost sharing: sure");
+  });
+  it("returns correct label for close date", () => {
+    expect(
+      formatPillLabel("closeDate", "yes", [
+        { value: "yes", label: "sure", id: "yes" },
+      ]),
+    ).toEqual("Closing within yes days");
+  });
+  it("returns correct label for everything else", () => {
+    expect(
+      formatPillLabel("status", "yes", [
+        { value: "yes", label: "sure", id: "yes" },
+      ]),
+    ).toEqual("sure");
+  });
+});
+
+describe("formatPillLabels", () => {
+  it("returns correctly formatted labels for all types of pills", () => {
+    expect(
+      formatPillLabels(
+        {
+          ...searchFetcherParams,
+          agency: new Set(["FAKE-SUB", "MOCK-SUB"]),
+        },
+        [
+          { id: "FAKE-SUB", label: "Fake sub", value: "FAKE-SUB" },
+          { id: "MOCK-SUB", label: "Mock sub", value: "MOCK-SUB" },
+        ],
+      ),
+    ).toEqual([
+      {
+        label: "Forecasted",
+        queryParamKey: "status",
+        queryParamValue: "forecasted",
+      },
+      {
+        label: "Open",
+        queryParamKey: "status",
+        queryParamValue: "posted",
+      },
+      {
+        label: "Grant",
+        queryParamKey: "fundingInstrument",
+        queryParamValue: "grant",
+      },
+      {
+        label: "Cooperative Agreement",
+        queryParamKey: "fundingInstrument",
+        queryParamValue: "cooperative_agreement",
+      },
+      {
+        label: "Fake sub",
+        queryParamKey: "agency",
+        queryParamValue: "FAKE-SUB",
+      },
+      {
+        label: "Mock sub",
+        queryParamKey: "agency",
+        queryParamValue: "MOCK-SUB",
       },
     ]);
   });

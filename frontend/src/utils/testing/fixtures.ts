@@ -2,6 +2,7 @@ import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
+  FilterPillLabelData,
   RelevantAgencyRecord,
 } from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
@@ -264,6 +265,48 @@ export const fakeAgencyResponseData: RelevantAgencyRecord[] = [
   },
 ];
 
+export const fakeAgencyResponseDataWithTopLevel: RelevantAgencyRecord[] = [
+  {
+    agency_code: "DOC-DOCNIST",
+    agency_name: "National Institute of Standards and Technology",
+    top_level_agency: {
+      agency_code: "DOC",
+      agency_name: "Detroit Optical Company",
+      agency_id: 11,
+      top_level_agency: null,
+    },
+    agency_id: 1,
+  },
+  {
+    agency_code: "MOCK-NIST",
+    agency_name: "Mational Institute",
+    top_level_agency: {
+      agency_code: "MOCK",
+      agency_name: "A mock",
+      agency_id: 12,
+      top_level_agency: null,
+    },
+    agency_id: 2,
+  },
+  {
+    agency_code: "MOCKTRASH",
+    agency_name: "Mational TRASH",
+    top_level_agency: {
+      agency_code: "MOCK",
+      agency_name: "A mock",
+      agency_id: 12,
+      top_level_agency: null,
+    },
+    agency_id: 3,
+  },
+  {
+    agency_code: "FAKEORG",
+    agency_name: "Completely fake",
+    top_level_agency: null,
+    agency_id: 4,
+  },
+];
+
 export const fakeSearchParamDict = {
   status: "forecasted,posted,archived,closed",
   eligibility: "state_governments",
@@ -280,6 +323,7 @@ export const fakeResponsiveTableHeaders = [
   { cellData: "a heading" },
   { cellData: "table header cell" },
 ];
+
 export const fakeResponsiveTableRows = [
   [
     { cellData: "hi from row one", stackOrder: 1 },
@@ -296,4 +340,27 @@ export const fakeResponsiveTableRows = [
     { cellData: "column two", stackOrder: 0 },
     { cellData: "even more data", stackOrder: -1 },
   ],
+];
+
+export const fakeFilterPillLabelData: FilterPillLabelData[] = [
+  {
+    label: "whatever",
+    queryParamKey: "status",
+    queryParamValue: "whichever",
+  },
+  {
+    label: "another",
+    queryParamKey: "category",
+    queryParamValue: "overHere",
+  },
+  {
+    label: "this one.",
+    queryParamKey: "agency",
+    queryParamValue: "that one!",
+  },
+  {
+    label: "last",
+    queryParamKey: "eligibility",
+    queryParamValue: "again",
+  },
 ];

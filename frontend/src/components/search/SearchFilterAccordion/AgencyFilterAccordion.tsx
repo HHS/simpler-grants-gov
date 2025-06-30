@@ -1,6 +1,6 @@
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
-import { agenciesToNestedFilterOptions } from "src/utils/search/filterUtils";
+import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 
@@ -32,7 +32,7 @@ export async function AgencyFilterAccordion({
     console.error("Unable to fetch agencies for filter list", e);
   }
 
-  const agencyOptions = agenciesToNestedFilterOptions(allAgencies);
+  const agencyOptions = agenciesToSortedAndNestedFilterOptions(allAgencies);
 
   return (
     <BasicSearchFilterAccordion
