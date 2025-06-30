@@ -557,6 +557,102 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "category_diff,expected_html",
+        [
+            (
+                {"is_cost_sharing": {"before": True, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
+            ),
+            (
+                {
+                    "funding_instruments": {
+                        "before": [FundingInstrument.GRANT],
+                        "after": [FundingInstrument.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
+            ),
+            (
+                {"category": {"before": OpportunityCategory.OTHER, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+            ),
+            (
+                {"category_explanation": {"before": None, "after": "to be determined"}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+            ),
+            # Skip category_explanation if Category changes from Other to any other category or none
+            (
+                {
+                    "category": {
+                        "before": OpportunityCategory.OTHER,
+                        "after": OpportunityCategory.MANDATORY,
+                    },
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
+            ),
+            (
+                {
+                    "category": {"before": OpportunityCategory.OTHER, "after": None},
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+            ),
+            (
+                {
+                    "category": {
+                        "before": OpportunityCategory.DISCRETIONARY,
+                        "after": OpportunityCategory.OTHER,
+                    },
+                    "category_explanation": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
+                '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+            ),
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.OPPORTUNITY_ZONE_BENEFITS],
+                        "after": [FundingCategory.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Opportunity zone benefits to Other.<br>',
+            ),
+            # Skip category_explanation if funding_categories changes from Other to any other category or none
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.OTHER],
+                        "after": [FundingCategory.ENERGY],
+                    },
+                    "funding_category_description": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
+            ),
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.EDUCATION],
+                        "after": [FundingCategory.OTHER],
+                    },
+                    "funding_category_description": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
+                '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
+            ),
+        ],
+    )
+    def test_build_categorization_fields_content(
+        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_categorization_fields_content(category_diff)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "contact_diffs,expected_html",
         [
             (
@@ -699,6 +795,12 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                         '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                         '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                        '<p style="padding-left: 20px;">Categorization</p>'
+                        '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
+                        '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br>'
                         '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
                         '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                         '<p style="padding-left: 40px;">•  New description: grant manager.<br>'

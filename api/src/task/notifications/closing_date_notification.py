@@ -40,7 +40,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
-        two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
+
+        days_ago = 14
+        interval_ago = datetime_util.get_now_us_eastern_date() + timedelta(days=days_ago)
 
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
@@ -54,8 +56,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
-                    OpportunitySummary.close_date >= two_weeks_from_now - timedelta(hours=24),
-                    OpportunitySummary.close_date <= two_weeks_from_now + timedelta(hours=24),
+                    OpportunitySummary.close_date <= interval_ago,
+                    OpportunitySummary.close_date >= datetime_util.get_now_us_eastern_date(),
                 ),
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
@@ -63,6 +65,11 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         UserOpportunityNotificationLog.user_id == UserSavedOpportunity.user_id,
                         UserOpportunityNotificationLog.opportunity_id
                         == UserSavedOpportunity.opportunity_id,
+                        UserOpportunityNotificationLog.created_at
+                        >= OpportunitySummary.close_date - timedelta(days=days_ago),
+                        # TODO Add this to the table
+                        # UserOpportunityNotificationLog.notification_reason
+                        # == NotificationReason.CLOSING_DATE_REMINDER
                     )
                 ),
             )
