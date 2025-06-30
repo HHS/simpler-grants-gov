@@ -463,7 +463,7 @@ class TestOpportunityNotification:
             ),
             (
                 {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.',
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
             ),
         ],
     )

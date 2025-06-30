@@ -57,7 +57,7 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
 }
 DOCUMENTS_FIELDS = {
     "attachments": "One or more new documents were",
-    "additional_info_url": "A link to additional information was updated.<br>",
+    "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
     "<div>"
@@ -293,7 +293,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
             elif field == "additional_info_url":
                 documents_section += (
-                    f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["additional_info_url"]}"
+                    f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["additional_info_url"]}<br>"
                 )
 
         return documents_section
