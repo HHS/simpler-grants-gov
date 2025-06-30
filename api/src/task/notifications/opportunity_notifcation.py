@@ -12,6 +12,7 @@ from src.constants.lookup_constants import FundingCategory, OpportunityCategory,
 from src.db.models.opportunity_models import OpportunityVersion
 from src.db.models.user_models import UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
     Metrics,
@@ -81,8 +82,10 @@ TRUNCATION_THRESHOLD = 250
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
-    def __init__(self, db_session: db.Session):
+    def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
         super().__init__(db_session)
+
+        self.notification_config = notification_config
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""

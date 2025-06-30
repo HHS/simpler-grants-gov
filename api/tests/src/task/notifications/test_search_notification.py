@@ -22,10 +22,14 @@ from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
+notification_config = None
+
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
     monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+    notification_config = EmailNotificationConfig()
+    notification_config.reset_emails_without_sending = False
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -276,8 +280,6 @@ def test_search_notifications_on_index_change(
     json_record = schema.dump(new_opportunity)
     search_client.bulk_upsert(setup_opensearch_data, [json_record], "opportunity_id")
 
-    notification_config = EmailNotificationConfig()
-    notification_config.reset_emails_without_sending = False
     # Run the notification task
     task = EmailNotificationTask(db_session, search_client, notification_config)
     task.run()
