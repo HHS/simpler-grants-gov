@@ -16,7 +16,7 @@ export async function FilterPillPanel({
 }) {
   let agencies;
   try {
-    agencies = await agencyListPromise; // TODO: this needs to be a flat list. Do we have that available?
+    agencies = await agencyListPromise;
   } catch (e) {
     console.error("Unable to fetch agency options for pills");
   }
