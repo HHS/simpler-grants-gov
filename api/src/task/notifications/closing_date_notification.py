@@ -1,7 +1,8 @@
 import logging
+from datetime import timedelta
 from uuid import UUID
 
-from sqlalchemy import and_, exists, select, text, update
+from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
@@ -40,6 +41,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
 
+        days_ago = 14
+        interval_ago = datetime_util.get_now_us_eastern_date() + timedelta(days=days_ago)
+
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
             select(UserSavedOpportunity)
@@ -52,8 +56,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
-                    OpportunitySummary.close_date <= text("now() + INTERVAL '14 day'"),
-                    OpportunitySummary.close_date >= text("now()"),
+                    OpportunitySummary.close_date <= interval_ago,
+                    OpportunitySummary.close_date >= datetime_util.get_now_us_eastern_date(),
                 ),
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
@@ -62,7 +66,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         UserOpportunityNotificationLog.opportunity_id
                         == UserSavedOpportunity.opportunity_id,
                         UserOpportunityNotificationLog.created_at
-                        >= OpportunitySummary.close_date - text("INTERVAL '14 DAY'"),
+                        >= OpportunitySummary.close_date - timedelta(days=days_ago),
                         # TODO Add this to the table
                         # UserOpportunityNotificationLog.notification_reason
                         # == NotificationReason.CLOSING_DATE_REMINDER
