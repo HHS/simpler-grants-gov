@@ -42,6 +42,8 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    agency_email_address: str | None,
+    agency_contact_description: str | None,
     summary_description: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
@@ -66,6 +68,8 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        agency_email_address=agency_email_address,
+        agency_contact_description=agency_contact_description,
         summary_description=summary_description,
     )
 
@@ -96,6 +100,8 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
     "summary_description": None,
 }
 
@@ -137,6 +143,8 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
     "summary_description": "Summary",
 }
 
@@ -168,6 +176,8 @@ TOPAZ_ALL = build_opp_and_version(
     category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
     funding_category_description="Accelerates early-stage renewable energy technology adoption",
+    agency_email_address="john.smith@gmail.com",
+    agency_contact_description="grant manager",
     summary_description="Climate research in mars",
 )
 
@@ -648,6 +658,43 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "contact_diffs,expected_html",
+        [
+            (
+                {"agency_email_address": {"before": None, "after": "contact@simpler.gov"}},
+                '<p style="padding-left: 20px;">Grantor contact information</p>'
+                '<p style="padding-left: 40px;">•  The updated email address is contact@simpler.gov.<br>',
+            ),
+            (
+                {
+                    "agency_contact_description": {
+                        "before": "Email customer service for any enquiries",
+                        "after": None,
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br>',
+            ),  # Truncate
+            (
+                {
+                    "agency_contact_description": {
+                        "before": None,
+                        "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.\n Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
+            ),
+        ],
+    )
+    def test_build_grantor_contact_fields_content(
+        self, db_session, contact_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_grantor_contact_fields_content(contact_diffs)
+        assert res == expected_html
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "description_diffs,expected_html",
         [
             ({"before": "testing", "after": None}, ""),
@@ -784,6 +831,8 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                         '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
                         '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
+                        '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
+                        '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
                         '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> Climate research in mars<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
