@@ -15,6 +15,7 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -34,8 +35,9 @@ class SearchNotificationTask(BaseNotificationTask):
         self,
         db_session: db.Session,
         search_client: search.SearchClient,
+        notification_config: EmailNotificationConfig | None,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, notification_config)
         self.search_client = search_client
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
