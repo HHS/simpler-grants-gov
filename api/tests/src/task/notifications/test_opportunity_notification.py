@@ -654,102 +654,6 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
-        "category_diff,expected_html",
-        [
-            (
-                {"is_cost_sharing": {"before": True, "after": None}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
-            ),
-            (
-                {
-                    "funding_instruments": {
-                        "before": [FundingInstrument.GRANT],
-                        "after": [FundingInstrument.OTHER],
-                    }
-                },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
-            ),
-            (
-                {"category": {"before": OpportunityCategory.OTHER, "after": None}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
-            ),
-            (
-                {"category_explanation": {"before": None, "after": "to be determined"}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
-            ),
-            # Skip category_explanation if Category changes from Other to any other category or none
-            (
-                {
-                    "category": {
-                        "before": OpportunityCategory.OTHER,
-                        "after": OpportunityCategory.MANDATORY,
-                    },
-                    "category_explanation": {"before": "to be determined", "after": None},
-                },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
-            ),
-            (
-                {
-                    "category": {"before": OpportunityCategory.OTHER, "after": None},
-                    "category_explanation": {"before": "to be determined", "after": None},
-                },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
-            ),
-            (
-                {
-                    "category": {
-                        "before": OpportunityCategory.DISCRETIONARY,
-                        "after": OpportunityCategory.OTHER,
-                    },
-                    "category_explanation": {"before": None, "after": "To be determined"},
-                },
-                '<p style="padding-left: 20px;">Categorization</p>'
-                '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
-                '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
-            ),
-            (
-                {
-                    "funding_categories": {
-                        "before": [FundingCategory.EDUCATION],
-                        "after": [FundingCategory.OTHER],
-                    }
-                },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>',
-            ),
-            # Skip category_explanation if funding_categories changes from Other to any other category or none
-            (
-                {
-                    "funding_categories": {
-                        "before": [FundingCategory.OTHER],
-                        "after": [FundingCategory.ENERGY],
-                    },
-                    "funding_category_description": {"before": "to be determined", "after": None},
-                },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
-            ),
-            (
-                {
-                    "funding_categories": {
-                        "before": [FundingCategory.EDUCATION],
-                        "after": [FundingCategory.OTHER],
-                    },
-                    "funding_category_description": {"before": None, "after": "To be determined"},
-                },
-                '<p style="padding-left: 20px;">Categorization</p>'
-                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
-                '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
-            ),
-        ],
-    )
-    def test_build_categorization_fields_content(
-        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
-    ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_categorization_fields_content(category_diff)
-        assert res == expected_html
-
-    @pytest.mark.parametrize(
         "eligibility_diffs,expected_html",
         [
             # Removed and Added type
@@ -764,8 +668,8 @@ class TestOpportunityNotification:
                     }
                 },
                 '<p style="padding-left: 20px;">Eligibility</p>'
-                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['State_governments'].<br>"
-                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Other', 'Public_and_state_institutions_of_higher_education'].<br>",
+                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['State governments'].<br>"
+                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Other', 'Public and state institutions of higher education'].<br>",
             ),
             # Add
             (
@@ -913,16 +817,10 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                         '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                         '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
-                        '<p style="padding-left: 20px;">Categorization</p>'
-                        '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
-                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative_agreement to Grant.<br>'
-                        '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science_technology_and_other_research_and_development, Environment to Energy.<br><br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
                         '<p style="padding-left: 20px;">Eligibility</p>'
-                        "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public_and_state_institutions_of_higher_education'].<br>"
-                        "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public_and_indian_housing_authorities'].<br>"
+                        "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
+                        "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
                         '<p style="padding-left: 40px;">•  Additional information was changed.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
