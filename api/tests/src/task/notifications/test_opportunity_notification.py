@@ -42,6 +42,8 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    opportunity_attachments: list,
+    additional_info_url: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -49,6 +51,7 @@ def build_opp_and_version(
         category=category,
         category_explanation=category_explanation,
         revision_number=revision_number,
+        opportunity_attachments=opportunity_attachments,
     )
 
     opportunity_summary = factories.OpportunitySummaryFactory.build(
@@ -65,6 +68,7 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        additional_info_url=additional_info_url,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -94,6 +98,8 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 OPAL = build_opp_and_version(
@@ -134,6 +140,8 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 TOPAZ = build_opp_and_version(
@@ -164,6 +172,8 @@ TOPAZ_ALL = build_opp_and_version(
     category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
     funding_category_description="Accelerates early-stage renewable energy technology adoption",
+    opportunity_attachments=[{"attachment_id": 3}],
+    additional_info_url="simpler-grants.gov",
 )
 
 
@@ -440,6 +450,33 @@ class TestOpportunityNotification:
         assert res == expected_dict
 
     @pytest.mark.parametrize(
+        "documents_diffs,expected_html",
+        [
+            (
+                {
+                    "attachments": {
+                        "before": [{"attachment_id": 1}, {"attachment_id": 34}],
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.',
+            ),
+        ],
+    )
+    def test_build_documents_fields(
+        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_documents_fields(documents_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "opp_status_diffs,expected_html",
         [
             (
@@ -652,7 +689,8 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                         '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                         '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
