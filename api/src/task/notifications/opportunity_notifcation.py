@@ -361,18 +361,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
             contact_section += f"{BULLET_POINTS_STYLING} {GRANTOR_CONTACT_INFORMATION_FIELDS[field]} {after.replace("\n", "<br>")}.<br>"
         return contact_section
 
-    def _build_opportunity_status_content(self, status_change: dict) -> str:
-        before = status_change["before"]
-        after = status_change["after"]
-
-        before = OPPORTUNITY_STATUS_MAP.get(before, before.capitalize())
-        after = OPPORTUNITY_STATUS_MAP.get(after, after.capitalize())
-
-        return (
-            SECTION_STYLING.format("Status")
-            + f"{BULLET_POINTS_STYLING} The status changed from {before} to {after}.<br>"
-        )
-
     def _normalize_date_field(self, value: str | int | None) -> str | int | None:
         if isinstance(value, str):
             return datetime.strptime(value, "%Y-%m-%d").strftime("%B %-d, %Y")
