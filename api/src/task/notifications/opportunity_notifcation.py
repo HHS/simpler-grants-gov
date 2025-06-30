@@ -342,6 +342,31 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return category_section
 
+    def _build_eligibility_content(self, eligibility_change: dict) -> str:
+        eligibility_section = SECTION_STYLING.format("Eligibility")
+        for field, change in eligibility_change.items():
+            before = change["before"]
+            after = change["after"]
+
+            if field == "applicant_types":
+                added = sorted(set(after) - set(before), key=lambda x: x.value)
+                removed = sorted(set(before) - set(after), key=lambda x: x.value)
+                stmt = ELIGIBILITY_FIELDS["applicant_types"]
+                if added:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} {[self._format_slug(e_type.value) for e_type in added]}.<br>"
+                if removed:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} {[self._format_slug(e_type.value) for e_type in removed]}.<br>"
+
+            if field == "applicant_eligibility_description":
+                stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
+                if not before and after:
+                    eligibility_section += f"{stmt} added.<br>"
+                elif before and not after:
+                    eligibility_section += f"{stmt} deleted.<br>"
+                else:
+                    eligibility_section += f"{stmt} changed.<br>"
+        return eligibility_section
+
     def _format_currency(self, value: int | str) -> str:
         if isinstance(value, int):
             return f"${value:,}"
@@ -431,6 +456,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(
                 self._build_grantor_contact_fields_content(grantor_contact_fields_diffs)
             )
+        if eligibility_fields_diffs := {k: changes[k] for k in ELIGIBILITY_FIELDS if k in changes}:
+            sections.append(self._build_eligibility_content(eligibility_fields_diffs))
         if "summary_description" in changes:
             sections.append(
                 self._build_description_fields_content(
@@ -491,7 +518,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
             if updated_opp_count > 1
             else "Your saved funding opportunity changed on "
         )
-        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+        subject += "Simpler.Grants.gov"
 
         return UserOpportunityUpdateContent(
             subject=subject,
