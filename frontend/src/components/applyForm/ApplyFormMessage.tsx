@@ -6,11 +6,11 @@ import { FormValidationWarning } from "./types";
 export const ApplyFormMessage = ({
   error,
   validationWarnings,
-  submitted,
+  saved,
 }: {
   error: boolean;
   validationWarnings: FormValidationWarning[] | null;
-  submitted: boolean;
+  saved: boolean;
 }) => {
   const t = useTranslations("Application.applyForm");
   const errorMessage = t.rich("errorMessage", {
@@ -19,11 +19,16 @@ export const ApplyFormMessage = ({
     ),
     p: (content) => <p>{content}</p>,
   });
-  if (!submitted) {
+  if (!saved) {
     return <></>;
   } else if (error) {
     return (
-      <Alert heading={t("errorTitle")} headingLevel="h2" type="error">
+      <Alert
+        heading={t("errorTitle")}
+        headingLevel="h2"
+        type="error"
+        validation
+      >
         {errorMessage}
       </Alert>
     );

@@ -15,7 +15,7 @@ type ApplyFormResponse = {
   error: boolean;
   formData: object;
   formId: string;
-  submitted: boolean;
+  saved: boolean;
 };
 
 export async function handleFormAction(
@@ -30,7 +30,7 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      submitted: true,
+      saved: true,
     };
   }
 
@@ -41,7 +41,7 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      submitted: true,
+      saved: true,
     };
   }
   const applicationFormData = shapeFormData<ApplicationResponseDetail>(
@@ -61,7 +61,7 @@ export async function handleFormAction(
       error: false,
       formData: applicationFormData,
       formId,
-      submitted: true,
+      saved: true,
     };
   } else {
     return {
@@ -69,7 +69,7 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      submitted: true,
+      saved: true,
     };
   }
 }

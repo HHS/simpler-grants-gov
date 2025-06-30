@@ -47,17 +47,17 @@ const ApplyForm = ({
     error: false,
     formId,
     formData: new FormData(),
-    submitted: false,
+    saved: false,
   });
 
-  const { formData, error, submitted } = formState;
+  const { formData, error, saved } = formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
   try {
     fields = buildFormTreeRecursive({
-      errors: submitted ? validationWarnings : null,
+      errors: saved ? validationWarnings : null,
       formData: formObject,
       schema: formSchema,
       uiSchema,
@@ -93,7 +93,7 @@ const ApplyForm = ({
         <div className="usa-in-page-nav-container">
           <FormGroup className="order-2 width-full">
             <ApplyFormMessage
-              submitted={submitted}
+              saved={saved}
               error={error}
               validationWarnings={validationWarnings}
             />
