@@ -502,7 +502,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
             if updated_opp_count > 1
             else "Your saved funding opportunity changed on "
         )
-        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+        subject += "Simpler.Grants.gov"
 
         return UserOpportunityUpdateContent(
             subject=subject,
