@@ -83,9 +83,7 @@ TRUNCATION_THRESHOLD = 250
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
-        super().__init__(db_session)
-
-        self.notification_config = notification_config
+        super().__init__(db_session, notification_config)
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
