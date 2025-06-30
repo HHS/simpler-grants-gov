@@ -796,11 +796,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_categorization_fields_content(
-        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        category_diff,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_categorization_fields_content(category_diff)
+        res = notification_task._build_categorization_fields_content(category_diff)
         assert res == expected_html
 
     @pytest.mark.parametrize(
