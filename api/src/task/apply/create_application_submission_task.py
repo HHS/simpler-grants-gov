@@ -26,18 +26,20 @@ class SubmissionContainer:
 
     manifest_text: str = ""
 
-    file_names_in_zip: list[str] = field(default_factory=list)
+    file_names_in_zip: set[str] = field(default_factory=set)
 
     def get_file_name_in_zip(self, file_name: str) -> str:
         if file_name not in self.file_names_in_zip:
-            self.file_names_in_zip.append(file_name)
+            self.file_names_in_zip.add(file_name)
             return file_name
 
-        # If the file name is already in the ZIP, rename
-        # it to something with a UUID on it
+        i = 1
         file_path = Path(file_name)
-        file_name = file_path.stem + f"-{uuid.uuid4()}" + file_path.suffix
-        self.file_names_in_zip.append(file_name)
+        while file_name in self.file_names_in_zip:
+            file_name = file_path.stem + f"-{i}" + "".join(file_path.suffixes)
+            i+= 1
+
+        self.file_names_in_zip.add(file_name)
         return file_name
 
 class CreateApplicationSubmissionTask(Task):
