@@ -1,7 +1,7 @@
 """Create application submission table
 
 Revision ID: 448ee11789b1
-Revises: b5946cdc3859
+Revises: cff668b42a9f
 Create Date: 2025-06-27 13:39:50.381509
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "448ee11789b1"
-down_revision = "b5946cdc3859"
+down_revision = "cff668b42a9f"
 branch_labels = None
 depends_on = None
 
