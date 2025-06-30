@@ -77,6 +77,7 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
+TRUNCATION_THRESHOLD = 250
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -292,6 +293,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return award_section
 
+    def _build_grantor_contact_fields_content(self, contact_change: dict) -> str:
+        contact_section = SECTION_STYLING.format("Grantor contact information")
+        for field, change in contact_change.items():
+            after = change["after"] if change["after"] else NOT_SPECIFIED
+            if len(after) > TRUNCATION_THRESHOLD:
+                after = after[: TRUNCATION_THRESHOLD - 3] + "..."
+
+            contact_section += (
+                f"{BULLET_POINTS_STYLING} {GRANTOR_CONTACT_INFORMATION_FIELDS[field]} {after}.<br>"
+            )
+        return contact_section
+
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
         after = status_change["after"]
@@ -343,7 +356,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_important_dates_content(important_date_diffs))
         if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
             sections.append(self._build_award_fields_content(award_fields_diffs))
-
+        if grantor_contact_fields_diffs := {
+            k: changes[k] for k in GRANTOR_CONTACT_INFORMATION_FIELDS if k in changes
+        }:
+            sections.append(
+                self._build_grantor_contact_fields_content(grantor_contact_fields_diffs)
+            )
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
