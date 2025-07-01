@@ -15,7 +15,7 @@ branch_labels = None
 depends_on = None
 
 create_trigger_function = """
-CREATE OR REPLACE FUNCTION update_opportunity_search_queue()
+CREATE OR REPLACE FUNCTION api.update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
     opp_id bigint;
@@ -69,7 +69,7 @@ def upgrade():
             f"""
             CREATE TRIGGER {table}_queue_trigger
             AFTER INSERT OR UPDATE ON api.{table}
-            FOR EACH ROW EXECUTE FUNCTION update_opportunity_search_queue();
+            FOR EACH ROW EXECUTE FUNCTION api.update_opportunity_search_queue();
         """
         )
 
@@ -80,4 +80,4 @@ def downgrade():
         op.execute(f"DROP TRIGGER IF EXISTS {table}_queue_trigger ON api.{table};")
 
     # Drop the trigger function
-    op.execute("DROP FUNCTION IF EXISTS update_opportunity_search_queue();")
+    op.execute("DROP FUNCTION IF EXISTS api.update_opportunity_search_queue();")
