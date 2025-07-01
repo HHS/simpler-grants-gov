@@ -43,8 +43,8 @@ class TestTransformCompetition(BaseTransformTestClass):
             opportunity=opportunity
         )
         f.StagingTopportunityCfdaFactory.create(
-            opp_cfda_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
-            opportunity_id=opportunity.opportunity_id,
+            opp_cfda_id=opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
+            opportunity_id=opportunity.legacy_opportunity_id,
             opportunity=None,  # Prevent factory from creating another opportunity
         )
 
@@ -53,7 +53,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=opportunity,
-            opportunity_assistance_listing_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
+            legacy_opportunity_assistance_listing_id=opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
         )
 
         # Insert with null fields (for optional fields only)
@@ -97,7 +97,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=opportunity,
-            opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
+            legacy_opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
         )
 
         # Test case where opportunity_id found through cfda listing but the opportunity
@@ -113,7 +113,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=None,
-            opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
         )
 
         # Run the transformation
@@ -184,11 +184,8 @@ class TestTransformCompetition(BaseTransformTestClass):
     def test_process_competition_with_invalid_form_family(self, db_session, transform_competition):
         """Test handling invalid form family ID"""
         # Create an opportunity to associate with the competition
-        opportunity = f.OpportunityFactory.create(
-            opportunity_id=90001, opportunity_assistance_listings=[]  # Unique ID for this test
-        )
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
         opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
-            opportunity_assistance_listing_id=90001,  # Unique ID for this test
             opportunity=opportunity,
         )
         db_session.commit()
@@ -200,7 +197,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             opportunity=opportunity,
             source_values={
                 "familyid": 999,  # Invalid form family ID
-                "opp_cfda_id": opportunity_assistance_listing.opportunity_assistance_listing_id,
+                "opp_cfda_id": opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
                 "comp_id": 90001,  # Unique ID for this test
             },
         )
@@ -220,11 +217,8 @@ class TestTransformCompetition(BaseTransformTestClass):
     ):
         """Test handling invalid applicant type"""
         # Create an opportunity to associate with the competition
-        opportunity = f.OpportunityFactory.create(
-            opportunity_id=90002, opportunity_assistance_listings=[]  # Unique ID for this test
-        )
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
         opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
-            opportunity_assistance_listing_id=90002,  # Unique ID for this test
             opportunity=opportunity,
         )
         db_session.commit()
