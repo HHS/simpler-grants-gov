@@ -18,7 +18,7 @@ export async function getSavedOpportunityHandler(
     const savedOpportunities = await getSavedOpportunity(
       session.token,
       session.user_id,
-      opportunityId
+      opportunityId,
     );
     return NextResponse.json(savedOpportunities, {
       status: 200,
