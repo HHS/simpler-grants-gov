@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
-from typing import Sequence, cast
+from typing import Sequence, cast, Pattern
 from uuid import UUID
+import re
 
 from sqlalchemy import and_, desc, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
@@ -77,6 +78,8 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
+BLOCK_TAGS = ['p', 'div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside', 'blockquote', 'ul']
+
 TRUNCATION_THRESHOLD = 250
 
 
@@ -274,13 +277,65 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _contains_regex(self, value: str, regex: str) -> bool:
+        return bool(re.search(regex, value))
+
+    def _truncate_html_safe(self,html: str) -> str:
+        tag_stack = []  # Keep track of open tags
+        output = ""  # HTML-safe output
+        total_length = 0  # Number of characters added
+        pos = 0
+
+        # Match any tags or text
+        tag_regex = re.compile(r'<[^>]+>|[^<]+')
+
+        for match in tag_regex.finditer(html):
+            token = match.group(0)  # substring matched by regex
+            token_len = len(token)
+
+            # Check if adding token exceeds the limit
+            if total_length + token_len > TRUNCATION_THRESHOLD:
+                # If text slice and add to output
+                if not token.startswith('<'):
+                    slice_len = TRUNCATION_THRESHOLD - total_length
+                    output += token[:slice_len]
+                    break
+
+            output += token
+            total_length += len(token)
+
+            if token.startswith('<'):  # Open Tag
+                if token[1] == '/':  # Closing tag
+                    tag_name = re.match(r'</(\w+)', token)
+                    if tag_stack and tag_stack[-1] == tag_name.group(
+                            1):  # check if closing tag matches the last opened tag
+                        tag_stack.pop()  # remove matched tag
+                else:
+                    # Add non self-closing tags
+                    tag_name = re.match(r'<(\w+)', token)
+                    if tag_name and not token.endswith('/>'):
+                        tag_stack.append(tag_name.group(1))
+
+        closing_tags = [f'</{tag}>' for tag in reversed(tag_stack)]
+        # Remove block-level closing tags from the end
+        while closing_tags and closing_tags[-1][2:-1] in BLOCK_TAGS:
+            closing_tags.pop()
+
+        return ''.join(output) + ''.join(closing_tags)
+
     def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
         after = description_change["after"]
         if after:
             description_section = SECTION_STYLING.format("Description")
+            description_section += f"{BULLET_POINTS_STYLING} <i>New Description:</i>"
+
             if len(after) > TRUNCATION_THRESHOLD:
-                after += f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
-            description_section += f"{BULLET_POINTS_STYLING} <i>New Description:</i> {after}<br>"
+                read_more =  f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style=\'color:blue;\'>...Read full description</a>"
+                if self._contains_regex(after, r'<[^>]+>'): # check for html tags
+                    after = self._truncate_html_safe(after)
+                    description_section += f'<div style = "padding-left: 40px;" >{after}{read_more}</div><br>'
+                else:
+                    description_section += f" {after[:TRUNCATION_THRESHOLD]}{read_more}<br>"
             return description_section
         return ""
 
