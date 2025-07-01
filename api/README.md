@@ -39,6 +39,15 @@ root
 
 See [development.md](../documentation/api/development.md) for installation and development instructions.
 
+## Running tests locally
+1. Start the services with `docker compose up`
+2. In another terminal run the tests `make test` or if you've set your PY Approach to local you probably want to run the tests in Docker so you don't have to deal with Env Vars and other config `PY_RUN_APPOACH=docker make test`
+
+You can also run only certain tests by pattern matching the file name:
+```bash
+args=tests/src/task/notifications/* make test
+```
+
 ## Running jobs/tasks
 
 ### Locally
