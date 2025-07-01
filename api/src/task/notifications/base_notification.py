@@ -104,6 +104,11 @@ class BaseNotificationTask(Task):
                             "notification_log_id": notification_log.user_notification_log_id,
                         },
                     )
+
+                    # still set notified, so that we update the user_saved_opportunity.last_notified_at
+                    # that opportunity version change notifications check
+                    user_notification.is_notified = True
+
             except Exception:
                 # Notification log will be updated in the finally block
                 logger.exception(
