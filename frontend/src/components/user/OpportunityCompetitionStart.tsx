@@ -13,7 +13,7 @@ export const OpportunityCompetitionStart = ({
   opportunityTitle: string;
 }) => {
   const { checkFeatureFlag } = useFeatureFlags();
-  const openCompetitions = selectOpenCompetitions({ competitions });
+  const openCompetitions = competitions.filter(({ is_open }) => is_open);
 
   if (!openCompetitions.length || checkFeatureFlag("applyFormPrototypeOff")) {
     return <></>;
@@ -27,24 +27,4 @@ export const OpportunityCompetitionStart = ({
       </>
     );
   }
-};
-
-export const selectOpenCompetitions = ({
-  competitions,
-}: {
-  competitions: [Competition];
-}) => {
-  return competitions.reduce<Competition[]>((acc, competition) => {
-    const todayDate = new Date();
-    const openingDate = new Date(competition.opening_date);
-    const closingDate = new Date(competition.closing_date);
-    if (
-      competition.is_open &&
-      todayDate >= openingDate &&
-      todayDate <= closingDate
-    ) {
-      acc.push(competition);
-    }
-    return acc;
-  }, []);
 };
