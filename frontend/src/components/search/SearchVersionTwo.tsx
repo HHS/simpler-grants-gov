@@ -16,7 +16,7 @@ import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
 import { AndOrPanel } from "./AndOrPanel";
 import { FilterPillPanel } from "./FilterPillPanel";
-import { PillList } from "./PillList";
+import { PillListSkeleton } from "./PillList";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -79,24 +79,7 @@ export function SearchVersionTwo({
             </div>
           </div>
           <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
-          <Suspense
-            fallback={
-              <div className="display-flex">
-                <div className="flex-1 flex-align-self-center">Loading...</div>
-                <div className="opacity-0 flex-1">
-                  <PillList
-                    pills={[
-                      {
-                        label: "",
-                        queryParamKey: "status",
-                        queryParamValue: "",
-                      },
-                    ]}
-                  />
-                </div>
-              </div>
-            }
-          >
+          <Suspense fallback={<PillListSkeleton />}>
             <FilterPillPanel
               searchParams={convertedSearchParams}
               agencyListPromise={agencyListPromise}
