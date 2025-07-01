@@ -525,9 +525,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "[Test email] Your saved funding opportunities changed on "
+            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "[Test email] Your saved funding opportunity changed on "
+            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
         )
         subject += "Simpler.Grants.gov"
 
