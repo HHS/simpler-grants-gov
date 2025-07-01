@@ -1,3 +1,5 @@
+import { Button } from "@trussworks/react-uswds";
+
 import { USWDSIcon } from "./USWDSIcon";
 
 export function Pill({
@@ -11,7 +13,9 @@ export function Pill({
     <div className="border-secondary-darker border-2px radius-pill display-inline-block padding-x-2 padding-y-1 bg-secondary-lightest">
       <div className="display-flex">
         <div>{label}</div>
-        <div
+        <Button
+          unstyled
+          type="button"
           aria-label={`Remove ${label} pill`}
           className="display-flex flex-align-center margin-left-1"
           onClick={() => {
@@ -22,7 +26,7 @@ export function Pill({
             name="close"
             className="usa-icon--size-3 text-secondary-darker"
           />
-        </div>
+        </Button>
       </div>
     </div>
   );

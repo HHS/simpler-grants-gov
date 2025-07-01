@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
-import { fakeSearchAPIResponse } from "src/utils/testing/fixtures";
+import {
+  fakeAgencyResponseData,
+  fakeSearchAPIResponse,
+} from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { Accordion } from "@trussworks/react-uswds";
@@ -50,31 +53,7 @@ jest.mock(
 );
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
-  getAgenciesForFilterOptions: () =>
-    Promise.resolve([
-      {
-        id: "NARA",
-        label: "National Archives and Records Administration",
-        value: "NARA",
-      },
-      {
-        id: "NASA",
-        label: "National Aeronautics and Space Administration",
-        value: "NASA",
-        children: [
-          {
-            id: "NASA-GSFC",
-            label: "NASA Goddard Space Flight Center",
-            value: "NASA-GSFC",
-          },
-          {
-            id: "NASA-HQ",
-            label: "NASA Headquarters",
-            value: "NASA-HQ",
-          },
-        ],
-      },
-    ]),
+  obtainAgencies: () => Promise.resolve(fakeAgencyResponseData),
 }));
 
 jest.mock("react", () => ({

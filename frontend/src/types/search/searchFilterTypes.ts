@@ -21,6 +21,10 @@ export const searchFilterNames = [
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
 export type BackendFilterNames = (typeof backendFilterNames)[number];
+export type HardcodedFrontendFilterNames = Exclude<
+  FrontendFilterNames,
+  "agency" | "topLevelAgency"
+>;
 
 export interface FilterOption {
   children?: FilterOption[];
@@ -41,3 +45,9 @@ export interface RelevantAgencyRecord {
   agency_name: string;
   top_level_agency: null | RelevantAgencyRecord;
 }
+
+export type FilterPillLabelData = {
+  label: string;
+  queryParamKey: FrontendFilterNames;
+  queryParamValue: string;
+};
