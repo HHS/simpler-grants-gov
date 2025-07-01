@@ -153,7 +153,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
 
           <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
             <OpportunityStatusWidget opportunityData={opportunityData} />
-            <OpportunityCTA id={opportunityData.opportunity_id} />
+            <OpportunityCTA legacyId={opportunityData.legacy_opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />
             <OpportunityHistory
               summary={opportunityData.summary}

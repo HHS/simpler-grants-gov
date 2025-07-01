@@ -22,7 +22,7 @@ const mockData = [
 
 describe("OpportunityDocuments", () => {
   it("renders", () => {
-    render(<OpportunityDocuments opportunityId={1} documents={mockData} />);
+    render(<OpportunityDocuments opportunityId='63588df8-f2d1-44ed-a201-5804abba696a' documents={mockData} />);
 
     const fundLink = screen.getByRole("link", {
       name: "FundingInformation.pdf",

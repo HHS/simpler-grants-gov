@@ -19,7 +19,7 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("SearchResultsTable", () => {
   beforeEach(() =>
-    mockFetchSavedOpportunities.mockResolvedValue([{ opportunity_id: 1 }]),
+    mockFetchSavedOpportunities.mockResolvedValue([{ opportunity_id: '0bfdd67c-e58a-4005-bfd1-12cfe592b17e' }]),
   );
   afterEach(() => jest.resetAllMocks());
   it("passes accessibility test", async () => {
@@ -42,7 +42,7 @@ describe("SearchResultsTable", () => {
     const component = await SearchResultsTable({
       searchResults: [
         mockOpportunity,
-        { ...mockOpportunity, opportunity_id: 1 },
+        { ...mockOpportunity, opportunity_id: '0bfdd67c-e58a-4005-bfd1-12cfe592b17e' },
       ],
     });
     render(component);

@@ -5,7 +5,7 @@ import { render, screen } from "tests/react-utils";
 import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
 const ZipDownloadButtonProps = {
-  opportunityId: 87,
+  opportunityId: '63588df8-f2d1-44ed-a201-5804abba696a',
 };
 
 const downloadAttachmentsZipMock = jest.fn();

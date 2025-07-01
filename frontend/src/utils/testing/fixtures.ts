@@ -14,7 +14,8 @@ import {
 } from "src/types/search/searchRequestTypes";
 
 export const mockOpportunity: BaseOpportunity = {
-  opportunity_id: 12345,
+  opportunity_id: '63588df8-f2d1-44ed-a201-5804abba696a',
+  legacy_opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
   opportunity_status: "posted",
   summary: {

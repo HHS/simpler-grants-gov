@@ -16,7 +16,8 @@ jest.mock("next-intl", () => ({
 }));
 
 const mockOpportunityData: OpportunityDetail = {
-  opportunity_id: 1,
+  opportunity_id: '63588df8-f2d1-44ed-a201-5804abba696a',
+  legacy_opportunity_id: 1,
   opportunity_title: "Test Opportunity",
   agency_name: "Test Agency",
   opportunity_assistance_listings: [
