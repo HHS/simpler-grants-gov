@@ -45,7 +45,7 @@ See [development.md](../documentation/api/development.md) for installation and d
 
 You can also run only certain tests by pattern matching the file name:
 ```bash
-args=tests/src/task/notifications/* make test
+make test args="tests/src/task/notifications/*"
 ```
 
 ## Running jobs/tasks
