@@ -47,6 +47,8 @@ def build_opp_and_version(
     agency_contact_description: str | None,
     applicant_types: list[ApplicantType],
     applicant_eligibility_description: str | None,
+    opportunity_attachments: list,
+    additional_info_url: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -54,6 +56,7 @@ def build_opp_and_version(
         category=category,
         category_explanation=category_explanation,
         revision_number=revision_number,
+        opportunity_attachments=opportunity_attachments,
     )
 
     opportunity_summary = factories.OpportunitySummaryFactory.build(
@@ -74,6 +77,7 @@ def build_opp_and_version(
         agency_contact_description=agency_contact_description,
         applicant_types=applicant_types,
         applicant_eligibility_description=applicant_eligibility_description,
+        additional_info_url=additional_info_url,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -107,6 +111,8 @@ base_opal_fields = {
     "agency_contact_description": "customer service",
     "applicant_types": [ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
     "applicant_eligibility_description": "Not yet determined",
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 OPAL = build_opp_and_version(
@@ -151,6 +157,8 @@ base_topaz_fields = {
     "agency_contact_description": "customer service",
     "applicant_types": [ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES],
     "applicant_eligibility_description": "No income",
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 TOPAZ = build_opp_and_version(
@@ -185,6 +193,8 @@ TOPAZ_ALL = build_opp_and_version(
     agency_contact_description="grant manager",
     applicant_types=[ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
     applicant_eligibility_description="Charter Schools only",
+    opportunity_attachments=[{"attachment_id": 3}],
+    additional_info_url="simpler-grants.gov",
 )
 
 
@@ -459,6 +469,33 @@ class TestOpportunityNotification:
         res = task._flatten_and_extract_field_changes(diff_dict)
 
         assert res == expected_dict
+
+    @pytest.mark.parametrize(
+        "documents_diffs,expected_html",
+        [
+            (
+                {
+                    "attachments": {
+                        "before": [{"attachment_id": 1}, {"attachment_id": 34}],
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
+            ),
+        ],
+    )
+    def test_build_documents_fields(
+        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_documents_fields(documents_diffs)
+
+        assert res == expected_html
 
     @pytest.mark.parametrize(
         "opp_status_diffs,expected_html",
@@ -870,7 +907,8 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Eligibility</p>'
                         "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
                         "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
-                        '<p style="padding-left: 40px;">•  Additional information was changed.<br>'
+                        '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
+                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
