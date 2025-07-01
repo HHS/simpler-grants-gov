@@ -173,7 +173,7 @@ export const formatPillLabels = (
 
       const queryParamKey = key as FrontendFilterNames;
       const availableOptions =
-        key === "agency"
+        key === "agency" || key === "topLevelAgency"
           ? agencyOptions
           : allFilterOptions[key as HardcodedFrontendFilterNames];
       const pillLabels = Array.from(values).map((value) => ({

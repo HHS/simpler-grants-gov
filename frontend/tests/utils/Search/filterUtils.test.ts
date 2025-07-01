@@ -523,18 +523,20 @@ describe("formatPillLabel", () => {
 
 describe("formatPillLabels", () => {
   it("returns correctly formatted labels for all types of pills", () => {
-    expect(
-      formatPillLabels(
-        {
-          ...searchFetcherParams,
-          agency: new Set(["FAKE-SUB", "MOCK-SUB"]),
-        },
-        [
-          { id: "FAKE-SUB", label: "Fake sub", value: "FAKE-SUB" },
-          { id: "MOCK-SUB", label: "Mock sub", value: "MOCK-SUB" },
-        ],
-      ),
-    ).toEqual([
+    const result = formatPillLabels(
+      {
+        ...searchFetcherParams,
+        agency: new Set(["FAKE-SUB", "MOCK-SUB"]),
+        topLevelAgency: new Set(["FAKE", "MOCK"]),
+      },
+      [
+        { id: "FAKE-SUB", label: "Fake sub", value: "FAKE-SUB" },
+        { id: "MOCK-SUB", label: "Mock sub", value: "MOCK-SUB" },
+        { id: "FAKE", label: "Fake top", value: "FAKE" },
+        { id: "MOCK", label: "Mock top", value: "MOCK" },
+      ],
+    );
+    expect(result).toEqual([
       {
         label: "Forecasted",
         queryParamKey: "status",
@@ -564,6 +566,16 @@ describe("formatPillLabels", () => {
         label: "Mock sub",
         queryParamKey: "agency",
         queryParamValue: "MOCK-SUB",
+      },
+      {
+        label: "Fake top",
+        queryParamKey: "topLevelAgency",
+        queryParamValue: "FAKE",
+      },
+      {
+        label: "Mock top",
+        queryParamKey: "topLevelAgency",
+        queryParamValue: "MOCK",
       },
     ]);
   });
