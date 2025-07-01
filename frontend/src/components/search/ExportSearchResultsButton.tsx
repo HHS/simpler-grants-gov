@@ -11,7 +11,11 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export function ExportSearchResultsButton() {
+export function ExportSearchResultsButton({
+  className,
+}: {
+  className?: string;
+}) {
   const t = useTranslations("Search.exportButton");
   const searchParams = useSearchParams();
   const { clientFetch } = useClientFetch<Response>(
@@ -35,10 +39,7 @@ export function ExportSearchResultsButton() {
   }, [searchParams]);
 
   return (
-    <div
-      className="desktop:grid-col-4 desktop:display-flex flex-align-self-center"
-      data-testid="search-download-button-container"
-    >
+    <div className={className} data-testid="search-download-button-container">
       <Button
         outline={true}
         type={"submit"}

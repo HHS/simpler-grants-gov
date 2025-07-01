@@ -497,6 +497,27 @@ export const messages = {
         ],
       },
     },
+    table: {
+      headings: {
+        closeDate: "Close date",
+        status: "Status",
+        title: "Title",
+        agency: "Agency",
+        awardMin: "Award min",
+        awardMax: "Award max",
+      },
+      statuses: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        archived: "Archived",
+        closed: "Closed",
+      },
+      number: "Number",
+      published: "Published",
+      expectedAwards: "Expected awards",
+      tbd: "TBD",
+      saved: "Saved",
+    },
     accordion: {
       any: "Any",
       all: "All",

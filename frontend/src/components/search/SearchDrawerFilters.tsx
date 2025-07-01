@@ -1,4 +1,12 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import {
+  categoryOptions,
+  closeDateOptions,
+  costSharingOptions,
+  eligibilityOptions,
+  fundingOptions,
+  statusOptions,
+} from "src/constants/searchFilterOptions";
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 import {
   QueryParamData,
@@ -12,14 +20,7 @@ import { Accordion } from "@trussworks/react-uswds";
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { RadioButtonFilter } from "./Filters/RadioButtonFilter";
 import { AgencyFilter } from "./SearchFilterAccordion/AgencyFilterAccordion";
-import {
-  categoryOptions,
-  closeDateOptions,
-  costSharingOptions,
-  eligibilityOptions,
-  fundingOptions,
-  statusOptions,
-} from "./SearchFilterAccordion/SearchFilterOptions";
+import SearchSortBy from "./SearchSortBy";
 
 export async function SearchDrawerFilters({
   searchParams,
@@ -37,6 +38,8 @@ export async function SearchDrawerFilters({
     agency,
     closeDate,
     costSharing,
+    sortby,
+    query,
   } = searchParams;
 
   const agenciesPromise = Promise.all([
@@ -55,6 +58,9 @@ export async function SearchDrawerFilters({
 
   return (
     <>
+      <div className="display-block tablet:display-none">
+        <SearchSortBy sortby={sortby} queryTerm={query} />
+      </div>
       <CheckboxFilter
         filterOptions={statusOptions}
         query={status}
