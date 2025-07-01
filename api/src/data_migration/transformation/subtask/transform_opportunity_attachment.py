@@ -209,7 +209,11 @@ def transform_opportunity_attachment(
     if source_attachment.file_lob_size is None:
         raise ValueError("Opportunity attachment does not have a file size, cannot process.")
 
-    attachment_id = uuid.uuid4()
+    if incoming_attachment:
+        attachment_id = incoming_attachment.attachment_id
+    else:
+        attachment_id = uuid.uuid4()
+
     file_location = attachment_util.get_s3_attachment_path(
         file_name, attachment_id, opportunity, s3_config
     )
@@ -231,9 +235,6 @@ def transform_opportunity_attachment(
         updated_by=source_attachment.last_upd_id,
         legacy_folder_id=source_attachment.syn_att_folder_id,
     )
-
-    if incoming_attachment:
-        target_attachment.attachment_id = incoming_attachment.attachment_id
 
     transform_util.transform_update_create_timestamp(
         source_attachment, target_attachment, log_extra=log_extra
