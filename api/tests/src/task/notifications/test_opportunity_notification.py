@@ -584,11 +584,15 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_documents_fields(
-        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        documents_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_documents_fields(documents_diffs)
+        res = notification_task._build_documents_fields(documents_diffs)
+
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -835,11 +839,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_grantor_contact_fields_content(
-        self, db_session, contact_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        contact_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_grantor_contact_fields_content(contact_diffs)
+        res = notification_task._build_grantor_contact_fields_content(contact_diffs)
         assert res == expected_html
         assert res == expected_html
 
@@ -889,10 +896,10 @@ class TestOpportunityNotification:
         eligibility_diffs,
         expected_html,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_eligibility_content(eligibility_diffs)
+
+        res = notification_task._build_eligibility_content(eligibility_diffs)
 
         assert res == expected_html
 
