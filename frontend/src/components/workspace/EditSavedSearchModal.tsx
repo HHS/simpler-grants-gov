@@ -84,7 +84,6 @@ function SuccessContent({
           modalRef={modalRef}
           closer
           unstyled
-          className="padding-105 text-center"
           onClick={onClose}
         >
           {t("closeText")}
@@ -232,7 +231,6 @@ export function EditSavedSearchModal({
                     modalRef={modalRef}
                     closer
                     unstyled
-                    className="padding-105 text-center"
                     onClick={onClose}
                   >
                     {t("cancelText")}

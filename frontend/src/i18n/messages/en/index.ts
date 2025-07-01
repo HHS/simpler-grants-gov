@@ -645,7 +645,7 @@ export const messages = {
         emptyNameError: "Please name this query.",
         successTitle: "Query successfully saved",
         successDescription:
-          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
+          "Manage your queries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
