@@ -121,9 +121,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
                 subject = (
-                    "Applications for your bookmarked funding opportunity are due soon"
+                    "[Test email] Applications for your bookmarked funding opportunity are due soon"
                     if len(closing_opportunities) == 1
-                    else "Applications for your bookmarked funding opportunities are due soon"
+                    else "[Test email] Applications for your bookmarked funding opportunities are due soon"
                 )
                 users_email_notifications.append(
                     UserEmailNotification(
