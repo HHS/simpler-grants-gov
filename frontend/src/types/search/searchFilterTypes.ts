@@ -23,7 +23,7 @@ export type FrontendFilterNames = (typeof searchFilterNames)[number];
 export type BackendFilterNames = (typeof backendFilterNames)[number];
 export type HardcodedFrontendFilterNames = Exclude<
   FrontendFilterNames,
-  "agency"
+  "agency" | "topLevelAgency"
 >;
 
 export interface FilterOption {
