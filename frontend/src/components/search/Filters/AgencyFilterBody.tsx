@@ -74,7 +74,7 @@ export function AgencyFilterBody({
     <div data-testid={`${title}-filter`}>
       <ul className="usa-list usa-list--unstyled">
         {includeAnyOption && (
-          <li>
+          <li className="margin-y-2">
             <AnyOptionCheckbox
               title={title.toLowerCase()}
               checked={isNoneSelected}
