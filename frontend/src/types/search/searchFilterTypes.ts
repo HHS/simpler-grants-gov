@@ -16,6 +16,7 @@ export const searchFilterNames = [
   "category",
   "closeDate",
   "costSharing",
+  "topLevelAgency",
 ] as const;
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
