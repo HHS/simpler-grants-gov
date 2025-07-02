@@ -1,4 +1,4 @@
-FORM_NAME = "Application For Federal Assistance SFS 424 - Individual"
+FORM_NAME = "(Prototype) Application For Federal Assistance SF 424 - Individual"
 
 UI_SCHEMA = [
     {
