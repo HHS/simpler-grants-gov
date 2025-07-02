@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime
 from typing import Sequence, cast
 from uuid import UUID
@@ -77,6 +78,20 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
+BLOCK_TAGS = [
+    "p",
+    "div",
+    "section",
+    "article",
+    "header",
+    "footer",
+    "main",
+    "nav",
+    "aside",
+    "blockquote",
+    "ul",
+]
+
 TRUNCATION_THRESHOLD = 250
 
 
@@ -273,6 +288,71 @@ class OpportunityNotificationTask(BaseNotificationTask):
         results = self.db_session.execute(stmt).all()
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
+
+    def _contains_regex(self, value: str, regex: str) -> bool:
+        return bool(re.search(regex, value))
+
+    def _truncate_html_safe(self, html_str: str) -> str:
+        tag_stack: list = []  # Keep track of open tags
+        output_tokens: list = []  # list of tokens
+
+        # Match any tags or text
+        tag_regex = re.compile(r"<[^>]+>|[^<]+")
+
+        for match in tag_regex.finditer(html_str):
+            token = match.group(0)  # substring matched by regex
+            output_tokens.append(token)
+
+            if token.startswith("<"):  # Open Tag
+                tag_name = re.match(r"</(\w+)", token)
+                if tag_name and token[1] == "/":  # Closing tag
+                    if tag_stack and tag_stack[-1] == tag_name.group(
+                        1
+                    ):  # check if closing tag matches the last opened tag
+                        tag_stack.pop()  # remove matched tag
+                else:
+                    # Add non self-closing tags
+                    tag_name = re.match(r"<(\w+)", token)
+                    if tag_name and not token.endswith("/>"):
+                        tag_stack.append(tag_name.group(1))
+
+        # Remove block-level closing tags from the end
+        while output_tokens:
+            last = output_tokens[-1]
+            closing_match = re.match(r"</(\w+)>", last)
+            if closing_match and closing_match.group(1) in BLOCK_TAGS:
+                output_tokens.pop()
+            else:
+                break
+        # Close any remaining open tags (excluding block-level)
+        closing_tags = [f"</{tag}>" for tag in reversed(tag_stack) if tag not in BLOCK_TAGS]
+
+        return "".join(output_tokens) + "".join(closing_tags)
+
+    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+        after = description_change["after"]
+        if not after:
+            return ""
+
+        description_section_parts = [
+            SECTION_STYLING.format("Description"),
+            f"{BULLET_POINTS_STYLING} <i>New Description:</i>",
+        ]
+
+        if len(after) > TRUNCATION_THRESHOLD:
+            truncated = after[:TRUNCATION_THRESHOLD]
+
+            if self._contains_regex(truncated, r"<[^>]+>"):
+                truncated = self._truncate_html_safe(truncated)
+
+            read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+            description_section_parts.append(
+                f'<div style="padding-left: 40px;">{truncated}{read_more}</div><br>'
+            )
+        else:
+            description_section_parts.append(f'<div style="padding-left: 40px;">{after}</div><br>')
+
+        return "".join(description_section_parts)
 
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
@@ -475,6 +555,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_eligibility_content(eligibility_fields_diffs))
         if documentation_fields_diffs := {k: changes[k] for k in DOCUMENTS_FIELDS if k in changes}:
             sections.append(self._build_documents_fields(documentation_fields_diffs))
+        if "summary_description" in changes:
+            sections.append(
+                self._build_description_fields_content(
+                    changes["summary_description"], opp_change.opportunity_id
+                )
+            )
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
