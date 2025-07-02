@@ -16,10 +16,12 @@ export type ApplicationDetailsCardProps = ApplicationDetail &
 export const InformationCard = ({
   applicationDetails,
   applicationSubmitHandler,
+  applicationSubmitted,
   submissionLoading,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
+  applicationSubmitted: boolean;
   submissionLoading: boolean;
 }) => {
   const t = useTranslations("Application.information");
@@ -177,12 +179,13 @@ export const InformationCard = ({
                 {applicationStatus()}
               </dd>
             </div>
-
-            <SubmitApplicationButton
-              buttonText={t("submit")}
-              submitHandler={applicationSubmitHandler}
-              loading={submissionLoading}
-            />
+            {!applicationSubmitted && (
+              <SubmitApplicationButton
+                buttonText={t("submit")}
+                submitHandler={applicationSubmitHandler}
+                loading={submissionLoading}
+              />
+            )}
           </dl>
         </Grid>
       </>
@@ -216,7 +219,7 @@ export const SubmitApplicationButton = ({
     <>
       <Button type="button" disabled={!!loading} onClick={submitHandler}>
         <USWDSIcon name="upload_file" />
-        {loading ? "loading..." : buttonText}
+        {loading ? "Loading...  " : buttonText}
       </Button>
     </>
   );
