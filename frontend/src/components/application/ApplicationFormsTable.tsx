@@ -1,6 +1,5 @@
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
-import { FormDetail } from "src/types/formResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -8,19 +7,22 @@ import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export const selectFormsByRequired = ({
+export const selectApplicationFormsByRequired = ({
+  applicationForms,
   forms,
   required,
 }: {
+  applicationForms: ApplicationFormDetail[];
   forms: CompetitionForms;
   required: boolean;
-}): FormDetail[] => {
-  return forms.reduce<FormDetail[]>((acc, item) => {
-    if (item.is_required === required) {
-      acc.push(item.form);
-    }
-    return acc;
-  }, []);
+}): ApplicationFormDetail[] => {
+  const filteredFormIds = forms
+    .filter((form) => form.is_required === required)
+    .map((form) => form.form.form_id);
+
+  return applicationForms.filter((form) =>
+    filteredFormIds.includes(form.form_id),
+  );
 };
 
 const selectApplicationForm = ({
@@ -46,8 +48,13 @@ export const ApplicationFormsTable = ({
   applicationId: string;
   forms: CompetitionForms;
 }) => {
-  const requiredForms = selectFormsByRequired({ forms, required: true });
-  const conditionalRequiredForms = selectFormsByRequired({
+  const requiredForms = selectApplicationFormsByRequired({
+    applicationForms,
+    forms,
+    required: true,
+  });
+  const conditionalRequiredForms = selectApplicationFormsByRequired({
+    applicationForms,
     forms,
     required: false,
   });
@@ -57,8 +64,8 @@ export const ApplicationFormsTable = ({
     <>
       <h3>{t("requiredForms")}</h3>
       <ApplicationTable
-        forms={requiredForms}
-        applicationForms={applicationForms}
+        forms={forms}
+        applicationForms={requiredForms}
         applicationId={applicationId}
       />
       {conditionalRequiredForms.length > 0 && (
@@ -66,8 +73,8 @@ export const ApplicationFormsTable = ({
           <h3>{t("conditionalForms")}</h3>
           <p>{t("conditionalFormsDescription")}</p>
           <ApplicationTable
-            forms={conditionalRequiredForms}
-            applicationForms={applicationForms}
+            forms={forms}
+            applicationForms={conditionalRequiredForms}
             applicationId={applicationId}
           />
         </>
@@ -80,10 +87,10 @@ const selectApplicationFormById = ({
   forms,
   formId,
 }: {
-  forms: FormDetail[];
+  forms: CompetitionForms;
   formId: string;
-}): FormDetail | undefined => {
-  return forms.find((form) => form.form_id === formId);
+}) => {
+  return forms.find((form) => form.form.form_id === formId);
 };
 
 const ApplicationTable = ({
@@ -93,7 +100,7 @@ const ApplicationTable = ({
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
-  forms: FormDetail[];
+  forms: CompetitionForms;
 }) => {
   const t = useTranslations("Application.competitionFormTable");
 
@@ -186,14 +193,15 @@ const InstructionsLink = ({
   unavailableText,
 }: {
   formId: string;
-  forms: FormDetail[];
+  forms: CompetitionForms;
   text: string;
   unavailableText: string;
 }) => {
-  const instructions = selectApplicationFormById({
+  const form = selectApplicationFormById({
     forms,
     formId,
-  })?.form_instruction;
+  });
+  const instructions = form?.form.form_instruction;
   const downloadPath = instructions?.download_path || null;
   return (
     <>
@@ -219,14 +227,15 @@ const FormLink = ({
   appFormId,
 }: {
   formId: string;
-  forms: FormDetail[];
+  forms: CompetitionForms;
   applicationId: string;
   appFormId: string;
 }) => {
-  const formName = selectApplicationFormById({
+  const form = selectApplicationFormById({
     forms,
     formId,
-  })?.form_name;
+  });
+  const formName = form?.form.form_name;
 
   return (
     <>
