@@ -1,9 +1,8 @@
 import { Meta } from "@storybook/react";
-import { OpportunityOverview } from "src/types/opportunity/opportunityResponseTypes";
-
-import { AttachmentsCard } from "src/components/application/AttachmentsCard";
-import attachmentsMock from "./attachments.mock.json";
 import { Attachment } from "src/types/attachmentTypes";
+
+import { AttachmentsCard } from "src/components/application/attachments/AttachmentsCard";
+import attachmentsMock from "./attachments.mock.json";
 
 const meta: Meta<typeof AttachmentsCard> = {
   title: "Components/Application/AttachmentsCard",

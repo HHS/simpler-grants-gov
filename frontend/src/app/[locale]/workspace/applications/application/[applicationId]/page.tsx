@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
+import { AttachmentsProvider } from "src/context/application/AttachmentsContext";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -11,6 +12,7 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import { AttachmentsCard } from "src/components/application/attachments/AttachmentsCard";
 import {
   ApplicationDetailsCardProps,
   InformationCard,
@@ -18,7 +20,6 @@ import {
 import { OpportunityCard } from "src/components/application/OpportunityCard";
 import BetaAlert from "src/components/BetaAlert";
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
-import { AttachmentsCard } from "src/components/application/AttachmentsCard";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +99,12 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           applicationForms={applicationForms}
           applicationId={applicationId}
         />
-        <AttachmentsCard attachments={attachments} />
+        <AttachmentsProvider
+          initialAttachments={attachments}
+          applicationId={applicationId}
+        >
+          <AttachmentsCard />
+        </AttachmentsProvider>
       </GridContainer>
     </>
   );

@@ -108,8 +108,9 @@ export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
 );
 
-export const fetchApplicationWithMethod = (type: "POST" | "GET" | "PUT") =>
-  requesterForEndpoint(toDynamicApplicationsEndpoint(type));
+export const fetchApplicationWithMethod = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,

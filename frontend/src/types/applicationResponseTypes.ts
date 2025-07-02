@@ -1,7 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
-import { Competition } from "./competitionsResponseTypes";
 import { Attachment } from "./attachmentTypes";
+import { Competition } from "./competitionsResponseTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -43,6 +43,12 @@ export interface ApplicationDetail {
   users: {
     email: string;
     user_id: string;
+  };
+}
+
+export interface ApplicationAttachmentUploadResponse extends APIResponse {
+  data: {
+    application_attachment_id: string;
   };
 }
 

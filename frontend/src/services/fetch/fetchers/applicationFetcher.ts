@@ -1,4 +1,7 @@
+import { environment } from "src/constants/environments";
+import { createRequestUrl } from "src/services/fetch/fetcherHelpers";
 import {
+  ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationResponseDetail,
@@ -37,6 +40,46 @@ export const getApplicationDetails = async (
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;
+};
+
+export const deleteAttachment = async (
+  applicationId: string,
+  application_attachment_id: string,
+  token: string,
+): Promise<ApplicationDetailApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchApplicationWithMethod("DELETE")({
+    subPath: `${applicationId}/attachments/${application_attachment_id}`,
+    additionalHeaders: ssgToken,
+  });
+
+  return (await response.json()) as ApplicationDetailApiResponse;
+};
+
+export const uploadAttachment = async (
+  applicationId: string,
+  token: string,
+  file: FormData,
+): Promise<ApplicationAttachmentUploadResponse> => {
+  const url = createRequestUrl(
+    "POST",
+    `${environment.API_URL}`,
+    "alpha",
+    "applications",
+    `${applicationId}/attachments`,
+  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "X-SGG-Token": token,
+    },
+    body: file,
+  });
+
+  return (await response.json()) as ApplicationAttachmentUploadResponse;
 };
 
 export const getApplicationFormDetails = async (

@@ -20,6 +20,15 @@ export function formatDate(dateStr: string | null): string {
   return dayjs(dateStr).format("LL");
 }
 
+export function formatDateTime(dateStr: string | null): string {
+  if (!dateStr || !dayjs(dateStr).isValid()) {
+    console.warn("invalid date string provided for parse");
+    return "";
+  }
+
+  return dayjs(dateStr).format("MMMM D, YYYY h:mm a");
+}
+
 export const getConfiguredDayJs = () => dayjs;
 
 export const isExpired = (expiration?: number) =>
