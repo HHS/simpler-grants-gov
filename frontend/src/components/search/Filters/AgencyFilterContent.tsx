@@ -3,6 +3,7 @@
 import { debounce } from "lodash";
 import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher";
 import { FilterOption } from "src/types/search/searchFilterTypes";
+import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterUtils";
 
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
@@ -36,7 +37,9 @@ export function AgencyFilterContent({
       }
       agencySearch(agencySearchTerm)
         .then((searchResults) => {
-          setAgencySearchResults(searchResults);
+          const searchResultsOptions =
+            agenciesToSortedAndNestedFilterOptions(searchResults);
+          setAgencySearchResults(searchResultsOptions);
         })
         .catch((e) => {
           console.error("Error fetching agency search results", e);
