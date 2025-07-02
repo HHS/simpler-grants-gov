@@ -1007,8 +1007,7 @@ class TestOpportunityNotification:
                         "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
                         "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
                         '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
-                        '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
+                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
                         '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i>'
                         '<div style="padding-left: 40px;">Climate research in mars</div><br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
