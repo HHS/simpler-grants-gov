@@ -26,7 +26,6 @@ describe("CompetitionFormsTable", () => {
         applicationId={applicationId}
       />,
     );
-
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
