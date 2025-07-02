@@ -7,7 +7,6 @@ import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTyp
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
@@ -17,11 +16,9 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 
-export const OpportunitySaveUserControl = () => {
+export const OpportunitySaveUserControl = ({ opportunityId } : { opportunityId: string}) => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
-  const params = useParams();
-  const opportunityId = String(params.id);
   const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
     "Error fetching saved opportunity",
   );

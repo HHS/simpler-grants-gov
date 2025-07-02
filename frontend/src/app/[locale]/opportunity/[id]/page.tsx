@@ -128,7 +128,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         paddingTop={false}
       >
         <div className="padding-y-3 display-flex">
-          <OpportunitySaveUserControl />
+          <OpportunitySaveUserControl opportunityId={opportunityData.opportunity_id} />
           {opportunityData.competitions &&
             opportunityData.opportunity_title && (
               <OpportunityCompetitionStart
