@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -9,6 +9,7 @@ from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
+from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -2151,7 +2152,7 @@ def test_application_form_get_with_internal_jwt_bypasses_auth(
     db_session.commit()
 
     # Create an internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -2197,7 +2198,7 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
     user_token, _ = create_jwt_for_user(user, db_session)
 
     # Create internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -2229,7 +2230,7 @@ def test_application_form_get_with_internal_jwt_nonexistent_application(
     nonexistent_form_id = str(uuid.uuid4())
 
     # Create internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,

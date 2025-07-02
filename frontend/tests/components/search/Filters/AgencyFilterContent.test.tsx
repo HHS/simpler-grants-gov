@@ -37,7 +37,7 @@ const query = new Set<string>();
 describe("AgencyFilterContent", () => {
   beforeEach(() => {
     mockAgencySearch.mockResolvedValue([
-      { value: "agency1", label: "Agency 1", id: "1" },
+      { agency_code: "agency1", agency_name: "Agency 1", agency_id: "1" },
     ]);
   });
   afterEach(() => {
@@ -101,6 +101,8 @@ describe("AgencyFilterContent", () => {
         facetCounts={facetCounts}
       />,
     );
+    expect(screen.getByText("Agency 1")).toBeInTheDocument();
+    expect(screen.getByText("Agency 2")).toBeInTheDocument();
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "garbage" } });
 
@@ -115,11 +117,9 @@ describe("AgencyFilterContent", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Agency 1")).toBeInTheDocument();
-    });
-    await waitFor(() => {
       expect(screen.queryByText("Agency 2")).not.toBeInTheDocument();
     });
+    expect(screen.getByText("Agency 1")).toBeInTheDocument();
   });
 
   it("shows FilterSearchNoResults when agencySearch returns empty array", async () => {
