@@ -210,6 +210,12 @@ class TestOpportunityNotification:
     def user_with_email(self, db_session, user):
         return factories.LinkExternalUserFactory.create(user=user, email="test@example.com").user
 
+    @pytest.fixture
+    def set_truncation_threshold(self, monkeypatch):
+        monkeypatch.setattr(
+            "src.task.notifications.opportunity_notifcation.TRUNCATION_THRESHOLD", 50
+        )
+
     def test_email_notifications_collection(
         self,
         db_session,
@@ -759,6 +765,60 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "html_str,expected_html",
+        [
+            # Truncate mid-text inside inline tag <strong>, no closing tags
+            (
+                "<p>This is a <strong>very big description here!!!!",
+                "<p>This is a <strong>very big description here!!!!</strong>",
+            ),
+            # Truncate mid-text inside multiple inline tag
+            (
+                "<p>Some <strong>bold and <em>emphasized text here ",
+                "<p>Some <strong>bold and <em>emphasized text here </em></strong>",
+            ),
+            # Truncate after closing an inline tag
+            (
+                "<p>This is a <strong>very long text that </strong>",
+                "<p>This is a <strong>very long text that </strong>",
+            ),
+            # Truncate mid-text after closing an inline tag
+            (
+                "<p>This is a <strong>very long text</strong> that ",
+                "<p>This is a <strong>very long text</strong> that ",
+            ),
+            # Self-closing tag inside truncated text (e.g. <br />)
+            (
+                "<div>This is a description<br/>with a break tag an",
+                "<div>This is a description<br/>with a break tag an",
+            ),
+            # Deeply nested HTML tags
+            (
+                "<section><div><p>This is <span>a deeply <strong>ne",
+                "<section><div><p>This is <span>a deeply <strong>ne</strong></span>",
+            ),
+            # Truncate after block level tag
+            (
+                "<section><p>Important text goes here</p></section>",
+                "<section><p>Important text goes here",
+            ),
+        ],
+    )
+    def test_truncate_html_safe(
+        self,
+        db_session,
+        html_str,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        set_truncation_threshold,
+    ):
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._truncate_html_safe(html_str)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "description_diffs,expected_html",
         [
             ({"before": "testing", "after": None}, ""),
@@ -768,7 +828,7 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
                 },
-                "<p style=\"padding-left: 20px;\">Description</p><p style=\"padding-left: 40px;\">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href='http://testhost:3000/opportunity/1' style='color:blue;'>...Read full description</a><br>",
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style = "padding-left: 40px;" >The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
             ),
             # Truncate with html tag
             (
@@ -910,7 +970,8 @@ class TestOpportunityNotification:
                         "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
                         "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
                         '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                        '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> Climate research in mars<br>'
+                        '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i>'
+                        '<div style="padding-left: 40px;">Climate research in mars</div><br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"

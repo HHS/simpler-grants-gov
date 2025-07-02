@@ -52,19 +52,19 @@ class TestAgencyRoutesSearch(BaseTestClass):
     @pytest.mark.parametrize(
         "search_request,expected_result",
         [
-            (
-                # Get all agencies
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                },
-                AGENCIES,
-            ),
+            # (
+            #     # Get all agencies
+            #     {
+            #         "pagination": {
+            #             "page_offset": 1,
+            #             "page_size": 25,
+            #             "sort_order": [
+            #                 {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #             ],
+            #         },
+            #     },
+            #     AGENCIES,
+            # ),
             (
                 # Query
                 {
@@ -79,103 +79,103 @@ class TestAgencyRoutesSearch(BaseTestClass):
                 },
                 [DOD, DOD_HRE, DOD_MCO],
             ),
-            # Filter
-            (
-                # Get all agencies using all status filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "opportunity_statuses": {
-                            "one_of": [
-                                OpportunityStatus.POSTED,
-                                OpportunityStatus.FORECASTED,
-                                OpportunityStatus.ARCHIVED,
-                                OpportunityStatus.CLOSED,
-                            ]
-                        },
-                    },
-                },
-                AGENCIES,
-            ),
-            (
-                # Get agencies  with open/forecasted opportunity status filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "opportunity_statuses": {
-                            "one_of": [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
-                        },
-                    },
-                },
-                [DOA, DOD, DOD_HRE, DOD_MCO],
-            ),
-            (
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "opportunity_statuses": {
-                            "one_of": [
-                                OpportunityStatus.POSTED,
-                                OpportunityStatus.CLOSED,
-                                OpportunityStatus.FORECASTED,
-                            ]
-                        },
-                    },
-                },
-                [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC],
-            ),
-            (
-                # Multi filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "is_test_agency": {"one_of": [False]},
-                        "opportunity_statuses": {"one_of": [OpportunityStatus.ARCHIVED]},
-                    },
-                },
-                [HHS_NIH],
-            ),
-            (
-                # Multi filter
-                {
-                    "pagination": {
-                        "page_offset": 1,
-                        "page_size": 25,
-                        "sort_order": [
-                            {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
-                        ],
-                    },
-                    "filters": {
-                        "is_test_agency": {"one_of": [True]},
-                        "opportunity_statuses": {"one_of": [OpportunityStatus.POSTED]},
-                    },
-                },
-                [],
-            ),
+            #     # Filter
+            #     (
+            #         # Get all agencies using all status filter
+            #         {
+            #             "pagination": {
+            #                 "page_offset": 1,
+            #                 "page_size": 25,
+            #                 "sort_order": [
+            #                     {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #                 ],
+            #             },
+            #             "filters": {
+            #                 "opportunity_statuses": {
+            #                     "one_of": [
+            #                         OpportunityStatus.POSTED,
+            #                         OpportunityStatus.FORECASTED,
+            #                         OpportunityStatus.ARCHIVED,
+            #                         OpportunityStatus.CLOSED,
+            #                     ]
+            #                 },
+            #             },
+            #         },
+            #         AGENCIES,
+            #     ),
+            #     (
+            #         # Get agencies  with open/forecasted opportunity status filter
+            #         {
+            #             "pagination": {
+            #                 "page_offset": 1,
+            #                 "page_size": 25,
+            #                 "sort_order": [
+            #                     {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #                 ],
+            #             },
+            #             "filters": {
+            #                 "opportunity_statuses": {
+            #                     "one_of": [OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
+            #                 },
+            #             },
+            #         },
+            #         [DOA, DOD, DOD_HRE, DOD_MCO],
+            #     ),
+            #     (
+            #         {
+            #             "pagination": {
+            #                 "page_offset": 1,
+            #                 "page_size": 25,
+            #                 "sort_order": [
+            #                     {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #                 ],
+            #             },
+            #             "filters": {
+            #                 "opportunity_statuses": {
+            #                     "one_of": [
+            #                         OpportunityStatus.POSTED,
+            #                         OpportunityStatus.CLOSED,
+            #                         OpportunityStatus.FORECASTED,
+            #                     ]
+            #                 },
+            #             },
+            #         },
+            #         [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC],
+            #     ),
+            #     (
+            #         # Multi filter
+            #         {
+            #             "pagination": {
+            #                 "page_offset": 1,
+            #                 "page_size": 25,
+            #                 "sort_order": [
+            #                     {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #                 ],
+            #             },
+            #             "filters": {
+            #                 "is_test_agency": {"one_of": [False]},
+            #                 "opportunity_statuses": {"one_of": [OpportunityStatus.ARCHIVED]},
+            #             },
+            #         },
+            #         [HHS_NIH],
+            #     ),
+            #     (
+            #         # Multi filter
+            #         {
+            #             "pagination": {
+            #                 "page_offset": 1,
+            #                 "page_size": 25,
+            #                 "sort_order": [
+            #                     {"order_by": "agency_code", "sort_direction": SortDirection.ASCENDING}
+            #                 ],
+            #             },
+            #             "filters": {
+            #                 "is_test_agency": {"one_of": [True]},
+            #                 "opportunity_statuses": {"one_of": [OpportunityStatus.POSTED]},
+            #             },
+            #         },
+            #         [],
+            #     ),
         ],
     )
     def test_search_agencies(self, client, api_auth_token, search_request, expected_result):

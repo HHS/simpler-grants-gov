@@ -293,18 +293,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return bool(re.search(regex, value))
 
     def _truncate_html_safe(self, html_str: str) -> str:
-        # Truncate
-        truncated = html_str[:TRUNCATION_THRESHOLD]
-
         tag_stack: list = []  # Keep track of open tags
-        output = ""  # HTML-safe output
+        output_tokens: list = []  # list of tokens
 
         # Match any tags or text
         tag_regex = re.compile(r"<[^>]+>|[^<]+")
 
-        for match in tag_regex.finditer(truncated):
+        for match in tag_regex.finditer(html_str):
             token = match.group(0)  # substring matched by regex
-            output += token
+            output_tokens.append(token)
 
             if token.startswith("<"):  # Open Tag
                 tag_name = re.match(r"</(\w+)", token)
@@ -322,10 +319,17 @@ class OpportunityNotificationTask(BaseNotificationTask):
         closing_tags = [f"</{tag}>" for tag in reversed(tag_stack)]
 
         # Remove block-level closing tags from the end
-        while closing_tags and closing_tags[-1][2:-1] in BLOCK_TAGS:
-            closing_tags.pop()
+        while output_tokens:
+            last = output_tokens[-1]
+            closing_match = re.match(r"</(\w+)>", last)
+            if closing_match and closing_match.group(1) in BLOCK_TAGS:
+                output_tokens.pop()
+            else:
+                break
+        # Close any remaining open tags (excluding block-level)
+        closing_tags = [f"</{tag}>" for tag in reversed(tag_stack) if tag not in BLOCK_TAGS]
 
-        return output + "".join(closing_tags)
+        return "".join(output_tokens) + "".join(closing_tags)
 
     def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
         after = description_change["after"]
@@ -334,14 +338,16 @@ class OpportunityNotificationTask(BaseNotificationTask):
             description_section += f"{BULLET_POINTS_STYLING} <i>New Description:</i>"
 
             if len(after) > TRUNCATION_THRESHOLD:
-                read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+                after = after[:TRUNCATION_THRESHOLD]
                 if self._contains_regex(after, r"<[^>]+>"):  # check for html tags
                     after = self._truncate_html_safe(after)
-                    description_section += (
-                        f'<div style = "padding-left: 40px;" >{after}{read_more}</div><br>'
-                    )
-                else:
-                    description_section += f" {after[:TRUNCATION_THRESHOLD]}{read_more}<br>"
+                read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+                description_section += (
+                    f'<div style="padding-left: 40px;">{after}{read_more}</div><br>'
+                )
+            else:
+                description_section += f'<div style="padding-left: 40px;">{after}</div><br>'
+
             return description_section
         return ""
 
