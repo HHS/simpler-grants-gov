@@ -49,6 +49,10 @@ def upgrade():
     op.drop_table("competition", schema="api")
 
     # 6. Drop opportunity-related child/link tables
+    op.drop_index(
+        op.f("user_saved_search_user_id_idx"), table_name="user_saved_search", schema="api"
+    )
+    op.drop_table("user_saved_search", schema="api")
     op.drop_table("user_saved_opportunity", schema="api")
     op.drop_index(
         op.f("user_opportunity_notification_log_opportunity_id_idx"),
@@ -1077,6 +1081,58 @@ def downgrade():
             ["user_id"], ["api.user.user_id"], name=op.f("application_user_user_id_user_fkey")
         ),
         sa.PrimaryKeyConstraint("application_id", "user_id", name=op.f("application_user_pkey")),
+        schema="api",
+    )
+    op.create_table(
+        "user_saved_search",
+        sa.Column("saved_search_id", sa.UUID(), autoincrement=False, nullable=False),
+        sa.Column("user_id", sa.UUID(), autoincrement=False, nullable=False),
+        sa.Column(
+            "search_query",
+            postgresql.JSONB(astext_type=sa.Text()),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.Column("name", sa.TEXT(), autoincrement=False, nullable=False),
+        sa.Column(
+            "created_at",
+            postgresql.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            postgresql.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.Column(
+            "last_notified_at",
+            postgresql.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.Column("is_deleted", sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column(
+            "searched_opportunity_ids",
+            postgresql.ARRAY(sa.UUID()),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["api.user.user_id"], name=op.f("user_saved_search_user_id_user_fkey")
+        ),
+        sa.PrimaryKeyConstraint("saved_search_id", name=op.f("user_saved_search_pkey")),
+        schema="api",
+    )
+    op.create_index(
+        op.f("user_saved_search_user_id_idx"),
+        "user_saved_search",
+        ["user_id"],
+        unique=False,
         schema="api",
     )
     op.create_table(
