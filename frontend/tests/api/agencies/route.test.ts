@@ -8,11 +8,11 @@ import { initialFilterOptions } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
 
-const mockSearchAgenciesForFilterOptions = jest.fn();
+const mockSearchAndFlattenAgencies = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
-  searchAgenciesForFilterOptions: (...args: unknown[]) =>
-    mockSearchAgenciesForFilterOptions(...args) as unknown,
+  searchAndFlattenAgencies: (...args: unknown[]) =>
+    mockSearchAndFlattenAgencies(...args) as unknown,
 }));
 
 describe("POST request", () => {
@@ -25,20 +25,20 @@ describe("POST request", () => {
       }),
     );
     expect(response.status).toBe(500);
-    expect(mockSearchAgenciesForFilterOptions).toHaveBeenCalledTimes(0);
+    expect(mockSearchAndFlattenAgencies).toHaveBeenCalledTimes(0);
   });
-  it("calls searchAgenciesForFilterOptions as expected", async () => {
-    mockSearchAgenciesForFilterOptions.mockResolvedValue(initialFilterOptions);
+  it("calls searchAndFlattenAgencies as expected", async () => {
+    mockSearchAndFlattenAgencies.mockResolvedValue(initialFilterOptions);
     await searchForAgencies(
       new NextRequest("http://simpler.grants.gov", {
         method: "POST",
         body: JSON.stringify({ keyword: "anything" }),
       }),
     );
-    expect(mockSearchAgenciesForFilterOptions).toHaveBeenCalledWith("anything");
+    expect(mockSearchAndFlattenAgencies).toHaveBeenCalledWith("anything");
   });
-  it("responds with return value of searchAgenciesForFilterOptions", async () => {
-    mockSearchAgenciesForFilterOptions.mockResolvedValue(initialFilterOptions);
+  it("responds with return value of searchAndFlattenAgencies", async () => {
+    mockSearchAndFlattenAgencies.mockResolvedValue(initialFilterOptions);
     const response = await searchForAgencies(
       new NextRequest("http://simpler.grants.gov", {
         method: "POST",

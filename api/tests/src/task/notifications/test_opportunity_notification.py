@@ -6,6 +6,7 @@ import pytest
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.constants.lookup_constants import (
+    ApplicantType,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -42,6 +43,12 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    agency_email_address: str | None,
+    agency_contact_description: str | None,
+    applicant_types: list[ApplicantType],
+    applicant_eligibility_description: str | None,
+    opportunity_attachments: list,
+    additional_info_url: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -49,6 +56,7 @@ def build_opp_and_version(
         category=category,
         category_explanation=category_explanation,
         revision_number=revision_number,
+        opportunity_attachments=opportunity_attachments,
     )
 
     opportunity_summary = factories.OpportunitySummaryFactory.build(
@@ -65,6 +73,11 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        agency_email_address=agency_email_address,
+        agency_contact_description=agency_contact_description,
+        applicant_types=applicant_types,
+        applicant_eligibility_description=applicant_eligibility_description,
+        additional_info_url=additional_info_url,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -94,6 +107,12 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
+    "applicant_types": [ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+    "applicant_eligibility_description": "Not yet determined",
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 OPAL = build_opp_and_version(
@@ -134,6 +153,12 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
+    "applicant_types": [ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES],
+    "applicant_eligibility_description": "No income",
+    "opportunity_attachments": [],
+    "additional_info_url": None,
 }
 
 TOPAZ = build_opp_and_version(
@@ -164,6 +189,12 @@ TOPAZ_ALL = build_opp_and_version(
     category_explanation="Focus on clean energy startups and demonstration projects",
     funding_categories=[FundingCategory.ENERGY],
     funding_category_description="Accelerates early-stage renewable energy technology adoption",
+    agency_email_address="john.smith@gmail.com",
+    agency_contact_description="grant manager",
+    applicant_types=[ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+    applicant_eligibility_description="Charter Schools only",
+    opportunity_attachments=[{"attachment_id": 3}],
+    additional_info_url="simpler-grants.gov",
 )
 
 
@@ -440,6 +471,33 @@ class TestOpportunityNotification:
         assert res == expected_dict
 
     @pytest.mark.parametrize(
+        "documents_diffs,expected_html",
+        [
+            (
+                {
+                    "attachments": {
+                        "before": [{"attachment_id": 1}, {"attachment_id": 34}],
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
+            ),
+        ],
+    )
+    def test_build_documents_fields(
+        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_documents_fields(documents_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "opp_status_diffs,expected_html",
         [
             (
@@ -547,6 +605,192 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "category_diff,expected_html",
+        [
+            (
+                {"is_cost_sharing": {"before": True, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
+            ),
+            (
+                {
+                    "funding_instruments": {
+                        "before": [FundingInstrument.GRANT],
+                        "after": [FundingInstrument.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
+            ),
+            (
+                {"category": {"before": OpportunityCategory.OTHER, "after": None}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+            ),
+            (
+                {"category_explanation": {"before": None, "after": "to be determined"}},
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+            ),
+            # Skip category_explanation if Category changes from Other to any other category or none
+            (
+                {
+                    "category": {
+                        "before": OpportunityCategory.OTHER,
+                        "after": OpportunityCategory.MANDATORY,
+                    },
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
+            ),
+            (
+                {
+                    "category": {"before": OpportunityCategory.OTHER, "after": None},
+                    "category_explanation": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+            ),
+            (
+                {
+                    "category": {
+                        "before": OpportunityCategory.DISCRETIONARY,
+                        "after": OpportunityCategory.OTHER,
+                    },
+                    "category_explanation": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
+                '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+            ),
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.OPPORTUNITY_ZONE_BENEFITS],
+                        "after": [FundingCategory.OTHER],
+                    }
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Opportunity zone benefits to Other.<br>',
+            ),
+            # Skip category_explanation if funding_categories changes from Other to any other category or none
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.OTHER],
+                        "after": [FundingCategory.ENERGY],
+                    },
+                    "funding_category_description": {"before": "to be determined", "after": None},
+                },
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
+            ),
+            (
+                {
+                    "funding_categories": {
+                        "before": [FundingCategory.EDUCATION],
+                        "after": [FundingCategory.OTHER],
+                    },
+                    "funding_category_description": {"before": None, "after": "To be determined"},
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
+                '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
+            ),
+        ],
+    )
+    def test_build_categorization_fields_content(
+        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_categorization_fields_content(category_diff)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
+        "contact_diffs,expected_html",
+        [
+            (
+                {"agency_email_address": {"before": None, "after": "contact@simpler.gov"}},
+                '<p style="padding-left: 20px;">Grantor contact information</p>'
+                '<p style="padding-left: 40px;">•  The updated email address is contact@simpler.gov.<br>',
+            ),
+            (
+                {
+                    "agency_contact_description": {
+                        "before": "Email customer service for any enquiries",
+                        "after": None,
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br>',
+            ),  # Truncate
+            (
+                {
+                    "agency_contact_description": {
+                        "before": None,
+                        "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.\n Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
+            ),
+        ],
+    )
+    def test_build_grantor_contact_fields_content(
+        self, db_session, contact_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_grantor_contact_fields_content(contact_diffs)
+        assert res == expected_html
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
+        "eligibility_diffs,expected_html",
+        [
+            # Removed and Added type
+            (
+                {
+                    "applicant_types": {
+                        "before": [
+                            ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                            ApplicantType.OTHER,
+                        ],
+                        "after": [ApplicantType.STATE_GOVERNMENTS],
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p>'
+                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['State governments'].<br>"
+                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Other', 'Public and state institutions of higher education'].<br>",
+            ),
+            # Add
+            (
+                {"applicant_eligibility_description": {"before": None, "after": "not decided"}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was added.<br>',
+            ),
+            # Update
+            (
+                {
+                    "applicant_eligibility_description": {
+                        "before": "business and personal ",
+                        "after": "business only",
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was changed.<br>',
+            ),
+            # Delete
+            (
+                {"applicant_eligibility_description": {"before": "Business", "after": None}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+            ),
+        ],
+    )
+    def test_build_eligibility_content(
+        self,
+        db_session,
+        eligibility_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_eligibility_content(eligibility_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -589,7 +833,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
@@ -613,7 +857,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
@@ -641,7 +885,7 @@ class TestOpportunityNotification:
                     )
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
@@ -652,7 +896,19 @@ class TestOpportunityNotification:
                         '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                         '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                         '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br>'
+                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                        '<p style="padding-left: 20px;">Categorization</p>'
+                        '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
+                        '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
+                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
+                        '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
+                        '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
+                        '<p style="padding-left: 20px;">Eligibility</p>'
+                        "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
+                        "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
+                        '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
+                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"

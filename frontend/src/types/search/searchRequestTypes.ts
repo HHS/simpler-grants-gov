@@ -17,6 +17,7 @@ export interface SearchFilterRequestBody {
   funding_category?: OneOfFilter;
   close_date?: RelativeDateRangeFilter;
   is_cost_sharing?: BooleanFilter;
+  top_level_agency?: OneOfFilter;
 }
 
 export type QueryOperator = "AND" | "OR";

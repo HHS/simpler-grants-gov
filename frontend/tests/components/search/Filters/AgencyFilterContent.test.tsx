@@ -37,7 +37,7 @@ const query = new Set<string>();
 describe("AgencyFilterContent", () => {
   beforeEach(() => {
     mockAgencySearch.mockResolvedValue([
-      { value: "agency1", label: "Agency 1", id: "1" },
+      { agency_code: "agency1", agency_name: "Agency 1", agency_id: "1" },
     ]);
   });
   afterEach(() => {
@@ -47,6 +47,7 @@ describe("AgencyFilterContent", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -60,6 +61,7 @@ describe("AgencyFilterContent", () => {
   it("renders the TextInput and CheckboxFilterBody with all agencies by default", () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -74,6 +76,7 @@ describe("AgencyFilterContent", () => {
   it("calls agencySearch when user types in the TextInput", async () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -91,17 +94,21 @@ describe("AgencyFilterContent", () => {
   it("shows search results returned by agencySearch", async () => {
     const { rerender } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
       />,
     );
+    expect(screen.getByText("Agency 1")).toBeInTheDocument();
+    expect(screen.getByText("Agency 2")).toBeInTheDocument();
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "garbage" } });
 
     rerender(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -110,17 +117,16 @@ describe("AgencyFilterContent", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Agency 1")).toBeInTheDocument();
-    });
-    await waitFor(() => {
       expect(screen.queryByText("Agency 2")).not.toBeInTheDocument();
     });
+    expect(screen.getByText("Agency 1")).toBeInTheDocument();
   });
 
   it("shows FilterSearchNoResults when agencySearch returns empty array", async () => {
     mockAgencySearch.mockResolvedValue([]);
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -138,6 +144,7 @@ describe("AgencyFilterContent", () => {
   it("restores all agencies when input is cleared", async () => {
     render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -165,6 +172,7 @@ describe("AgencyFilterContent", () => {
     mockAgencySearch.mockRejectedValue(new Error("Network error"));
     const { rerender } = render(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}
@@ -176,6 +184,7 @@ describe("AgencyFilterContent", () => {
 
     rerender(
       <AgencyFilterContent
+        topLevelQuery={new Set()}
         query={query}
         title="Agencies"
         allAgencies={allAgencies}

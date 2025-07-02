@@ -82,6 +82,7 @@ class TestTransformCompetition(BaseTransformTestClass):
                 "graceperiod": 20,
                 # Test changing is_wrkspc_compatible value
                 "is_wrkspc_compatible": "N",
+                "expected_appl_num": 4356435643,
             },
         )
 

@@ -1,5 +1,6 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
+import { FormValidationWarning } from "src/components/applyForm/types";
 import { Competition } from "./competitionsResponseTypes";
 
 export interface ApplicationResponseDetail {
@@ -31,12 +32,17 @@ export interface ApplicationFormDetail {
   form_id: string;
 }
 
+export interface FormValidationWarnings {
+  [applicationId: string]: FormValidationWarning;
+}
+
 export interface ApplicationDetail {
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
   application_status: string;
   competition: Competition;
+  form_validation_warnings?: FormValidationWarnings;
   organization: Oranization;
   users: {
     email: string;

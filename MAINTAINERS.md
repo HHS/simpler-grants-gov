@@ -43,5 +43,6 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Chris Weekley
 * Chris Kuryak
 * Eric Serrato
+* Glenn Grieves
 
 
