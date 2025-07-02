@@ -38,9 +38,9 @@ const ApplicationContainer = ({
     useState<FormValidationWarnings>();
 
   const [error, setError] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
-
   const [loading, setLoading] = useState<boolean>(false);
+  const [notStarted, setNotStarted] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
 
   const handleSubmit = useCallback(() => {
     if (!token) {
@@ -54,6 +54,10 @@ const ApplicationContainer = ({
           Object.entries(data.form_validation_errors).length > 0
         ) {
           setValidationErrors(data.form_validation_errors);
+        }
+        // if no forms are started we get an empty result
+        else if (Object.entries(data).length === 0) {
+          setNotStarted(true);
         } else {
           setSuccess(true);
         }
@@ -94,13 +98,12 @@ const ApplicationContainer = ({
         </Alert>
       )}
 
-      {validationErrors && (
-        <ApplicantionValidationAlert
-          applicationForms={applicationForms}
-          forms={forms}
-          validationErrors={validationErrors}
-        />
-      )}
+      <ApplicantionValidationAlert
+        applicationForms={applicationForms}
+        forms={forms}
+        notStarted={notStarted}
+        validationErrors={validationErrors}
+      />
       <InformationCard
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
@@ -120,25 +123,29 @@ const ApplicationContainer = ({
 const ApplicantionValidationAlert = ({
   applicationForms,
   forms,
+  notStarted,
   validationErrors,
 }: {
   applicationForms: ApplicationFormDetail[];
   forms: CompetitionForms;
-  validationErrors: FormValidationWarnings;
+  notStarted: boolean;
+  validationErrors: FormValidationWarnings | undefined;
 }) => {
   const t = useTranslations("Application");
-  const formattedValidationErrors = Object.entries(validationErrors).map(
-    ([appFormId, _validationErrors]) => {
-      const appForm = applicationForms.find(
-        (appForm) => appForm.application_form_id === appFormId,
-      );
-      const form = forms.find((form) => form.form.form_id === appForm?.form_id);
-      return {
-        appFormId,
-        formName: form?.form.form_name,
-      };
-    },
-  );
+  const formattedValidationErrors = validationErrors
+    ? Object.entries(validationErrors).map(([appFormId, _validationErrors]) => {
+        const appForm = applicationForms.find(
+          (appForm) => appForm.application_form_id === appFormId,
+        );
+        const form = forms.find(
+          (form) => form.form.form_id === appForm?.form_id,
+        );
+        return {
+          appFormId,
+          formName: form?.form.form_name,
+        };
+      })
+    : [];
   const notStartedForms = applicationForms.filter(
     (applicationForm) =>
       applicationForm.application_form_status === "not_started",
@@ -156,33 +163,37 @@ const ApplicantionValidationAlert = ({
     },
   );
 
+  const validationError = formattedValidationErrors.length > 0 || notStarted;
+
   return (
-    <Alert
-      validation
-      heading={t("submissionError.title")}
-      type="error"
-      headingLevel="h3"
-    >
-      {t("submissionValidationError.description")}
-      {formattedValidationErrors.length > 0 ? (
-        <ul>
-          {formattedValidationErrors.map(({ appFormId, formName }) => (
-            <li key={appFormId}>
-              <a href={`#form-${appFormId}`}>{formName}</a>{" "}
-              {t("submissionValidationError.incompleteForm")}
-            </li>
-          ))}
-          {formattedNotStartedFormsErrors.map(({ appFormId, formName }) => (
-            <li key={appFormId}>
-              <a href={`#form-${appFormId}`}>{formName}</a>{" "}
-              {t("submissionValidationError.notStartedForm")}
-            </li>
-          ))}
-        </ul>
+    <>
+      {validationError ? (
+        <Alert
+          validation
+          heading={t("submissionError.title")}
+          type="error"
+          headingLevel="h3"
+        >
+          {t("submissionValidationError.description")}
+          <ul>
+            {formattedValidationErrors.map(({ appFormId, formName }) => (
+              <li key={appFormId}>
+                <a href={`#form-${appFormId}`}>{formName}</a>{" "}
+                {t("submissionValidationError.incompleteForm")}
+              </li>
+            ))}
+            {formattedNotStartedFormsErrors.map(({ appFormId, formName }) => (
+              <li key={appFormId}>
+                <a href={`#form-${appFormId}`}>{formName}</a>{" "}
+                {t("submissionValidationError.notStartedForm")}
+              </li>
+            ))}
+          </ul>
+        </Alert>
       ) : (
-        "No validation errors."
+        <></>
       )}
-    </Alert>
+    </>
   );
 };
 
