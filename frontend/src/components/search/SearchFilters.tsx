@@ -5,7 +5,10 @@ import {
   fundingOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
-import { obtainAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
+import {
+  obtainAgencies,
+  performAgencySearch,
+} from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
@@ -33,7 +36,10 @@ export default async function SearchFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = Promise.all([obtainAgencies(), searchResultsPromise]);
+  const agenciesPromise = Promise.all([
+    performAgencySearch(),
+    searchResultsPromise,
+  ]);
 
   let searchResults;
   try {

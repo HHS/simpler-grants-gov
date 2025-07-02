@@ -1,14 +1,13 @@
 "server only";
 
 import { ApiRequestError } from "src/errors";
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchAgencies,
   searchAgencies,
 } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
-
-import { JSONRequestBody } from "../fetcherHelpers";
 
 // would have called this getAgencies, but technically it's a POST
 export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
@@ -24,7 +23,6 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
           },
         ],
       },
-      filters: { active: true },
     },
     nextOptions: {
       revalidate: 604800,
@@ -48,7 +46,11 @@ export const performAgencySearch = async (
         },
       ],
     },
-    filters: { active: true },
+    filters: {
+      opportunity_statuses: {
+        one_of: ["posted", "forecasted"],
+      },
+    },
   };
   if (keyword) {
     requestBody.query = keyword;
