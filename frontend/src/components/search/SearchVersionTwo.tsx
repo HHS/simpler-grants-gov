@@ -1,8 +1,5 @@
 import { environment } from "src/constants/environments";
-import {
-  obtainAgencies,
-  performAgencySearch,
-} from "src/services/fetch/fetchers/agenciesFetcher";
+import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";

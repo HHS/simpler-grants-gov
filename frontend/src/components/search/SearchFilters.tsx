@@ -5,10 +5,7 @@ import {
   fundingOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
-import {
-  obtainAgencies,
-  performAgencySearch,
-} from "src/services/fetch/fetchers/agenciesFetcher";
+import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
