@@ -4,8 +4,6 @@ import {
   useAttachmentsList,
   useDeletingIds,
   useFileInputRef,
-  useSetPendingDeleteId,
-  useSetPendingDeleteName,
   useUploadAttachment,
 } from "src/context/application/AttachmentsContext";
 import { Attachment } from "src/types/attachmentTypes";
@@ -41,8 +39,6 @@ const AttachmentsCard = () => {
   const fileInputRef = useFileInputRef();
 
   const deletingIds = useDeletingIds();
-  const setPendingDeleteId = useSetPendingDeleteId();
-  const setPendingDeleteName = useSetPendingDeleteName();
 
   const t = useTranslations("Application.attachments");
 
@@ -65,11 +61,6 @@ const AttachmentsCard = () => {
       return 0;
     });
   }, [attachments, sortBy, sortDirection]);
-
-  const setFileNameAndId = (fileName: string, id: string) => {
-    setPendingDeleteName(fileName);
-    setPendingDeleteId(id);
-  };
 
   const handleUpload = async (file: File) => await uploadAttachment(file);
 

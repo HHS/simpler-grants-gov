@@ -2,8 +2,6 @@
 
 import {
   useDeletingIds,
-  usePendingDeleteId,
-  usePendingDeleteName,
   useSetPendingDeleteId,
   useSetPendingDeleteName,
 } from "src/context/application/AttachmentsContext";
@@ -25,8 +23,6 @@ export const AttachmentDeleteButton = ({
   file,
   modalRef,
 }: Props) => {
-  const pendingDeleteId = usePendingDeleteId();
-  const pendingDeleteName = usePendingDeleteName();
   const setPendingDeleteId = useSetPendingDeleteId();
   const setPendingDeleteName = useSetPendingDeleteName();
   const deletingIds = useDeletingIds();
