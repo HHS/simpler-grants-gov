@@ -2,7 +2,7 @@
 description: Template page for deliverable specifications.
 ---
 
-# 🏁 Open source onboarding
+# Open source onboarding
 
 ## Summary details
 

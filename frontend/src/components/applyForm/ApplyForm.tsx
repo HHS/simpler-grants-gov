@@ -4,14 +4,14 @@ import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
+import { useTranslations } from "next-intl";
 import { JSX, useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
-import { ApplyFormErrorMessage } from "./ApplyFormErrorMessage";
+import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
-import { ApplyFormSuccessMessage } from "./ApplyFormSuccessMessage";
-import { UiSchema } from "./types";
+import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
@@ -19,6 +19,7 @@ const ApplyForm = ({
   formId,
   formSchema,
   savedFormData,
+  validationWarnings,
   uiSchema,
 }: {
   applicationId: string;
@@ -26,27 +27,37 @@ const ApplyForm = ({
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
+  validationWarnings: FormValidationWarning[] | null;
 }) => {
   const { pending } = useFormStatus();
+  const t = useTranslations("Application.applyForm");
+  const required = t.rich("required", {
+    abr: (content) => (
+      <abbr
+        title="required"
+        className="usa-hint usa-hint--required text-no-underline"
+      >
+        {content}
+      </abbr>
+    ),
+  });
 
   const [formState, formAction] = useActionState(handleFormAction, {
     applicationId,
-    errorMessage: "",
+    error: false,
     formId,
     formData: new FormData(),
-    successMessage: "",
-    validationErrors: [],
+    saved: false,
   });
 
-  const { formData, errorMessage, successMessage, validationErrors } =
-    formState;
+  const { formData, error, saved } = formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
   try {
     fields = buildFormTreeRecursive({
-      errors: validationErrors,
+      errors: saved ? validationWarnings : null,
       formData: formObject,
       schema: formSchema,
       uiSchema,
@@ -60,47 +71,38 @@ const ApplyForm = ({
   }
 
   return (
-    <div className="usa-in-page-nav-container flex-justify">
-      <ApplyFormNav fields={navFields} />
+    <>
       <form
-        className="usa-form usa-form--large flex-1 margin-top-neg-5"
+        className="flex-1 margin-top-2"
         action={formAction}
         // turns off html5 validation so all error displays are consistent
         noValidate
       >
-        <ApplyFormSuccessMessage message={successMessage} />
-        <ApplyFormErrorMessage
-          message={errorMessage}
-          errors={validationErrors}
-        />
-        <FormGroup>{fields}</FormGroup>
-        <p>
+        <div className="display-flex flex-justify">
+          <div>{required}</div>
           <Button
             data-testid="apply-form-save"
             type="submit"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            secondary
             name="apply-form-button"
+            className="margin-top-0"
             value="save"
           >
             {pending ? "Saving..." : "Save"}
           </Button>
-          <Button
-            data-testid="apply-form-submit"
-            onClick={() =>
-              validationErrors.length > 0
-                ? window.scrollTo({ top: 0, behavior: "smooth" })
-                : undefined
-            }
-            name="apply-form-button"
-            value="submit"
-            type="submit"
-          >
-            {pending ? "Submitting..." : "Submit"}
-          </Button>
-        </p>
+        </div>
+        <div className="usa-in-page-nav-container">
+          <FormGroup className="order-2 width-full">
+            <ApplyFormMessage
+              saved={saved}
+              error={error}
+              validationWarnings={validationWarnings}
+            />
+            {fields}
+          </FormGroup>
+          <ApplyFormNav title={t("navTitle")} fields={navFields} />
+        </div>
       </form>
-    </div>
+    </>
   );
 };
 

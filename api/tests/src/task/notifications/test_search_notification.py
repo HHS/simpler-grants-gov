@@ -378,7 +378,7 @@ def test_search_notification_email_format_single_opportunity(
         mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
             "SimpleEmail"
         ]["Subject"]["Data"]
-        == f"New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
     email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
@@ -555,7 +555,7 @@ def test_search_notification_email_format_multiple_opportunities(
         mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
             "SimpleEmail"
         ]["Subject"]["Data"]
-        == f"2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] 2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
     email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][

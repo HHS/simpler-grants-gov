@@ -4,7 +4,7 @@ description: >-
   word choice, and formatting to ensure clear, consistent, and on-brand content.
 ---
 
-# Editoral style
+# Editorial style
 
 ### External style guides
 
@@ -30,13 +30,15 @@ Using contractions (like _we're', it's' or you'll_) helps our writing sound more
 \
 **Sentence case examples**
 
-* H3 subheadings and lower
 * Body text
 * Column headers
 * Labels and other UI components
 * Progress indicator labels
 * Modal titles
 * Buttons (per [USWDS](https://designsystem.digital.gov/components/button/))
+* H2 form section headings
+  * In application forms, H2s should be styled in sentence case. See Simpler's version of Form SF-424 for an example.
+* H3 subheadings and lower
 
 **Title case examples**
 

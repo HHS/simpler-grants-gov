@@ -1,4 +1,5 @@
 import { environment } from "src/constants/environments";
+import { obtainAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
@@ -6,7 +7,7 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { use } from "react";
+import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
@@ -14,6 +15,8 @@ import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
 import { AndOrPanel } from "./AndOrPanel";
+import { FilterPillPanel } from "./FilterPillPanel";
+import { PillListSkeleton } from "./PillList";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -37,6 +40,7 @@ export function SearchVersionTwo({
   }
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
+  const agencyListPromise = obtainAgencies();
 
   return (
     <>
@@ -47,7 +51,7 @@ export function SearchVersionTwo({
       <QueryProvider>
         <div className="grid-container">
           <div className="desktop:display-flex desktop:margin-bottom-2">
-            <div className="flex-6">
+            <div className="flex-6 flex-align-self-end">
               <SearchBar
                 tableView={true}
                 queryTermFromParent={convertedSearchParams.query}
@@ -65,6 +69,7 @@ export function SearchVersionTwo({
                   <SearchDrawerFilters
                     searchParams={convertedSearchParams}
                     searchResultsPromise={searchResultsPromise}
+                    agencyListPromise={agencyListPromise}
                   />
                 </DrawerUnit>
               </div>
@@ -74,6 +79,12 @@ export function SearchVersionTwo({
             </div>
           </div>
           <AndOrPanel hasSearchTerm={!!convertedSearchParams.query} />
+          <Suspense fallback={<PillListSkeleton />}>
+            <FilterPillPanel
+              searchParams={convertedSearchParams}
+              agencyListPromise={agencyListPromise}
+            />
+          </Suspense>
           <SearchResults
             searchParams={convertedSearchParams}
             loadingMessage={t("loading")}

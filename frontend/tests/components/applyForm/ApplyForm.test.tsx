@@ -1,9 +1,13 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 const mockHandleFormAction = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
@@ -85,10 +89,11 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId=""
-        savedFormData={{ name: "myself" }}
-        formSchema={formSchema}
-        uiSchema={uiSchema}
         formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
       />,
     );
 
@@ -114,7 +119,7 @@ describe("ApplyForm", () => {
     expect(dobField).toHaveAttribute("type", "date");
 
     const nav = screen.getByTestId("InPageNavigation");
-    expect(nav).toHaveTextContent("On this form");
+    expect(nav).toHaveTextContent("navTitle");
 
     const textareaField = screen.getByTestId("textarea");
     expect(textareaField).toBeInTheDocument();
@@ -127,34 +132,34 @@ describe("ApplyForm", () => {
     expect(screen.getAllByRole("option").length).toBe(2);
     expect(screen.getByText("test select option")).toBeInTheDocument();
 
-    const button = screen.getByTestId("apply-form-submit");
+    const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
   });
 
-  it("calls handleFormAction action on submit", () => {
+  it("calls handleFormAction action on save", () => {
     mockHandleFormAction.mockImplementation(() => Promise.resolve());
 
     render(
       <ApplyForm
         applicationId="test"
-        savedFormData={{}}
-        formSchema={formSchema}
-        uiSchema={uiSchema}
         formId="test"
+        formSchema={formSchema}
+        savedFormData={{}}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
       />,
     );
 
-    const button = screen.getByTestId("apply-form-submit");
+    const button = screen.getByTestId("apply-form-save");
     button.click();
 
     expect(mockHandleFormAction).toHaveBeenCalledWith(
       {
         applicationId: "test",
-        errorMessage: "",
+        error: false,
         formData: new FormData(),
         formId: "test",
-        successMessage: "",
-        validationErrors: [],
+        saved: false,
       },
 
       expect.any(FormData),
@@ -166,10 +171,11 @@ describe("ApplyForm", () => {
     render(
       <ApplyForm
         applicationId="test"
-        savedFormData={{}}
+        formId="test"
         formSchema={{}}
         uiSchema={uiSchema}
-        formId="test"
+        savedFormData={{}}
+        validationWarnings={[]}
       />,
     );
     const alert = screen.getByTestId("alert");
@@ -186,6 +192,7 @@ describe("ApplyForm", () => {
         formSchema={{ arbitrayField: "arbirtrary value" }}
         uiSchema={uiSchema}
         formId="test"
+        validationWarnings={[]}
       />,
     );
 
@@ -202,6 +209,7 @@ describe("ApplyForm", () => {
         formSchema={formSchema}
         uiSchema={uiSchema}
         formId="test"
+        validationWarnings={[]}
       />,
     );
 
@@ -212,5 +220,118 @@ describe("ApplyForm", () => {
 
     const errorMessage = screen.queryByText("Error rendering form");
     expect(errorMessage).not.toBeInTheDocument();
+  });
+  it("provides correct error message", async () => {
+    mockHandleFormAction.mockResolvedValue({
+      applicationId: "test",
+      error: true,
+      formData: new FormData(),
+      formId: "test",
+      saved: true,
+    });
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[
+          {
+            field: "$.name",
+            message: "this is an error",
+            value: "",
+            type: "",
+          },
+        ]}
+      />,
+    );
+    const button = screen.getByTestId("apply-form-save");
+    button.click();
+    // error for form
+    await waitFor(() => {
+      const alert = screen.getByTestId("alert");
+      expect(alert).toHaveTextContent("errorTitle");
+    });
+    // error for field
+    await waitFor(() => {
+      const alert = screen.getByTestId("errorMessage");
+      expect(alert).toHaveTextContent("this is an error");
+    });
+  });
+  it("provides correct validation message", async () => {
+    mockHandleFormAction.mockResolvedValue({
+      applicationId: "test",
+      error: false,
+      formData: new FormData(),
+      formId: "test",
+      saved: true,
+    });
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[
+          {
+            field: "$.name",
+            message: "this is an error",
+            value: "",
+            type: "",
+          },
+        ]}
+      />,
+    );
+    const button = screen.getByTestId("apply-form-save");
+    button.click();
+    // error for form
+    await waitFor(() => {
+      const alert = screen.getByTestId("alert");
+      expect(alert).toHaveTextContent("savedTitle");
+    });
+    await waitFor(() => {
+      const alert = screen.getByTestId("alert");
+      expect(alert).toHaveTextContent("validationMessage");
+    });
+    // error for field
+    await waitFor(() => {
+      const alert = screen.getByTestId("errorMessage");
+      expect(alert).toHaveTextContent("this is an error");
+    });
+  });
+  it("provides correct save message", async () => {
+    mockHandleFormAction.mockResolvedValue({
+      applicationId: "test",
+      error: false,
+      formData: new FormData(),
+      formId: "test",
+      saved: true,
+    });
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+      />,
+    );
+    const button = screen.getByTestId("apply-form-save");
+    button.click();
+    // error for form
+    await waitFor(() => {
+      const alert = screen.getByTestId("alert");
+      expect(alert).toHaveTextContent("savedTitle");
+    });
+    await waitFor(() => {
+      const alert = screen.getByTestId("alert");
+      expect(alert).toHaveTextContent("savedMessage");
+    });
   });
 });
