@@ -240,9 +240,9 @@ describe("EditSavedSearchModal", () => {
       />,
     );
 
-    const success = await screen.findByText("successTitle");
+    const success = await screen.findByLabelText("success");
 
-    expect(success).toBeInTheDocument();
+    expect(success).toHaveTextContent("updatedNotification");
   });
   it("defaults input to current name of query", () => {
     render(
