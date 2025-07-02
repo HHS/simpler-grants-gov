@@ -85,7 +85,7 @@ E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` director
 
 To run E2E tests via CLI:
 
-- `cd ../api && make init db-seed-local start` (prerequisite to start the API)
+- `cd ../api && make remake-backend start` (prerequisite to start the API)
 - `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
 - `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
 - `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
@@ -190,7 +190,7 @@ The `/search` and opportunity pages rely on the application API. The API endpoin
 
 The `API_URL` environment variable can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. To successfully connect to a deployed API, the `API_AUTH_TOKEN` variable must be set correctly for the environment.
 
-To start a local development version of the API, run `make init && db-seed-local && populate-search-opportunities` in the `/api` folder.
+To start a local development version of the API, run `make remake-backend` in the `/api` folder.
 
 See [documentation/api/development.md](../api/development.md) for more details.
 
