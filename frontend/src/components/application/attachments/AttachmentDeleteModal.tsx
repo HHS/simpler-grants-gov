@@ -1,4 +1,3 @@
-// AttachmentDeleteModal.tsx – context‑aware version
 "use client";
 
 import {
@@ -24,7 +23,6 @@ interface Props {
   descriptionText: string;
   cancelCtaText: string;
   buttonCtaText: string;
-  /** modal infra */
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
 }

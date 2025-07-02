@@ -1,4 +1,3 @@
-// AttachmentsContext.tsx
 "use client";
 
 import { Attachment } from "src/types/attachmentTypes";
