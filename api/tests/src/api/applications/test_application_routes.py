@@ -1,11 +1,12 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import pytest
 from sqlalchemy import select
 
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.constants.lookup_constants import ApplicationFormStatus
+from src.auth.internal_jwt_auth import create_jwt_for_internal_token
+from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util.datetime_util import get_now_us_eastern_date
@@ -2396,3 +2397,322 @@ def test_application_start_organization_membership_validation_works_with_multipl
 
     assert response.status_code == 403
     assert "User is not a member of the organization" in response.json["message"]
+
+
+def test_application_form_get_with_internal_jwt_bypasses_auth(
+    client, enable_factory_create, db_session
+):
+    """Test that internal JWT auth bypasses user access checks for application form endpoint"""
+    # Create an application form that is NOT associated with any user
+    application_form = ApplicationFormFactory.create(
+        application_response={"name": "John Doe", "age": 30}
+    )
+
+    # Create the competition form relationship
+    CompetitionFormFactory.create(
+        competition=application_form.application.competition,
+        form=application_form.form,
+        is_required=True,
+    )
+
+    db_session.commit()
+
+    # Create an internal JWT token
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    internal_token, _ = create_jwt_for_internal_token(
+        expires_at=expires_at,
+        db_session=db_session,
+    )
+    db_session.commit()
+
+    # Make request with internal JWT token
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Internal-Token": internal_token},
+    )
+
+    # Should succeed even though no user is associated with the application
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["data"]["application_response"] == {"name": "John Doe", "age": 30}
+
+
+def test_application_form_get_with_internal_jwt_vs_regular_jwt(
+    client, enable_factory_create, db_session, user
+):
+    """Test that regular JWT still requires user access while internal JWT bypasses it"""
+    # Create an application form that is NOT associated with the test user
+    other_user = UserFactory.create()
+    application_form = ApplicationFormFactory.create(
+        application_response={"name": "Jane Doe", "age": 25}
+    )
+
+    # Associate the application with a different user (not the test user)
+    ApplicationUserFactory.create(application=application_form.application, user=other_user)
+
+    # Create the competition form relationship
+    CompetitionFormFactory.create(
+        competition=application_form.application.competition,
+        form=application_form.form,
+        is_required=True,
+    )
+
+    db_session.commit()
+
+    # Create regular user JWT token for the test user (who is NOT associated with the application)
+    user_token, _ = create_jwt_for_user(user, db_session)
+
+    # Create internal JWT token
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    internal_token, _ = create_jwt_for_internal_token(
+        expires_at=expires_at,
+        db_session=db_session,
+    )
+    db_session.commit()
+
+    # Regular JWT should fail with 403 because user is not associated with the application
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_token},
+    )
+    assert response.status_code == 403
+    assert "Unauthorized" in response.json["message"]
+
+    # Internal JWT should succeed
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Internal-Token": internal_token},
+    )
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+
+def test_application_form_get_with_internal_jwt_nonexistent_application(
+    client, enable_factory_create, db_session
+):
+    """Test that internal JWT still validates that the application exists"""
+    nonexistent_id = str(uuid.uuid4())
+    nonexistent_form_id = str(uuid.uuid4())
+
+    # Create internal JWT token
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    internal_token, _ = create_jwt_for_internal_token(
+        expires_at=expires_at,
+        db_session=db_session,
+    )
+    db_session.commit()
+
+    # Should still return 404 for nonexistent application
+    response = client.get(
+        f"/alpha/applications/{nonexistent_id}/application_form/{nonexistent_form_id}",
+        headers={"X-SGG-Internal-Token": internal_token},
+    )
+    assert response.status_code == 404
+    assert "Application with ID" in response.json["message"]
+
+
+def test_application_start_organization_not_allowed(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when applying as organization but competition only allows individuals"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    # Create competition that only allows individual applicants
+    competition = CompetitionFactory.create(
+        opening_date=today,
+        closing_date=future_date,
+        open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+    )
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,  # Applying as organization
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert "This competition does not allow organization applications" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_individual_not_allowed(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when applying as individual but competition only allows organizations"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create competition that only allows organization applicants
+    competition = CompetitionFactory.create(
+        opening_date=today,
+        closing_date=future_date,
+        open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        # No organization_id - applying as individual
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert "This competition does not allow individual applications" in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_allowed(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation succeeds when applying as organization and competition allows organizations"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    # Create competition that allows organization applicants
+    competition = CompetitionFactory.create(
+        opening_date=today,
+        closing_date=future_date,
+        open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+    )
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,  # Applying as organization
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created with organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
+
+
+def test_application_start_individual_allowed(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation succeeds when applying as individual and competition allows individuals"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create competition that allows individual applicants
+    competition = CompetitionFactory.create(
+        opening_date=today,
+        closing_date=future_date,
+        open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        # No organization_id - applying as individual
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify application was created without organization
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert application.organization_id is None
+
+
+def test_application_start_both_applicant_types_allowed(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation succeeds when competition allows both individual and organization applicants"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization and associate user with it
+    organization = OrganizationFactory.create()
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    # Create competition that allows both applicant types (this is the new factory default)
+    competition = CompetitionFactory.create(
+        opening_date=today,
+        closing_date=future_date,
+        # open_to_applicants defaults to both individual and organization
+    )
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+
+    # Test applying as organization
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Test applying as individual
+    request_data = {
+        "competition_id": competition_id,
+        # No organization_id
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"

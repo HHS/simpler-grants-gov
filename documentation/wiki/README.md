@@ -18,7 +18,7 @@ layout:
     visible: false
 ---
 
-# 👋 Welcome
+# Welcome
 
 This website is a shared resource for internal Simpler.Grants.gov team members, external collaborators, and community stakeholders.
 

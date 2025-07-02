@@ -525,6 +525,9 @@ button.usa-pagination__button.usa-button {
   .usa-modal__content {
     height: 100%;
   }
+  .usa-radio__input {
+    width: 0;
+  }
 }
 
 // make modal close "X" use normal style rather than simpler button styline
@@ -556,5 +559,34 @@ dl {
   .usa-tooltip__body {
     min-width: 12rem;
     font-size: font-size("body", "3xs");
+  }
+}
+
+.simpler-responsive-table {
+  thead {
+    @include at-media("tablet-lg") {
+      display: table-header-group;
+    }
+    display: none;
+  }
+  tr {
+    @include at-media("tablet-lg") {
+      display: table-row;
+    }
+    display: flex;
+    flex-direction: column;
+  }
+  tbody {
+    td {
+      word-wrap: anywhere;
+    }
+    tr:nth-child(2n) {
+      td {
+        background-color: color(gray-warm-5);
+        @include at-media("tablet-lg") {
+          background-color: white;
+        }
+      }
+    }
   }
 }

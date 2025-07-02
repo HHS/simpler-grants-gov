@@ -63,6 +63,11 @@ const filterConfigurations = [
     backendName: "is_cost_sharing",
     dataType: "boolean",
   },
+  {
+    frontendName: "topLevelAgency",
+    backendName: "top_level_agency",
+    dataType: "oneOf",
+  },
 ] as const;
 
 const toOneOfFilter = (data: Set<string>): OneOfFilter => {

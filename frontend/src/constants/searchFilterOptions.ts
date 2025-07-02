@@ -204,3 +204,12 @@ export const andOrOptions = [
     value: "OR",
   },
 ];
+
+export const allFilterOptions = {
+  status: statusOptions,
+  eligibility: eligibilityOptions,
+  costSharing: costSharingOptions,
+  closeDate: closeDateOptions,
+  category: categoryOptions,
+  fundingInstrument: fundingOptions,
+};

@@ -23,6 +23,8 @@ from src.api.application_alpha.application_schemas import (
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
+from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
+from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
@@ -129,8 +131,8 @@ def application_form_update(
     "/applications/<uuid:application_id>/application_form/<uuid:app_form_id>"
 )
 @application_blueprint.output(ApplicationFormGetResponseSchema)
-@application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_jwt_auth)
+@application_blueprint.doc(responses=[200, 401, 404], security=jwt_key_or_internal_security_schemes)
+@jwt_key_or_internal_multi_auth.login_required
 @flask_db.with_db_session()
 def application_form_get(
     db_session: db.Session, application_id: UUID, app_form_id: UUID
@@ -144,9 +146,15 @@ def application_form_get(
     )
     logger.info("GET /alpha/applications/:application_id/application_form/:app_form_id")
 
-    # Get user from token session
-    token_session = api_jwt_auth.get_user_token_session()
-    user = token_session.user
+    # Get user from the multi-auth and determine auth type
+    multi_auth_user = jwt_key_or_internal_multi_auth.get_user()
+
+    if isinstance(multi_auth_user.user, UserTokenSession):
+        # validate user can access as we already do
+        user = multi_auth_user.user.user
+    else:
+        # Do not check
+        user = None
 
     with db_session.begin():
         application_form, warnings = get_application_form(

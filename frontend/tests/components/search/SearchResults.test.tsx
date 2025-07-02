@@ -45,6 +45,11 @@ jest.mock("src/services/fetch/fetchers/searchFetcher", () => ({
   searchForOpportunities: jest.fn(() => Promise.resolve()),
 }));
 
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default: (component: unknown) => component,
+}));
+
 describe("SearchResults", () => {
   it("Renders without errors", () => {
     render(
@@ -60,6 +65,7 @@ describe("SearchResults", () => {
           eligibility: new Set(),
           closeDate: new Set(),
           costSharing: new Set(),
+          topLevelAgency: new Set(),
         }}
         loadingMessage={""}
         searchResultsPromise={Promise.resolve(fakeSearchAPIResponse)}

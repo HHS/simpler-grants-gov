@@ -94,4 +94,23 @@ describe("WithFeatureFlag", () => {
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(0);
   });
+
+  it("works correctly even if searchParams are not present", async () => {
+    enableFeature = true;
+    const OriginalComponent = jest.fn();
+    const onEnabled = jest.fn();
+    // const searchParams = { any: "param" };
+    const WrappedComponent = withFeatureFlag(
+      OriginalComponent,
+      "searchOff",
+      onEnabled,
+    );
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const component = await WrappedComponent({});
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    render(component);
+    expect(onEnabled).toHaveBeenCalledTimes(1);
+  });
 });

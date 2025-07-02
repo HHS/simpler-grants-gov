@@ -11,8 +11,11 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import {
+  ApplicationDetailsCardProps,
+  InformationCard,
+} from "src/components/application/InformationCard";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
-import BetaAlert from "src/components/BetaAlert";
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 export const dynamic = "force-dynamic";
@@ -34,8 +37,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     return <TopLevelError />;
   }
   const { applicationId } = await params;
-  let forms = [];
   let applicationForms = [];
+  let details = {} as ApplicationDetailsCardProps;
+  let forms = [];
   let opportunity = {} as OpportunityDetail;
 
   try {
@@ -51,6 +55,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       );
       return <TopLevelError />;
     }
+    applicationForms = response.data.application_forms;
+    details = response.data;
     forms = response.data.competition.competition_forms;
     applicationForms = response.data.application_forms;
     const opportunityId = response.data.competition.opportunity_id;
@@ -78,9 +84,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
 
   return (
     <>
-      <BetaAlert containerClasses="margin-top-5" />
       <GridContainer>
         <h1>Application</h1>
+        <InformationCard applicationDetails={details} />
         <OpportunityCard opportunityOverview={opportunity} />
         <ApplicationFormsTable
           forms={forms}

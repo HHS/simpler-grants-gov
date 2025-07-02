@@ -29,7 +29,7 @@ const StartApplicationModal = ({
   const headerTranslation = useTranslations("HeaderLoginModal");
   const modalId = "start-application";
   const [validationError, setValidationError] = useState<string>();
-  const [savedSearchName, setSavedSearchName] = useState<string>();
+  const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
   const token = user?.token || null;
@@ -41,12 +41,12 @@ const StartApplicationModal = ({
     if (validationError) {
       setValidationError(undefined);
     }
-    if (!savedSearchName) {
+    if (!savedApplicationName) {
       setValidationError(t("startApplicationModal.validationError"));
       return;
     }
     setLoading(true);
-    startApplication(competitionId, savedSearchName, token)
+    startApplication(savedApplicationName, competitionId, token)
       .then((data) => {
         const { applicationId } = data;
         router.push(`/workspace/applications/application/${applicationId}`);
@@ -60,17 +60,17 @@ const StartApplicationModal = ({
         }
         console.error(error);
       });
-  }, [competitionId, router, savedSearchName, t, token, validationError]);
+  }, [competitionId, router, savedApplicationName, t, token, validationError]);
 
   const onClose = useCallback(() => {
     setError("");
     setLoading(false);
     setValidationError(undefined);
-    setSavedSearchName("");
+    setSavedApplicationName("");
   }, []);
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSavedSearchName(e.target.value);
+    setSavedApplicationName(e.target.value);
   }, []);
 
   return (
