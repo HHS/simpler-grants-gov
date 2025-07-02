@@ -28,8 +28,11 @@ const ApplicationContainer = ({
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
   const applicationId = applicationDetails.application_id;
+  const applicationStatus = applicationDetails.application_status;
+
   const { user } = useUser();
   const token = user?.token || null;
+  const t = useTranslations("Application");
 
   const [validationErrors, setValidationErrors] =
     useState<FormValidationWarnings>();
@@ -67,37 +70,48 @@ const ApplicationContainer = ({
   return (
     <>
       {success && (
-        <Alert heading="Application submitted" headingLevel="h3" type="success">
-          Application has successfully been submitted.
+        <Alert
+          heading={t("submissionSuccess.title")}
+          headingLevel="h3"
+          type="success"
+        >
+          {t("submissionSuccess.description")}{" "}
         </Alert>
       )}
       {error && (
         <Alert
-          heading="Error submitting application"
+          heading={t("submissionError.title")}
           headingLevel="h3"
           type="error"
+          validation
         >
-          Error submitting application. Please try again.
+          {t.rich("submissionError.description", {
+            "email-link": (content) => (
+              <a href="mailto:simpler@grants.gov">{content}</a>
+            ),
+            p: (content) => <p>{content}</p>,
+          })}
         </Alert>
       )}
 
       {validationErrors && (
         <ApplicantionValidationAlert
-          forms={forms}
           applicationForms={applicationForms}
+          forms={forms}
           validationErrors={validationErrors}
         />
       )}
       <InformationCard
-        applicationSubmitHandler={handleSubmit}
-        submissionLoading={loading}
         applicationDetails={applicationDetails}
+        applicationSubmitHandler={handleSubmit}
+        applicationSubmitted={applicationStatus === "submitted"}
+        submissionLoading={loading}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
-        forms={forms}
         applicationForms={applicationForms}
         applicationId={applicationId}
+        forms={forms}
       />
     </>
   );
@@ -149,19 +163,19 @@ const ApplicantionValidationAlert = ({
       type="error"
       headingLevel="h3"
     >
-      {t("submissionError.description")}
+      {t("submissionValidationError.description")}
       {formattedValidationErrors.length > 0 ? (
         <ul>
           {formattedValidationErrors.map(({ appFormId, formName }) => (
             <li key={appFormId}>
               <a href={`#form-${appFormId}`}>{formName}</a>{" "}
-              {t("submissionError.incompleteForm")}
+              {t("submissionValidationError.incompleteForm")}
             </li>
           ))}
           {formattedNotStartedFormsErrors.map(({ appFormId, formName }) => (
             <li key={appFormId}>
               <a href={`#form-${appFormId}`}>{formName}</a>{" "}
-              {t("submissionError.notStartedForm")}
+              {t("submissionValidationError.notStartedForm")}
             </li>
           ))}
         </ul>
