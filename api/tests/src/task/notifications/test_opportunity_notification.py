@@ -768,17 +768,16 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a><br>'
+                "<p style=\"padding-left: 20px;\">Description</p><p style=\"padding-left: 40px;\">•  <i>New Description:</i> The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href='http://testhost:3000/opportunity/1' style='color:blue;'>...Read full description</a><br>",
             ),
             # Truncate with html tag
             (
-                    {
-                        "before": "testing",
-                        "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>'
-            },
-                    '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style = "padding-left: 40px;" ><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainab</strong><a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>'
-
-            )
+                {
+                    "before": "testing",
+                    "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>',
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style = "padding-left: 40px;" ><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainab</strong><a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
+            ),
         ],
     )
     def test_build_description_fields_content(
