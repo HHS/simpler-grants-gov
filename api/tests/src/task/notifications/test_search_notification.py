@@ -1,5 +1,5 @@
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -7,6 +7,7 @@ from sqlalchemy import select
 import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.constants import NotificationReason
@@ -20,7 +21,7 @@ from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTU
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -58,6 +59,22 @@ def test_search_notifications_cli(
     caplog,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
+
+    # Update the search index with new data that will change the results
+    for i in range(4, 6):
+        opportunity = factories.OpportunityFactory.create(
+            opportunity_id=i,
+            no_current_summary=True,
+        )
+        summary = factories.OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=date.fromisoformat("2025-01-31"),
+            close_date=date.fromisoformat("2025-04-30"),
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            opportunity_summary=summary,
+        )
     # Create a saved search that needs notification
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
@@ -138,6 +155,22 @@ def test_grouped_search_queries_cli(
     user2 = factories.UserFactory.create()
     factories.LinkExternalUserFactory.create(user=user1, email="user1@example.com")
     factories.LinkExternalUserFactory.create(user=user2, email="user2@example.com")
+
+    # Update the search index with new data that will change the results
+    for i in range(7, 9):
+        opportunity = factories.OpportunityFactory.create(
+            opportunity_id=i,
+            no_current_summary=True,
+        )
+        summary = factories.OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=date.fromisoformat("2025-01-31"),
+            close_date=date.fromisoformat("2025-04-30"),
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            opportunity_summary=summary,
+        )
 
     same_search_query = {"keywords": "shared search"}
 
@@ -270,3 +303,258 @@ def test_pagination_params_are_stripped_from_search_query(
 
     params = _strip_pagination_params(saved_search.search_query)
     assert params.keys() == {"query"}
+
+
+def test_search_notification_email_format_single_opportunity(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails"""
+    # Create test opportunities with known data
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=2,
+        opportunity_title="2025 Port Infrastructure Development Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-01-31"),
+        close_date=date.fromisoformat("2025-04-30"),
+        award_floor=1_000_000,
+        award_ceiling=112_500_000,
+        expected_number_of_awards=40,
+        is_cost_sharing=True,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1],  # Test single opportunity
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    assert (
+        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+            "SimpleEmail"
+        ]["Subject"]["Data"]
+        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+    )
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test single opportunity format
+    expected_single = """A funding opportunity matching your saved search query was recently published.
+
+2025 Port Infrastructure Development Program
+
+Status: Posted
+Submission period: 1/31/2025–4/30/2025
+Award range: $1,000,000-$112,500,000
+Expected awards: 40
+Cost sharing: Yes
+
+To unsubscribe from email notifications for this query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
+
+    assert email_content.strip() == expected_single.strip()
+
+
+def test_search_notification_email_format_no_close_date(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails when there's no close date"""
+    # Create test opportunity with post date but no close date
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=3,
+        opportunity_title="Ongoing Research Grant Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-02-15"),
+        close_date=None,  # No close date - indefinite submission period
+        award_floor=50_000,
+        award_ceiling=500_000,
+        expected_number_of_awards=10,
+        is_cost_sharing=False,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "research"},
+        name="Research Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2],  # Previous results
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test opportunity with no close date format
+    expected_content = """A funding opportunity matching your saved search query was recently published.
+
+Ongoing Research Grant Program
+
+Status: Posted
+Submission period: 2/15/2025-(To be determined)
+Award range: $50,000-$500,000
+Expected awards: 10
+Cost sharing: No
+
+To unsubscribe from email notifications for this query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
+
+    assert email_content.strip() == expected_content.strip()
+
+
+def test_search_notification_email_format_multiple_opportunities(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+):
+    """Test that verifies the format of search notification emails"""
+    # Create test opportunities with known data
+    opportunity1 = factories.OpportunityFactory.create(
+        opportunity_id=1,
+        opportunity_title="2025 Port Infrastructure Development Program",
+        no_current_summary=True,
+    )
+    summary1 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        post_date=date.fromisoformat("2025-01-31"),
+        close_date=date.fromisoformat("2025-04-30"),
+        award_floor=1_000_000,
+        award_ceiling=112_500_000,
+        expected_number_of_awards=40,
+        is_cost_sharing=True,
+        is_forecast=False,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity1,
+        opportunity_summary=summary1,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create a forecasted opportunity
+    opportunity2 = factories.OpportunityFactory.create(
+        opportunity_id=2,
+        opportunity_title="Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)",
+        no_current_summary=True,
+    )
+    summary2 = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity2,
+        award_floor=1,
+        award_ceiling=30_000,
+        expected_number_of_awards=None,
+        is_cost_sharing=False,
+        is_forecast=True,
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity2,
+        opportunity_summary=summary2,
+        opportunity_status=OpportunityStatus.FORECASTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        user=user_with_email,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[3],  # Test single opportunity
+    )
+
+    _clear_mock_responses()
+
+    # Run notification task
+    result = cli_runner.invoke(args=["task", "email-notifications"])
+    assert result.exit_code == 0
+
+    # Get the email content from mock responses
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    assert (
+        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+            "SimpleEmail"
+        ]["Subject"]["Data"]
+        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] 2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+    )
+
+    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+        "SimpleEmail"
+    ]["TextPart"]["Data"]
+
+    # Test single opportunity format
+    expected_single = """The following funding opportunities matching your saved search queries were recently published.
+
+2025 Port Infrastructure Development Program
+
+Status: Posted
+Submission period: 1/31/2025–4/30/2025
+Award range: $1,000,000-$112,500,000
+Expected awards: 40
+Cost sharing: Yes
+
+Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)
+
+Status: Forecasted
+Submission period: To be announced.
+Award range: $1-$30,000
+Expected awards: --
+Cost sharing: No
+
+To unsubscribe from email notifications for a query, delete it from your saved search queries.""".replace(
+        "\n", "<br/>"
+    )
+
+    assert email_content.strip() == expected_single.strip()

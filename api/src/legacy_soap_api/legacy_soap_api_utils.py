@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 from typing import Any
 
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
@@ -6,6 +7,23 @@ from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRespon
 BASE_SOAP_API_RESPONSE_HEADERS = {
     "Strict-Transport-Security": "max-age=31536000",
     "Content-Type": 'multipart/related; type="application/xop+xml"',
+}
+
+
+@dataclass
+class SOAPOperationConfig:
+    response_operation_name: str
+    force_list_attributes: tuple | None = tuple()
+
+
+SOAP_OPERATION_CONFIGS = {
+    "applicants": {
+        "GetOpportunityListRequest": SOAPOperationConfig(
+            response_operation_name="GetOpportunityListResponse",
+            force_list_attributes=("OpportunityDetails",),
+        )
+    },
+    "grantors": {},
 }
 
 
@@ -53,3 +71,26 @@ class SOAPFaultException(Exception):
         self.message = message
         self.fault = fault
         super().__init__(message, fault, *args)
+
+
+def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
+    return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})
+
+
+def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
+    body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
+    return {"Envelope": {"Body": {**body}}}
+
+
+def get_auth_error_response() -> SOAPResponse:
+    data = b"""
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <soap:Fault>
+            <faultcode>soap:Server</faultcode>
+            <faultstring>Auth error</faultstring>
+        </soap:Fault>
+    </soap:Body>
+</soap:Envelope>
+"""
+    return SOAPResponse(data=format_local_soap_response(data), status_code=500, headers={})

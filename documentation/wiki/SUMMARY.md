@@ -1,6 +1,6 @@
 # Table of contents
 
-* [👋 Welcome](README.md)
+* [Welcome](README.md)
 
 ## GET INVOLVED
 
@@ -31,15 +31,14 @@
 
 * [Roadmap](product/product-roadmap.md)
 * [Deliverables](product/deliverables/README.md)
-  * [🏁 Static site soft launch](product/deliverables/static-site-soft-launch.md)
-  * [🏁 Static site public launch](product/deliverables/static-site-public-launch.md)
-  * [🏁 GET Opportunities](product/deliverables/get-opportunities.md)
-  * [🏁 Open source onboarding](product/deliverables/open-source-onboarding.md)
-  * [🏁 Co-Design Group planning](product/deliverables/co-design-group.md)
+  * [Static site soft launch](product/deliverables/static-site-soft-launch.md)
+  * [Static site public launch](product/deliverables/static-site-public-launch.md)
+  * [GET Opportunities](product/deliverables/get-opportunities.md)
+  * [Open source onboarding](product/deliverables/open-source-onboarding.md)
+  * [Co-Design Group planning](product/deliverables/co-design-group.md)
 * [Decisions](product/decisions/README.md)
   * [ADR Template](product/decisions/template.md)
   * [ADRs](product/decisions/adr/README.md)
-    * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/template.md)
     * [Recording Architecture Decisions](product/decisions/adr/2023-06-26-recording-architecture-decisions.md)
     * [Task Runner for the CI / CD Pipeline](product/decisions/adr/2023-06-29-ci-cd-task-runner.md)
     * [API Language](product/decisions/adr/2023-06-30-api-language.md)
@@ -90,8 +89,10 @@
     * [Cross-Program Team Health Survey Tool](product/decisions/adr/2024-12-06-team-health-survey-tool.md)
     * [Adding Slack Users to SimplerGrants Slack Workspace](product/decisions/adr/2024-12-17-adding-slack-users.md)
     * [Repo organization](product/decisions/adr/2025-01-02-repo-organization.md)
-    * [Internal knowledge management](product/decisions/adr/2025-04-18-internal-knowledge-management.md)
+    * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/2025-02-25-community-forum.md)
     * [Migrate Existing API Consumers](product/decisions/adr/2025-03-24-migrate-existing-api-consumers.md)
+    * [Internal knowledge management](product/decisions/adr/2025-04-18-internal-knowledge-management.md)
+    * [Revisiting SOAP Proxy](product/decisions/adr/2025-05-09-revisiting-soap-proxy.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)
     * [CI/CD interface](product/decisions/infra/0001-ci-cd-interface.md)
@@ -117,8 +118,11 @@
   * [Typography](design-and-research/brand-guidelines/typography.md)
   * [Iconography](design-and-research/brand-guidelines/iconography.md)
   * [Photos and illustrations](design-and-research/brand-guidelines/photos-and-illustrations.md)
-* [Content guidelines](design-and-research/content-guidelines/README.md)
+* [Writing standards](design-and-research/content-guidelines/README.md)
   * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
+  * [Editorial style](design-and-research/content-guidelines/editoral-style.md)
+  * [Content patterns](design-and-research/content-guidelines/content-patterns.md)
+  * [Terminology usage](design-and-research/content-guidelines/terminology-usage.md)
 * [User research](design-and-research/user-research/README.md)
   * [Grants.gov archetypes](design-and-research/user-research/grants.gov-archetypes.md)
 

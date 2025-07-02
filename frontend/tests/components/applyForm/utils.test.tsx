@@ -1,11 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
-import {
-  FieldErrors,
-  UiSchema,
-  UiSchemaField,
-} from "src/components/applyForm/types";
+import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
@@ -118,11 +115,11 @@ describe("shapeFormData", () => {
       tasks: [
         {
           title: "Submit form",
-          done: "false",
+          done: false,
         },
         {
           title: "Start form",
-          done: "true",
+          done: true,
         },
       ],
       todos: ["email", "write"],
@@ -173,7 +170,7 @@ describe("buildField", () => {
       required: ["name"],
     };
 
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = { name: "Jane Doe" };
 
     const BuiltField = buildField({
@@ -215,7 +212,7 @@ describe("buildField", () => {
       },
     };
 
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = {};
 
     const BuiltField = buildField({
@@ -253,11 +250,10 @@ describe("buildField", () => {
 
     const errors = [
       {
-        instancePath: "/email",
-        schemaPath: "#/properties/email",
-        keyword: "format",
-        params: { format: "email" },
+        field: "$.email",
         message: "Invalid email format",
+        type: "",
+        value: "",
       },
     ];
 
@@ -301,7 +297,7 @@ describe("buildFormTreeRecursive", () => {
       { type: "field", definition: "/properties/age" },
     ];
 
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = { name: "John", age: 30 };
 
     const result = buildFormTreeRecursive({
@@ -345,7 +341,7 @@ describe("buildFormTreeRecursive", () => {
       },
     ];
 
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = { address: { street: "123 Main St", city: "Metropolis" } };
 
     const result = buildFormTreeRecursive({
@@ -368,7 +364,7 @@ describe("buildFormTreeRecursive", () => {
     };
 
     const uiSchema: UiSchema = [];
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = { name: "John" };
 
     const result = buildFormTreeRecursive({
@@ -413,7 +409,7 @@ describe("buildFormTreeRecursive", () => {
       },
     ];
 
-    const errors: FieldErrors = [];
+    const errors = null;
     const formData = { section: { field1: "Value 1", field2: "Value 2" } };
 
     const result = buildFormTreeRecursive({
@@ -434,10 +430,11 @@ describe("getApplicationResponse", () => {
       {
         application_form_id: "test",
         application_id: "test",
+        application_form_status: "complete",
         application_response: { test: "test" },
         form_id: "test",
       },
-    ];
+    ] as ApplicationFormDetail[];
 
     const result = getApplicationResponse(forms, "test");
 

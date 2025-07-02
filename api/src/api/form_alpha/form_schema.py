@@ -2,6 +2,24 @@ from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 
 
+class FormInstructionSchema(Schema):
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the form instruction file",
+            "example": "instructions.pdf",
+        }
+    )
+    download_path = fields.String(
+        metadata={"description": "The download URL for the form instruction file"}
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "The timestamp when the form instruction was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "The timestamp when the form instruction was last updated"}
+    )
+
+
 class FormAlphaSchema(Schema):
     form_id = fields.UUID(metadata={"description": "The primary key ID of the form"})
 
@@ -44,6 +62,12 @@ class FormAlphaSchema(Schema):
                 {"type": "field", "definition": "/properties/Date"},
             ],
         }
+    )
+
+    form_instruction = fields.Nested(
+        FormInstructionSchema,
+        allow_none=True,
+        metadata={"description": "The instruction file for the form, if available"},
     )
 
 

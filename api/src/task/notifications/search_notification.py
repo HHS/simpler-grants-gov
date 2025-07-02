@@ -1,4 +1,5 @@
 import logging
+from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -6,6 +7,11 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 import src.adapters.search as search
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySummary,
+)
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
@@ -50,16 +56,27 @@ class SearchNotificationTask(BaseNotificationTask):
                 query_map[query_key] = []
             query_map[query_key].append(saved_search)
 
+        # Track new opportunities per user
+        user_new_opportunities: dict[UUID, set[UUID]] = {}
+        # Track which saved searches have updates
         updated_saved_searches: dict[UUID, list[UserSavedSearch]] = {}
 
         for searches in query_map.values():
             current_results = search_opportunities_id(self.search_client, searches[0].search_query)
             for saved_search in searches:
-                previous_results = set(saved_search.searched_opportunity_ids)
-                if set(current_results) != previous_results:
+                previous_results = set(saved_search.searched_opportunity_ids or [])
+                # Find NEW opportunities (in current but not in previous)
+                top_new_opportunities = set(current_results[:25]) - previous_results
+
+                # Only add searches that have new opportunities
+                if top_new_opportunities:
                     user_id = saved_search.user_id
                     updated_saved_searches.setdefault(user_id, []).append(saved_search)
-                    saved_search.searched_opportunity_ids = list(current_results)
+                    # Add top new opportunities for this user
+                    user_new_opportunities.setdefault(user_id, set()).update(top_new_opportunities)
+
+                # Always update the saved search with current results
+                saved_search.searched_opportunity_ids = current_results
 
         users_email_notifications: list[UserEmailNotification] = []
 
@@ -70,16 +87,62 @@ class SearchNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
+            # Get all of the most relevant NEW opportunity IDs for this user
+            new_opportunity_ids = user_new_opportunities[user_id]
+
             logger.info(
                 "Created changed search email notification",
-                extra={"user_id": user_id, "changed_search_count": len(saved_items)},
+                extra={
+                    "user_id": user_id,
+                    "changed_search_count": len(saved_items),
+                    "new_opportunities_count": len(new_opportunity_ids),
+                },
+            )
+
+            if not new_opportunity_ids:
+                logger.info("No new opportunities to notify for user", extra={"user_id": user_id})
+                continue
+
+            # Fetch only the new opportunities that need to be included in the notification
+            opportunities_stmt = (
+                select(Opportunity)
+                .join(
+                    CurrentOpportunitySummary,
+                    CurrentOpportunitySummary.opportunity_id == Opportunity.opportunity_id,
+                )
+                .join(
+                    OpportunitySummary,
+                    OpportunitySummary.opportunity_summary_id
+                    == CurrentOpportunitySummary.opportunity_summary_id,
+                )
+                .where(Opportunity.opportunity_id.in_(new_opportunity_ids))
+                .options(
+                    selectinload(Opportunity.current_opportunity_summary).selectinload(
+                        CurrentOpportunitySummary.opportunity_summary
+                    )
+                )
+            )
+
+            opportunities = self.db_session.execute(opportunities_stmt).scalars().all()
+
+            if not opportunities:
+                logger.info("No opportunities found to notify about", extra={"user_id": user_id})
+                continue
+
+            message = self._build_notification_message(opportunities)
+
+            formatted_date = datetime_util.utcnow().strftime("%-m/%-d/%Y")
+            subject = (
+                f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {formatted_date}"
+                if len(opportunities) == 1
+                else f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] {len(opportunities)} New Grants Published on {formatted_date}"
             )
             users_email_notifications.append(
                 UserEmailNotification(
                     user_id=user_id,
                     user_email=user_email,
-                    subject="Updates to Your Saved Opportunities",
-                    content="",
+                    subject=subject,
+                    content=message,
                     notification_reason=NotificationReason.SEARCH_UPDATES,
                     notified_object_ids=[
                         saved_search.saved_search_id for saved_search in saved_items
@@ -100,6 +163,80 @@ class SearchNotificationTask(BaseNotificationTask):
         )
 
         return users_email_notifications
+
+    def _build_notification_message(self, opportunities: Sequence[Opportunity]) -> str:
+
+        # Build message intro based on number of opportunities
+        if len(opportunities) == 1:
+            message = (
+                "A funding opportunity matching your saved search query was recently published.\n\n"
+            )
+        else:
+            message = "The following funding opportunities matching your saved search queries were recently published.\n\n"
+
+        # Add details for each opportunity
+        for opportunity in opportunities:
+            summary = (
+                opportunity.current_opportunity_summary.opportunity_summary
+                if opportunity.current_opportunity_summary
+                else None
+            )
+
+            if not summary:
+                continue
+
+            # Add opportunity title (empty line before title)
+            message += f"{opportunity.opportunity_title}\n\n"
+
+            # Add status
+            status = (
+                str(opportunity.opportunity_status).capitalize()
+                if opportunity.opportunity_status
+                else "Unknown"
+            )
+            message += f"Status: {status}\n"
+
+            # Add submission period
+            if summary.is_forecast:
+                message += "Submission period: To be announced.\n"
+            elif summary.post_date:
+                # Both post and close dates available
+                formatted_post = summary.post_date.strftime("%-m/%-d/%Y")
+                if summary.close_date:
+                    formatted_close = summary.close_date.strftime("%-m/%-d/%Y")
+                    message += f"Submission period: {formatted_post}–{formatted_close}\n"
+                else:
+                    # Post date available but no close date (indefinite submission period)
+                    message += f"Submission period: {formatted_post}-(To be determined)\n"
+            # The else case is No post date available - skip this opportunity entirely by not adding submission period
+            # This case should be rare as opportunities without post dates should be filtered out
+
+            # Add award range
+            if summary.award_floor is not None and summary.award_ceiling is not None:
+                award_floor_formatted = f"${summary.award_floor:,}"
+                award_ceiling_formatted = f"${summary.award_ceiling:,}"
+                message += f"Award range: {award_floor_formatted}-{award_ceiling_formatted}\n"
+
+            # Add expected awards
+            if summary.expected_number_of_awards is not None:
+                message += f"Expected awards: {summary.expected_number_of_awards}\n"
+            else:
+                message += "Expected awards: --\n"
+
+            # Add cost sharing
+            cost_sharing = "Yes" if summary.is_cost_sharing else "No"
+            message += f"Cost sharing: {cost_sharing}"
+
+            # Add a blank line between opportunities
+            message += "\n\n"
+
+        # Add footer
+        if len(opportunities) == 1:
+            message += "To unsubscribe from email notifications for this query, delete it from your saved search queries."
+        else:
+            message += "To unsubscribe from email notifications for a query, delete it from your saved search queries."
+
+        return message.replace("\n", "<br/>")
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:

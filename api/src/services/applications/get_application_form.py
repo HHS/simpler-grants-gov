@@ -1,31 +1,44 @@
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import Application, ApplicationForm
 from src.db.models.user_models import User
-from src.form_schema.jsonschema_validator import (
-    ValidationErrorDetail,
-    validate_json_schema_for_form,
+from src.form_schema.jsonschema_validator import ValidationErrorDetail
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    is_form_required,
+    validate_application_form,
 )
-from src.services.applications.auth_utils import check_user_application_access
 from src.services.applications.get_application import get_application
 
 
 def get_application_form(
-    db_session: db.Session, application_id: UUID, app_form_id: UUID, user: User
+    db_session: db.Session, application_id: UUID, app_form_id: UUID, user: User | None = None
 ) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
     """
-    Get an application form by ID, checking if the user has access to it.
-    """
-    # Get the application
-    application = get_application(db_session, application_id, user)
+    Get an application form by ID, optionally checking if the user has access to it.
 
-    # Get the application form
+    If user is None (for internal JWT tokens), access checks are bypassed.
+    """
+    # Determine if this is an internal user request (user is None)
+    is_internal_user = user is None
+
+    # Ensure the application exists and user has access (if not internal)
+    get_application(db_session, application_id, user, is_internal_user)
+
+    # Get the application form with eagerly loaded application and its attachments
     application_form = db_session.execute(
-        select(ApplicationForm).where(
+        select(ApplicationForm)
+        .options(
+            selectinload(ApplicationForm.application).selectinload(
+                Application.application_attachments
+            )
+        )
+        .where(
             ApplicationForm.application_id == application_id,
             ApplicationForm.application_form_id == app_form_id,
         )
@@ -34,11 +47,12 @@ def get_application_form(
     if not application_form:
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
-    # Check if the user has access to the application
-    check_user_application_access(application, user)
-
-    warnings: list[ValidationErrorDetail] = validate_json_schema_for_form(
-        application_form.application_response, application_form.form
+    # Get a list of validation warnings (also sets form status)
+    warnings: list[ValidationErrorDetail] = validate_application_form(
+        application_form, ApplicationAction.GET
     )
+
+    # Set the is_required field on the application form object
+    application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
 
     return application_form, warnings

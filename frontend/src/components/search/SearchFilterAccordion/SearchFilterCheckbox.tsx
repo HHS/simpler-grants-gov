@@ -3,6 +3,7 @@
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
 import FilterCheckbox from "src/components/FilterCheckbox";
+import { FilterOptionLabel } from "src/components/search/Filters/FilterOptionLabel";
 
 interface SearchFilterCheckboxProps {
   option: FilterOption;
@@ -10,15 +11,17 @@ interface SearchFilterCheckboxProps {
   accordionTitle: string;
   query: Set<string>;
   facetCounts?: { [key: string]: number };
+  parentSelected?: boolean;
 }
 
-const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
+const SearchFilterCheckbox = ({
   option,
   updateCheckedOption,
   accordionTitle,
   query,
   facetCounts,
-}) => {
+  parentSelected,
+}: SearchFilterCheckboxProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     updateCheckedOption(event.target.value, checked);
@@ -30,19 +33,10 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
   return (
     <FilterCheckbox
       id={option.id}
-      label={
-        <>
-          <span>{option.label}</span>
-          {!!facetCounts && (
-            <span className="text-base-dark padding-left-05">
-              [{facetCounts[option.value] || 0}]
-            </span>
-          )}
-        </>
-      }
+      label={<FilterOptionLabel option={option} facetCounts={facetCounts} />}
       name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
-      checked={query.has(option.value)}
+      checked={query.has(option.value) || parentSelected}
       value={option.value}
     />
   );

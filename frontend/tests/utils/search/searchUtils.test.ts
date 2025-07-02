@@ -2,185 +2,19 @@
  * @jest-environment node
  */
 
-import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
 import {
   areSetsEqual,
-  getAgencyDisplayName,
+  convertSearchParamsToProperTypes,
+  getAgencyParent,
+  getSiblingOptionValues,
   paramsToFormattedQuery,
-  sortFilterOptions,
+  paramToDateRange,
 } from "src/utils/search/searchUtils";
-
-describe("sortFilterOptions", () => {
-  it("alphabetically sorts top level and child options by label", () => {
-    expect(
-      sortFilterOptions([
-        {
-          id: "NARA",
-          label: "National Archives and Records Administration",
-          value: "NARA",
-        },
-        {
-          id: "HUD",
-          label: "Department of Housing and Urban Development",
-          value: "HUD",
-        },
-        {
-          id: "DOE",
-          label: "Department of Energy",
-          value: "DOE",
-          children: [
-            {
-              id: "DOE-GFO",
-              label: "Golden Field Office",
-              value: "DOE-GFO",
-            },
-            {
-              id: "DOE-NETL",
-              label: "National Energy Technology Laboratory",
-              value: "DOE-NETL",
-            },
-            {
-              id: "DOE-ID",
-              label: "Idaho Field Office",
-              value: "DOE-ID",
-            },
-            {
-              id: "DOE-CH",
-              label: "Chicago Service Center",
-              value: "DOE-CH",
-            },
-          ],
-        },
-        {
-          id: "NASA",
-          label: "National Aeronautics and Space Administration",
-          value: "NASA",
-          children: [
-            {
-              id: "NASA-GSFC",
-              label: "NASA Goddard Space Flight Center",
-              value: "NASA-GSFC",
-            },
-            {
-              id: "NASA-HQ",
-              label: "NASA Headquarters",
-              value: "NASA-HQ",
-            },
-          ],
-        },
-      ]),
-    ).toEqual([
-      {
-        id: "DOE",
-        label: "Department of Energy",
-        value: "DOE",
-        children: [
-          {
-            id: "DOE-CH",
-            label: "Chicago Service Center",
-            value: "DOE-CH",
-          },
-          {
-            id: "DOE-GFO",
-            label: "Golden Field Office",
-            value: "DOE-GFO",
-          },
-          {
-            id: "DOE-ID",
-            label: "Idaho Field Office",
-            value: "DOE-ID",
-          },
-          {
-            id: "DOE-NETL",
-            label: "National Energy Technology Laboratory",
-            value: "DOE-NETL",
-          },
-        ],
-      },
-      {
-        id: "HUD",
-        label: "Department of Housing and Urban Development",
-        value: "HUD",
-      },
-      {
-        id: "NASA",
-        label: "National Aeronautics and Space Administration",
-        value: "NASA",
-        children: [
-          {
-            id: "NASA-GSFC",
-            label: "NASA Goddard Space Flight Center",
-            value: "NASA-GSFC",
-          },
-          {
-            id: "NASA-HQ",
-            label: "NASA Headquarters",
-            value: "NASA-HQ",
-          },
-        ],
-      },
-      {
-        id: "NARA",
-        label: "National Archives and Records Administration",
-        value: "NARA",
-      },
-    ]);
-  });
-});
-
-describe("getAgencyDisplayName", () => {
-  const fakeOpportunity = {
-    agency_code: "NON-HMN-READABWOL",
-    agency_name: "This Agency",
-    top_level_agency_name: "The Parent",
-    summary: {
-      estimated_total_program_funding: 5000000,
-      expected_number_of_awards: 10,
-      award_ceiling: 1000000,
-      award_floor: 50000,
-      is_cost_sharing: true,
-      funding_instruments: ["Grant", "Cooperative Agreement"],
-      funding_categories: ["Education", "Health"],
-      funding_category_description:
-        "Support for education and health initiatives",
-    },
-    category: "Discretionary",
-    category_explanation: "Funds allocated by agency discretion",
-  } as BaseOpportunity;
-
-  it("returns `--` if agency lookup fails", () => {
-    expect(
-      getAgencyDisplayName({
-        ...fakeOpportunity,
-        ...{ agency_code: null, agency_name: null },
-      }),
-    ).toEqual("--");
-  });
-
-  it("returns top level agency with agency name if available", () => {
-    expect(getAgencyDisplayName(fakeOpportunity)).toEqual(
-      "The Parent - This Agency",
-    );
-  });
-  it("falls back to agency name for top level agencies", () => {
-    expect(getAgencyDisplayName(fakeOpportunity)).toEqual(
-      "The Parent - This Agency",
-    );
-  });
-  it("falls back to agency name if top level agency is not available", () => {
-    expect(
-      getAgencyDisplayName({
-        ...fakeOpportunity,
-        ...{ top_level_agency_name: null },
-      }),
-    ).toEqual("This Agency");
-  });
-  it("falls back to agency code if agency name is not available", () => {
-    expect(
-      getAgencyDisplayName({ ...fakeOpportunity, ...{ agency_name: null } }),
-    ).toEqual("NON-HMN-READABWOL");
-  });
-});
+import {
+  fakeSearchParamDict,
+  initialFilterOptions,
+} from "src/utils/testing/fixtures";
 
 describe("areSetsEqual", () => {
   it("returns false for sets of unequal size", () => {
@@ -221,5 +55,93 @@ describe("paramsToFormattedQuery", () => {
         ]),
       ),
     ).toEqual("?key=value,anotherValue&big=small&simpler=grants");
+  });
+});
+
+describe("paramToDateRange", () => {
+  it("returns empty set if no param value", () => {
+    expect(paramToDateRange()).toEqual(new Set());
+  });
+  it("returns first value in set if only one param value", () => {
+    expect(paramToDateRange("hi")).toEqual(new Set(["hi"]));
+  });
+  it("returns set of first two values (comma separated) in param otherwise", () => {
+    expect(paramToDateRange("hi,there")).toEqual(new Set(["hi", "there"]));
+    expect(paramToDateRange("hi,there,again")).toEqual(
+      new Set(["hi", "there"]),
+    );
+  });
+});
+
+describe("convertSearchParamsToProperTypes", () => {
+  it("converts search param strings to proper types", () => {
+    expect(
+      convertSearchParamsToProperTypes({
+        unhandledParam: "whatever",
+        closeDate: "7",
+        ...fakeSearchParamDict,
+      }),
+    ).toEqual({
+      unhandledParam: "whatever",
+      query: fakeSearchParamDict.query,
+      status: new Set(fakeSearchParamDict.status.split(",")),
+      fundingInstrument: new Set([fakeSearchParamDict.fundingInstrument]),
+      eligibility: new Set([fakeSearchParamDict.eligibility]),
+      agency: new Set([fakeSearchParamDict.agency]),
+      category: new Set([fakeSearchParamDict.category]),
+      closeDate: new Set(["7"]),
+      costSharing: new Set(),
+      topLevelAgency: new Set(),
+      andOr: fakeSearchParamDict.andOr,
+      sortby: fakeSearchParamDict.sortby,
+      page: 1,
+      actionType: SearchFetcherActionType.InitialLoad,
+    });
+  });
+});
+
+describe("getAgencyParent", () => {
+  it("returns the pre dash part of the agency code", () => {
+    expect(getAgencyParent("PREFIX-SUFFIX")).toEqual("PREFIX");
+  });
+  it("does not break if there is no dash", () => {
+    expect(getAgencyParent("WHATEVER")).toEqual("WHATEVER");
+  });
+  it("works with multiple dashes", () => {
+    expect(getAgencyParent("HI-THERE-HOW-ARE-YOU")).toEqual("HI");
+  });
+});
+
+describe("getSiblingOptionValues", () => {
+  it("returns an empty array if parent is not found or has no children", () => {
+    expect(getSiblingOptionValues("no-children", [])).toEqual([]);
+    expect(getSiblingOptionValues("no-children", initialFilterOptions)).toEqual(
+      [],
+    );
+    expect(
+      getSiblingOptionValues("no-children", [
+        { value: "no", id: "no", label: "no" },
+      ]),
+    ).toEqual([]);
+  });
+  it("returns all siblings but not the target node", () => {
+    expect(
+      getSiblingOptionValues("parent-target", [
+        {
+          value: "parent",
+          id: "parent",
+          label: "parent",
+          children: [
+            { value: "parent-target", id: "target", label: "target" },
+            { value: "parent-sibling", id: "sibling", label: "sibling" },
+            {
+              value: "parent-another-sibling",
+              id: "another-sibling",
+              label: "another-sibling",
+            },
+          ],
+        },
+      ]),
+    ).toEqual(["parent-sibling", "parent-another-sibling"]);
   });
 });

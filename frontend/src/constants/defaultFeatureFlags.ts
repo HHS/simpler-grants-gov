@@ -9,5 +9,6 @@ export const defaultFeatureFlags: FeatureFlags = {
   savedOpportunitiesOn: true,
   savedSearchesOn: true,
   applyFormPrototypeOff: true,
-  filterDrawerOn: false,
+  searchDrawerOn: false,
+  searchTableOn: false,
 };

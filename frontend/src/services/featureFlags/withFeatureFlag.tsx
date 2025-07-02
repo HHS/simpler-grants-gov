@@ -23,7 +23,11 @@ const withFeatureFlag = <P, R extends ReactNode>(
   const ComponentWithFeatureFlagAndSearchParams = async (
     props: P & WithFeatureFlagProps,
   ) => {
-    const searchParams = (await props.searchParams) || {};
+    // note that it's not necessary to pass search params (as when wrapping a non page level component)
+    // but if middleware doesn't run you will potentially miss out on any flags set via params
+    const searchParams = props.searchParams
+      ? (await props.searchParams) || {}
+      : {};
     const resolvedCookies = await cookies();
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
       if (

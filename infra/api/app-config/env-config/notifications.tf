@@ -10,9 +10,12 @@ locals {
 
     # Set to the email address to be used when sending emails.
     # If enable_notifications is true, this is required.
-    sender_email = "notifications@${var.domain_name}"
+    sender_email = "notifications@${local.network_config.domain_config.hosted_zone}"
 
     # Configure the REPLY-TO email address if it should be different from the sender.
-    reply_to_email = "notifications@${var.domain_name}"
+    reply_to_email = "notifications@${local.network_config.domain_config.hosted_zone}"
+
+    #Email zone name, since the SES permissions use that not api. which is what the service knows as it's name
+    hosted_zone = local.network_config.domain_config.hosted_zone
   } : null
 }

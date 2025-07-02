@@ -32,12 +32,12 @@ logger = logging.getLogger(__name__)
 
 
 class GenerateNotificationsConfig(PydanticBaseEnvConfig):
-    app_id: str = Field(alias="PINPOINT_APP_ID")
+    app_id: str = Field(alias="AWS_PINPOINT_APP_ID")
     frontend_base_url: str = Field(alias="FRONTEND_BASE_URL")
 
 
 CONTACT_INFO = (
-    "mailto:support@grants.gov\n"
+    '<a href="mailto:support@grants.gov">support@grants.gov</a>\n'
     "1-800-518-4726\n"
     "24 hours a day, 7 days a week\n"
     "Closed on federal holidays"

@@ -2,20 +2,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import lazyload, selectinload
 
 import src.adapters.db as db
-from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
-from src.util.env_config import PydanticBaseEnvConfig
-from src.util.file_util import convert_public_s3_to_cdn_url, pre_sign_file_location
+from src.db.models.opportunity_models import Opportunity
 
 
-class AttachmentConfig(PydanticBaseEnvConfig):
-    # If the CDN URL is set, we'll use it instead of pre-signing the file locations
-    cdn_url: str | None = None
-
-
-def _fetch_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
+def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     stmt = (
         select(Opportunity)
         .where(Opportunity.opportunity_id == opportunity_id)
@@ -43,30 +35,5 @@ def _fetch_opportunity(db_session: db.Session, opportunity_id: int) -> Opportuni
 
     if opportunity is None:
         raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
-
-    return opportunity
-
-
-def pre_sign_opportunity_file_location(
-    opp_atts: list,
-) -> list[OpportunityAttachment]:
-    for opp_att in opp_atts:
-        opp_att.download_path = pre_sign_file_location(opp_att.file_location)
-
-    return opp_atts
-
-
-def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
-    opportunity = _fetch_opportunity(db_session, opportunity_id)
-
-    attachment_config = AttachmentConfig()
-    if attachment_config.cdn_url is not None:
-        s3_config = S3Config()
-        for opp_att in opportunity.opportunity_attachments:
-            opp_att.download_path = convert_public_s3_to_cdn_url(  # type: ignore
-                opp_att.file_location, attachment_config.cdn_url, s3_config
-            )
-    else:
-        pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
 
     return opportunity

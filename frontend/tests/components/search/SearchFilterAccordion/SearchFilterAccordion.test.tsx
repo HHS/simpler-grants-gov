@@ -132,7 +132,7 @@ describe("SearchFilterAccordion", () => {
     });
     expect(anyCheckbox).toBeInTheDocument();
   });
-  it("ensures only the component contents scroll when wrapForScroll is true", () => {
+  it("ensures the component contents scroll", () => {
     render(
       <SearchFilterAccordion
         filterOptions={initialFilterOptions}
@@ -140,7 +140,6 @@ describe("SearchFilterAccordion", () => {
         queryParamKey={queryParamKey}
         query={new Set("")}
         facetCounts={fakeFacetCounts}
-        wrapForScroll={true}
       />,
     );
 
@@ -198,33 +197,6 @@ describe("BasicSearchFilterAccordion", () => {
     // Toggle the accordion and the hidden attribute should be removed
     fireEvent.click(accordionToggleButton);
     expect(contentDiv).not.toHaveAttribute("hidden");
-  });
-
-  it("ensures only the component contents scroll when wrapForScroll is true", () => {
-    render(
-      <BasicSearchFilterAccordion
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set("")}
-      >
-        <div>some filter content</div>
-      </BasicSearchFilterAccordion>,
-    );
-
-    const scrollableContainer = screen.getByTestId(
-      `accordionItem_opportunity-filter-${queryParamKey}`,
-    );
-
-    expect(scrollableContainer).toHaveClass("overflow-auto");
-
-    const initialScrollTop = scrollableContainer.scrollTop;
-
-    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
-
-    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
-
-    // Assert that the document body has not scrolled
-    expect(window.scrollY).toBe(0);
   });
 
   it("renders the correct title", () => {

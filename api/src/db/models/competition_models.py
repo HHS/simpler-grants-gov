@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
@@ -17,6 +18,7 @@ from src.db.models.lookup_models import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
+from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -64,12 +66,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkCompetitionOpenToApplicant(competition_open_to_applicant=obj),
     )
     is_electronic_required: Mapped[bool | None]
-    expected_application_count: Mapped[int | None]
+    expected_application_count: Mapped[int | None] = mapped_column(BigInteger)
     expected_application_size_mb: Mapped[int | None] = mapped_column(BigInteger)
     is_multi_package: Mapped[bool | None]
     agency_download_url: Mapped[str | None]
     is_legacy_workspace_compatible: Mapped[bool | None]
     can_send_mail: Mapped[bool | None]
+    is_simpler_grants_enabled: Mapped[bool | None] = mapped_column(default=False)
 
     competition_forms: Mapped[list["CompetitionForm"]] = relationship(
         "CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan"
@@ -79,15 +82,27 @@ class Competition(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
+    competition_instructions: Mapped[list["CompetitionInstruction"]] = relationship(
+        "CompetitionInstruction",
+        uselist=True,
+        back_populates="competition",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def is_open(self) -> bool:
-        """The competition is open if the following are both true:
+        """The competition is open if the following are all true:
+        * The competition has is_simpler_grants_enabled set to True
         * It is on/after the competition opening date OR the opening date is null
         * It is on/before the competition close date + grace period OR the close date is null
 
         Effectively, if the date is null, the check isn't necessary, a competition
         with both opening and closing as null is open regardless of date.
         """
+
+        # Check if simpler grants is enabled for this competition first
+        if self.is_simpler_grants_enabled is not True:
+            return False
 
         current_date = get_now_us_eastern_date()
 
@@ -123,9 +138,16 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Competition.competition_id), primary_key=True
     )
-    competition: Mapped[Competition] = relationship(Competition)
+    competition: Mapped[Competition] = relationship(
+        Competition, back_populates="competition_instructions"
+    )
 
     file_location: Mapped[str]
+    file_name: Mapped[str]
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_location)
 
 
 class FormInstruction(ApiSchemaTable, TimestampMixin):
@@ -136,6 +158,10 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     )
     file_location: Mapped[str]
     file_name: Mapped[str]
+
+    @property
+    def download_path(self) -> str:
+        return presign_or_s3_cdnify_url(self.file_location)
 
 
 class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
@@ -174,6 +200,8 @@ class Form(ApiSchemaTable, TimestampMixin):
     form_instruction: Mapped[FormInstruction | None] = relationship(
         FormInstruction, cascade="all, delete-orphan", single_parent=True
     )
+
+    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -217,12 +245,26 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     application_name: Mapped[str | None]
 
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
+    organization: Mapped[Organization] = relationship(
+        Organization, uselist=False, back_populates="applications"
+    )
+
     application_forms: Mapped[list["ApplicationForm"]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
     )
 
     application_users: Mapped[list["ApplicationUser"]] = relationship(
         "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
+    )
+
+    application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -248,6 +290,8 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
 
     application_response: Mapped[dict] = mapped_column(JSONB)
 
+    is_included_in_submission: Mapped[bool | None]
+
     @property
     def form(self) -> Form:
         """Property function for slightly easier access to the actual form object"""
@@ -257,6 +301,48 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     def form_id(self) -> uuid.UUID:
         """Property function for slightly easier access to the form ID"""
         return self.competition_form.form_id
+
+    @property
+    def application_attachments(self) -> list["ApplicationAttachment"]:
+        """Property function to access application attachments"""
+        return self.application.application_attachments
+
+
+class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_attachment"
+
+    application_attachment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Application.application_id))
+    application: Mapped[Application] = relationship(Application)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), nullable=False)
+    user: Mapped["User"] = relationship("User")
+
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+    mime_type: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    @property
+    def download_path(self) -> str:
+        """Get the presigned s3 url path for downloading the file"""
+        # NOTE: These attachments will only ever be in a non-public
+        # bucket so we only can presign their URL, we can't use the CDN path.
+        return pre_sign_file_location(self.file_location)
+
+
+class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "short_lived_internal_token"
+
+    short_lived_internal_token_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    is_valid: Mapped[bool] = mapped_column(nullable=False, default=True)
 
 
 class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):

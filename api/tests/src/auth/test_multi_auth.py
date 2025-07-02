@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 import pytest
 
 import src.app as app_entry
 import src.logging
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.auth.multi_auth import AuthType, jwt_or_key_multi_auth
+from src.auth.internal_jwt_auth import create_jwt_for_internal_token
+from src.auth.multi_auth import AuthType, jwt_key_or_internal_multi_auth, jwt_or_key_multi_auth
+from src.util import datetime_util
 from tests.src.db.models.factories import UserFactory
 
 
@@ -30,6 +34,19 @@ def mini_app(monkeypatch_module):
             "auth_type": user.auth_type,
             "user_id": getattr(user.user, "user_id", None),
             "username": getattr(user.user, "username", None),
+        }
+
+    @mini_app.get("/dummy_internal_auth_endpoint")
+    @mini_app.auth_required(jwt_key_or_internal_multi_auth)
+    def dummy_internal_endpoint():
+        user = jwt_key_or_internal_multi_auth.get_user()
+
+        return {
+            "message": "ok",
+            "auth_type": user.auth_type,
+            "user_id": getattr(user.user, "user_id", None),
+            "username": getattr(user.user, "username", None),
+            "token_id": getattr(user.user, "short_lived_internal_token_id", None),
         }
 
     # To avoid re-initializing logging everytime we
@@ -90,3 +107,72 @@ def test_multi_auth_invalid_key(mini_app):
         resp.json["message"]
         == "The server could not verify that you are authorized to access the URL requested"
     )
+
+
+def test_internal_multi_auth_with_user_jwt(mini_app, enable_factory_create, db_session):
+    """Test that the internal multi-auth works with regular user JWT tokens"""
+    user = UserFactory.create()
+    token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    resp = mini_app.test_client().get(
+        "/dummy_internal_auth_endpoint", headers={"X-SGG-Token": token}
+    )
+    assert resp.status_code == 200
+    assert resp.json["auth_type"] == AuthType.USER_JWT_AUTH
+    assert resp.json["user_id"] == str(user.user_id)
+    assert resp.json["username"] is None
+    assert resp.json["token_id"] is None
+
+
+def test_internal_multi_auth_with_api_key(mini_app, api_auth_token):
+    """Test that the internal multi-auth rejects API key tokens (security requirement)"""
+    resp = mini_app.test_client().get(
+        "/dummy_internal_auth_endpoint", headers={"X-Auth": api_auth_token}
+    )
+    # API keys should not be accepted for internal multi-auth endpoints for security reasons
+    assert resp.status_code == 401
+    assert resp.json["message"] == "Unable to process token"
+
+
+def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, db_session):
+    """Test that the internal multi-auth works with internal JWT tokens"""
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
+    token, short_lived_token = create_jwt_for_internal_token(
+        expires_at=expires_at,
+        db_session=db_session,
+    )
+    db_session.commit()
+
+    resp = mini_app.test_client().get(
+        "/dummy_internal_auth_endpoint", headers={"X-SGG-Internal-Token": token}
+    )
+    assert resp.status_code == 200
+    assert resp.json["auth_type"] == AuthType.INTERNAL_JWT_AUTH
+    assert resp.json["user_id"] is None
+    assert resp.json["username"] is None
+    assert resp.json["token_id"] == str(short_lived_token.short_lived_internal_token_id)
+
+
+def test_internal_multi_auth_precedence(
+    mini_app, enable_factory_create, db_session, api_auth_token
+):
+    """Test that auth precedence works correctly - user JWT takes precedence over internal JWT"""
+    user = UserFactory.create()
+    user_token, _ = create_jwt_for_user(user, db_session)
+
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
+    internal_token, _ = create_jwt_for_internal_token(
+        expires_at=expires_at,
+        db_session=db_session,
+    )
+    db_session.commit()
+
+    # If we provide both user JWT and internal JWT, user JWT takes precedence
+    resp = mini_app.test_client().get(
+        "/dummy_internal_auth_endpoint",
+        headers={"X-SGG-Token": user_token, "X-SGG-Internal-Token": internal_token},
+    )
+    assert resp.status_code == 200
+    assert resp.json["auth_type"] == AuthType.USER_JWT_AUTH
+    assert resp.json["user_id"] == str(user.user_id)

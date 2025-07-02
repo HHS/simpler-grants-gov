@@ -2,7 +2,7 @@
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
-import { getAgencyDisplayName } from "src/utils/search/searchUtils";
+import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -73,7 +73,11 @@ export default function SearchResultsListItem({
               <span
                 className={`${metadataBorderClasses} tablet:order-0 order-2`}
               >
-                <strong>{t("resultsListItem.summary.posted")}</strong>
+                <strong>
+                  {opportunity.opportunity_status === "forecasted"
+                    ? t("resultsListItem.summary.forecasted")
+                    : t("resultsListItem.summary.posted")}
+                </strong>
                 {opportunity?.summary?.post_date
                   ? formatDate(opportunity?.summary?.post_date)
                   : "--"}

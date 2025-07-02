@@ -1,18 +1,18 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
-import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
-
-import { useTranslations } from "next-intl";
-import { Suspense } from "react";
-import { Accordion } from "@trussworks/react-uswds";
-
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import {
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
   statusOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
+} from "src/constants/searchFilterOptions";
+import { obtainAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
+import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
+
+import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+
+import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 
 export default async function SearchFilters({
@@ -21,6 +21,7 @@ export default async function SearchFilters({
   agency,
   category,
   opportunityStatus,
+  topLevelAgency,
   searchResultsPromise,
 }: {
   fundingInstrument: Set<string>;
@@ -28,13 +29,11 @@ export default async function SearchFilters({
   agency: Set<string>;
   category: Set<string>;
   opportunityStatus: Set<string>;
+  topLevelAgency: Set<string>;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = Promise.all([
-    getAgenciesForFilterOptions(),
-    searchResultsPromise,
-  ]);
+  const agenciesPromise = Promise.all([obtainAgencies(), searchResultsPromise]);
 
   let searchResults;
   try {
@@ -61,6 +60,7 @@ export default async function SearchFilters({
         queryParamKey="fundingInstrument"
         title={t("accordion.titles.funding")}
         facetCounts={facetCounts?.funding_instrument || {}}
+        contentClassName="overflow-visible"
       />
       <SearchFilterAccordion
         filterOptions={eligibilityOptions}
@@ -71,25 +71,19 @@ export default async function SearchFilters({
       />
       <Suspense
         fallback={
-          <Accordion
-            bordered={true}
-            items={[
-              {
-                title: t("accordion.titles.agency"),
-                content: [],
-                expanded: false,
-                id: "opportunity-filter-agency-disabled",
-                headingLevel: "h2",
-              },
-            ]}
-            multiselectable={true}
-            className="margin-top-4"
+          <CheckboxFilter
+            filterOptions={[]}
+            query={agency}
+            queryParamKey={"agency"}
+            title={t("accordion.titles.agency")}
+            facetCounts={{}}
           />
         }
       >
         <AgencyFilterAccordion
           query={agency}
           agencyOptionsPromise={agenciesPromise}
+          topLevelQuery={topLevelAgency}
         />
       </Suspense>
       <SearchFilterAccordion

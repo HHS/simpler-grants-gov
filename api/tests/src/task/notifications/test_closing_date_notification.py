@@ -19,7 +19,7 @@ from tests.lib.db_testing import cascade_delete_from_db_table
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -63,6 +63,31 @@ def test_closing_date_notifications(
         user=user_with_email, opportunity=opportunity_later
     )
 
+    # Create an opportunity closing in the past (shouldn't trigger notification)
+    opportunity_past = factories.OpportunityFactory.create(no_current_summary=True)
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity_past, close_date=datetime_util.utcnow() - timedelta(days=21)
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity_past, opportunity_summary=summary
+    )
+
+    factories.UserSavedOpportunityFactory.create(user=user_with_email, opportunity=opportunity_past)
+
+    # Create an opportunity closing within the 2 week window (should trigger notification)
+    opportunity_within_window = factories.OpportunityFactory.create(no_current_summary=True)
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opportunity_within_window,
+        close_date=datetime_util.utcnow() + timedelta(days=13),
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity_within_window, opportunity_summary=summary
+    )
+
+    factories.UserSavedOpportunityFactory.create(
+        user=user_with_email, opportunity=opportunity_within_window
+    )
+
     _clear_mock_responses()
     # Run the notification task
     task = EmailNotificationTask(db_session, search_client)
@@ -83,15 +108,22 @@ def test_closing_date_notifications(
         db_session.execute(select(UserOpportunityNotificationLog)).scalars().all()
     )
 
+    # this is emails not opps so this should be 1, 1 email 2 opportunities
     assert len(notification_logs) == 1
     assert notification_logs[0].notification_sent is True
 
-    assert len(notification_opportunity_logs) == 1
+    assert len(notification_opportunity_logs) == 2
     assert notification_opportunity_logs[0].opportunity_id == opportunity.opportunity_id
     assert notification_opportunity_logs[0].user_id == user_with_email.user_id
 
+    assert (
+        notification_opportunity_logs[1].opportunity_id == opportunity_within_window.opportunity_id
+    )
+    assert notification_opportunity_logs[1].user_id == user_with_email.user_id
+
     # Verify email was sent via Pinpoint
     mock_responses = _get_mock_responses()
+    # 1 email, 2 opps
     assert len(mock_responses) == 1
 
 

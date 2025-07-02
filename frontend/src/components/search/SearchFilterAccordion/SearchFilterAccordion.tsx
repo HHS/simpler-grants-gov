@@ -34,7 +34,7 @@ export interface CommonSearchFilterAccordionProps {
 export interface BasicSearchFilterAccordionProps
   extends CommonSearchFilterAccordionProps {
   className?: string;
-  wrapForScroll?: boolean;
+  contentClassName?: string;
   expanded?: boolean;
   children: React.ReactNode;
 }
@@ -50,6 +50,10 @@ export interface SearchAccordionContentProps
 export interface SearchFilterAccordionProps
   extends SearchAccordionContentProps {
   wrapForScroll?: boolean;
+}
+
+export interface SearchFilterProps extends SearchAccordionContentProps {
+  contentClassName?: string;
 }
 
 const AccordionTitle = ({
@@ -121,6 +125,7 @@ const AccordionContent = ({
                 updateCheckedOption={toggleOptionChecked}
                 accordionTitle={title}
                 facetCounts={facetCounts}
+                queryParamKey={queryParamKey}
               />
             ) : (
               <SearchFilterCheckbox
@@ -146,9 +151,9 @@ export function SearchFilterAccordion({
   query,
   facetCounts,
   defaultEmptySelection,
+  contentClassName,
   includeAnyOption = true,
-  wrapForScroll = false,
-}: SearchFilterAccordionProps) {
+}: SearchFilterProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
       title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
@@ -166,9 +171,10 @@ export function SearchFilterAccordion({
       expanded: !!query.size,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: wrapForScroll
-        ? "maxh-mobile-lg overflow-auto position-relative"
-        : "",
+      className: clsx(
+        "maxh-mobile-lg overflow-auto position-relative",
+        contentClassName,
+      ),
     },
   ];
 
@@ -189,8 +195,8 @@ export function BasicSearchFilterAccordion({
   queryParamKey,
   query,
   className,
+  contentClassName,
   expanded = false,
-  wrapForScroll = true,
 }: BasicSearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -199,9 +205,7 @@ export function BasicSearchFilterAccordion({
       expanded,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: wrapForScroll
-        ? "maxh-mobile-lg overflow-auto position-relative"
-        : "",
+      className: contentClassName || "",
     },
   ];
 

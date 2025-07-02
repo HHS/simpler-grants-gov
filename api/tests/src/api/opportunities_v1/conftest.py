@@ -35,6 +35,7 @@ def get_search_request(
     applicant_type_one_of: list[ApplicantType] | None = None,
     opportunity_status_one_of: list[OpportunityStatus] | None = None,
     agency_one_of: list[str] | None = None,
+    top_level_agency_one_of: list[str] | None = None,
     assistance_listing_one_of: list[str] = None,
     is_cost_sharing_one_of: list[bool | str] | None = None,
     expected_number_of_awards: dict | None = None,
@@ -44,7 +45,6 @@ def get_search_request(
     post_date: dict | None = None,
     close_date: dict | None = None,
     format: str | None = None,
-    top_level_agency: str | None = None,
 ):
     if sort_order is None:
         sort_order = [{"order_by": "opportunity_id", "sort_direction": "ascending"}]
@@ -73,6 +73,9 @@ def get_search_request(
 
     if agency_one_of is not None:
         filters["agency"] = {"one_of": agency_one_of}
+
+    if top_level_agency_one_of is not None:
+        filters["top_level_agency"] = {"one_of": top_level_agency_one_of}
 
     if assistance_listing_one_of is not None:
         filters["assistance_listing_number"] = {"one_of": assistance_listing_one_of}
@@ -109,8 +112,6 @@ def get_search_request(
 
     if experimental is not None:
         req["experimental"] = experimental
-    if top_level_agency is not None:
-        req["top_level_agency"] = top_level_agency
 
     return req
 

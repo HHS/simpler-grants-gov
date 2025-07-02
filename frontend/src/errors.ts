@@ -174,6 +174,7 @@ type SearchInputsSimple = {
   [key: string]: string[] | string | number | null | undefined;
 };
 
+// Is this still being used? Can we get rid of this?
 function convertSearchInputSetsToArrays(
   searchInputs: QueryParamData,
 ): SearchInputsSimple {
@@ -188,6 +189,13 @@ function convertSearchInputSetsToArrays(
       : [],
     agency: searchInputs.agency ? Array.from(searchInputs.agency) : [],
     category: searchInputs.category ? Array.from(searchInputs.category) : [],
+    closeDate: searchInputs.closeDate ? Array.from(searchInputs.closeDate) : [],
+    costSharing: searchInputs.costSharing
+      ? Array.from(searchInputs.costSharing)
+      : [],
+    topLevelAgency: searchInputs.topLevelAgency
+      ? Array.from(searchInputs.topLevelAgency)
+      : [],
     query: searchInputs.query,
     sortby: searchInputs.sortby,
     page: searchInputs.page,
