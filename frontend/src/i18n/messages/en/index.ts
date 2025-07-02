@@ -263,6 +263,17 @@ export const messages = {
       },
       updated: "Last updated",
     },
+    applyForm: {
+      errorTitle: "This form could not be saved",
+      errorMessage:
+        "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+      savedMessage: "No errors were detected.",
+      savedTitle: "Form was saved",
+      validationMessage:
+        "Correct the following errors before submitting your application.",
+      required: "A red asterisk <abr>*</abr> indicates a required field.",
+      navTitle: "Sections in this form",
+    },
     attachments: {
       attachedDocument: "Attached document",
       attachments: "Attachments",
@@ -284,17 +295,6 @@ export const messages = {
         deleteFileCta: "Delete file",
         deleteFilesCta: "Delete files",
         cancelDeleteCta: "Cancel",
-      },
-      applyForm: {
-        errorTitle: "This form could not be saved",
-        errorMessage:
-          "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
-        savedMessage: "No errors were detected.",
-        savedTitle: "Form was saved",
-        validationMessage:
-          "Correct the following errors before submitting your application.",
-        required: "A red asterisk <abr>*</abr> indicates a required field.",
-        navTitle: "Sections in this form",
       },
     },
   },
