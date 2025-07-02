@@ -16,7 +16,11 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 
-export const OpportunitySaveUserControl = ({ opportunityId } : { opportunityId: string}) => {
+export const OpportunitySaveUserControl = ({
+  opportunityId,
+}: {
+  opportunityId: string;
+}) => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
   const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
