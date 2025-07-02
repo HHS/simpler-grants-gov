@@ -1,7 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
-import { Attachment } from "./attachmentTypes";
 import { FormValidationWarning } from "src/components/applyForm/types";
+import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 
 export interface ApplicationResponseDetail {
