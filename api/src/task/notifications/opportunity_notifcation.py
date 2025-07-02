@@ -57,8 +57,8 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    "attachments": "One or more new documents were ",
-    "additional_info_url": "A link to additional information was",
+    "attachments": "One or more new documents were",
+    "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
     "<div>"
@@ -437,6 +437,31 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     eligibility_section += f"{stmt} changed.<br>"
         return eligibility_section
 
+    def _build_documents_fields(self, documents_change: dict) -> str:
+        documents_section = SECTION_STYLING.format("Documents")
+        for field, change in documents_change.items():
+            before = change["before"]
+            after = change["after"]
+            if field == "attachments":
+                before_set = set(att["attachment_id"] for att in before)
+                after_set = set(att["attachment_id"] for att in after)
+
+                if after_set - before_set:
+                    documents_section += (
+                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} added.<br>"
+                    )
+                if before_set - after_set:
+                    documents_section += (
+                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} removed.<br>"
+                    )
+
+            elif field == "additional_info_url":
+                documents_section += (
+                    f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["additional_info_url"]}<br>"
+                )
+
+        return documents_section
+
     def _format_currency(self, value: int | str) -> str:
         if isinstance(value, int):
             return f"${value:,}"
@@ -528,6 +553,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         if eligibility_fields_diffs := {k: changes[k] for k in ELIGIBILITY_FIELDS if k in changes}:
             sections.append(self._build_eligibility_content(eligibility_fields_diffs))
+        if documentation_fields_diffs := {k: changes[k] for k in DOCUMENTS_FIELDS if k in changes}:
+            sections.append(self._build_documents_fields(documentation_fields_diffs))
         if "summary_description" in changes:
             sections.append(
                 self._build_description_fields_content(
@@ -584,9 +611,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "Your saved funding opportunities changed on "
+            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "Your saved funding opportunity changed on "
+            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
         )
         subject += "Simpler.Grants.gov"
 

@@ -22,6 +22,7 @@ const fakeConvertedParams = {
   fundingInstrument: new Set(),
   closeDate: new Set(),
   costSharing: new Set(),
+  topLevelAgency: new Set(),
   andOr: "",
   page: 1,
   query: "",

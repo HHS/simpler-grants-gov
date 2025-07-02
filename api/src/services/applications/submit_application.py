@@ -28,7 +28,7 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     # Run validations
     validate_application_in_progress(application, ApplicationAction.SUBMIT)
     validate_competition_open(application.competition, ApplicationAction.SUBMIT)
-    validate_forms(application)
+    validate_forms(application, ApplicationAction.SUBMIT)
 
     # Update application status
     application.application_status = ApplicationStatus.SUBMITTED

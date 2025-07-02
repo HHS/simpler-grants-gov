@@ -263,6 +263,17 @@ export const messages = {
       },
       updated: "Last updated",
     },
+    applyForm: {
+      errorTitle: "This form could not be saved",
+      errorMessage:
+        "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+      savedMessage: "No errors were detected.",
+      savedTitle: "Form was saved",
+      validationMessage:
+        "Correct the following errors before submitting your application.",
+      required: "A red asterisk <abr>*</abr> indicates a required field.",
+      navTitle: "Sections in this form",
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",
@@ -645,7 +656,7 @@ export const messages = {
         emptyNameError: "Please name this query.",
         successTitle: "Query successfully saved",
         successDescription:
-          "Manage your quries in your <workspaceLink>Workspace</workspaceLink>.",
+          "Manage your queries in your <workspaceLink>Workspace</workspaceLink>.",
         apiError: "Error loading saved query. Try again later.",
       },
       copySearch: {
@@ -688,6 +699,7 @@ export const messages = {
       sortby: "Sort by",
       closeDate: "Close date",
       costSharing: "Cost sharing",
+      topLevelAgency: "Top level agency",
     },
     editModal: {
       loading: "Updating",
@@ -698,6 +710,7 @@ export const messages = {
       closeText: "Close",
       emptyNameError: "Please name this query.",
       successTitle: "Query successfully updated",
+      updatedNotification: "has been successfully updated to",
       apiError: "Error updating saved query. Try again later.",
     },
     deleteModal: {
