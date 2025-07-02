@@ -1,14 +1,16 @@
 import { upperFirst } from "lodash";
-import {
-  eligbilityValueToGroup,
-  eligibilityValueToLabel,
-} from "src/constants/opportunity";
+import { eligbilityValueToGroup } from "src/constants/opportunity";
+import { eligibilityOptions } from "src/constants/searchFilterOptions";
+import { getFilterOptionLabel } from "src/utils/search/filterUtils";
 
 export const applicantTypesToGroups = (applicantTypes: string[]) =>
   applicantTypes.reduce(
     (groupedApplicantTypes, applicantType) => {
       const group = eligbilityValueToGroup[applicantType];
-      const applicantTypeDisplay = eligibilityValueToLabel[applicantType];
+      const applicantTypeDisplay = getFilterOptionLabel(
+        applicantType,
+        eligibilityOptions,
+      );
       if (!group || !applicantTypeDisplay) {
         return groupedApplicantTypes;
       }

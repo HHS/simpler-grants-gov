@@ -7,8 +7,6 @@ from typing import Sequence
 
 from sqlalchemy import select
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
@@ -16,9 +14,7 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.entity_models import SamGovEntity, SamGovEntityImportType
 from src.db.models.sam_extract_models import SamExtractFile
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
-from src.task.task_blueprint import task_blueprint
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
@@ -463,11 +459,3 @@ def convert_exclusion_status_flag(value_str: str) -> bool:
         return True
 
     return False
-
-
-@task_blueprint.cli.command("process-sam-extracts", help="Process sam.gov extracts")
-@ecs_background_task("process-sam-extracts")
-@flask_db.with_db_session()
-def run_process_sam_extracts_task(db_session: db.Session) -> None:
-    # Initialize and run the task
-    ProcessSamExtractsTask(db_session).run()

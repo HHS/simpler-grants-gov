@@ -6,37 +6,8 @@ import {
 import { Suspense } from "react";
 
 import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
-import Loading from "src/components/Loading";
-import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
 import { SearchError } from "./SearchError";
-import SearchPagination from "./SearchPagination";
-import SearchResultsHeader from "./SearchResultsHeader";
-import SearchResultsList from "./SearchResultsList";
-
-const SearchResultsSkeleton = ({
-  sortby,
-  page,
-  query,
-  loadingMessage,
-}: {
-  sortby: string | null;
-  page: number;
-  query?: string | null;
-  loadingMessage: string;
-}) => {
-  return (
-    <>
-      <SearchResultsHeader sortby={sortby} />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <SearchPagination loading={true} page={page} query={query} />
-        </div>
-        <Loading message={loadingMessage} />
-        <SearchPagination loading={true} page={page} query={query} />
-      </div>
-    </>
-  );
-};
+import { SearchResultsSkeleton, SearchResultsView } from "./SearchResultsView";
 
 const ResolvedSearchResults = async ({
   sortby,
@@ -77,32 +48,14 @@ const ResolvedSearchResults = async ({
   const totalPages = searchResults.pagination_info?.total_pages;
 
   return (
-    <>
-      <SearchResultsHeader
-        queryTerm={query}
-        sortby={sortby}
-        totalFetchedResults={totalResults}
-      />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton />
-          <SearchPagination
-            totalPages={totalPages}
-            page={page}
-            query={query}
-            totalResults={totalResults}
-          />
-        </div>
-        <SearchResultsList searchResults={searchResults} page={page} />
-        <SearchPagination
-          totalPages={totalPages}
-          page={page}
-          query={query}
-          totalResults={totalResults}
-          scroll={true}
-        />
-      </div>
-    </>
+    <SearchResultsView
+      sortby={sortby}
+      page={page}
+      query={query}
+      totalResults={totalResults}
+      totalPages={totalPages}
+      searchResults={searchResults}
+    />
   );
 };
 

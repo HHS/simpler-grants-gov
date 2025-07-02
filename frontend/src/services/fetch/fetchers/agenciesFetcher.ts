@@ -5,15 +5,8 @@ import {
   fetchAgencies,
   searchAgencies,
 } from "src/services/fetch/fetchers/fetchers";
-import {
-  FilterOption,
-  RelevantAgencyRecord,
-} from "src/types/search/searchFilterTypes";
-import {
-  agenciesToFilterOptions,
-  flattenAgencies,
-  sortFilterOptions,
-} from "src/utils/search/searchUtils";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
+import { flattenAgencies } from "src/utils/search/filterUtils";
 
 // would have called this getAgencies, but technically it's a POST
 export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
@@ -74,13 +67,9 @@ export const performAgencySearch = async (
   return data;
 };
 
-// two functions below are more or less identical except
-// behavior differs depending on whether a keyword is present
-// if there is a keyword we hit the search endpoint and then must flatten top level agencies
-// if not we just fetch the full list
-export const searchAgenciesForFilterOptions = async (
+export const searchAndFlattenAgencies = async (
   keyword: string,
-): Promise<FilterOption[]> => {
+): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
     agencies = await performAgencySearch(keyword);
@@ -89,30 +78,9 @@ export const searchAgenciesForFilterOptions = async (
     throw e;
   }
   try {
-    const flattenedAgencies = flattenAgencies(agencies);
-    const filterOptions = agenciesToFilterOptions(flattenedAgencies);
-    return sortFilterOptions(filterOptions);
+    return flattenAgencies(agencies);
   } catch (e) {
-    console.error("Error sorting agency search results");
-    throw e;
-  }
-};
-
-export const getAgenciesForFilterOptions = async (): Promise<
-  FilterOption[]
-> => {
-  let agencies = [];
-  try {
-    agencies = await obtainAgencies();
-  } catch (e) {
-    console.error("Error fetching agency options");
-    throw e;
-  }
-  try {
-    const filterOptions = agenciesToFilterOptions(agencies);
-    return sortFilterOptions(filterOptions);
-  } catch (e) {
-    console.error("Error sorting agency search results");
+    console.error("Error flattening agency search results");
     throw e;
   }
 };

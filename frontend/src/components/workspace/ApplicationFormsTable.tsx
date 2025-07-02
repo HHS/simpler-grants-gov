@@ -76,6 +76,16 @@ export const ApplicationFormsTable = ({
   );
 };
 
+const selectApplicationFormById = ({
+  forms,
+  formId,
+}: {
+  forms: FormDetail[];
+  formId: string;
+}): FormDetail | undefined => {
+  return forms.find((form) => form.form_id === formId);
+};
+
 const ApplicationTable = ({
   applicationForms,
   applicationId,
@@ -106,7 +116,7 @@ const ApplicationTable = ({
         </tr>
       </thead>
       <tbody>
-        {forms.map((form, index) => (
+        {applicationForms.map((form, index) => (
           <tr key={index}>
             <td data-label={t("status")}>
               <CompetitionStatus
@@ -115,20 +125,17 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("form")}>
-              <Link
-                className="text-bold"
-                href={`/workspace/applications/application/${applicationId}/form/${form.form_id}`}
-              >
-                {form.form_name}
-              </Link>
+              <FormLink
+                formId={form.form_id}
+                forms={forms}
+                applicationId={applicationId}
+                appFormId={form.application_form_id}
+              />
             </td>
             <td data-label={t("instructions")}>
               <InstructionsLink
-                downloadPath={
-                  form.form_instruction && form.form_instruction.download_path
-                    ? form.form_instruction.download_path
-                    : null
-                }
+                forms={forms}
+                formId={form.form_id}
                 text={t("downloadInstructions")}
                 unavailableText={t("attachmentUnavailable")}
               />
@@ -173,17 +180,23 @@ const CompetitionStatus = ({
 };
 
 const InstructionsLink = ({
-  downloadPath,
+  formId,
+  forms,
   text,
   unavailableText,
 }: {
-  downloadPath: string | null;
+  formId: string;
+  forms: FormDetail[];
   text: string;
   unavailableText: string;
 }) => {
+  const instructions = selectApplicationFormById({
+    forms,
+    formId,
+  })?.form_instruction;
+  const downloadPath = instructions?.download_path || null;
   return (
     <>
-      {" "}
       {downloadPath ? (
         <Link
           className="display-flex flex-align-center font-sans-2xs"
@@ -194,6 +207,36 @@ const InstructionsLink = ({
         </Link>
       ) : (
         <>{unavailableText}</>
+      )}
+    </>
+  );
+};
+
+const FormLink = ({
+  formId,
+  forms,
+  applicationId,
+  appFormId,
+}: {
+  formId: string;
+  forms: FormDetail[];
+  applicationId: string;
+  appFormId: string;
+}) => {
+  const formName = selectApplicationFormById({
+    forms,
+    formId,
+  })?.form_name;
+
+  return (
+    <>
+      {formName && (
+        <Link
+          className="text-bold"
+          href={`/workspace/applications/application/${applicationId}/form/${appFormId}`}
+        >
+          {formName}
+        </Link>
       )}
     </>
   );

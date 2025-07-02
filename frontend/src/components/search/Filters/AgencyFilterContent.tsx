@@ -7,8 +7,8 @@ import { FilterOption } from "src/types/search/searchFilterTypes";
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
-import { CheckboxFilterBody } from "src/components/search/Filters/CheckboxFilter";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { AgencyFilterBody } from "./AgencyFilterBody";
 import { FilterSearchNoResults } from "./FilterSearchNoResults";
 
 export function AgencyFilterContent({
@@ -16,16 +16,18 @@ export function AgencyFilterContent({
   title,
   allAgencies,
   facetCounts,
+  topLevelQuery,
 }: {
   query: Set<string>;
   title: string;
   allAgencies: FilterOption[];
   facetCounts: { [key: string]: number };
+  topLevelQuery: Set<string>;
 }) {
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
   const [searchTerm, setSearchTerm] = useState<string>();
-  const searchForAgencies = debounce(
+  const debouncedSearchForAgencies = debounce(
     (agencySearchTerm: string) => {
       setSearchTerm(agencySearchTerm);
       if (!agencySearchTerm) {
@@ -54,7 +56,7 @@ export function AgencyFilterContent({
           id="AgencySearch"
           title="Agency Search"
           aria-label="Agency Search"
-          onChange={(e) => searchForAgencies(e.target.value)}
+          onChange={(e) => debouncedSearchForAgencies(e.target.value)}
         />
         <USWDSIcon
           name="search"
@@ -64,14 +66,15 @@ export function AgencyFilterContent({
       {agencySearchResults && !agencySearchResults.length ? (
         <FilterSearchNoResults />
       ) : (
-        <CheckboxFilterBody
+        <AgencyFilterBody
           query={query}
-          queryParamKey={"agency"}
           title={title}
           includeAnyOption={!searchTerm}
           filterOptions={agencySearchResults || allAgencies}
           facetCounts={facetCounts}
           referenceOptions={allAgencies}
+          topLevelQuery={topLevelQuery}
+          queryParamKey={"agency"} // this is unused, but here to satisfy prop types
         />
       )}
     </>

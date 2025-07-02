@@ -18,7 +18,6 @@ import {
   InformationCard,
 } from "src/components/application/InformationCard";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
-import BetaAlert from "src/components/BetaAlert";
 import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 export const dynamic = "force-dynamic";
@@ -89,7 +88,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
 
   return (
     <>
-      <BetaAlert containerClasses="margin-top-5" />
       <GridContainer>
         <h1>Application</h1>
         <InformationCard applicationDetails={details} />

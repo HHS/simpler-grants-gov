@@ -1,17 +1,17 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
+import {
+  categoryOptions,
+  eligibilityOptions,
+  fundingOptions,
+  statusOptions,
+} from "src/constants/searchFilterOptions";
+import { obtainAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import {
-  categoryOptions,
-  eligibilityOptions,
-  fundingOptions,
-  statusOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import { CheckboxFilter } from "./Filters/CheckboxFilter";
 import { AgencyFilterAccordion } from "./SearchFilterAccordion/AgencyFilterAccordion";
 
@@ -21,6 +21,7 @@ export default async function SearchFilters({
   agency,
   category,
   opportunityStatus,
+  topLevelAgency,
   searchResultsPromise,
 }: {
   fundingInstrument: Set<string>;
@@ -28,13 +29,11 @@ export default async function SearchFilters({
   agency: Set<string>;
   category: Set<string>;
   opportunityStatus: Set<string>;
+  topLevelAgency: Set<string>;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const t = useTranslations("Search");
-  const agenciesPromise = Promise.all([
-    getAgenciesForFilterOptions(),
-    searchResultsPromise,
-  ]);
+  const agenciesPromise = Promise.all([obtainAgencies(), searchResultsPromise]);
 
   let searchResults;
   try {
@@ -84,6 +83,7 @@ export default async function SearchFilters({
         <AgencyFilterAccordion
           query={agency}
           agencyOptionsPromise={agenciesPromise}
+          topLevelQuery={topLevelAgency}
         />
       </Suspense>
       <SearchFilterAccordion

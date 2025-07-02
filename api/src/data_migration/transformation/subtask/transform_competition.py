@@ -1,6 +1,7 @@
 import logging
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -41,16 +42,35 @@ class TransformCompetition(AbstractTransformSubTask):
 
                 if opportunity_cfda:
                     opportunity_id = opportunity_cfda.opportunity_id
-                    opportunity_assistance_listing_id = opportunity_cfda.opp_cfda_id
 
                     # Make sure the opportunity exists in our target table
                     opportunity = self.db_session.execute(
-                        select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
+                        select(Opportunity)
+                        .where(Opportunity.opportunity_id == opportunity_cfda.opportunity_id)
+                        .options(selectinload(Opportunity.opportunity_assistance_listings))
                     ).scalar_one_or_none()
 
+                    # If we found opportunity_id through cfda listing and the opportunity is not
+                    # found associated to that id, this denotes an orphaned competition. This case
+                    # will be indicated in the competition.transform_notes with 'orphaned_competition'.
                     if not opportunity:
                         opportunity_id = None
                         opportunity_assistance_listing_id = None
+                    else:
+                        # In order to know which opportunity to connect the competition to, we reference the CFDA record
+                        # which links the two tables in the Oracle DB. We cannot use our assistance listing number table as
+                        # we skip transforming opportunity assistance listings with null program title which only existed
+                        # for the purposes of connecting the tables.
+                        for assistance_listing in opportunity.opportunity_assistance_listings:
+                            if (
+                                assistance_listing.opportunity_assistance_listing_id
+                                == opportunity_cfda.opp_cfda_id
+                            ):
+                                opportunity_id = opportunity.opportunity_id
+                                opportunity_assistance_listing_id = (
+                                    assistance_listing.opportunity_assistance_listing_id
+                                )
+                                break
 
                 self.process_competition(
                     source_competition,
@@ -92,9 +112,13 @@ class TransformCompetition(AbstractTransformSubTask):
                 extra=extra,
             )
         elif opportunity_id is None:
-            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
-            # we'll make sure the opportunity actually exists
-            raise ValueError("Competition references opportunity that doesn't exist")
+            # Handle orphaned competition when an opportunity_id has been found but
+            # the opportunity for that id does not exist.
+            self.increment(transform_constants.Metrics.TOTAL_RECORDS_ORPHANED)
+            logger.info(
+                "Competition is orphaned and does not connect to any opportunity", extra=extra
+            )
+            source_competition.transformation_notes = transform_constants.ORPHANED_COMPETITION
         else:
             # insert/update
             # To avoid incrementing metrics for records we fail to transform, record
