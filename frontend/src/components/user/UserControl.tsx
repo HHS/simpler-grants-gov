@@ -14,6 +14,7 @@ import {
 
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { redirectLogout } from "./redirectLogout";
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
@@ -132,17 +133,25 @@ export const UserControl = () => {
       method: "POST",
     });
 
-    const res = await fetch(pathname, {
-      method: "HEAD",
-    });
+    let redirectToLogout = false
+    for(const path in redirectLogout) {
+      const base = path.substring(1) // remove the forward-trailing '/' for the basepath to have a valid regex
+      const re = new RegExp(base)
+      if(re.test(pathname)) {
+        redirectToLogout = true;
+        break;
+      }
+    }
 
     logoutLocalUser();
 
-    if (res.headers.has("x-redirectOnLogout")) {
-      redirect("/");
+    if(redirectToLogout) {
+      redirect("/")
     } else {
       router.refresh();
     }
+
+
   }, [logoutLocalUser, router, pathname]);
 
   return (
