@@ -316,8 +316,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     if tag_name and not token.endswith("/>"):
                         tag_stack.append(tag_name.group(1))
 
-        closing_tags = [f"</{tag}>" for tag in reversed(tag_stack)]
-
         # Remove block-level closing tags from the end
         while output_tokens:
             last = output_tokens[-1]
@@ -333,23 +331,28 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
         after = description_change["after"]
-        if after:
-            description_section = SECTION_STYLING.format("Description")
-            description_section += f"{BULLET_POINTS_STYLING} <i>New Description:</i>"
+        if not after:
+            return ""
 
-            if len(after) > TRUNCATION_THRESHOLD:
-                after = after[:TRUNCATION_THRESHOLD]
-                if self._contains_regex(after, r"<[^>]+>"):  # check for html tags
-                    after = self._truncate_html_safe(after)
-                read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
-                description_section += (
-                    f'<div style="padding-left: 40px;">{after}{read_more}</div><br>'
-                )
-            else:
-                description_section += f'<div style="padding-left: 40px;">{after}</div><br>'
+        description_section_parts = [
+            SECTION_STYLING.format("Description"),
+            f"{BULLET_POINTS_STYLING} <i>New Description:</i>",
+        ]
 
-            return description_section
-        return ""
+        if len(after) > TRUNCATION_THRESHOLD:
+            truncated = after[:TRUNCATION_THRESHOLD]
+
+            if self._contains_regex(truncated, r"<[^>]+>"):
+                truncated = self._truncate_html_safe(truncated)
+
+            read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+            description_section_parts.append(
+                f'<div style="padding-left: 40px;">{truncated}{read_more}</div><br>'
+            )
+        else:
+            description_section_parts.append(f'<div style="padding-left: 40px;">{after}</div><br>')
+
+        return "".join(description_section_parts)
 
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:

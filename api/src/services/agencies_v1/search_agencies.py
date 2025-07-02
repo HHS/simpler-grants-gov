@@ -81,9 +81,7 @@ def get_search_request(params: AgencySearchParams) -> dict:
                 one_of=[OpportunityStatus.POSTED, OpportunityStatus.FORECASTED]
             )
         _add_search_filters(builder, AGENCY_REQUEST_FIELD_NAME_MAPPING, params.filters)
-    import pdb
 
-    pdb.set_trace()
     return builder.build()
 
 
