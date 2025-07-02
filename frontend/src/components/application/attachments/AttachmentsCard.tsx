@@ -112,7 +112,7 @@ const AttachmentsCard = () => {
   return (
     <>
       <GridContainer data-testid="opportunity-card" className="padding-x-2">
-        <h3 className="margin-top-3">{t("attachments")}</h3>
+        <h3 className="margin-top-4">{t("attachments")}</h3>
         <Grid row gap>
           <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
             {t("attachmentsInstructions")}
@@ -136,7 +136,7 @@ const AttachmentsCard = () => {
                   sortKey="file_name"
                   value={t("attachedDocument")}
                 />
-                <TableHeader value="action" />
+                <TableHeader value={t("action")} />
                 <TableHeader
                   isSortable
                   sortKey="file_size_bytes"

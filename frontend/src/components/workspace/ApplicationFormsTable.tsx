@@ -162,7 +162,7 @@ const CompetitionStatus = ({
 
   if (applicationForm?.application_form_status === "in_progress") {
     return (
-      <div className="display-flex flex-align-center text-bold icon-active">
+      <div className="display-flex flex-align-center text-bold text-accent-warm-darkest">
         <USWDSIcon name="loop" className="margin-right-2px" />
         {t("in_progress")}
       </div>

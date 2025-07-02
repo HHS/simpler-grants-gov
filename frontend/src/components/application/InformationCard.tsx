@@ -106,7 +106,7 @@ export const InformationCard = ({
     return (
       <div>
         <dt className="usa-sr-only">{t("specialInstructionsLabel")}: </dt>
-        <dd className="margin-right-1 text-bold text-orange">
+        <dd className="margin-right-1 text-bold text-accent-warm-darkest">
           {t("specialInstructions")}
         </dd>
       </div>
@@ -159,7 +159,7 @@ export const InformationCard = ({
                 :{" "}
               </dt>
               <dd className="margin-right-1">
-                <span className="text-bold text-orange">
+                <span className="text-bold text-accent-warm-darkest">
                   {applicationDetails.competition.closing_date}
                 </span>{" "}
                 (12:00am ET)
@@ -170,7 +170,7 @@ export const InformationCard = ({
             ) : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
-              <dd className="margin-right-1 text-bold text-orange">
+              <dd className="margin-right-1 text-bold text-accent-warm-darkest">
                 {applicationStatus()}
               </dd>
             </div>
