@@ -8,6 +8,8 @@ import {
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 
+import { JSONRequestBody } from "../fetcherHelpers";
+
 // would have called this getAgencies, but technically it's a POST
 export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
   const response = await fetchAgencies({
@@ -35,21 +37,24 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
 export const performAgencySearch = async (
   keyword?: string,
 ): Promise<RelevantAgencyRecord[]> => {
-  const response = await searchAgencies({
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_order: [
-          {
-            order_by: "agency_code",
-            sort_direction: "ascending",
-          },
-        ],
-      },
-      filters: { active: true },
-      query: keyword || "",
+  const requestBody: JSONRequestBody = {
+    pagination: {
+      page_offset: 1,
+      page_size: 1500, // 969 agencies in prod as of 3/7/25
+      sort_order: [
+        {
+          order_by: "agency_code",
+          sort_direction: "ascending",
+        },
+      ],
     },
+    filters: { active: true },
+  };
+  if (keyword) {
+    requestBody.query = keyword;
+  }
+  const response = await searchAgencies({
+    body: requestBody,
   });
   if (!response || response.status !== 200) {
     throw new ApiRequestError(
