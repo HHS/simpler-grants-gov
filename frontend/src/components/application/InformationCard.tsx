@@ -1,3 +1,5 @@
+"use client";
+
 import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 
@@ -8,20 +10,17 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 type CompetitionDetails = { competition: Competition };
 
-export type ApplicationDetailsCardProps = Pick<
-  ApplicationDetail,
-  | "application_id"
-  | "application_name"
-  | "application_status"
-  | "users"
-  | "organization"
-> &
+export type ApplicationDetailsCardProps = ApplicationDetail &
   CompetitionDetails;
 
 export const InformationCard = ({
   applicationDetails,
+  applicationSubmitHandler,
+  submissionLoading,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
+  applicationSubmitHandler: () => void;
+  submissionLoading: boolean;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
@@ -127,7 +126,11 @@ export const InformationCard = ({
     }
   };
 
-  const InformationCardDetails = () => {
+  const InformationCardDetails = ({
+    applicationSubmitHandler,
+  }: {
+    applicationSubmitHandler: () => void;
+  }) => {
     return (
       <>
         {/* 
@@ -175,9 +178,11 @@ export const InformationCard = ({
               </dd>
             </div>
 
-            {/* 
-              TODO: Submit button in a later task
-            */}
+            <SubmitApplicationButton
+              buttonText={t("submit")}
+              submitHandler={applicationSubmitHandler}
+              loading={submissionLoading}
+            />
           </dl>
         </Grid>
       </>
@@ -187,11 +192,32 @@ export const InformationCard = ({
   return (
     <GridContainer
       data-testid="information-card"
-      className="border radius-md border-base-lighter padding-x-2 margin-bottom-4"
+      className="border radius-md border-base-lighter padding-x-2 margin-y-4"
     >
       <Grid row gap>
-        <InformationCardDetails />
+        <InformationCardDetails
+          applicationSubmitHandler={applicationSubmitHandler}
+        />
       </Grid>
     </GridContainer>
+  );
+};
+
+export const SubmitApplicationButton = ({
+  buttonText,
+  loading,
+  submitHandler,
+}: {
+  buttonText: string;
+  loading: boolean;
+  submitHandler: () => void;
+}) => {
+  return (
+    <>
+      <Button type="button" disabled={!!loading} onClick={submitHandler}>
+        <USWDSIcon name="upload_file" />
+        {loading ? "loading..." : buttonText}
+      </Button>
+    </>
   );
 };

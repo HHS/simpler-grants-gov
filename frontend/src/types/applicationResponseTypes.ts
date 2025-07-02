@@ -36,6 +36,10 @@ export interface FormValidationWarnings {
   [applicationId: string]: FormValidationWarning;
 }
 
+export interface FormValidationErrors {
+  form_validation_errors: FormValidationWarnings;
+}
+
 export interface ApplicationDetail {
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
@@ -54,6 +58,10 @@ export interface ApplicationStartApiResponse extends APIResponse {
   data: {
     application_id: string;
   };
+}
+
+export interface ApplicationSubmitApiResponse extends APIResponse {
+  data: FormValidationErrors;
 }
 
 export interface ApplicationFormDetailApiResponse extends APIResponse {

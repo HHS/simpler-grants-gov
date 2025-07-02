@@ -74,7 +74,8 @@ export function requesterForEndpoint({
 
     if (
       !response.ok &&
-      response.headers.get("Content-Type") === "application/json"
+      response.headers.get("Content-Type") === "application/json" &&
+      response.status !== 422
     ) {
       // we can assume this is serializable json based on the response header, but we'll catch anyway
       let jsonBody;
@@ -86,7 +87,7 @@ export function requesterForEndpoint({
         );
       }
       return throwError(jsonBody, url);
-    } else if (!response.ok) {
+    } else if (!response.ok && response.status !== 422) {
       throw new ApiRequestError(
         `unable to fetch ${url}`,
         "APIRequestError",

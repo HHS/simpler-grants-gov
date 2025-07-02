@@ -208,6 +208,14 @@ export const messages = {
     genericErrorCta: "Please try refreshing the page.",
   },
   Application: {
+    title: "Application",
+    submissionError: {
+      title: "Your application could not be submitted",
+      description:
+        "All required fields or attachments in required forms must be completed or uploaded.",
+      incompleteForm: "is incomplete. Answer all required questions to submit.",
+      notStartedForm: "has not been started. Complete the form to submit.",
+    },
     information: {
       applicant: "Applicant",
       applicantTypeIndividual: "Individual",
@@ -224,6 +232,7 @@ export const messages = {
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
+      submit: "Submit application",
     },
     opportunityOverview: {
       opportunity: "Opportunity",

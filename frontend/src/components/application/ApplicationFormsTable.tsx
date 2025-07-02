@@ -117,7 +117,7 @@ const ApplicationTable = ({
       </thead>
       <tbody>
         {applicationForms.map((form, index) => (
-          <tr key={index}>
+          <tr key={index} id={`form-${form.application_form_id}`}>
             <td data-label={t("status")}>
               <CompetitionStatus
                 applicationForms={applicationForms}
