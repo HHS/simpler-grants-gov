@@ -2,7 +2,6 @@ import uuid
 
 from src.db.models.competition_models import Form
 
-# TODO - pluralization of values
 FORM_JSON_SCHEMA = {
     "type": "object",
     "required": [
@@ -10,9 +9,9 @@ FORM_JSON_SCHEMA = {
         "total_budget_summary",
         "total_budget_categories",
         "total_non_federal_resources",
+        "forecasted_cash_needs",
         "total_federal_fund_estimates",
         "confirmation",
-
     ],
     "properties": {
         "activity_line_items": {
@@ -21,7 +20,14 @@ FORM_JSON_SCHEMA = {
             "maxItems": 4,
             "items": {
                 "type": "object",
-                "required": ["activity_title", "assistance_listing_number", "budget_summary", "budget_categories", "non_federal_resources", "federal_fund_estimates"],
+                "required": [
+                    "activity_title",
+                    "assistance_listing_number",
+                    "budget_summary",
+                    "budget_categories",
+                    "non_federal_resources",
+                    "federal_fund_estimates",
+                ],
                 "properties": {
                     "activity_title": {
                         # Activity title appears in multiple places on the form
@@ -63,7 +69,14 @@ FORM_JSON_SCHEMA = {
             # Section A - Total Row (Column 5)
             "allOf": [{"$ref": "#/$defs/budget_summary"}],
             # In the total budget summary, all fields are required
-            "required": ["federal_estimated_unobligated_amount", "non_federal_estimated_unobligated_amount", "federal_new_or_revised_amount", "non_federal_new_or_revised_amount", "total_amount"]
+            "required": [
+                "federal_estimated_unobligated_amount",
+                "non_federal_estimated_unobligated_amount",
+                "federal_new_or_revised_amount",
+                "non_federal_new_or_revised_amount",
+                # total_amount is already required in the base definition
+                # don't include it again or it gets added as an error twice.
+            ],
         },
         "total_budget_categories": {
             # Section B - Total Column (Column 5)
@@ -73,12 +86,22 @@ FORM_JSON_SCHEMA = {
             # Section C - Total Row (Line 12)
             "allOf": [{"$ref": "#/$defs/non_federal_resources"}],
             # In the total non-federal resources, all fields are required
-            "required": ["applicant_amount", "state_amount", "other_amount", "total_amount"]
+            "required": [
+                "applicant_amount",
+                "state_amount",
+                "other_amount",
+                # total_amount is already required in the base definition
+                # don't include it again or it gets added as an error twice.
+            ],
         },
         "forecasted_cash_needs": {
             # Section D
             "type": "object",
-            "required": [],
+            "required": [
+                "federal_forecasted_cash_needs",
+                "non_federal_forecasted_cash_needs",
+                "total_forecasted_cash_needs",
+            ],
             "properties": {
                 "federal_forecasted_cash_needs": {
                     # Section D - Line 13
@@ -98,7 +121,12 @@ FORM_JSON_SCHEMA = {
             # Section E - Total Row (Line 20)
             "allOf": [{"$ref": "#/$defs/federal_fund_estimates"}],
             # In the total federal fund estimates, all fields are required
-            "required": ["first_year_amount", "second_year_amount", "third_year_amount", "fourth_year_amount"]
+            "required": [
+                "first_year_amount",
+                "second_year_amount",
+                "third_year_amount",
+                "fourth_year_amount",
+            ],
         },
         "direct_charges_explanation": {
             # Line 21
@@ -125,10 +153,10 @@ FORM_JSON_SCHEMA = {
             "maxLength": 250,
         },
         "confirmation": {
-            # TODO - can I make sure this is only ever True?
             "type": "boolean",
-            "title": "TODO",
-            "description": "TODO",
+            "title": "Confirmation",
+            "description": "Is this form complete?",
+            "enum": [True],
         },
     },
     "$defs": {
@@ -303,8 +331,22 @@ FORM_JSON_SCHEMA = {
     },
 }
 
-
-FORM_UI_SCHEMA = []
+# I have no idea what the frontend needs for the UI schema as it's
+# likely quite different from anything prior, so just going to leave
+# this blank for now.
+FORM_UI_SCHEMA = [
+    {
+        "type": "section",
+        "label": "1. Everything",
+        "name": "Everything",
+        "children": [
+            {"type": "field", "definition": "/properties/direct_charges_explanation"},
+            {"type": "field", "definition": "/properties/indirect_charges_explanation"},
+            {"type": "field", "definition": "/properties/remarks"},
+            {"type": "field", "definition": "/properties/confirmation"},
+        ],
+    }
+]
 
 
 SF424a_v1_0 = Form(
@@ -313,10 +355,11 @@ SF424a_v1_0 = Form(
     form_id=uuid.UUID("08e6603f-d197-4a60-98cd-d49acb1fc1fd"),
     form_name="Budget Information for Non-Construction Programs (SF-424A)",
     form_version="1.0",
-    agency_code="SGG",  # TODO - Do we want to add Simpler Grants.gov as an "Agency"?
+    agency_code="SGG",
     omb_number="4040-0006",
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
+    # No rule schema yet, we'll likely but automated sums in this
     form_rule_schema=None,
     # No form instructions at the moment.
 )

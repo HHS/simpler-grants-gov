@@ -31,7 +31,10 @@ def _required(
                 f"{field_name!r} is a required property", path=[field_name]
             )
 
-def _maxItems(validator: jsonschema.Draft202012Validator, mI: typing.Any, instance: typing.Any, _: typing.Any) -> typing.Generator[jsonschema.ValidationError]:
+
+def _maxItems(
+    validator: jsonschema.Draft202012Validator, mI: typing.Any, instance: typing.Any, _: typing.Any
+) -> typing.Generator[jsonschema.ValidationError]:
     """Handle a maxItems field validator in the JSON Schema validation
 
     This is identical to the maxItems validator, but we adjusted the message
@@ -42,11 +45,13 @@ def _maxItems(validator: jsonschema.Draft202012Validator, mI: typing.Any, instan
         message = "is expected to be empty" if mI == 0 else "is too long"
         yield jsonschema.ValidationError(f"The array {message}, expected a maximum length of {mI}")
 
+
 OUR_VALIDATOR = jsonschema.validators.extend(
-    validator=jsonschema.Draft202012Validator, validators={
+    validator=jsonschema.Draft202012Validator,
+    validators={
         "required": _required,
         "maxItems": _maxItems,
-    }
+    },
 )
 
 
