@@ -56,7 +56,7 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    "attachments": "One or more new documents were",
+    "opportunity_attachments": "One or more new documents were",
     "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
@@ -351,9 +351,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 removed = sorted(set(before) - set(after), key=lambda x: x.value)
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} {[self._format_slug(e_type.value) for e_type in added]}.<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
                 if removed:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} {[self._format_slug(e_type.value) for e_type in removed]}.<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
 
             if field == "applicant_eligibility_description":
                 stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
@@ -370,18 +370,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in documents_change.items():
             before = change["before"]
             after = change["after"]
-            if field == "attachments":
+            if field == "opportunity_attachments":
                 before_set = set(att["attachment_id"] for att in before)
                 after_set = set(att["attachment_id"] for att in after)
 
                 if after_set - before_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} added.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} added.<br>"
                 if before_set - after_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} removed.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} removed.<br>"
 
             elif field == "additional_info_url":
                 documents_section += (
