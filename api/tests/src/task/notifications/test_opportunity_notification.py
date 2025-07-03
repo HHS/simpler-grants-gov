@@ -49,6 +49,7 @@ def build_opp_and_version(
     applicant_types: list[ApplicantType],
     applicant_eligibility_description: str | None,
     additional_info_url: str | None,
+    summary_description: str | None,
     has_attachments: bool | None = None,
     db_session: db.Session | None = None,
 ) -> OpportunityVersion:
@@ -82,6 +83,7 @@ def build_opp_and_version(
         applicant_types=applicant_types,
         applicant_eligibility_description=applicant_eligibility_description,
         additional_info_url=additional_info_url,
+        summary_description=summary_description,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -116,6 +118,7 @@ base_opal_fields = {
     "applicant_types": [ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
     "applicant_eligibility_description": "Not yet determined",
     "additional_info_url": None,
+    "summary_description": None,
 }
 
 OPAL = build_opp_and_version(
@@ -161,6 +164,7 @@ base_topaz_fields = {
     "applicant_types": [ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES],
     "applicant_eligibility_description": "No income",
     "additional_info_url": None,
+    "summary_description": "Summary",
 }
 
 TOPAZ = build_opp_and_version(
@@ -764,6 +768,28 @@ class TestOpportunityNotification:
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_eligibility_content(eligibility_diffs)
 
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
+        "description_diffs,expected_html",
+        [
+            ({"before": "testing", "after": None}, ""),
+            (
+                {"before": "testing", "after": "Updated description"},
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
+            ),
+        ],
+    )
+    def test_build_description_fields_content(
+        self,
+        db_session,
+        description_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_description_fields_content(description_diffs, 1)
         assert res == expected_html
 
     @pytest.mark.parametrize(
