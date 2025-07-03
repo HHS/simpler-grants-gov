@@ -915,6 +915,7 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         set_env_var_for_email_notification_config,
+        notification_task
     ):
         TOPZ_ALL = build_opp_and_version(
             revision_number=2,
@@ -976,9 +977,7 @@ class TestOpportunityNotification:
             updated_opportunity_ids=[TOPAZ.opportunity_id],
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_notification_content(
+        res = notification_task._build_notification_content(
             [
                 OpportunityVersionChange(
                     opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPZ_ALL
