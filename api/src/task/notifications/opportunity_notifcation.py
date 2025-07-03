@@ -274,6 +274,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+        after = description_change["after"]
+        if after:
+            description_section = SECTION_STYLING.format("Description")
+            description_section += f"{BULLET_POINTS_STYLING} The description has changed.<br>"
+            return description_section
+        return ""
+
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
             return NOT_SPECIFIED
@@ -475,6 +483,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             sections.append(self._build_eligibility_content(eligibility_fields_diffs))
         if documentation_fields_diffs := {k: changes[k] for k in DOCUMENTS_FIELDS if k in changes}:
             sections.append(self._build_documents_fields(documentation_fields_diffs))
+        if "summary_description" in changes:
+            sections.append(
+                self._build_description_fields_content(
+                    changes["summary_description"], opp_change.opportunity_id
+                )
+            )
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
