@@ -134,14 +134,13 @@ export const UserControl = () => {
     });
 
     let redirectToLogout = false;
-    for (const path in redirectLogout) {
+    redirectLogout.forEach((path) => {
       const base = path.substring(1); // remove the forward-trailing '/' for the basepath to have a valid regex
       const re = new RegExp(base);
       if (re.test(pathname)) {
         redirectToLogout = true;
-        break;
       }
-    }
+    });
 
     logoutLocalUser();
 
