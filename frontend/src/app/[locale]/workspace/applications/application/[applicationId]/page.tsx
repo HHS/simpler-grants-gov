@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
+import { AttachmentsProvider } from "src/context/application/AttachmentsContext";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -11,6 +12,7 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import { AttachmentsCard } from "src/components/application/attachments/AttachmentsCard";
 import {
   ApplicationDetailsCardProps,
   InformationCard,
@@ -38,6 +40,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
   const { applicationId } = await params;
   let applicationForms = [];
+  let attachments = [];
   let details = {} as ApplicationDetailsCardProps;
   let forms = [];
   let opportunity = {} as OpportunityDetail;
@@ -59,6 +62,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     details = response.data;
     forms = response.data.competition.competition_forms;
     applicationForms = response.data.application_forms;
+    attachments = response.data.application_attachments;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
       String(opportunityId),
@@ -93,6 +97,12 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           applicationForms={applicationForms}
           applicationId={applicationId}
         />
+        <AttachmentsProvider
+          initialAttachments={attachments}
+          applicationId={applicationId}
+        >
+          <AttachmentsCard />
+        </AttachmentsProvider>
       </GridContainer>
     </>
   );

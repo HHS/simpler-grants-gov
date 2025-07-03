@@ -274,6 +274,29 @@ export const messages = {
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
     },
+    attachments: {
+      attachedDocument: "Attached document",
+      attachments: "Attachments",
+      attachmentsInstructions:
+        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+      action: "Action",
+      cancelUpload: "Cancel upload",
+      delete: "Delete",
+      deleting: "Deleting...",
+      download: "Download",
+      emptyTable: "No attachments uploaded",
+      fileSize: "File Size",
+      uploadBy: "Upload by",
+      uploadDate: "Upload date",
+      deleteModal: {
+        titleText: "Delete",
+        descriptionText:
+          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+        deleteFileCta: "Delete file",
+        deleteFilesCta: "Delete files",
+        cancelDeleteCta: "Cancel",
+      },
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",

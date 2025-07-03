@@ -1,6 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
+import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 
 export interface ApplicationResponseDetail {
@@ -37,6 +38,7 @@ export interface FormValidationWarnings {
 }
 
 export interface ApplicationDetail {
+  application_attachments: Array<Attachment>;
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
@@ -47,6 +49,12 @@ export interface ApplicationDetail {
   users: {
     email: string;
     user_id: string;
+  };
+}
+
+export interface ApplicationAttachmentUploadResponse extends APIResponse {
+  data: {
+    application_attachment_id: string;
   };
 }
 
