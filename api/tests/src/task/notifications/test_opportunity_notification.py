@@ -15,6 +15,7 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     Metrics,
     NotificationReason,
@@ -184,6 +185,9 @@ class TestOpportunityNotification:
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
+        self.notification_config = EmailNotificationConfig()
+        self.notification_config.reset_emails_without_sending = False
+
     @pytest.fixture(autouse=True)
     def clear_data(self, db_session):
         """Clear all notification logs"""
@@ -195,6 +199,10 @@ class TestOpportunityNotification:
     def user_with_email(self, db_session, user):
         return factories.LinkExternalUserFactory.create(user=user, email="test@example.com").user
 
+    @pytest.fixture()
+    def notification_task(self, db_session):
+        return OpportunityNotificationTask(db_session, self.notification_config)
+
     def test_email_notifications_collection(
         self,
         db_session,
@@ -202,6 +210,7 @@ class TestOpportunityNotification:
         user,
         caplog,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
         caplog.set_level(logging.INFO)
 
@@ -267,10 +276,7 @@ class TestOpportunityNotification:
 
         _clear_mock_responses()
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task._get_latest_opportunity_versions()
+        results = notification_task._get_latest_opportunity_versions()
 
         # assert that only the latest version is picked up for each user_saved_opportunity
         assert len(results) == 4
@@ -286,7 +292,9 @@ class TestOpportunityNotification:
                 assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
 
         # Run the notification task
-        task = EmailNotificationTask(db_session, search_client)
+        task = EmailNotificationTask(
+            db_session, search_client, notification_config=self.notification_config
+        )
         task.run()
 
         # Verify notification log was created
@@ -318,9 +326,7 @@ class TestOpportunityNotification:
         )
 
     def test_with_no_user_email_notification(
-        self,
-        db_session,
-        set_env_var_for_email_notification_config,
+        self, db_session, set_env_var_for_email_notification_config, notification_task
     ):
         """Test that no notification is collected if the user has no linked email address."""
         # Create a saved opportunity that needs notification
@@ -335,15 +341,12 @@ class TestOpportunityNotification:
             opportunity=opportunity,
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task.collect_email_notifications()
+        results = notification_task.collect_email_notifications()
 
         assert len(results) == 0
 
     def test_with_no_prior_version_email_collections(
-        self, db_session, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config, notification_task
     ):
         """Test that no notification log is created when no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -352,16 +355,14 @@ class TestOpportunityNotification:
             opportunity=opportunity,
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        results = task.collect_email_notifications()
+        results = notification_task.collect_email_notifications()
 
         assert len(results) == 0
-        metrics = task.metrics
+        metrics = notification_task.metrics
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_no_updates_email_collections(
-        self, db_session, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config, notification_task
     ):
         """Test that no notification is collected when there are no opportunity updates."""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -372,14 +373,11 @@ class TestOpportunityNotification:
             last_notified_at=version.created_at + timedelta(minutes=1),
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task.collect_email_notifications()
+        results = notification_task.collect_email_notifications()
         assert len(results) == 0
 
     def test_last_notified_version(
-        self, db_session, user, set_env_var_for_email_notification_config
+        self, db_session, user, set_env_var_for_email_notification_config, notification_task
     ):
         """
          Test that `_get_last_notified_versions` correctly returns the most recent
@@ -405,10 +403,7 @@ class TestOpportunityNotification:
             last_notified_at=v_2.created_at + timedelta(minutes=1),
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task._get_last_notified_versions(
+        results = notification_task._get_last_notified_versions(
             [
                 (user.user_id, opp.opportunity_id),
                 (user_2.user_id, opp.opportunity_id),
@@ -442,11 +437,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_flatten_and_extract_field_changes(
-        self, db_session, diff_dict, expected_dict, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        diff_dict,
+        expected_dict,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._flatten_and_extract_field_changes(diff_dict)
+        res = notification_task._flatten_and_extract_field_changes(diff_dict)
 
         assert res == expected_dict
 
@@ -469,11 +467,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_documents_fields(
-        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        documents_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_documents_fields(documents_diffs)
+        res = notification_task._build_documents_fields(documents_diffs)
 
         assert res == expected_html
 
@@ -491,11 +492,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_opportunity_status_content(
-        self, db_session, opp_status_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        opp_status_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_opportunity_status_content(opp_status_diffs)
+        res = notification_task._build_opportunity_status_content(opp_status_diffs)
 
         assert res == expected_html
 
@@ -546,11 +550,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_important_dates_content(
-        self, db_session, imp_dates_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        imp_dates_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_important_dates_content(imp_dates_diffs)
+        res = notification_task._build_important_dates_content(imp_dates_diffs)
 
         assert res == expected_html
 
@@ -576,11 +583,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_award_fields_content(
-        self, db_session, award_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        award_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_award_fields_content(award_diffs)
+        res = notification_task._build_award_fields_content(award_diffs)
 
         assert res == expected_html
 
@@ -673,11 +683,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_categorization_fields_content(
-        self, db_session, category_diff, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        category_diff,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_categorization_fields_content(category_diff)
+        res = notification_task._build_categorization_fields_content(category_diff)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -709,11 +722,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_grantor_contact_fields_content(
-        self, db_session, contact_diffs, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        contact_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_grantor_contact_fields_content(contact_diffs)
+        res = notification_task._build_grantor_contact_fields_content(contact_diffs)
         assert res == expected_html
         assert res == expected_html
 
@@ -763,10 +779,10 @@ class TestOpportunityNotification:
         eligibility_diffs,
         expected_html,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_eligibility_content(eligibility_diffs)
+
+        res = notification_task._build_eligibility_content(eligibility_diffs)
 
         assert res == expected_html
 
@@ -786,10 +802,9 @@ class TestOpportunityNotification:
         description_diffs,
         expected_html,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_description_fields_content(description_diffs, 1)
+        res = notification_task._build_description_fields_content(description_diffs, 1)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -814,11 +829,14 @@ class TestOpportunityNotification:
         ],
     )
     def test_build_sections(
-        self, db_session, version_change, expected_html, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        version_change,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_sections(version_change)
+        res = notification_task._build_sections(version_change)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -887,10 +905,9 @@ class TestOpportunityNotification:
         version_changes,
         expected,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_notification_content(version_changes)
+        res = notification_task._build_notification_content(version_changes)
         assert res == expected
 
     def test_build_notification_content_all_changes(
@@ -898,6 +915,7 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         set_env_var_for_email_notification_config,
+        notification_task,
     ):
         TOPZ_ALL = build_opp_and_version(
             revision_number=2,
@@ -959,9 +977,7 @@ class TestOpportunityNotification:
             updated_opportunity_ids=[TOPAZ.opportunity_id],
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_notification_content(
+        res = notification_task._build_notification_content(
             [
                 OpportunityVersionChange(
                     opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPZ_ALL
