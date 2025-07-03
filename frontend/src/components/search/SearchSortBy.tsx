@@ -21,10 +21,10 @@ export default function SearchSortBy({ queryTerm, sortby }: SearchSortByProps) {
       label: t("sortBy.options.default"),
       value: "relevancy",
     },
-    { label: t("sortBy.options.postedDateDesc"), value: "postedDateDesc" },
-    { label: t("sortBy.options.postedDateAsc"), value: "postedDateAsc" },
     { label: t("sortBy.options.closeDateDesc"), value: "closeDateDesc" },
     { label: t("sortBy.options.closeDateAsc"), value: "closeDateAsc" },
+    { label: t("sortBy.options.postedDateDesc"), value: "postedDateDesc" },
+    { label: t("sortBy.options.postedDateAsc"), value: "postedDateAsc" },
     {
       label: t("sortBy.options.opportunityTitleAsc"),
       value: "opportunityTitleAsc",
@@ -33,15 +33,15 @@ export default function SearchSortBy({ queryTerm, sortby }: SearchSortByProps) {
       label: t("sortBy.options.opportunityTitleDesc"),
       value: "opportunityTitleDesc",
     },
-    { label: t("sortBy.options.agencyAsc"), value: "agencyAsc" },
-    { label: t("sortBy.options.agencyDesc"), value: "agencyDesc" },
+    { label: t("sortBy.options.awardFloorAsc"), value: "awardFloorAsc" },
+    { label: t("sortBy.options.awardFloorDesc"), value: "awardFloorDesc" },
     {
-      label: t("sortBy.options.opportunityNumberDesc"),
-      value: "opportunityNumberDesc",
+      label: t("sortBy.options.awardCeilingAsc"),
+      value: "awardCeilingAsc",
     },
     {
-      label: t("sortBy.options.opportunityNumberAsc"),
-      value: "opportunityNumberAsc",
+      label: t("sortBy.options.awardCeilingDesc"),
+      value: "awardCeilingDesc",
     },
   ];
 

@@ -40,7 +40,7 @@ export const searchFetcherParams: QueryParamData = {
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
-  sortby: "opportunityNumberAsc",
+  sortby: "opportunityTitleAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
   andOr: "OR",

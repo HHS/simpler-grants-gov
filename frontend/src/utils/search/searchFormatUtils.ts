@@ -25,6 +25,8 @@ const orderByFieldLookup = {
   agency: ["top_level_agency_name", "agency_name"],
   postedDate: ["post_date"],
   closeDate: ["close_date"],
+  awardFloor: ["award_floor"],
+  awardCeiling: ["award_ceiling"],
 };
 
 const filterConfigurations = [
@@ -291,7 +293,7 @@ export const buildPagination = (
 
   let sort_order: PaginationSortOrder = [
     { order_by: "relevancy", sort_direction: "descending" },
-    { order_by: "post_date", sort_direction: "descending" },
+    { order_by: "close_date", sort_direction: "ascending" },
   ];
 
   if (sortby) {
