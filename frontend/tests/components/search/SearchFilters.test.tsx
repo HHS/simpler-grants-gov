@@ -53,7 +53,7 @@ jest.mock(
 );
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
-  obtainAgencies: () => Promise.resolve(fakeAgencyResponseData),
+  performAgencySearch: () => Promise.resolve(fakeAgencyResponseData),
 }));
 
 jest.mock("react", () => ({

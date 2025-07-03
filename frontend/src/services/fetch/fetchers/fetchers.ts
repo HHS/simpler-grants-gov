@@ -3,7 +3,6 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
-  fetchAgenciesEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
@@ -119,8 +118,6 @@ export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
-
-export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
 
