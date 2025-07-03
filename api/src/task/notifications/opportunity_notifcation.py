@@ -56,7 +56,7 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    "attachments": "One or more new documents were",
+    "opportunity_attachments": "One or more new documents were",
     "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
@@ -362,18 +362,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in documents_change.items():
             before = change["before"]
             after = change["after"]
-            if field == "attachments":
+            if field == "opportunity_attachments":
                 before_set = set(att["attachment_id"] for att in before)
                 after_set = set(att["attachment_id"] for att in after)
 
                 if after_set - before_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} added.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} added.<br>"
                 if before_set - after_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} removed.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} removed.<br>"
 
             elif field == "additional_info_url":
                 documents_section += (
