@@ -456,11 +456,20 @@ class TestOpportunityNotification:
             (
                 {
                     "opportunity_attachments": {
-                        "before": [],
+                        "before": None,
                         "after": [{"attachment_id": 2}],
                     }
                 },
                 '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
+                        "before": [{"attachment_id": 2}],
+                        "after": [],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
             ),
             (
                 {
