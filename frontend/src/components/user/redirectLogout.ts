@@ -1,3 +1,1 @@
-export const redirectLogout = [
-    "/saved*"
-]
+export const redirectLogout = ["/saved*"];

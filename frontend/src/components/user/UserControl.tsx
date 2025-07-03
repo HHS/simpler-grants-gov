@@ -133,11 +133,11 @@ export const UserControl = () => {
       method: "POST",
     });
 
-    let redirectToLogout = false
-    for(const path in redirectLogout) {
-      const base = path.substring(1) // remove the forward-trailing '/' for the basepath to have a valid regex
-      const re = new RegExp(base)
-      if(re.test(pathname)) {
+    let redirectToLogout = false;
+    for (const path in redirectLogout) {
+      const base = path.substring(1); // remove the forward-trailing '/' for the basepath to have a valid regex
+      const re = new RegExp(base);
+      if (re.test(pathname)) {
         redirectToLogout = true;
         break;
       }
@@ -145,13 +145,11 @@ export const UserControl = () => {
 
     logoutLocalUser();
 
-    if(redirectToLogout) {
-      redirect("/")
+    if (redirectToLogout) {
+      redirect("/");
     } else {
       router.refresh();
     }
-
-
   }, [logoutLocalUser, router, pathname]);
 
   return (
