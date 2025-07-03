@@ -58,43 +58,7 @@ class BaseNotificationTask(Task):
             self.db_session.add(notification_log)
 
             try:
-                if not self.notification_config.reset_emails_without_sending:
-                    response = send_pinpoint_email_raw(
-                        to_address=user_notification.user_email,
-                        subject=user_notification.subject,
-                        message=user_notification.content,
-                        app_id=self.notification_config.app_id,
-                        trace_id=trace_id,
-                    )
-
-                    email_response = response.results.get(user_notification.user_email, None)
-
-                    logger.info(
-                        "Successfully delivered notification to user",
-                        extra={
-                            "user_id": user_notification.user_id,
-                            "notification_reason": user_notification.notification_reason,
-                            "notification_log_id": notification_log.user_notification_log_id,
-                            "pinpoint_delivery_status": (
-                                email_response.delivery_status if email_response else None
-                            ),
-                            "pinpoint_message_id": (
-                                email_response.message_id if email_response else None
-                            ),
-                            "pinpoint_status_code": (
-                                email_response.status_code if email_response else None
-                            ),
-                            "pinpoint_status_message": (
-                                email_response.status_message if email_response else None
-                            ),
-                            "pinpoint_trace_id": trace_id,
-                        },
-                    )
-                    notification_log.notification_sent = True
-                    user_notification.is_notified = True
-
-                    self.increment(Metrics.USERS_NOTIFIED)
-                else:
+                if self.notification_config.reset_emails_without_sending:
                     self.increment(Metrics.NOTIFICATIONS_RESET)
                     logger.info(
                         "Skipping notification to user due to reset flag",
@@ -105,9 +69,48 @@ class BaseNotificationTask(Task):
                         },
                     )
 
-                    # still set notified, so that we update the user_saved_opportunity.last_notified_at
+                    # still set notified/sent, so that we update the user_saved_opportunity.last_notified_at
                     # that opportunity version change notifications check
+                    notification_log.notification_sent = True
                     user_notification.is_notified = True
+
+                    return
+
+                response = send_pinpoint_email_raw(
+                    to_address=user_notification.user_email,
+                    subject=user_notification.subject,
+                    message=user_notification.content,
+                    app_id=self.notification_config.app_id,
+                    trace_id=trace_id,
+                )
+
+                email_response = response.results.get(user_notification.user_email, None)
+
+                logger.info(
+                    "Successfully delivered notification to user",
+                    extra={
+                        "user_id": user_notification.user_id,
+                        "notification_reason": user_notification.notification_reason,
+                        "notification_log_id": notification_log.user_notification_log_id,
+                        "pinpoint_delivery_status": (
+                            email_response.delivery_status if email_response else None
+                        ),
+                        "pinpoint_message_id": (
+                            email_response.message_id if email_response else None
+                        ),
+                        "pinpoint_status_code": (
+                            email_response.status_code if email_response else None
+                        ),
+                        "pinpoint_status_message": (
+                            email_response.status_message if email_response else None
+                        ),
+                        "pinpoint_trace_id": trace_id,
+                    },
+                )
+                notification_log.notification_sent = True
+                user_notification.is_notified = True
+
+                self.increment(Metrics.USERS_NOTIFIED)
 
             except Exception:
                 # Notification log will be updated in the finally block
