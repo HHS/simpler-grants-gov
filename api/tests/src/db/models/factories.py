@@ -829,7 +829,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     # NOTE: If you want the file to properly get written to s3 for tests/locally
     # make sure the bucket actually exists
     file_location = factory.LazyAttribute(
-        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1, max=100_000_000)}/{o.file_name}"
+        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{o.attachment_id}/{o.file_name}"
     )
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
