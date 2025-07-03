@@ -732,8 +732,8 @@ class TestOpportunityNotification:
                     }
                 },
                 '<p style="padding-left: 20px;">Eligibility</p>'
-                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['State governments'].<br>"
-                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Other', 'Public and state institutions of higher education'].<br>",
+                '<p style="padding-left: 40px;">•  Additional eligibility criteria include: [State governments].<br>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
             ),
             # Add
             (
@@ -922,6 +922,7 @@ class TestOpportunityNotification:
             applicant_types=[ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
             applicant_eligibility_description="Charter Schools only",
             additional_info_url="simpler-grants.gov",
+            summary_description="Climate research in mars",
             has_attachments=True,
             db_session=enable_factory_create,
         )
@@ -939,20 +940,18 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                 '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
                 '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
-                '<p style="padding-left: 20px;">Categorization</p>'
-                '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                 '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                 '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
                 '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                 '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
-                '<p style="padding-left: 20px;">Eligibility</p>'
-                '<p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                '<p style="padding-left: 20px;">Documents</p>'
-                '<p style="padding-left: 40px;">•  One or more new documents were added.<br>'
-                '<p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>'
+                '<p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
