@@ -919,10 +919,9 @@ class TestOpportunityNotification:
         description_diffs,
         expected_html,
         set_env_var_for_email_notification_config,
+        notification_task
     ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_description_fields_content(description_diffs)
+        res = notification_task._build_description_fields_content(description_diffs, 1)
         assert res == expected_html
 
     @pytest.mark.parametrize(
