@@ -456,6 +456,24 @@ class TestOpportunityNotification:
             (
                 {
                     "opportunity_attachments": {
+                        "before": None,
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
+                        "before": [{"attachment_id": 2}],
+                        "after": [],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
                         "before": [{"attachment_id": 1}, {"attachment_id": 34}],
                         "after": [{"attachment_id": 2}],
                     }
@@ -474,7 +492,6 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_documents_fields(documents_diffs)
-
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -949,8 +966,7 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>'
-                '<p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
                 '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
