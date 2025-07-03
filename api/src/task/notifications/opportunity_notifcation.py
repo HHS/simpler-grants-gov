@@ -371,8 +371,8 @@ class OpportunityNotificationTask(BaseNotificationTask):
             before = change["before"]
             after = change["after"]
             if field == "opportunity_attachments":
-                before_set = set(att["attachment_id"] for att in before)
-                after_set = set(att["attachment_id"] for att in after)
+                before_set = set(att["attachment_id"] for att in before if before)
+                after_set = set(att["attachment_id"] for att in after if after)
 
                 if after_set - before_set:
                     documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} added.<br>"

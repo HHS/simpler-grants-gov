@@ -456,6 +456,15 @@ class TestOpportunityNotification:
             (
                 {
                     "opportunity_attachments": {
+                        "before": [],
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
                         "before": [{"attachment_id": 1}, {"attachment_id": 34}],
                         "after": [{"attachment_id": 2}],
                     }
@@ -474,7 +483,6 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_documents_fields(documents_diffs)
-
         assert res == expected_html
 
     @pytest.mark.parametrize(
