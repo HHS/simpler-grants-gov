@@ -49,6 +49,7 @@ def build_opp_and_version(
     applicant_eligibility_description: str | None,
     opportunity_attachments: list,
     additional_info_url: str | None,
+    summary_description: str | None,
 ) -> OpportunityVersion:
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -78,6 +79,7 @@ def build_opp_and_version(
         applicant_types=applicant_types,
         applicant_eligibility_description=applicant_eligibility_description,
         additional_info_url=additional_info_url,
+        summary_description=summary_description,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -113,6 +115,7 @@ base_opal_fields = {
     "applicant_eligibility_description": "Not yet determined",
     "opportunity_attachments": [],
     "additional_info_url": None,
+    "summary_description": None,
 }
 
 OPAL = build_opp_and_version(
@@ -159,6 +162,7 @@ base_topaz_fields = {
     "applicant_eligibility_description": "No income",
     "opportunity_attachments": [],
     "additional_info_url": None,
+    "summary_description": "Summary",
 }
 
 TOPAZ = build_opp_and_version(
@@ -195,6 +199,7 @@ TOPAZ_ALL = build_opp_and_version(
     applicant_eligibility_description="Charter Schools only",
     opportunity_attachments=[{"attachment_id": 3}],
     additional_info_url="simpler-grants.gov",
+    summary_description="Climate research in mars",
 )
 
 
@@ -791,6 +796,28 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "description_diffs,expected_html",
+        [
+            ({"before": "testing", "after": None}, ""),
+            (
+                {"before": "testing", "after": "Updated description"},
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
+            ),
+        ],
+    )
+    def test_build_description_fields_content(
+        self,
+        db_session,
+        description_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_description_fields_content(description_diffs, 1)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -908,7 +935,8 @@ class TestOpportunityNotification:
                         "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
                         "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
                         '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>'
+                        '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                        '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                         "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
