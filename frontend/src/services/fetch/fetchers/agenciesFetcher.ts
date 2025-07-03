@@ -1,14 +1,31 @@
 "server only";
 
+import { uniq } from "lodash";
+import { STATUS_FILTER_DEFAULT_VALUES } from "src/constants/search";
+import { statusOptions } from "src/constants/searchFilterOptions";
 import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 
-export const performAgencySearch = async (
-  keyword?: string,
-): Promise<RelevantAgencyRecord[]> => {
+export const performAgencySearch = async ({
+  keyword,
+  selectedStatuses,
+}: {
+  keyword?: string;
+  selectedStatuses?: string[];
+} = {}): Promise<RelevantAgencyRecord[]> => {
+  // this works but need to adjust callers to send in blanks when we want ANY rather than blanks when we want DEFAULT
+  const statuses = selectedStatuses?.length
+    ? uniq(selectedStatuses.concat(STATUS_FILTER_DEFAULT_VALUES))
+    : statusOptions.map(({ value }) => value);
+
+  // const statuses = selectedStatuses?.length
+  //   ? uniq(selectedStatuses.concat(STATUS_FILTER_DEFAULT_VALUES))
+  //   : STATUS_FILTER_DEFAULT_VALUES;
+
+  console.log("!!! statuses", statuses);
   const requestBody: JSONRequestBody = {
     pagination: {
       page_offset: 1,
@@ -22,7 +39,7 @@ export const performAgencySearch = async (
     },
     filters: {
       opportunity_statuses: {
-        one_of: ["posted", "forecasted"],
+        one_of: statuses,
       },
     },
   };
@@ -50,10 +67,16 @@ export const performAgencySearch = async (
 
 export const searchAndFlattenAgencies = async (
   keyword: string,
+  selectedStatuses?: Set<string>,
 ): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
-    agencies = await performAgencySearch(keyword);
+    agencies = await performAgencySearch({
+      keyword,
+      selectedStatuses: selectedStatuses
+        ? Array.from(selectedStatuses)
+        : undefined,
+    });
   } catch (e) {
     console.error("Error searching agency options");
     throw e;

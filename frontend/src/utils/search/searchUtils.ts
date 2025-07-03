@@ -1,6 +1,6 @@
 import {
-  SEARCH_DEFAULT_VALUES,
   SEARCH_NO_STATUS_VALUE,
+  STATUS_FILTER_DEFAULT_VALUES,
 } from "src/constants/search";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { FilterOption } from "src/types/search/searchFilterTypes";
@@ -47,7 +47,7 @@ export function convertSearchParamsToProperTypes(
 // and to reset that status params none if status=none is set
 function paramToSet(param: QuerySetParam, type?: string): Set<string> {
   if (!param && type === "status") {
-    return new Set(SEARCH_DEFAULT_VALUES);
+    return new Set(STATUS_FILTER_DEFAULT_VALUES);
   }
 
   if (!param || (type === "status" && param === SEARCH_NO_STATUS_VALUE)) {
