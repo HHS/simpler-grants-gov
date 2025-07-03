@@ -103,4 +103,4 @@ def _get_cfda_details(
 
 
 def _get_opened_competitions(competitions: Sequence[Competition]) -> list[Competition]:
-    return list(filter(lambda competition: competition.is_open, competitions))
+    return list(filter(lambda competition: competition.has_open_date, competitions))
