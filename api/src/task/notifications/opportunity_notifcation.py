@@ -343,9 +343,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 removed = sorted(set(before) - set(after), key=lambda x: x.value)
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} {[self._format_slug(e_type.value) for e_type in added]}.<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
                 if removed:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} {[self._format_slug(e_type.value) for e_type in removed]}.<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
 
             if field == "applicant_eligibility_description":
                 stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"

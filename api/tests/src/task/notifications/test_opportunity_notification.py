@@ -921,8 +921,8 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                 '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
                 '<p style="padding-left: 20px;">Eligibility</p>'
-                "<p style=\"padding-left: 40px;\">•  Additional eligibility criteria include: ['Public and state institutions of higher education'].<br>"
-                "<p style=\"padding-left: 40px;\">•  Removed eligibility criteria include: ['Public and indian housing authorities'].<br>"
+                '<p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
                 '<p style="padding-left: 20px;">Documents</p>'
                 '<p style="padding-left: 40px;">•  One or more new documents were added.<br>'
