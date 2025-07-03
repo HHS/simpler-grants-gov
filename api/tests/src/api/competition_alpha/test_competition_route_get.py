@@ -183,6 +183,8 @@ def test_competition_get_200_is_open(
         opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
     )
 
+    assert competition.has_open_date == expected_is_open
+
     resp = client.get(
         f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
     )
@@ -263,6 +265,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     )
 
     # Test disabled competition
+    assert competition_disabled.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_disabled.competition_id}",
         headers={"X-Auth": api_auth_token},
@@ -271,6 +274,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert resp.get_json()["data"]["is_open"] is False
 
     # Test enabled and open competition
+    assert competition_enabled_open.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_open.competition_id}",
         headers={"X-Auth": api_auth_token},
@@ -279,6 +283,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert resp.get_json()["data"]["is_open"] is True
 
     # Test enabled but closed competition
+    assert competition_enabled_closed.has_open_date is False
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_closed.competition_id}",
         headers={"X-Auth": api_auth_token},
