@@ -56,7 +56,7 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    # "opportunity_attachments": "One or more new documents were",
+    # "opportunity_attachments": "One or more new documents were", # temporarily skip opportunity_attachment change
     "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
