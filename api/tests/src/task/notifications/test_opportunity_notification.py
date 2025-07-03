@@ -919,7 +919,7 @@ class TestOpportunityNotification:
         description_diffs,
         expected_html,
         set_env_var_for_email_notification_config,
-        notification_task
+        notification_task,
     ):
         res = notification_task._build_description_fields_content(description_diffs, 1)
         assert res == expected_html
@@ -1032,7 +1032,7 @@ class TestOpportunityNotification:
         db_session,
         enable_factory_create,
         set_env_var_for_email_notification_config,
-        notification_task
+        notification_task,
     ):
         TOPZ_ALL = build_opp_and_version(
             revision_number=2,
