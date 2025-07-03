@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { redirectLogoutPaths } from "src/constants/redirectLogout";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -14,7 +15,6 @@ import {
 
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { redirectLogout } from "./redirectLogout";
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
@@ -133,14 +133,9 @@ export const UserControl = () => {
       method: "POST",
     });
 
-    let redirectToLogout = false;
-    redirectLogout.forEach((path) => {
-      const base = path.substring(1); // remove the forward-trailing '/' for the basepath to have a valid regex
-      const re = new RegExp(base);
-      if (re.test(pathname)) {
-        redirectToLogout = true;
-      }
-    });
+    const redirectToLogout = redirectLogoutPaths.some((pathRegexp) =>
+      pathRegexp.test(pathname),
+    );
 
     logoutLocalUser();
 
