@@ -25,7 +25,7 @@ const cspHeader = `
     base-uri 'self';
     media-src 'self';
     style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com/;
-    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
+    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/ https://ethn.io;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
