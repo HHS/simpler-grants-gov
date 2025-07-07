@@ -96,7 +96,7 @@ const ApplicationContainer = ({
       <InformationCard
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
-        applicationSubmitted={applicationStatus === "submitted"}
+        applicationSubmitted={applicationStatus === "submitted" || success}
         submissionLoading={loading}
       />
       <OpportunityCard opportunityOverview={opportunity} />
