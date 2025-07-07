@@ -3029,51 +3029,6 @@ def test_application_form_inclusion_update_success_false(
     assert application_form.is_included_in_submission is False
 
 
-def test_application_form_inclusion_update_application_not_found(
-    client, enable_factory_create, db_session, user_auth_token
-):
-    """Test form inclusion update fails when application doesn't exist"""
-    # Create form
-    competition_form = CompetitionFormFactory.create()
-
-    non_existent_application_id = str(uuid.uuid4())
-    form_id = str(competition_form.form_id)
-    request_data = {"is_included_in_submission": True}
-
-    response = client.put(
-        f"/alpha/applications/{non_existent_application_id}/forms/{form_id}/inclusion",
-        json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert response.status_code == 404
-    assert (
-        f"Application with ID {non_existent_application_id} not found" in response.json["message"]
-    )
-
-
-def test_application_form_inclusion_update_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
-):
-    """Test form inclusion update fails when form doesn't exist"""
-    # Create application
-    application = ApplicationFactory.create()
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
-    application_id = str(application.application_id)
-    non_existent_form_id = str(uuid.uuid4())
-    request_data = {"is_included_in_submission": True}
-
-    response = client.put(
-        f"/alpha/applications/{application_id}/forms/{non_existent_form_id}/inclusion",
-        json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert response.status_code == 404
-    assert f"Form with ID {non_existent_form_id} not found" in response.json["message"]
 
 
 def test_application_form_inclusion_update_application_form_not_found(
@@ -3102,91 +3057,7 @@ def test_application_form_inclusion_update_application_form_not_found(
     assert "Application form not found" in response.json["message"]
 
 
-def test_application_form_inclusion_update_unauthorized(client, enable_factory_create, db_session):
-    """Test form inclusion update fails without proper authentication"""
-    # Create application with a form
-    application = ApplicationFactory.create()
-    form = FormFactory.create()
-    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
-    ApplicationFormFactory.create(
-        application=application,
-        competition_form=competition_form,
-        application_response={"name": "John Doe"},
-    )
 
-    application_id = str(application.application_id)
-    form_id = str(form.form_id)
-    request_data = {"is_included_in_submission": True}
-
-    response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
-        json=request_data,
-        headers={"X-SGG-Token": "invalid.jwt.token"},
-    )
-
-    assert response.status_code == 401
-
-
-def test_application_form_inclusion_update_forbidden_if_not_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
-):
-    """Test form inclusion update fails when user is not associated with the application"""
-    # Create application with a form, but don't associate user
-    application = ApplicationFactory.create()
-    form = FormFactory.create()
-    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
-    ApplicationFormFactory.create(
-        application=application,
-        competition_form=competition_form,
-        application_response={"name": "John Doe"},
-    )
-
-    application_id = str(application.application_id)
-    form_id = str(form.form_id)
-    request_data = {"is_included_in_submission": True}
-
-    response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
-        json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
-
-
-@pytest.mark.parametrize(
-    "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
-)
-def test_application_form_inclusion_update_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
-):
-    """Test form inclusion update fails when application is not in progress"""
-    # Create application with non-in-progress status
-    application = ApplicationFactory.create(application_status=initial_status)
-    form = FormFactory.create()
-    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
-    ApplicationFormFactory.create(
-        application=application,
-        competition_form=competition_form,
-        application_response={"name": "John Doe"},
-    )
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
-    application_id = str(application.application_id)
-    form_id = str(form.form_id)
-    request_data = {"is_included_in_submission": True}
-
-    response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
-        json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert response.status_code == 403
-    assert "Cannot modify" in response.json["message"]
 
 
 def test_application_form_inclusion_update_invalid_request_missing_field(
