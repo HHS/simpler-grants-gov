@@ -42,8 +42,12 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
-        factories.OpportunityFactory.create_batch(size=2, agency_code="CLOSED", is_closed_summary=True)
-        factories.OpportunityFactory.create_batch(size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True)
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="CLOSED", is_closed_summary=True
+        )
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True
+        )
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
