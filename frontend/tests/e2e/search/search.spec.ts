@@ -54,8 +54,8 @@ test.describe("Search page tests", () => {
       waitForFilterOptions(page, "agency"),
     ]);
 
-    await selectSortBy(page, "agencyDesc");
-    await expectSortBy(page, "agencyDesc");
+    await selectSortBy(page, "awardCeilingDesc");
+    await expectSortBy(page, "awardCeilingDesc");
 
     await fillSearchInputAndSubmit(searchTerm, page);
 
@@ -105,7 +105,7 @@ test.describe("Search page tests", () => {
     }
 
     // Expect search inputs are retained in the new tab
-    await expectSortBy(page, "agencyDesc");
+    await expectSortBy(page, "awardCeilingDesc");
     const searchInput = getSearchInput(page);
     await expect(searchInput).toHaveValue(searchTerm);
 
