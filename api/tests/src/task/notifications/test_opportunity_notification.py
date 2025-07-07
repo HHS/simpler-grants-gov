@@ -23,6 +23,7 @@ from src.task.notifications.constants import (
 )
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.util.string_utils import truncate_html_safe
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
@@ -194,6 +195,12 @@ class TestOpportunityNotification:
     @pytest.fixture(autouse=True)
     def user_with_email(self, db_session, user):
         return factories.LinkExternalUserFactory.create(user=user, email="test@example.com").user
+
+    @pytest.fixture
+    def set_truncation_threshold(self, monkeypatch):
+        monkeypatch.setattr(
+            "src.task.notifications.opportunity_notifcation.TRUNCATION_THRESHOLD", 50
+        )
 
     def test_email_notifications_collection(
         self,
@@ -788,12 +795,84 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "html_str,expected_html",
+        [
+            # Truncate mid-text inside inline tag <strong>, no closing tags
+            (
+                "<p>This is a <strong>very big description here!!!!",
+                "<p>This is a <strong>very big description here!!!!</strong>",
+            ),
+            # Truncate mid-text inside multiple inline tag
+            (
+                "<p>Some <strong>bold and <em>emphasized text here ",
+                "<p>Some <strong>bold and <em>emphasized text here </em></strong>",
+            ),
+            (
+                "div>first<div>second<div>another</div></div></div>",
+                "div>first<div>second<div>another",
+            ),
+            (
+                "<p>Hello <p><strong>i am here!!</strong></div></p>",
+                "<p>Hello <p><strong>i am here!!</strong>",
+            ),
+            # Truncate after closing an inline tag
+            (
+                "<p>This is a <strong>very long text that </strong>",
+                "<p>This is a <strong>very long text that </strong>",
+            ),
+            # Truncate mid-text after closing an inline tag
+            (
+                "<p>This is a <strong>very long text</strong> that ",
+                "<p>This is a <strong>very long text</strong> that ",
+            ),
+            # Self-closing tag inside truncated text (e.g. <br />)
+            (
+                "<div>This is a description<br/>with a break tag an",
+                "<div>This is a description<br/>with a break tag an",
+            ),
+            # Deeply nested HTML tags
+            (
+                "<section><div><p>This is <span>a deeply <strong>ne",
+                "<section><div><p>This is <span>a deeply <strong>ne</strong></span>",
+            ),
+            # Truncate after block level tag
+            (
+                "<section><p>Important text goes here</p></section>",
+                "<section><p>Important text goes here",
+            ),
+        ],
+    )
+    def test_truncate_html_safe(
+        self,
+        db_session,
+        html_str,
+        expected_html,
+        set_env_var_for_email_notification_config,
+        set_truncation_threshold,
+    ):
+
+        res = truncate_html_safe(html_str)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "description_diffs,expected_html",
         [
             ({"before": "testing", "after": None}, ""),
+            # Truncate
             (
-                {"before": "testing", "after": "Updated description"},
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
+                {
+                    "before": "testing",
+                    "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
+            ),
+            # Truncate with html tag
+            (
+                {
+                    "before": "testing",
+                    "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>',
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainab</strong><a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
             ),
         ],
     )
@@ -967,7 +1046,7 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
                 '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
