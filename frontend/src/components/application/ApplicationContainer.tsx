@@ -98,7 +98,7 @@ const ApplicationContainer = ({
         </Alert>
       )}
 
-      <ApplicantionValidationAlert
+      <ApplicationValidationAlert
         applicationForms={applicationForms}
         forms={forms}
         notStarted={notStarted}
@@ -120,7 +120,7 @@ const ApplicationContainer = ({
   );
 };
 
-const ApplicantionValidationAlert = ({
+const ApplicationValidationAlert = ({
   applicationForms,
   forms,
   notStarted,

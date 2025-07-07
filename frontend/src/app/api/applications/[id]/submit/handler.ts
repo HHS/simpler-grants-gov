@@ -21,7 +21,6 @@ export const submitApplicationHandler = async (
     const status = response.status_code;
 
     if (!response || (status !== 200 && status !== 422)) {
-      console.error("wtf");
       throw new ApiRequestError(
         `Error submitting application: ${response.message}`,
         "APIRequestError",

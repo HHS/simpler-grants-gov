@@ -27,7 +27,7 @@ export const handleStartApplication = async (
 };
 
 export const handleSubmitApplication = async (
-  applictionId: string,
+  applicationId: string,
   token: string,
 ): Promise<ApplicationSubmitApiResponse> => {
   const ssgToken = {
@@ -35,7 +35,7 @@ export const handleSubmitApplication = async (
   };
 
   const response = await fetchApplicationWithMethod("POST")({
-    subPath: `${applictionId}/submit`,
+    subPath: `${applicationId}/submit`,
     additionalHeaders: ssgToken,
   });
 

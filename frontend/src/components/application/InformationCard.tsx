@@ -216,11 +216,9 @@ export const SubmitApplicationButton = ({
   submitHandler: () => void;
 }) => {
   return (
-    <>
-      <Button type="button" disabled={!!loading} onClick={submitHandler}>
-        <USWDSIcon name="upload_file" />
-        {loading ? "Loading...  " : buttonText}
-      </Button>
-    </>
+    <Button type="button" disabled={!!loading} onClick={submitHandler}>
+      <USWDSIcon name="upload_file" />
+      {loading ? "Loading...  " : buttonText}
+    </Button>
   );
 };
