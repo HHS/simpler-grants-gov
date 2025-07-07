@@ -22,18 +22,20 @@ def update_application_form(
     db_session: db.Session,
     application_id: UUID,
     form_id: UUID,
-    application_response: dict,
     user: User,
+    application_response: dict | None = None,
+    is_included_in_submission: bool | None = None,
 ) -> tuple[ApplicationForm, list[ValidationErrorDetail]]:
     """
-    Update an application form response.
+    Update an application form response and/or inclusion status.
 
     Args:
         db_session: Database session
         application_id: UUID of the application
         form_id: UUID of the form
-        application_response: The form response data
         user: User attempting to update the application form
+        application_response: The form response data (optional for inclusion-only updates)
+        is_included_in_submission: Whether this form should be included in submission
 
     Returns:
         Tuple of (ApplicationForm, warnings list)
@@ -41,7 +43,15 @@ def update_application_form(
     Raises:
         Flask error with 404 status if application or form doesn't exist
         Flask error with 403 status if user is not authorized to access the application
+        Flask error with 400 status if neither application_response nor is_included_in_submission provided
     """
+    # Validate that at least one update is being made
+    if application_response is None and is_included_in_submission is None:
+        raise_flask_error(
+            400,
+            "Either application_response or is_included_in_submission must be provided",
+        )
+
     # Check if application exists
     application = get_application(db_session, application_id, user)
 
@@ -72,23 +82,42 @@ def update_application_form(
 
     if application_form:
         # Update existing application form
-        application_form.application_response = application_response
+        if application_response is not None:
+            application_form.application_response = application_response
+        if is_included_in_submission is not None:
+            application_form.is_included_in_submission = is_included_in_submission
     else:
-        # Create new application form
+        # Create new application form (requires application_response)
+        if application_response is None:
+            raise_flask_error(
+                404,
+                f"Application form not found for application {application_id} and form {form_id}",
+            )
+
         application_form = ApplicationForm(
             application=application,
             competition_form=competition_form,
             application_response=application_response,
+            is_included_in_submission=is_included_in_submission,
         )
         db_session.add(application_form)
 
-    # Get a list of validation warnings (also sets form status)
-    warnings: list[ValidationErrorDetail] = validate_application_form(
-        application_form, ApplicationAction.MODIFY
-    )
+    # Only validate if we're updating form content
+    if application_response is not None:
+        warnings: list[ValidationErrorDetail] = validate_application_form(
+            application_form, ApplicationAction.MODIFY
+        )
+    else:
+        warnings = []
+
+    operation_type = []
+    if application_response is not None:
+        operation_type.append("form response")
+    if is_included_in_submission is not None:
+        operation_type.append("inclusion status")
 
     logger.info(
-        "Updated application form response",
+        f"Updated application {' and '.join(operation_type)}",
         extra={
             "application_id": str(application_id),
             "form_id": str(form_id),

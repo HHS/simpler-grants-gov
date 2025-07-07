@@ -13,6 +13,8 @@ from src.api.application_alpha.application_schemas import (
     ApplicationAttachmentUpdateRequestSchema,
     ApplicationAttachmentUpdateResponseSchema,
     ApplicationFormGetResponseSchema,
+    ApplicationFormInclusionUpdateRequestSchema,
+    ApplicationFormInclusionUpdateResponseSchema,
     ApplicationFormUpdateRequestSchema,
     ApplicationFormUpdateResponseSchema,
     ApplicationGetResponseSchema,
@@ -113,6 +115,7 @@ def application_form_update(
     logger.info("PUT /alpha/applications/:application_id/forms/:form_id")
 
     application_response = json_data["application_response"]
+    is_included_in_submission = json_data.get("is_included_in_submission")
 
     # Get user from token session
     token_session = api_jwt_auth.get_user_token_session()
@@ -121,10 +124,54 @@ def application_form_update(
     with db_session.begin():
         # Call the service to update the application form
         application_form, warnings = update_application_form(
-            db_session, application_id, form_id, application_response, user
+            db_session,
+            application_id,
+            form_id,
+            user,
+            application_response,
+            is_included_in_submission,
         )
 
     return response.ApiResponse(message="Success", data=application_form, warnings=warnings)
+
+
+@application_blueprint.put("/applications/<uuid:application_id>/forms/<uuid:form_id>/inclusion")
+@application_blueprint.input(ApplicationFormInclusionUpdateRequestSchema, location="json")
+@application_blueprint.output(ApplicationFormInclusionUpdateResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_form_inclusion_update(
+    db_session: db.Session, application_id: UUID, form_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update whether an application form should be included in submission"""
+    add_extra_data_to_current_request_logs({"application_id": application_id, "form_id": form_id})
+    logger.info("PUT /alpha/applications/:application_id/forms/:form_id/inclusion")
+
+    is_included_in_submission = json_data["is_included_in_submission"]
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        # Use the existing service with inclusion-only update
+        application_form, _ = update_application_form(
+            db_session,
+            application_id,
+            form_id,
+            user,
+            is_included_in_submission=is_included_in_submission,
+        )
+
+    return response.ApiResponse(
+        message="Success",
+        data={
+            "application_id": application_form.application_id,
+            "form_id": application_form.form_id,
+            "is_included_in_submission": application_form.is_included_in_submission,
+        },
+    )
 
 
 @application_blueprint.get(

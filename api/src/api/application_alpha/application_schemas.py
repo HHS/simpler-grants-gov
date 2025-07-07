@@ -40,7 +40,20 @@ class ApplicationUpdateResponseSchema(AbstractResponseSchema):
 
 
 class ApplicationFormUpdateRequestSchema(Schema):
-    application_response = fields.Dict(required=True)
+    application_response = fields.Dict(
+        required=True,
+        metadata={
+            "description": "The form response data to update",
+            "example": {"name": "John Doe", "email": "john@example.com"},
+        },
+    )
+    is_included_in_submission = fields.Boolean(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Whether this form should be included in the application submission"
+        },
+    )
 
 
 class ApplicationFormUpdateResponseDataSchema(Schema):
@@ -49,6 +62,11 @@ class ApplicationFormUpdateResponseDataSchema(Schema):
     application_form_status = fields.Enum(
         ApplicationFormStatus,
         metadata={"description": "Status indicating how much of a form has been filled out"},
+    )
+
+    is_included_in_submission = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether this form is included in the application submission"},
     )
 
 
@@ -127,6 +145,11 @@ class ApplicationFormGetResponseDataSchema(Schema):
 
     is_required = fields.Boolean(
         metadata={"description": "Whether this form is required for the application"}
+    )
+
+    is_included_in_submission = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether this form is included in the application submission"},
     )
 
     application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
@@ -224,3 +247,24 @@ class ApplicationAttachmentUpdateRequestSchema(Schema):
 
 class ApplicationAttachmentUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentCreateSchema())
+
+
+class ApplicationFormInclusionUpdateRequestSchema(Schema):
+    is_included_in_submission = fields.Boolean(
+        required=True,
+        metadata={
+            "description": "Whether this form should be included in the application submission"
+        },
+    )
+
+
+class ApplicationFormInclusionUpdateResponseDataSchema(Schema):
+    application_id = fields.UUID()
+    form_id = fields.UUID()
+    is_included_in_submission = fields.Boolean(
+        metadata={"description": "Whether this form is included in the application submission"},
+    )
+
+
+class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationFormInclusionUpdateResponseDataSchema())
