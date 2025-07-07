@@ -2,6 +2,7 @@ import logging
 import random
 
 import click
+from sqlalchemy import select
 
 import src.adapters.db as db
 import src.logging
