@@ -24,11 +24,14 @@ jest.mock("src/utils/search/filterUtils", () => ({
 
 describe("performAgencySearch", () => {
   it("calls request function with correct parameters", async () => {
-    const result = await performAgencySearch("anything");
+    const result = await performAgencySearch({
+      keyword: "anything",
+      selectedStatuses: ["forecasted"],
+    });
 
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
-        filters: { opportunity_statuses: { one_of: ["posted", "forecasted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted", "posted"] } },
         pagination: {
           page_offset: 1,
           page_size: 1500,
@@ -52,13 +55,12 @@ describe("searchAndFlattenAgencies", () => {
     mockFetchAgencies.mockResolvedValue(fakeResponse);
     mockSearchAgencies.mockResolvedValue(fakeResponse);
     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-    // mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
   });
   afterEach(() => {
     jest.resetAllMocks();
   });
   it("calls fetch, and flattens", async () => {
-    await searchAndFlattenAgencies("anything");
+    await searchAndFlattenAgencies("anything", ["forecasted"]);
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
         pagination: {
@@ -71,7 +73,7 @@ describe("searchAndFlattenAgencies", () => {
             },
           ],
         },
-        filters: { opportunity_statuses: { one_of: ["posted", "forecasted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted", "posted"] } },
         query: "anything",
       },
     });

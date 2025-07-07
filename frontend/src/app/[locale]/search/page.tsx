@@ -80,7 +80,6 @@ function Search({ searchParams, params }: SearchPageProps) {
               >
                 <SaveSearchPanel />
                 <SearchFilters
-                  rawStatus={resolvedSearchParams?.status?.split(",") || []}
                   opportunityStatus={status}
                   eligibility={eligibility}
                   category={category}

@@ -14,9 +14,6 @@ export const performAgencySearch = async ({
   keyword?: string;
   selectedStatuses?: string[];
 } = {}): Promise<RelevantAgencyRecord[]> => {
-  const statuses = getStatusValueForAgencySearch(selectedStatuses);
-
-  console.log("!!! statuses", statuses);
   const requestBody: JSONRequestBody = {
     pagination: {
       page_offset: 1,
@@ -30,7 +27,7 @@ export const performAgencySearch = async ({
     },
     filters: {
       opportunity_statuses: {
-        one_of: statuses,
+        one_of: getStatusValueForAgencySearch(selectedStatuses),
       },
     },
   };
@@ -58,15 +55,13 @@ export const performAgencySearch = async ({
 
 export const searchAndFlattenAgencies = async (
   keyword: string,
-  selectedStatuses?: Set<string>,
+  selectedStatuses?: string[],
 ): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
     agencies = await performAgencySearch({
       keyword,
-      selectedStatuses: selectedStatuses
-        ? Array.from(selectedStatuses)
-        : undefined,
+      selectedStatuses: selectedStatuses || undefined,
     });
   } catch (e) {
     console.error("Error searching agency options");

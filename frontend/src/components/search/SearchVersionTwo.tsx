@@ -41,7 +41,7 @@ export function SearchVersionTwo({
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
   const agencyListPromise = performAgencySearch({
-    selectedStatuses: Array.from(resolvedSearchParams.status || []),
+    selectedStatuses: Array.from(convertedSearchParams.status),
   });
 
   return (

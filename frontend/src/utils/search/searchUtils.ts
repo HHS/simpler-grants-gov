@@ -111,14 +111,12 @@ export const getSiblingOptionValues = (
     : [];
 };
 
+// defaults will already have been applied upstream
 export const getStatusValueForAgencySearch = (statuses?: string[]) => {
-  // if empty - apply defaults
+  // if empty - apply any / all
   if (!statuses?.length) {
-    return STATUS_FILTER_DEFAULT_VALUES;
-  }
-  // if "none" - apply any / all
-  if (statuses.includes(SEARCH_NO_STATUS_VALUE)) {
     return statusOptions.map(({ value }) => value);
   }
+  // always include posted and forecasted
   return uniq(statuses.concat(STATUS_FILTER_DEFAULT_VALUES));
 };
