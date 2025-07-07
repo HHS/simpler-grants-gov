@@ -90,20 +90,14 @@ class Competition(ApiSchemaTable, TimestampMixin):
     )
 
     @property
-    def is_open(self) -> bool:
-        """The competition is open if the following are all true:
-        * The competition has is_simpler_grants_enabled set to True
+    def has_open_date(self) -> bool:
+        """The competition has an open date if:
         * It is on/after the competition opening date OR the opening date is null
         * It is on/before the competition close date + grace period OR the close date is null
 
         Effectively, if the date is null, the check isn't necessary, a competition
         with both opening and closing as null is open regardless of date.
         """
-
-        # Check if simpler grants is enabled for this competition first
-        if self.is_simpler_grants_enabled is not True:
-            return False
-
         current_date = get_now_us_eastern_date()
 
         # Check whether we're on/after the current date
@@ -127,6 +121,17 @@ class Competition(ApiSchemaTable, TimestampMixin):
         # If it didn't hit any of the above cases
         # then we consider it to be open
         return True
+
+    @property
+    def is_open(self) -> bool:
+        """The competition is open if the following are all true:
+        * The competition has is_simpler_grants_enabled set to True
+        * The is_open_date property resolves to True
+        """
+        # Check if simpler grants is enabled for this competition first
+        if self.is_simpler_grants_enabled is not True:
+            return False
+        return self.has_open_date
 
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):

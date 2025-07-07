@@ -50,13 +50,15 @@ export const logRequest = (request: NextRequest) => {
     headers.get("sec-fetch-dest") === "empty";
 
   if (!isPrefetch) {
-    logger.info({
-      url,
-      method,
-      userAgent: headers.get("user-agent"),
-      acceptLanguage: headers.get("accept-language"),
-      awsTraceId: headers.get("X-Amz-Cf-Id"),
-    });
+    if (!url.endsWith("/health") || Math.random() * 10 <= 1) {
+      logger.info({
+        url,
+        method,
+        userAgent: headers.get("user-agent"),
+        acceptLanguage: headers.get("accept-language"),
+        awsTraceId: headers.get("X-Amz-Cf-Id"),
+      });
+    }
   }
 };
 

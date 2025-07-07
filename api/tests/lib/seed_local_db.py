@@ -1,18 +1,16 @@
 import logging
 import random
-import uuid
 
 import click
-from sqlalchemy import select
 
 import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.sf424 import SF424_v4_0
+from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
@@ -64,28 +62,7 @@ def _build_opportunities(
     logger.info("Finished creating opportunities")
 
 
-def _build_competitions(db_session: db.Session) -> None:
-    logger.info("Creating competitions")
-
-    # Statically create a competition with exactly one of our default forms
-    # Static to make development for frontend folks easier so they don't need
-    # to keep looking up the UUID
-    static_competition_id = uuid.UUID("fd7f5921-9585-48a5-ab0f-e726f4d1ef94")
-    static_competition = db_session.execute(
-        select(Competition).where(Competition.competition_id == static_competition_id)
-    ).scalar_one_or_none()
-    if static_competition is None:
-        competition = factories.CompetitionFactory.create(
-            competition_id=static_competition_id, competition_forms=[]
-        )
-        factories.CompetitionFormFactory.create(competition=competition)
-        big_form = factories.FormFactory.create(
-            form_json_schema=JSON_SCHEMA_FORM, form_name=FORM_NAME, form_ui_schema=UI_SCHEMA
-        )
-        factories.CompetitionFormFactory.create(competition=competition, form=big_form)
-
-    logger.info(f"Static competition for development exists with ID {str(static_competition_id)}")
-
+def _build_pilot_competition(db_session: db.Session) -> None:
     logger.info("Creating an opportunity setup like our pilot")
     pilot_competition = factories.CompetitionFactory.create(
         opportunity__opportunity_title="Local Pilot-equivalent Opportunity",
@@ -93,11 +70,17 @@ def _build_competitions(db_session: db.Session) -> None:
         with_instruction=True,
     )
 
-    # Create/update the sf424 form if it doesn't already exist
-    form_obj = db_session.merge(SF424_v4_0, load=True)
+    # Create/update the forms if they don't already exist
+    sf424 = db_session.merge(SF424_v4_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=form_obj, is_required=True
+        competition=pilot_competition, form=sf424, is_required=True
     )
+
+    sf424a = db_session.merge(SF424a_v1_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sf424a, is_required=True
+    )
+
     logger.info(
         f"Created a pilot-like opportunity - http://localhost:3000/opportunity/{pilot_competition.opportunity_id}"
     )
@@ -132,6 +115,37 @@ def _build_user_saved_opportunities_and_searches(db_session: db.Session) -> None
                 search_query={"keywords": f"keyword {i + 1}"},
                 searched_opportunity_ids=selected_opportunities,
             )
+
+
+def _build_simple_competition():
+    logger.info("Creating a very simple competition for local development")
+
+    simple_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Local Very Simple Opportunity",
+        competition_forms=[],
+        with_instruction=True,
+    )
+
+    factories.CompetitionFormFactory.create(
+        competition=simple_competition, is_required=True, form__with_instruction=True
+    )
+    factories.CompetitionFormFactory.create(
+        competition=simple_competition,
+        is_required=False,
+        form__form_name=FORM_NAME,
+        form__form_json_schema=JSON_SCHEMA_FORM,
+        form__form_ui_schema=UI_SCHEMA,
+    )
+
+    logger.info(
+        f"Created a very simple local opportunity - http://localhost:3000/opportunity/{simple_competition.opportunity_id}"
+    )
+
+
+def _build_competitions(db_session: db.Session) -> None:
+    logger.info("Creating competitions")
+    _build_simple_competition()
+    _build_pilot_competition(db_session)
 
 
 @click.command()
