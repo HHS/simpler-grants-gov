@@ -17,6 +17,11 @@ from sqlalchemy.orm import selectinload
 from src.util import file_util
 from dataclasses import dataclass, field
 import src.adapters.db as db
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class SubmissionContainer:
@@ -34,9 +39,9 @@ class SubmissionContainer:
             return file_name
 
         i = 1
-        file_path = Path(file_name)
+        original_filename = file_name
         while file_name in self.file_names_in_zip:
-            file_name = file_path.stem + f"-{i}" + "".join(file_path.suffixes)
+            file_name = f"{i}-{original_filename}"
             i+= 1
 
         self.file_names_in_zip.add(file_name)
@@ -53,18 +58,34 @@ class CreateApplicationSubmissionTask(Task):
     class Metrics(StrEnum):
         APPLICATION_PROCESSED_COUNT = "application_processed_count"
 
+
     def run_task(self) -> None:
         submitted_applications = self.fetch_applications()
 
         for application in submitted_applications:
-            self.process_application(application)
+            try:
+                self.process_application(application)
+            except Exception:
+                # If for whatever reason we fail to create an application
+                # submission, we'll log an error and continue on, hoping
+                # we can process a different one.
+                logger.exception("Failed to create an application submission", extra={"application_id": application.application_id})
 
     def fetch_applications(self) -> Sequence[Application]:
         # TODO - fetch more
-        return self.db_session.scalars(select(Application).where(Application.application_status == ApplicationStatus.SUBMITTED)).all()
+        return self.db_session.scalars(
+            select(Application)
+            .where(Application.application_status == ApplicationStatus.SUBMITTED)
+            .options(
+                selectinload(Application.application_attachments),
+                selectinload(Application.application_forms),
+                selectinload(Application.competition)
+            )
+        ).all()
 
-    def process_application(self, application: Application) -> None:
+    def process_application(self, application: Application) -> str: # TODO - don't return anything
         """TODO"""
+        logger.info("Processing application submission", extra={"application_id": application.application_id})
         self.increment(self.Metrics.APPLICATION_PROCESSED_COUNT)
 
         s3_path = build_s3_application_submission_path(self.s3_config, application)
@@ -72,22 +93,27 @@ class CreateApplicationSubmissionTask(Task):
             with zipfile.ZipFile(outfile, "w") as submission_zip:
 
                 submission_container = SubmissionContainer(application, submission_zip)
-
+                # TODO - when we add PDF form logic, call it here.
                 self.process_application_attachments(submission_container)
+                # TODO - when we add the metadata logic, add it here
 
-        # TODO
-        # application.application_status = ApplicationStatus.ACCEPTED
+        # TODO - add submission path to the DB
 
+        application.application_status = ApplicationStatus.ACCEPTED
+
+        return s3_path
 
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         for application_attachment in submission.application.application_attachments:
             with file_util.open_stream(application_attachment.file_location, "rb") as attachment_file:
 
-                # Handle duplicate file names in zip
-
-                with submission.submission_zip.open(application_attachment.file_name, "w") as file_in_zip:
+                # Copy the contents of the file to the ZIP, renaming the file if it has
+                # the same filename as something already in the ZIP
+                file_name_in_zip = submission.get_file_name_in_zip(application_attachment.file_name)
+                with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
+                # TODO - add metadata here about the file.
 
 def build_s3_application_submission_path(s3_config: S3Config, application: Application) -> str:
     """TODO"""
@@ -99,7 +125,7 @@ def build_s3_application_submission_path(s3_config: S3Config, application: Appli
         str(application.application_id),
         "submissions",
         #str() # TODO - submission ID should be here
-        "submission-123.zip" # TODO - actual name from something
+        f"submission-{application.application_id}.zip"
     )
 
 def adjust_file_name_for_dupes(file_name: str) -> str:
