@@ -480,7 +480,7 @@ def upgrade():
         sa.Column("form_family_id", sa.Integer(), nullable=True),
         sa.Column("opportunity_assistance_listing_id", sa.UUID(), nullable=True),
         sa.Column("is_electronic_required", sa.Boolean(), nullable=True),
-        sa.Column("expected_application_count", sa.Integer(), nullable=True),
+        sa.Column("expected_application_count", sa.BigInteger(), nullable=True),
         sa.Column("expected_application_size_mb", sa.BigInteger(), nullable=True),
         sa.Column("is_multi_package", sa.Boolean(), nullable=True),
         sa.Column("agency_download_url", sa.Text(), nullable=True),
