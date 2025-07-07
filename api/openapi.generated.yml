@@ -1192,6 +1192,54 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/forms/{form_id}/inclusion:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormInclusionUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update whether an application form should be included in submission
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -3345,6 +3393,11 @@ components:
         is_required:
           type: boolean
           description: Whether this form is required for the application
+        is_included_in_submission:
+          type:
+          - boolean
+          - 'null'
+          description: Whether this form is included in the application submission
         application_attachments:
           type: array
           items:
@@ -3809,7 +3862,16 @@ components:
       properties:
         application_response:
           type: object
+          description: The form response data to update
+          example:
+            name: John Doe
+            email: john@example.com
           additionalProperties: {}
+        is_included_in_submission:
+          type:
+          - boolean
+          - 'null'
+          description: Whether this form should be included in the application submission
       required:
       - application_response
     ApplicationFormUpdateResponseData:
@@ -3827,6 +3889,11 @@ components:
           - complete
           type:
           - string
+        is_included_in_submission:
+          type:
+          - boolean
+          - 'null'
+          description: Whether this form is included in the application submission
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -3858,6 +3925,43 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormInclusionUpdateRequest:
+      type: object
+      properties:
+        is_included_in_submission:
+          type: boolean
+          description: Whether this form should be included in the application submission
+      required:
+      - is_included_in_submission
+    ApplicationFormInclusionUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_included_in_submission:
+          type: boolean
+          description: Whether this form is included in the application submission
+    ApplicationFormInclusionUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationFormInclusionUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
