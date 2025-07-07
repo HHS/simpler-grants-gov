@@ -5,7 +5,6 @@ import { agencySearch } from "src/services/fetch/fetchers/clientAgenciesFetcher"
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterUtils";
 
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
@@ -26,9 +25,8 @@ export function AgencyFilterContent({
   allAgencies: FilterOption[];
   facetCounts: { [key: string]: number };
   topLevelQuery: Set<string>;
-  selectedStatuses?: Set<string>;
+  selectedStatuses?: string[];
 }) {
-  // const searchParams = useSearchParams();
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
   const [searchTerm, setSearchTerm] = useState<string>();
@@ -39,12 +37,7 @@ export function AgencyFilterContent({
         setAgencySearchResults(allAgencies);
         return;
       }
-      // const selectedStatuses = searchParams.get("status");
-      agencySearch(
-        agencySearchTerm,
-        // selectedStatuses ? selectedStatuses.split(",") : undefined,
-        selectedStatuses ? Array.from(selectedStatuses) : undefined,
-      )
+      agencySearch(agencySearchTerm, selectedStatuses || undefined)
         .then((searchResults) => {
           const searchResultsOptions =
             agenciesToSortedAndNestedFilterOptions(searchResults);

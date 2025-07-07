@@ -23,6 +23,7 @@ export default async function SearchFilters({
   opportunityStatus,
   topLevelAgency,
   searchResultsPromise,
+  rawStatus,
 }: {
   fundingInstrument: Set<string>;
   eligibility: Set<string>;
@@ -31,11 +32,12 @@ export default async function SearchFilters({
   opportunityStatus: Set<string>;
   topLevelAgency: Set<string>;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  rawStatus: string[];
 }) {
   const t = useTranslations("Search");
   const agenciesPromise = Promise.all([
     performAgencySearch({
-      selectedStatuses: Array.from(opportunityStatus),
+      selectedStatuses: rawStatus,
     }),
     searchResultsPromise,
   ]);
@@ -89,7 +91,7 @@ export default async function SearchFilters({
           query={agency}
           agencyOptionsPromise={agenciesPromise}
           topLevelQuery={topLevelAgency}
-          selectedStatuses={opportunityStatus}
+          selectedStatuses={rawStatus}
         />
       </Suspense>
       <SearchFilterAccordion

@@ -1,7 +1,9 @@
+import { uniq } from "lodash";
 import {
   SEARCH_NO_STATUS_VALUE,
   STATUS_FILTER_DEFAULT_VALUES,
 } from "src/constants/search";
+import { statusOptions } from "src/constants/searchFilterOptions";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { QuerySetParam } from "src/types/search/searchQueryTypes";
@@ -107,4 +109,16 @@ export const getSiblingOptionValues = (
         return acc;
       }, [] as string[])
     : [];
+};
+
+export const getStatusValueForAgencySearch = (statuses?: string[]) => {
+  // if empty - apply defaults
+  if (!statuses?.length) {
+    return STATUS_FILTER_DEFAULT_VALUES;
+  }
+  // if "none" - apply any / all
+  if (statuses.includes(SEARCH_NO_STATUS_VALUE)) {
+    return statusOptions.map(({ value }) => value);
+  }
+  return uniq(statuses.concat(STATUS_FILTER_DEFAULT_VALUES));
 };

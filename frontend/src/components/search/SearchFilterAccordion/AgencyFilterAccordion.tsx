@@ -18,7 +18,7 @@ export async function AgencyFilterAccordion({
   agencyOptionsPromise: Promise<[RelevantAgencyRecord[], SearchAPIResponse]>;
   topLevelQuery: Set<string>;
   className?: string;
-  selectedStatuses?: Set<string>;
+  selectedStatuses?: string[];
 }) {
   const t = useTranslations("Search");
 

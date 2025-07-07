@@ -1,13 +1,11 @@
 "server only";
 
-import { uniq } from "lodash";
-import { STATUS_FILTER_DEFAULT_VALUES } from "src/constants/search";
-import { statusOptions } from "src/constants/searchFilterOptions";
 import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
+import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
 
 export const performAgencySearch = async ({
   keyword,
@@ -16,14 +14,7 @@ export const performAgencySearch = async ({
   keyword?: string;
   selectedStatuses?: string[];
 } = {}): Promise<RelevantAgencyRecord[]> => {
-  // this works but need to adjust callers to send in blanks when we want ANY rather than blanks when we want DEFAULT
-  const statuses = selectedStatuses?.length
-    ? uniq(selectedStatuses.concat(STATUS_FILTER_DEFAULT_VALUES))
-    : statusOptions.map(({ value }) => value);
-
-  // const statuses = selectedStatuses?.length
-  //   ? uniq(selectedStatuses.concat(STATUS_FILTER_DEFAULT_VALUES))
-  //   : STATUS_FILTER_DEFAULT_VALUES;
+  const statuses = getStatusValueForAgencySearch(selectedStatuses);
 
   console.log("!!! statuses", statuses);
   const requestBody: JSONRequestBody = {
