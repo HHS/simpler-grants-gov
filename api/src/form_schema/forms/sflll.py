@@ -500,8 +500,10 @@ FORM_RULE_SCHEMA = {
     "federal_program_name": {"gg_pre_population": {"rule": "assistance_listing_program_title"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
     ##### POST-POPULATION RULES
-    "signed_date": {"gg_post_population": {"rule": "current_date"}},
-    "signature": {"gg_post_population": {"rule": "signature"}},
+    "signature_block": {
+        "signed_date": {"gg_post_population": {"rule": "current_date"}},
+        "signature": {"gg_post_population": {"rule": "signature"}},
+    },
 }
 
 SFLLL_v2_0 = Form(
