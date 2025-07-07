@@ -24,8 +24,8 @@
     "test:pa11y-mobile": "pa11y-ci --config .pa11yci-mobile.json --sitemap http://localhost:3000/sitemap.xml",
     "test-update": "jest --update-snapshot",
     "test-watch": "jest --watch",
-    "test:e2e": "npx playwright test --config ./tests/playwright.config.ts",
-    "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui",
+    "test:e2e": "npx playwright test --config ./tests/playwright.config.ts --workers 10",
+    "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui --workers 10",
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
