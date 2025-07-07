@@ -8,6 +8,7 @@ import {
   convertSearchParamsToProperTypes,
   getAgencyParent,
   getSiblingOptionValues,
+  getStatusValueForAgencySearch,
   paramsToFormattedQuery,
   paramToDateRange,
 } from "src/utils/search/searchUtils";
@@ -143,5 +144,23 @@ describe("getSiblingOptionValues", () => {
         },
       ]),
     ).toEqual(["parent-sibling", "parent-another-sibling"]);
+  });
+});
+
+describe("getStatusValueForAgencySearch", () => {
+  it("returns all options if passed empty status array", () => {
+    expect(getStatusValueForAgencySearch([])).toEqual([
+      "forecasted",
+      "posted",
+      "closed",
+      "archived",
+    ]);
+  });
+  it("returns default options plus any passed options", () => {
+    expect(getStatusValueForAgencySearch(["closed"])).toEqual([
+      "closed",
+      "forecasted",
+      "posted",
+    ]);
   });
 });

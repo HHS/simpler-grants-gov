@@ -12,6 +12,9 @@ const fakeResponse = {
 const mockFetchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockSearchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockFlattenAgencies = jest.fn().mockReturnValue(fakeAgencyResponseData);
+const mockGetStatusValueForAgencySearch = jest
+  .fn()
+  .mockReturnValue(["forecasted"]);
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAgencies: (arg: unknown): unknown => mockFetchAgencies(arg),
@@ -20,6 +23,11 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 
 jest.mock("src/utils/search/filterUtils", () => ({
   flattenAgencies: (arg: unknown): unknown => mockFlattenAgencies(arg),
+}));
+
+jest.mock("src/utils/search/searchUtils", () => ({
+  getStatusValueForAgencySearch: (arg: unknown) =>
+    mockGetStatusValueForAgencySearch(arg) as unknown,
 }));
 
 describe("performAgencySearch", () => {
@@ -31,7 +39,7 @@ describe("performAgencySearch", () => {
 
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
-        filters: { opportunity_statuses: { one_of: ["forecasted", "posted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         pagination: {
           page_offset: 1,
           page_size: 1500,
@@ -73,7 +81,7 @@ describe("searchAndFlattenAgencies", () => {
             },
           ],
         },
-        filters: { opportunity_statuses: { one_of: ["forecasted", "posted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         query: "anything",
       },
     });
