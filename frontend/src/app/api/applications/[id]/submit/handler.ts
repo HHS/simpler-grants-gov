@@ -17,7 +17,6 @@ export const submitApplicationHandler = async (
       applicationId,
       session.token,
     );
-
     const status = response.status_code;
 
     if (!response || (status !== 200 && status !== 422)) {
@@ -32,7 +31,7 @@ export const submitApplicationHandler = async (
         status === 200
           ? "Application submit success"
           : "Validation errors for submitted application",
-      data: response?.data,
+      data: response,
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);

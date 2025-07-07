@@ -2,7 +2,7 @@
 
 import {
   ApplicationSubmitApiResponse,
-  FormValidationErrors,
+  ApplicationSubmitResponse,
 } from "src/types/applicationResponseTypes";
 
 interface ClientApplicationStartResponse {
@@ -37,7 +37,7 @@ export const startApplication = async (
 
 export const submitApplication = async (
   applicationId: string,
-): Promise<FormValidationErrors> => {
+): Promise<ApplicationSubmitResponse> => {
   const res = await fetch(`/api/applications/${applicationId}/submit`, {
     method: "POST",
   });

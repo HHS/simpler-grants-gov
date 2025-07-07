@@ -60,8 +60,15 @@ export interface ApplicationStartApiResponse extends APIResponse {
   };
 }
 
-export interface ApplicationSubmitApiResponse extends APIResponse {
-  data: FormValidationErrors;
+export interface ApplicationSubmitResponse {
+  data: object;
+  errors?: FormValidationWarning[];
+  internal_request_id?: string;
+}
+
+export interface ApplicationSubmitApiResponse
+  extends Omit<APIResponse, "errors"> {
+  data: ApplicationSubmitResponse;
 }
 
 export interface ApplicationFormDetailApiResponse extends APIResponse {
