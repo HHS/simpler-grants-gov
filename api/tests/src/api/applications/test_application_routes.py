@@ -3029,8 +3029,6 @@ def test_application_form_inclusion_update_success_false(
     assert application_form.is_included_in_submission is False
 
 
-
-
 def test_application_form_inclusion_update_application_form_not_found(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
@@ -3055,9 +3053,6 @@ def test_application_form_inclusion_update_application_form_not_found(
 
     assert response.status_code == 404
     assert "Application form not found" in response.json["message"]
-
-
-
 
 
 def test_application_form_inclusion_update_invalid_request_missing_field(
