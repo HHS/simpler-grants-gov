@@ -2,6 +2,7 @@ import "@testing-library/jest-dom";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import {
   FakeQueryProvider,
   mockUpdateQueryTerm,
@@ -19,6 +20,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: mockUpdateQueryParams,
     searchParams: new ReadonlyURLSearchParams(),
+  }),
+}));
+
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => true,
   }),
 }));
 

@@ -14,6 +14,9 @@ const mockDefaultFeatureFlagsString = JSON.stringify(
 const MOCK_FEATURE_FLAG_NAME = "mockFeatureName";
 const MOCK_FEATURE_FLAG_INITIAL_VALUE = true;
 
+const mockPush = jest.fn();
+const mockUseUser = jest.fn();
+
 const mockSetCookie = jest.fn();
 const mockGetCookie = jest.fn();
 
@@ -27,16 +30,20 @@ jest.mock("next/navigation", () => ({
   useRouter() {
     return {
       prefetch: () => null,
-      push: () => true,
+      push: (arg) => mockPush(arg),
     };
   },
 }));
 
+jest.mock("src/services/auth/useUser", () => ({
+  useUser: () => mockUseUser(),
+}));
 describe("useFeatureFlags", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-  test("should allow you to update feature flags on client cookie", () => {
+  test("should allow you to update feature flag query param", () => {
+    mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
     const { result } = renderHook(() => useFeatureFlags());
 
     const { setFeatureFlag } = result.current;
@@ -45,39 +52,35 @@ describe("useFeatureFlags", () => {
       setFeatureFlag(MOCK_FEATURE_FLAG_NAME, !MOCK_FEATURE_FLAG_INITIAL_VALUE);
     });
 
-    expect(mockSetCookie).toHaveBeenCalledWith(
-      FEATURE_FLAGS_KEY,
-      JSON.stringify({
-        [MOCK_FEATURE_FLAG_NAME]: !MOCK_FEATURE_FLAG_INITIAL_VALUE,
-      }),
-      {
-        expires: expect.any(Date) as Date,
-      },
+    expect(mockPush).toHaveBeenCalledWith(
+      `/test?_ff=${MOCK_FEATURE_FLAG_NAME}%3A${(!MOCK_FEATURE_FLAG_INITIAL_VALUE).toString()}`,
     );
   });
 
-  test("returns list feature flags from cookie", () => {
-    mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
+  test("returns list feature flags from user provider", () => {
+    mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
     const { result } = renderHook(() => useFeatureFlags());
 
     const { featureFlags } = result.current;
 
-    expect(featureFlags).toEqual(MOCK_DEFAULT_FEATURE_FLAGS);
+    expect(featureFlags).toEqual({ someFlag: true });
   });
 
   describe("checkFeatureFlag", () => {
     test("allows checking value of individual flag", () => {
-      mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
+      // mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
+      mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
       const { result } = renderHook(() => useFeatureFlags());
 
       const { checkFeatureFlag } = result.current;
 
-      const value = checkFeatureFlag("someFakeFeature1");
+      const value = checkFeatureFlag("someFlag");
       expect(value).toEqual(true);
     });
 
     test("returns false if specified flag is not present", () => {
-      mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
+      // mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
+      mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
       const { result } = renderHook(() => useFeatureFlags());
 
       const { checkFeatureFlag } = result.current;

@@ -145,7 +145,7 @@ export class FeatureFlagsManager {
     const nonDefaultFlags: { [key: string]: boolean } = {};
     Object.keys(featureFlags).forEach((key) => {
       const value = featureFlags[key];
-      if (value !== defaultFeatureFlags[key]) {
+      if (value !== this.featureFlags[key]) {
         nonDefaultFlags[key] = value;
       }
     });
