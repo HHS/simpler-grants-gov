@@ -386,9 +386,9 @@ def test_search_notification_email_format_single_opportunity(
     ]["TextPart"]["Data"]
 
     # Test single opportunity format
-    expected_single = """A funding opportunity matching your saved search query was recently published.
+    expected_single = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/2' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
@@ -460,9 +460,9 @@ def test_search_notification_email_format_no_close_date(
     ]["TextPart"]["Data"]
 
     # Test opportunity with no close date format
-    expected_content = """A funding opportunity matching your saved search query was recently published.
+    expected_content = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/3' target='_blank'>Ongoing Research Grant Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>Ongoing Research Grant Program</a></b>
 Status: Posted
 Submission period: 2/15/2025-(To be determined)
 Award range: $50,000-$500,000
@@ -561,16 +561,16 @@ def test_search_notification_email_format_multiple_opportunities(
     ]["TextPart"]["Data"]
 
     # Test single opportunity format
-    expected_single = """The following funding opportunities matching your saved search queries were recently published.
+    expected_single = f"""The following funding opportunities matching your saved search queries were recently published.
 
-<b><a href='http://localhost:8080/opportunity/1' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
 Expected awards: 40
 Cost sharing: Yes
 
-<b><a href='http://localhost:8080/opportunity/2' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
 Status: Forecasted
 Submission period: To be announced.
 Award range: $1-$30,000
