@@ -57,7 +57,7 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    "attachments": "One or more new documents were",
+    "opportunity_attachments": "One or more new documents were",  # temporarily skip opportunity_attachment change
     "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
@@ -354,6 +354,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return "".join(description_section_parts)
 
+    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+        after = description_change["after"]
+        if after:
+            description_section = SECTION_STYLING.format("Description")
+            description_section += f"{BULLET_POINTS_STYLING} The description has changed.<br>"
+            return description_section
+        return ""
+
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
             return NOT_SPECIFIED
@@ -423,7 +431,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 removed = sorted(set(before) - set(after), key=lambda x: x.value)
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
-                    eligibility_section += f'{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>'
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
                 if removed:
                     eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
 
@@ -442,18 +450,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in documents_change.items():
             before = change["before"]
             after = change["after"]
-            if field == "attachments":
-                before_set = set(att["attachment_id"] for att in before)
-                after_set = set(att["attachment_id"] for att in after)
+
+            if field == "opportunity_attachments":
+                before_set = set(att["attachment_id"] for att in (before or []))
+                after_set = set(att["attachment_id"] for att in (after or []))
 
                 if after_set - before_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} added.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} added.<br>"
                 if before_set - after_set:
-                    documents_section += (
-                        f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["attachments"]} removed.<br>"
-                    )
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} removed.<br>"
 
             elif field == "additional_info_url":
                 documents_section += (
@@ -553,14 +558,20 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         if eligibility_fields_diffs := {k: changes[k] for k in ELIGIBILITY_FIELDS if k in changes}:
             sections.append(self._build_eligibility_content(eligibility_fields_diffs))
-        if documentation_fields_diffs := {k: changes[k] for k in DOCUMENTS_FIELDS if k in changes}:
-            sections.append(self._build_documents_fields(documentation_fields_diffs))
+        if "additional_info_url" in changes:
+            sections.append(
+                self._build_documents_fields(
+                    {"additional_info_url": changes["additional_info_url"]}
+                )
+            )
         if "summary_description" in changes:
             sections.append(
                 self._build_description_fields_content(
                     changes["summary_description"], opp_change.opportunity_id
                 )
             )
+        if documentation_fields_diffs := {k: changes[k] for k in DOCUMENTS_FIELDS if k in changes}:
+            sections.append(self._build_documents_fields(documentation_fields_diffs))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
