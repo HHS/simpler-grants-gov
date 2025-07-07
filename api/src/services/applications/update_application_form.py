@@ -102,13 +102,11 @@ def update_application_form(
         )
         db_session.add(application_form)
 
-    # Only validate if we're updating form content
-    if application_response is not None:
-        warnings: list[ValidationErrorDetail] = validate_application_form(
-            application_form, ApplicationAction.MODIFY
-        )
-    else:
-        warnings = []
+    # Get a list of validation warnings (also sets form status)
+    # Always validate because inclusion status affects validation requirements
+    warnings: list[ValidationErrorDetail] = validate_application_form(
+        application_form, ApplicationAction.MODIFY
+    )
 
     operation_type = []
     if application_response is not None:

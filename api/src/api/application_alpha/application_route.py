@@ -164,14 +164,7 @@ def application_form_inclusion_update(
             is_included_in_submission=is_included_in_submission,
         )
 
-    return response.ApiResponse(
-        message="Success",
-        data={
-            "application_id": application_form.application_id,
-            "form_id": application_form.form_id,
-            "is_included_in_submission": application_form.is_included_in_submission,
-        },
-    )
+    return response.ApiResponse(message="Success", data=application_form)
 
 
 @application_blueprint.get(

@@ -56,47 +56,6 @@ class ApplicationFormUpdateRequestSchema(Schema):
     )
 
 
-class ApplicationFormUpdateResponseDataSchema(Schema):
-    application_id = fields.UUID()
-
-    application_form_status = fields.Enum(
-        ApplicationFormStatus,
-        metadata={"description": "Status indicating how much of a form has been filled out"},
-    )
-
-    is_included_in_submission = fields.Boolean(
-        allow_none=True,
-        metadata={"description": "Whether this form is included in the application submission"},
-    )
-
-
-class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
-    data = fields.Nested(ApplicationFormUpdateResponseDataSchema())
-
-
-class ApplicationUserSchema(Schema):
-    """Schema for users associated with an application"""
-
-    user_id = fields.UUID()
-    email = fields.String()
-    is_application_owner = fields.Boolean()
-
-
-class SamGovEntitySchema(Schema):
-    """Schema for SAM.gov entity information"""
-
-    uei = fields.String()
-    legal_business_name = fields.String()
-    expiration_date = fields.Date()
-
-
-class OrganizationSchema(Schema):
-    """Schema for organization information"""
-
-    organization_id = fields.UUID()
-    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
-
-
 class ApplicationAttachmentNoLinkSchema(Schema):
     """A schema for an application attachment, but without a file_download URL"""
 
@@ -153,6 +112,33 @@ class ApplicationFormGetResponseDataSchema(Schema):
     )
 
     application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+
+
+class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationUserSchema(Schema):
+    """Schema for users associated with an application"""
+
+    user_id = fields.UUID()
+    email = fields.String()
+    is_application_owner = fields.Boolean()
+
+
+class SamGovEntitySchema(Schema):
+    """Schema for SAM.gov entity information"""
+
+    uei = fields.String()
+    legal_business_name = fields.String()
+    expiration_date = fields.Date()
+
+
+class OrganizationSchema(Schema):
+    """Schema for organization information"""
+
+    organization_id = fields.UUID()
+    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -258,13 +244,5 @@ class ApplicationFormInclusionUpdateRequestSchema(Schema):
     )
 
 
-class ApplicationFormInclusionUpdateResponseDataSchema(Schema):
-    application_id = fields.UUID()
-    form_id = fields.UUID()
-    is_included_in_submission = fields.Boolean(
-        metadata={"description": "Whether this form is included in the application submission"},
-    )
-
-
 class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(ApplicationFormInclusionUpdateResponseDataSchema())
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())
