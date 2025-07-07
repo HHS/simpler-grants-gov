@@ -23,6 +23,7 @@ from src.task.notifications.constants import (
 )
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.util.string_utils import truncate_html_safe
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
@@ -794,28 +795,6 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
-        "description_diffs,expected_html",
-        [
-            ({"before": "testing", "after": None}, ""),
-            (
-                {"before": "testing", "after": "Updated description"},
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
-            ),
-        ],
-    )
-    def test_build_description_fields_content(
-        self,
-        db_session,
-        description_diffs,
-        expected_html,
-        set_env_var_for_email_notification_config,
-    ):
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_description_fields_content(description_diffs, 1)
-        assert res == expected_html
-
-    @pytest.mark.parametrize(
         "html_str,expected_html",
         [
             # Truncate mid-text inside inline tag <strong>, no closing tags
@@ -827,6 +806,14 @@ class TestOpportunityNotification:
             (
                 "<p>Some <strong>bold and <em>emphasized text here ",
                 "<p>Some <strong>bold and <em>emphasized text here </em></strong>",
+            ),
+            (
+                "div>first<div>second<div>another</div></div></div>",
+                "div>first<div>second<div>another",
+            ),
+            (
+                "<p>Hello <p><strong>i am here!!</strong></div></p>",
+                "<p>Hello <p><strong>i am here!!</strong>",
             ),
             # Truncate after closing an inline tag
             (
@@ -864,9 +851,7 @@ class TestOpportunityNotification:
         set_truncation_threshold,
     ):
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-        res = task._truncate_html_safe(html_str)
+        res = truncate_html_safe(html_str)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -1061,7 +1046,7 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
                 '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
