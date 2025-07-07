@@ -3874,26 +3874,6 @@ components:
           description: Whether this form should be included in the application submission
       required:
       - application_response
-    ApplicationFormUpdateResponseData:
-      type: object
-      properties:
-        application_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_form_status:
-          description: Status indicating how much of a form has been filled out
-          enum:
-          - not_started
-          - in_progress
-          - complete
-          type:
-          - string
-        is_included_in_submission:
-          type:
-          - boolean
-          - 'null'
-          description: Whether this form is included in the application submission
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -3911,7 +3891,7 @@ components:
         data:
           type:
           - object
-          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -3937,20 +3917,6 @@ components:
           description: Whether this form should be included in the application submission
       required:
       - is_included_in_submission
-    ApplicationFormInclusionUpdateResponseData:
-      type: object
-      properties:
-        application_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        form_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        is_included_in_submission:
-          type: boolean
-          description: Whether this form is included in the application submission
     ApplicationFormInclusionUpdateResponse:
       type: object
       properties:
@@ -3961,7 +3927,7 @@ components:
         data:
           type:
           - object
-          $ref: '#/components/schemas/ApplicationFormInclusionUpdateResponseData'
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
