@@ -9,6 +9,7 @@ import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
@@ -77,6 +78,11 @@ def _build_pilot_competition(db_session: db.Session) -> None:
     sf424a = db_session.merge(SF424a_v1_0, load=True)
     factories.CompetitionFormFactory.create(
         competition=pilot_competition, form=sf424a, is_required=True
+    )
+
+    sflll = db_session.merge(SFLLL_v2_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sflll, is_required=False
     )
 
     logger.info(
