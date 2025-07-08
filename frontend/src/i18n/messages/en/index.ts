@@ -597,8 +597,8 @@ export const messages = {
       options: {
         postedDateDesc: "Posted date (Newest)",
         postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Soonest)",
-        closeDateAsc: "Close date (Furthest)",
+        closeDateDesc: "Close date (Furthest)",
+        closeDateAsc: "Close date (Soonest)",
         awardFloorAsc: "Award minimum (Lowest)",
         awardFloorDesc: "Award minimum (Highest)",
         awardCeilingAsc: "Award maximum (Lowest)",
