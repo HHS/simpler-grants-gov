@@ -2,7 +2,6 @@ import "@testing-library/jest-dom";
 
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import {
   FakeQueryProvider,
   mockUpdateQueryTerm,

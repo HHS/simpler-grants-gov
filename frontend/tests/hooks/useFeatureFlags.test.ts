@@ -1,16 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
+import { UserContextHook } from "src/services/auth/useUser";
 
-const MOCK_DEFAULT_FEATURE_FLAGS = {
-  someFakeFeature1: true,
-  someFakeFeature2: true,
-  someFakeFeature3: true,
-};
-
-const mockDefaultFeatureFlagsString = JSON.stringify(
-  MOCK_DEFAULT_FEATURE_FLAGS,
-);
 const MOCK_FEATURE_FLAG_NAME = "mockFeatureName";
 const MOCK_FEATURE_FLAG_INITIAL_VALUE = true;
 
@@ -30,13 +21,13 @@ jest.mock("next/navigation", () => ({
   useRouter() {
     return {
       prefetch: () => null,
-      push: (arg) => mockPush(arg),
+      push: (arg) => mockPush(arg) as undefined,
     };
   },
 }));
 
 jest.mock("src/services/auth/useUser", () => ({
-  useUser: () => mockUseUser(),
+  useUser: () => mockUseUser() as UserContextHook,
 }));
 describe("useFeatureFlags", () => {
   afterEach(() => {
