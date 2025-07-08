@@ -25,14 +25,6 @@ def _validate_organization_membership(
 ) -> None:
     """
     Validate that the user is a member of the organization.
-
-    Args:
-        db_session: Database session
-        organization: Organization to validate membership for
-        user: User to check membership
-
-    Raises:
-        Flask error with 403 status if user is not a member of the organization
     """
     # Check if the user is a member of the organization
     is_member = db_session.execute(
