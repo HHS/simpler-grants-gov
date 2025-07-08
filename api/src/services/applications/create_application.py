@@ -21,32 +21,28 @@ logger = logging.getLogger(__name__)
 
 
 def _validate_organization_membership(
-    db_session: db.Session, organization_id: UUID, user: User
-) -> Organization:
-    # Fetch the organization with its sam_gov_entity relationship
-    organization = db_session.execute(
-        select(Organization)
-        .where(Organization.organization_id == organization_id)
-        .options(
-            selectinload(Organization.organization_users),
-            selectinload(Organization.sam_gov_entity),
-        )
-    ).scalar_one_or_none()
+    db_session: db.Session, organization: Organization, user: User
+) -> None:
+    """
+    Validate that the user is a member of the organization.
 
-    if not organization:
-        raise_flask_error(404, "Organization not found")
+    Args:
+        db_session: Database session
+        organization: Organization to validate membership for
+        user: User to check membership
 
+    Raises:
+        Flask error with 403 status if user is not a member of the organization
+    """
     # Check if the user is a member of the organization
     is_member = db_session.execute(
         select(OrganizationUser)
-        .where(OrganizationUser.organization_id == organization_id)
+        .where(OrganizationUser.organization_id == organization.organization_id)
         .where(OrganizationUser.user_id == user.user_id)
     ).scalar_one_or_none()
 
     if not is_member:
         raise_flask_error(403, "User is not a member of the organization")
-
-    return organization
 
 
 def _validate_organization_expiration(organization: Organization) -> None:
@@ -138,8 +134,21 @@ def create_application(
 
     # Validate organization if provided
     if organization_id is not None:
-        organization = _validate_organization_membership(db_session, organization_id, user)
-        # Validate that the organization is not expired
+        # Fetch the organization with its sam_gov_entity relationship
+        organization = db_session.execute(
+            select(Organization)
+            .where(Organization.organization_id == organization_id)
+            .options(
+                selectinload(Organization.organization_users),
+                selectinload(Organization.sam_gov_entity),
+            )
+        ).scalar_one_or_none()
+
+        if not organization:
+            raise_flask_error(404, "Organization not found")
+
+        # Validate user membership and organization status
+        _validate_organization_membership(db_session, organization, user)
         _validate_organization_expiration(organization)
 
     # Get default application name if not provided
