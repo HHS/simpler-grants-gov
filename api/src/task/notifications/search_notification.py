@@ -63,6 +63,7 @@ class SearchNotificationTask(BaseNotificationTask):
 
         for searches in query_map.values():
             current_results = search_opportunities_id(self.search_client, searches[0].search_query)
+
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids or [])
                 # Find NEW opportunities (in current but not in previous)
@@ -186,8 +187,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 continue
 
             # Add opportunity title (empty line before title)
-            message += f"{opportunity.opportunity_title}\n\n"
-
+            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
             # Add status
             status = (
                 str(opportunity.opportunity_status).capitalize()
