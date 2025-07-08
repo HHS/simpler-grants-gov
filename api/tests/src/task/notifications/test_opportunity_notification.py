@@ -235,7 +235,7 @@ class TestOpportunityNotification:
         opp_2 = factories.OpportunityFactory.create(is_posted_summary=True)
         opp_3 = factories.OpportunityFactory.create(is_posted_summary=True)
 
-        # create old versions  for opps
+        # create first versions for opps
         factories.OpportunityVersionFactory.create(
             opportunity=opp_1,
         )
@@ -272,16 +272,16 @@ class TestOpportunityNotification:
         factories.OpportunityVersionFactory.create(
             opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=60)
         )
-        opp_1_v_2 = factories.OpportunityVersionFactory.create(
+        opp_1_v_3 = factories.OpportunityVersionFactory.create(
             opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=160)
         )
-        opp_2_v_1 = factories.OpportunityVersionFactory.create(
+        opp_2_v_2 = factories.OpportunityVersionFactory.create(
             opportunity=opp_2, created_at=opp_2.created_at + timedelta(minutes=60)
         )
         factories.OpportunityVersionFactory.create(
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=60)
         )
-        opp_3_v_2 = factories.OpportunityVersionFactory.create(
+        opp_3_v_3 = factories.OpportunityVersionFactory.create(
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=80)
         )
 
@@ -291,7 +291,6 @@ class TestOpportunityNotification:
         task = OpportunityNotificationTask(db_session=db_session)
 
         results = task._get_latest_opportunity_versions()
-
         # assert that only the latest version is picked up for each user_saved_opportunity
         assert len(results) == 4
 
@@ -299,11 +298,11 @@ class TestOpportunityNotification:
             opp_id = user_saved_opp.opportunity_id
 
             if opp_id == opp_1.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_1_v_2.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_1_v_3.opportunity_id
             elif opp_id == opp_2.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_2_v_1.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_2_v_2.opportunity_id
             elif opp_id == opp_3.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_3_v_3.opportunity_id
 
         # Run the notification task
         task = EmailNotificationTask(db_session, search_client)
