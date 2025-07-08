@@ -1,10 +1,13 @@
 import uuid
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    filter_headers,
     format_local_soap_response,
     get_auth_error_response,
     get_envelope_dict,
+    get_streamed_soap_response,
 )
 
 
@@ -38,3 +41,32 @@ def test_get_auth_error_response() -> None:
 """
     assert err in err_response.data
     assert err_response.status_code == 500
+
+
+def test_filter_headers() -> None:
+    assert filter_headers({"foo": "bar"}, ["foo"]) == {}
+    assert filter_headers({"Foo": "bar"}, ["foo"]) == {}
+
+
+def test_get_streamed_soap_response_success():
+    # Simulate streamed response
+    chunks = [b"<soap>", b"<body>Hello</body>", b"</soap>"]
+    mock_response = Mock()
+    mock_response.iter_content = Mock(return_value=chunks)
+    mock_response.status_code = 200
+    mock_response.headers = {
+        "Content-Type": "application/xml",
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=60",
+        "Connection": "keep-alive",
+    }
+
+    result = get_streamed_soap_response(mock_response)
+
+    expected_data = b"".join(chunks)
+    expected_headers = {"Content-Type": "application/xml"}
+
+    assert isinstance(result, SOAPResponse)
+    assert result.data == expected_data
+    assert result.status_code, 200
+    assert result.headers == expected_headers
