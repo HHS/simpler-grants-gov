@@ -1,9 +1,8 @@
-from datetime import date, timedelta
+from datetime import timedelta
 
 import pytest
 from apiflask.exceptions import HTTPError
 
-from src.api.route_utils import raise_flask_error
 from src.services.applications.create_application import _validate_organization_expiration
 from src.util.datetime_util import get_now_us_eastern_date
 from tests.src.db.models.factories import OrganizationFactory, SamGovEntityFactory
