@@ -30,6 +30,17 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: identity,
 }));
 
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+jest.mock("src/services/sessionStorage/useSessionStorage", () => ({
+  useSessionStorage: () => ({
+    getSessionStorageItem: jest.fn(),
+    setSessionStorageItem: jest.fn(),
+  }),
+}));
+
 describe("Subscribe", () => {
   it("renders intro text", () => {
     render(Subscribe({ params: localeParams }));

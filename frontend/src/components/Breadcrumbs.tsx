@@ -5,15 +5,11 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
+import { ReturnToGrantsNotification } from "./ReturnToGrantsNotification";
+
 export type Breadcrumb = {
   title: string;
   path: string;
-};
-
-export type BreadcrumbList = Breadcrumb[];
-
-type Props = {
-  breadcrumbList: BreadcrumbList;
 };
 
 const microdata = {
@@ -33,7 +29,7 @@ const microdata = {
   },
 };
 
-const Breadcrumbs = ({ breadcrumbList }: Props) => {
+const Breadcrumbs = ({ breadcrumbList }: { breadcrumbList: Breadcrumb[] }) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
       <Breadcrumb
@@ -59,10 +55,14 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
   });
 
   return (
-    <GridContainer data-testid="breadcrumb">
-      <BreadcrumbBar listProps={{ ...microdata.ol }}>
+    <GridContainer
+      className="display-flex flex-column tablet:flex-row"
+      data-testid="breadcrumb"
+    >
+      <BreadcrumbBar className="flex-1" listProps={{ ...microdata.ol }}>
         {breadcrumArray}
       </BreadcrumbBar>
+      <ReturnToGrantsNotification />
     </GridContainer>
   );
 };

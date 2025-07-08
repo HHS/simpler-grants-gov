@@ -1,5 +1,6 @@
-import { useSearchParams } from "next/navigation";
-import { createContext, PropsWithChildren, useEffect } from "react";
+"use client";
+
+import { createContext, PropsWithChildren } from "react";
 
 type SessionStorageProviderState = {
   setSessionStorageItem: (key: string, value: string) => void;
@@ -16,7 +17,6 @@ export const SessionStorageContext = createContext({
 } as SessionStorageProviderState);
 
 export function SessionStorageProvider({ children }: PropsWithChildren) {
-  const searchParams = useSearchParams();
   const getSessionStorageItem = (key: string): string => {
     if (!window.sessionStorage) {
       console.error("session storage not available");
@@ -32,13 +32,6 @@ export function SessionStorageProvider({ children }: PropsWithChildren) {
     }
     return window.sessionStorage.setItem(key, value);
   };
-
-  useEffect(() => {
-    const sourceParam = searchParams.get("utm_source");
-    if (sourceParam === "Grants.gov") {
-      setSessionStorageItem("showLegacySearchReturnNotification", "true");
-    }
-  }, [searchParams]);
 
   return (
     <SessionStorageContext
