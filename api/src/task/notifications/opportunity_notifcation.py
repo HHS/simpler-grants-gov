@@ -146,12 +146,17 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            updated_opps = user_changed_opp.opportunities
+            updated_opps: list[OpportunityVersionChange] = []
 
-            for opp in updated_opps:
-                opp.previous = prior_notified_versions.get(
-                    (user_changed_opp.user_id, opp.opportunity_id)
-                )
+            for opp in user_changed_opp.opportunities:
+                opp.previous = prior_notified_versions.get((user_id, opp.opportunity_id))
+                if opp.previous is None:
+                    logger.error(
+                        "No previous version found for this opportunity",
+                        extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    continue
+                updated_opps.append(opp)
 
             user_content = self._build_notification_content(updated_opps)
 
@@ -273,7 +278,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
         ).where(subq.c.rn == 1)
 
         results = self.db_session.execute(stmt).all()
-
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
     def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
@@ -473,7 +477,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
     def _build_sections(self, opp_change: OpportunityVersionChange) -> str:
         # Get diff between latest and previous version
         previous = cast(OpportunityVersion, opp_change.previous)
-
         diffs = diff_nested_dicts(previous.opportunity_data, opp_change.latest.opportunity_data)
 
         # Transform diffs

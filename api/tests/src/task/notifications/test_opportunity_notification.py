@@ -349,6 +349,31 @@ class TestOpportunityNotification:
 
         assert len(results) == 0
 
+    def test_with_no_prior_version_email_collections_with_latest_version(
+        self, db_session, user, set_env_var_for_email_notification_config, caplog
+    ):
+        """Test that no notification is created when a new version exists but no prior version exist"""
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opportunity,
+        )
+        factories.OpportunityVersionFactory.create(opportunity=opportunity)
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        results = task.collect_email_notifications()
+
+        assert len(results) == 0
+        # Verify the log contains the correct metrics
+        log_records = [
+            r
+            for r in caplog.records
+            if "No previous version found for this opportunity" in r.message
+        ]
+
+        assert len(log_records) == 1
+
     def test_with_no_prior_version_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config
     ):
