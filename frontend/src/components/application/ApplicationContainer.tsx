@@ -14,13 +14,18 @@ import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
+import { AttachmentsProvider } from "src/context/application/AttachmentsContext";
+import { AttachmentsCard } from "./attachments/AttachmentsCard";
+import { Attachment } from "src/types/attachmentTypes";
 
 const ApplicationContainer = ({
   applicationDetails,
   opportunity,
+  attachments
 }: {
   applicationDetails: ApplicationDetail;
   opportunity: OpportunityDetail;
+  attachments: Attachment[]
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
@@ -107,6 +112,12 @@ const ApplicationContainer = ({
         applicationId={applicationId}
         forms={forms}
       />
+              <AttachmentsProvider
+          initialAttachments={attachments}
+          applicationId={applicationId}
+        >
+          <AttachmentsCard />
+        </AttachmentsProvider>
     </>
   );
 };
