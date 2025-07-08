@@ -381,7 +381,7 @@ class TestOpportunityNotification:
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_with_no_prior_version_email_collections_with_latest_version(
-            self, db_session, user, set_env_var_for_email_notification_config, caplog
+        self, db_session, user, set_env_var_for_email_notification_config, caplog
     ):
         """Test that no notification is created when a new version exists but no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -404,6 +404,7 @@ class TestOpportunityNotification:
         ]
 
         assert len(log_records) == 1
+
     def test_no_updates_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config
     ):
