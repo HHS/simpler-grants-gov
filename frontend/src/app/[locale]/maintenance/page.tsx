@@ -27,8 +27,8 @@ export default function Maintenance({ params }: LocalizedPageProps) {
   return (
     <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 padding-x-5 tablet:padding-x-7 desktop-lg:padding-x-10 text-center">
       <h2 className="margin-bottom-0">{t("heading")}</h2>
-      <div>{body}</div>
-      <div>{t("signOff")}</div>
+      <p className="margin-x-auto">{body}</p>
+      <p className="margin-x-auto">{t("signOff")}</p>
     </GridContainer>
   );
 }
