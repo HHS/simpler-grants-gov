@@ -76,7 +76,7 @@ class UserGetResponseSchema(AbstractResponseSchema):
 
 
 class UserSaveOpportunityRequestSchema(Schema):
-    opportunity_id = fields.Integer(required=True)
+    opportunity_id = fields.UUID(required=True)
 
 
 class UserSaveOpportunityResponseSchema(AbstractResponseSchema):

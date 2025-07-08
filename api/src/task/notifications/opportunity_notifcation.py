@@ -144,12 +144,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            updated_opps = user_changed_opp.opportunities
-
-            for opp in updated_opps:
+            updated_opps: list[OpportunityVersionChange] = []
+            for opp in user_changed_opp.opportunities:
                 opp.previous = prior_notified_versions.get(
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
+                if opp.previous is None:
+                    logger.error(
+                        "No previous version found for this opportunity",
+                        extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    continue
+                updated_opps.append(opp)
 
             user_content = self._build_notification_content(updated_opps)
 

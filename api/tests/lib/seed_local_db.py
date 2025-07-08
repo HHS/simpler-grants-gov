@@ -1,14 +1,18 @@
 import logging
+import random
 
 import click
+from sqlalchemy import select
 
 import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
@@ -79,9 +83,45 @@ def _build_pilot_competition(db_session: db.Session) -> None:
         competition=pilot_competition, form=sf424a, is_required=True
     )
 
+    sflll = db_session.merge(SFLLL_v2_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sflll, is_required=False
+    )
+
     logger.info(
         f"Created a pilot-like opportunity - http://localhost:3000/opportunity/{pilot_competition.opportunity_id}"
     )
+
+
+def _build_user_saved_opportunities_and_searches(db_session: db.Session) -> None:
+    logger.info("Creating users with saved opportunities and searches")
+    saved_opportunities_count = 5
+    saved_searched_count = 5
+
+    # Retrieve list of possible opportunities
+    opportunity_ids: list = db_session.execute(select(Opportunity.opportunity_id)).scalars().all()
+
+    # Create users
+    users = factories.UserFactory.create_batch(size=5)
+
+    for user in users:
+        # Create saved opportunities from randomly selected opportunities
+        selected_opportunities = random.sample(opportunity_ids, saved_opportunities_count)
+        for opportunity_id in selected_opportunities:
+            factories.UserSavedOpportunityFactory.create(user=user, opportunity_id=opportunity_id)
+
+        # Create saved searches from randomly selected opportunities
+        for i in range(saved_searched_count):
+            saved_search_opportunities_count = random.randint(1, 10)
+            selected_opportunities = random.sample(
+                opportunity_ids, saved_search_opportunities_count
+            )
+            factories.UserSavedSearchFactory.create(
+                user=user,
+                name=f"Save Search {i + 1}",
+                search_query={"keywords": f"keyword {i + 1}"},
+                searched_opportunity_ids=selected_opportunities,
+            )
 
 
 def _build_simple_competition():
@@ -143,4 +183,5 @@ def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
 
             _build_agencies(db_session)
             _build_competitions(db_session)
+            _build_user_saved_opportunities_and_searches(db_session)
             db_session.commit()

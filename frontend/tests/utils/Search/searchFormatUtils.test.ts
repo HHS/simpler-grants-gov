@@ -41,7 +41,7 @@ describe("formatSearchRequestBody", () => {
       page_size: 25,
       sort_order: [
         {
-          order_by: "opportunity_number",
+          order_by: "opportunity_title",
           sort_direction: "ascending",
         },
       ],
@@ -184,7 +184,7 @@ describe("buildPagination", () => {
   it("builds correct sort_direction based on sortby", () => {
     const pagination = buildPagination({
       ...searchFetcherParams,
-      ...{ sortby: "opportunityNumberDesc" },
+      ...{ sortby: "opportunityTitleDesc" },
     });
 
     expect(pagination.sort_order[0].sort_direction).toEqual("descending");

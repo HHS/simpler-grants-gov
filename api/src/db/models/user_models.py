@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, and_
+from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
@@ -106,8 +106,8 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_saved_opportunity"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
 
     last_notified_at: Mapped[datetime] = mapped_column(
@@ -140,7 +140,8 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
         default=datetime_util.utcnow,
         server_default=sqlnow(),
     )
-    searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger))
+
+    searched_opportunity_ids: Mapped[list[uuid.UUID]] = mapped_column(ARRAY(UUID))
     is_deleted: Mapped[bool | None]
 
 
@@ -168,8 +169,8 @@ class UserOpportunityNotificationLog(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
 
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="all_opportunity_notification_logs"
