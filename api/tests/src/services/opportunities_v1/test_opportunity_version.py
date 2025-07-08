@@ -41,7 +41,8 @@ def test_save_opportunity_version(db_session, enable_factory_create):
         "updated_at": opp.updated_at.isoformat(),
         "agency_code": opp.agency_code,
         "agency_name": agency.agency_name,
-        "opportunity_id": opp.opportunity_id,
+        "opportunity_id": str(opp.opportunity_id),
+        "legacy_opportunity_id": opp.legacy_opportunity_id,
         "opportunity_title": opp.opportunity_title,
         "opportunity_number": opp.opportunity_number,
         "opportunity_status": None,
@@ -74,8 +75,8 @@ def test_save_opportunity_version_with_attachments(db_session, enable_factory_cr
     attachment_2 = OpportunityAttachmentFactory.create(opportunity=opp)
 
     expected = [
-        {"attachment_id": attachment_1.attachment_id},
-        {"attachment_id": attachment_2.attachment_id},
+        {"attachment_id": str(attachment_1.attachment_id)},
+        {"attachment_id": str(attachment_2.attachment_id)},
     ]
 
     # Save opportunity into opportunity_version table

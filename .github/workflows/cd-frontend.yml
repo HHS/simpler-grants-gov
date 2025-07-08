@@ -2,13 +2,13 @@ name: Deploy frontend
 run-name: Deploy ${{ inputs.version || 'main' }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - "frontend/**"
-      - "infra/frontend/**"
-      - "infra/modules/**"
+  # push:
+  #   branches:
+  #     - "main"
+  #   paths:
+  #     - "frontend/**"
+  #     - "infra/frontend/**"
+  #     - "infra/modules/**"
   release:
     types: [published]
   workflow_dispatch:

@@ -208,6 +208,24 @@ export const messages = {
     genericErrorCta: "Please try refreshing the page.",
   },
   Application: {
+    title: "Application",
+    submissionValidationError: {
+      title: "Your application could not be submitted",
+      description:
+        "All required fields or attachments in required forms must be completed or uploaded.",
+      incompleteForm: "is incomplete. Answer all required questions to submit.",
+      notStartedForm: "has not been started. Complete the form to submit.",
+    },
+    submissionError: {
+      title: "Your application could not be submitted",
+      description:
+        "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+    },
+    submissionSuccess: {
+      title: "Your application has been submitted",
+      description:
+        "The awarding agency will review and process it independently of Grants.gov. Once they receive your application, they will manage all further updates. Grants.gov won’t have access to the status of your award.",
+    },
     information: {
       applicant: "Applicant",
       applicantTypeIndividual: "Individual",
@@ -224,6 +242,7 @@ export const messages = {
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
+      submit: "Submit application",
     },
     opportunityOverview: {
       opportunity: "Opportunity",
@@ -620,14 +639,14 @@ export const messages = {
       options: {
         postedDateDesc: "Posted date (Newest)",
         postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Newest)",
-        closeDateAsc: "Close date (Oldest)",
+        closeDateDesc: "Close date (Furthest)",
+        closeDateAsc: "Close date (Soonest)",
+        awardFloorAsc: "Award minimum (Lowest)",
+        awardFloorDesc: "Award minimum (Highest)",
+        awardCeilingAsc: "Award maximum (Lowest)",
+        awardCeilingDesc: "Award maximum (Highest)",
         opportunityTitleAsc: "Opportunity title (A to Z)",
         opportunityTitleDesc: "Opportunity title (Z to A)",
-        agencyAsc: "Agency (A to Z)",
-        agencyDesc: "Agency (Z to A)",
-        opportunityNumberAsc: "Opportunity number (Ascending)",
-        opportunityNumberDesc: "Opportunity number (Descending)",
         default: "Most relevant (Default)",
       },
       label: "Sort by",

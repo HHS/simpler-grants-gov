@@ -63,7 +63,8 @@ def test_search_notifications_cli(
     # Update the search index with new data that will change the results
     for i in range(4, 6):
         opportunity = factories.OpportunityFactory.create(
-            opportunity_id=i,
+            legacy_opportunity_id=i,
+            opportunity_id=OPPORTUNITIES[i].opportunity_id,
             no_current_summary=True,
         )
         summary = factories.OpportunitySummaryFactory.create(
@@ -81,7 +82,11 @@ def test_search_notifications_cli(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+            OPPORTUNITIES[2].opportunity_id,
+        ],
     )
 
     notification_logs_count = (
@@ -159,7 +164,8 @@ def test_grouped_search_queries_cli(
     # Update the search index with new data that will change the results
     for i in range(7, 9):
         opportunity = factories.OpportunityFactory.create(
-            opportunity_id=i,
+            legacy_opportunity_id=i,
+            opportunity_id=OPPORTUNITIES[i].opportunity_id,
             no_current_summary=True,
         )
         summary = factories.OpportunitySummaryFactory.create(
@@ -180,7 +186,11 @@ def test_grouped_search_queries_cli(
         search_query=same_search_query,
         name="User 1 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+            OPPORTUNITIES[2].opportunity_id,
+        ],
     )
 
     saved_search2 = factories.UserSavedSearchFactory.create(
@@ -188,7 +198,11 @@ def test_grouped_search_queries_cli(
         search_query=same_search_query,
         name="User 2 Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[4, 5, 6],
+        searched_opportunity_ids=[
+            OPPORTUNITIES[3].opportunity_id,
+            OPPORTUNITIES[4].opportunity_id,
+            OPPORTUNITIES[5].opportunity_id,
+        ],
     )
 
     result = cli_runner.invoke(args=["task", "email-notifications"])
@@ -232,13 +246,16 @@ def test_search_notifications_on_index_change(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],  # Initial results
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+        ],  # Initial results
     )
 
     # Update the search index with new data that will change the results
     schema = OpportunityV1Schema()
     new_opportunity = factories.OpportunityFactory.create(
-        opportunity_id=999, opportunity_title="New Test Opportunity", no_current_summary=True
+        legacy_opportunity_id=999, opportunity_title="New Test Opportunity", no_current_summary=True
     )
     summary = factories.OpportunitySummaryFactory.build(
         opportunity=new_opportunity,
@@ -268,7 +285,9 @@ def test_search_notifications_on_index_change(
 
     # Verify the saved search was updated with new results
     db_session.refresh(saved_search)
-    assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+    assert (
+        new_opportunity.opportunity_id in saved_search.searched_opportunity_ids
+    )  # New opportunity should be in results
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
@@ -298,7 +317,7 @@ def test_pagination_params_are_stripped_from_search_query(
         },
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],
+        searched_opportunity_ids=[OPPORTUNITIES[0].opportunity_id, OPPORTUNITIES[1].opportunity_id],
     )
 
     params = _strip_pagination_params(saved_search.search_query)
@@ -315,7 +334,8 @@ def test_search_notification_email_format_single_opportunity(
     """Test that verifies the format of search notification emails"""
     # Create test opportunities with known data
     opportunity1 = factories.OpportunityFactory.create(
-        opportunity_id=2,
+        opportunity_id=OPPORTUNITIES[1].opportunity_id,
+        legacy_opportunity_id=2,
         opportunity_title="2025 Port Infrastructure Development Program",
         no_current_summary=True,
     )
@@ -341,7 +361,7 @@ def test_search_notification_email_format_single_opportunity(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1],  # Test single opportunity
+        searched_opportunity_ids=[OPPORTUNITIES[0].opportunity_id],  # Test single opportunity
     )
 
     _clear_mock_responses()
@@ -366,10 +386,9 @@ def test_search_notification_email_format_single_opportunity(
     ]["TextPart"]["Data"]
 
     # Test single opportunity format
-    expected_single = """A funding opportunity matching your saved search query was recently published.
+    expected_single = f"""A funding opportunity matching your saved search query was recently published.
 
-2025 Port Infrastructure Development Program
-
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
@@ -393,7 +412,8 @@ def test_search_notification_email_format_no_close_date(
     """Test that verifies the format of search notification emails when there's no close date"""
     # Create test opportunity with post date but no close date
     opportunity1 = factories.OpportunityFactory.create(
-        opportunity_id=3,
+        opportunity_id=OPPORTUNITIES[2].opportunity_id,
+        legacy_opportunity_id=3,
         opportunity_title="Ongoing Research Grant Program",
         no_current_summary=True,
     )
@@ -419,7 +439,10 @@ def test_search_notification_email_format_no_close_date(
         search_query={"keywords": "research"},
         name="Research Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2],  # Previous results
+        searched_opportunity_ids=[
+            OPPORTUNITIES[0].opportunity_id,
+            OPPORTUNITIES[1].opportunity_id,
+        ],  # Previous results
     )
 
     _clear_mock_responses()
@@ -437,10 +460,9 @@ def test_search_notification_email_format_no_close_date(
     ]["TextPart"]["Data"]
 
     # Test opportunity with no close date format
-    expected_content = """A funding opportunity matching your saved search query was recently published.
+    expected_content = f"""A funding opportunity matching your saved search query was recently published.
 
-Ongoing Research Grant Program
-
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>Ongoing Research Grant Program</a></b>
 Status: Posted
 Submission period: 2/15/2025-(To be determined)
 Award range: $50,000-$500,000
@@ -464,7 +486,8 @@ def test_search_notification_email_format_multiple_opportunities(
     """Test that verifies the format of search notification emails"""
     # Create test opportunities with known data
     opportunity1 = factories.OpportunityFactory.create(
-        opportunity_id=1,
+        opportunity_id=OPPORTUNITIES[0].opportunity_id,
+        legacy_opportunity_id=1,
         opportunity_title="2025 Port Infrastructure Development Program",
         no_current_summary=True,
     )
@@ -486,7 +509,8 @@ def test_search_notification_email_format_multiple_opportunities(
 
     # Create a forecasted opportunity
     opportunity2 = factories.OpportunityFactory.create(
-        opportunity_id=2,
+        opportunity_id=OPPORTUNITIES[1].opportunity_id,
+        legacy_opportunity_id=2,
         opportunity_title="Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)",
         no_current_summary=True,
     )
@@ -510,7 +534,9 @@ def test_search_notification_email_format_multiple_opportunities(
         search_query={"keywords": "test"},
         name="Test Search",
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[3],  # Test single opportunity
+        searched_opportunity_ids=[
+            OPPORTUNITIES[2].opportunity_id,
+        ],  # Test single opportunity
     )
 
     _clear_mock_responses()
@@ -535,18 +561,16 @@ def test_search_notification_email_format_multiple_opportunities(
     ]["TextPart"]["Data"]
 
     # Test single opportunity format
-    expected_single = """The following funding opportunities matching your saved search queries were recently published.
+    expected_single = f"""The following funding opportunities matching your saved search queries were recently published.
 
-2025 Port Infrastructure Development Program
-
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
 Expected awards: 40
 Cost sharing: Yes
 
-Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)
-
+<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
 Status: Forecasted
 Submission period: To be announced.
 Award range: $1-$30,000

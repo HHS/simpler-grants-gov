@@ -39,6 +39,19 @@ root
 
 See [development.md](../documentation/api/development.md) for installation and development instructions.
 
+## Running tests locally
+1. Run `make init` or have run it previously
+2. Run the tests `make test` or if you've set your PY Approach to local you probably want to run the tests in Docker so you don't have to deal with Env Vars and other config `PY_RUN_APPOACH=docker make test`
+
+You can also run only certain tests by pattern matching the file name and log more while running the tests:
+```bash
+make test args="tests/src/task/notifications/*"
+make test args="-x -s -vv tests/src/api/users/test_user_route_login.py"
+```
+* -x will stop and fail the test suite on the first test that fails
+* -s will not print the commands being run
+* -vv reports all runtimes, not just those above a certain threshold
+
 ## Running jobs/tasks
 
 ### Locally
