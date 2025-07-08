@@ -23,4 +23,6 @@ export default function ClientMaintenanceCheck() {
       redirect("/", RedirectType.push);
     }
   }, [checkFeatureFlag]);
+
+  return null;
 }
