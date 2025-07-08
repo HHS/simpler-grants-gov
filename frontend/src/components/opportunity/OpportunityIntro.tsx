@@ -67,7 +67,7 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
         <div className="flex-3">
           <a
             className="usa-button usa-button--unstyled"
-            href={legacyOpportunityUrl(opportunityData.opportunity_id)}
+            href={legacyOpportunityUrl(opportunityData.legacy_opportunity_id)}
             target="_blank"
             rel="noopener noreferrer"
           >

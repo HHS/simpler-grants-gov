@@ -535,13 +535,51 @@ paths:
       summary: Form Get
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/organizations:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Organizations
+      security:
+      - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
       - in: path
         name: opportunity_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
@@ -583,44 +621,6 @@ paths:
         '
       security:
       - ApiKeyAuth: []
-  /v1/users/{user_id}/organizations:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserOrganizationsResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Forbidden
-      tags:
-      - User v1 - Internal Only
-      summary: User Get Organizations
-      security:
-      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -881,6 +881,54 @@ paths:
               $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
+  /v1/opportunities/{legacy_opportunity_id}:
+    get:
+      parameters:
+      - in: path
+        name: legacy_opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityGetResponseV1'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Opportunity v1
+      summary: Opportunity Get Legacy
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      security:
+      - ApiKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -1160,7 +1208,7 @@ paths:
       - in: path
         name: opportunity_id
         schema:
-          type: integer
+          type: string
         required: true
       responses:
         '200':
@@ -1192,32 +1240,26 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
-  /alpha/applications/{application_id}/forms/{form_id}/inclusion:
-    put:
+  /v1/users/{user_id}/saved-opportunities/{legacy_opportunity_id}:
+    delete:
       parameters:
       - in: path
-        name: application_id
+        name: user_id
         schema:
           type: string
         required: true
       - in: path
-        name: form_id
+        name: legacy_opportunity_id
         schema:
-          type: string
+          type: integer
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationFormInclusionUpdateResponse'
+                $ref: '#/components/schemas/UserDeleteSavedOpportunityResponse'
           description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation error
         '401':
           content:
             application/json:
@@ -1231,13 +1273,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-      - Application Alpha
-      summary: Update whether an application form should be included in submission
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
+      - User v1 - Internal Only
+      summary: User Delete Saved Opportunity Legacy
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
@@ -2673,8 +2710,13 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        legacy_opportunity_id:
+          type: integer
+          description: The internal legacy ID of the opportunity
           example: 12345
         opportunity_number:
           type:
@@ -3004,6 +3046,53 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SamGovEntity:
+      type: object
+      properties:
+        uei:
+          type: string
+        legal_business_name:
+          type: string
+        expiration_date:
+          type: string
+          format: date
+    UserOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_organization_owner:
+          type: boolean
+          description: Whether the user is an owner of this organization
+          example: true
+        sam_gov_entity:
+          description: SAM.gov entity information for the organization
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntity'
+          - type: 'null'
+    UserOrganizationsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organizations the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     OpportunityAttachmentV1:
       type: object
       properties:
@@ -3072,8 +3161,10 @@ components:
           description: The competition ID
           example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The opportunity ID that the competition is associated with
+          example: 123e4567-e89b-12d3-a456-426614174000
         competition_forms:
           type: array
           items:
@@ -3126,8 +3217,13 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The internal ID of the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        legacy_opportunity_id:
+          type: integer
+          description: The internal legacy ID of the opportunity
           example: 12345
         opportunity_number:
           type:
@@ -3227,53 +3323,6 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    SamGovEntity:
-      type: object
-      properties:
-        uei:
-          type: string
-        legal_business_name:
-          type: string
-        expiration_date:
-          type: string
-          format: date
-    UserOrganization:
-      type: object
-      properties:
-        organization_id:
-          type: string
-          description: The internal ID of the organization
-          example: 123e4567-e89b-12d3-a456-426614174000
-        is_organization_owner:
-          type: boolean
-          description: Whether the user is an owner of this organization
-          example: true
-        sam_gov_entity:
-          description: SAM.gov entity information for the organization
-          type:
-          - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
-          - type: 'null'
-    UserOrganizationsResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: List of organizations the user is associated with
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/UserOrganization'
         status_code:
           type: integer
           description: The HTTP status code
@@ -3393,11 +3442,6 @@ components:
         is_required:
           type: boolean
           description: Whether this form is required for the application
-        is_included_in_submission:
-          type:
-          - boolean
-          - 'null'
-          description: Whether this form is included in the application submission
         application_attachments:
           type: array
           items:
@@ -3563,7 +3607,9 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
       required:
       - opportunity_id
     UserSaveOpportunityResponse:
@@ -3748,9 +3794,10 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: integer
+          type: string
+          format: uuid
           description: The ID of the saved opportunity
-          example: 1234
+          example: 123e4567-e89b-12d3-a456-426614174000
         opportunity_title:
           type:
           - string
@@ -3862,18 +3909,24 @@ components:
       properties:
         application_response:
           type: object
-          description: The form response data to update
-          example:
-            name: John Doe
-            email: john@example.com
           additionalProperties: {}
-        is_included_in_submission:
-          type:
-          - boolean
-          - 'null'
-          description: Whether this form should be included in the application submission
       required:
       - application_response
+    ApplicationFormUpdateResponseData:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_form_status:
+          description: Status indicating how much of a form has been filled out
+          enum:
+          - not_started
+          - in_progress
+          - complete
+          type:
+          - string
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -3891,7 +3944,7 @@ components:
         data:
           type:
           - object
-          $ref: '#/components/schemas/ApplicationFormGetResponseData'
+          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -3905,29 +3958,6 @@ components:
           example: Success
         data:
           example: null
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    ApplicationFormInclusionUpdateRequest:
-      type: object
-      properties:
-        is_included_in_submission:
-          type: boolean
-          description: Whether this form should be included in the application submission
-      required:
-      - is_included_in_submission
-    ApplicationFormInclusionUpdateResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
