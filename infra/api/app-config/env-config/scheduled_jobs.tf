@@ -47,31 +47,31 @@ locals {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
     load-search-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
       schedule_expression = "cron(30 * * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
     export-opportunity-data = {
       task_command = ["poetry", "run", "flask", "task", "export-opportunity-data"]
       # Every day at 4am Eastern Time during DST. 5am during non-DST.
       schedule_expression = "cron(0 9 * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
     create-analytics-db-csvs = {
       task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
       # Every day at 5am Eastern Time during DST. 6am during non-DST.
       schedule_expression = "cron(0 10 * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
     load-search-agency-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
       # Every day at 8am Eastern Time during DST. 9am during non-DST.
       schedule_expression = "cron(0 13 * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
   }
 }

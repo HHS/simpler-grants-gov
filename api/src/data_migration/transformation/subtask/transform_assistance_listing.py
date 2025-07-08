@@ -21,7 +21,7 @@ class TransformAssistanceListing(AbstractTransformSubTask):
             OpportunityAssistanceListing,
             [
                 TopportunityCfda.opp_cfda_id
-                == OpportunityAssistanceListing.opportunity_assistance_listing_id
+                == OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
             ],
         )
 
@@ -109,7 +109,7 @@ class TransformAssistanceListing(AbstractTransformSubTask):
 
             logger.info("Transforming and upserting assistance listing", extra=extra)
             transformed_assistance_listing = transform_util.transform_assistance_listing(
-                source_assistance_listing, target_assistance_listing
+                source_assistance_listing, target_assistance_listing, opportunity
             )
 
             if is_insert:

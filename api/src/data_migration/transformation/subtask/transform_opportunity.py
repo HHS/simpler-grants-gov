@@ -32,7 +32,7 @@ class TransformOpportunity(AbstractTransformSubTask):
         opportunities: list[Tuple[Topportunity, Opportunity | None]] = self.fetch(
             Topportunity,
             Opportunity,
-            [Topportunity.opportunity_id == Opportunity.opportunity_id],
+            [Topportunity.opportunity_id == Opportunity.legacy_opportunity_id],
         )
 
         for source_opportunity, target_opportunity in opportunities:

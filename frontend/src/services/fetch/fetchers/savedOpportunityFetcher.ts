@@ -8,7 +8,7 @@ export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
   token: string,
   userId: string,
-  opportunityId: number,
+  opportunityId: string,
 ) => {
   const ssgToken = {
     "X-SGG-Token": token,
@@ -63,11 +63,11 @@ export const getSavedOpportunities = async (
 export const getSavedOpportunity = async (
   token: string,
   userId: string,
-  opportunityId: number,
+  opportunityId: string,
 ): Promise<MinimalOpportunity | null> => {
   const savedOpportunities = await getSavedOpportunities(token, userId);
   const savedOpportunity = savedOpportunities.find(
-    (savedOpportunity: { opportunity_id: number }) =>
+    (savedOpportunity: { opportunity_id: string }) =>
       savedOpportunity.opportunity_id === opportunityId,
   );
   return savedOpportunity ?? null;
