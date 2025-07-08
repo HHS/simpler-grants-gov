@@ -2,7 +2,7 @@ import { Meta } from "@storybook/react";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
-import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
+import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 import competitionMock from "./competition.mock.json";
 
 const competitionForms = competitionMock.competition

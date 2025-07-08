@@ -75,7 +75,9 @@ describe("requesterForEndpoint", () => {
   beforeEach(() => {
     global.fetch = fetchMock;
   });
-
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it("returns a function", () => {
     expect(typeof requesterForEndpoint(basicEndpoint)).toBe("function");
   });
@@ -130,5 +132,47 @@ describe("requesterForEndpoint", () => {
     });
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
     expect(throwErrorMock).toHaveBeenCalledWith(fakeJsonBody, "fakeurl/1");
+  });
+  it("returns without error if status included in allowedErrorStatuses", async () => {
+    fetchMock.mockResolvedValue({
+      json: responseJsonMock,
+      ok: false,
+      status: 422,
+      headers: { get: () => "application/json" },
+    });
+
+    const requester = requesterForEndpoint({
+      ...basicEndpoint,
+      allowedErrorStatuses: [422, 450],
+    });
+
+    const response = await requester({
+      subPath: "1",
+      body: { key: "value" },
+      additionalHeaders: { "Header-Name": "headerValue" },
+    });
+    expect(response.status).toEqual(422);
+    expect(throwErrorMock).toHaveBeenCalledTimes(0);
+  });
+  it("returns an error if status is 4XX but not included in allowedErrorStatuses", async () => {
+    fetchMock.mockResolvedValue({
+      json: responseJsonMock,
+      ok: false,
+      status: 423,
+      headers: { get: () => "application/json" },
+    });
+
+    const requester = requesterForEndpoint({
+      ...basicEndpoint,
+      allowedErrorStatuses: [422],
+    });
+
+    await requester({
+      subPath: "1",
+      body: { key: "value" },
+      additionalHeaders: { "Header-Name": "headerValue" },
+    });
+
+    expect(throwErrorMock).toHaveBeenCalledTimes(1);
   });
 });
