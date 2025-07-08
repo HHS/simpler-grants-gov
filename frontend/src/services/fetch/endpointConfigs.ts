@@ -62,13 +62,6 @@ export const toDynamicUsersEndpoint = (type: "POST" | "DELETE" | "PUT") => {
   };
 };
 
-export const fetchAgenciesEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "agencies",
-  method: "POST" as ApiMethod,
-};
-
 export const userRefreshEndpoint = {
   basePath: environment.API_URL,
   version: "v1",
