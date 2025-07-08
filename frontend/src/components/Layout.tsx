@@ -1,4 +1,5 @@
 import UserProvider from "src/services/auth/UserProvider";
+import { SessionStorageProvider } from "src/services/sessionStorage/SessionStorageProvider";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -19,17 +20,19 @@ export default function Layout({ children, locale }: Props) {
 
   return (
     <UserProvider>
-      <div className="display-flex flex-column minh-viewport">
-        <a className="usa-skipnav" href="#main-content">
-          {t("Layout.skipToMain")}
-        </a>
-        <Header locale={locale} />
-        <main id="main-content" className="border-top-0">
-          {children}
-        </main>
-        <Footer />
-        <GrantsIdentifier />
-      </div>
+      <SessionStorageProvider>
+        <div className="display-flex flex-column minh-viewport">
+          <a className="usa-skipnav" href="#main-content">
+            {t("Layout.skipToMain")}
+          </a>
+          <Header locale={locale} />
+          <main id="main-content" className="border-top-0">
+            {children}
+          </main>
+          <Footer />
+          <GrantsIdentifier />
+        </div>
+      </SessionStorageProvider>
     </UserProvider>
   );
 }
