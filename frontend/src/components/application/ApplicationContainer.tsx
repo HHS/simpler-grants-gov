@@ -46,7 +46,9 @@ const ApplicationContainer = ({
     setLoading(true);
     submitApplication(applicationId)
       .then((data) => {
-        if (data?.errors) {
+        if (!data) {
+          setError(true);
+        } else if (data?.errors) {
           setValidationErrors(data.errors);
         } else {
           setSuccess(true);

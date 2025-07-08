@@ -35,6 +35,7 @@ export function requesterForEndpoint({
   basePath,
   version,
   namespace,
+  allowedErrorStatuses = [],
 }: EndpointConfig) {
   return async function (
     options: {
@@ -75,7 +76,7 @@ export function requesterForEndpoint({
     if (
       !response.ok &&
       response.headers.get("Content-Type") === "application/json" &&
-      response.status !== 422
+      !allowedErrorStatuses.includes(response.status)
     ) {
       // we can assume this is serializable json based on the response header, but we'll catch anyway
       let jsonBody;
@@ -87,7 +88,10 @@ export function requesterForEndpoint({
         );
       }
       return throwError(jsonBody, url);
-    } else if (!response.ok && response.status !== 422) {
+    } else if (
+      !response.ok &&
+      !allowedErrorStatuses.includes(response.status)
+    ) {
       throw new ApiRequestError(
         `unable to fetch ${url}`,
         "APIRequestError",

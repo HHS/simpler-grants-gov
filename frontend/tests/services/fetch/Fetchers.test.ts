@@ -133,7 +133,7 @@ describe("requesterForEndpoint", () => {
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
     expect(throwErrorMock).toHaveBeenCalledWith(fakeJsonBody, "fakeurl/1");
   });
-  it("returns without error if status is 422", async () => {
+  it("returns without error if status included in allowedErrorStatuses", async () => {
     fetchMock.mockResolvedValue({
       json: responseJsonMock,
       ok: false,
@@ -141,7 +141,10 @@ describe("requesterForEndpoint", () => {
       headers: { get: () => "application/json" },
     });
 
-    const requester = requesterForEndpoint(basicEndpoint);
+    const requester = requesterForEndpoint({
+      ...basicEndpoint,
+      allowedErrorStatuses: [422, 450],
+    });
 
     const response = await requester({
       subPath: "1",
@@ -151,7 +154,7 @@ describe("requesterForEndpoint", () => {
     expect(response.status).toEqual(422);
     expect(throwErrorMock).toHaveBeenCalledTimes(0);
   });
-  it("returns without error if status is 4XX but not 422", async () => {
+  it("returns an error if status is 4XX but not included in allowedErrorStatuses", async () => {
     fetchMock.mockResolvedValue({
       json: responseJsonMock,
       ok: false,
@@ -159,7 +162,10 @@ describe("requesterForEndpoint", () => {
       headers: { get: () => "application/json" },
     });
 
-    const requester = requesterForEndpoint(basicEndpoint);
+    const requester = requesterForEndpoint({
+      ...basicEndpoint,
+      allowedErrorStatuses: [422],
+    });
 
     await requester({
       subPath: "1",
