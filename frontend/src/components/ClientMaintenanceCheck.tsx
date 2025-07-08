@@ -22,5 +22,5 @@ export default function ClientMaintenanceCheck() {
       // console.log("would redir");
       redirect("/", RedirectType.push);
     }
-  }, []);
+  }, [checkFeatureFlag]);
 }
