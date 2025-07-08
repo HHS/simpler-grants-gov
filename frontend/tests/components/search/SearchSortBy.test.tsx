@@ -87,11 +87,11 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).not.toHaveTextContent(
-      "sortBy.options.opportunityNumberAsc",
+      "sortBy.options.opportunityTitleAsc",
     );
 
     fireEvent.select(screen.getByRole("combobox"), {
-      target: { value: "opportunityNumberAsc" },
+      target: { value: "opportunityTitleAsc" },
     });
 
     selectedOption = screen.getByRole("option", {
@@ -99,7 +99,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(selectedOption).toHaveTextContent(
-      "sortBy.options.opportunityNumberAsc",
+      "sortBy.options.opportunityTitleAsc",
     );
   });
 });

@@ -6,10 +6,10 @@ export type SortOptions =
   | "closeDateAsc"
   | "opportunityTitleAsc"
   | "opportunityTitleDesc"
-  | "agencyAsc"
-  | "agencyDesc"
-  | "opportunityNumberDesc"
-  | "opportunityNumberAsc";
+  | "awardFloorAsc"
+  | "awardFloorDesc"
+  | "awardCeilingAsc"
+  | "awardCeilingDesc";
 
 export type SortOption = {
   label: string;
