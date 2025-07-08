@@ -11,14 +11,14 @@ jest.mock("next-intl", () => ({
 
 describe("OpportunityCTA", () => {
   it("renders the expected content and title", () => {
-    render(<OpportunityCTA id={1} />);
+    render(<OpportunityCTA legacyId={1} />);
 
     expect(screen.getByText("applyTitle")).toBeInTheDocument();
     expect(screen.getByText("applyContent")).toBeInTheDocument();
   });
 
   it("renders a link that links out to the opportunity detail on grants.gov", () => {
-    render(<OpportunityCTA id={1} />);
+    render(<OpportunityCTA legacyId={1} />);
 
     const link = screen.getByRole("link");
     expect(link).toBeInTheDocument();

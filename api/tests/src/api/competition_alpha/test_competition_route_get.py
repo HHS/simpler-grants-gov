@@ -19,7 +19,7 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
     response_competition = resp.get_json()["data"]
 
     assert response_competition["competition_id"] == str(competition.competition_id)
-    assert response_competition["opportunity_id"] == competition.opportunity_id
+    assert response_competition["opportunity_id"] == str(competition.opportunity_id)
     assert response_competition["competition_title"] == competition.competition_title
     assert response_competition["opening_date"] == competition.opening_date.isoformat()
     assert response_competition["closing_date"] == competition.closing_date.isoformat()
@@ -133,7 +133,7 @@ def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_cr
     response_competition = resp.get_json()["data"]
 
     assert response_competition["competition_id"] == str(competition.competition_id)
-    assert response_competition["opportunity_id"] == competition.opportunity_id
+    assert response_competition["opportunity_id"] == str(competition.opportunity_id)
     assert response_competition["competition_title"] == competition.competition_title
     assert response_competition["opening_date"] == competition.opening_date.isoformat()
     assert response_competition["closing_date"] == competition.closing_date.isoformat()

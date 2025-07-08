@@ -565,6 +565,8 @@ FORM_JSON_SCHEMA = {
                     "type": "string",
                     "title": "Zip / Postal Code",
                     "description": "Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United states.",
+                    "minLength": 1,
+                    "maxLength": 30,
                 },
             },
         },

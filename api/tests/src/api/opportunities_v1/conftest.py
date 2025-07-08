@@ -122,7 +122,7 @@ def get_search_request(
 
 
 def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
-    assert db_opportunity.opportunity_id == resp_opportunity["opportunity_id"]
+    assert str(db_opportunity.opportunity_id) == resp_opportunity["opportunity_id"]
     assert db_opportunity.opportunity_number == resp_opportunity["opportunity_number"]
     assert db_opportunity.opportunity_title == resp_opportunity["opportunity_title"]
     assert db_opportunity.agency_code == resp_opportunity["agency_code"]

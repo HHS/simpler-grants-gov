@@ -8,7 +8,7 @@ import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
-  opportunityId: number;
+  opportunityId: string;
 }
 
 const DocumentTable = ({

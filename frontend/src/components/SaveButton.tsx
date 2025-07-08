@@ -49,7 +49,8 @@ const SaveButton = ({
       >
         {loading ? (
           <>
-            <Spinner className="height-3 width-3" /> {loadingText}
+            <Spinner className="height-105 width-105 button-icon-large" />{" "}
+            {loadingText}
           </>
         ) : (
           <>
