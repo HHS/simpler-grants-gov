@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { after } from "lodash";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReturnToGrantsNotification } from "src/components/ReturnToGrantsNotification";
@@ -9,7 +8,7 @@ const mockSetSessionStorageItem = jest.fn();
 const mockUseSearchParams = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useSearchParams: () => mockUseSearchParams(),
+  useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
 jest.mock("src/services/sessionStorage/useSessionStorage", () => ({
