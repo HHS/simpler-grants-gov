@@ -74,7 +74,8 @@ module "prod_config" {
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
 
     # grants.gov services/applications URI.
-    GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
+    GRANTS_GOV_URI  = "https://ws07.grants.gov"
+    GRANTS_GOV_PORT = 443
     ENABLE_SOAP_API = 1
 
     # Sam.gov

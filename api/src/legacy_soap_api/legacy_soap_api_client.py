@@ -14,7 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
 )
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
+from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAP_OPERATION_CONFIGS,
@@ -34,7 +34,7 @@ class BaseSOAPClient:
     def __init__(
         self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None = None
     ) -> None:
-        self.config = LegacySoapAPIConfig()
+        self.config = get_soap_config()
         self.auth = auth
         self.soap_request = soap_request
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
@@ -107,9 +107,7 @@ class BaseSOAPClient:
 
     def get_soap_proxy_url(self) -> str:
         return os.path.join(
-            self.soap_request.headers.get(
-                self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
-            ),
+            self.soap_request.headers.get(self.config.gg_s2s_proxy_header_key, self.config.gg_url),
             self.soap_request.full_path.lstrip("/"),
         )
 
