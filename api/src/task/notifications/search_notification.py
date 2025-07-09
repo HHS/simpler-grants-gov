@@ -44,9 +44,10 @@ class SearchNotificationTask(BaseNotificationTask):
             select(UserSavedSearch)
             .options(selectinload(UserSavedSearch.user))
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
+            .where(UserSavedSearch.is_deleted.isnot(True))
         )
-        saved_searches = self.db_session.execute(stmt).scalars().all()
 
+        saved_searches = self.db_session.execute(stmt).scalars().all()
         query_map: dict[str, list[UserSavedSearch]] = {}
         for saved_search in saved_searches:
             search_query = _strip_pagination_params(saved_search.search_query)
