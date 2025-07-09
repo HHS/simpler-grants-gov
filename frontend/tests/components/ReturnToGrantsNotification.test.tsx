@@ -3,20 +3,24 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReturnToGrantsNotification } from "src/components/ReturnToGrantsNotification";
 
-const mockGetSessionStorageItem = jest.fn();
-const mockSetSessionStorageItem = jest.fn();
+const mockGetItem = jest.fn();
+const mockSetItem = jest.fn();
 const mockUseSearchParams = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
-jest.mock("src/services/sessionStorage/useSessionStorage", () => ({
-  useSessionStorage: () => ({
-    getSessionStorageItem: mockGetSessionStorageItem,
-    setSessionStorageItem: mockSetSessionStorageItem,
-  }),
-}));
+jest.mock("src/services/sessionStorage/sessionStorage", () => {
+  return {
+    __esModule: true,
+    default: {
+      setItem: (key: string, value: string) =>
+        mockSetItem(key, value) as unknown,
+      getItem: (key: string) => mockGetItem(key) as unknown,
+    },
+  };
+});
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
@@ -30,7 +34,7 @@ describe("ReturnToGrantsNotification", () => {
     );
     render(<ReturnToGrantsNotification />);
 
-    expect(mockSetSessionStorageItem).toHaveBeenCalledWith(
+    expect(mockSetItem).toHaveBeenCalledWith(
       "showLegacySearchReturnNotification",
       "true",
     );
@@ -39,14 +43,14 @@ describe("ReturnToGrantsNotification", () => {
 
   it("displays link if session storage is set", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
-    mockGetSessionStorageItem.mockReturnValue("true");
+    mockGetItem.mockReturnValue("true");
     render(<ReturnToGrantsNotification />);
 
     expect(screen.getByRole("link")).toBeInTheDocument();
   });
   it("does not display a link if utm source and session storage are not set", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
-    mockGetSessionStorageItem.mockReturnValue("false");
+    mockGetItem.mockReturnValue("false");
     render(<ReturnToGrantsNotification />);
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
