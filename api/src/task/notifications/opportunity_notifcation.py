@@ -357,15 +357,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in eligibility_change.items():
             before = change["before"]
             after = change["after"]
-
             if field == "applicant_types":
-                added = sorted(set(after) - set(before), key=lambda x: x.value)
-                removed = sorted(set(before) - set(after), key=lambda x: x.value)
+                added = sorted(set(after) - set(before))
+                removed = sorted(set(before) - set(after))
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type)}" for e_type in added)}].<br>"
                 if removed:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type)}" for e_type in removed)}].<br>"
 
             if field == "applicant_eligibility_description":
                 stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
