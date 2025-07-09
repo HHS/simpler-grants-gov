@@ -28,8 +28,6 @@ notification_config = None
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
     monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
-    notification_config = EmailNotificationConfig()
-    notification_config.reset_emails_without_sending = False
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -55,6 +53,16 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedSearch)
+
+
+@pytest.fixture()
+def notification_task(db_session, search_client):
+    notification_config = EmailNotificationConfig()
+    notification_config.reset_emails_without_sending = False
+
+    return SearchNotificationTask(
+        db_session=db_session, search_client=search_client, notification_config=notification_config
+    )
 
 
 def test_search_notifications_cli(
@@ -609,6 +617,7 @@ def test_search_notification_deleted_search(
     enable_factory_create,
     user_with_email,
     search_client,
+    notification_task,
 ):
     opp = factories.OpportunityFactory.create(
         opportunity_id=OPPORTUNITIES[0].opportunity_id,
@@ -633,9 +642,8 @@ def test_search_notification_deleted_search(
         last_notified_at=datetime_util.utcnow() - timedelta(days=1),
         is_deleted=True,
     )
-    # Instantiate the task
-    task = SearchNotificationTask(db_session=db_session, search_client=search_client)
-    results = task.collect_email_notifications()
+
+    results = notification_task.collect_email_notifications()
 
     # assert deleted saved search is not picked up
     assert len(results) == 0

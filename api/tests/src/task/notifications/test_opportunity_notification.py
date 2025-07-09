@@ -326,16 +326,19 @@ class TestOpportunityNotification:
         )
 
     def test_get_latest_opportunity_versions_deleted(
-        self, db_session, search_client, user, set_env_var_for_email_notification_config
+        self,
+        db_session,
+        search_client,
+        user,
+        set_env_var_for_email_notification_config,
+        notification_task,
     ):
         """Test that the user notification does not pick up opportunities that have been marked as deleted"""
         opp = factories.OpportunityFactory.create(is_posted_summary=True)
         factories.UserSavedOpportunityFactory.create(user=user, opportunity=opp, is_deleted=True)
         factories.OpportunityVersionFactory.create(opportunity=opp)
         # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task._get_latest_opportunity_versions()
+        results = notification_task._get_latest_opportunity_versions()
 
         # assert deleted saved opportunity is not picked up
         assert len(results) == 0
@@ -361,7 +364,7 @@ class TestOpportunityNotification:
         assert len(results) == 0
 
     def test_with_no_relevant_notifications(
-        self, db_session, user, set_env_var_for_email_notification_config, caplog
+        self, db_session, user, set_env_var_for_email_notification_config, caplog, notification_task
     ):
         """Test that only relevant (tracked) changes to opportunities generate email notifications"""
         caplog.set_level(logging.INFO)
@@ -401,10 +404,7 @@ class TestOpportunityNotification:
             opportunity=opp_2,
         )
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task.collect_email_notifications()
+        results = notification_task.collect_email_notifications()
 
         # assert only the change to Opportunity 2 is tracked and should result in a notification.
         assert len(results) == 1
@@ -434,7 +434,7 @@ class TestOpportunityNotification:
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
 
     def test_with_no_prior_version_email_collections_with_latest_version(
-        self, db_session, user, set_env_var_for_email_notification_config, caplog
+        self, db_session, user, set_env_var_for_email_notification_config, caplog, notification_task
     ):
         """Test that no notification is created when a new version exists but no prior version exist"""
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
@@ -444,10 +444,7 @@ class TestOpportunityNotification:
         )
         factories.OpportunityVersionFactory.create(opportunity=opportunity)
 
-        # Instantiate the task
-        task = OpportunityNotificationTask(db_session=db_session)
-
-        results = task.collect_email_notifications()
+        results = notification_task.collect_email_notifications()
 
         assert len(results) == 0
         # Verify the log contains the correct metrics
@@ -921,7 +918,7 @@ class TestOpportunityNotification:
         set_env_var_for_email_notification_config,
         notification_task,
     ):
-        res = notification_task._build_description_fields_content(description_diffs, 1)
+        res = notification_task._build_description_fields_content(description_diffs)
         assert res == expected_html
 
     @pytest.mark.parametrize(
