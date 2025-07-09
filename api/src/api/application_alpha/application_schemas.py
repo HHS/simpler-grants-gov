@@ -40,43 +40,20 @@ class ApplicationUpdateResponseSchema(AbstractResponseSchema):
 
 
 class ApplicationFormUpdateRequestSchema(Schema):
-    application_response = fields.Dict(required=True)
-
-
-class ApplicationFormUpdateResponseDataSchema(Schema):
-    application_id = fields.UUID()
-
-    application_form_status = fields.Enum(
-        ApplicationFormStatus,
-        metadata={"description": "Status indicating how much of a form has been filled out"},
+    application_response = fields.Dict(
+        required=True,
+        metadata={
+            "description": "The form response data to update",
+            "example": {"name": "John Doe", "email": "john@example.com"},
+        },
     )
-
-
-class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
-    data = fields.Nested(ApplicationFormUpdateResponseDataSchema())
-
-
-class ApplicationUserSchema(Schema):
-    """Schema for users associated with an application"""
-
-    user_id = fields.UUID()
-    email = fields.String()
-    is_application_owner = fields.Boolean()
-
-
-class SamGovEntitySchema(Schema):
-    """Schema for SAM.gov entity information"""
-
-    uei = fields.String()
-    legal_business_name = fields.String()
-    expiration_date = fields.Date()
-
-
-class OrganizationSchema(Schema):
-    """Schema for organization information"""
-
-    organization_id = fields.UUID()
-    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
+    is_included_in_submission = fields.Boolean(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Whether this form should be included in the application submission"
+        },
+    )
 
 
 class ApplicationAttachmentNoLinkSchema(Schema):
@@ -129,7 +106,39 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Whether this form is required for the application"}
     )
 
+    is_included_in_submission = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether this form is included in the application submission"},
+    )
+
     application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+
+
+class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationUserSchema(Schema):
+    """Schema for users associated with an application"""
+
+    user_id = fields.UUID()
+    email = fields.String()
+    is_application_owner = fields.Boolean()
+
+
+class SamGovEntitySchema(Schema):
+    """Schema for SAM.gov entity information"""
+
+    uei = fields.String()
+    legal_business_name = fields.String()
+    expiration_date = fields.Date()
+
+
+class OrganizationSchema(Schema):
+    """Schema for organization information"""
+
+    organization_id = fields.UUID()
+    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -224,3 +233,16 @@ class ApplicationAttachmentUpdateRequestSchema(Schema):
 
 class ApplicationAttachmentUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentCreateSchema())
+
+
+class ApplicationFormInclusionUpdateRequestSchema(Schema):
+    is_included_in_submission = fields.Boolean(
+        required=True,
+        metadata={
+            "description": "Whether this form should be included in the application submission"
+        },
+    )
+
+
+class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationFormGetResponseDataSchema())

@@ -13,7 +13,10 @@ from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.generate_notifications import NotificationConstants
-from src.task.notifications.search_notification import _strip_pagination_params
+from src.task.notifications.search_notification import (
+    SearchNotificationTask,
+    _strip_pagination_params,
+)
 from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
@@ -582,3 +585,42 @@ To unsubscribe from email notifications for a query, delete it from your saved s
     )
 
     assert email_content.strip() == expected_single.strip()
+
+
+def test_search_notification_deleted_search(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+    search_client,
+):
+    opp = factories.OpportunityFactory.create(
+        opportunity_id=OPPORTUNITIES[0].opportunity_id,
+        no_current_summary=True,
+        legacy_opportunity_id=5,
+        opportunity_title="Grant Program",
+    )
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opp, post_date=date.fromisoformat("2030-01-31")
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opp,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        search_query={"keywords": "test"},
+        user=user_with_email,
+        searched_opportunity_ids=[OPPORTUNITIES[1].opportunity_id],
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        is_deleted=True,
+    )
+    # Instantiate the task
+    task = SearchNotificationTask(db_session=db_session, search_client=search_client)
+    results = task.collect_email_notifications()
+
+    # assert deleted saved search is not picked up
+    assert len(results) == 0
