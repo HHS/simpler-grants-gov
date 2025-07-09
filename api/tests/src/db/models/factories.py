@@ -2454,6 +2454,11 @@ class StagingTcompetitionFactory(AbstractStagingFactory):
         )
 
 
+class StagingTinstructionsFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.instructions.Tinstructions
+
+
 ###################
 # Extract Factories
 ###################
