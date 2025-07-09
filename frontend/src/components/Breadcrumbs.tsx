@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   Breadcrumb,
   BreadcrumbBar,
@@ -62,7 +63,9 @@ const Breadcrumbs = ({ breadcrumbList }: { breadcrumbList: Breadcrumb[] }) => {
       <BreadcrumbBar className="flex-1" listProps={{ ...microdata.ol }}>
         {breadcrumArray}
       </BreadcrumbBar>
-      <ReturnToGrantsNotification />
+      <Suspense>
+        <ReturnToGrantsNotification />
+      </Suspense>
     </GridContainer>
   );
 };
