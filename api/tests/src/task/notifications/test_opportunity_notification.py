@@ -185,9 +185,6 @@ class TestOpportunityNotification:
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
-        self.notification_config = EmailNotificationConfig()
-        self.notification_config.reset_emails_without_sending = False
-
     @pytest.fixture(autouse=True)
     def clear_data(self, db_session):
         """Clear all notification logs"""
@@ -201,6 +198,9 @@ class TestOpportunityNotification:
 
     @pytest.fixture()
     def notification_task(self, db_session):
+        self.notification_config = EmailNotificationConfig()
+        self.notification_config.reset_emails_without_sending = False
+
         return OpportunityNotificationTask(db_session, self.notification_config)
 
     def test_email_notifications_collection(
