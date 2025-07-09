@@ -359,7 +359,7 @@ class TestOpportunityNotification:
     def test_with_no_relevant_notifications(
         self, db_session, user, set_env_var_for_email_notification_config, caplog
     ):
-        """Test notification is collected with mixed users with no relevant and irrelevant updates to opportunities ."""
+        """Test that only relevant (tracked) changes to opportunities generate email notifications"""
         caplog.set_level(logging.INFO)
         # Create a saved opportunity that needs notification
         user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
@@ -402,7 +402,7 @@ class TestOpportunityNotification:
 
         results = task.collect_email_notifications()
 
-        # assert only change to tracked updates to notification is collected
+        # assert only the change to Opportunity 2 is tracked and should result in a notification.
         assert len(results) == 1
         assert results[0].user_id == user_2.user_id
 
