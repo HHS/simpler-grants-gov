@@ -356,6 +356,63 @@ class TestOpportunityNotification:
 
         assert len(results) == 0
 
+    def test_with_no_relevant_notifications(
+        self, db_session, user, set_env_var_for_email_notification_config, caplog
+    ):
+        """Test that only relevant (tracked) changes to opportunities generate email notifications"""
+        caplog.set_level(logging.INFO)
+        # Create a saved opportunity that needs notification
+        user_2 = factories.LinkExternalUserFactory.create(email="test@example.com").user
+
+        opp_1 = factories.OpportunityFactory.create(no_current_summary=True)
+        opp_2 = factories.OpportunityFactory.create(
+            no_current_summary=True, category=OpportunityCategory.DISCRETIONARY
+        )
+
+        # First versions
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_1,
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_2,
+        )
+        # Save opportunity
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp_1,
+        )
+        factories.UserSavedOpportunityFactory.create(
+            user=user_2,
+            opportunity=opp_2,
+        )
+
+        # update fields
+        opp_1.opportunity_title = None  # untracked
+        opp_2.category = OpportunityCategory.MANDATORY
+        # Second versions
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_1,
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp_2,
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+
+        results = task.collect_email_notifications()
+
+        # assert only the change to Opportunity 2 is tracked and should result in a notification.
+        assert len(results) == 1
+        assert results[0].user_id == user_2.user_id
+
+        # Verify the log captures non-relevant changes
+        log_records = [
+            r for r in caplog.records if "No relevant notifications found for user" in r.message
+        ]
+
+        assert len(log_records) == 1
+
     def test_with_no_prior_version_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config
     ):
@@ -387,6 +444,7 @@ class TestOpportunityNotification:
 
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
+
         results = task.collect_email_notifications()
 
         assert len(results) == 0
@@ -394,7 +452,8 @@ class TestOpportunityNotification:
         log_records = [
             r
             for r in caplog.records
-            if "No previous version found for this opportunity" in r.message
+            if "No previous version found for this opportunity"
+            and "No opportunities with prior versions for user" in r.message
         ]
 
         assert len(log_records) == 1
@@ -845,7 +904,7 @@ class TestOpportunityNotification:
     ):
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
-        res = task._build_description_fields_content(description_diffs, 1)
+        res = task._build_description_fields_content(description_diffs)
         assert res == expected_html
 
     @pytest.mark.parametrize(

@@ -157,11 +157,16 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     continue
                 updated_opps.append(opp)
 
-            user_content = self._build_notification_content(updated_opps)
+            if not updated_opps:
+                logger.warning(
+                    "No opportunities with prior versions for user", extra={"user_id": user_id}
+                )
+                continue
 
+            user_content = self._build_notification_content(updated_opps)
             if not user_content:
                 logger.info("No relevant notifications found for user", extra={"user_id": user_id})
-                return users_email_notifications
+                continue
 
             logger.info(
                 "Created changed opportunity email notifications",
@@ -234,7 +239,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _get_last_notified_versions(
         self, user_opportunity_pairs: list
-    ) -> dict[tuple[UUID, int], OpportunityVersion]:
+    ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
         OpportunityVersion for each that was created before the user's
@@ -281,7 +286,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+    def _build_description_fields_content(self, description_change: dict) -> str:
         after = description_change["after"]
         if after:
             description_section = SECTION_STYLING.format("Description")
@@ -492,11 +497,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
             )
         if "summary_description" in changes:
-            sections.append(
-                self._build_description_fields_content(
-                    changes["summary_description"], opp_change.opportunity_id
-                )
-            )
+            sections.append(self._build_description_fields_content(changes["summary_description"]))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
