@@ -2957,7 +2957,7 @@ def test_application_form_inclusion_update_success_true(
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
-    application_form = ApplicationFormFactory.create(
+    ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3130,13 +3130,11 @@ def test_application_start_organization_valid_entity_success(
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
-    assert response.json["data"]["application_id"] == application_id
-    assert response.json["data"]["form_id"] == form_id
-    assert response.json["data"]["is_included_in_submission"] is True
+    )
 
-    # Verify in database
-    db_session.refresh(application_form)
-    assert application_form.is_included_in_submission is True
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
 
 def test_application_form_inclusion_update_success_false(
@@ -3149,7 +3147,7 @@ def test_application_form_inclusion_update_success_false(
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with inclusion initially set to true
-    application_form = ApplicationFormFactory.create(
+    ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3174,11 +3172,14 @@ def test_application_form_inclusion_update_success_false(
     assert "application_id" in response.json["data"]
 
     # Verify application was created with the organization
+    competition_id = str(application.competition_id)
+    organization_id = str(application.organization_id)
     application_id = response.json["data"]["application_id"]
     application = db_session.execute(
         select(Application).where(Application.application_id == application_id)
     ).scalar_one_or_none()
 
+    # Verify application was created with the organization
     assert application is not None
     assert str(application.competition_id) == competition_id
     assert str(application.organization_id) == organization_id
@@ -3253,13 +3254,6 @@ def test_application_start_organization_entity_expiring_yesterday(
         .all()
     )
     assert len(applications_count) == 0
-    assert response.json["data"]["application_id"] == application_id
-    assert response.json["data"]["form_id"] == form_id
-    assert response.json["data"]["is_included_in_submission"] is False
-
-    # Verify in database
-    db_session.refresh(application_form)
-    assert application_form.is_included_in_submission is False
 
 
 def test_application_form_inclusion_update_application_form_not_found(
