@@ -15,34 +15,61 @@ from src.services.applications.application_validation import (
     ApplicationAction,
     validate_competition_open,
 )
+from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
 
 def _validate_organization_membership(
-    db_session: db.Session, organization_id: UUID, user: User
-) -> Organization:
-    # Fetch the organization
-    organization = db_session.execute(
-        select(Organization)
-        .where(Organization.organization_id == organization_id)
-        .options(selectinload(Organization.organization_users))
-    ).scalar_one_or_none()
-
-    if not organization:
-        raise_flask_error(404, "Organization not found")
-
+    db_session: db.Session, organization: Organization, user: User
+) -> None:
+    """
+    Validate that the user is a member of the organization.
+    """
     # Check if the user is a member of the organization
     is_member = db_session.execute(
         select(OrganizationUser)
-        .where(OrganizationUser.organization_id == organization_id)
+        .where(OrganizationUser.organization_id == organization.organization_id)
         .where(OrganizationUser.user_id == user.user_id)
     ).scalar_one_or_none()
 
     if not is_member:
         raise_flask_error(403, "User is not a member of the organization")
 
-    return organization
+
+def _validate_organization_expiration(organization: Organization) -> None:
+    """
+    Validate that the organization's SAM.gov entity record is not expired.
+
+    Args:
+        organization: Organization to validate
+
+    Raises:
+        Flask error with 422 status if organization is expired or has no SAM.gov entity record
+    """
+    # Check if organization has no sam.gov entity record
+    if not organization.sam_gov_entity:
+        raise_flask_error(
+            422,
+            "This organization has no SAM.gov entity record and cannot be used for applications",
+        )
+
+    sam_gov_entity = organization.sam_gov_entity
+    current_date = get_now_us_eastern_date()
+
+    # Check if organization is marked as inactive
+    if sam_gov_entity.is_inactive is True:
+        raise_flask_error(
+            422,
+            "This organization is inactive in SAM.gov and cannot be used for applications",
+        )
+
+    # Check if organization's registration has expired
+    if sam_gov_entity.expiration_date < current_date:
+        raise_flask_error(
+            422,
+            f"This organization's SAM.gov registration expired on {sam_gov_entity.expiration_date.strftime('%B %d, %Y')} and cannot be used for applications",
+        )
 
 
 def _validate_applicant_type(competition: Competition, organization_id: UUID | None) -> None:
@@ -99,7 +126,22 @@ def create_application(
 
     # Validate organization if provided
     if organization_id is not None:
-        _validate_organization_membership(db_session, organization_id, user)
+        # Fetch the organization with its sam_gov_entity relationship
+        organization = db_session.execute(
+            select(Organization)
+            .where(Organization.organization_id == organization_id)
+            .options(
+                selectinload(Organization.organization_users),
+                selectinload(Organization.sam_gov_entity),
+            )
+        ).scalar_one_or_none()
+
+        if not organization:
+            raise_flask_error(404, "Organization not found")
+
+        # Validate user membership and organization status
+        _validate_organization_membership(db_session, organization, user)
+        _validate_organization_expiration(organization)
 
     # Get default application name if not provided
     if application_name is None:
