@@ -316,6 +316,21 @@ class TestOpportunityNotification:
             == 2
         )
 
+    def test_get_latest_opportunity_versions_deleted(
+        self, db_session, search_client, user, set_env_var_for_email_notification_config
+    ):
+        """Test that the user notification does not pick up opportunities that have been marked as deleted"""
+        opp = factories.OpportunityFactory.create(is_posted_summary=True)
+        factories.UserSavedOpportunityFactory.create(user=user, opportunity=opp, is_deleted=True)
+        factories.OpportunityVersionFactory.create(opportunity=opp)
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+
+        results = task._get_latest_opportunity_versions()
+
+        # assert deleted saved opportunity is not picked up
+        assert len(results) == 0
+
     def test_with_no_user_email_notification(
         self,
         db_session,

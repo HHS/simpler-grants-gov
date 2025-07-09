@@ -214,7 +214,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         # Map cols in the subquery back to OpportunityVersion model
         latest_opp_version = aliased(OpportunityVersion, latest_versions_subq)
 
-        # Grab latest version for each UserSavedOpportunity
+        # Grab latest version for each active UserSavedOpportunity
         stmt = (
             select(UserSavedOpportunity, latest_opp_version)
             .options(selectinload(UserSavedOpportunity.user))
@@ -225,6 +225,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     latest_versions_subq.c.rn == 1,
                 ),
             )
+            .where(UserSavedOpportunity.is_deleted.isnot(True))
         )
 
         results = self.db_session.execute(stmt).all()
