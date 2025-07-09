@@ -2,13 +2,13 @@ name: Deploy API
 run-name: Deploy ${{ inputs.version || 'main' }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - "api/**"
-      - "infra/api/**"
-      - "infra/modules/**"
+  # push:
+  #   branches:
+  #     - "main"
+  #   paths:
+  #     - "api/**"
+  #     - "infra/api/**"
+  #     - "infra/modules/**"
   release:
     types: [published]
   workflow_dispatch:

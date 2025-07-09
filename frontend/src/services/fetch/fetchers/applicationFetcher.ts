@@ -3,25 +3,43 @@ import {
   ApplicationFormDetailApiResponse,
   ApplicationResponseDetail,
   ApplicationStartApiResponse,
+  ApplicationSubmitApiResponse,
 } from "src/types/applicationResponseTypes";
 
 import { fetchApplicationWithMethod } from "./fetchers";
 
 export const handleStartApplication = async (
-  competitionID: string,
   applicationName: string,
+  competitionID: string,
   token: string,
 ): Promise<ApplicationStartApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
+
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
     additionalHeaders: ssgToken,
-    body: { competition_id: competitionID, name: applicationName },
+    body: { competition_id: competitionID, application_name: applicationName },
   });
 
   return (await response.json()) as ApplicationStartApiResponse;
+};
+
+export const handleSubmitApplication = async (
+  applicationId: string,
+  token: string,
+): Promise<ApplicationSubmitApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const response = await fetchApplicationWithMethod("POST")({
+    subPath: `${applicationId}/submit`,
+    additionalHeaders: ssgToken,
+  });
+
+  return (await response.json()) as ApplicationSubmitApiResponse;
 };
 
 export const getApplicationDetails = async (

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pytest
 
@@ -7,6 +7,7 @@ import src.logging
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.auth.multi_auth import AuthType, jwt_key_or_internal_multi_auth, jwt_or_key_multi_auth
+from src.util import datetime_util
 from tests.src.db.models.factories import UserFactory
 
 
@@ -136,7 +137,7 @@ def test_internal_multi_auth_with_api_key(mini_app, api_auth_token):
 
 def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, db_session):
     """Test that the internal multi-auth works with internal JWT tokens"""
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     token, short_lived_token = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -160,7 +161,7 @@ def test_internal_multi_auth_precedence(
     user = UserFactory.create()
     user_token, _ = create_jwt_for_user(user, db_session)
 
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,

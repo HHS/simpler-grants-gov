@@ -36,6 +36,8 @@ TABLES_TO_LOAD = [
     "tsubscription",
     "tsubscription_search",
     "tsubscription_opportunity",
+    "tcompetition",
+    "tinstructions",
 ]
 
 

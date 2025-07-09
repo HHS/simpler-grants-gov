@@ -32,11 +32,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
     def __init__(
         self,
         db_session: db.Session,
-        frontend_base_url: str | None = None,
     ):
         super().__init__(db_session)
-
-        self.frontend_base_url = frontend_base_url
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
@@ -121,9 +118,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
                 subject = (
-                    "Applications for your bookmarked funding opportunity are due soon"
+                    "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunity are due soon"
                     if len(closing_opportunities) == 1
-                    else "Applications for your bookmarked funding opportunities are due soon"
+                    else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunities are due soon"
                 )
                 users_email_notifications.append(
                     UserEmailNotification(
@@ -161,21 +158,21 @@ class ClosingDateNotificationTask(BaseNotificationTask):
 
         for closing_opp in closing_opportunities:
             message += (
-                f"<a href='{self.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
+                f"<a href='{self.notification_config.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
                 f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
             )
 
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )

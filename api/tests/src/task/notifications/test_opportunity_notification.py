@@ -4,8 +4,10 @@ from datetime import date, timedelta
 import pytest
 
 import tests.src.db.models.factories as factories
+from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.constants.lookup_constants import (
+    ApplicantType,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -42,7 +44,16 @@ def build_opp_and_version(
     category_explanation: str | None,
     funding_categories: list[FundingCategory],
     funding_category_description: str | None,
+    agency_email_address: str | None,
+    agency_contact_description: str | None,
+    applicant_types: list[ApplicantType],
+    applicant_eligibility_description: str | None,
+    additional_info_url: str | None,
+    summary_description: str | None,
+    has_attachments: bool | None = None,
+    db_session: db.Session | None = None,
 ) -> OpportunityVersion:
+    _ = db_session  # Prevent linter warning for unused variable
     opportunity = factories.OpportunityFactory.build(
         opportunity_title=opportunity_title,
         current_opportunity_summary=None,
@@ -50,6 +61,8 @@ def build_opp_and_version(
         category_explanation=category_explanation,
         revision_number=revision_number,
     )
+    if has_attachments:
+        factories.OpportunityAttachmentFactory.create(opportunity=opportunity)
 
     opportunity_summary = factories.OpportunitySummaryFactory.build(
         opportunity=opportunity,
@@ -65,6 +78,12 @@ def build_opp_and_version(
         funding_instruments=funding_instruments,
         funding_categories=funding_categories,
         funding_category_description=funding_category_description,
+        agency_email_address=agency_email_address,
+        agency_contact_description=agency_contact_description,
+        applicant_types=applicant_types,
+        applicant_eligibility_description=applicant_eligibility_description,
+        additional_info_url=additional_info_url,
+        summary_description=summary_description,
     )
 
     opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
@@ -94,6 +113,12 @@ base_opal_fields = {
     "category_explanation": None,
     "funding_categories": [FundingCategory.EDUCATION],
     "funding_category_description": None,
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
+    "applicant_types": [ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+    "applicant_eligibility_description": "Not yet determined",
+    "additional_info_url": None,
+    "summary_description": None,
 }
 
 OPAL = build_opp_and_version(
@@ -134,6 +159,12 @@ base_topaz_fields = {
         FundingCategory.ENVIRONMENT,
     ],
     "funding_category_description": "Supports research in climate modeling and adaptation",
+    "agency_email_address": None,
+    "agency_contact_description": "customer service",
+    "applicant_types": [ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES],
+    "applicant_eligibility_description": "No income",
+    "additional_info_url": None,
+    "summary_description": "Summary",
 }
 
 TOPAZ = build_opp_and_version(
@@ -144,26 +175,6 @@ TOPAZ = build_opp_and_version(
 TOPAZ_STATUS = build_opp_and_version(
     opportunity_status=OpportunityStatus.CLOSED,
     **base_topaz_fields,
-)
-
-TOPAZ_ALL = build_opp_and_version(
-    revision_number=2,
-    opportunity_title="Topaz 2025 Climate Research Grant",
-    opportunity_status=OpportunityStatus.CLOSED,
-    close_date=date(2025, 12, 31),
-    forecasted_award_date=date(2026, 3, 15),
-    forecasted_project_start_date=date(2026, 5, 1),
-    fiscal_year=2026,
-    estimated_total_program_funding=12_000_000,
-    expected_number_of_awards=5,
-    award_floor=200_000,
-    award_ceiling=3_000_000,
-    is_cost_sharing=False,
-    funding_instruments=[FundingInstrument.GRANT],
-    category=OpportunityCategory.DISCRETIONARY,
-    category_explanation="Focus on clean energy startups and demonstration projects",
-    funding_categories=[FundingCategory.ENERGY],
-    funding_category_description="Accelerates early-stage renewable energy technology adoption",
 )
 
 
@@ -204,7 +215,7 @@ class TestOpportunityNotification:
         opp_2 = factories.OpportunityFactory.create(is_posted_summary=True)
         opp_3 = factories.OpportunityFactory.create(is_posted_summary=True)
 
-        # create old versions  for opps
+        # create first versions for opps
         factories.OpportunityVersionFactory.create(
             opportunity=opp_1,
         )
@@ -241,16 +252,16 @@ class TestOpportunityNotification:
         factories.OpportunityVersionFactory.create(
             opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=60)
         )
-        opp_1_v_2 = factories.OpportunityVersionFactory.create(
+        opp_1_v_3 = factories.OpportunityVersionFactory.create(
             opportunity=opp_1, created_at=opp_1.created_at + timedelta(minutes=160)
         )
-        opp_2_v_1 = factories.OpportunityVersionFactory.create(
+        opp_2_v_2 = factories.OpportunityVersionFactory.create(
             opportunity=opp_2, created_at=opp_2.created_at + timedelta(minutes=60)
         )
         factories.OpportunityVersionFactory.create(
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=60)
         )
-        opp_3_v_2 = factories.OpportunityVersionFactory.create(
+        opp_3_v_3 = factories.OpportunityVersionFactory.create(
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=80)
         )
 
@@ -260,7 +271,6 @@ class TestOpportunityNotification:
         task = OpportunityNotificationTask(db_session=db_session)
 
         results = task._get_latest_opportunity_versions()
-
         # assert that only the latest version is picked up for each user_saved_opportunity
         assert len(results) == 4
 
@@ -268,11 +278,11 @@ class TestOpportunityNotification:
             opp_id = user_saved_opp.opportunity_id
 
             if opp_id == opp_1.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_1_v_2.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_1_v_3.opportunity_id
             elif opp_id == opp_2.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_2_v_1.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_2_v_2.opportunity_id
             elif opp_id == opp_3.opportunity_id:
-                assert latest_opp_ver.opportunity_id == opp_3_v_2.opportunity_id
+                assert latest_opp_ver.opportunity_id == opp_3_v_3.opportunity_id
 
         # Run the notification task
         task = EmailNotificationTask(db_session, search_client)
@@ -348,6 +358,31 @@ class TestOpportunityNotification:
         assert len(results) == 0
         metrics = task.metrics
         assert metrics[Metrics.VERSIONLESS_OPPORTUNITY_COUNT] == 1
+
+    def test_with_no_prior_version_email_collections_with_latest_version(
+        self, db_session, user, set_env_var_for_email_notification_config, caplog
+    ):
+        """Test that no notification is created when a new version exists but no prior version exist"""
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opportunity,
+        )
+        factories.OpportunityVersionFactory.create(opportunity=opportunity)
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        results = task.collect_email_notifications()
+
+        assert len(results) == 0
+        # Verify the log contains the correct metrics
+        log_records = [
+            r
+            for r in caplog.records
+            if "No previous version found for this opportunity" in r.message
+        ]
+
+        assert len(log_records) == 1
 
     def test_no_updates_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config
@@ -438,6 +473,50 @@ class TestOpportunityNotification:
         res = task._flatten_and_extract_field_changes(diff_dict)
 
         assert res == expected_dict
+
+    @pytest.mark.parametrize(
+        "documents_diffs,expected_html",
+        [
+            (
+                {
+                    "opportunity_attachments": {
+                        "before": None,
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
+                        "before": [{"attachment_id": 2}],
+                        "after": [],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {
+                    "opportunity_attachments": {
+                        "before": [{"attachment_id": 1}, {"attachment_id": 34}],
+                        "after": [{"attachment_id": 2}],
+                    }
+                },
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+            ),
+            (
+                {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
+            ),
+        ],
+    )
+    def test_build_documents_fields(
+        self, db_session, documents_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_documents_fields(documents_diffs)
+        assert res == expected_html
 
     @pytest.mark.parametrize(
         "opp_status_diffs,expected_html",
@@ -643,6 +722,118 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
+        "contact_diffs,expected_html",
+        [
+            (
+                {"agency_email_address": {"before": None, "after": "contact@simpler.gov"}},
+                '<p style="padding-left: 20px;">Grantor contact information</p>'
+                '<p style="padding-left: 40px;">•  The updated email address is contact@simpler.gov.<br>',
+            ),
+            (
+                {
+                    "agency_contact_description": {
+                        "before": "Email customer service for any enquiries",
+                        "after": None,
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br>',
+            ),  # Truncate
+            (
+                {
+                    "agency_contact_description": {
+                        "before": None,
+                        "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.\n Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
+                    }
+                },
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
+            ),
+        ],
+    )
+    def test_build_grantor_contact_fields_content(
+        self, db_session, contact_diffs, expected_html, set_env_var_for_email_notification_config
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_grantor_contact_fields_content(contact_diffs)
+        assert res == expected_html
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
+        "eligibility_diffs,expected_html",
+        [
+            # Removed and Added type
+            (
+                {
+                    "applicant_types": {
+                        "before": [
+                            ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                            ApplicantType.OTHER,
+                        ],
+                        "after": [ApplicantType.STATE_GOVERNMENTS],
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p>'
+                '<p style="padding-left: 40px;">•  Additional eligibility criteria include: [State governments].<br>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
+            ),
+            # Add
+            (
+                {"applicant_eligibility_description": {"before": None, "after": "not decided"}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was added.<br>',
+            ),
+            # Update
+            (
+                {
+                    "applicant_eligibility_description": {
+                        "before": "business and personal ",
+                        "after": "business only",
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was changed.<br>',
+            ),
+            # Delete
+            (
+                {"applicant_eligibility_description": {"before": "Business", "after": None}},
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+            ),
+        ],
+    )
+    def test_build_eligibility_content(
+        self,
+        db_session,
+        eligibility_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_eligibility_content(eligibility_diffs)
+
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
+        "description_diffs,expected_html",
+        [
+            ({"before": "testing", "after": None}, ""),
+            (
+                {"before": "testing", "after": "Updated description"},
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
+            ),
+        ],
+    )
+    def test_build_description_fields_content(
+        self,
+        db_session,
+        description_diffs,
+        expected_html,
+        set_env_var_for_email_notification_config,
+    ):
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_description_fields_content(description_diffs, 1)
+        assert res == expected_html
+
+    @pytest.mark.parametrize(
         "version_change,expected_html",
         [
             # Status update
@@ -685,7 +876,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunities changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
@@ -709,7 +900,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
+                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
@@ -729,38 +920,6 @@ class TestOpportunityNotification:
                 ],
                 None,
             ),
-            # All changes
-            (
-                [
-                    OpportunityVersionChange(
-                        opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPAZ_ALL
-                    )
-                ],
-                UserOpportunityUpdateContent(
-                    subject="Your saved funding opportunity changed on <a href='http://testhost:3000' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>",
-                    message=(
-                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
-                        '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
-                        '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
-                        '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
-                        '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
-                        '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
-                        '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
-                        '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
-                        '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
-                        '<p style="padding-left: 20px;">Categorization</p>'
-                        '<p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
-                        '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
-                        '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
-                        '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br>'
-                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
-                    ),
-                    updated_opportunity_ids=[TOPAZ.opportunity_id],
-                ),
-            ),
         ],
     )
     def test_build_notification_content(
@@ -773,4 +932,80 @@ class TestOpportunityNotification:
         # Instantiate the task
         task = OpportunityNotificationTask(db_session=db_session)
         res = task._build_notification_content(version_changes)
+        assert res == expected
+
+    def test_build_notification_content_all_changes(
+        self,
+        db_session,
+        enable_factory_create,
+        set_env_var_for_email_notification_config,
+    ):
+        TOPZ_ALL = build_opp_and_version(
+            revision_number=2,
+            opportunity_title="Topaz 2025 Climate Research Grant",
+            opportunity_status=OpportunityStatus.CLOSED,
+            close_date=date(2025, 12, 31),
+            forecasted_award_date=date(2026, 3, 15),
+            forecasted_project_start_date=date(2026, 5, 1),
+            fiscal_year=2026,
+            estimated_total_program_funding=12_000_000,
+            expected_number_of_awards=5,
+            award_floor=200_000,
+            award_ceiling=3_000_000,
+            is_cost_sharing=False,
+            funding_instruments=[FundingInstrument.GRANT],
+            category=OpportunityCategory.DISCRETIONARY,
+            category_explanation="Focus on clean energy startups and demonstration projects",
+            funding_categories=[FundingCategory.ENERGY],
+            funding_category_description="Accelerates early-stage renewable energy technology adoption",
+            agency_email_address="john.smith@gmail.com",
+            agency_contact_description="grant manager",
+            applicant_types=[ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION],
+            applicant_eligibility_description="Charter Schools only",
+            additional_info_url="simpler-grants.gov",
+            summary_description="Climate research in mars",
+            has_attachments=True,
+            db_session=enable_factory_create,
+        )
+
+        expected = UserOpportunityUpdateContent(
+            subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
+            message=(
+                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
+                '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
+                '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
+                '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
+                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
+                '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
+                '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
+                '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
+                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
+                '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
+                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
+                '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
+                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
+                '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
+                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
+                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+            ),
+            updated_opportunity_ids=[TOPAZ.opportunity_id],
+        )
+
+        # Instantiate the task
+        task = OpportunityNotificationTask(db_session=db_session)
+        res = task._build_notification_content(
+            [
+                OpportunityVersionChange(
+                    opportunity_id=TOPAZ.opportunity_id, previous=TOPAZ, latest=TOPZ_ALL
+                )
+            ]
+        )
         assert res == expected

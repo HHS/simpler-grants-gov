@@ -56,8 +56,8 @@ GRANTOR_CONTACT_INFORMATION_FIELDS = {
     "agency_contact_description": "New description:",
 }
 DOCUMENTS_FIELDS = {
-    "attachments": "One or more new documents were ",
-    "additional_info_url": "A link to additional information was",
+    "opportunity_attachments": "One or more new documents were",  # temporarily skip opportunity_attachment change
+    "additional_info_url": "A link to additional information was updated.",
 }
 CONTACT_INFO = (
     "<div>"
@@ -77,6 +77,7 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
+TRUNCATION_THRESHOLD = 250
 
 
 class OpportunityNotificationTask(BaseNotificationTask):
@@ -143,12 +144,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            updated_opps = user_changed_opp.opportunities
-
-            for opp in updated_opps:
+            updated_opps: list[OpportunityVersionChange] = []
+            for opp in user_changed_opp.opportunities:
                 opp.previous = prior_notified_versions.get(
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
+                if opp.previous is None:
+                    logger.error(
+                        "No previous version found for this opportunity",
+                        extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    continue
+                updated_opps.append(opp)
 
             user_content = self._build_notification_content(updated_opps)
 
@@ -273,6 +280,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
+    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+        after = description_change["after"]
+        if after:
+            description_section = SECTION_STYLING.format("Description")
+            description_section += f"{BULLET_POINTS_STYLING} The description has changed.<br>"
+            return description_section
+        return ""
+
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
             return NOT_SPECIFIED
@@ -331,6 +346,53 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
         return category_section
 
+    def _build_eligibility_content(self, eligibility_change: dict) -> str:
+        eligibility_section = SECTION_STYLING.format("Eligibility")
+        for field, change in eligibility_change.items():
+            before = change["before"]
+            after = change["after"]
+
+            if field == "applicant_types":
+                added = sorted(set(after) - set(before), key=lambda x: x.value)
+                removed = sorted(set(before) - set(after), key=lambda x: x.value)
+                stmt = ELIGIBILITY_FIELDS["applicant_types"]
+                if added:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
+                if removed:
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
+
+            if field == "applicant_eligibility_description":
+                stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
+                if not before and after:
+                    eligibility_section += f"{stmt} added.<br>"
+                elif before and not after:
+                    eligibility_section += f"{stmt} deleted.<br>"
+                else:
+                    eligibility_section += f"{stmt} changed.<br>"
+        return eligibility_section
+
+    def _build_documents_fields(self, documents_change: dict) -> str:
+        documents_section = SECTION_STYLING.format("Documents")
+        for field, change in documents_change.items():
+            before = change["before"]
+            after = change["after"]
+
+            if field == "opportunity_attachments":
+                before_set = set(att["attachment_id"] for att in (before or []))
+                after_set = set(att["attachment_id"] for att in (after or []))
+
+                if after_set - before_set:
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} added.<br>"
+                if before_set - after_set:
+                    documents_section += f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["opportunity_attachments"]} removed.<br>"
+
+            elif field == "additional_info_url":
+                documents_section += (
+                    f"{BULLET_POINTS_STYLING} {DOCUMENTS_FIELDS["additional_info_url"]}<br>"
+                )
+
+        return documents_section
+
     def _format_currency(self, value: int | str) -> str:
         if isinstance(value, int):
             return f"${value:,}"
@@ -349,6 +411,16 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 f"{BULLET_POINTS_STYLING} {AWARD_FIELDS[field]} {before} to {after}.<br>"
             )
         return award_section
+
+    def _build_grantor_contact_fields_content(self, contact_change: dict) -> str:
+        contact_section = SECTION_STYLING.format("Grantor contact information")
+        for field, change in contact_change.items():
+            after = change["after"] if change["after"] else NOT_SPECIFIED
+            if len(after) > TRUNCATION_THRESHOLD:
+                after = after[: TRUNCATION_THRESHOLD - 3] + ".."
+
+            contact_section += f"{BULLET_POINTS_STYLING} {GRANTOR_CONTACT_INFORMATION_FIELDS[field]} {after.replace("\n", "<br>")}.<br>"
+        return contact_section
 
     def _normalize_date_field(self, value: str | int | None) -> str | int | None:
         if isinstance(value, str):
@@ -404,6 +476,26 @@ class OpportunityNotificationTask(BaseNotificationTask):
             k: changes[k] for k in CATEGORIZATION_FIELDS if k in changes
         }:
             sections.append(self._build_categorization_fields_content(categorization_fields_diffs))
+        if grantor_contact_fields_diffs := {
+            k: changes[k] for k in GRANTOR_CONTACT_INFORMATION_FIELDS if k in changes
+        }:
+            sections.append(
+                self._build_grantor_contact_fields_content(grantor_contact_fields_diffs)
+            )
+        if eligibility_fields_diffs := {k: changes[k] for k in ELIGIBILITY_FIELDS if k in changes}:
+            sections.append(self._build_eligibility_content(eligibility_fields_diffs))
+        if "additional_info_url" in changes:
+            sections.append(
+                self._build_documents_fields(
+                    {"additional_info_url": changes["additional_info_url"]}
+                )
+            )
+        if "summary_description" in changes:
+            sections.append(
+                self._build_description_fields_content(
+                    changes["summary_description"], opp_change.opportunity_id
+                )
+            )
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
@@ -454,11 +546,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "Your saved funding opportunities changed on "
+            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "Your saved funding opportunity changed on "
+            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
         )
-        subject += f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Simpler.Grants.gov</a>"
+        subject += "Simpler.Grants.gov"
 
         return UserOpportunityUpdateContent(
             subject=subject,

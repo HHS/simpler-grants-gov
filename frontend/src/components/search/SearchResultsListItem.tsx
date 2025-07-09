@@ -2,7 +2,7 @@
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
-import { getAgencyDisplayName } from "src/utils/search/searchUtils";
+import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";

@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -9,6 +9,7 @@ from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
+from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
@@ -35,6 +36,15 @@ SIMPLE_JSON_SCHEMA = {
     },
     "required": ["name"],
 }
+
+SIMPLE_ATTACHMENT_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "attachment_field": {"type": "string", "format": "uuid"},
+    },
+}
+
+SIMPLE_ATTACHMENT_RULE_SCHEMA = {"attachment_field": {"gg_validation": {"rule": "attachment"}}}
 
 
 def test_application_start_success(
@@ -485,6 +495,59 @@ def test_application_form_update_with_validation_warnings(
     assert existing_application_form.application_response == application_response
 
 
+def test_application_form_update_with_rule_validation_issues(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    application = ApplicationFactory.create()
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_response = {"attachment_field": "90b413f3-b0f3-4aed-9f30-c109991db0fc"}
+    request_data = {"application_response": application_response}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_status"] == ApplicationFormStatus.IN_PROGRESS
+    assert response.json["warnings"] == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "90b413f3-b0f3-4aed-9f30-c109991db0fc",
+        }
+    ]
+
+    # Verify application form was updated in the database
+    db_session.refresh(existing_application_form)
+    assert existing_application_form.application_response == application_response
+
+
 def test_application_form_update_with_invalid_schema_500(
     client,
     enable_factory_create,
@@ -713,6 +776,221 @@ def test_application_form_update_complex_json(
     assert application_form.application_response == complex_json
 
 
+def test_application_form_update_with_is_included_in_submission_true(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application form update with is_included_in_submission set to true"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(competition_form.form_id)
+    request_data = {
+        "application_response": {"name": "John Doe"},
+        "is_included_in_submission": True,
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["is_included_in_submission"] is True
+
+    # Verify application form was created in the database with correct value
+    application_form = db_session.execute(
+        select(ApplicationForm).where(
+            ApplicationForm.application_id == application.application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
+        )
+    ).scalar_one_or_none()
+
+    assert application_form is not None
+    assert application_form.application_response == {"name": "John Doe"}
+    assert application_form.is_included_in_submission is True
+
+
+def test_application_form_update_with_is_included_in_submission_false(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application form update with is_included_in_submission set to false"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(competition_form.form_id)
+    request_data = {
+        "application_response": {"name": "John Doe"},
+        "is_included_in_submission": False,
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["is_included_in_submission"] is False
+
+    # Verify application form was created in the database with correct value
+    application_form = db_session.execute(
+        select(ApplicationForm).where(
+            ApplicationForm.application_id == application.application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
+        )
+    ).scalar_one_or_none()
+
+    assert application_form is not None
+    assert application_form.application_response == {"name": "John Doe"}
+    assert application_form.is_included_in_submission is False
+
+
+def test_application_form_update_without_is_included_in_submission(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application form update without is_included_in_submission field defaults to None"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(competition_form.form_id)
+    request_data = {"application_response": {"name": "John Doe"}}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["is_included_in_submission"] is None
+
+    # Verify application form was created in the database with None value
+    application_form = db_session.execute(
+        select(ApplicationForm).where(
+            ApplicationForm.application_id == application.application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
+        )
+    ).scalar_one_or_none()
+
+    assert application_form is not None
+    assert application_form.application_response == {"name": "John Doe"}
+    assert application_form.is_included_in_submission is None
+
+
+def test_application_form_update_existing_form_preserves_is_included_in_submission(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test updating existing application form preserves is_included_in_submission when not provided"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Original Name"},
+        is_included_in_submission=True,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    request_data = {"application_response": {"name": "Updated Name"}}
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["warnings"] == []
+    assert response.json["data"]["is_included_in_submission"] is True
+
+    # Verify application form was updated in the database but preserved the flag
+    db_session.refresh(existing_form)
+    assert existing_form.application_response == {"name": "Updated Name"}
+    assert existing_form.is_included_in_submission is True
+
+
+def test_application_form_update_existing_form_updates_is_included_in_submission(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test updating existing application form updates is_included_in_submission when provided"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Original Name"},
+        is_included_in_submission=True,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    request_data = {
+        "application_response": {"name": "Updated Name"},
+        "is_included_in_submission": False,
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["warnings"] == []
+    assert response.json["data"]["is_included_in_submission"] is False
+
+    # Verify application form was updated in the database
+    db_session.refresh(existing_form)
+    assert existing_form.application_response == {"name": "Updated Name"}
+    assert existing_form.is_included_in_submission is False
+
+
 def test_application_form_get_success(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
@@ -894,6 +1172,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
             "created_at": application_form.created_at.isoformat(),
             "updated_at": application_form.updated_at.isoformat(),
             "is_required": True,
+            "is_included_in_submission": None,
             "application_attachments": [],
         }
 
@@ -1033,6 +1312,95 @@ def test_application_get_success_with_validation_issues(
     )
 
 
+def test_application_get_success_with_rule_validation_issue(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    # Create a competition with two forms
+    form_a = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+    form_b = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+    competition = CompetitionFactory.create(competition_forms=[])
+    competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
+    competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
+
+    # Create an application with two app forms, one partially filled out, one not started
+    application = ApplicationFactory.create(competition=competition)
+    application_form_a = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_a,
+        application_response={"attachment_field": "b6b58969-499c-438c-b6ca-19c416b198f9"},
+    )
+    application_form_b = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form_b,
+        application_response={"attachment_field": "43fc2b03-6025-41be-81ee-d8b339189530"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    assert len(response.json["warnings"]) == 2
+    for warning in response.json["warnings"]:
+        assert warning["field"] == "application_form_id"
+        assert warning["message"] == "The application form has outstanding errors."
+        assert warning["type"] == "application_form_validation"
+        assert warning["value"] in {
+            str(application_form_a.application_form_id),
+            str(application_form_b.application_form_id),
+        }
+
+    form_a_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_a.application_form_id)
+    ]
+    assert form_a_warnings == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "b6b58969-499c-438c-b6ca-19c416b198f9",
+        }
+    ]
+
+    form_b_warnings = response.json["data"]["form_validation_warnings"][
+        str(application_form_b.application_form_id)
+    ]
+    assert form_b_warnings == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "43fc2b03-6025-41be-81ee-d8b339189530",
+        }
+    ]
+
+    # Validate the application form statuses are as expected
+    application_form_statuses = {
+        app_form["application_form_id"]: app_form["application_form_status"]
+        for app_form in response.json["data"]["application_forms"]
+    }
+    assert (
+        application_form_statuses[str(application_form_a.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+    assert (
+        application_form_statuses[str(application_form_b.application_form_id)]
+        == ApplicationFormStatus.IN_PROGRESS
+    )
+
+
 def test_application_get_application_not_found(
     client, enable_factory_create, db_session, user_auth_token
 ):
@@ -1138,6 +1506,58 @@ def test_application_form_get_with_validation_warnings(
     assert response.json["data"]["application_response"] == application_response
     assert response.json["data"]["application_form_status"] == expected_form_status
     assert response.json["warnings"] == expected_warnings
+
+
+def test_application_form_get_with_rule_validation_issue(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    # Create a form with our test schema
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    # Create application with the form
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with the test response data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"attachment_field": "0296eed1-b358-4920-9185-08709ab12e60"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Make the GET request
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Verify response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_form_id"] == str(application_form.application_form_id)
+    assert response.json["warnings"] == [
+        {
+            "field": "$.attachment_field",
+            "message": "Field references application_attachment_id not on the application",
+            "type": "unknown_application_attachment",
+            "value": "0296eed1-b358-4920-9185-08709ab12e60",
+        }
+    ]
+    assert response.json["data"]["application_form_status"] == ApplicationFormStatus.IN_PROGRESS
 
 
 def test_application_form_get_with_invalid_schema(
@@ -1266,6 +1686,70 @@ def test_application_submit_validation_issues(
                     "message": "5 is not of type 'string'",
                     "type": "type",
                     "value": None,
+                }
+            ]
+        }
+    }
+
+    assert response.json["errors"] == [
+        {
+            "field": "application_form_id",
+            "message": "The application form has outstanding errors.",
+            "type": "application_form_validation",
+            "value": str(application_form.application_form_id),
+        }
+    ]
+
+
+def test_application_submit_rule_validation_issue(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    # Create a form with our test schema
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+    )
+
+    # Create application with the form
+    competition = CompetitionFactory.create(competition_forms=[])
+    application = ApplicationFactory.create(competition=competition)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with the test response data
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"attachment_field": "30092ec9-9553-4eb2-a6be-dac919df6867"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 422
+    assert response.json["message"] == "The application has issues in its form responses."
+
+    assert response.json["data"] == {
+        "form_validation_errors": {
+            str(application_form.application_form_id): [
+                {
+                    "field": "$.attachment_field",
+                    "message": "Field references application_attachment_id not on the application",
+                    "type": "unknown_application_attachment",
+                    "value": "30092ec9-9553-4eb2-a6be-dac919df6867",
                 }
             ]
         }
@@ -2151,7 +2635,7 @@ def test_application_form_get_with_internal_jwt_bypasses_auth(
     db_session.commit()
 
     # Create an internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -2197,7 +2681,7 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
     user_token, _ = create_jwt_for_user(user, db_session)
 
     # Create internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -2229,7 +2713,7 @@ def test_application_form_get_with_internal_jwt_nonexistent_application(
     nonexistent_form_id = str(uuid.uuid4())
 
     # Create internal JWT token
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime_util.utcnow() + timedelta(hours=1)
     internal_token, _ = create_jwt_for_internal_token(
         expires_at=expires_at,
         db_session=db_session,
@@ -2406,7 +2890,7 @@ def test_application_start_individual_allowed(
 def test_application_start_both_applicant_types_allowed(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test application creation succeeds when competition allows both individual and organization applicants"""
+    """Test application creation succeeds when both individual and organization applicants are allowed"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -2414,38 +2898,189 @@ def test_application_start_both_applicant_types_allowed(
     organization = OrganizationFactory.create()
     OrganizationUserFactory.create(organization=organization, user=user)
 
-    # Create competition that allows both applicant types (this is the new factory default)
+    # Create competition that allows both individual and organization applicants
     competition = CompetitionFactory.create(
         opening_date=today,
         closing_date=future_date,
-        # open_to_applicants defaults to both individual and organization
+        open_to_applicants=[
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        ],
     )
 
     competition_id = str(competition.competition_id)
     organization_id = str(organization.organization_id)
 
+    # Test applying as individual (no organization_id)
+    request_data_individual = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start",
+        json=request_data_individual,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
     # Test applying as organization
-    request_data = {
+    request_data_organization = {
         "competition_id": competition_id,
         "organization_id": organization_id,
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start",
+        json=request_data_organization,
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
-    # Test applying as individual
-    request_data = {
-        "competition_id": competition_id,
-        # No organization_id
-    }
+    # Verify both applications were created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 2
 
-    response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+
+def test_application_form_inclusion_update_success_true(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successfully setting form inclusion to true"""
+    # Create application with a form
+    application = ApplicationFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    # Create an application form with some data but no inclusion flag set
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "John Doe"},
+        is_included_in_submission=None,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {"is_included_in_submission": True}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == application_id
+    assert response.json["data"]["form_id"] == form_id
+    assert response.json["data"]["is_included_in_submission"] is True
+
+    # Verify in database
+    db_session.refresh(application_form)
+    assert application_form.is_included_in_submission is True
+
+
+def test_application_form_inclusion_update_success_false(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successfully setting form inclusion to false"""
+    # Create application with a form
+    application = ApplicationFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    # Create an application form with inclusion initially set to true
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "John Doe"},
+        is_included_in_submission=True,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {"is_included_in_submission": False}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == application_id
+    assert response.json["data"]["form_id"] == form_id
+    assert response.json["data"]["is_included_in_submission"] is False
+
+    # Verify in database
+    db_session.refresh(application_form)
+    assert application_form.is_included_in_submission is False
+
+
+def test_application_form_inclusion_update_application_form_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test form inclusion update fails when application form doesn't exist"""
+    # Create application and form, but no application form record
+    application = ApplicationFactory.create()
+    form = FormFactory.create()
+    CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {"is_included_in_submission": True}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert "Application form not found" in response.json["message"]
+
+
+def test_application_form_inclusion_update_invalid_request_missing_field(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test form inclusion update fails with missing required field"""
+    # Create application with a form
+    application = ApplicationFactory.create()
+    form = FormFactory.create()
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "John Doe"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {}  # Missing is_included_in_submission
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 422
+    assert "is_included_in_submission" in str(response.json)

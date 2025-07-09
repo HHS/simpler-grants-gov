@@ -23,6 +23,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_auth_error_response,
     get_envelope_dict,
     get_soap_response,
+    get_streamed_soap_response,
     wrap_envelope_dict,
 )
 from src.legacy_soap_api.soap_payload_handler import SoapPayload
@@ -40,13 +41,15 @@ class BaseSOAPClient:
         self.soap_request_message = SoapPayload(self.soap_request.data.decode())
         self.soap_request_operation_name = self.soap_request_message.operation_name
         self.proxy_response = self._proxy_soap_request()
-        self.proxy_response_message = SoapPayload(self.proxy_response.data.decode())
+        self.proxy_response_message = SoapPayload(self.proxy_response.data.decode(errors="replace"))
         self.db_session = db_session
 
-    def _proxy_soap_request(self) -> SOAPResponse:
+    def _proxy_soap_request(self, timeout: int = 3600) -> SOAPResponse:
         """Proxy incoming SOAP requests to grants.gov
         This method handles proxying requests to grants.gov SOAP API and retrieving
         and returning the xml data as is from the existing SOAP API.
+
+        Default timeout for proxied request to 1 hour.
         """
         session = requests.Session()
         session.mount("https://", SessionResumptionAdapter())
@@ -60,7 +63,7 @@ class BaseSOAPClient:
         if not self.auth or self.config.soap_auth_map == {}:
             logger.info("soap_api_proxy: proxying unauthorized request")
             prepared = session.prepare_request(request)
-            response = session.send(prepared)
+            return get_streamed_soap_response(session.send(prepared, stream=True, timeout=timeout))
         else:
             logger.info("soap_api_proxy: proxying authorized request")
             with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
@@ -73,15 +76,11 @@ class BaseSOAPClient:
                 temp_cert_file.flush()
                 prepared = session.prepare_request(request)
                 try:
-                    response = session.send(prepared, cert=temp_file_path)
+                    return get_streamed_soap_response(
+                        session.send(prepared, cert=temp_file_path, stream=True, timeout=timeout)
+                    )
                 except requests.exceptions.SSLError:
                     return get_auth_error_response()
-
-        return SOAPResponse(
-            data=self._process_response_response_content(response.content),
-            status_code=response.status_code,
-            headers=dict(response.headers),
-        )
 
     def get_client_cert(self) -> str:
         """This is temp auth solution"""
