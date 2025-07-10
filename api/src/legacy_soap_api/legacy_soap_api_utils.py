@@ -123,3 +123,13 @@ def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
     if not headers_to_omit:
         return headers
     return {key: value for key, value in headers.items() if key.lower() not in headers_to_omit}
+
+
+def ensure_dot_prefix(data: str) -> str:
+    return data if data.startswith(".") else f".{data}"
+
+
+def bool_to_string(value: bool | None) -> str | None:
+    if value is None:
+        return None
+    return "true" if value else "false"
