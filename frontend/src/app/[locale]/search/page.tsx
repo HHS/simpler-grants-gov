@@ -3,6 +3,7 @@ import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
+import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { Breakpoints } from "src/types/uiTypes";
@@ -63,7 +64,7 @@ function Search({ searchParams, params }: SearchPageProps) {
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
 
   return (
-    <>
+    <QueryProvider>
       <SearchAnalytics
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
@@ -122,7 +123,7 @@ function Search({ searchParams, params }: SearchPageProps) {
           </div>
         </div>
       </div>
-    </>
+    </QueryProvider>
   );
 }
 
