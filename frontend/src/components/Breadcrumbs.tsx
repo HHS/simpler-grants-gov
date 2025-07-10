@@ -34,6 +34,7 @@ const microdata = {
 const Breadcrumbs = ({
   breadcrumbList,
   className,
+  gi,
 }: {
   breadcrumbList: Breadcrumb[];
   className?: string;
@@ -63,18 +64,18 @@ const Breadcrumbs = ({
   });
 
   return (
-    <>
+    <div className="display-flex flex-column tablet:flex-row">
       <BreadcrumbBar
         listProps={{ ...microdata.ol }}
         data-testid="breadcrumb"
-        className={clsx(className, "display-flex flex-column tablet:flex-row")}
+        className={clsx("flex-1", className)}
       >
         {breadcrumArray}
       </BreadcrumbBar>
       <Suspense>
         <ReturnToGrantsNotification />
       </Suspense>
-    </>
+    </div>
   );
 };
 
