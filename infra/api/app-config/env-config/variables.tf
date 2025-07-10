@@ -30,6 +30,11 @@ variable "s3_cdn_domain_name" {
   default     = null
 }
 
+variable "mtls_domain_name" {
+  type        = string
+  description = "The domain name for the mTLS side-by-side ALB for the API"
+  default     = null
+}
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
