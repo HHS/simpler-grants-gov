@@ -10,13 +10,13 @@ type ContextHandlers = {
 };
 
 // Generic child component that creates a context object, updates it and displays dynamic content based-on its current state
-function ChildWithHandlers(props: contextHandlers) {
+function ChildWithHandlers(props: ContextHandlers) {
   const context = useContext(QueryContext);
   props.onContextUpdate(context);
   return props.onContextDisplay(context);
 }
 
-function renderQueryProviderWithHandlers(props: contextHandlers) {
+function renderQueryProviderWithHandlers(props: ContextHandlers) {
   render(
     <QueryProvider>
       <ChildWithHandlers
