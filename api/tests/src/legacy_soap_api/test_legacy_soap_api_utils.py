@@ -3,6 +3,8 @@ from unittest.mock import Mock, patch
 
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    bool_to_string,
+    ensure_dot_prefix,
     filter_headers,
     format_local_soap_response,
     get_auth_error_response,
@@ -70,3 +72,14 @@ def test_get_streamed_soap_response_success():
     assert result.data == expected_data
     assert result.status_code, 200
     assert result.headers == expected_headers
+
+
+def test_ensure_dot_prefix() -> None:
+    assert ensure_dot_prefix("foo") == ".foo"
+    assert ensure_dot_prefix(".foo") == ".foo"
+
+
+def test_bool_to_string() -> None:
+    assert bool_to_string(True) == "true"
+    assert bool_to_string(False) == "false"
+    assert bool_to_string(None) is None
