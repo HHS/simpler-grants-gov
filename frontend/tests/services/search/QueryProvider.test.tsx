@@ -4,7 +4,7 @@ import { render, screen } from "tests/react-utils";
 
 import { useContext } from "react";
 
-type contextHandlers = {
+type ContextHandlers = {
   onContextUpdate: (context: QueryContextParams) => void;
   onContextDisplay: (context: QueryContextParams) => React.ReactNode;
 };
