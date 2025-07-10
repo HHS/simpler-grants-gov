@@ -13,6 +13,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { use } from "react";
 
+import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
@@ -66,6 +67,25 @@ function Search({ searchParams, params }: SearchPageProps) {
       <SearchAnalytics
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
+      />
+      <BetaAlert
+        containerClasses="margin-top-5"
+        heading={t("betaAlert.alertTitle")}
+        alertMessage={t.rich("betaAlert.alert", {
+          mailToGrants: (chunks) => (
+            <a href="mailto:simpler@grants.gov">{chunks}</a>
+          ),
+          bugReport: (chunks) => (
+            <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=1_bug_report.yml">
+              {chunks}
+            </a>
+          ),
+          featureRequest: (chunks) => (
+            <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=2_feature_request.yml">
+              {chunks}
+            </a>
+          ),
+        })}
       />
       <div className="grid-container">
         <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
