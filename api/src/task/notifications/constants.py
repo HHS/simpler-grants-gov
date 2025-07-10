@@ -19,6 +19,7 @@ class Metrics(StrEnum):
     NOTIFICATIONS_SENT = "notifications_sent"
     FAILED_TO_SEND = "failed_to_send"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
+    NOTIFICATIONS_RESET = "notifications_reset"
 
 
 @dataclass
@@ -34,7 +35,7 @@ class UserEmailNotification:
 
 @dataclass
 class OpportunityVersionChange:
-    opportunity_id: int
+    opportunity_id: UUID
     latest: OpportunityVersion
     previous: OpportunityVersion | None
 

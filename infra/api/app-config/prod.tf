@@ -8,6 +8,7 @@ module "prod_config" {
   domain_name                     = "api.simpler.grants.gov"
   enable_https                    = true
   s3_cdn_domain_name              = "files.simpler.grants.gov"
+  mtls_domain_name                = "soap.simpler.grants.gov"
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
@@ -74,7 +75,8 @@ module "prod_config" {
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
 
     # grants.gov services/applications URI.
-    GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
+    GRANTS_GOV_URI  = "https://ws07.grants.gov"
+    GRANTS_GOV_PORT = 443
     ENABLE_SOAP_API = 1
 
     # Sam.gov
