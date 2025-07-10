@@ -1,4 +1,4 @@
-import SessionStorage from "src/services/auth/sessionStorage";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 describe("SessionStorage", () => {
   const mockConsoleError = jest.fn();

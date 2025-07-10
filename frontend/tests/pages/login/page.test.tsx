@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/login/page";
-import SessionStorage from "src/services/auth/sessionStorage";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import * as React from "react";
 

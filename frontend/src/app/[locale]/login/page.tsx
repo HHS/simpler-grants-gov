@@ -1,6 +1,6 @@
 "use client";
 
-import SessionStorage from "src/services/auth/sessionStorage";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

@@ -1223,4 +1223,7 @@ export const messages = {
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
   },
+  returnToGrants: {
+    message: "Return to Grants.gov",
+  },
 };
