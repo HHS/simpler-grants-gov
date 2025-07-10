@@ -17,6 +17,7 @@ from src.legacy_soap_api.applicants.schemas import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_utils import bool_to_string, ensure_dot_prefix
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +78,16 @@ def get_tinstructions_urls(competition: Competition, tinstructions_map: dict) ->
     urls = TinstructionsURL()
     if not competition.legacy_package_id:
         return urls
-    base_url = f"{get_soap_config().grants_gov_uri}/apply/opportunities"
-    urls.schema_url = f"{base_url}/schemas/applicant/{competition.legacy_package_id}.xsd"
+    base_url = file_util.join(get_soap_config().grants_gov_uri, "apply", "opportunities")
+    urls.schema_url = file_util.join(
+        base_url, "schemas", "applicant", f"{competition.legacy_package_id}.xsd"
+    )
     if extension := tinstructions_map.get(competition.legacy_competition_id):
-        urls.instructions_url = f"{base_url}/instructions/{competition.legacy_package_id}-instructions{ensure_dot_prefix(extension)}"
+        urls.instructions_url = file_util.join(
+            base_url,
+            "instructions",
+            f"{competition.legacy_package_id}-instructions{ensure_dot_prefix(extension)}",
+        )
     return urls
 
 
