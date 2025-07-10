@@ -1,11 +1,11 @@
-
+import uuid
 import zipfile
 from typing import Sequence
 
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, ApplicationSubmission
 from src.task import task_blueprint
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 import src.adapters.db as db
 import logging
 
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,9 @@ class SubmissionContainer:
         self.file_names_in_zip.add(file_name)
         return file_name
 
+class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
+    pass
+
 class CreateApplicationSubmissionTask(Task):
 
     def __init__(self, db_session: db.Session, s3_config: S3Config | None = None):
@@ -55,6 +59,8 @@ class CreateApplicationSubmissionTask(Task):
         if s3_config is None:
             s3_config = S3Config()
         self.s3_config = s3_config
+
+
 
     class Metrics(StrEnum):
         APPLICATION_PROCESSED_COUNT = "application_processed_count"
@@ -65,6 +71,21 @@ class CreateApplicationSubmissionTask(Task):
 
 
     def run_task(self) -> None:
+        # TODO - batch this
+        with self.db_session.begin():
+            submitted_applications = self.fetch_applications()
+
+            for application in submitted_applications:
+                try:
+                    self.process_application(application)
+                except Exception:
+                    # If for whatever reason we fail to create an application
+                    # submission, we'll log an error and continue on, hoping
+                    # we can process a different one.
+                    logger.exception("Failed to create an application submission", extra={"application_id": application.application_id})
+                    self.increment(self.Metrics.ERROR_COUNT)
+
+    def run_batch(self):
         submitted_applications = self.fetch_applications()
 
         for application in submitted_applications:
@@ -79,7 +100,8 @@ class CreateApplicationSubmissionTask(Task):
 
     def fetch_applications(self) -> Sequence[Application]:
         """Fetch the applications that have been submitted"""
-        x = self.db_session.execute(select(Application).where(Application.application_status == ApplicationStatus.ACCEPTED)).mappings().all()
+
+        # TODO - I should batch this in some way
         return self.db_session.scalars(
             select(Application)
             .where(Application.application_status == ApplicationStatus.SUBMITTED)
@@ -90,12 +112,13 @@ class CreateApplicationSubmissionTask(Task):
             )
         ).all()
 
-    def process_application(self, application: Application) -> str: # TODO - don't return anything
+    def process_application(self, application: Application) -> None:
         """Process an application and create an application submission"""
         logger.info("Processing application submission", extra={"application_id": application.application_id, "competition_id": application.competition_id})
         self.increment(self.Metrics.APPLICATION_PROCESSED_COUNT)
 
-        s3_path = build_s3_application_submission_path(self.s3_config, application)
+        submission_id = uuid.uuid4()
+        s3_path = build_s3_application_submission_path(self.s3_config, application, submission_id)
         with file_util.open_stream(s3_path, "wb") as outfile:
             with zipfile.ZipFile(outfile, "w") as submission_zip:
 
@@ -105,19 +128,26 @@ class CreateApplicationSubmissionTask(Task):
                 self.process_application_attachments(submission_container)
                 self.create_manifest_file(submission_container)
 
-        # TODO - add submission path to the DB
+        # Get the size of the zip from s3
+        zip_length = file_util.get_file_length_bytes(s3_path)
 
+        # Create the submission record in the DB and mark the app as accepted
+        application_submission = ApplicationSubmission(
+            application_submission_id=submission_id,
+            application=application,
+            file_location=s3_path,
+            file_size_bytes=zip_length
+        )
+        self.db_session.add(application_submission)
         application.application_status = ApplicationStatus.ACCEPTED
 
-        # TODO - remove once I have the DB table
-        return s3_path
 
     def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
         log_extra = {"application_id": submission.application.application_id, "competition_id": submission.application.competition_id}
-        logger.info("Processing application forms for application submission zip")
+        logger.info("Processing application forms for application submission")
         for application_form in submission.application.application_forms:
-            logger.info("Processing application form", extra=log_extra | {"application_form_id": application_form.application_form_id})
+            logger.info("Adding application form to application submission zip", extra=log_extra | {"application_form_id": application_form.application_form_id})
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
             # TODO - when we add PDF form logic - do it here
             # TODO - when we add the manifest logic, add it here
@@ -125,12 +155,13 @@ class CreateApplicationSubmissionTask(Task):
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         """Add application attachments to the zip file"""
         log_extra = {"application_id": submission.application.application_id, "competition_id": submission.application.competition_id}
-        logger.info("Adding application attachments to application submission zip", extra=log_extra)
+        logger.info("Processing attachments for application submission", extra=log_extra)
 
         for application_attachment in submission.application.application_attachments:
-            logger.info("Processing application attachment for application submission zip", extra=log_extra | {"application_attachment_id": application_attachment.application_attachment_id})
-            with file_util.open_stream(application_attachment.file_location, "rb") as attachment_file:
+            logger.info("Adding attachment to application submission zip", extra=log_extra | {"application_attachment_id": application_attachment.application_attachment_id})
+            self.increment(self.Metrics.APPLICATION_ATTACHMENT_COUNT)
 
+            with file_util.open_stream(application_attachment.file_location, "rb") as attachment_file:
                 # Copy the contents of the file to the ZIP, renaming the file if it has
                 # the same filename as something already in the ZIP
                 file_name_in_zip = submission.get_file_name_in_zip(application_attachment.file_name)
@@ -147,8 +178,13 @@ class CreateApplicationSubmissionTask(Task):
         with submission.submission_zip.open("manifest.txt", "w") as metadata_file:
             metadata_file.write(submission.manifest_text.encode("utf-8"))
 
-def build_s3_application_submission_path(s3_config: S3Config, application: Application) -> str:
-    """TODO"""
+def build_s3_application_submission_path(s3_config: S3Config, application: Application, submission_id: uuid.UUID) -> str:
+    """Construct a path to the application submission on s3
+
+    Will be formatted like:
+
+        s3://<bucket>/applications/<application_id>/submissions/<submission_id>/<file_name>
+    """
     base_path = s3_config.draft_files_bucket_path
 
     return file_util.join(
@@ -156,7 +192,9 @@ def build_s3_application_submission_path(s3_config: S3Config, application: Appli
         "applications",
         str(application.application_id),
         "submissions",
-        #str() # TODO - submission ID should be here
+        str(submission_id),
+        # In the future we may want to name the file with something a bit more human-readable
+        # than a UUID, but that's what we're going with for now.
         f"submission-{application.application_id}.zip"
     )
 
