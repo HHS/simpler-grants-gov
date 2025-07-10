@@ -21,7 +21,10 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 export default function SavedSearchesLayout({ children }: LayoutProps) {
   return (
     <>
-      <Breadcrumbs breadcrumbList={SAVED_SEARCHES_CRUMBS} />
+      <Breadcrumbs
+        className="grid-container"
+        breadcrumbList={SAVED_SEARCHES_CRUMBS}
+      />
       <AuthenticationGate>{children}</AuthenticationGate>
     </>
   );

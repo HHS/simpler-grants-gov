@@ -121,12 +121,12 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   return (
     <div>
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={breadcrumbs} />
       <ContentLayout
         title={opportunityData.opportunity_title}
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
+        <Breadcrumbs breadcrumbList={breadcrumbs} />
         <div className="padding-y-3 display-flex">
           <OpportunitySaveUserControl
             opportunityId={opportunityData.opportunity_id}

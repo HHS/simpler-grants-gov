@@ -12,6 +12,7 @@ interface FilterRadioProps {
   checked?: boolean;
   value?: string;
   facetCount?: number;
+  className?: string;
 }
 
 export const SearchFilterRadio = ({
@@ -23,8 +24,10 @@ export const SearchFilterRadio = ({
   checked = false,
   value,
   facetCount,
+  className,
 }: FilterRadioProps) => (
   <Radio
+    className={className}
     id={id}
     name={name || ""}
     label={

@@ -1,17 +1,10 @@
 import { useTranslations } from "next-intl";
 import React from "react";
-import { GridContainer } from "@trussworks/react-uswds";
 
-const SearchCallToAction: React.FC = () => {
+const SearchCallToAction = () => {
   const t = useTranslations("Search");
 
-  return (
-    <>
-      <GridContainer>
-        <h1>{t("callToAction.title")}</h1>
-      </GridContainer>
-    </>
-  );
+  return <h1 className="margin-top-0">{t("callToAction.title")}</h1>;
 };
 
 export default SearchCallToAction;
