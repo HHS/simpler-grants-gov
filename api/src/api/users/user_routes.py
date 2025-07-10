@@ -11,6 +11,8 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
+    UserApplicationListRequestSchema,
+    UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
@@ -39,6 +41,7 @@ from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
+from src.services.users.get_user_applications import get_user_applications
 from src.services.users.get_user_organizations import get_user_organizations
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
@@ -196,6 +199,38 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
     )
 
     return response.ApiResponse(message="Success", data=organizations)
+
+
+@user_blueprint.post("/<uuid:user_id>/applications")
+@user_blueprint.input(UserApplicationListRequestSchema, location="json")
+@user_blueprint.output(UserApplicationListResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_applications(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get all applications for a user"""
+    logger.info("POST /v1/users/:user_id/applications")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        applications = get_user_applications(db_session, user_id)
+
+    logger.info(
+        "Retrieved applications for user",
+        extra={
+            "user_id": user_id,
+            "application_count": len(applications),
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=applications)
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities")
