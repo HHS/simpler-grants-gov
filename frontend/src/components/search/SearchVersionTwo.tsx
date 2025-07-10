@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
+import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
@@ -53,6 +54,25 @@ export function SearchVersionTwo({
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
       <div className="bg-base-lightest">
+        <BetaAlert
+          containerClasses="padding-top-5"
+          heading={t("betaAlert.alertTitle")}
+          alertMessage={t.rich("betaAlert.alert", {
+            mailToGrants: (chunks) => (
+              <a href="mailto:simpler@grants.gov">{chunks}</a>
+            ),
+            bugReport: (chunks) => (
+              <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=1_bug_report.yml">
+                {chunks}
+              </a>
+            ),
+            featureRequest: (chunks) => (
+              <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=2_feature_request.yml">
+                {chunks}
+              </a>
+            ),
+          })}
+        />
         <div className="grid-container">
           <Breadcrumbs
             breadcrumbList={SEARCH_CRUMBS}
