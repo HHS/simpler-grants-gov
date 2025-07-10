@@ -14,6 +14,7 @@ export type BreadcrumbList = Breadcrumb[];
 
 type Props = {
   breadcrumbList: BreadcrumbList;
+  className?: string;
 };
 
 const microdata = {
@@ -33,7 +34,7 @@ const microdata = {
   },
 };
 
-const Breadcrumbs = ({ breadcrumbList }: Props) => {
+const Breadcrumbs = ({ breadcrumbList, className }: Props) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
       <Breadcrumb
@@ -59,11 +60,13 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
   });
 
   return (
-    <GridContainer data-testid="breadcrumb">
-      <BreadcrumbBar listProps={{ ...microdata.ol }}>
-        {breadcrumArray}
-      </BreadcrumbBar>
-    </GridContainer>
+    <BreadcrumbBar
+      listProps={{ ...microdata.ol }}
+      data-testid="breadcrumb"
+      className={className}
+    >
+      {breadcrumArray}
+    </BreadcrumbBar>
   );
 };
 

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
+import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
-import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { Breakpoints } from "src/types/uiTypes";
@@ -13,10 +13,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { use } from "react";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
+import SearchCallToAction from "src/components/search/SearchCallToAction";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
 import { SearchVersionTwo } from "src/components/search/SearchVersionTwo";
@@ -65,41 +67,41 @@ function Search({ searchParams, params }: SearchPageProps) {
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <QueryProvider>
-        <div className="grid-container">
-          <div className="search-bar">
-            <SearchBar queryTermFromParent={query} />
-          </div>
-          <div className="grid-row grid-gap">
-            <div className="tablet:grid-col-4">
-              <ContentDisplayToggle
-                showCallToAction={t("filterDisplayToggle.showFilters")}
-                hideCallToAction={t("filterDisplayToggle.hideFilters")}
-                breakpoint={Breakpoints.TABLET}
-                type="centered"
-              >
-                <SaveSearchPanel />
-                <SearchFilters
-                  opportunityStatus={status}
-                  eligibility={eligibility}
-                  category={category}
-                  fundingInstrument={fundingInstrument}
-                  agency={agency}
-                  topLevelAgency={topLevelAgency}
-                  searchResultsPromise={searchResultsPromise}
-                />
-              </ContentDisplayToggle>
-            </div>
-            <div className="tablet:grid-col-8">
-              <SearchResults
-                searchParams={convertedSearchParams}
-                loadingMessage={t("loading")}
+      <div className="grid-container">
+        <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
+        <SearchCallToAction />
+        <div className="search-bar">
+          <SearchBar queryTermFromParent={query} />
+        </div>
+        <div className="grid-row grid-gap">
+          <div className="tablet:grid-col-4">
+            <ContentDisplayToggle
+              showCallToAction={t("filterDisplayToggle.showFilters")}
+              hideCallToAction={t("filterDisplayToggle.hideFilters")}
+              breakpoint={Breakpoints.TABLET}
+              type="centered"
+            >
+              <SaveSearchPanel />
+              <SearchFilters
+                opportunityStatus={status}
+                eligibility={eligibility}
+                category={category}
+                fundingInstrument={fundingInstrument}
+                agency={agency}
+                topLevelAgency={topLevelAgency}
                 searchResultsPromise={searchResultsPromise}
-              ></SearchResults>
-            </div>
+              />
+            </ContentDisplayToggle>
+          </div>
+          <div className="tablet:grid-col-8">
+            <SearchResults
+              searchParams={convertedSearchParams}
+              loadingMessage={t("loading")}
+              searchResultsPromise={searchResultsPromise}
+            ></SearchResults>
           </div>
         </div>
-      </QueryProvider>
+      </div>
     </>
   );
 }

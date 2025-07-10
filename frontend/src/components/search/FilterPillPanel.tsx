@@ -23,7 +23,7 @@ export async function FilterPillPanel({
   const agencyOptions = agenciesToSortedFilterOptions(agencies || []);
   const pillLabelData = formatPillLabels(searchParams, agencyOptions || []);
   return (
-    <div>
+    <div className="padding-y-3">
       <PillList pills={pillLabelData} />
     </div>
   );
