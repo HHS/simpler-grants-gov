@@ -1,6 +1,5 @@
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
-import { FormDetail } from "src/types/formResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -8,19 +7,22 @@ import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export const selectFormsByRequired = ({
+export const selectApplicationFormsByRequired = ({
+  applicationForms,
   forms,
   required,
 }: {
+  applicationForms: ApplicationFormDetail[];
   forms: CompetitionForms;
   required: boolean;
-}): FormDetail[] => {
-  return forms.reduce<FormDetail[]>((acc, item) => {
-    if (item.is_required === required) {
-      acc.push(item.form);
-    }
-    return acc;
-  }, []);
+}): ApplicationFormDetail[] => {
+  const filteredFormIds = forms
+    .filter((form) => form.is_required === required)
+    .map((form) => form.form.form_id);
+
+  return applicationForms.filter((form) =>
+    filteredFormIds.includes(form.form_id),
+  );
 };
 
 const selectApplicationForm = ({
@@ -46,8 +48,13 @@ export const ApplicationFormsTable = ({
   applicationId: string;
   forms: CompetitionForms;
 }) => {
-  const requiredForms = selectFormsByRequired({ forms, required: true });
-  const conditionalRequiredForms = selectFormsByRequired({
+  const requiredForms = selectApplicationFormsByRequired({
+    applicationForms,
+    forms,
+    required: true,
+  });
+  const conditionalRequiredForms = selectApplicationFormsByRequired({
+    applicationForms,
     forms,
     required: false,
   });
@@ -57,8 +64,8 @@ export const ApplicationFormsTable = ({
     <>
       <h3>{t("requiredForms")}</h3>
       <ApplicationTable
-        forms={requiredForms}
-        applicationForms={applicationForms}
+        forms={forms}
+        applicationForms={requiredForms}
         applicationId={applicationId}
       />
       {conditionalRequiredForms.length > 0 && (
@@ -66,14 +73,24 @@ export const ApplicationFormsTable = ({
           <h3>{t("conditionalForms")}</h3>
           <p>{t("conditionalFormsDescription")}</p>
           <ApplicationTable
-            forms={conditionalRequiredForms}
-            applicationForms={applicationForms}
+            forms={forms}
+            applicationForms={conditionalRequiredForms}
             applicationId={applicationId}
           />
         </>
       )}
     </>
   );
+};
+
+const selectApplicationFormById = ({
+  forms,
+  formId,
+}: {
+  forms: CompetitionForms;
+  formId: string;
+}) => {
+  return forms.find((form) => form.form.form_id === formId);
 };
 
 const ApplicationTable = ({
@@ -83,7 +100,7 @@ const ApplicationTable = ({
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
-  forms: FormDetail[];
+  forms: CompetitionForms;
 }) => {
   const t = useTranslations("Application.competitionFormTable");
 
@@ -106,8 +123,8 @@ const ApplicationTable = ({
         </tr>
       </thead>
       <tbody>
-        {forms.map((form, index) => (
-          <tr key={index}>
+        {applicationForms.map((form, index) => (
+          <tr key={index} id={`form-${form.application_form_id}`}>
             <td data-label={t("status")}>
               <CompetitionStatus
                 applicationForms={applicationForms}
@@ -115,20 +132,17 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("form")}>
-              <Link
-                className="text-bold"
-                href={`/workspace/applications/application/${applicationId}/form/${form.form_id}`}
-              >
-                {form.form_name}
-              </Link>
+              <FormLink
+                formId={form.form_id}
+                forms={forms}
+                applicationId={applicationId}
+                appFormId={form.application_form_id}
+              />
             </td>
             <td data-label={t("instructions")}>
               <InstructionsLink
-                downloadPath={
-                  form.form_instruction && form.form_instruction.download_path
-                    ? form.form_instruction.download_path
-                    : null
-                }
+                forms={forms}
+                formId={form.form_id}
                 text={t("downloadInstructions")}
                 unavailableText={t("attachmentUnavailable")}
               />
@@ -173,17 +187,24 @@ const CompetitionStatus = ({
 };
 
 const InstructionsLink = ({
-  downloadPath,
+  formId,
+  forms,
   text,
   unavailableText,
 }: {
-  downloadPath: string | null;
+  formId: string;
+  forms: CompetitionForms;
   text: string;
   unavailableText: string;
 }) => {
+  const form = selectApplicationFormById({
+    forms,
+    formId,
+  });
+  const instructions = form?.form.form_instruction;
+  const downloadPath = instructions?.download_path || null;
   return (
     <>
-      {" "}
       {downloadPath ? (
         <Link
           className="display-flex flex-align-center font-sans-2xs"
@@ -194,6 +215,37 @@ const InstructionsLink = ({
         </Link>
       ) : (
         <>{unavailableText}</>
+      )}
+    </>
+  );
+};
+
+const FormLink = ({
+  formId,
+  forms,
+  applicationId,
+  appFormId,
+}: {
+  formId: string;
+  forms: CompetitionForms;
+  applicationId: string;
+  appFormId: string;
+}) => {
+  const form = selectApplicationFormById({
+    forms,
+    formId,
+  });
+  const formName = form?.form.form_name;
+
+  return (
+    <>
+      {formName && (
+        <Link
+          className="text-bold"
+          href={`/workspace/applications/application/${applicationId}/form/${appFormId}`}
+        >
+          {formName}
+        </Link>
       )}
     </>
   );

@@ -79,8 +79,10 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
             ]
             == 2
         )
-        assert opp_vers[0].opportunity_id == oca_1.opportunity_id
-        assert opp_vers[1].opportunity_id == oca_2.opportunity_id
+        assert {opp_vers[0].opportunity_id, opp_vers[1].opportunity_id} == {
+            oca_1.opportunity_id,
+            oca_2.opportunity_id,
+        }
 
     def test_with_existing_opportunity_saved_version_no_diff(
         self, db_session, enable_factory_create, store_opportunity_version_task
@@ -119,8 +121,10 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
             ]
             == 1
         )
-        assert opp_vers[0].opportunity_id == opp_ver_existing.opportunity_id
-        assert opp_vers[1].opportunity_id == opp_ver_existing.opportunity_id
+        assert [opp_vers[0].opportunity_id, opp_vers[1].opportunity_id] == [
+            opp_ver_existing.opportunity_id,
+            opp_ver_existing.opportunity_id,
+        ]
 
         # run with a second update
         oca.opportunity.current_opportunity_summary = None
@@ -137,4 +141,4 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
             ]
             == 1
         )
-        assert opp_vers[2].opportunity_id == opp_ver_existing.opportunity_id
+        assert set([o.opportunity_id for o in opp_vers]) == {opp_ver_existing.opportunity_id}

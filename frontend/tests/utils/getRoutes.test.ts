@@ -25,8 +25,8 @@ describe("getNextRoutes", () => {
       "/subscribe/unsubscribe",
       "/unauthenticated",
       "/vision",
-      "/workspace/applications/application/[applicationId]/form/[formId]",
-      "/workspace/applications/application/[applicationId]/form/[formId]/success",
+      "/workspace/applications/application/[applicationId]/form/[appFormId]",
+      "/workspace/applications/application/[applicationId]/form/[appFormId]/success",
       "/workspace/applications/application/[applicationId]",
     ]);
   });

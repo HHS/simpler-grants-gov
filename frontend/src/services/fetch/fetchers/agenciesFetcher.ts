@@ -1,62 +1,36 @@
 "server only";
 
 import { ApiRequestError } from "src/errors";
-import {
-  fetchAgencies,
-  searchAgencies,
-} from "src/services/fetch/fetchers/fetchers";
-import {
-  FilterOption,
-  RelevantAgencyRecord,
-} from "src/types/search/searchFilterTypes";
-import {
-  agenciesToFilterOptions,
-  flattenAgencies,
-  sortFilterOptions,
-} from "src/utils/search/searchUtils";
-
-// would have called this getAgencies, but technically it's a POST
-export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  const response = await fetchAgencies({
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_order: [
-          {
-            order_by: "created_at",
-            sort_direction: "ascending",
-          },
-        ],
-      },
-      filters: { active: true },
-    },
-    nextOptions: {
-      revalidate: 604800,
-    },
-  });
-  const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
-  return data;
-};
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
+import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
+import { flattenAgencies } from "src/utils/search/filterUtils";
 
 export const performAgencySearch = async (
   keyword?: string,
 ): Promise<RelevantAgencyRecord[]> => {
-  const response = await searchAgencies({
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_order: [
-          {
-            order_by: "agency_code",
-            sort_direction: "ascending",
-          },
-        ],
-      },
-      filters: { active: true },
-      query: keyword || "",
+  const requestBody: JSONRequestBody = {
+    pagination: {
+      page_offset: 1,
+      page_size: 1500, // 969 agencies in prod as of 3/7/25
+      sort_order: [
+        {
+          order_by: "agency_code",
+          sort_direction: "ascending",
+        },
+      ],
     },
+    filters: {
+      opportunity_statuses: {
+        one_of: ["posted", "forecasted"],
+      },
+    },
+  };
+  if (keyword) {
+    requestBody.query = keyword;
+  }
+  const response = await searchAgencies({
+    body: requestBody,
   });
   if (!response || response.status !== 200) {
     throw new ApiRequestError(
@@ -74,13 +48,9 @@ export const performAgencySearch = async (
   return data;
 };
 
-// two functions below are more or less identical except
-// behavior differs depending on whether a keyword is present
-// if there is a keyword we hit the search endpoint and then must flatten top level agencies
-// if not we just fetch the full list
-export const searchAgenciesForFilterOptions = async (
+export const searchAndFlattenAgencies = async (
   keyword: string,
-): Promise<FilterOption[]> => {
+): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
     agencies = await performAgencySearch(keyword);
@@ -89,30 +59,9 @@ export const searchAgenciesForFilterOptions = async (
     throw e;
   }
   try {
-    const flattenedAgencies = flattenAgencies(agencies);
-    const filterOptions = agenciesToFilterOptions(flattenedAgencies);
-    return sortFilterOptions(filterOptions);
+    return flattenAgencies(agencies);
   } catch (e) {
-    console.error("Error sorting agency search results");
-    throw e;
-  }
-};
-
-export const getAgenciesForFilterOptions = async (): Promise<
-  FilterOption[]
-> => {
-  let agencies = [];
-  try {
-    agencies = await obtainAgencies();
-  } catch (e) {
-    console.error("Error fetching agency options");
-    throw e;
-  }
-  try {
-    const filterOptions = agenciesToFilterOptions(agencies);
-    return sortFilterOptions(filterOptions);
-  } catch (e) {
-    console.error("Error sorting agency search results");
+    console.error("Error flattening agency search results");
     throw e;
   }
 };

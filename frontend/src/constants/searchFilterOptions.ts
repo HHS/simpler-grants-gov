@@ -195,12 +195,21 @@ export const costSharingOptions: FilterOption[] = [
 export const andOrOptions = [
   {
     id: "andOr-and",
-    label: "Must include all words (ex. labor AND welfare)",
+    label: "Must include all words (ex. transportation AND safety)",
     value: "AND",
   },
   {
     id: "andOr-or",
-    label: "May include any words (ex. labor OR welfare)",
+    label: "May include any words (ex. transportation OR safety)",
     value: "OR",
   },
 ];
+
+export const allFilterOptions = {
+  status: statusOptions,
+  eligibility: eligibilityOptions,
+  costSharing: costSharingOptions,
+  closeDate: closeDateOptions,
+  category: categoryOptions,
+  fundingInstrument: fundingOptions,
+};

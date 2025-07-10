@@ -32,8 +32,26 @@ def _required(
             )
 
 
+def _maxItems(
+    validator: jsonschema.Draft202012Validator, mI: typing.Any, instance: typing.Any, _: typing.Any
+) -> typing.Generator[jsonschema.ValidationError]:
+    """Handle a maxItems field validator in the JSON Schema validation
+
+    This is identical to the maxItems validator, but we adjusted the message
+    to not contain the entire array that is too long. In some cases this was
+    an incredibly large list of objects which was not helpful.
+    """
+    if validator.is_type(instance, "array") and len(instance) > mI:
+        message = "is expected to be empty" if mI == 0 else "is too long"
+        yield jsonschema.ValidationError(f"The array {message}, expected a maximum length of {mI}")
+
+
 OUR_VALIDATOR = jsonschema.validators.extend(
-    validator=jsonschema.Draft202012Validator, validators={"required": _required}
+    validator=jsonschema.Draft202012Validator,
+    validators={
+        "required": _required,
+        "maxItems": _maxItems,
+    },
 )
 
 

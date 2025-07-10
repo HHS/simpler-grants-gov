@@ -19,7 +19,7 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
     response_competition = resp.get_json()["data"]
 
     assert response_competition["competition_id"] == str(competition.competition_id)
-    assert response_competition["opportunity_id"] == competition.opportunity_id
+    assert response_competition["opportunity_id"] == str(competition.opportunity_id)
     assert response_competition["competition_title"] == competition.competition_title
     assert response_competition["opening_date"] == competition.opening_date.isoformat()
     assert response_competition["closing_date"] == competition.closing_date.isoformat()
@@ -133,7 +133,7 @@ def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_cr
     response_competition = resp.get_json()["data"]
 
     assert response_competition["competition_id"] == str(competition.competition_id)
-    assert response_competition["opportunity_id"] == competition.opportunity_id
+    assert response_competition["opportunity_id"] == str(competition.opportunity_id)
     assert response_competition["competition_title"] == competition.competition_title
     assert response_competition["opening_date"] == competition.opening_date.isoformat()
     assert response_competition["closing_date"] == competition.closing_date.isoformat()
@@ -182,6 +182,8 @@ def test_competition_get_200_is_open(
     competition = CompetitionFactory.create(
         opening_date=opening_date, closing_date=closing_date, grace_period=grace_period
     )
+
+    assert competition.has_open_date == expected_is_open
 
     resp = client.get(
         f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
@@ -263,6 +265,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     )
 
     # Test disabled competition
+    assert competition_disabled.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_disabled.competition_id}",
         headers={"X-Auth": api_auth_token},
@@ -271,6 +274,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert resp.get_json()["data"]["is_open"] is False
 
     # Test enabled and open competition
+    assert competition_enabled_open.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_open.competition_id}",
         headers={"X-Auth": api_auth_token},
@@ -279,6 +283,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert resp.get_json()["data"]["is_open"] is True
 
     # Test enabled but closed competition
+    assert competition_enabled_closed.has_open_date is False
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_closed.competition_id}",
         headers={"X-Auth": api_auth_token},

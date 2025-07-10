@@ -1,6 +1,6 @@
 ## Summary
 
-Fixes #ISSUE
+Work for #ISSUE
 
 ## Changes proposed
 

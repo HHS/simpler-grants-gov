@@ -9,6 +9,7 @@ from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -32,15 +33,15 @@ class ClosingDateNotificationTask(BaseNotificationTask):
     def __init__(
         self,
         db_session: db.Session,
-        frontend_base_url: str | None = None,
+        notification_config: EmailNotificationConfig | None = None,
     ):
-        super().__init__(db_session)
-
-        self.frontend_base_url = frontend_base_url
+        super().__init__(db_session, notification_config)
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
-        two_weeks_from_now = datetime_util.utcnow() + timedelta(days=14)
+
+        days_ago = 14
+        interval_ago = datetime_util.get_now_us_eastern_date() + timedelta(days=days_ago)
 
         # Find saved opportunities closing in two weeks that haven't been notified
         stmt = (
@@ -54,8 +55,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
             .where(
                 # Check if closing date is within 24 hours of two weeks from now
                 and_(
-                    OpportunitySummary.close_date >= two_weeks_from_now - timedelta(hours=24),
-                    OpportunitySummary.close_date <= two_weeks_from_now + timedelta(hours=24),
+                    OpportunitySummary.close_date <= interval_ago,
+                    OpportunitySummary.close_date >= datetime_util.get_now_us_eastern_date(),
                 ),
                 # Ensure we haven't already sent a closing reminder
                 ~exists().where(
@@ -63,6 +64,11 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         UserOpportunityNotificationLog.user_id == UserSavedOpportunity.user_id,
                         UserOpportunityNotificationLog.opportunity_id
                         == UserSavedOpportunity.opportunity_id,
+                        UserOpportunityNotificationLog.created_at
+                        >= OpportunitySummary.close_date - timedelta(days=days_ago),
+                        # TODO Add this to the table
+                        # UserOpportunityNotificationLog.notification_reason
+                        # == NotificationReason.CLOSING_DATE_REMINDER
                     )
                 ),
             )
@@ -114,9 +120,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
                 subject = (
-                    "Applications for your bookmarked funding opportunity are due soon"
+                    "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunity are due soon"
                     if len(closing_opportunities) == 1
-                    else "Applications for your bookmarked funding opportunities are due soon"
+                    else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunities are due soon"
                 )
                 users_email_notifications.append(
                     UserEmailNotification(
@@ -154,21 +160,21 @@ class ClosingDateNotificationTask(BaseNotificationTask):
 
         for closing_opp in closing_opportunities:
             message += (
-                f"<a href='{self.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
+                f"<a href='{self.notification_config.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
                 f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
             )
 
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )

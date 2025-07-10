@@ -25,7 +25,7 @@ export const handleSavedOpportunityRequest = async (request: Request) => {
       request.method,
       session.token,
       session.user_id,
-      Number(opportunityId),
+      opportunityId,
     );
     const res = (await response.json()) as {
       status_code: number;

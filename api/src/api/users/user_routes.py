@@ -229,13 +229,13 @@ def user_save_opportunity(
     return response.ApiResponse(message="Success")
 
 
-@user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<int:opportunity_id>")
+@user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<uuid:opportunity_id>")
 @user_blueprint.output(UserDeleteSavedOpportunityResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_delete_saved_opportunity(
-    db_session: db.Session, user_id: UUID, opportunity_id: int
+    db_session: db.Session, user_id: UUID, opportunity_id: UUID
 ) -> response.ApiResponse:
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -247,6 +247,29 @@ def user_delete_saved_opportunity(
     with db_session.begin():
         # Delete the saved opportunity
         delete_saved_opportunity(db_session, user_id, opportunity_id)
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.delete("/<uuid:user_id>/saved-opportunities/<int:legacy_opportunity_id>")
+@user_blueprint.output(UserDeleteSavedOpportunityResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_delete_saved_opportunity_legacy(
+    db_session: db.Session, user_id: UUID, legacy_opportunity_id: int
+) -> response.ApiResponse:
+    logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    with db_session.begin():
+        # Delete the saved opportunity
+        delete_saved_opportunity(db_session, user_id, legacy_opportunity_id)
 
     return response.ApiResponse(message="Success")
 
