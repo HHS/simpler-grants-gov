@@ -15,13 +15,6 @@ logger = logging.getLogger(__name__)
 def get_user_applications(db_session: db.Session, user_id: UUID) -> list[Application]:
     """
     Get all applications for a user
-
-    Args:
-        db_session: Database session
-        user_id: The ID of the user to get applications for
-
-    Returns:
-        List of Application objects that the user has access to
     """
     logger.info(f"Getting applications for user {user_id}")
 
