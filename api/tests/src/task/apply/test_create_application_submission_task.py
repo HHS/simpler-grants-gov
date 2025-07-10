@@ -4,12 +4,23 @@ from io import BytesIO
 import pytest
 
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application
 from src.task.apply.create_application_submission_task import SubmissionContainer, CreateApplicationSubmissionTask
 from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import ApplicationFactory, ApplicationAttachmentFactory
 
+def validate_file_in_zip(zip_file_path, file_name, expected_contents = None):
+    with file_util.open_stream(zip_file_path, "rb") as f:
+        with zipfile.ZipFile(f) as submission_zip:
+
+            file_names_in_zip = [info.filename for info in submission_zip.infolist()]
+            assert file_name in file_names_in_zip
+
+            with submission_zip.open(file_name) as myfile:
+                if expected_contents:
+                    assert myfile.read() == expected_contents.encode()
+                else:
+                    assert myfile.read() is not None
 
 class TestCreateApplicationSubmissionTask(BaseTestClass):
 
@@ -42,13 +53,15 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="dupe_filename.txt", file_contents="contents of first dupe_filename.txt")
         ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="dupe_filename.txt", file_contents="contents of second dupe_filename.txt")
 
-
         path = create_submission_task.process_application(application_with_attachments)
 
-        with file_util.open_stream(path, "rb") as f:
-            with zipfile.ZipFile(f) as submission_zip:
-                with submission_zip.open("file_a.txt") as myfile:
-                    assert myfile.read() == b"contents of file A"
+        validate_file_in_zip(path, "file_a.txt", "contents of file A")
+        validate_file_in_zip(path, "file_b.txt", "contents of file B")
+        validate_file_in_zip(path, "dupe_filename.txt", "contents of first dupe_filename.txt")
+        validate_file_in_zip(path, "1-dupe_filename.txt", "contents of second dupe_filename.txt")
+
+        validate_file_in_zip(path, "manifest.txt", "TODO")
+
 
 def test_get_file_name_in_zip():
     with BytesIO() as bytes_stream:
@@ -62,7 +75,6 @@ def test_get_file_name_in_zip():
 
         assert container.get_file_name_in_zip("no_suffix") == "no_suffix"
         assert container.get_file_name_in_zip("no_suffix") == "1-no_suffix"
-
 
         assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
         assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
