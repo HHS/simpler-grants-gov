@@ -79,14 +79,14 @@ export function SearchVersionTwo({
             className="bg-base-lightest"
           />
           <SearchCallToAction />
-          <div className="desktop:display-flex desktop:margin-bottom-2 margin-top-0">
+          <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
               <SearchBar
                 tableView={true}
                 queryTermFromParent={convertedSearchParams.query}
               />
             </div>
-            <div className="display-flex desktop:flex-5">
+            <div className="display-flex tablet:flex-2 desktop:flex-5 margin-y-2 tablet:margin-y-0">
               <div className="flex-2 flex-align-self-end">
                 <DrawerUnit
                   drawerId="search-filter-drawer"
@@ -94,6 +94,7 @@ export function SearchVersionTwo({
                   openText={t("filterDisplayToggle.drawer")}
                   headingText={<SearchDrawerHeading />}
                   iconName="filter_list"
+                  buttonClass="tablet:margin-x-auto"
                 >
                   <SearchDrawerFilters
                     searchParams={convertedSearchParams}
@@ -102,7 +103,7 @@ export function SearchVersionTwo({
                   />
                 </DrawerUnit>
               </div>
-              <div className="flex-3 flex-align-self-end">
+              <div className="flex-3 flex-align-self-end display-none desktop:display-block">
                 <SaveSearchPanel />
               </div>
             </div>
