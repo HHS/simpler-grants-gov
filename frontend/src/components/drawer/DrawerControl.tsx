@@ -21,7 +21,7 @@ export const DrawerControl = ({
     <ModalToggleButton
       modalRef={drawerRef}
       opener
-      secondary
+      outline
       className={clsx("display-block", className)}
     >
       {iconName && (
