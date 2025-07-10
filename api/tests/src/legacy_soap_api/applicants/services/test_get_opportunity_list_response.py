@@ -42,7 +42,9 @@ def test_get_opportunity_list_by_package_id(db_session, enable_factory_create):
         legacy_package_id=mock_package_id,
     )
     StagingTinstructionsFactory.create(
-        comp_id=competition.legacy_competition_id, extension=mock_instructions_extension
+        competition=None,
+        comp_id=competition.legacy_competition_id,
+        extension=mock_instructions_extension,
     )
 
     result = get_opportunity_list_response(db_session, opportunity_list_request)
@@ -76,7 +78,9 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id_and_competiti
         legacy_competition_id=mock_legacy_competition_id,
     )
     StagingTinstructionsFactory.create(
-        comp_id=competition.legacy_competition_id, extension=mock_instructions_extension
+        competition=None,
+        comp_id=competition.legacy_competition_id,
+        extension=mock_instructions_extension,
     )
     opportunity_list_request = GetOpportunityListRequest(
         opportunity_filter=OpportunityFilter(
@@ -113,7 +117,9 @@ def test_get_opportunity_list_by_opportunity_filter_opportunity_id(
         legacy_package_id=mock_package_id,
     )
     StagingTinstructionsFactory.create(
-        comp_id=competition.legacy_competition_id, extension=mock_instructions_extension
+        competition=None,
+        comp_id=competition.legacy_competition_id,
+        extension=mock_instructions_extension,
     )
     opportunity_list_request = GetOpportunityListRequest(
         opportunity_filter=OpportunityFilter(funding_opportunity_number=mock_opportunity_number)

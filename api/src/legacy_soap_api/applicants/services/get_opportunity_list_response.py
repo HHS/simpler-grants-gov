@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TinstructionsURLs:
+class TinstructionsURL:
     schema_url: str | None = None
     instructions_url: str | None = None
 
@@ -70,13 +70,11 @@ def get_tinstructions_map(db_session: db.Session, competitions: list) -> dict:
         .mappings()
         .all()
     )
-    if not tinstructions:
-        return {}
     return {tinstruction.comp_id: tinstruction.extension for tinstruction in tinstructions}
 
 
-def get_tinstructions_urls(competition: Competition, tinstructions_map: dict) -> TinstructionsURLs:
-    urls = TinstructionsURLs()
+def get_tinstructions_urls(competition: Competition, tinstructions_map: dict) -> TinstructionsURL:
+    urls = TinstructionsURL()
     if not competition.legacy_package_id:
         return urls
     base_url = f"{get_soap_config().grants_gov_uri}/apply/opportunities"
@@ -119,20 +117,19 @@ def _get_competitions(
 def _build_get_opportunity_list_response(
     competitions: list, tcompetitions_map: dict
 ) -> GetOpportunityListResponse:
-    if not competitions:
-        return GetOpportunityListResponse(opportunity_details=[])
-    return GetOpportunityListResponse(
-        opportunity_details=[
+    opportunity_details = []
+    if competitions:
+        opportunity_details = [
             _build_get_opportunity_details(
                 competition, get_tinstructions_urls(competition, tcompetitions_map)
             )
             for competition in competitions
         ]
-    )
+    return GetOpportunityListResponse(opportunity_details=opportunity_details)
 
 
 def _build_get_opportunity_details(
-    competition_model: Competition, tinstructions_urls: TinstructionsURLs
+    competition_model: Competition, tinstructions_urls: TinstructionsURL
 ) -> OpportunityDetails:
     return OpportunityDetails(
         competition_title=competition_model.competition_title,
