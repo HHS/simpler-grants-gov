@@ -2461,9 +2461,7 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     competition = factory.SubFactory(StagingTcompetitionFactory)
     comp_id = factory.LazyAttribute(lambda c: c.competition.comp_id)
     extension = factory.LazyFunction(lambda: random.choice(["pdf", "docx", ".docx"]))
-    mimetype = factory.LazyFunction(
-        lambda: random.choice(["application/pdf", "application/octet-stream"])
-    )
+    mimetype = factory.Faker("mime_type")
     last_update = factory.Faker("date_between", start_date="-1y", end_date="today")
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 

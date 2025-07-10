@@ -75,20 +75,20 @@ def get_tinstructions_map(db_session: db.Session, competitions: list) -> dict:
 
 
 def get_tinstructions_urls(competition: Competition, tinstructions_map: dict) -> TinstructionsURL:
-    urls = TinstructionsURL()
+    url = TinstructionsURL()
     if not competition.legacy_package_id:
-        return urls
+        return url
     base_url = file_util.join(get_soap_config().grants_gov_uri, "apply", "opportunities")
-    urls.schema_url = file_util.join(
+    url.schema_url = file_util.join(
         base_url, "schemas", "applicant", f"{competition.legacy_package_id}.xsd"
     )
     if extension := tinstructions_map.get(competition.legacy_competition_id):
-        urls.instructions_url = file_util.join(
+        url.instructions_url = file_util.join(
             base_url,
             "instructions",
             f"{competition.legacy_package_id}-instructions{ensure_dot_prefix(extension)}",
         )
-    return urls
+    return url
 
 
 def _get_competitions(
