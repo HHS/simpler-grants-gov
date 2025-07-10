@@ -27,6 +27,7 @@ const SavedOpportunitiesList = ({
             opportunity={opportunity}
             saved={true}
             index={index}
+            headingLevel="h2"
           />
         </li>
       ),

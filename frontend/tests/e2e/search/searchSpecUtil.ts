@@ -129,7 +129,7 @@ export async function getFirstSearchResultTitle(page: Page) {
 
 export async function getLastSearchResultTitle(page: Page) {
   const lastResultSelector = page.locator(
-    ".usa-list--unstyled > li:last-child h2 a",
+    ".usa-list--unstyled > li:last-child h3 a",
   );
   return await lastResultSelector.textContent();
 }
