@@ -318,3 +318,9 @@ variable "mtls_domain_name" {
   description = "The fully qualified domain name for the mTLS-enabled load balancer"
   default     = null
 }
+
+variable "mtls_certificate_arn" {
+  description = "The ARN of the certificate to use for the mTLS LB for the API"
+  type        = string
+  default     = null
+}
