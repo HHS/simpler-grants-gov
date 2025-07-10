@@ -21,7 +21,10 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 export default function SavedOpportunitiesLayout({ children }: LayoutProps) {
   return (
     <>
-      <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
+      <Breadcrumbs
+        className="grid-container"
+        breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS}
+      />
       <AuthenticationGate>{children}</AuthenticationGate>
     </>
   );

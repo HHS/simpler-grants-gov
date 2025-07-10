@@ -1,7 +1,7 @@
+import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { environment } from "src/constants/environments";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
-import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
@@ -17,6 +18,7 @@ import SearchResults from "src/components/search/SearchResults";
 import { AndOrPanel } from "./AndOrPanel";
 import { FilterPillPanel } from "./FilterPillPanel";
 import { PillListSkeleton } from "./PillList";
+import SearchCallToAction from "./SearchCallToAction";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
 
@@ -50,9 +52,14 @@ export function SearchVersionTwo({
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <QueryProvider>
+      <div className="bg-base-lightest">
         <div className="grid-container">
-          <div className="desktop:display-flex desktop:margin-bottom-2">
+          <Breadcrumbs
+            breadcrumbList={SEARCH_CRUMBS}
+            className="bg-base-lightest"
+          />
+          <SearchCallToAction />
+          <div className="desktop:display-flex desktop:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
               <SearchBar
                 tableView={true}
@@ -87,13 +94,15 @@ export function SearchVersionTwo({
               agencyListPromise={agencyListPromise}
             />
           </Suspense>
-          <SearchResults
-            searchParams={convertedSearchParams}
-            loadingMessage={t("loading")}
-            searchResultsPromise={searchResultsPromise}
-          ></SearchResults>
         </div>
-      </QueryProvider>
+      </div>
+      <div className="grid-container">
+        <SearchResults
+          searchParams={convertedSearchParams}
+          loadingMessage={t("loading")}
+          searchResultsPromise={searchResultsPromise}
+        ></SearchResults>
+      </div>
     </>
   );
 }

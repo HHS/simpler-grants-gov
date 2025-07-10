@@ -120,20 +120,20 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
-      <Breadcrumbs
-        breadcrumbList={[
-          { title: "home", path: "/" },
-          {
-            title: applicationData.application_name,
-            path: `/workspace/applications/application/${applicationData.application_id}`,
-          },
-          {
-            title: "Form",
-            path: `/workspace/applications/application/${applicationData.application_id}/form/${applicationId}`,
-          },
-        ]}
-      />
       <GridContainer>
+        <Breadcrumbs
+          breadcrumbList={[
+            { title: "home", path: "/" },
+            {
+              title: applicationData.application_name,
+              path: `/workspace/applications/application/${applicationData.application_id}`,
+            },
+            {
+              title: "Form",
+              path: `/workspace/applications/application/${applicationData.application_id}/form/${applicationId}`,
+            },
+          ]}
+        />
         <h1>{form_name}</h1>
         <ApplyForm
           validationWarnings={formValidationWarnings}
