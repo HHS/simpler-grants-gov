@@ -10,13 +10,19 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import UserNotificationLog, UserSavedSearch
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.generate_notifications import NotificationConstants
-from src.task.notifications.search_notification import _strip_pagination_params
+from src.task.notifications.search_notification import (
+    SearchNotificationTask,
+    _strip_pagination_params,
+)
 from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
+
+notification_config = None
 
 
 @pytest.fixture
@@ -47,6 +53,16 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedSearch)
+
+
+@pytest.fixture()
+def notification_task(db_session, search_client):
+    notification_config = EmailNotificationConfig()
+    notification_config.reset_emails_without_sending = False
+
+    return SearchNotificationTask(
+        db_session=db_session, search_client=search_client, notification_config=notification_config
+    )
 
 
 def test_search_notifications_cli(
@@ -97,7 +113,9 @@ def test_search_notifications_cli(
 
     _clear_mock_responses()
 
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
 
     assert result.exit_code == 0
 
@@ -205,7 +223,9 @@ def test_grouped_search_queries_cli(
         ],
     )
 
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
 
     assert result.exit_code == 0
 
@@ -269,7 +289,7 @@ def test_search_notifications_on_index_change(
     search_client.bulk_upsert(setup_opensearch_data, [json_record], "opportunity_id")
 
     # Run the notification task
-    task = EmailNotificationTask(db_session, search_client)
+    task = EmailNotificationTask(db_session, search_client, notification_config)
     task.run()
 
     # Verify notification log was created due to changed results
@@ -291,7 +311,7 @@ def test_search_notifications_on_index_change(
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
-    task_rerun = EmailNotificationTask(db_session, search_client)
+    task_rerun = EmailNotificationTask(db_session, search_client, notification_config)
     task_rerun.run()
 
     notification_logs = (
@@ -367,7 +387,9 @@ def test_search_notification_email_format_single_opportunity(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
@@ -448,7 +470,9 @@ def test_search_notification_email_format_no_close_date(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
@@ -542,7 +566,9 @@ def test_search_notification_email_format_multiple_opportunities(
     _clear_mock_responses()
 
     # Run notification task
-    result = cli_runner.invoke(args=["task", "email-notifications"])
+    result = cli_runner.invoke(
+        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+    )
     assert result.exit_code == 0
 
     # Get the email content from mock responses
@@ -582,3 +608,42 @@ To unsubscribe from email notifications for a query, delete it from your saved s
     )
 
     assert email_content.strip() == expected_single.strip()
+
+
+def test_search_notification_deleted_search(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+    search_client,
+    notification_task,
+):
+    opp = factories.OpportunityFactory.create(
+        opportunity_id=OPPORTUNITIES[0].opportunity_id,
+        no_current_summary=True,
+        legacy_opportunity_id=5,
+        opportunity_title="Grant Program",
+    )
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opp, post_date=date.fromisoformat("2030-01-31")
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opp,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        search_query={"keywords": "test"},
+        user=user_with_email,
+        searched_opportunity_ids=[OPPORTUNITIES[1].opportunity_id],
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        is_deleted=True,
+    )
+
+    results = notification_task.collect_email_notifications()
+
+    # assert deleted saved search is not picked up
+    assert len(results) == 0

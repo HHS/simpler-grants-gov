@@ -25,7 +25,7 @@ describe("AndOrPanel", () => {
     );
 
     const radio = screen.getByRole("radio", {
-      name: "May include any words (ex. labor OR welfare)",
+      name: "May include any words (ex. transportation OR safety)",
     });
     await userEvent.click(radio);
     expect(mockUpdateLocalAndOrParam).toHaveBeenCalledWith("OR");
@@ -39,7 +39,7 @@ describe("AndOrPanel", () => {
     );
 
     const radio = screen.getByRole("radio", {
-      name: "May include any words (ex. labor OR welfare)",
+      name: "May include any words (ex. transportation OR safety)",
     });
     await userEvent.click(radio);
     expect(mockUpdateLocalAndOrParam).toHaveBeenCalledWith("OR");
@@ -53,10 +53,10 @@ describe("AndOrPanel", () => {
     );
 
     const radioOr = screen.getByRole("radio", {
-      name: "May include any words (ex. labor OR welfare)",
+      name: "May include any words (ex. transportation OR safety)",
     });
     const radioAnd = screen.getByRole("radio", {
-      name: "Must include all words (ex. labor AND welfare)",
+      name: "Must include all words (ex. transportation AND safety)",
     });
 
     expect(radioOr).not.toBeChecked();
@@ -70,10 +70,10 @@ describe("AndOrPanel", () => {
     );
 
     const radioOr = screen.getByRole("radio", {
-      name: "May include any words (ex. labor OR welfare)",
+      name: "May include any words (ex. transportation OR safety)",
     });
     const radioAnd = screen.getByRole("radio", {
-      name: "Must include all words (ex. labor AND welfare)",
+      name: "Must include all words (ex. transportation AND safety)",
     });
 
     expect(radioOr).toBeChecked();

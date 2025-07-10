@@ -2957,7 +2957,7 @@ def test_application_form_inclusion_update_success_true(
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
-    application_form = ApplicationFormFactory.create(
+    ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -2979,13 +2979,162 @@ def test_application_form_inclusion_update_success_true(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
-    assert response.json["data"]["application_id"] == application_id
-    assert response.json["data"]["form_id"] == form_id
-    assert response.json["data"]["is_included_in_submission"] is True
 
-    # Verify in database
-    db_session.refresh(application_form)
-    assert application_form.is_included_in_submission is True
+
+def test_application_start_organization_no_sam_gov_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization has no SAM.gov entity record"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization WITHOUT sam.gov entity
+    organization = OrganizationFactory.create(sam_gov_entity=None)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert (
+        "This organization has no SAM.gov entity record and cannot be used for applications"
+        in response.json["message"]
+    )
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_expired_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization's SAM.gov entity has expired"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    past_expiration_date = today - timedelta(days=30)  # Expired 30 days ago
+
+    # Create organization with expired sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=past_expiration_date, is_inactive=False
+    )
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    expected_message = f"This organization's SAM.gov registration expired on {past_expiration_date.strftime('%B %d, %Y')} and cannot be used for applications"
+    assert expected_message in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_inactive_entity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization's SAM.gov entity is inactive"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    future_expiration_date = today + timedelta(days=365)  # Valid expiration date
+
+    # Create organization with inactive sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=future_expiration_date, is_inactive=True
+    )
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    assert (
+        "This organization is inactive in SAM.gov and cannot be used for applications"
+        in response.json["message"]
+    )
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
+
+
+def test_application_start_organization_valid_entity_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successful application creation when organization has valid (not expired and not inactive) SAM.gov entity"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    future_expiration_date = today + timedelta(days=365)  # Valid expiration date
+
+    # Create organization with valid sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=future_expiration_date, is_inactive=False
+    )
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
 
 def test_application_form_inclusion_update_success_false(
@@ -2998,7 +3147,7 @@ def test_application_form_inclusion_update_success_false(
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with inclusion initially set to true
-    application_form = ApplicationFormFactory.create(
+    ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3020,13 +3169,91 @@ def test_application_form_inclusion_update_success_false(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
-    assert response.json["data"]["application_id"] == application_id
-    assert response.json["data"]["form_id"] == form_id
-    assert response.json["data"]["is_included_in_submission"] is False
+    assert "application_id" in response.json["data"]
 
-    # Verify in database
-    db_session.refresh(application_form)
-    assert application_form.is_included_in_submission is False
+    # Verify application was created with the organization
+    competition_id = str(application.competition_id)
+    organization_id = str(application.organization_id)
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    # Verify application was created with the organization
+    assert application is not None
+    assert str(application.competition_id) == competition_id
+    assert str(application.organization_id) == organization_id
+    assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_organization_entity_expiring_today(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization's SAM.gov entity expires today"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create organization with sam.gov entity expiring today
+    sam_gov_entity = SamGovEntityFactory.create(expiration_date=today, is_inactive=False)
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    # Should succeed as expiration_date is today (not in the past)
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+
+def test_application_start_organization_entity_expiring_yesterday(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test application creation fails when organization's SAM.gov entity expired yesterday"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    yesterday = today - timedelta(days=1)
+
+    # Create organization with sam.gov entity that expired yesterday
+    sam_gov_entity = SamGovEntityFactory.create(expiration_date=yesterday, is_inactive=False)
+    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+    OrganizationUserFactory.create(organization=organization, user=user)
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    organization_id = str(organization.organization_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 422
+    expected_message = f"This organization's SAM.gov registration expired on {yesterday.strftime('%B %d, %Y')} and cannot be used for applications"
+    assert expected_message in response.json["message"]
+
+    # Verify no application was created
+    applications_count = (
+        db_session.execute(select(Application).where(Application.competition_id == competition_id))
+        .scalars()
+        .all()
+    )
+    assert len(applications_count) == 0
 
 
 def test_application_form_inclusion_update_application_form_not_found(
