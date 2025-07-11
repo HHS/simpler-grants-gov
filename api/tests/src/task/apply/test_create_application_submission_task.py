@@ -2,12 +2,17 @@ import zipfile
 from io import BytesIO
 
 import pytest
+from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus
-from src.task.apply.create_application_submission_task import SubmissionContainer, CreateApplicationSubmissionTask
+from src.db.models.competition_models import Application
+from src.task.apply.create_application_submission_task import (
+    CreateApplicationSubmissionTask,
+    SubmissionContainer,
+)
 from src.util import file_util
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ApplicationFactory, ApplicationAttachmentFactory
+from tests.src.db.models.factories import ApplicationAttachmentFactory, ApplicationFactory
 
 
 def validate_files_in_zip(zip_file_path, expected_file_mapping):
@@ -30,24 +35,53 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     @pytest.fixture(autouse=True)
     def cleanup(self, db_session, enable_factory_create):
-        pass # TODO
+        # Rather than deleting apps from other tests, just
+        # adjust their statuses so they don't get picked up by this test
+        db_session.execute(
+            update(Application).values(application_status=ApplicationStatus.ACCEPTED)
+        )
+        db_session.commit()
 
     @pytest.fixture
     def create_submission_task(self, db_session, s3_config):
         return CreateApplicationSubmissionTask(db_session)
 
     def test_run_task(self, db_session, create_submission_task):
-        application_without_attachments = ApplicationFactory.create(with_forms=True, application_status=ApplicationStatus.SUBMITTED)
+        application_without_attachments = ApplicationFactory.create(
+            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+        )
 
-        application_with_attachments = ApplicationFactory.create(with_forms=True, application_status=ApplicationStatus.SUBMITTED)
-        ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="file_a.txt", file_contents="contents of file A")
-        ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="file_b.txt", file_contents="contents of file B")
-        ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="dupe_filename.txt", file_contents="contents of first dupe_filename.txt")
-        ApplicationAttachmentFactory.create(application=application_with_attachments, file_name="dupe_filename.txt", file_contents="contents of second dupe_filename.txt")
+        application_with_attachments = ApplicationFactory.create(
+            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+        )
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments,
+            file_name="file_a.txt",
+            file_contents="contents of file A",
+        )
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments,
+            file_name="file_b.txt",
+            file_contents="contents of file B",
+        )
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments,
+            file_name="dupe_filename.txt",
+            file_contents="contents of first dupe_filename.txt",
+        )
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments,
+            file_name="dupe_filename.txt",
+            file_contents="contents of second dupe_filename.txt",
+        )
 
         # These apps won't get picked up at all because of their status
-        not_picked_up_app1 = ApplicationFactory.create(with_forms=True, application_status=ApplicationStatus.IN_PROGRESS)
-        not_picked_up_app2 = ApplicationFactory.create(with_forms=True, application_status=ApplicationStatus.ACCEPTED)
+        not_picked_up_app1 = ApplicationFactory.create(
+            with_forms=True, application_status=ApplicationStatus.IN_PROGRESS
+        )
+        not_picked_up_app2 = ApplicationFactory.create(
+            with_forms=True, application_status=ApplicationStatus.ACCEPTED
+        )
 
         create_submission_task.run()
 
@@ -55,10 +89,13 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert application_without_attachments.application_status == ApplicationStatus.ACCEPTED
         assert len(application_without_attachments.application_submissions) == 1
         no_attachment_submission = application_without_attachments.application_submissions[0]
-        validate_files_in_zip(no_attachment_submission.file_location, {
-            # No attachments (and no PDFs yet) - just a manifest
-            "manifest.txt": "TODO"
-        })
+        validate_files_in_zip(
+            no_attachment_submission.file_location,
+            {
+                # No attachments (and no PDFs yet) - just a manifest
+                "manifest.txt": "TODO"
+            },
+        )
         assert no_attachment_submission.file_size_bytes > 0
 
         # Validate the submission with attachments
@@ -66,13 +103,16 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(application_with_attachments.application_submissions) == 1
         attachment_submission = application_with_attachments.application_submissions[0]
 
-        validate_files_in_zip(attachment_submission.file_location, {
-            "file_a.txt": "contents of file A",
-            "file_b.txt": "contents of file B",
-            "dupe_filename.txt": "contents of first dupe_filename.txt",
-            "1-dupe_filename.txt": "contents of second dupe_filename.txt",
-            "manifest.txt": "TODO"
-        })
+        validate_files_in_zip(
+            attachment_submission.file_location,
+            {
+                "file_a.txt": "contents of file A",
+                "file_b.txt": "contents of file B",
+                "dupe_filename.txt": "contents of first dupe_filename.txt",
+                "1-dupe_filename.txt": "contents of second dupe_filename.txt",
+                "manifest.txt": "TODO",
+            },
+        )
 
         # These weren't picked up
         assert len(not_picked_up_app1.application_submissions) == 0
@@ -82,16 +122,41 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
         assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 4
         apps_processed = [application_with_attachments, application_without_attachments]
-        assert metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT] == sum([len(app.application_forms) for app in apps_processed])
+        assert metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT] == sum(
+            [len(app.application_forms) for app in apps_processed]
+        )
 
-    def test_run_task_with_erroring_application(self, db_session, create_submission_task):
-        application = ApplicationFactory.create(with_forms=True, application_status=ApplicationStatus.SUBMITTED)
+    def test_run_task_with_erroring_application(
+        self, db_session, create_submission_task, monkeypatch
+    ):
+        application = ApplicationFactory.create(
+            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+        )
 
+        def erroring_function():
+            raise Exception("It errors")
+
+        monkeypatch.setattr(
+            create_submission_task, "process_application_attachments", erroring_function
+        )
+
+        create_submission_task.run_task()
+
+        # App was not updated
+        db_session.refresh(application)
+        assert application.application_status == ApplicationStatus.SUBMITTED
+        assert len(application.application_submissions) == 0
+
+        metrics = create_submission_task.metrics
+        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 1
+        assert metrics[create_submission_task.Metrics.ERROR_COUNT] == 1
 
 
 def test_get_file_name_in_zip():
     with BytesIO() as bytes_stream:
-        container = SubmissionContainer(ApplicationFactory.build(), zipfile.ZipFile(bytes_stream, mode="w"))
+        container = SubmissionContainer(
+            ApplicationFactory.build(), zipfile.ZipFile(bytes_stream, mode="w")
+        )
 
         assert container.get_file_name_in_zip("my_file.txt") == "my_file.txt"
         assert container.get_file_name_in_zip("my_file.txt") == "1-my_file.txt"
@@ -102,5 +167,9 @@ def test_get_file_name_in_zip():
         assert container.get_file_name_in_zip("no_suffix") == "no_suffix"
         assert container.get_file_name_in_zip("no_suffix") == "1-no_suffix"
 
-        assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
-        assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
+        assert (
+            container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
+        )
+        assert (
+            container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
+        )

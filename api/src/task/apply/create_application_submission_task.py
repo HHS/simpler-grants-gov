@@ -1,23 +1,22 @@
+import logging
 import uuid
 import zipfile
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Sequence
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+import src.adapters.db as db
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
-from src.task import task_blueprint
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
-from enum import StrEnum
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-
+from src.task.task_blueprint import task_blueprint
 from src.util import file_util
-from dataclasses import dataclass, field
-import src.adapters.db as db
-import logging
-
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -44,15 +43,17 @@ class SubmissionContainer:
         original_filename = file_name
         while file_name in self.file_names_in_zip:
             file_name = f"{i}-{original_filename}"
-            i+= 1
+            i += 1
 
         self.file_names_in_zip.add(file_name)
         return file_name
 
+
 class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
 
-    application_submission_batch_size: int = 25 # APPLICATION_SUBMISSION_BATCH_SIZE
-    application_submission_max_batches: int = 100 # APPLICATION_SUBMISSION_MAX_BATCHES
+    application_submission_batch_size: int = 25  # APPLICATION_SUBMISSION_BATCH_SIZE
+    application_submission_max_batches: int = 100  # APPLICATION_SUBMISSION_MAX_BATCHES
+
 
 class CreateApplicationSubmissionTask(Task):
 
@@ -72,18 +73,20 @@ class CreateApplicationSubmissionTask(Task):
 
         ERROR_COUNT = "error_count"
 
-
     def run_task(self) -> None:
         batch_num = 0
         while self.has_more_to_process:
             batch_num += 1
             with self.db_session.begin():
-                self.run_batch()
+                self.process_batch()
 
                 # If we process more batches than the configured max
                 # break just in case our logic allowed for an infinite loop
                 if batch_num > self.app_submission_config.application_submission_max_batches:
-                    logger.error("Application submission job has run %s batches, stopping furhter processing in case job is stuck", self.app_submission_config.application_submission_max_batches)
+                    logger.error(
+                        "Application submission job has run %s batches, stopping furhter processing in case job is stuck",
+                        self.app_submission_config.application_submission_max_batches,
+                    )
                     break
 
             # As a safety net, expire all references in session after running
@@ -91,7 +94,8 @@ class CreateApplicationSubmissionTask(Task):
             # regardless of any internal cache it might have on subsequent loops.
             self.db_session.expire_all()
 
-    def run_batch(self):
+    def process_batch(self) -> None:
+        """Process a batch of application submissions"""
         submitted_applications = self.fetch_applications()
 
         for application in submitted_applications:
@@ -101,11 +105,17 @@ class CreateApplicationSubmissionTask(Task):
                 # If for whatever reason we fail to create an application
                 # submission, we'll log an error and continue on, hoping
                 # we can process a different one.
-                logger.exception("Failed to create an application submission", extra={"application_id": application.application_id})
+                logger.exception(
+                    "Failed to create an application submission",
+                    extra={"application_id": application.application_id},
+                )
                 self.increment(self.Metrics.ERROR_COUNT)
 
         # Assume if we had fewer than the batch size, we don't have anything else to process
-        if len(submitted_applications) < self.app_submission_config.application_submission_batch_size:
+        if (
+            len(submitted_applications)
+            < self.app_submission_config.application_submission_batch_size
+        ):
             self.has_more_to_process = False
 
     def fetch_applications(self) -> Sequence[Application]:
@@ -116,7 +126,7 @@ class CreateApplicationSubmissionTask(Task):
             .options(
                 selectinload(Application.application_attachments),
                 selectinload(Application.application_forms),
-                selectinload(Application.competition)
+                selectinload(Application.competition),
             )
             # We only fetch a limited number of apps in a batch so that we're
             # processing and committing them quicker.
@@ -125,7 +135,13 @@ class CreateApplicationSubmissionTask(Task):
 
     def process_application(self, application: Application) -> None:
         """Process an application and create an application submission"""
-        logger.info("Processing application submission", extra={"application_id": application.application_id, "competition_id": application.competition_id})
+        logger.info(
+            "Processing application submission",
+            extra={
+                "application_id": application.application_id,
+                "competition_id": application.competition_id,
+            },
+        )
         self.increment(self.Metrics.APPLICATION_PROCESSED_COUNT)
 
         submission_id = uuid.uuid4()
@@ -147,32 +163,46 @@ class CreateApplicationSubmissionTask(Task):
             application_submission_id=submission_id,
             application=application,
             file_location=s3_path,
-            file_size_bytes=zip_length
+            file_size_bytes=zip_length,
         )
         self.db_session.add(application_submission)
         application.application_status = ApplicationStatus.ACCEPTED
 
-
     def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
-        log_extra = {"application_id": submission.application.application_id, "competition_id": submission.application.competition_id}
+        log_extra = {
+            "application_id": submission.application.application_id,
+            "competition_id": submission.application.competition_id,
+        }
         logger.info("Processing application forms for application submission")
         for application_form in submission.application.application_forms:
-            logger.info("Adding application form to application submission zip", extra=log_extra | {"application_form_id": application_form.application_form_id})
+            logger.info(
+                "Adding application form to application submission zip",
+                extra=log_extra | {"application_form_id": application_form.application_form_id},
+            )
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
             # TODO - when we add PDF form logic - do it here
             # TODO - when we add the manifest logic, add it here
 
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         """Add application attachments to the zip file"""
-        log_extra = {"application_id": submission.application.application_id, "competition_id": submission.application.competition_id}
+        log_extra = {
+            "application_id": submission.application.application_id,
+            "competition_id": submission.application.competition_id,
+        }
         logger.info("Processing attachments for application submission", extra=log_extra)
 
         for application_attachment in submission.application.application_attachments:
-            logger.info("Adding attachment to application submission zip", extra=log_extra | {"application_attachment_id": application_attachment.application_attachment_id})
+            logger.info(
+                "Adding attachment to application submission zip",
+                extra=log_extra
+                | {"application_attachment_id": application_attachment.application_attachment_id},
+            )
             self.increment(self.Metrics.APPLICATION_ATTACHMENT_COUNT)
 
-            with file_util.open_stream(application_attachment.file_location, "rb") as attachment_file:
+            with file_util.open_stream(
+                application_attachment.file_location, "rb"
+            ) as attachment_file:
                 # Copy the contents of the file to the ZIP, renaming the file if it has
                 # the same filename as something already in the ZIP
                 file_name_in_zip = submission.get_file_name_in_zip(application_attachment.file_name)
@@ -183,13 +213,19 @@ class CreateApplicationSubmissionTask(Task):
 
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
-        log_extra = {"application_id": submission.application.application_id, "competition_id": submission.application.competition_id}
+        log_extra = {
+            "application_id": submission.application.application_id,
+            "competition_id": submission.application.competition_id,
+        }
         logger.info("Adding manifest file to application submission zip", extra=log_extra)
 
         with submission.submission_zip.open("manifest.txt", "w") as metadata_file:
             metadata_file.write(submission.manifest_text.encode("utf-8"))
 
-def build_s3_application_submission_path(s3_config: S3Config, application: Application, submission_id: uuid.UUID) -> str:
+
+def build_s3_application_submission_path(
+    s3_config: S3Config, application: Application, submission_id: uuid.UUID
+) -> str:
     """Construct a path to the application submission on s3
 
     Will be formatted like:
@@ -206,7 +242,7 @@ def build_s3_application_submission_path(s3_config: S3Config, application: Appli
         str(submission_id),
         # In the future we may want to name the file with something a bit more human-readable
         # than a UUID, but that's what we're going with for now.
-        f"submission-{application.application_id}.zip"
+        f"submission-{application.application_id}.zip",
     )
 
 
