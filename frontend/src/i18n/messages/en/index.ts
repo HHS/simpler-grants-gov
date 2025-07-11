@@ -566,7 +566,7 @@ export const messages = {
         closed: "Closed",
       },
       number: "Number",
-      published: "Published",
+      published: "Posted date",
       expectedAwards: "Expected awards",
       tbd: "TBD",
       saved: "Saved",

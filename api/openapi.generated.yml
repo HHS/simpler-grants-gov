@@ -535,6 +535,55 @@ paths:
       summary: Form Get
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/applications:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApplicationListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get all applications for a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserApplicationListRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/organizations:
     get:
       parameters:
@@ -1275,6 +1324,54 @@ paths:
       tags:
       - User v1 - Internal Only
       summary: User Delete Saved Opportunity Legacy
+      security:
+      - ApiJwtAuth: []
+  /alpha/applications/{application_id}/forms/{form_id}/inclusion:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationFormInclusionUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Update whether an application form should be included in submission
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
@@ -3046,6 +3143,9 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserApplicationListRequest:
+      type: object
+      properties: {}
     SamGovEntity:
       type: object
       properties:
@@ -3075,6 +3175,88 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntity'
           - type: 'null'
+    UserApplicationCompetition:
+      type: object
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_title:
+          type: string
+          description: The title of the competition
+          example: Proposal for Advanced Research
+        opening_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The opening date of the competition, the first day applications
+            are accepted
+        closing_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The closing date of the competition, the last day applications
+            are accepted
+        is_open:
+          type: boolean
+          description: Whether the competition is open and accepting applications
+    UserApplicationListItem:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          description: The application ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the application
+          example: my app
+        application_status:
+          description: Status of the application
+          enum:
+          - in_progress
+          - submitted
+          - accepted
+          type:
+          - string
+        organization:
+          description: Organization associated with the application
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserOrganization'
+          - type: 'null'
+        competition:
+          description: Competition information
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationCompetition'
+    UserApplicationListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of applications for the user
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserApplicationListItem'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserOrganizationsResponse:
       type: object
       properties:
@@ -3442,6 +3624,11 @@ components:
         is_required:
           type: boolean
           description: Whether this form is required for the application
+        is_included_in_submission:
+          type:
+          - boolean
+          - 'null'
+          description: Whether this form is included in the application submission
         application_attachments:
           type: array
           items:
@@ -3909,24 +4096,18 @@ components:
       properties:
         application_response:
           type: object
+          description: The form response data to update
+          example:
+            name: John Doe
+            email: john@example.com
           additionalProperties: {}
+        is_included_in_submission:
+          type:
+          - boolean
+          - 'null'
+          description: Whether this form should be included in the application submission
       required:
       - application_response
-    ApplicationFormUpdateResponseData:
-      type: object
-      properties:
-        application_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        application_form_status:
-          description: Status indicating how much of a form has been filled out
-          enum:
-          - not_started
-          - in_progress
-          - complete
-          type:
-          - string
     ApplicationFormUpdateResponse:
       type: object
       properties:
@@ -3944,7 +4125,7 @@ components:
         data:
           type:
           - object
-          $ref: '#/components/schemas/ApplicationFormUpdateResponseData'
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -3958,6 +4139,29 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationFormInclusionUpdateRequest:
+      type: object
+      properties:
+        is_included_in_submission:
+          type: boolean
+          description: Whether this form should be included in the application submission
+      required:
+      - is_included_in_submission
+    ApplicationFormInclusionUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationFormGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code

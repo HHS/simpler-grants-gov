@@ -109,6 +109,12 @@ data "aws_acm_certificate" "s3_cdn_cert" {
   most_recent = true
 }
 
+data "aws_acm_certificate" "mtls_cert" {
+  count       = local.service_config.mtls_domain_name != null ? 1 : 0
+  domain      = local.service_config.mtls_domain_name
+  most_recent = true
+}
+
 data "aws_iam_policy" "app_db_access_policy" {
   count = module.app_config.has_database ? 1 : 0
   name  = local.database_config.app_access_policy_name
@@ -156,9 +162,14 @@ module "service" {
   domain_name            = local.service_config.domain_name
   s3_cdn_domain_name     = local.service_config.s3_cdn_domain_name
   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
-  hosted_zone_id         = null
 
+  hosted_zone_id = null
+
+  # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = true
+  mtls_domain_name          = local.service_config.mtls_domain_name
+  mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
+
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

@@ -272,6 +272,13 @@ class Application(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    application_submissions: Mapped[list["ApplicationSubmission"]] = relationship(
+        "ApplicationSubmission",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list["User"]:
         """Return the list of User objects associated with this application"""
@@ -335,6 +342,31 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     def download_path(self) -> str:
         """Get the presigned s3 url path for downloading the file"""
         # NOTE: These attachments will only ever be in a non-public
+        # bucket so we only can presign their URL, we can't use the CDN path.
+        return pre_sign_file_location(self.file_location)
+
+
+class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission"
+
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Application.application_id), nullable=False
+    )
+    application: Mapped[Application] = relationship(
+        Application, back_populates="application_submissions"
+    )
+
+    file_location: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    @property
+    def download_path(self) -> str:
+        """Get the presigned s3 url path for downloading the submission file"""
+        # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         return pre_sign_file_location(self.file_location)
 
