@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { submitApplicationHandler } from "src/app/api/applications/[id]/submit/handler";
+import { submitApplicationHandler } from "src/app/api/applications/[applicationId]/submit/handler";
 import { ApplicationSubmitApiResponse } from "src/types/applicationResponseTypes";
 
 import { NextRequest } from "next/server";
