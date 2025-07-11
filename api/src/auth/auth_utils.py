@@ -6,7 +6,7 @@ import flask
 from apiflask.exceptions import HTTPError
 
 from src.api import response
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri
+from src.auth.login_gov_jwt_auth import get_final_redirect_uri, LoginGovConfig
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,7 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
     def decorator(f: Callable[P, flask.Response]) -> Callable[P, flask.Response]:
         @functools.wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> flask.Response:
+            config = LoginGovConfig()
             try:
                 return f(*args, **kwargs)
             except HTTPError as e:
@@ -62,6 +63,7 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                         e.message,
                     )
 
+                message += config.login_gov_token_endpoint
                 return response.redirect_response(
                     get_final_redirect_uri("error", error_description=message)
                 )
@@ -69,8 +71,9 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                 # Any other exception, we'll just use a generic error message to be safe
                 # but this means an unexpected error occurred and we should log an error
                 logger.exception("Unexpected error occurred in login flow")
+                message = str(e) + config.login_gov_token_endpoint
                 return response.redirect_response(
-                    get_final_redirect_uri("error", error_description=str(e))
+                    get_final_redirect_uri("error", error_description=message)
                 )
 
         return wrapper

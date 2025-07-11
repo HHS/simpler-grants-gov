@@ -126,7 +126,9 @@ def handle_login_gov_token(
 
     # If this request failed, we'll assume we're the issue and 500
     if response.is_error_response():
-        raise_flask_error(500, response.error_description)
+        msg = response.error_description
+        msg += client.config.login_gov_token_endpoint
+        raise_flask_error(500, msg)
 
     # Process the token response from login.gov
     # which will create/update a user in the DB
