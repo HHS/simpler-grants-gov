@@ -489,8 +489,6 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    # Pre-populate should have federal program name and assistance listing number
-    # Post-populate should have signature, signature date
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
@@ -516,7 +514,6 @@ SFLLL_v2_0 = Form(
     omb_number="4040-0013",
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
-    # No rule schema yet, we'll likely but automated sums in this
     form_rule_schema=FORM_RULE_SCHEMA,
     # No form instructions at the moment.
 )
