@@ -32,8 +32,7 @@ describe("SearchResultsTable", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  // skip until we're ready
-  it.skip("matches snapshot", async () => {
+  it("matches snapshot", async () => {
     const component = await SearchResultsTable({
       searchResults: [mockOpportunity],
     });
@@ -163,6 +162,18 @@ describe("SearchResultsTable", () => {
     expect(
       within(results[1]).getByRole("cell", {
         name: "headings.awardMax $--",
+      }),
+    ).toBeInTheDocument();
+  });
+  it("displays a proper message when there are no results", async () => {
+    const component = await SearchResultsTable({
+      searchResults: [],
+    });
+    render(component);
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+    expect(
+      screen.getByRole("heading", {
+        name: "title",
       }),
     ).toBeInTheDocument();
   });

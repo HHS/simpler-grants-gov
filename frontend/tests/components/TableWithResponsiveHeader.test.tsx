@@ -19,7 +19,7 @@ describe("TableWithResponsiveHeader", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it.skip("matches snapshot", () => {
+  it("matches snapshot", () => {
     const component = TableWithResponsiveHeader({
       headerContent: fakeResponsiveTableHeaders,
       tableRowData: fakeResponsiveTableRows,
