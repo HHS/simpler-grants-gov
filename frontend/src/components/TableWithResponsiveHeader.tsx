@@ -71,7 +71,7 @@ export const TableWithResponsiveHeader = ({
                   {headerContent[j].cellData}
                 </div>
                 <div
-                  className="flex-2 tablet:flex-3"
+                  className="flex-2"
                   data-testid={`responsive-data-${i}-${j}`}
                 >
                   {tableCell.cellData}
