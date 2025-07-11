@@ -213,4 +213,3 @@ Attachments included in ZIP (total 4)
 3. magic.pptx (size 456 bytes)
 4. something_else.pdf (size 777 bytes)"""
     assert text == expected_text
-
