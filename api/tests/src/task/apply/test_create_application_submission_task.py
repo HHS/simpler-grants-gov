@@ -8,14 +8,15 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.task.apply.create_application_submission_task import (
     CreateApplicationSubmissionTask,
-    SubmissionContainer,
+    SubmissionContainer, create_manifest_text, FileMetadata,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import ApplicationAttachmentFactory, ApplicationFactory
 
+def validate_manifest_contents(expected_forms)
 
-def validate_files_in_zip(zip_file_path, expected_file_mapping):
+def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | None]):
     with file_util.open_stream(zip_file_path, "rb") as f:
         with zipfile.ZipFile(f) as submission_zip:
             # Make sure the files we expect are present
@@ -27,6 +28,9 @@ def validate_files_in_zip(zip_file_path, expected_file_mapping):
                 with submission_zip.open(file_name) as file_in_zip:
                     if expected_contents is not None:
                         assert file_in_zip.read() == expected_contents.encode()
+                    elif file_name == "manifest.txt":
+                        contents_of_manifest = file_in_zip.read()
+
                     else:
                         assert file_in_zip.read() is not None
 
@@ -93,7 +97,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             no_attachment_submission.file_location,
             {
                 # No attachments (and no PDFs yet) - just a manifest
-                "manifest.txt": "TODO"
+                "manifest.txt": None
             },
         )
         assert no_attachment_submission.file_size_bytes > 0
@@ -110,7 +114,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 "file_b.txt": "contents of file B",
                 "dupe_filename.txt": "contents of first dupe_filename.txt",
                 "1-dupe_filename.txt": "contents of second dupe_filename.txt",
-                "manifest.txt": "TODO",
+                "manifest.txt": None
             },
         )
 
@@ -173,3 +177,40 @@ def test_get_file_name_in_zip():
         assert (
             container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
         )
+
+def test_create_manifest_text_empty():
+    container = SubmissionContainer(
+        ApplicationFactory.build(), zipfile.ZipFile(BytesIO(), mode="w")
+    )
+    text = create_manifest_text(container)
+    assert text == f"Manifest for Grant Application {container.application.application_id}"
+
+def test_create_manifest_text_full():
+    container = SubmissionContainer(
+        ApplicationFactory.build(), zipfile.ZipFile(BytesIO(), mode="w")
+    )
+    container.form_pdf_metadata.append(FileMetadata("form-A.pdf", 123))
+    container.form_pdf_metadata.append(FileMetadata("form-B.pdf", 222))
+    container.form_pdf_metadata.append(FileMetadata("form-XYZ.pdf", 100))
+
+    container.attachment_metadata.append(FileMetadata("my-attachment.txt", 500))
+    container.attachment_metadata.append(FileMetadata("research-plan.docx", 1001))
+    container.attachment_metadata.append(FileMetadata("magic.pptx", 456))
+    container.attachment_metadata.append(FileMetadata("something_else.pdf", 777))
+
+    text = create_manifest_text(container)
+    expected_text = \
+f"""Manifest for Grant Application {container.application.application_id}
+
+Forms included in ZIP (total 3)
+1. Form form-A.pdf (size 123 bytes)
+2. Form form-B.pdf (size 222 bytes)
+3. Form form-XYZ.pdf (size 100 bytes)
+
+Attachments included in ZIP (total 4)
+1. my-attachment.txt (size 500 bytes)
+2. research-plan.docx (size 1001 bytes)
+3. magic.pptx (size 456 bytes)
+4. something_else.pdf (size 777 bytes)"""
+    assert text == expected_text
+

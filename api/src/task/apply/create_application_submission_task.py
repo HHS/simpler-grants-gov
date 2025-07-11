@@ -21,6 +21,10 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+@dataclass
+class FileMetadata:
+    file_name: str
+    file_size_in_bytes: int
 
 @dataclass
 class SubmissionContainer:
@@ -28,9 +32,8 @@ class SubmissionContainer:
     application: Application
     submission_zip: zipfile.ZipFile
 
-    # TODO - when we build the manifest file, we might not want to
-    # just build raw text, but will leave that to that particular ticket to sort out.
-    manifest_text: str = "TODO"
+    form_pdf_metadata: list[FileMetadata] = field(default_factory=list)
+    attachment_metadata: list[FileMetadata] = field(default_factory=list)
 
     file_names_in_zip: set[str] = field(default_factory=set)
 
@@ -209,7 +212,8 @@ class CreateApplicationSubmissionTask(Task):
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
-                # TODO - add metadata here about the file for the manifest.
+                submission.attachment_metadata.append(FileMetadata(file_name_in_zip, 123)) # TODO
+
 
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
@@ -220,7 +224,8 @@ class CreateApplicationSubmissionTask(Task):
         logger.info("Adding manifest file to application submission zip", extra=log_extra)
 
         with submission.submission_zip.open("manifest.txt", "w") as metadata_file:
-            metadata_file.write(submission.manifest_text.encode("utf-8"))
+            text = create_manifest_text(submission)
+            metadata_file.write(text.encode("utf-8"))
 
 
 def build_s3_application_submission_path(
@@ -254,3 +259,28 @@ def build_s3_application_submission_path(
 @ecs_background_task(task_name="create-application-submission")
 def create_application_submission(db_session: db.Session) -> None:
     CreateApplicationSubmissionTask(db_session).run()
+
+
+def create_manifest_text(submission: SubmissionContainer) -> str:
+    """TODO"""
+    sections = []
+
+    # Add a header
+    sections.append(f"Manifest for Grant Application {submission.application.application_id}")
+
+    # Process the forms
+    if len(submission.form_pdf_metadata) > 0:
+        form_lines = [f"Forms included in ZIP (total {len(submission.form_pdf_metadata)})"]
+        for i, app_form in enumerate(submission.form_pdf_metadata, start=1):
+            form_lines.append(f"{i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)")
+
+        sections.append("\n".join(form_lines))
+
+    if len(submission.attachment_metadata) > 0:
+        attachment_lines = [f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"]
+        for i, app_attachment in enumerate(submission.attachment_metadata, start=1):
+            attachment_lines.append(f"{i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)")
+
+        sections.append("\n".join(attachment_lines))
+
+    return "\n\n".join(sections)
