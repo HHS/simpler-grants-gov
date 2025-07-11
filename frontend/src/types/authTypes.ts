@@ -1,4 +1,5 @@
 import { JWTPayload } from "jose";
+import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 
 /**
  * Configure the UserProvider component.
@@ -70,4 +71,7 @@ export type UserProviderState = {
   resetHasBeenLoggedOut: () => void;
   refreshIfExpired: () => Promise<boolean | undefined>;
   refreshIfExpiring: () => Promise<boolean | undefined>;
+  featureFlags: FeatureFlags;
+  userFeatureFlags: FeatureFlags;
+  defaultFeatureFlags: FeatureFlags;
 };

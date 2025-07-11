@@ -22,6 +22,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => true,
+  }),
+}));
+
 describe("SearchBar", () => {
   afterEach(() => {
     jest.resetAllMocks();

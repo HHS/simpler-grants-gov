@@ -1,3 +1,4 @@
+import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import UserProvider from "src/services/auth/UserProvider";
 
 import { useTranslations } from "next-intl";
@@ -18,7 +19,7 @@ export default function Layout({ children, locale }: Props) {
   const t = useTranslations();
 
   return (
-    <UserProvider>
+    <UserProvider featureFlagDefaults={defaultFeatureFlags}>
       <div className="display-flex flex-column minh-viewport">
         <a className="usa-skipnav" href="#main-content">
           {t("Layout.skipToMain")}
