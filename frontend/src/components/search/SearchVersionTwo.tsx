@@ -15,11 +15,11 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
-import SearchBar from "src/components/search/SearchBar";
 import SearchResults from "src/components/search/SearchResults";
 import { AndOrPanel } from "./AndOrPanel";
 import { FilterPillPanel } from "./FilterPillPanel";
 import { PillListSkeleton } from "./PillList";
+import { NewSearchBar } from "./SearchBarWithLabel";
 import SearchCallToAction from "./SearchCallToAction";
 import { SearchDrawerFilters } from "./SearchDrawerFilters";
 import { SearchDrawerHeading } from "./SearchDrawerHeading";
@@ -82,7 +82,7 @@ export function SearchVersionTwo({
           <SearchCallToAction />
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
-              <SearchBar
+              <NewSearchBar
                 tableView={true}
                 queryTermFromParent={convertedSearchParams.query}
               />

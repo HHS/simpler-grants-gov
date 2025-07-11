@@ -19,7 +19,7 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
-import SearchBar from "src/components/search/SearchBar";
+import { LegacySearchBar } from "src/components/search/SearchBarWithLabel";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
@@ -92,7 +92,7 @@ function Search({ searchParams, params }: SearchPageProps) {
         <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
         <SearchCallToAction />
         <div className="search-bar">
-          <SearchBar queryTermFromParent={query} />
+          <LegacySearchBar queryTermFromParent={query} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
