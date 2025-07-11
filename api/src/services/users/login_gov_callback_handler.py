@@ -120,7 +120,9 @@ def handle_login_gov_token(
             )
         )
     except Exception as e:
-        raise_flask_error(500, str(e))
+        msg = repr(e)
+        msg += client.config.login_gov_token_endpoint
+        raise_flask_error(500, msg)
 
     # If this request failed, we'll assume we're the issue and 500
     if response.is_error_response():

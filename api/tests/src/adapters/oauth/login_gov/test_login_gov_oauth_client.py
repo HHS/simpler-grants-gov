@@ -52,3 +52,10 @@ def test_get_token_error(monkeypatch):
     assert resp.error == "invalid_request"
     assert resp.error_description == "missing required parameter grant_type"
     assert resp.is_error_response() is True
+
+
+def test_get_token_real_tmp(monkeypatch):
+    client = LoginGovOauthClient(LoginGovConfig(LOGIN_GOV_TOKEN_ENDPOINT="http://mock-oauth2-server:5001/issuer1/token"))
+
+    token = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
+    print(token)
