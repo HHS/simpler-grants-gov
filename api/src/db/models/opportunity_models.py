@@ -477,6 +477,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
+    has_been_versioned: Mapped[bool | None]
 
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
@@ -489,6 +490,6 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
-    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
