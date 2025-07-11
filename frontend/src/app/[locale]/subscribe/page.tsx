@@ -33,7 +33,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
-        <h1>{t("title")}</h1>
+        <h1 className="margin-top-0">{t("title")}</h1>
         <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
