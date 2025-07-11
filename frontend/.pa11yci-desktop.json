@@ -6,7 +6,7 @@
       "color-contrast",
       "document-title",
       "frame-title",
-      "fram-tested"
+      "frame-tested"
     ],
     "concurrency": 1,
     "chromeLaunchConfig": {
