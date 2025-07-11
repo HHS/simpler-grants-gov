@@ -168,15 +168,44 @@ def validate_application_form(
     """Validate an application form, and set the current application form status"""
     form_validation_errors: list[ValidationErrorDetail] = []
 
+    # Always run rule validation
     context = JsonRuleContext(application_form, config=_get_json_rule_config_for_action(action))
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
     # TODO pre/post-populate should update the value here
 
-    form_validation_errors.extend(
-        validate_json_schema_for_form(application_form.application_response, application_form.form)
-    )
+    # Check if the form is required
+    is_required = is_form_required(application_form)
+
+    # Handle validation based on form requirement and is_included_in_submission flag
+    should_run_json_schema_validation = True
+
+    if not is_required:
+        # For non-required forms, check is_included_in_submission
+        if application_form.is_included_in_submission is None:
+            # Add validation issue but don't run JSON schema validation
+            form_validation_errors.append(
+                ValidationErrorDetail(
+                    message="is_included_in_submission must be set on all non-required forms",
+                    type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
+                    field="is_included_in_submission",
+                    value=None,
+                )
+            )
+            should_run_json_schema_validation = False
+        elif application_form.is_included_in_submission is False:
+            # Don't run JSON schema validation if form is not included in submission
+            should_run_json_schema_validation = False
+        # If is_included_in_submission is True, run validation (default behavior)
+
+    # Run JSON schema validation only if required
+    if should_run_json_schema_validation:
+        form_validation_errors.extend(
+            validate_json_schema_for_form(
+                application_form.application_response, application_form.form
+            )
+        )
 
     # If there are no issues, we consider the form complete
     if len(form_validation_errors) == 0:

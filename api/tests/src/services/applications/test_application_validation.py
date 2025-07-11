@@ -9,6 +9,7 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
+    validate_application_form,
     validate_application_in_progress,
     validate_competition_open,
 )
@@ -124,6 +125,7 @@ def test_validate_form_all_valid(
         application=application,
         competition_form=competition_form_c,
         application_response=VALID_FORM_C_RESPONSE,
+        is_included_in_submission=True,  # Set to True for non-required forms to run validation
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
     # TODO - add attachment stuff
@@ -159,6 +161,40 @@ def test_validate_form_all_valid_not_started_optional_form(
     )
     assert len(validation_errors) == 0
     assert len(error_detail) == 0
+
+
+def test_validate_forms_non_required_form_with_null_is_included_in_submission(
+    competition, competition_form_c
+):
+    """Test that non-required forms with null is_included_in_submission get validation error but no JSON schema validation"""
+    application = ApplicationFactory.build(competition=competition, application_forms=[])
+
+    # Form C (non-required) - has invalid response but null is_included_in_submission
+    application_form_c = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_c,
+        application_response={"str_c": 123},  # Invalid type - should be string, not number
+        is_included_in_submission=None,
+    )
+    application.application_forms = [application_form_c]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
+
+    # Should have 1 validation error for missing is_included_in_submission
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == ValidationErrorType.APPLICATION_FORM_VALIDATION
+    assert validation_errors[0].field == "application_form_id"
+    assert validation_errors[0].value == application_form_c.application_form_id
+
+    # Should have error detail with missing_included_in_submission error only
+    assert len(error_detail) == 1
+    form_c_errors = error_detail[str(application_form_c.application_form_id)]
+    assert len(form_c_errors) == 1
+    assert form_c_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+    assert form_c_errors[0].field == "is_included_in_submission"
+    assert form_c_errors[0].value is None
 
 
 def test_validate_forms_missing_all_forms(
@@ -245,6 +281,7 @@ def test_validate_forms_invalid_responses(
         application=application,
         competition_form=competition_form_c,
         application_response={"str_c": False},
+        is_included_in_submission=True,  # Set to True so JSON schema validation runs for non-required form
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -362,3 +399,199 @@ def test_validate_competition_open_error(opening_date, closing_date, grace_perio
         excinfo.value.extra_data["validation_issues"][0].type
         == ValidationErrorType.COMPETITION_NOT_OPEN
     )
+
+
+# Tests for validate_application_form is_included_in_submission logic
+def test_validate_application_form_required_form_ignores_is_included_in_submission(form_a):
+    """Test that required forms ignore is_included_in_submission and always run validation"""
+    competition = CompetitionFactory.build(competition_forms=[])
+    competition_form = CompetitionFormFactory.build(
+        competition=competition, form=form_a, is_required=True
+    )
+    competition.competition_forms = [competition_form]
+
+    application = ApplicationFactory.build(competition=competition)
+
+    # Test with is_included_in_submission = None
+    application_form = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form,
+        application_response={
+            "str_a": 123,
+            "obj_a": {"int_a": 4},
+        },  # str_a should be string, not integer
+        is_included_in_submission=None,
+    )
+
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should have JSON schema validation error (type error for str_a)
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == "type"
+    assert "$.str_a" in validation_errors[0].field
+
+    # Test with is_included_in_submission = False (should still validate for required forms)
+    application_form.is_included_in_submission = False
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should still have JSON schema validation error
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == "type"
+
+
+def test_validate_application_form_non_required_form_null_is_included_in_submission(form_c):
+    """Test that non-required forms with null is_included_in_submission get validation error but no JSON schema validation"""
+    competition = CompetitionFactory.build(competition_forms=[])
+    competition_form = CompetitionFormFactory.build(
+        competition=competition, form=form_c, is_required=False
+    )
+    competition.competition_forms = [competition_form]
+
+    application = ApplicationFactory.build(competition=competition)
+    application_form = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form,
+        application_response={"str_c": 123},  # Invalid type - should be string, not number
+        is_included_in_submission=None,
+    )
+
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should have exactly one validation error for missing is_included_in_submission
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+    assert validation_errors[0].field == "is_included_in_submission"
+    assert validation_errors[0].value is None
+    assert (
+        validation_errors[0].message
+        == "is_included_in_submission must be set on all non-required forms"
+    )
+
+
+def test_validate_application_form_non_required_form_false_is_included_in_submission(form_c):
+    """Test that non-required forms with is_included_in_submission=False skip JSON schema validation"""
+    competition = CompetitionFactory.build(competition_forms=[])
+    competition_form = CompetitionFormFactory.build(
+        competition=competition, form=form_c, is_required=False
+    )
+    competition.competition_forms = [competition_form]
+
+    application = ApplicationFactory.build(competition=competition)
+    application_form = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form,
+        application_response={"str_c": 123},  # Invalid type - should be string, not number
+        is_included_in_submission=False,
+    )
+
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should have no validation errors because JSON schema validation is skipped
+    assert len(validation_errors) == 0
+
+
+def test_validate_application_form_non_required_form_true_is_included_in_submission(form_c):
+    """Test that non-required forms with is_included_in_submission=True run JSON schema validation"""
+    competition = CompetitionFactory.build(competition_forms=[])
+    competition_form = CompetitionFormFactory.build(
+        competition=competition, form=form_c, is_required=False
+    )
+    competition.competition_forms = [competition_form]
+
+    application = ApplicationFactory.build(competition=competition)
+    application_form = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form,
+        application_response={"str_c": 123},  # Invalid type - should be string, not number
+        is_included_in_submission=True,
+    )
+
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should have JSON schema validation error
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == "type"
+    assert "$.str_c" in validation_errors[0].field
+
+
+def test_validate_application_form_non_required_form_valid_response_true_is_included_in_submission(
+    form_c,
+):
+    """Test that non-required forms with valid response and is_included_in_submission=True pass validation"""
+    competition = CompetitionFactory.build(competition_forms=[])
+    competition_form = CompetitionFormFactory.build(
+        competition=competition, form=form_c, is_required=False
+    )
+    competition.competition_forms = [competition_form]
+
+    application = ApplicationFactory.build(competition=competition)
+    application_form = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form,
+        application_response=VALID_FORM_C_RESPONSE,  # Valid response
+        is_included_in_submission=True,
+    )
+
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
+
+
+def test_get_application_form_errors_with_is_included_in_submission_validation(
+    competition, competition_form_a, competition_form_b, competition_form_c
+):
+    """Test that get_application_form_errors includes is_included_in_submission validation errors"""
+    application = ApplicationFactory.build(competition=competition, application_forms=[])
+
+    # Form A (required) - valid
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+        is_included_in_submission=None,  # Should be ignored for required forms
+    )
+
+    # Form B (required) - invalid response
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response={"str_b": 123},  # Invalid type
+        is_included_in_submission=False,  # Should be ignored for required forms
+    )
+
+    # Form C (non-required) - null is_included_in_submission
+    application_form_c = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_c,
+        application_response={"str_c": 123},  # Invalid type, but should be ignored
+        is_included_in_submission=None,
+    )
+
+    application.application_forms = [application_form_a, application_form_b, application_form_c]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
+
+    # Should have 2 validation errors:
+    # 1. Form B has validation issues (JSON schema validation ran despite is_included_in_submission=False because it's required)
+    # 2. Form C has is_included_in_submission validation issue
+    assert len(validation_errors) == 2
+
+    # Check that we have the right types of errors
+    error_types = [error.type for error in validation_errors]
+    assert ValidationErrorType.APPLICATION_FORM_VALIDATION in error_types
+
+    # Check error details
+    assert len(error_detail) == 2
+
+    # Form B should have JSON schema validation error
+    form_b_errors = error_detail[str(application_form_b.application_form_id)]
+    assert len(form_b_errors) == 1
+    assert form_b_errors[0].type == "type"
+
+    # Form C should have is_included_in_submission validation error
+    form_c_errors = error_detail[str(application_form_c.application_form_id)]
+    assert len(form_c_errors) == 1
+    assert form_c_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
