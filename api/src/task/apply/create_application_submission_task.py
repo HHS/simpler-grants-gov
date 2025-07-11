@@ -50,7 +50,9 @@ class SubmissionContainer:
         return file_name
 
 class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
-    pass
+
+    application_submission_batch_size: int = 25 # APPLICATION_SUBMISSION_BATCH_SIZE
+    application_submission_max_batches: int = 100 # APPLICATION_SUBMISSION_MAX_BATCHES
 
 class CreateApplicationSubmissionTask(Task):
 
@@ -60,7 +62,8 @@ class CreateApplicationSubmissionTask(Task):
             s3_config = S3Config()
         self.s3_config = s3_config
 
-
+        self.app_submission_config = ApplicationSubmissionConfig()
+        self.has_more_to_process = True
 
     class Metrics(StrEnum):
         APPLICATION_PROCESSED_COUNT = "application_processed_count"
@@ -71,19 +74,22 @@ class CreateApplicationSubmissionTask(Task):
 
 
     def run_task(self) -> None:
-        # TODO - batch this
-        with self.db_session.begin():
-            submitted_applications = self.fetch_applications()
+        batch_num = 0
+        while self.has_more_to_process:
+            batch_num += 1
+            with self.db_session.begin():
+                self.run_batch()
 
-            for application in submitted_applications:
-                try:
-                    self.process_application(application)
-                except Exception:
-                    # If for whatever reason we fail to create an application
-                    # submission, we'll log an error and continue on, hoping
-                    # we can process a different one.
-                    logger.exception("Failed to create an application submission", extra={"application_id": application.application_id})
-                    self.increment(self.Metrics.ERROR_COUNT)
+                # If we process more batches than the configured max
+                # break just in case our logic allowed for an infinite loop
+                if batch_num > self.app_submission_config.application_submission_max_batches:
+                    logger.error("Application submission job has run %s batches, stopping furhter processing in case job is stuck", self.app_submission_config.application_submission_max_batches)
+                    break
+
+            # As a safety net, expire all references in session after running
+            # This evicts the cache of SQLAlchemy so it pulls from the DB
+            # regardless of any internal cache it might have on subsequent loops.
+            self.db_session.expire_all()
 
     def run_batch(self):
         submitted_applications = self.fetch_applications()
@@ -98,10 +104,12 @@ class CreateApplicationSubmissionTask(Task):
                 logger.exception("Failed to create an application submission", extra={"application_id": application.application_id})
                 self.increment(self.Metrics.ERROR_COUNT)
 
+        # Assume if we had fewer than the batch size, we don't have anything else to process
+        if len(submitted_applications) < self.app_submission_config.application_submission_batch_size:
+            self.has_more_to_process = False
+
     def fetch_applications(self) -> Sequence[Application]:
         """Fetch the applications that have been submitted"""
-
-        # TODO - I should batch this in some way
         return self.db_session.scalars(
             select(Application)
             .where(Application.application_status == ApplicationStatus.SUBMITTED)
@@ -110,6 +118,9 @@ class CreateApplicationSubmissionTask(Task):
                 selectinload(Application.application_forms),
                 selectinload(Application.competition)
             )
+            # We only fetch a limited number of apps in a batch so that we're
+            # processing and committing them quicker.
+            .limit(self.app_submission_config.application_submission_batch_size)
         ).all()
 
     def process_application(self, application: Application) -> None:
