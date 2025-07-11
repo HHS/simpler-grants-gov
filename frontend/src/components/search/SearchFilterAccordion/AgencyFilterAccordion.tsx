@@ -12,12 +12,13 @@ export async function AgencyFilterAccordion({
   agencyOptionsPromise,
   topLevelQuery,
   className,
+  selectedStatuses,
 }: {
   query: Set<string>;
-
   agencyOptionsPromise: Promise<[RelevantAgencyRecord[], SearchAPIResponse]>;
   topLevelQuery: Set<string>;
   className?: string;
+  selectedStatuses?: string[];
 }) {
   const t = useTranslations("Search");
 
@@ -48,6 +49,7 @@ export async function AgencyFilterAccordion({
         allAgencies={agencyOptions}
         facetCounts={facetCounts}
         topLevelQuery={topLevelQuery}
+        selectedStatuses={selectedStatuses}
       />
     </BasicSearchFilterAccordion>
   );

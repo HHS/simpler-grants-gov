@@ -32,10 +32,16 @@ describe("POST request", () => {
     await searchForAgencies(
       new NextRequest("http://simpler.grants.gov", {
         method: "POST",
-        body: JSON.stringify({ keyword: "anything" }),
+        body: JSON.stringify({
+          keyword: "anything",
+          selectedStatuses: ["forecasted", "posted"],
+        }),
       }),
     );
-    expect(mockSearchAndFlattenAgencies).toHaveBeenCalledWith("anything");
+    expect(mockSearchAndFlattenAgencies).toHaveBeenCalledWith("anything", [
+      "forecasted",
+      "posted",
+    ]);
   });
   it("responds with return value of searchAndFlattenAgencies", async () => {
     mockSearchAndFlattenAgencies.mockResolvedValue(initialFilterOptions);

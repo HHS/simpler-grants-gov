@@ -34,7 +34,9 @@ export default async function SearchFilters({
 }) {
   const t = useTranslations("Search");
   const agenciesPromise = Promise.all([
-    performAgencySearch(),
+    performAgencySearch({
+      selectedStatuses: Array.from(opportunityStatus),
+    }),
     searchResultsPromise,
   ]);
 
@@ -87,6 +89,7 @@ export default async function SearchFilters({
           query={agency}
           agencyOptionsPromise={agenciesPromise}
           topLevelQuery={topLevelAgency}
+          selectedStatuses={Array.from(opportunityStatus)}
         />
       </Suspense>
       <SearchFilterAccordion
