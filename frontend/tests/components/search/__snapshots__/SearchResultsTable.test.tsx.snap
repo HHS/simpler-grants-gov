@@ -63,7 +63,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.closeDate
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-0"
             >
               Feb 1, 2023
@@ -83,7 +83,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.status
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-1"
             >
               <div
@@ -107,7 +107,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.title
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-2"
             >
               <div
@@ -147,7 +147,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.agency
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-3"
             >
               <div
@@ -189,7 +189,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.awardMin
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-4"
             >
               $10,000
@@ -209,7 +209,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               headings.awardMax
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-5"
             >
               $50,000
