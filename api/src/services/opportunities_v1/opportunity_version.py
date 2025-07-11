@@ -1,7 +1,5 @@
 import logging
-
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from operator import attrgetter
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
@@ -28,17 +26,11 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
 
     if opportunity.is_draft:
         return False
-    # Fetch latest opportunity version stored
-    latest_opp_version = (
-        db_session.execute(
-            select(OpportunityVersion)
-            .where(OpportunityVersion.opportunity_id == opportunity.opportunity_id)
-            .order_by(OpportunityVersion.created_at.desc())
-            .options(selectinload("*"))
-        )
-        .scalars()
-        .first()
-    )
+
+    # Get the latest version
+    latest_opp_version: OpportunityVersion | None = None
+    if len(opportunity.versions) > 0:
+        latest_opp_version = max(opportunity.versions, key=attrgetter("created_at"))
 
     # Extracts the opportunity data as JSON object
     opportunity_new = SCHEMA.dump(opportunity)
