@@ -121,7 +121,9 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   return (
     <div>
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={breadcrumbs} />
+      <div className="grid-container">
+        <Breadcrumbs breadcrumbList={breadcrumbs} />
+      </div>
       <ContentLayout
         title={opportunityData.opportunity_title}
         data-testid="opportunity-intro-content"

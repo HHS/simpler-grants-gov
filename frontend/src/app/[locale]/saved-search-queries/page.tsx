@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { SAVED_SEARCHES_CRUMBS } from "src/constants/breadcrumbs";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import {
@@ -11,6 +12,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
@@ -80,6 +82,7 @@ export default async function SavedSearchQueries({
   return (
     <>
       <GridContainer>
+        <Breadcrumbs breadcrumbList={SAVED_SEARCHES_CRUMBS} />
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
           {t("heading")}
         </h1>

@@ -30,9 +30,9 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
   return (
     <>
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
+        <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
         <h1>{t("title")}</h1>
         <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">

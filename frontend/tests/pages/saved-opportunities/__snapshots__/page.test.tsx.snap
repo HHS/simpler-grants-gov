@@ -14,17 +14,38 @@ exports[`Saved Opportunities page to match snapshot 1`] = `
         "_store": {},
         "key": null,
         "props": {
-          "children": {
-            "$$typeof": Symbol(react.transitional.element),
-            "_owner": null,
-            "_store": {},
-            "key": null,
-            "props": {
-              "children": "SavedOpportunities.heading",
-              "className": "tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0",
+          "children": [
+            {
+              "$$typeof": Symbol(react.transitional.element),
+              "_owner": null,
+              "_store": {},
+              "key": null,
+              "props": {
+                "breadcrumbList": [
+                  {
+                    "path": "/",
+                    "title": "Home",
+                  },
+                  {
+                    "path": "/saved-opportunities/",
+                    "title": "Saved opportunities",
+                  },
+                ],
+              },
+              "type": [Function],
             },
-            "type": "h1",
-          },
+            {
+              "$$typeof": Symbol(react.transitional.element),
+              "_owner": null,
+              "_store": {},
+              "key": null,
+              "props": {
+                "children": "SavedOpportunities.heading",
+                "className": "tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0",
+              },
+              "type": "h1",
+            },
+          ],
         },
         "type": [Function],
       },
