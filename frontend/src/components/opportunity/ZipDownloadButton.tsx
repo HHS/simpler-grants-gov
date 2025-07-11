@@ -8,7 +8,7 @@ import { Button } from "@trussworks/react-uswds";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type ZipDownloadProps = {
-  opportunityId: number;
+  opportunityId: string;
 };
 
 const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {

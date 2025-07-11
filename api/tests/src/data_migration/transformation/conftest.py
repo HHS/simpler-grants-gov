@@ -58,7 +58,7 @@ def setup_opportunity(
 
     if create_existing:
         f.OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id,
+            legacy_opportunity_id=source_opportunity.opportunity_id,
             opportunity_attachments=[],
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
@@ -79,9 +79,8 @@ def setup_cfda(
     if source_values is None:
         source_values = {}
 
-    # If you don't provide an opportunity, you need to provide an ID
     if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_cfda = f.StagingTopportunityCfdaFactory.create(
         **source_values,
@@ -91,10 +90,10 @@ def setup_cfda(
         all_fields_null=all_fields_null,
     )
 
-    if create_existing:
+    if create_existing and opportunity is not None:
         f.OpportunityAssistanceListingFactory.create(
             opportunity=opportunity,
-            opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
             timestamps_in_past=True,
@@ -107,7 +106,7 @@ def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
-    opportunity: Opportunity | None,
+    opportunity: Opportunity | None = None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     is_existing_current_opportunity_summary: bool = False,
@@ -130,8 +129,8 @@ def setup_synopsis_forecast(
     if revision_number is not None:
         source_values["revision_number"] = revision_number
 
-    if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
+    if isinstance(opportunity, Opportunity):
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
 
     source_summary = factory_cls.create(
         **source_values,
@@ -178,7 +177,7 @@ def setup_applicant_type(
 
     source_applicant_type = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         at_id=legacy_lookup_value,
@@ -225,7 +224,7 @@ def setup_funding_instrument(
 
     source_funding_instrument = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fi_id=legacy_lookup_value,
@@ -272,7 +271,7 @@ def setup_funding_category(
 
     source_funding_category = factory_cls.create(
         **source_values,
-        opportunity_id=opportunity_summary.opportunity_id,
+        opportunity_id=opportunity_summary.legacy_opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         fac_id=legacy_lookup_value,
@@ -320,7 +319,7 @@ def setup_agency(
 
 def setup_opportunity_attachment(
     create_existing: bool,
-    opportunity: Opportunity,
+    opportunity: Opportunity | staging.opportunity.Topportunity,
     config: S3Config,
     is_delete: bool = False,
     is_already_processed: bool = False,
@@ -329,9 +328,13 @@ def setup_opportunity_attachment(
     if source_values is None:
         source_values = {}
 
+    if isinstance(opportunity, Opportunity):
+        source_values["opportunity_id"] = opportunity.legacy_opportunity_id
+    elif isinstance(opportunity, staging.opportunity.Topportunity):
+        source_values["opportunity_id"] = opportunity.opportunity_id
+
     synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
         opportunity=None,
-        opportunity_id=opportunity.opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         **source_values,
@@ -345,11 +348,25 @@ def setup_opportunity_attachment(
         with file_util.open_stream(s3_path, "w") as outfile:
             outfile.write(f.fake.sentence(25))
 
-        f.OpportunityAttachmentFactory.create(
-            attachment_id=synopsis_attachment.syn_att_id,
-            opportunity=opportunity,
-            file_location=s3_path,
-        )
+        if isinstance(opportunity, Opportunity):
+            f.OpportunityAttachmentFactory.create(
+                legacy_attachment_id=synopsis_attachment.syn_att_id,
+                opportunity=opportunity,
+                file_location=s3_path,
+            )
+        elif isinstance(opportunity, staging.opportunity.Topportunity):
+            opportunity = f.OpportunityFactory.create(
+                legacy_opportunity_id=opportunity.opportunity_id,
+                opportunity_attachments=[],
+                # set created_at/updated_at to an earlier time so its clear
+                # when they were last updated
+                timestamps_in_past=True,
+            )
+            f.OpportunityAttachmentFactory.create(
+                legacy_attachment_id=synopsis_attachment.syn_att_id,
+                opportunity=opportunity,
+                file_location=s3_path,
+            )
 
     return synopsis_attachment
 
@@ -398,7 +415,7 @@ def validate_opportunity(
 ):
     opportunity = (
         db_session.query(Opportunity)
-        .filter(Opportunity.opportunity_id == source_opportunity.opportunity_id)
+        .filter(Opportunity.legacy_opportunity_id == source_opportunity.opportunity_id)
         .one_or_none()
     )
 
@@ -442,7 +459,7 @@ def validate_assistance_listing(
     assistance_listing = (
         db_session.query(OpportunityAssistanceListing)
         .filter(
-            OpportunityAssistanceListing.opportunity_assistance_listing_id
+            OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
             == source_cfda.opp_cfda_id
         )
         .one_or_none()
@@ -471,7 +488,7 @@ def get_summary_from_source(db_session, source_summary):
     opportunity_summary = (
         db_session.query(OpportunitySummary)
         .filter(
-            OpportunitySummary.opportunity_id == source_summary.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_summary.opportunity_id,
             OpportunitySummary.is_forecast == is_forecast,
             # Populate existing to force it to fetch updates from the DB
         )
@@ -574,7 +591,7 @@ def validate_applicant_type(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_applicant_type.is_forecast,
-            OpportunitySummary.opportunity_id == source_applicant_type.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_applicant_type.opportunity_id,
         )
         .scalar()
     )
@@ -620,7 +637,7 @@ def validate_funding_instrument(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_instrument.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_instrument.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_instrument.opportunity_id,
         )
         .scalar()
     )
@@ -667,7 +684,7 @@ def validate_funding_category(
         db_session.query(OpportunitySummary.opportunity_summary_id)
         .filter(
             OpportunitySummary.is_forecast == source_funding_category.is_forecast,
-            OpportunitySummary.opportunity_id == source_funding_category.opportunity_id,
+            OpportunitySummary.legacy_opportunity_id == source_funding_category.opportunity_id,
         )
         .scalar()
     )
@@ -774,7 +791,7 @@ def validate_opportunity_attachment(
 
     opportunity_attachment = (
         db_session.query(OpportunityAttachment)
-        .filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id)
+        .filter(OpportunityAttachment.legacy_attachment_id == source_attachment.syn_att_id)
         .one_or_none()
     )
 
@@ -787,8 +804,7 @@ def validate_opportunity_attachment(
         source_attachment,
         opportunity_attachment,
         [
-            ("syn_att_id", "attachment_id"),
-            ("opportunity_id", "opportunity_id"),
+            ("syn_att_id", "legacy_attachment_id"),
             ("mime_type", "mime_type"),
             ("file_name", "file_name"),
             ("file_desc", "file_description"),
@@ -816,7 +832,7 @@ def setup_competition(
     is_delete: bool = False,
     is_already_processed: bool = False,
     opportunity: Opportunity | None = None,
-    opportunity_assistance_listing_id: int | None = None,
+    legacy_opportunity_assistance_listing_id: int | None = None,
     source_values: dict | None = None,
     all_fields_null: bool = False,
 ) -> staging.competition.Tcompetition:
@@ -843,23 +859,23 @@ def setup_competition(
                 values[key] = None
 
     # Set up the opportunity_cfda_id
-    if opportunity and opportunity_assistance_listing_id:
-        values["opp_cfda_id"] = opportunity_assistance_listing_id
+    if opportunity and legacy_opportunity_assistance_listing_id:
+        values["opp_cfda_id"] = legacy_opportunity_assistance_listing_id
 
         # Create the staging TopportunityCfda record if it doesn't exist
         existing_cfda = (
             db_session.query(staging.opportunity.TopportunityCfda)
             .filter(
                 staging.opportunity.TopportunityCfda.opp_cfda_id
-                == opportunity_assistance_listing_id
+                == legacy_opportunity_assistance_listing_id
             )
             .one_or_none()
         )
 
         if not existing_cfda:
             f.StagingTopportunityCfdaFactory.create(
-                opp_cfda_id=opportunity_assistance_listing_id,
-                opportunity_id=opportunity.opportunity_id,
+                opp_cfda_id=legacy_opportunity_assistance_listing_id,
+                opportunity_id=opportunity.legacy_opportunity_id,
                 opportunity=None,  # Prevent factory from creating another opportunity
             )
 
@@ -868,12 +884,14 @@ def setup_competition(
         opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
             opportunity=opportunity
         )
-        values["opp_cfda_id"] = opportunity_assistance_listing.opportunity_assistance_listing_id
+        values["opp_cfda_id"] = (
+            opportunity_assistance_listing.legacy_opportunity_assistance_listing_id
+        )
 
         # Create the staging TopportunityCfda record
         f.StagingTopportunityCfdaFactory.create(
-            opp_cfda_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
-            opportunity_id=opportunity.opportunity_id,
+            opp_cfda_id=opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
+            opportunity_id=opportunity.legacy_opportunity_id,
             opportunity=None,  # Prevent factory from creating another opportunity
         )
 
@@ -920,9 +938,10 @@ def setup_competition(
             form_family=form_family,
             opportunity=opportunity,
             opportunity_id=opportunity.opportunity_id if opportunity else None,
-            opportunity_assistance_listing_id=(
-                opportunity_assistance_listing_id or competition.opp_cfda_id
-            ),
+            # TODO https://github.com/HHS/simpler-grants-gov/issues/5522
+            # opportunity_assistance_listing_id=(
+            #     opportunity_assistance_listing_id or competition.opp_cfda_id
+            # ),
             is_electronic_required=(
                 competition.electronic_required == "Y" if competition.electronic_required else None
             ),

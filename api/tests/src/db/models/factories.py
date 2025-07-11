@@ -9,6 +9,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
 
 import random
+import uuid
 from datetime import datetime
 from typing import Optional
 
@@ -346,14 +347,15 @@ class OpportunityFactory(BaseFactory):
     def _setup_next_sequence(cls):
         if _db_session is not None:
             value = _db_session.query(
-                func.max(opportunity_models.Opportunity.opportunity_id)
+                func.max(opportunity_models.Opportunity.legacy_opportunity_id)
             ).scalar()
             if value is not None:
                 return value + 1
 
         return 1
 
-    opportunity_id = factory.Sequence(lambda n: n)
+    opportunity_id = Generators.UuidObj
+    legacy_opportunity_id = factory.Sequence(lambda n: n)
 
     opportunity_number = factory.Faker("opportunity_number")
     opportunity_title = factory.Faker("opportunity_title")
@@ -462,8 +464,12 @@ class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
 
+    opportunity_summary_id = Generators.UuidObj
+
     opportunity = factory.SubFactory(OpportunityFactory, current_opportunity_summary=None)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    legacy_opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.legacy_opportunity_id)
 
     summary_description = factory.Faker("summary_description")
     is_cost_sharing = factory.Faker("boolean")
@@ -725,7 +731,7 @@ class OpportunityAssistanceListingFactory(BaseFactory):
         if _db_session is not None:
             value = _db_session.query(
                 func.max(
-                    opportunity_models.OpportunityAssistanceListing.opportunity_assistance_listing_id
+                    opportunity_models.OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 )
             ).scalar()
             if value is not None:
@@ -733,7 +739,9 @@ class OpportunityAssistanceListingFactory(BaseFactory):
 
         return 1
 
-    opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
+    opportunity_assistance_listing_id = Generators.UuidObj
+
+    legacy_opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
@@ -794,6 +802,21 @@ class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
 
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(opportunity_models.OpportunityAttachment.legacy_attachment_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    attachment_id = Generators.UuidObj
+
+    legacy_attachment_id = factory.Sequence(lambda n: n)
+
     class Params:
         duplicate_filename = factory.Trait(file_name="duplicate.txt")
 
@@ -806,7 +829,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     # NOTE: If you want the file to properly get written to s3 for tests/locally
     # make sure the bucket actually exists
     file_location = factory.LazyAttribute(
-        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1, max=100_000_000)}/{o.file_name}"
+        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{o.attachment_id}/{o.file_name}"
     )
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
@@ -942,7 +965,9 @@ class UserSavedSearchFactory(BaseFactory):
 
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
-    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+    searched_opportunity_ids = factory.LazyAttribute(
+        lambda _: [uuid.uuid4() for __ in range(random.randint(1, 1000))]
+    )
 
 
 ###################
@@ -1332,6 +1357,53 @@ class ApplicationAttachmentFactory(BaseFactory):
             ) from e
 
         return attachment
+
+
+class ApplicationSubmissionFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmission
+
+    application_submission_id = Generators.UuidObj
+
+    application_id = factory.LazyAttribute(lambda s: s.application.application_id)
+    application = factory.SubFactory(ApplicationFactory)
+
+    file_size_bytes = factory.Faker("random_int", min=1000000, max=50000000)  # 1MB to 50MB
+
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+    # NOTE: If you want the file to properly get written to s3 for tests/locally
+    # make sure the bucket actually exists
+    file_location = factory.LazyAttribute(
+        lambda s: f"s3://local-mock-public-bucket/applications/{s.application_id}/submissions/{fake.uuid4()}/submission.zip"
+    )
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents", None)  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents", "Application submission ZIP file contents")
+        submission = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(submission.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your submission to {submission.file_location}.
+
+                    Does this location exist? If you are running in unit tests, make sure
+                    `enable_factory_create` is pulled in as a fixture to your test.
+
+                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    """
+            ) from e
+
+        return submission
 
 
 ###################
@@ -2427,6 +2499,18 @@ class StagingTcompetitionFactory(AbstractStagingFactory):
             sendmail=None,
             # is_wrkspc_compatible and dialect must NEVER be None
         )
+
+
+class StagingTinstructionsFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.instructions.Tinstructions
+
+    competition = factory.SubFactory(StagingTcompetitionFactory)
+    comp_id = factory.LazyAttribute(lambda c: c.competition.comp_id)
+    extension = factory.LazyFunction(lambda: random.choice(["pdf", "docx", ".docx"]))
+    mimetype = factory.Faker("mime_type")
+    last_update = factory.Faker("date_between", start_date="-1y", end_date="today")
+    created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
 
 ###################

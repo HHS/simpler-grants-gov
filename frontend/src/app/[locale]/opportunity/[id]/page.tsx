@@ -97,12 +97,7 @@ function emptySummary() {
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
-  const idForParsing = Number(id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
-  // Opportunity id needs to be a number greater than 1
-  if (isNaN(idForParsing) || idForParsing < 1) {
-    return <NotFound />;
-  }
 
   let opportunityData = {} as OpportunityDetail;
   try {
@@ -133,7 +128,9 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         paddingTop={false}
       >
         <div className="padding-y-3 display-flex">
-          <OpportunitySaveUserControl />
+          <OpportunitySaveUserControl
+            opportunityId={opportunityData.opportunity_id}
+          />
           {opportunityData.competitions &&
             opportunityData.opportunity_title && (
               <OpportunityCompetitionStart
@@ -158,7 +155,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
 
           <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
             <OpportunityStatusWidget opportunityData={opportunityData} />
-            <OpportunityCTA id={opportunityData.opportunity_id} />
+            <OpportunityCTA legacyId={opportunityData.legacy_opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />
             <OpportunityHistory
               summary={opportunityData.summary}

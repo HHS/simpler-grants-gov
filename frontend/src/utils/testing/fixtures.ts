@@ -15,7 +15,8 @@ import {
 } from "src/types/search/searchRequestTypes";
 
 export const mockOpportunity: BaseOpportunity = {
-  opportunity_id: 12345,
+  opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
+  legacy_opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
   opportunity_status: "posted",
   summary: {
@@ -40,7 +41,7 @@ export const searchFetcherParams: QueryParamData = {
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
-  sortby: "opportunityNumberAsc",
+  sortby: "opportunityTitleAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
   andOr: "OR",

@@ -31,6 +31,10 @@ and fix the schema. A few callouts:
 * The title/description fields are used by our UI, they almost certainly need to be rewritten completely from what the .dat file put
 * Common or nested fields should be defined in the `$defs` section
 
+Be aware that some schemas are quite complex and may not be represented in a way
+that our tool can transform properly (eg. the SF424A budget form), in these cases
+I'd recommend using the XSD + PDF as a starting point.
+
 ### Reading the .xsd file
 A few tips:
 * Many fields reference/import types. The files they import from are at the top of the XSD, but mostly those types are defined in https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd
