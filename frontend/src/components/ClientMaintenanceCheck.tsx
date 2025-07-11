@@ -6,7 +6,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * View for managing feature flags
+ * Checks for the "major" features being offline, otherwise we're not in maintenance, so redir to homepage.
  */
 export default function ClientMaintenanceCheck() {
   const {
@@ -19,7 +19,6 @@ export default function ClientMaintenanceCheck() {
       !checkFeatureFlag("opportunityOff") &&
       checkFeatureFlag("authOn")
     ) {
-      // console.log("would redir");
       redirect("/", RedirectType.push);
     }
   }, [checkFeatureFlag]);

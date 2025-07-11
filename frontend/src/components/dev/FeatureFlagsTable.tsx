@@ -48,7 +48,7 @@ export default function FeatureFlagsTable() {
                     : "#fc6a6a",
                 }}
               >
-                {defaultFeatureFlags?.[featureName] ? "Enable" : "Disable"}
+                {defaultFeatureFlags?.[featureName] ? "Enabled" : "Disabled"}
               </td>
               <td
                 data-testid={`${featureName}-status`}
