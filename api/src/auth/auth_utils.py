@@ -56,7 +56,7 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
 
                 # But we still don't expect 5xx errors
                 if e.status_code >= 500:
-                    message = INTERNAL_ERROR
+                    #message = INTERNAL_ERROR
                     logger.exception(
                         "Unexpected error occurred in login flow via raise_flask_error: %s",
                         e.message,
@@ -65,12 +65,12 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                 return response.redirect_response(
                     get_final_redirect_uri("error", error_description=message)
                 )
-            except Exception:
+            except Exception as e:
                 # Any other exception, we'll just use a generic error message to be safe
                 # but this means an unexpected error occurred and we should log an error
                 logger.exception("Unexpected error occurred in login flow")
                 return response.redirect_response(
-                    get_final_redirect_uri("error", error_description=INTERNAL_ERROR)
+                    get_final_redirect_uri("error", error_description=str(e))
                 )
 
         return wrapper

@@ -127,8 +127,6 @@ services:
     volumes:
       - ./mock-oauth/config.json:/app/config.json
       - ./mock-oauth/mock-server-key.json:/app/resources/mock-oauth2-server-keys.json
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   mock-applicants-soap-api:
     image: outofcoffee/imposter

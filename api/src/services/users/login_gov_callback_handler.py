@@ -113,11 +113,14 @@ def handle_login_gov_token(
     # call the token endpoint (make a client)
     # https://developers.login.gov/oidc/token/
     client = get_login_gov_client()
-    response = client.get_token(
-        OauthTokenRequest(
-            code=login_gov_data.code, client_assertion=get_login_gov_client_assertion()
+    try:
+        response = client.get_token(
+            OauthTokenRequest(
+                code=login_gov_data.code, client_assertion=get_login_gov_client_assertion()
+            )
         )
-    )
+    except Exception as e:
+        raise_flask_error(500, str(e))
 
     # If this request failed, we'll assume we're the issue and 500
     if response.is_error_response():
