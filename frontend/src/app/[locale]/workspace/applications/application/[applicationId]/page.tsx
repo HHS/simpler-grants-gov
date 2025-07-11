@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import { AttachmentsProvider } from "src/context/application/AttachmentsContext";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -15,7 +15,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
-import { Attachment } from "src/types/attachmentTypes";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +39,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
   let opportunity = {} as OpportunityDetail;
-  let attachments = [] as Attachment[]
+  let attachments = [] as Attachment[];
 
   try {
     const response = await getApplicationDetails(
@@ -68,6 +67,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <TopLevelError />;
     }
     opportunity = opportunityResponse.data;
+    attachments = response.data.application_attachments;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(

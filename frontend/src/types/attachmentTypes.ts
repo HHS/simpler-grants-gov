@@ -21,5 +21,6 @@ export interface AttachmentResponse extends APIResponse {
     | "file_size_bytes"
     | "mime_type"
     | "updated_at"
-  >;
+    | "download_path"
+  >[];
 }

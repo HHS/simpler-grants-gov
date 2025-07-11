@@ -12,24 +12,23 @@ function createFormData(filename: string, buffer: Buffer, mimeType: string) {
 }
 
 export const postAttachmentHandler = async (
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ applicationId: string }> },
 ) => {
   const applicationId = (await params).applicationId;
-  const formData = await _request.formData();
+  const formData = await request.formData();
   const file = formData.get("file_attachment") as File;
-
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-  }
-
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to get saved opportunity");
+      throw new UnauthorizedError("No active session post an attachment");
+    }
+
+    if (!file) {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
     await uploadAttachment(

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useDeletingIds,
-  useSetPendingDeleteId,
-  useSetPendingDeleteName,
-} from "src/context/application/AttachmentsContext";
+import { useAttachmentsContext } from "src/features/attachments/context/AttachmentsContext";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { RefObject } from "react";
@@ -12,7 +8,7 @@ import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-interface Props {
+interface AttachmentDeleteButtonProps {
   buttonText: string;
   file: Attachment;
   modalRef: RefObject<ModalRef | null>;
@@ -22,10 +18,9 @@ export const AttachmentDeleteButton = ({
   buttonText,
   file,
   modalRef,
-}: Props) => {
-  const setPendingDeleteId = useSetPendingDeleteId();
-  const setPendingDeleteName = useSetPendingDeleteName();
-  const deletingIds = useDeletingIds();
+}: AttachmentDeleteButtonProps) => {
+  const { setPendingDeleteId, setPendingDeleteName, deletingIds } =
+    useAttachmentsContext();
 
   const setFileToDeleteData = (fileName: string, id: string) => {
     setPendingDeleteName(fileName);

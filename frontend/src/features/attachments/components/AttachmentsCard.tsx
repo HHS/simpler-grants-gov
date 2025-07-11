@@ -1,16 +1,16 @@
 "use client";
 
-import {
-  useAttachmentsList,
-  useDeletingIds,
-  useFileInputRef,
-  useUploadAttachment,
-} from "src/context/application/AttachmentsContext";
+import { AttachmentDeleteButton } from "src/features/attachments/components/AttachmentDeleteButton";
+import { AttachmentDeleteModal } from "src/features/attachments/components/AttachmentDeleteModal";
+import { FormattedDate } from "src/features/attachments/components/FormattedDate";
+import { NoAttachmentsEmptyTableRow } from "src/features/attachments/components/NoAttachmentsEmptyTableRow";
+import { useAttachmentsContext } from "src/features/attachments/context/AttachmentsContext";
+import { useAttachmentUpload } from "src/features/attachments/hooks/useAttachmentUpload";
 import { Attachment } from "src/types/attachmentTypes";
 import { formatFileSize } from "src/utils/formatFileSizeUtil";
 
 import { useTranslations } from "next-intl";
-import { DragEvent, FormEvent, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Button,
   FileInput,
@@ -21,24 +21,20 @@ import {
   Table,
 } from "@trussworks/react-uswds";
 
-import { AttachmentDeleteButton } from "src/components/application/attachments/AttachmentDeleteButton";
-import { AttachmentDeleteModal } from "src/components/application/attachments/AttachmentDeleteModal";
-import { FormattedDate } from "src/components/application/attachments/FormattedDate";
-import { NoAttachmentsEmptyTableRow } from "src/components/application/attachments/NoAttachmentsEmptyTableRow";
 import { PopoverMenu } from "src/components/PopoverMenu";
 import Spinner from "src/components/Spinner";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type SortKey = "file_name" | "file_size_bytes" | "updated_at";
+type SortDirection = "asc" | "desc";
 
 const AttachmentsCard = () => {
   const [sortBy, setSortBy] = useState<SortKey>("updated_at");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const uploadAttachment = useUploadAttachment();
-  const attachments = useAttachmentsList();
-  const fileInputRef = useFileInputRef();
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  const deletingIds = useDeletingIds();
+  // Get upload function and context state
+  const { uploadAttachment } = useAttachmentUpload();
+  const { attachments, fileInputRef, deletingIds } = useAttachmentsContext();
 
   const t = useTranslations("Application.attachments");
 
@@ -46,15 +42,10 @@ const AttachmentsCard = () => {
 
   const sortedAttachments = useMemo(() => {
     return [...attachments].sort((a, b) => {
-      const aTyped = a;
-      const bTyped = b;
-      const aVal = aTyped[sortBy];
-      const bVal = bTyped[sortBy];
-
       const aComparable =
-        sortBy === "updated_at" ? new Date(aVal as string).getTime() : aVal;
+        sortBy === "updated_at" ? new Date(a[sortBy]).getTime() : a[sortBy];
       const bComparable =
-        sortBy === "updated_at" ? new Date(bVal as string).getTime() : bVal;
+        sortBy === "updated_at" ? new Date(b[sortBy]).getTime() : b[sortBy];
 
       if (aComparable < bComparable) return sortDirection === "asc" ? -1 : 1;
       if (aComparable > bComparable) return sortDirection === "asc" ? 1 : -1;
@@ -62,18 +53,9 @@ const AttachmentsCard = () => {
     });
   }, [attachments, sortBy, sortDirection]);
 
-  const handleUpload = async (file: File) => await uploadAttachment(file);
-
-  const handleAttachmentUpload = async (e: FormEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
+  const handleUpload = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    await handleUpload(files[0]);
-  };
-
-  const handleAttachmentDrop = async (event: DragEvent) => {
-    const files = event.dataTransfer.files;
-    if (!files || files.length === 0) return;
-    await handleUpload(files[0]);
+    return uploadAttachment(files[0]);
   };
 
   const handleCancelUpload = (attachment: Attachment) => {
@@ -111,7 +93,7 @@ const AttachmentsCard = () => {
 
   return (
     <>
-      <GridContainer data-testid="opportunity-card" className="padding-x-2">
+      <GridContainer data-testid="opportunity-card" className="padding-x-0">
         <h3 className="margin-top-4">{t("attachments")}</h3>
         <Grid row gap>
           <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
@@ -121,8 +103,14 @@ const AttachmentsCard = () => {
             <FileInput
               id="application-attachment-upload"
               name="application-attachment-upload"
-              onChange={(e) => handleAttachmentUpload(e) as unknown as void}
-              onDrop={(e) => handleAttachmentDrop(e) as unknown as void}
+              onChange={(e) => {
+                const files = e.currentTarget.files;
+                handleUpload(files || null);
+              }}
+              onDrop={(e) => {
+                const files = e.dataTransfer.files;
+                handleUpload(files);
+              }}
               ref={fileInputRef}
             />
           </Grid>
@@ -168,10 +156,6 @@ const AttachmentsCard = () => {
                       {file.file_name}
                     </td>
                     <td>
-                      {/*
-                       * file is in the process of loading
-                       */}
-
                       {file.status === "uploading" && (
                         <Button
                           className=" usa-button--unstyled"
@@ -182,33 +166,23 @@ const AttachmentsCard = () => {
                         </Button>
                       )}
 
-                      {/*
-                       * file is in the process of deleting
-                       */}
                       {deletingIds.has(file.application_attachment_id) &&
                         t("deleting")}
 
-                      {/*
-                       * we do not want to see the dropdown if the file is in the
-                       * process of uploading or downloading
-                       */}
-
                       {file.status !== "uploading" &&
                         !deletingIds.has(file.application_attachment_id) && (
-                          <>
-                            <PopoverMenu>
-                              {file.download_path && (
-                                <Link download href={file.download_path}>
-                                  {t("download")}
-                                </Link>
-                              )}
-                              <AttachmentDeleteButton
-                                file={file}
-                                buttonText={t("delete")}
-                                modalRef={modalRef}
-                              />
-                            </PopoverMenu>
-                          </>
+                          <PopoverMenu>
+                            {file.download_path && (
+                              <Link download href={file.download_path}>
+                                {t("download")}
+                              </Link>
+                            )}
+                            <AttachmentDeleteButton
+                              file={file}
+                              buttonText={t("delete")}
+                              modalRef={modalRef}
+                            />
+                          </PopoverMenu>
                         )}
                     </td>
                     <td>

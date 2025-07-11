@@ -1,8 +1,11 @@
 "use client";
 
+import { AttachmentsCard } from "src/features/attachments/components/AttachmentsCard";
+import { AttachmentsProvider } from "src/features/attachments/context/AttachmentsContext";
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -14,18 +17,15 @@ import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
-import { AttachmentsProvider } from "src/context/application/AttachmentsContext";
-import { AttachmentsCard } from "./attachments/AttachmentsCard";
-import { Attachment } from "src/types/attachmentTypes";
 
 const ApplicationContainer = ({
   applicationDetails,
   opportunity,
-  attachments
+  attachments,
 }: {
   applicationDetails: ApplicationDetail;
   opportunity: OpportunityDetail;
-  attachments: Attachment[]
+  attachments: Attachment[];
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
@@ -112,12 +112,12 @@ const ApplicationContainer = ({
         applicationId={applicationId}
         forms={forms}
       />
-              <AttachmentsProvider
-          initialAttachments={attachments}
-          applicationId={applicationId}
-        >
-          <AttachmentsCard />
-        </AttachmentsProvider>
+      <AttachmentsProvider
+        initialAttachments={attachments}
+        applicationId={applicationId}
+      >
+        <AttachmentsCard />
+      </AttachmentsProvider>
     </>
   );
 };

@@ -5,10 +5,6 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "./USWDSIcon";
 
-interface Props {
-  children: ReactNode;
-}
-
 const PopoverTrigger = ({
   buttonRef,
   children,
@@ -35,7 +31,7 @@ const PopoverTrigger = ({
   );
 };
 
-export const PopoverMenu = ({ children }: Props) => {
+export const PopoverMenu = ({ children }: React.PropsWithChildren) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -67,8 +63,7 @@ export const PopoverMenu = ({ children }: Props) => {
 
       {open && (
         <div
-          className="border border-base-light bg-white shadow-2 radius-md padding-1 text-no-wrap position-absolute z-top"
-          style={{ top: "100%", right: 0 }}
+          className="border border-base-light bg-white shadow-2 radius-md padding-1 text-no-wrap position-absolute z-top top-full right-0"
           role="menu"
           ref={menuRef}
         >

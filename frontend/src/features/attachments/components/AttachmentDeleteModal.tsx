@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  useDeleteAttachment,
-  usePendingDeleteId,
-  usePendingDeleteName,
-  useSetDeletingIds,
-} from "src/context/application/AttachmentsContext";
+import { useAttachmentsContext } from "src/features/attachments/context/AttachmentsContext";
+import { useAttachmentDelete } from "src/features/attachments/hooks/useAttachmentDelete";
 
 import { RefObject } from "react";
 import {
@@ -35,17 +31,16 @@ export const AttachmentDeleteModal = ({
   modalId,
   modalRef,
 }: Props) => {
-  const pendingDeleteId = usePendingDeleteId();
-  const pendingDeleteName = usePendingDeleteName();
-  const deleteAttachment = useDeleteAttachment();
-  const setDeletingIds = useSetDeletingIds();
+  const { pendingDeleteId, pendingDeleteName, setDeletingIds } =
+    useAttachmentsContext();
+  const { deleteAttachment } = useAttachmentDelete();
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!pendingDeleteId) return;
     setDeletingIds((prev) => new Set(prev).add(pendingDeleteId));
-    await deleteAttachment(pendingDeleteId).finally(() =>
-      modalRef.current?.toggleModal(),
-    );
+    modalRef.current?.toggleModal();
+    // eslint-disable-next-line no-void
+    void deleteAttachment(pendingDeleteId).catch((e) => console.error(e));
   };
 
   return (
@@ -62,10 +57,7 @@ export const AttachmentDeleteModal = ({
       <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            type="button"
-            onClick={() => handleDelete() as unknown as void}
-          >
+          <Button type="button" onClick={handleDelete}>
             {buttonCtaText}
           </Button>
           <ModalToggleButton
