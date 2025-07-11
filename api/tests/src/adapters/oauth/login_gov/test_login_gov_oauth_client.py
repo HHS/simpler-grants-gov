@@ -55,7 +55,7 @@ def test_get_token_error(monkeypatch):
 
 
 def test_get_token_real_tmp(monkeypatch):
-    client = LoginGovOauthClient(LoginGovConfig(LOGIN_GOV_TOKEN_ENDPOINT="http://host.docker.internal:5001/issuer1/token"))
+    client = LoginGovOauthClient(LoginGovConfig(LOGIN_GOV_TOKEN_ENDPOINT="http://mock-oauth2-server:5001/issuer1/token"))
 
     token = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
     print(token)
