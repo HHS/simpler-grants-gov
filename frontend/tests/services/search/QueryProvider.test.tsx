@@ -1,22 +1,30 @@
+import userEvent from "@testing-library/user-event";
 import QueryProvider, { QueryContext } from "src/services/search/QueryProvider";
 import { QueryContextParams } from "src/types/search/searchQueryTypes";
 import { render, screen } from "tests/react-utils";
 
-import { useContext } from "react";
+import React, { useContext } from "react";
 
 type ContextHandlers = {
   onContextUpdate: (context: QueryContextParams) => void;
   onContextDisplay: (context: QueryContextParams) => React.ReactNode;
 };
 
-// Generic child component that creates a context object, updates it and displays dynamic content based-on its current state
+// Generic child component for displaying + updating the context object held by QueryProvider
 function ChildWithHandlers(props: ContextHandlers) {
   const context = useContext(QueryContext);
-  props.onContextUpdate(context);
-  return props.onContextDisplay(context);
+  return (
+    <React.Fragment>
+      <button onClick={() => props.onContextUpdate(context)}>
+        UPDATE CONTEXT
+      </button>
+      {props.onContextDisplay(context)}
+    </React.Fragment>
+  );
 }
 
-function renderQueryProviderWithHandlers(props: ContextHandlers) {
+// Util function to simplify the process for rendering components + updating the context by clicking the button
+async function updateAndDisplayContext(props: ContextHandlers) {
   render(
     <QueryProvider>
       <ChildWithHandlers
@@ -25,23 +33,28 @@ function renderQueryProviderWithHandlers(props: ContextHandlers) {
       />
     </QueryProvider>,
   );
+
+  // We need to wait until AFTER the first render is complete to update the context object or else
+  // React will throw a "Cannot update a component from inside the function body of a different component" warning when
+  // QueryProvider's setState() get invoked while ChildWithHandlers is rendering
+  const updateButton = screen.getByRole("button");
+  await userEvent.click(updateButton);
 }
 
 describe("QueryProvider", () => {
-  it("queryTerm updates when updateQueryTerm() is called in a child component", () => {
+  it("queryTerm updates when updateQueryTerm() is called in a child component", async () => {
     const expectedText = "testQueryTerm";
-    renderQueryProviderWithHandlers({
+    await updateAndDisplayContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateQueryTerm(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.queryTerm,
     });
-
     const content = screen.getByText(expectedText);
     expect(content).toBeInTheDocument();
   });
-  it("totalPages updates when updateTotalPages() is called in a child component", () => {
+  it("totalPages updates when updateTotalPages() is called in a child component", async () => {
     const expectedText = "testTotalPages";
-    renderQueryProviderWithHandlers({
+    await updateAndDisplayContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateTotalPages(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.totalPages,
@@ -49,9 +62,9 @@ describe("QueryProvider", () => {
     const content = screen.getByText(expectedText);
     expect(content).toBeInTheDocument();
   });
-  it("totalResults updates when updateTotalResults() is called in a child component", () => {
+  it("totalResults updates when updateTotalResults() is called in a child component", async () => {
     const expectedText = "testTotalResults";
-    renderQueryProviderWithHandlers({
+    await updateAndDisplayContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateTotalResults(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.totalResults,
@@ -59,9 +72,9 @@ describe("QueryProvider", () => {
     const content = screen.getByText(expectedText);
     expect(content).toBeInTheDocument();
   });
-  it("localAndOrParam updates when updateLocalAndOrParam() is called in a child component", () => {
+  it("localAndOrParam updates when updateLocalAndOrParam() is called in a child component", async () => {
     const expectedText = "testLocalAndOrParam";
-    renderQueryProviderWithHandlers({
+    await updateAndDisplayContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateLocalAndOrParam(expectedText),
       onContextDisplay: (context: QueryContextParams) =>
