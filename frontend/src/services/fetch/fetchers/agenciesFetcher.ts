@@ -5,10 +5,15 @@ import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
+import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
 
-export const performAgencySearch = async (
-  keyword?: string,
-): Promise<RelevantAgencyRecord[]> => {
+export const performAgencySearch = async ({
+  keyword,
+  selectedStatuses,
+}: {
+  keyword?: string;
+  selectedStatuses?: string[];
+} = {}): Promise<RelevantAgencyRecord[]> => {
   const requestBody: JSONRequestBody = {
     pagination: {
       page_offset: 1,
@@ -22,7 +27,7 @@ export const performAgencySearch = async (
     },
     filters: {
       opportunity_statuses: {
-        one_of: ["posted", "forecasted"],
+        one_of: getStatusValueForAgencySearch(selectedStatuses),
       },
     },
   };
@@ -50,10 +55,14 @@ export const performAgencySearch = async (
 
 export const searchAndFlattenAgencies = async (
   keyword: string,
+  selectedStatuses?: string[],
 ): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
-    agencies = await performAgencySearch(keyword);
+    agencies = await performAgencySearch({
+      keyword,
+      selectedStatuses: selectedStatuses || undefined,
+    });
   } catch (e) {
     console.error("Error searching agency options");
     throw e;

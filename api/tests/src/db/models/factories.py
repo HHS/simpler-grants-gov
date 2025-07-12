@@ -1284,6 +1284,14 @@ class ApplicationFactory(BaseFactory):
             ),
         )
 
+        with_attachments = factory.Trait(
+            application_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationAttachmentFactory",
+                factory_related_name="application",
+                size=lambda: random.randint(1, 3),
+            )
+        )
+
         with_organization = factory.Trait(
             organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
         )

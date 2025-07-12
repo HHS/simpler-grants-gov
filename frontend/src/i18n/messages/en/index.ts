@@ -543,7 +543,7 @@ export const messages = {
         closed: "Closed",
       },
       number: "Number",
-      published: "Published",
+      published: "Posted date",
       expectedAwards: "Expected awards",
       tbd: "TBD",
       saved: "Saved",
@@ -1222,5 +1222,8 @@ export const messages = {
     "YEM: YEMEN": "Yemen",
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
+  },
+  returnToGrants: {
+    message: "Return to Grants.gov",
   },
 };

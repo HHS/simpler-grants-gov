@@ -33,6 +33,7 @@ const allAgencies: FilterOption[] = [
 
 const facetCounts = { agency1: 5, agency2: 2 };
 const query = new Set<string>();
+const selectedStatuses = ["posted", "closed"];
 
 describe("AgencyFilterContent", () => {
   beforeEach(() => {
@@ -52,6 +53,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     const results = await axe(container);
@@ -66,6 +68,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     expect(screen.getByRole("textbox")).toBeInTheDocument();
@@ -81,13 +84,14 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "NASA" } });
 
     await waitFor(() => {
-      expect(mockAgencySearch).toHaveBeenCalledWith("NASA");
+      expect(mockAgencySearch).toHaveBeenCalledWith("NASA", selectedStatuses);
     });
   });
 
@@ -99,6 +103,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     expect(screen.getByText("Agency 1")).toBeInTheDocument();
@@ -113,6 +118,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
 
@@ -131,6 +137,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     const input = screen.getByRole("textbox");
@@ -149,13 +156,17 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "garbage" } });
     await waitFor(() => {
-      expect(mockAgencySearch).toHaveBeenCalledWith("garbage");
+      expect(mockAgencySearch).toHaveBeenCalledWith(
+        "garbage",
+        selectedStatuses,
+      );
     });
 
     fireEvent.change(input, { target: { value: "" } });
@@ -177,6 +188,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
     const input = screen.getByRole("textbox");
@@ -189,6 +201,7 @@ describe("AgencyFilterContent", () => {
         title="Agencies"
         allAgencies={allAgencies}
         facetCounts={facetCounts}
+        selectedStatuses={selectedStatuses}
       />,
     );
 

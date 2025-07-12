@@ -563,6 +563,7 @@ dl {
 }
 
 .simpler-responsive-table {
+  min-width: 100%;
   thead {
     @include at-media("tablet-lg") {
       display: table-header-group;
