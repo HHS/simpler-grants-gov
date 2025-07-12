@@ -24,7 +24,7 @@ function ChildWithHandlers(props: ContextHandlers) {
 }
 
 // Util function to simplify the process for rendering components + updating the context by clicking the button
-async function updateAndDisplayContext(props: ContextHandlers) {
+async function updateAndDisplayQueryContext(props: ContextHandlers) {
   render(
     <QueryProvider>
       <ChildWithHandlers
@@ -41,10 +41,27 @@ async function updateAndDisplayContext(props: ContextHandlers) {
   await userEvent.click(updateButton);
 }
 
+const defaultQueryTerm = "defaultQueryTerm";
+const mockSearchParams = new URLSearchParams(defaultQueryTerm);
+mockSearchParams.set("query", defaultQueryTerm);
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => mockSearchParams,
+}));
+
 describe("QueryProvider", () => {
+  it("queryTerm is set to the correct default based-on useSearchParams()", async () => {
+    await updateAndDisplayQueryContext({
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      onContextUpdate: (_: QueryContextParams) => {},
+      onContextDisplay: (context: QueryContextParams) => context.queryTerm,
+    });
+    const content = screen.getByText(defaultQueryTerm);
+    expect(content).toBeInTheDocument();
+  });
+
   it("queryTerm updates when updateQueryTerm() is called in a child component", async () => {
     const expectedText = "testQueryTerm";
-    await updateAndDisplayContext({
+    await updateAndDisplayQueryContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateQueryTerm(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.queryTerm,
@@ -54,7 +71,7 @@ describe("QueryProvider", () => {
   });
   it("totalPages updates when updateTotalPages() is called in a child component", async () => {
     const expectedText = "testTotalPages";
-    await updateAndDisplayContext({
+    await updateAndDisplayQueryContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateTotalPages(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.totalPages,
@@ -64,7 +81,7 @@ describe("QueryProvider", () => {
   });
   it("totalResults updates when updateTotalResults() is called in a child component", async () => {
     const expectedText = "testTotalResults";
-    await updateAndDisplayContext({
+    await updateAndDisplayQueryContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateTotalResults(expectedText),
       onContextDisplay: (context: QueryContextParams) => context.totalResults,
@@ -74,7 +91,7 @@ describe("QueryProvider", () => {
   });
   it("localAndOrParam updates when updateLocalAndOrParam() is called in a child component", async () => {
     const expectedText = "testLocalAndOrParam";
-    await updateAndDisplayContext({
+    await updateAndDisplayQueryContext({
       onContextUpdate: (context: QueryContextParams) =>
         context.updateLocalAndOrParam(expectedText),
       onContextDisplay: (context: QueryContextParams) =>
