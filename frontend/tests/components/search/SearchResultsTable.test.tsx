@@ -19,7 +19,9 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("SearchResultsTable", () => {
   beforeEach(() =>
-    mockFetchSavedOpportunities.mockResolvedValue([{ opportunity_id: 1 }]),
+    mockFetchSavedOpportunities.mockResolvedValue([
+      { opportunity_id: "0bfdd67c-e58a-4005-bfd1-12cfe592b17e" },
+    ]),
   );
   afterEach(() => jest.resetAllMocks());
   it("passes accessibility test", async () => {
@@ -30,8 +32,7 @@ describe("SearchResultsTable", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  // skip until we're ready
-  it.skip("matches snapshot", async () => {
+  it("matches snapshot", async () => {
     const component = await SearchResultsTable({
       searchResults: [mockOpportunity],
     });
@@ -42,7 +43,10 @@ describe("SearchResultsTable", () => {
     const component = await SearchResultsTable({
       searchResults: [
         mockOpportunity,
-        { ...mockOpportunity, opportunity_id: 1 },
+        {
+          ...mockOpportunity,
+          opportunity_id: "0bfdd67c-e58a-4005-bfd1-12cfe592b17e",
+        },
       ],
     });
     render(component);
@@ -158,6 +162,18 @@ describe("SearchResultsTable", () => {
     expect(
       within(results[1]).getByRole("cell", {
         name: "headings.awardMax $--",
+      }),
+    ).toBeInTheDocument();
+  });
+  it("displays a proper message when there are no results", async () => {
+    const component = await SearchResultsTable({
+      searchResults: [],
+    });
+    render(component);
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+    expect(
+      screen.getByRole("heading", {
+        name: "title",
       }),
     ).toBeInTheDocument();
   });

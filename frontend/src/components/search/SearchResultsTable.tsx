@@ -17,6 +17,7 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
 
 const statusColorClasses = {
   posted: "bg-accent-warm-light",
@@ -145,6 +146,10 @@ export const SearchResultsTable = async ({
   searchResults: SearchResponseData;
 }) => {
   const t = useTranslations("Search.table");
+
+  if (!searchResults.length) {
+    return <FilterSearchNoResults useHeading={true} />;
+  }
 
   const savedOpportunities = await fetchSavedOpportunities();
   const savedOpportunityIds = savedOpportunities.map(

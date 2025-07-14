@@ -8,15 +8,13 @@ import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFe
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import {
-  ApplicationDetailsCardProps,
-  InformationCard,
-} from "src/components/application/InformationCard";
+import ApplicationContainer from "src/components/application/ApplicationContainer";
+import { ApplicationDetailsCardProps, InformationCard } from "src/components/application/InformationCard";
 import { OpportunityCard } from "src/components/application/OpportunityCard";
-import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +31,13 @@ interface ApplicationLandingPageProps {
 
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const userSession = await getSession();
+  const t = await getTranslations("Application");
+
   if (!userSession || !userSession.token) {
     return <TopLevelError />;
   }
   const { applicationId } = await params;
-  let applicationForms = [];
   let details = {} as ApplicationDetailsCardProps;
-  let forms = [];
   let opportunity = {} as OpportunityDetail;
 
   try {
@@ -55,10 +53,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       );
       return <TopLevelError />;
     }
-    applicationForms = response.data.application_forms;
     details = response.data;
-    forms = response.data.competition.competition_forms;
-    applicationForms = response.data.application_forms;
     const opportunityId = response.data.competition.opportunity_id;
     const opportunityResponse = await getOpportunityDetails(
       String(opportunityId),
@@ -85,13 +80,12 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   return (
     <>
       <GridContainer>
-        <h1>Application</h1>
+        <h1>{t("title")}</h1>
         <InformationCard applicationDetails={details} opportunityName={opportunity.opportunity_title} />
         <OpportunityCard opportunityOverview={opportunity} />
-        <ApplicationFormsTable
-          forms={forms}
-          applicationForms={applicationForms}
-          applicationId={applicationId}
+        <ApplicationContainer
+          applicationDetails={details}
+          opportunity={opportunity}
         />
       </GridContainer>
     </>

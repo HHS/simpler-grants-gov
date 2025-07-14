@@ -5,7 +5,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 )
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ExternalUserType
+from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -76,7 +76,7 @@ class UserGetResponseSchema(AbstractResponseSchema):
 
 
 class UserSaveOpportunityRequestSchema(Schema):
-    opportunity_id = fields.Integer(required=True)
+    opportunity_id = fields.UUID(required=True)
 
 
 class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
@@ -195,4 +195,70 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(UserOrganizationSchema),
         metadata={"description": "List of organizations the user is associated with"},
+    )
+
+
+class UserApplicationListRequestSchema(Schema):
+    """Schema for application list request - currently empty but provided for future filtering"""
+
+    pass
+
+
+class UserApplicationCompetitionSchema(Schema):
+    """Schema for competition information in application list"""
+
+    competition_id = fields.UUID(metadata={"description": "The competition ID"})
+    competition_title = fields.String(
+        metadata={
+            "description": "The title of the competition",
+            "example": "Proposal for Advanced Research",
+        }
+    )
+    opening_date = fields.Date(
+        allow_none=True,
+        metadata={
+            "description": "The opening date of the competition, the first day applications are accepted"
+        },
+    )
+    closing_date = fields.Date(
+        allow_none=True,
+        metadata={
+            "description": "The closing date of the competition, the last day applications are accepted"
+        },
+    )
+    is_open = fields.Boolean(
+        metadata={"description": "Whether the competition is open and accepting applications"}
+    )
+
+
+class UserApplicationListItemSchema(Schema):
+    """Schema for individual application in the list"""
+
+    application_id = fields.UUID(metadata={"description": "The application ID"})
+    application_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the application",
+            "example": "my app",
+        },
+    )
+    application_status = fields.Enum(
+        ApplicationStatus,
+        metadata={"description": "Status of the application"},
+    )
+    organization = fields.Nested(
+        UserOrganizationSchema,
+        allow_none=True,
+        metadata={"description": "Organization associated with the application"},
+    )
+    competition = fields.Nested(
+        UserApplicationCompetitionSchema,
+        metadata={"description": "Competition information"},
+    )
+
+
+class UserApplicationListResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserApplicationListItemSchema),
+        metadata={"description": "List of applications for the user"},
     )

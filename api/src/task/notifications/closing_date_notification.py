@@ -9,6 +9,7 @@ from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
@@ -32,8 +33,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
     def __init__(
         self,
         db_session: db.Session,
+        notification_config: EmailNotificationConfig | None = None,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, notification_config)
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for opportunities closing in two weeks"""
@@ -165,14 +167,14 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )

@@ -1,55 +1,41 @@
 "server only";
 
 import { ApiRequestError } from "src/errors";
-import {
-  fetchAgencies,
-  searchAgencies,
-} from "src/services/fetch/fetchers/fetchers";
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
+import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
+import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
 
-// would have called this getAgencies, but technically it's a POST
-export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  const response = await fetchAgencies({
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_order: [
-          {
-            order_by: "created_at",
-            sort_direction: "ascending",
-          },
-        ],
+export const performAgencySearch = async ({
+  keyword,
+  selectedStatuses,
+}: {
+  keyword?: string;
+  selectedStatuses?: string[];
+} = {}): Promise<RelevantAgencyRecord[]> => {
+  const requestBody: JSONRequestBody = {
+    pagination: {
+      page_offset: 1,
+      page_size: 1500, // 969 agencies in prod as of 3/7/25
+      sort_order: [
+        {
+          order_by: "agency_code",
+          sort_direction: "ascending",
+        },
+      ],
+    },
+    filters: {
+      opportunity_statuses: {
+        one_of: getStatusValueForAgencySearch(selectedStatuses),
       },
-      filters: { active: true },
     },
-    nextOptions: {
-      revalidate: 604800,
-    },
-  });
-  const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
-  return data;
-};
-
-export const performAgencySearch = async (
-  keyword?: string,
-): Promise<RelevantAgencyRecord[]> => {
+  };
+  if (keyword) {
+    requestBody.query = keyword;
+  }
   const response = await searchAgencies({
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1500, // 969 agencies in prod as of 3/7/25
-        sort_order: [
-          {
-            order_by: "agency_code",
-            sort_direction: "ascending",
-          },
-        ],
-      },
-      filters: { active: true },
-      query: keyword || "",
-    },
+    body: requestBody,
   });
   if (!response || response.status !== 200) {
     throw new ApiRequestError(
@@ -69,10 +55,14 @@ export const performAgencySearch = async (
 
 export const searchAndFlattenAgencies = async (
   keyword: string,
+  selectedStatuses?: string[],
 ): Promise<RelevantAgencyRecord[]> => {
   let agencies = [];
   try {
-    agencies = await performAgencySearch(keyword);
+    agencies = await performAgencySearch({
+      keyword,
+      selectedStatuses: selectedStatuses || undefined,
+    });
   } catch (e) {
     console.error("Error searching agency options");
     throw e;

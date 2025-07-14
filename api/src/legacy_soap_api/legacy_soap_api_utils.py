@@ -2,6 +2,8 @@ import uuid
 from dataclasses import dataclass
 from typing import Any
 
+import requests
+
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 
 BASE_SOAP_API_RESPONSE_HEADERS = {
@@ -94,3 +96,40 @@ def get_auth_error_response() -> SOAPResponse:
 </soap:Envelope>
 """
     return SOAPResponse(data=format_local_soap_response(data), status_code=500, headers={})
+
+
+def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
+    """Get streamed SOAP response
+
+    The SOAP requests to GG will be returned in chunks if response is large.
+    This method handles building the response for chunked responses from the existing
+    GG S2S SOAP API.
+    """
+    chunk_size = 8192
+    data = b""
+    for chunk in response.iter_content(chunk_size=chunk_size):
+        data += chunk
+
+    # We omit these headers to prevent issues from flask and wsgi from erroring chunked responses.
+    response_headers = filter_headers(
+        dict(response.headers), ["transfer-encoding", "keep-alive", "connection"]
+    )
+
+    return SOAPResponse(data=data, status_code=response.status_code, headers=response_headers)
+
+
+def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
+    headers_to_omit = [i.lower() for i in headers_to_omit] if headers_to_omit else []
+    if not headers_to_omit:
+        return headers
+    return {key: value for key, value in headers.items() if key.lower() not in headers_to_omit}
+
+
+def ensure_dot_prefix(data: str) -> str:
+    return data if data.startswith(".") else f".{data}"
+
+
+def bool_to_string(value: bool | None) -> str | None:
+    if value is None:
+        return None
+    return "true" if value else "false"

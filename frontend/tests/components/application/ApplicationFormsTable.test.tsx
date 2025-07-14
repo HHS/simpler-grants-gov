@@ -5,7 +5,7 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
-import { ApplicationFormsTable } from "src/components/workspace/ApplicationFormsTable";
+import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
@@ -26,7 +26,6 @@ describe("CompetitionFormsTable", () => {
         applicationId={applicationId}
       />,
     );
-
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

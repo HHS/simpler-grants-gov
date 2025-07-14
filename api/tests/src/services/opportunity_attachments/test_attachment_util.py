@@ -10,24 +10,24 @@ from tests.src.db.models.factories import OpportunityFactory
     [
         (
             False,
-            123,
-            456,
+            "955058ea-e95a-40df-b881-26e3b98699be",
+            "3fda3bca-7091-40df-8550-021ddc8bf9e6",
             "my_file.txt",
-            "s3://test-public-bucket/opportunities/123/attachments/456/my_file.txt",
+            "s3://test-public-bucket/opportunities/955058ea-e95a-40df-b881-26e3b98699be/attachments/3fda3bca-7091-40df-8550-021ddc8bf9e6/my_file.txt",
         ),
         (
             True,
-            12345,
-            45678,
+            "f64657c8-df6e-426d-9788-d4b50c2aee8f",
+            "00488774-8c56-47f9-b8ad-5476d310cb54",
             "example.pdf",
-            "s3://test-draft-bucket/opportunities/12345/attachments/45678/example.pdf",
+            "s3://test-draft-bucket/opportunities/f64657c8-df6e-426d-9788-d4b50c2aee8f/attachments/00488774-8c56-47f9-b8ad-5476d310cb54/example.pdf",
         ),
         (
             False,
-            1,
-            1,
+            "7c709b9a-93ab-4857-b8e7-113b1d02572f",
+            "06118982-b328-4d5b-8d77-babd60dcc36a",
             "example.docx",
-            "s3://test-public-bucket/opportunities/1/attachments/1/example.docx",
+            "s3://test-public-bucket/opportunities/7c709b9a-93ab-4857-b8e7-113b1d02572f/attachments/06118982-b328-4d5b-8d77-babd60dcc36a/example.docx",
         ),
     ],
 )

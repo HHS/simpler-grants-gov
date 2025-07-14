@@ -18,12 +18,14 @@ export function AgencyFilterContent({
   allAgencies,
   facetCounts,
   topLevelQuery,
+  selectedStatuses,
 }: {
   query: Set<string>;
   title: string;
   allAgencies: FilterOption[];
   facetCounts: { [key: string]: number };
   topLevelQuery: Set<string>;
+  selectedStatuses?: string[];
 }) {
   const [agencySearchResults, setAgencySearchResults] =
     useState<FilterOption[]>();
@@ -35,7 +37,7 @@ export function AgencyFilterContent({
         setAgencySearchResults(allAgencies);
         return;
       }
-      agencySearch(agencySearchTerm)
+      agencySearch(agencySearchTerm, selectedStatuses || undefined)
         .then((searchResults) => {
           const searchResultsOptions =
             agenciesToSortedAndNestedFilterOptions(searchResults);

@@ -87,8 +87,7 @@ resource "aws_lb_listener" "alb_listener_https" {
   load_balancer_arn = aws_lb.alb[count.index].arn
   port              = 443
   protocol          = "HTTPS"
-  #TODO: figure out how we get soap. certificate here for false option
-  certificate_arn = count.index == 0 ? var.certificate_arn : var.certificate_arn
+  certificate_arn   = count.index == 0 ? var.certificate_arn : var.mtls_certificate_arn
   mutual_authentication {
     mode = count.index == 1 ? "passthrough" : "off"
   }

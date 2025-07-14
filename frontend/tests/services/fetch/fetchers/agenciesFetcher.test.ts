@@ -1,5 +1,4 @@
 import {
-  obtainAgencies,
   performAgencySearch,
   searchAndFlattenAgencies,
 } from "src/services/fetch/fetchers/agenciesFetcher";
@@ -10,36 +9,12 @@ const fakeResponse = {
   status: 200,
 };
 
-// const fakeSortedOptions = [
-//   {
-//     id: "DOCNIST",
-//     label: "National Institute of Standards and Technology",
-//     value: "DOCNIST",
-//   },
-//   {
-//     id: "MOCKNIST",
-//     label: "Mational Institute",
-//     value: "MOCKNIST",
-//   },
-//   {
-//     id: "MOCKTRASH",
-//     label: "Mational TRASH",
-//     value: "MOCKTRASH",
-//   },
-//   {
-//     id: "FAKEORG",
-//     label: "Completely fake",
-//     value: "FAKEORG",
-//   },
-// ];
-
-// const mockSortFilterOptions = jest.fn();
 const mockFetchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockSearchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockFlattenAgencies = jest.fn().mockReturnValue(fakeAgencyResponseData);
-// const mockAgenciesToFilterOptions = jest
-//   .fn()
-//   .mockReturnValue(fakeSortedOptions);
+const mockGetStatusValueForAgencySearch = jest
+  .fn()
+  .mockReturnValue(["forecasted"]);
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAgencies: (arg: unknown): unknown => mockFetchAgencies(arg),
@@ -47,46 +22,24 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 }));
 
 jest.mock("src/utils/search/filterUtils", () => ({
-  // sortFilterOptions: (arg: unknown): unknown => mockSortFilterOptions(arg),
-  // agenciesToFilterOptions: (arg: unknown): unknown =>
-  //   mockAgenciesToFilterOptions(arg),
   flattenAgencies: (arg: unknown): unknown => mockFlattenAgencies(arg),
 }));
 
-describe("obtainAgencies", () => {
-  it("calls request function with correct parameters", async () => {
-    const result = await obtainAgencies();
-
-    expect(mockFetchAgencies).toHaveBeenCalledWith({
-      body: {
-        filters: { active: true },
-        pagination: {
-          page_offset: 1,
-          page_size: 1500,
-          sort_order: [
-            {
-              order_by: "created_at",
-              sort_direction: "ascending",
-            },
-          ],
-        },
-      },
-      nextOptions: {
-        revalidate: 604800,
-      },
-    });
-
-    expect(result).toEqual(fakeAgencyResponseData);
-  });
-});
+jest.mock("src/utils/search/searchUtils", () => ({
+  getStatusValueForAgencySearch: (arg: unknown) =>
+    mockGetStatusValueForAgencySearch(arg) as unknown,
+}));
 
 describe("performAgencySearch", () => {
   it("calls request function with correct parameters", async () => {
-    const result = await performAgencySearch("anything");
+    const result = await performAgencySearch({
+      keyword: "anything",
+      selectedStatuses: ["forecasted"],
+    });
 
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
-        filters: { active: true },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         pagination: {
           page_offset: 1,
           page_size: 1500,
@@ -110,13 +63,12 @@ describe("searchAndFlattenAgencies", () => {
     mockFetchAgencies.mockResolvedValue(fakeResponse);
     mockSearchAgencies.mockResolvedValue(fakeResponse);
     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-    // mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
   });
   afterEach(() => {
     jest.resetAllMocks();
   });
   it("calls fetch, and flattens", async () => {
-    await searchAndFlattenAgencies("anything");
+    await searchAndFlattenAgencies("anything", ["forecasted"]);
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
         pagination: {
@@ -129,49 +81,10 @@ describe("searchAndFlattenAgencies", () => {
             },
           ],
         },
-        filters: { active: true },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         query: "anything",
       },
     });
     expect(mockFlattenAgencies).toHaveBeenCalledWith(fakeAgencyResponseData);
   });
 });
-
-// describe("getAgenciesForFilterOptions", () => {
-//   beforeEach(() => {
-//     mockFetchAgencies.mockResolvedValue(fakeResponse);
-//     mockSearchAgencies.mockResolvedValue(fakeResponse);
-//     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-//     mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
-//   });
-//   afterEach(() => {
-//     jest.resetAllMocks();
-//   });
-//   it("calls fetch, transforms, and sorts", async () => {
-//     await getAgenciesForFilterOptions();
-
-//     expect(mockFetchAgencies).toHaveBeenCalledWith({
-//       body: {
-//         pagination: {
-//           page_offset: 1,
-//           page_size: 1500, // 969 agencies in prod as of 3/7/25
-//           sort_order: [
-//             {
-//               order_by: "created_at",
-//               sort_direction: "ascending",
-//             },
-//           ],
-//         },
-//         filters: { active: true },
-//       },
-//       nextOptions: {
-//         revalidate: 604800,
-//       },
-//     });
-//     expect(mockAgenciesToFilterOptions).toHaveBeenCalledWith(
-//       fakeAgencyResponseData,
-//     );
-
-//     expect(mockSortFilterOptions).toHaveBeenCalledWith(fakeSortedOptions);
-//   });
-// });

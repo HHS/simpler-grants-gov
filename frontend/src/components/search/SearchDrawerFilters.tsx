@@ -111,6 +111,7 @@ export async function SearchDrawerFilters({
           agencyOptionsPromise={agenciesPromise}
           topLevelQuery={topLevelAgency}
           className="width-100 padding-right-5"
+          selectedStatuses={Array.from(status)}
         />
       </Suspense>
       <CheckboxFilter

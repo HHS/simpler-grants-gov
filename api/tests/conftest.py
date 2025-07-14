@@ -73,7 +73,17 @@ def env_vars():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def set_logging_defaults(monkeypatch_session):
+def set_env_var_defaults(monkeypatch_session):
+    """Set env vars to default values for unit tests
+
+    While many of our env vars have defaults defined in local.env
+    these are ones that developers frequently override for local development
+    in override.env which can interfere with unit tests. To avoid
+    that issue, we re-set them here so tests don't fail that depend on the defaults.
+    """
+    # For local dev, it's convenient to override this to a higher value, but our tests
+    # assume the default configured value of 30 minutes
+    monkeypatch_session.setenv("API_JWT_TOKEN_EXPIRATION_MINUTES", "30")
     # Some loggers are noisy/buggy in our tests, so adjust them
     monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
 
@@ -350,6 +360,10 @@ def app(
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
+    )
+    # TODO: Discussion shouldnt the env variable cover this?
+    monkeypatch_session.setenv(
+        "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
     app = app_entry.create_app()
 

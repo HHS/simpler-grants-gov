@@ -56,9 +56,9 @@ git clone https://github.com/<your-github-username>/<repository-name>.git
 
 Instruction on setting up the local development environment can be found in the README of the repository.&#x20;
 
-API Development Instructions [API Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
+API Development Instructions [API Development Instructions](../../api/development.md)
 
-Front End Development Instructions [Front End Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
+Front End Development Instructions [Front End Development Instructions](../../../frontend/)
 
 {% hint style="info" %}
 Nee**d help with your local development environment?**\

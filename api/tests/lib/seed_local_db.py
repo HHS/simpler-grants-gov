@@ -1,5 +1,5 @@
 import logging
-import uuid
+import random
 
 import click
 from sqlalchemy import select
@@ -9,8 +9,10 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.competition_models import Competition
+from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.sf424 import SF424_v4_0
+from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
@@ -40,6 +42,12 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="CLOSED", is_closed_summary=True
+        )
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True
+        )
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
@@ -62,28 +70,7 @@ def _build_opportunities(
     logger.info("Finished creating opportunities")
 
 
-def _build_competitions(db_session: db.Session) -> None:
-    logger.info("Creating competitions")
-
-    # Statically create a competition with exactly one of our default forms
-    # Static to make development for frontend folks easier so they don't need
-    # to keep looking up the UUID
-    static_competition_id = uuid.UUID("fd7f5921-9585-48a5-ab0f-e726f4d1ef94")
-    static_competition = db_session.execute(
-        select(Competition).where(Competition.competition_id == static_competition_id)
-    ).scalar_one_or_none()
-    if static_competition is None:
-        competition = factories.CompetitionFactory.create(
-            competition_id=static_competition_id, competition_forms=[]
-        )
-        factories.CompetitionFormFactory.create(competition=competition)
-        big_form = factories.FormFactory.create(
-            form_json_schema=JSON_SCHEMA_FORM, form_name=FORM_NAME, form_ui_schema=UI_SCHEMA
-        )
-        factories.CompetitionFormFactory.create(competition=competition, form=big_form)
-
-    logger.info(f"Static competition for development exists with ID {str(static_competition_id)}")
-
+def _build_pilot_competition(db_session: db.Session) -> None:
     logger.info("Creating an opportunity setup like our pilot")
     pilot_competition = factories.CompetitionFactory.create(
         opportunity__opportunity_title="Local Pilot-equivalent Opportunity",
@@ -91,14 +78,87 @@ def _build_competitions(db_session: db.Session) -> None:
         with_instruction=True,
     )
 
-    # Create/update the sf424 form if it doesn't already exist
-    form_obj = db_session.merge(SF424_v4_0, load=True)
+    # Create/update the forms if they don't already exist
+    sf424 = db_session.merge(SF424_v4_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=form_obj, is_required=True
+        competition=pilot_competition, form=sf424, is_required=True
     )
+
+    sf424a = db_session.merge(SF424a_v1_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sf424a, is_required=True
+    )
+
+    sflll = db_session.merge(SFLLL_v2_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sflll, is_required=False
+    )
+
     logger.info(
         f"Created a pilot-like opportunity - http://localhost:3000/opportunity/{pilot_competition.opportunity_id}"
     )
+
+
+def _build_user_saved_opportunities_and_searches(db_session: db.Session) -> None:
+    logger.info("Creating users with saved opportunities and searches")
+    saved_opportunities_count = 5
+    saved_searched_count = 5
+
+    # Retrieve list of possible opportunities
+    opportunity_ids: list = db_session.execute(select(Opportunity.opportunity_id)).scalars().all()
+
+    # Create users
+    users = factories.UserFactory.create_batch(size=5)
+
+    for user in users:
+        # Create saved opportunities from randomly selected opportunities
+        selected_opportunities = random.sample(opportunity_ids, saved_opportunities_count)
+        for opportunity_id in selected_opportunities:
+            factories.UserSavedOpportunityFactory.create(user=user, opportunity_id=opportunity_id)
+
+        # Create saved searches from randomly selected opportunities
+        for i in range(saved_searched_count):
+            saved_search_opportunities_count = random.randint(1, 10)
+            selected_opportunities = random.sample(
+                opportunity_ids, saved_search_opportunities_count
+            )
+            factories.UserSavedSearchFactory.create(
+                user=user,
+                name=f"Save Search {i + 1}",
+                search_query={"keywords": f"keyword {i + 1}"},
+                searched_opportunity_ids=selected_opportunities,
+            )
+
+
+def _build_simple_competition():
+    logger.info("Creating a very simple competition for local development")
+
+    simple_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Local Very Simple Opportunity",
+        competition_forms=[],
+        with_instruction=True,
+    )
+
+    factories.CompetitionFormFactory.create(
+        competition=simple_competition, is_required=True, form__with_instruction=True
+    )
+    factories.CompetitionFormFactory.create(
+        competition=simple_competition,
+        is_required=False,
+        form__form_name=FORM_NAME,
+        form__form_json_schema=JSON_SCHEMA_FORM,
+        form__form_ui_schema=UI_SCHEMA,
+    )
+
+    logger.info(
+        f"Created a very simple local opportunity - http://localhost:3000/opportunity/{simple_competition.opportunity_id}"
+    )
+
+
+def _build_competitions(db_session: db.Session) -> None:
+    logger.info("Creating competitions")
+    _build_simple_competition()
+    _build_pilot_competition(db_session)
 
 
 @click.command()
@@ -129,4 +189,5 @@ def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
 
             _build_agencies(db_session)
             _build_competitions(db_session)
+            _build_user_saved_opportunities_and_searches(db_session)
             db_session.commit()
