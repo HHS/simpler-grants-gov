@@ -185,10 +185,16 @@ class CreateApplicationSubmissionTask(Task):
                 "Adding application form to application submission zip",
                 extra=log_extra | {"application_form_id": application_form.application_form_id},
             )
-
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
-            # TODO - when we add PDF form logic - do it here
-            # TODO - add the application form's metadata
+            # TODO - when we add the logic to fetch a form as a PDF
+            #        call it here and pass the contents below.
+            app_form_file_name = f"{application_form.form.short_form_name}.pdf"
+            file_name_in_zip = submission.get_file_name_in_zip(app_form_file_name)
+            with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+                file_in_zip.write(b"TODO")
+
+            file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
+            submission.form_pdf_metadata.append(FileMetadata(file_name_in_zip, file_size))
 
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         """Add application attachments to the zip file"""
@@ -215,7 +221,8 @@ class CreateApplicationSubmissionTask(Task):
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
-                submission.attachment_metadata.append(FileMetadata(file_name_in_zip, 123))  # TODO
+                file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
+                submission.attachment_metadata.append(FileMetadata(file_name_in_zip, file_size))
 
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
@@ -264,7 +271,22 @@ def create_application_submission(db_session: db.Session) -> None:
 
 
 def create_manifest_text(submission: SubmissionContainer) -> str:
-    """TODO"""
+    """Create a manifest file and put it in the ZIP
+
+    This manifest contains a list of files present in the ZIP.
+
+    This file is formatted like:
+
+        Manifest for Grant Application {application_id}
+
+        Forms include in ZIP (total #)
+        1. Form FormXYZ.pdf (size X)
+        2. Form FormABC.pdf (size X)
+
+        Attachments included in ZIP (total #)
+        1. my-attachment.txt (size X)
+        2. another-attachment.docx (size X)
+    """
     sections = []
 
     # Add a header
@@ -280,6 +302,7 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
 
         sections.append("\n".join(form_lines))
 
+    # Process the attachments
     if len(submission.attachment_metadata) > 0:
         attachment_lines = [
             f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"
@@ -291,4 +314,5 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
 
         sections.append("\n".join(attachment_lines))
 
+    # Return any sections populated
     return "\n\n".join(sections)

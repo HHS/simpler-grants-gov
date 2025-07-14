@@ -20,7 +20,7 @@ from tests.src.db.models.factories import ApplicationAttachmentFactory, Applicat
 def validate_manifest_contents(contents_of_manifest: str, expected_files: list[str]):
     # We don't validate the structure, just that
     # the files we expected are present.
-
+    print(contents_of_manifest)
     assert contents_of_manifest.startswith("Manifest for Grant Application")
 
     for expected_file in expected_files:
@@ -65,10 +65,17 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         application_without_attachments = ApplicationFactory.create(
             with_forms=True, application_status=ApplicationStatus.SUBMITTED
         )
+        app_without_attachments_form_file_names = [
+            f"{f.form.short_form_name}.pdf"
+            for f in application_without_attachments.application_forms
+        ]
 
         application_with_attachments = ApplicationFactory.create(
             with_forms=True, application_status=ApplicationStatus.SUBMITTED
         )
+        app_with_attachments_form_file_names = [
+            f"{f.form.short_form_name}.pdf" for f in application_with_attachments.application_forms
+        ]
         ApplicationAttachmentFactory.create(
             application=application_with_attachments,
             file_name="file_a.txt",
@@ -106,10 +113,8 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         no_attachment_submission = application_without_attachments.application_submissions[0]
         validate_files_in_zip(
             no_attachment_submission.file_location,
-            {
-                # No attachments (and no PDFs yet) - just a manifest
-                "manifest.txt": []
-            },
+            {"manifest.txt": app_without_attachments_form_file_names}
+            | {f: None for f in app_without_attachments_form_file_names},
         )
         assert no_attachment_submission.file_size_bytes > 0
 
@@ -130,8 +135,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                     "file_b.txt",
                     "dupe_filename.txt",
                     "1-dupe_filename.txt",
-                ],
-            },
+                ]
+                + app_with_attachments_form_file_names,
+            }
+            | {f: None for f in app_with_attachments_form_file_names},
         )
 
         # These weren't picked up
