@@ -4,6 +4,7 @@ import { Competition } from "src/types/competitionsResponseTypes";
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
 
+import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type CompetitionDetails = { competition: Competition };
@@ -20,8 +21,10 @@ export type ApplicationDetailsCardProps = Pick<
 
 export const InformationCard = ({
   applicationDetails,
+  opportunityName,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
+  opportunityName: string | null;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
@@ -136,6 +139,11 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
+            <EditAppFilingName
+              applicationId={applicationDetails.application_id}
+              applicationName={applicationDetails.application_name}
+              opportunityName={opportunityName}
+            />
           </h3>
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>

@@ -86,7 +86,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     <>
       <GridContainer>
         <h1>Application</h1>
-        <InformationCard applicationDetails={details} />
+        <InformationCard applicationDetails={details} opportunityName={opportunity.opportunity_title} />
         <OpportunityCard opportunityOverview={opportunity} />
         <ApplicationFormsTable
           forms={forms}

@@ -224,6 +224,16 @@ export const messages = {
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
+      editApplicationFilingNameModal: {
+        buttonText: "Edit filing name",
+        title: "Change application filing name",
+        label: "Application filing name",
+        appliedFor: "Applying for: ",
+        fieldRequirements: 'All fields are required.',
+        helperText: "Create a unique and descriptive name for this application so it's easy for you to track. You can change it up until the application is submitted.",
+        buttonAction: "Save",
+        buttonCancel: "Cancel"
+      }
     },
     opportunityOverview: {
       opportunity: "Opportunity",
