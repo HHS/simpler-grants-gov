@@ -46,7 +46,9 @@ export const EditAppFilingNameModalForm = ({
       <input type="hidden" name="application_id" value={applicationId} />
       <FormGroup>
         <label htmlFor="edit-application-filing-name">{t("label")}</label>
-        <p className="margin-top-0 text-gray-50 line-height-sans-2 font-sans-2xs">{t("helperText")}</p>
+        <p className="margin-top-0 text-gray-50 line-height-sans-2 font-sans-2xs">
+          {t("helperText")}
+        </p>
         {state?.error && <p className="text-red">{state.error}</p>}
         <TextInput
           ref={inputRef}
