@@ -8,11 +8,14 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.task.apply.create_application_submission_task import (
     CreateApplicationSubmissionTask,
-    SubmissionContainer, create_manifest_text, FileMetadata,
+    FileMetadata,
+    SubmissionContainer,
+    create_manifest_text,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import ApplicationAttachmentFactory, ApplicationFactory
+
 
 def validate_manifest_contents(contents_of_manifest: str, expected_files: list[str]):
     # We don't validate the structure, just that
@@ -22,6 +25,7 @@ def validate_manifest_contents(contents_of_manifest: str, expected_files: list[s
 
     for expected_file in expected_files:
         assert expected_file in contents_of_manifest
+
 
 def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | None | list[str]]):
     with file_util.open_stream(zip_file_path, "rb") as f:
@@ -121,7 +125,12 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 "file_b.txt": "contents of file B",
                 "dupe_filename.txt": "contents of first dupe_filename.txt",
                 "1-dupe_filename.txt": "contents of second dupe_filename.txt",
-                "manifest.txt": ["file_a.txt", "file_b.txt", "dupe_filename.txt", "1-dupe_filename.txt"],
+                "manifest.txt": [
+                    "file_a.txt",
+                    "file_b.txt",
+                    "dupe_filename.txt",
+                    "1-dupe_filename.txt",
+                ],
             },
         )
 
@@ -177,12 +186,9 @@ def test_get_file_name_in_zip():
     assert container.get_file_name_in_zip("no_suffix") == "no_suffix"
     assert container.get_file_name_in_zip("no_suffix") == "1-no_suffix"
 
-    assert (
-        container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
-    )
-    assert (
-        container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
-    )
+    assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
+    assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
+
 
 def test_create_manifest_text_empty():
     container = SubmissionContainer(
@@ -190,6 +196,7 @@ def test_create_manifest_text_empty():
     )
     text = create_manifest_text(container)
     assert text == f"Manifest for Grant Application {container.application.application_id}"
+
 
 def test_create_manifest_text_full():
     container = SubmissionContainer(
@@ -205,8 +212,7 @@ def test_create_manifest_text_full():
     container.attachment_metadata.append(FileMetadata("something_else.pdf", 777))
 
     text = create_manifest_text(container)
-    expected_text = \
-f"""Manifest for Grant Application {container.application.application_id}
+    expected_text = f"""Manifest for Grant Application {container.application.application_id}
 
 Forms included in ZIP (total 3)
 1. Form form-A.pdf (size 123 bytes)

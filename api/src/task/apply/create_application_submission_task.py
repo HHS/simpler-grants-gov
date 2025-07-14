@@ -21,10 +21,12 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class FileMetadata:
     file_name: str
     file_size_in_bytes: int
+
 
 @dataclass
 class SubmissionContainer:
@@ -213,8 +215,7 @@ class CreateApplicationSubmissionTask(Task):
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
-                submission.attachment_metadata.append(FileMetadata(file_name_in_zip, 123)) # TODO
-
+                submission.attachment_metadata.append(FileMetadata(file_name_in_zip, 123))  # TODO
 
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
@@ -273,14 +274,20 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
     if len(submission.form_pdf_metadata) > 0:
         form_lines = [f"Forms included in ZIP (total {len(submission.form_pdf_metadata)})"]
         for i, app_form in enumerate(submission.form_pdf_metadata, start=1):
-            form_lines.append(f"{i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)")
+            form_lines.append(
+                f"{i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)"
+            )
 
         sections.append("\n".join(form_lines))
 
     if len(submission.attachment_metadata) > 0:
-        attachment_lines = [f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"]
+        attachment_lines = [
+            f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"
+        ]
         for i, app_attachment in enumerate(submission.attachment_metadata, start=1):
-            attachment_lines.append(f"{i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)")
+            attachment_lines.append(
+                f"{i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)"
+            )
 
         sections.append("\n".join(attachment_lines))
 
