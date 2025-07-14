@@ -118,25 +118,6 @@ def get_application_form_errors(
             application_form, action
         )
 
-        is_app_form_required = is_form_required(application_form)
-
-        # If the user has not yet started, we don't want to put
-        # every error message and instead just want a "form is required error"
-        # If the form is not required, then if they haven't started it
-        # we effectively just want to ignore it.
-        if len(application_form.application_response) == 0:
-            if is_app_form_required:
-                form_errors.append(
-                    ValidationErrorDetail(
-                        message=f"Form {application_form.form.form_name} is required",
-                        type=ValidationErrorType.MISSING_REQUIRED_FORM,
-                        field="form_id",
-                        value=application_form.form_id,
-                    )
-                )
-            # Don't add the form validation errors below if they haven't started yet
-            continue
-
         if form_validation_errors:
             form_error_map[str(application_form.application_form_id)] = form_validation_errors
 

@@ -251,16 +251,27 @@ def test_validate_forms_not_started_all_forms(
         application, ApplicationAction.GET
     )
 
-    # All forms missing
-    assert len(validation_errors) == 2
-    for validation_error in validation_errors:
-        assert validation_error.message in ["Form form_a is required", "Form form_b is required"]
-        assert validation_error.type == ValidationErrorType.MISSING_REQUIRED_FORM
-        assert validation_error.field == "form_id"
-        assert validation_error.value in [competition_form_a.form_id, competition_form_b.form_id]
+    # With the new validation logic:
+    # - Required forms (A & B) generate APPLICATION_FORM_VALIDATION errors due to JSON schema validation
+    # - Non-required form (C) generates MISSING_INCLUDED_IN_SUBMISSION error since is_included_in_submission is None
+    assert len(validation_errors) == 3
+    
+    # Check for APPLICATION_FORM_VALIDATION errors for required forms A and B
+    app_form_validation_errors = [
+        error for error in validation_errors 
+        if error.type == ValidationErrorType.APPLICATION_FORM_VALIDATION
+    ]
+    assert len(app_form_validation_errors) == 2
+    
+    # Check for MISSING_INCLUDED_IN_SUBMISSION error for non-required form C
+    missing_inclusion_errors = [
+        error for error in validation_errors 
+        if error.type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+    ]
+    assert len(missing_inclusion_errors) == 1
 
-    # No error detail because that's only for specific validations
-    assert len(error_detail) == 0
+    # Should have error details for forms A and B due to JSON schema validation failures
+    assert len(error_detail) == 2
 
 
 def test_validate_forms_invalid_responses(
