@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -37,7 +37,7 @@ export const EditAppFilingNameModalForm = ({
     setError(null);
   };
 
-  const handleUpdateAppFilingName = async () => {
+  const handleUpdateAppFilingName = () => {
     setIsSaving(true);
     setError(null);
 
@@ -45,16 +45,12 @@ export const EditAppFilingNameModalForm = ({
     formData.append("application_name", currentValue);
 
     try {
-      const res = await fetch(`/api/applications/${applicationId}`, {
+      fetch(`/api/applications/${applicationId}`, {
         method: "PUT",
         body: formData,
-      });
+      }).catch(error => console.error(error));
 
-      if (!res.ok) {
-        throw new Error(`Failed to update application: HTTP ${res.status}`);
-      }
-
-      setInitialAppName(currentValue.trim())
+      setInitialAppName(currentValue.trim());
       modalRef.current?.toggleModal();
       router.refresh();
     } catch (err) {
@@ -68,7 +64,9 @@ export const EditAppFilingNameModalForm = ({
   return (
     <FormGroup>
       <label htmlFor="edit-application-filing-name">{t("label")}</label>
-      <p className="margin-top-0 text-gray-50 line-height-sans-2 font-sans-2xs">{t("helperText")}</p>
+      <p className="margin-top-0 text-gray-50 line-height-sans-2 font-sans-2xs">
+        {t("helperText")}
+      </p>
       {error && <p className="text-red">{error}</p>}
 
       <div>

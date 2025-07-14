@@ -29,7 +29,7 @@ export const handleStartApplication = async (
 export const updateApplicationDetails = async (
   applicationId: string,
   token: string,
-  data: { application_name: string }
+  data: { application_name: string },
 ): Promise<ApplicationDetailApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
@@ -37,11 +37,11 @@ export const updateApplicationDetails = async (
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: applicationId,
     additionalHeaders: ssgToken,
-    body: data
+    body: data,
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;
-}
+};
 
 export const handleSubmitApplication = async (
   applicationId: string,

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
@@ -30,10 +30,7 @@ export const EditAppFilingName = ({
         className="usa-nav__link font-sans-2xs text-normal border-0 margin-left-1"
         data-testid="sign-in-button"
       >
-        <USWDSIcon
-          className="usa-icon margin-right-01"
-          name="edit"
-        />
+        <USWDSIcon className="usa-icon margin-right-01" name="edit" />
         {t("information.editApplicationFilingNameModal.buttonText")}
       </ModalToggleButton>
       <EditAppFilingNameModal
@@ -42,7 +39,7 @@ export const EditAppFilingName = ({
         modalId="edit-application-filing-name-modal"
         modalRef={modalRef}
         opportunityName={opportunityName}
-        titleText={t('information.editApplicationFilingNameModal.title')}
+        titleText={t("information.editApplicationFilingNameModal.title")}
       />
     </>
   );

@@ -14,13 +14,13 @@ type CompetitionDetails = { competition: Competition };
 export type ApplicationDetailsCardProps = ApplicationDetail &
   CompetitionDetails;
 
-  export const InformationCard = ({
+export const InformationCard = ({
   applicationDetails,
   applicationSubmitHandler,
   applicationSubmitted,
   opportunityName,
-  submissionLoading
-}:  {
+  submissionLoading,
+}: {
   applicationDetails: ApplicationDetailsCardProps;
   opportunityName: string | null;
   applicationSubmitHandler: () => void;

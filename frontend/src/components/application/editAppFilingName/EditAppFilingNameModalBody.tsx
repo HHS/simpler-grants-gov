@@ -5,11 +5,13 @@ export const EditAppFilingNameModalBody = ({
 }: {
   opportunityName: string | null;
 }) => {
-  const t = useTranslations("Application.information.editApplicationFilingNameModal");
+  const t = useTranslations(
+    "Application.information.editApplicationFilingNameModal",
+  );
 
   return (
     <>
-      <p className="text-bold">{t("appliedFor") + opportunityName}</p>
+      <p className="text-bold">{t("appliedFor")}{opportunityName}</p>
       <p className="margin-top-0 font-sans-3xs">{t("fieldRequirements")}</p>
     </>
   );

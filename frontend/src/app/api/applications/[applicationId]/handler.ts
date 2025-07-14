@@ -9,7 +9,9 @@ export const updateApplicationDetailsHandler = async (
   { params }: { params: Promise<{ applicationId: string }> },
 ) => {
   const formData = await request.formData();
-  const applicationName = formData.get("application_name")?.toString() as string;
+  const applicationName = formData
+    .get("application_name")
+    ?.toString() as string;
   const applicationId = (await params).applicationId;
 
   try {
