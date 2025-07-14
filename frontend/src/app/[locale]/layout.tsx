@@ -81,7 +81,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
             />
             <Script
-              src="https://ethn.io/91732.js"
+              src="https://ethn.io/91732.js?page=search"
               async={true}
               type="text/javascript"
             />
