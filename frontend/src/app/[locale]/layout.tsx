@@ -18,6 +18,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 
 import Layout from "src/components/Layout";
+import { ClientScriptInjector } from "src/components/ScriptInjector";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
@@ -80,11 +81,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
               dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
             />
-            <Script
-              src="https://ethn.io/91732.js?page=search"
-              async={true}
-              type="text/javascript"
-            />
+            <ClientScriptInjector />
           </>
         )}
       </body>
