@@ -12,6 +12,9 @@ const fakeResponse = {
 const mockFetchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockSearchAgencies = jest.fn().mockResolvedValue(fakeResponse);
 const mockFlattenAgencies = jest.fn().mockReturnValue(fakeAgencyResponseData);
+const mockGetStatusValueForAgencySearch = jest
+  .fn()
+  .mockReturnValue(["forecasted"]);
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAgencies: (arg: unknown): unknown => mockFetchAgencies(arg),
@@ -22,13 +25,21 @@ jest.mock("src/utils/search/filterUtils", () => ({
   flattenAgencies: (arg: unknown): unknown => mockFlattenAgencies(arg),
 }));
 
+jest.mock("src/utils/search/searchUtils", () => ({
+  getStatusValueForAgencySearch: (arg: unknown) =>
+    mockGetStatusValueForAgencySearch(arg) as unknown,
+}));
+
 describe("performAgencySearch", () => {
   it("calls request function with correct parameters", async () => {
-    const result = await performAgencySearch("anything");
+    const result = await performAgencySearch({
+      keyword: "anything",
+      selectedStatuses: ["forecasted"],
+    });
 
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
-        filters: { opportunity_statuses: { one_of: ["posted", "forecasted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         pagination: {
           page_offset: 1,
           page_size: 1500,
@@ -52,13 +63,12 @@ describe("searchAndFlattenAgencies", () => {
     mockFetchAgencies.mockResolvedValue(fakeResponse);
     mockSearchAgencies.mockResolvedValue(fakeResponse);
     mockFlattenAgencies.mockReturnValue(fakeAgencyResponseData);
-    // mockAgenciesToFilterOptions.mockReturnValue(fakeSortedOptions);
   });
   afterEach(() => {
     jest.resetAllMocks();
   });
   it("calls fetch, and flattens", async () => {
-    await searchAndFlattenAgencies("anything");
+    await searchAndFlattenAgencies("anything", ["forecasted"]);
     expect(mockSearchAgencies).toHaveBeenCalledWith({
       body: {
         pagination: {
@@ -71,7 +81,7 @@ describe("searchAndFlattenAgencies", () => {
             },
           ],
         },
-        filters: { opportunity_statuses: { one_of: ["posted", "forecasted"] } },
+        filters: { opportunity_statuses: { one_of: ["forecasted"] } },
         query: "anything",
       },
     });

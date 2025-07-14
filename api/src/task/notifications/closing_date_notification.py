@@ -167,14 +167,14 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-grants' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )

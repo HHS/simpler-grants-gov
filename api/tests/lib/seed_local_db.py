@@ -10,6 +10,7 @@ import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
+from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.form_schema.forms.sflll import SFLLL_v2_0
@@ -41,6 +42,12 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
         factories.OpportunityFactory.create_batch(
             size=2, is_posted_summary=True, has_long_descriptions=True
+        )
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="CLOSED", is_closed_summary=True
+        )
+        factories.OpportunityFactory.create_batch(
+            size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True
         )
 
         # generate a few opportunities with mostly null values
@@ -81,6 +88,11 @@ def _build_pilot_competition(db_session: db.Session) -> None:
     sf424a = db_session.merge(SF424a_v1_0, load=True)
     factories.CompetitionFormFactory.create(
         competition=pilot_competition, form=sf424a, is_required=True
+    )
+
+    project_abstract_summary = db_session.merge(ProjectAbstractSummary_v2_0, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=project_abstract_summary, is_required=True
     )
 
     sflll = db_session.merge(SFLLL_v2_0, load=True)

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -8,6 +9,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -76,6 +78,7 @@ export default async function SavedOpportunities({
   return (
     <>
       <GridContainer>
+        <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
           {t("SavedOpportunities.heading")}
         </h1>

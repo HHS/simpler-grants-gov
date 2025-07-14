@@ -45,7 +45,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               hi
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-0"
             >
               hi from row one
@@ -65,7 +65,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               a heading
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-1"
             >
               i am column two
@@ -85,7 +85,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               table header cell
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-0-2"
             >
               some data
@@ -109,7 +109,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               hi
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-1-0"
             >
               hi from row two
@@ -129,7 +129,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               a heading
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-1-1"
             >
               still column two
@@ -149,7 +149,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               table header cell
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-1-2"
             >
               some more data
@@ -173,7 +173,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               hi
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-2-0"
             >
               hi from row three
@@ -193,7 +193,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               a heading
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-2-1"
             >
               column two
@@ -213,7 +213,7 @@ exports[`TableWithResponsiveHeader matches snapshot 1`] = `
               table header cell
             </div>
             <div
-              class="flex-2 tablet:flex-3"
+              class="flex-2"
               data-testid="responsive-data-2-2"
             >
               even more data

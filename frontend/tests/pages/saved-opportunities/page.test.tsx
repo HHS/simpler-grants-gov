@@ -14,6 +14,11 @@ jest.mock("next-intl/server", () => ({
 
 const savedOpportunities = jest.fn().mockReturnValue([]);
 const opportunity = jest.fn().mockReturnValue({ data: [] });
+const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => mockUseSearchParams() as unknown,
+}));
 
 jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
   getOpportunityDetails: () => opportunity() as Promise<OpportunityApiResponse>,
@@ -49,8 +54,11 @@ describe("Saved Opportunities page", () => {
 
     expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
-    const listItems = screen.getAllByRole("listitem");
-    expect(listItems).toHaveLength(1);
+    expect(
+      screen.getByRole("link", {
+        name: "Test Opportunity",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
