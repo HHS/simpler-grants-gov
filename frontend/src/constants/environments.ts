@@ -25,8 +25,6 @@ const {
   CI,
 } = process.env;
 
-console.error("!!!", CI);
-
 export const featureFlags = {
   opportunityOff: FEATURE_OPPORTUNITY_OFF,
   searchOff: FEATURE_SEARCH_OFF,
