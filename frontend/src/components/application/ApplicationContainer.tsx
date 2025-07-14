@@ -100,6 +100,7 @@ const ApplicationContainer = ({
         applicationSubmitHandler={handleSubmit}
         applicationSubmitted={applicationStatus === "submitted" || success}
         submissionLoading={loading}
+        opportunityName={opportunity.opportunity_title}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable

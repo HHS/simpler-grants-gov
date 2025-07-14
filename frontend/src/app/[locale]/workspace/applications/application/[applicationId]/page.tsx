@@ -13,8 +13,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
-import { ApplicationDetailsCardProps, InformationCard } from "src/components/application/InformationCard";
-import { OpportunityCard } from "src/components/application/OpportunityCard";
+import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
 
 export const dynamic = "force-dynamic";
 
@@ -81,8 +80,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     <>
       <GridContainer>
         <h1>{t("title")}</h1>
-        <InformationCard applicationDetails={details} opportunityName={opportunity.opportunity_title} />
-        <OpportunityCard opportunityOverview={opportunity} />
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
