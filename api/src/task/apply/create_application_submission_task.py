@@ -183,9 +183,10 @@ class CreateApplicationSubmissionTask(Task):
                 "Adding application form to application submission zip",
                 extra=log_extra | {"application_form_id": application_form.application_form_id},
             )
+
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
             # TODO - when we add PDF form logic - do it here
-            # TODO - when we add the manifest logic, add it here
+            # TODO - add the application form's metadata
 
     def process_application_attachments(self, submission: SubmissionContainer) -> None:
         """Add application attachments to the zip file"""

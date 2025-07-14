@@ -774,10 +774,11 @@ FORM_RULE_SCHEMA = {
 
 
 SF424_v4_0 = Form(
-    # legacy form ID - 713
     # https://www.grants.gov/forms/form-items-description/fid/713
     form_id=uuid.UUID("1623b310-85be-496a-b84b-34bdee22a68a"),
+    legacy_form_id=713,
     form_name="Application for Federal Assistance (SF-424)",
+    short_form_name="SF424_4_0",
     form_version="4.0",
     agency_code="SGG",  # TODO - Do we want to add Simpler Grants.gov as an "Agency"?
     omb_number="4040-0004",

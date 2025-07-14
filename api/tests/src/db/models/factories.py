@@ -1149,7 +1149,10 @@ class FormFactory(BaseFactory):
         model = competition_models.Form
 
     form_id = Generators.UuidObj
+    legacy_form_id = factory.Sequence(lambda n: n)
     form_name = "Test form"
+    # short_form_name will look like AB123A_1_2
+    short_form_name = factory.LazyAttribute(lambda f: f"{fake.pystr_format( string_format="??###?")}_{f.form_version.replace('.', '_')}")
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
