@@ -4,6 +4,12 @@ import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 import { render, screen, waitFor } from "tests/react-utils";
 
+const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => mockUseSearchParams() as unknown,
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => Promise.resolve(mockUseTranslations),
 }));

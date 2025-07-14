@@ -23,7 +23,7 @@ BEGIN
     INSERT INTO api.opportunity_change_audit (opportunity_id)
     VALUES (opp_id)
     ON CONFLICT (opportunity_id)
-    DO UPDATE SET updated_at = CURRENT_TIMESTAMP, is_loaded_to_search = FALSE;
+    DO UPDATE SET updated_at = CURRENT_TIMESTAMP, is_loaded_to_search = FALSE, is_loaded_to_version_table=FALSE;
 
     RETURN NEW;
 END;

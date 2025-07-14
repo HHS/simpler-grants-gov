@@ -1,9 +1,10 @@
+import clsx from "clsx";
+
 import { Suspense } from "react";
 import {
   Breadcrumb,
   BreadcrumbBar,
   BreadcrumbLink,
-  GridContainer,
 } from "@trussworks/react-uswds";
 
 import { ReturnToGrantsNotification } from "./ReturnToGrantsNotification";
@@ -30,7 +31,13 @@ const microdata = {
   },
 };
 
-const Breadcrumbs = ({ breadcrumbList }: { breadcrumbList: Breadcrumb[] }) => {
+const Breadcrumbs = ({
+  breadcrumbList,
+  className,
+}: {
+  breadcrumbList: Breadcrumb[];
+  className?: string;
+}) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
       <Breadcrumb
@@ -56,17 +63,18 @@ const Breadcrumbs = ({ breadcrumbList }: { breadcrumbList: Breadcrumb[] }) => {
   });
 
   return (
-    <GridContainer
-      className="display-flex flex-column tablet:flex-row"
-      data-testid="breadcrumb"
-    >
-      <BreadcrumbBar className="flex-1" listProps={{ ...microdata.ol }}>
+    <div className="display-flex flex-column tablet:flex-row">
+      <BreadcrumbBar
+        listProps={{ ...microdata.ol }}
+        data-testid="breadcrumb"
+        className={clsx("flex-1", className)}
+      >
         {breadcrumArray}
       </BreadcrumbBar>
       <Suspense>
         <ReturnToGrantsNotification />
       </Suspense>
-    </GridContainer>
+    </div>
   );
 };
 

@@ -153,23 +153,18 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
 
 def test_get_file_name_in_zip():
-    with BytesIO() as bytes_stream:
-        container = SubmissionContainer(
-            ApplicationFactory.build(), zipfile.ZipFile(bytes_stream, mode="w")
-        )
+    container = SubmissionContainer(
+        ApplicationFactory.build(), zipfile.ZipFile(BytesIO(), mode="w")
+    )
 
-        assert container.get_file_name_in_zip("my_file.txt") == "my_file.txt"
-        assert container.get_file_name_in_zip("my_file.txt") == "1-my_file.txt"
-        assert container.get_file_name_in_zip("my_file.txt") == "2-my_file.txt"
-        assert container.get_file_name_in_zip("my_file.txt") == "3-my_file.txt"
-        assert container.get_file_name_in_zip("2-my_file.txt") == "1-2-my_file.txt"
+    assert container.get_file_name_in_zip("my_file.txt") == "my_file.txt"
+    assert container.get_file_name_in_zip("my_file.txt") == "1-my_file.txt"
+    assert container.get_file_name_in_zip("my_file.txt") == "2-my_file.txt"
+    assert container.get_file_name_in_zip("my_file.txt") == "3-my_file.txt"
+    assert container.get_file_name_in_zip("2-my_file.txt") == "1-2-my_file.txt"
 
-        assert container.get_file_name_in_zip("no_suffix") == "no_suffix"
-        assert container.get_file_name_in_zip("no_suffix") == "1-no_suffix"
+    assert container.get_file_name_in_zip("no_suffix") == "no_suffix"
+    assert container.get_file_name_in_zip("no_suffix") == "1-no_suffix"
 
-        assert (
-            container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
-        )
-        assert (
-            container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"
-        )
+    assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "multiple_suffix.txt.zip"
+    assert container.get_file_name_in_zip("multiple_suffix.txt.zip") == "1-multiple_suffix.txt.zip"

@@ -29,6 +29,7 @@ export function AndOrPanel({ hasSearchTerm }: { hasSearchTerm: boolean }) {
   return andOrOptions.map((option) => {
     return (
       <SearchFilterRadio
+        className="bg-base-lightest"
         key={option.value}
         id={option.id}
         name={option.value}

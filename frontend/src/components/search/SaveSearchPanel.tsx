@@ -84,7 +84,7 @@ export function SaveSearchPanel() {
   };
 
   return (
-    <div className="border-base-lighter border-1px padding-2">
+    <div className="border-base border-1px padding-2">
       {showSavedSearchUI && (
         <>
           <div className="display-flex margin-bottom-2">
