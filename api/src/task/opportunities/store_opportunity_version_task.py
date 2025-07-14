@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class StoreOpportunityVersionConfig(PydanticBaseEnvConfig):
     store_opportunity_version_batch_size: int = 500
-    store_opportunity_version_batch_count: int = 100
+    store_opportunity_version_batch_count: int = 250
 
 
 class StoreOpportunityVersionTask(Task):
@@ -89,6 +89,7 @@ class StoreOpportunityVersionTask(Task):
 
             # Store to OpportunityVersion table
             if save_opportunity_version(self.db_session, opp_change_audit.opportunity):
+                logger.info("Opportunity has a new version", extra=log_extra)
                 self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
 
             # Mark the change audit record so we don't pick it up again next batch
