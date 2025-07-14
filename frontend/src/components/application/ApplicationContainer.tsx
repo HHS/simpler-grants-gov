@@ -43,6 +43,7 @@ const ApplicationContainer = ({
     if (!token) {
       return;
     }
+
     setLoading(true);
     submitApplication(applicationId)
       .then((data) => {

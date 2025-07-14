@@ -22,9 +22,9 @@ export const InformationCard = ({
   submissionLoading,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
-  opportunityName: string | null;
   applicationSubmitHandler: () => void;
   applicationSubmitted: boolean;
+  opportunityName: string | null;
   submissionLoading: boolean;
 }) => {
   const t = useTranslations("Application.information");
