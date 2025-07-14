@@ -104,9 +104,11 @@ def update_application_form(
 
     # Get a list of validation warnings (also sets form status)
     # Always validate because inclusion status affects validation requirements
-    warnings: list[ValidationErrorDetail] = validate_application_form(
+    form_warnings, inclusion_warnings = validate_application_form(
         application_form, ApplicationAction.MODIFY
     )
+    # Combine all warnings
+    warnings = form_warnings + inclusion_warnings
 
     operation_type = []
     if application_response is not None:

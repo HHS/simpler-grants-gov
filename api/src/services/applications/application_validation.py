@@ -114,9 +114,12 @@ def get_application_form_errors(
 
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:
-        form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
+        form_validation_errors, inclusion_errors = validate_application_form(
             application_form, action
         )
+
+        # Add inclusion errors directly to the main form_errors list
+        form_errors.extend(inclusion_errors)
 
         if form_validation_errors:
             form_error_map[str(application_form.application_form_id)] = form_validation_errors
@@ -145,9 +148,16 @@ def _get_json_rule_config_for_action(action: ApplicationAction) -> JsonRuleConfi
 
 def validate_application_form(
     application_form: ApplicationForm, action: ApplicationAction
-) -> list[ValidationErrorDetail]:
-    """Validate an application form, and set the current application form status"""
+) -> tuple[list[ValidationErrorDetail], list[ValidationErrorDetail]]:
+    """Validate an application form, and set the current application form status
+    
+    Returns:
+        tuple: (form_validation_errors, inclusion_errors)
+            - form_validation_errors: errors that should be wrapped in APPLICATION_FORM_VALIDATION
+            - inclusion_errors: MISSING_INCLUDED_IN_SUBMISSION errors that should be returned directly
+    """
     form_validation_errors: list[ValidationErrorDetail] = []
+    inclusion_errors: list[ValidationErrorDetail] = []
 
     context = JsonRuleContext(application_form, config=_get_json_rule_config_for_action(action))
     process_rule_schema_for_context(context)
@@ -164,16 +174,21 @@ def validate_application_form(
     if not is_required:
         # For non-required forms, check is_included_in_submission
         if application_form.is_included_in_submission is None:
-            # Add validation issue but don't run JSON schema validation
-            form_validation_errors.append(
-                ValidationErrorDetail(
-                    message="is_included_in_submission must be set on all non-required forms",
-                    type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
-                    field="is_included_in_submission",
-                    value=None,
+            # If the form has no content and is_included_in_submission is None,
+            # treat it as not included in submission (don't validate)
+            if len(application_form.application_response) == 0:
+                should_run_json_schema_validation = False
+            else:
+                # If form has content but is_included_in_submission is None, require explicit setting
+                inclusion_errors.append(
+                    ValidationErrorDetail(
+                        message="is_included_in_submission must be set on all non-required forms",
+                        type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
+                        field="is_included_in_submission",
+                        value=None,
+                    )
                 )
-            )
-            should_run_json_schema_validation = False
+                should_run_json_schema_validation = False
         elif application_form.is_included_in_submission is False:
             # Don't run JSON schema validation if form is not included in submission
             should_run_json_schema_validation = False
@@ -181,13 +196,13 @@ def validate_application_form(
 
     # Run JSON schema validation only if required
     if should_run_json_schema_validation:
-        form_validation_errors.extend(
-            validate_json_schema_for_form(
-                application_form.application_response, application_form.form
-            )
+        json_validation_errors = validate_json_schema_for_form(
+            application_form.application_response, application_form.form
         )
+        form_validation_errors.extend(json_validation_errors)
 
     # If there are no issues, we consider the form complete
+    # Note: inclusion_errors don't count as form completion issues since they're configuration errors
     if len(form_validation_errors) == 0:
         application_form_status = ApplicationFormStatus.COMPLETE
     # If the form has no answers, we assume it has not been started
@@ -199,7 +214,7 @@ def validate_application_form(
 
     application_form.application_form_status = application_form_status  # type: ignore[attr-defined]
 
-    return form_validation_errors
+    return form_validation_errors, inclusion_errors
 
 
 def validate_forms(application: Application, action: ApplicationAction) -> None:

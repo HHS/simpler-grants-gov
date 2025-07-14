@@ -48,9 +48,11 @@ def get_application_form(
         raise_flask_error(404, f"Application form with ID {app_form_id} not found")
 
     # Get a list of validation warnings (also sets form status)
-    warnings: list[ValidationErrorDetail] = validate_application_form(
+    form_warnings, inclusion_warnings = validate_application_form(
         application_form, ApplicationAction.GET
     )
+    # Combine all warnings
+    warnings = form_warnings + inclusion_warnings
 
     # Set the is_required field on the application form object
     application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
