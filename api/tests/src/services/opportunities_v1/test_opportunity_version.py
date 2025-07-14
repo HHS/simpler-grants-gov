@@ -97,3 +97,26 @@ def test_save_opportunity_version_draft(db_session, enable_factory_create):
     # Verify record is not created
     saved_opp_version = db_session.query(OpportunityVersion).all()
     assert len(saved_opp_version) == 0
+
+
+def test_save_opportunity_version_with_prior_versions(db_session, enable_factory_create):
+    opp = OpportunityFactory.create()
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 1
+
+    opp.opportunity_title = "A new opportunity title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 2
+
+    opp.opportunity_title = "Yet another title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 3
+
+    # Not changing anything won't add a new version
+    opp.opportunity_title = "Yet another title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 3
