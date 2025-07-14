@@ -48,7 +48,7 @@ export const EditAppFilingNameModalForm = ({
       fetch(`/api/applications/${applicationId}`, {
         method: "PUT",
         body: formData,
-      }).catch(error => console.error(error));
+      }).catch((error) => console.error(error));
 
       setInitialAppName(currentValue.trim());
       modalRef.current?.toggleModal();
