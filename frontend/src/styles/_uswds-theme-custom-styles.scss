@@ -631,5 +631,15 @@ iframe[id^="ethnio-screener-"] {
     border-bottom: 2px solid color("base-darkest");
     transform: rotate(-45deg);
     transform-origin: left bottom;
+
+  }
+}
+
+#opportunity-detail-content {
+  p:first-child {
+    margin-top: 1rem;
+  }
+  p:last-child {
+    margin-bottom: 1rem;
   }
 }

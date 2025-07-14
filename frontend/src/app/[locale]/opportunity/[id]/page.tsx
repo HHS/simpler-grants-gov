@@ -148,7 +148,10 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
               />
             )}
         </div>
-        <div className="grid-row grid-gap margin-top-2">
+        <div
+          className="grid-row grid-gap margin-top-2"
+          id="opportunity-detail-content"
+        >
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
