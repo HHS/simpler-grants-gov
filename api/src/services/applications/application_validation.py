@@ -168,7 +168,6 @@ def validate_application_form(
     """Validate an application form, and set the current application form status"""
     form_validation_errors: list[ValidationErrorDetail] = []
 
-    # Always run rule validation
     context = JsonRuleContext(application_form, config=_get_json_rule_config_for_action(action))
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)

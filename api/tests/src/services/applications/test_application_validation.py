@@ -125,7 +125,7 @@ def test_validate_form_all_valid(
         application=application,
         competition_form=competition_form_c,
         application_response=VALID_FORM_C_RESPONSE,
-        is_included_in_submission=True,  # Set to True for non-required forms to run validation
+        is_included_in_submission=True,
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
     # TODO - add attachment stuff
