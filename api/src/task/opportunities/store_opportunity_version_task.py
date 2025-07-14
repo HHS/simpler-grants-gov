@@ -59,7 +59,7 @@ class StoreOpportunityVersionTask(Task):
         opportunity_change_audits = self.db_session.scalars(
             select(OpportunityChangeAudit)
             .join(Opportunity)
-            .where(OpportunityChangeAudit.has_been_versioned.isnot(True))
+            .where(OpportunityChangeAudit.is_loaded_to_version_table.isnot(True))
             # We filter drafts out of creating versions, so just don't fetch them.
             .where(Opportunity.is_draft.is_(False))
             .options(selectinload("*"))
@@ -93,7 +93,7 @@ class StoreOpportunityVersionTask(Task):
                 self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
 
             # Mark the change audit record so we don't pick it up again next batch
-            opp_change_audit.has_been_versioned = True
+            opp_change_audit.is_loaded_to_version_table = True
 
         # If the batch we grabbed has fewer than the batch size, we know we've
         # reached the end of processing.

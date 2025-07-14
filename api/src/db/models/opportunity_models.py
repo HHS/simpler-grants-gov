@@ -477,7 +477,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
-    has_been_versioned: Mapped[bool | None]
+    is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
 
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):

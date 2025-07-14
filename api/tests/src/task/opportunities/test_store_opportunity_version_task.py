@@ -23,7 +23,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
     def test_with_prior_job_log_no_updated_opportunity(
         self, db_session, enable_factory_create, store_opportunity_version_task
     ):
-        OpportunityChangeAuditFactory.create(has_been_versioned=True)
+        OpportunityChangeAuditFactory.create(is_loaded_to_version_table=True)
         store_opportunity_version_task.run()
 
         opp_vers = db_session.query(OpportunityVersion).all()
@@ -102,7 +102,7 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         # run with a second update
         oca.opportunity.current_opportunity_summary = None
         oca.updated_at = datetime_util.utcnow()
-        oca.has_been_versioned = False
+        oca.is_loaded_to_version_table = False
         db_session.commit()
 
         store_opportunity_version_task.has_unprocessed_records = True
