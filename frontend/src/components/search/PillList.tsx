@@ -20,7 +20,7 @@ export function PillList({ pills }: { pills: FilterPillLabelData[] }) {
         ? pills.map(({ queryParamKey, queryParamValue, label }) => (
             <div
               key={`pill-for-${label}`}
-              className="margin-x-1 margin-top-2 display-inline-block"
+              className="margin-x-1 margin-bottom-2 display-inline-block"
             >
               <Pill
                 label={label}
