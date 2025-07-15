@@ -13,7 +13,7 @@ export type UpdateAppFilingNameActionState =
   | undefined;
 
 export const updateAppFilingNameAction = async (
-  _prevState: void,
+  _prevState: UpdateAppFilingNameActionState | undefined,
   formData: FormData,
 ): Promise<UpdateAppFilingNameActionState> => {
   const session = await getSession();
