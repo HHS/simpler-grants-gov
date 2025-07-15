@@ -96,7 +96,7 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
             {t(`${title as TranslationKeys}`)}
             {":"}
           </p>
-          <div className={"margin-top-0"}>{formatSubContent(content)}</div>
+          <div>{formatSubContent(content)}</div>
         </div>
       ))}
     </div>
