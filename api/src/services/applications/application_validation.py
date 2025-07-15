@@ -174,21 +174,16 @@ def validate_application_form(
     if not is_required:
         # For non-required forms, check is_included_in_submission
         if application_form.is_included_in_submission is None:
-            # If the form has no content and is_included_in_submission is None,
-            # treat it as not included in submission (don't validate)
-            if len(application_form.application_response) == 0:
-                should_run_json_schema_validation = False
-            else:
-                # If form has content but is_included_in_submission is None, require explicit setting
-                inclusion_errors.append(
-                    ValidationErrorDetail(
-                        message="is_included_in_submission must be set on all non-required forms",
-                        type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
-                        field="is_included_in_submission",
-                        value=None,
-                    )
+            # If form hasn't set is_included_in_submission, it's always an error regardless of content
+            inclusion_errors.append(
+                ValidationErrorDetail(
+                    message="is_included_in_submission must be set on all non-required forms",
+                    type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
+                    field="is_included_in_submission",
+                    value=None,
                 )
-                should_run_json_schema_validation = False
+            )
+            should_run_json_schema_validation = False
         elif application_form.is_included_in_submission is False:
             # Don't run JSON schema validation if form is not included in submission
             should_run_json_schema_validation = False

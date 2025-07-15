@@ -152,7 +152,8 @@ def test_validate_form_all_valid_not_started_optional_form(
         application_response=VALID_FORM_B_RESPONSE,
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, competition_form=competition_form_c, application_response={}
+        application=application, competition_form=competition_form_c, application_response={},
+        is_included_in_submission=False
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
@@ -248,8 +249,8 @@ def test_validate_forms_not_started_all_forms(
 
     # With the new validation logic:
     # - Required forms (A & B) generate APPLICATION_FORM_VALIDATION errors due to JSON schema validation
-    # - Non-required form (C) with empty response and is_included_in_submission=None is treated as not included (no error)
-    assert len(validation_errors) == 2
+    # - Non-required form (C) with empty response and is_included_in_submission=None generates MISSING_INCLUDED_IN_SUBMISSION error
+    assert len(validation_errors) == 3
 
     # Check for APPLICATION_FORM_VALIDATION errors for required forms A and B
     app_form_validation_errors = [
@@ -259,13 +260,13 @@ def test_validate_forms_not_started_all_forms(
     ]
     assert len(app_form_validation_errors) == 2
 
-    # No MISSING_INCLUDED_IN_SUBMISSION errors since empty optional form is treated as not included
+    # Should have one MISSING_INCLUDED_IN_SUBMISSION error for the non-required form
     missing_inclusion_errors = [
         error
         for error in validation_errors
         if error.type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
     ]
-    assert len(missing_inclusion_errors) == 0
+    assert len(missing_inclusion_errors) == 1
 
     # Should have error details for forms A and B due to JSON schema validation failures
     assert len(error_detail) == 2
