@@ -6,7 +6,7 @@ import {
   defaultFeatureFlags,
   FeatureFlags,
 } from "src/constants/defaultFeatureFlags";
-import { featureFlags } from "src/constants/environments";
+import { envFeatureFlags } from "src/constants/environments";
 import {
   assignBaseFlags,
   deleteCookie,
@@ -160,4 +160,4 @@ export class FeatureFlagsManager {
   }
 }
 
-export const featureFlagsManager = new FeatureFlagsManager(featureFlags);
+export const featureFlagsManager = new FeatureFlagsManager(envFeatureFlags);
