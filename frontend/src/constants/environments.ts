@@ -22,6 +22,7 @@ const {
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
   NEXT_RUNTIME,
+  CI,
 } = process.env;
 
 export const featureFlags = {
@@ -55,4 +56,5 @@ export const environment: { [key: string]: string } = {
   API_JWT_PUBLIC_KEY: API_JWT_PUBLIC_KEY || "",
   NEW_RELIC_ENABLED: NEW_RELIC_ENABLED || "false",
   NEXT_RUNTIME: NEXT_RUNTIME || "",
+  IS_CI: CI || "false",
 };
