@@ -4,14 +4,14 @@ import { handleSubmitApplication } from "src/services/fetch/fetchers/application
 
 export const submitApplicationHandler = async (
   _request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ applicationId: string }> },
 ) => {
   try {
     const session = await getSession();
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session submit application");
     }
-    const applicationId = (await params).id;
+    const applicationId = (await params).applicationId;
 
     const response = await handleSubmitApplication(
       applicationId,
