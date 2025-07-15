@@ -1150,7 +1150,6 @@ class FormFactory(BaseFactory):
         model = competition_models.Form
 
     form_id = Generators.UuidObj
-    legacy_form_id = factory.Sequence(lambda n: n)
     form_name = "Test form"
     # short_form_name will look like AB123A_1_2
     short_form_name = factory.LazyAttribute(
