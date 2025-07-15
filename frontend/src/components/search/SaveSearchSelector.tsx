@@ -88,7 +88,7 @@ export const SaveSearchSelector = ({
         }
         const searchQueryParams = searchToQueryParams(searchToApply);
         setApplyingSavedSearch(true);
-        replaceQueryParams(searchQueryParams);
+        replaceQueryParams({ ...searchQueryParams, savedSearch: selectedId });
         updateQueryTerm(searchQueryParams.query || "");
       }
     },
@@ -116,28 +116,58 @@ export const SaveSearchSelector = ({
         // this works now but may not if once we introduce token refreshes.
         // if a token changes without clearing the newSavedSearches list on the parent
         // we could accidentally select a saved search on token refresh
-        setApplyingSavedSearch(true);
+        // setApplyingSavedSearch(true);
         setSelectedSavedSearch(savedSearchToSetInSelectAfterFetch);
-        if (savedSearchQueryValue) {
-          removeQueryParam("savedSearch");
-        }
+        // if (savedSearchQueryValue) {
+        //   removeQueryParam("savedSearch");
+        // }
       }
       setRunPostFetchActions(false);
     }
   }, [runPostFetchActions, searchParams, newSavedSearches, removeQueryParam]);
 
-  // reset saved search selector on search change
+  // I think this works...
   useEffect(() => {
-    // we want to display the name of selected saved search on selection, so opt out of clearing during apply
-    if (!applyingSavedSearch && searchParams !== prevSearchParams) {
+    console.log(
+      "####",
+      searchParams !== prevSearchParams,
+      searchParams.get("savedSearch"),
+      prevSearchParams?.get("savedSearch"),
+    );
+    if (
+      searchParams !== prevSearchParams &&
+      searchParams.get("savedSearch") &&
+      prevSearchParams?.get("savedSearch")
+    ) {
       setSelectedSavedSearch("");
+      removeQueryParam("savedSearch");
     }
-  }, [searchParams, prevSearchParams, applyingSavedSearch]);
+  }, [searchParams, prevSearchParams, removeQueryParam]);
 
-  // clear applying saved flag when searchParams change
-  useEffect(() => {
-    setApplyingSavedSearch(false);
-  }, [searchParams]);
+  // // reset saved search selector on search change
+  // useEffect(() => {
+  //   // we want to display the name of selected saved search on selection, so opt out of clearing during apply
+  //   console.log(
+  //     "!!!",
+  //     !applyingSavedSearch,
+  //     searchParams !== prevSearchParams,
+  //     searchParams,
+  //     prevSearchParams,
+  //   );
+  //   // if (selectedSavedSearch && searchParams !== prevSearchParams) {
+  //   if (!applyingSavedSearch && searchParams !== prevSearchParams) {
+  //     setSelectedSavedSearch("");
+  //   }
+  //   if (applyingSavedSearch) {
+  //     setApplyingSavedSearch(false);
+  //   }
+  // }, [searchParams, prevSearchParams, applyingSavedSearch]);
+  // // }, [searchParams, prevSearchParams, selectedSavedSearch]);
+
+  // // clear applying saved flag when searchParams change
+  // useEffect(() => {
+  //   setApplyingSavedSearch(false);
+  // }, [searchParams]);
 
   if (apiError) {
     return (
