@@ -597,3 +597,7 @@ dl {
     background-color: color($theme-color-secondary-lightest);
   }
 }
+
+iframe[id^="ethnio-screener-"] {
+  position: fixed !important;
+}
