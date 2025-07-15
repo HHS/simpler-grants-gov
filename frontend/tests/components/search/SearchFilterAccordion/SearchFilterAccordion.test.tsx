@@ -83,7 +83,7 @@ describe("SearchFilterAccordion", () => {
     expect(contentDiv).not.toHaveAttribute("hidden");
   });
 
-  it("checks boxes correctly and updates count", () => {
+  it("updates heading background color when options are selected", () => {
     const { rerender } = render(
       <SearchFilterAccordion
         filterOptions={initialFilterOptions}
@@ -97,8 +97,6 @@ describe("SearchFilterAccordion", () => {
     const updatedQuery = new Set("");
     updatedQuery.add("Cooperative Agreement");
     updatedQuery.add("Grant");
-    // after clicking one of the boxes, the page should rerender
-    // both select all and clear all should be enabled
     rerender(
       <SearchFilterAccordion
         filterOptions={initialFilterOptions}
@@ -109,11 +107,10 @@ describe("SearchFilterAccordion", () => {
       />,
     );
 
-    // Verify the count updates to 2
-    const countSpan = screen.getByText("2", {
-      selector: ".usa-tag.usa-tag--big.radius-pill.margin-left-1",
-    });
-    expect(countSpan).toBeInTheDocument();
+    // Verify the background updates after selecting options
+    // actual checkbox state is tested in AccordionContent
+    const titleHeading = screen.getByRole("heading");
+    expect(titleHeading).toHaveClass("simpler-selected-filter");
   });
   it("adds an any option checkbox by default", () => {
     render(

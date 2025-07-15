@@ -47,33 +47,9 @@ export interface SearchAccordionContentProps
   includeAnyOption?: boolean;
 }
 
-export interface SearchFilterAccordionProps
-  extends SearchAccordionContentProps {
-  wrapForScroll?: boolean;
-}
-
 export interface SearchFilterProps extends SearchAccordionContentProps {
   contentClassName?: string;
 }
-
-const AccordionTitle = ({
-  title,
-  totalCheckedCount,
-}: {
-  title: string;
-  totalCheckedCount: number;
-}) => {
-  return (
-    <>
-      {title}
-      {!!totalCheckedCount && (
-        <span className="usa-tag usa-tag--big radius-pill margin-left-1">
-          {totalCheckedCount}
-        </span>
-      )}
-    </>
-  );
-};
 
 const AccordionContent = ({
   filterOptions,
@@ -156,7 +132,7 @@ export function SearchFilterAccordion({
 }: SearchFilterProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
-      title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
+      title,
       content: (
         <AccordionContent
           filterOptions={filterOptions}
@@ -174,6 +150,7 @@ export function SearchFilterAccordion({
       className: clsx(
         "maxh-mobile-lg overflow-auto position-relative",
         contentClassName,
+        { "simpler-selected-filter": query.size },
       ),
     },
   ];
@@ -200,12 +177,14 @@ export function BasicSearchFilterAccordion({
 }: BasicSearchFilterAccordionProps) {
   const accordionOptions: AccordionItemProps[] = [
     {
-      title: <AccordionTitle title={title} totalCheckedCount={query.size} />,
+      title,
       content: children,
       expanded,
       id: `opportunity-filter-${queryParamKey as string}`,
       headingLevel: "h2",
-      className: contentClassName || "",
+      className: clsx(contentClassName, {
+        "simpler-selected-filter": query.size,
+      }),
     },
   ];
 
