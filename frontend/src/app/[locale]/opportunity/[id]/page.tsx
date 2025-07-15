@@ -109,16 +109,16 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     }
     throw error;
   }
-  opportunityData.summary = opportunityData?.summary
-    ? opportunityData.summary
-    : emptySummary();
-
   if (id !== opportunityData.opportunity_id) {
     redirect(
       `/opportunity/${opportunityData.opportunity_id}`,
       RedirectType.push,
     );
   }
+
+  opportunityData.summary = opportunityData?.summary
+    ? opportunityData.summary
+    : emptySummary();
 
   breadcrumbs.push({
     title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
