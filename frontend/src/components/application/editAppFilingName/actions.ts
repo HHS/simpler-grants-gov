@@ -13,11 +13,9 @@ export type UpdateAppFilingNameActionState =
   | undefined;
 
 export const updateAppFilingNameAction = async (
-  _prevState: UpdateAppFilingNameActionState | undefined,
+  _prevState: void,
   formData: FormData,
 ): Promise<UpdateAppFilingNameActionState> => {
-  const applicationId = formData.get("application_id") as string;
-  const applicationName = formData.get("application_name") as string;
   const session = await getSession();
 
   if (!session || !session.token) {
@@ -26,6 +24,9 @@ export const updateAppFilingNameAction = async (
       error: "Session has expired",
     };
   }
+
+  const applicationId = formData.get("application_id") as string;
+  const applicationName = formData.get("application_name") as string;
 
   try {
     const res = await updateApplicationFilingName(session.token, {

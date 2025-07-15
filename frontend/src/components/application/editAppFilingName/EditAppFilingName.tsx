@@ -18,7 +18,9 @@ export const EditAppFilingName = ({
   applicationName,
   opportunityName,
 }: EditAppFilingNameProps) => {
-  const t = useTranslations("Application");
+  const t = useTranslations(
+    "Application.information.editApplicationFilingNameModal",
+  );
   const modalRef = useRef<ModalRef>(null);
 
   return (
@@ -31,7 +33,7 @@ export const EditAppFilingName = ({
         data-testid="sign-in-button"
       >
         <USWDSIcon className="usa-icon margin-right-01" name="edit" />
-        {t("information.editApplicationFilingNameModal.buttonText")}
+        {t("buttonText")}
       </ModalToggleButton>
       <EditAppFilingNameModal
         applicationId={applicationId}
@@ -39,7 +41,7 @@ export const EditAppFilingName = ({
         modalId="edit-application-filing-name-modal"
         modalRef={modalRef}
         opportunityName={opportunityName}
-        titleText={t("information.editApplicationFilingNameModal.title")}
+        titleText={t("title")}
       />
     </>
   );
