@@ -591,3 +591,13 @@ dl {
     }
   }
 }
+
+.simpler-selected-filter {
+  .usa-accordion__button {
+    background-color: color($theme-color-secondary-lightest);
+  }
+}
+
+iframe[id^="ethnio-screener-"] {
+  position: fixed !important;
+}
