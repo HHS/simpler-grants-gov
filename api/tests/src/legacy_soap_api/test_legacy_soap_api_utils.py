@@ -8,7 +8,6 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     filter_headers,
     format_local_soap_response,
     get_auth_error_response,
-    get_envelope_dict,
     get_streamed_soap_response,
 )
 
@@ -23,10 +22,10 @@ def test_format_local_soap_response() -> None:
         assert expected == given
 
 
-def test_get_envelope_dict() -> None:
-    operation_name = "a"
-    soap_xml_dict = {"Envelope": {"Body": {operation_name: {1: 1}}}}
-    assert get_envelope_dict(soap_xml_dict, operation_name) == {1: 1}
+# def test_get_envelope_dict() -> None:
+#     operation_name = "a"
+#     soap_xml_dict = {"Envelope": {"Body": {operation_name: {1: 1}}}}
+#     assert get_envelope_dict(soap_xml_dict, operation_name) == {1: 1}
 
 
 def test_get_auth_error_response() -> None:

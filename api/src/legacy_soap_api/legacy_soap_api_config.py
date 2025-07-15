@@ -1,6 +1,8 @@
 import json
 import logging
-from functools import cache
+from dataclasses import dataclass
+from enum import Enum
+from functools import cache, lru_cache
 from typing import Any
 
 from pydantic import Field
@@ -38,3 +40,35 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
 def get_soap_config() -> LegacySoapAPIConfig:
     # This is cached since any changes the config will require app restart anyways.
     return LegacySoapAPIConfig()
+
+
+class SimplerSoapAPI(Enum):
+    GRANTORS = "grantors"
+    APPLICANTS = "applicants"
+
+
+@dataclass
+class SOAPOperationConfig:
+    request_operation_name: str
+    response_operation_name: str
+    force_list_attributes: tuple | None = tuple()
+
+
+SIMPLER_SOAP_OPERATION_CONFIG_CACHE_SIZE = 10
+SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
+    SimplerSoapAPI.APPLICANTS: {
+        "GetOpportunityListRequest": SOAPOperationConfig(
+            request_operation_name="GetOpportunityListRequest",
+            response_operation_name="GetOpportunityListResponse",
+            force_list_attributes=("OpportunityDetails",),
+        )
+    },
+    SimplerSoapAPI.GRANTORS: {},
+}
+
+
+@lru_cache(maxsize=SIMPLER_SOAP_OPERATION_CONFIG_CACHE_SIZE)
+def get_soap_operation_config(
+    simpler_api: SimplerSoapAPI, request_operation_name: str
+) -> SOAPOperationConfig | None:
+    return SIMPLER_SOAP_OPERATION_CONFIGS.get(simpler_api, {}).get(request_operation_name)
