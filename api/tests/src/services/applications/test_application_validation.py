@@ -152,8 +152,10 @@ def test_validate_form_all_valid_not_started_optional_form(
         application_response=VALID_FORM_B_RESPONSE,
     )
     application_form_c = ApplicationFormFactory.build(
-        application=application, competition_form=competition_form_c, application_response={},
-        is_included_in_submission=False
+        application=application,
+        competition_form=competition_form_c,
+        application_response={},
+        is_included_in_submission=False,
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
