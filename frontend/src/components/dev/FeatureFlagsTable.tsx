@@ -1,6 +1,5 @@
 "use client";
 
-import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import React, { useState } from "react";
@@ -12,7 +11,8 @@ import BetaAlert from "src/components/BetaAlert";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { setFeatureFlag, featureFlags } = useFeatureFlags();
+  const { setFeatureFlag, featureFlags, defaultFeatureFlags } =
+    useFeatureFlags();
   const [pendingChanges, setPendingChanges] = useState(false);
 
   const handleFeatureChange = (flagName: string, value: boolean) => {

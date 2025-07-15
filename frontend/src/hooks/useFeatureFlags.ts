@@ -17,6 +17,7 @@ export function useFeatureFlags(): {
   setFeatureFlag: (flagName: string, value: boolean) => void;
   checkFeatureFlag: (flagName: string) => boolean;
   featureFlags: FeatureFlags;
+  defaultFeatureFlags: FeatureFlags;
 } {
   const userContext = useUser();
   const pathname = usePathname() || "";
@@ -31,8 +32,18 @@ export function useFeatureFlags(): {
   const checkFeatureFlag = useCallback(
     (flagName: string): boolean => {
       const value = userContext.featureFlags[flagName];
+
+      console.dir({
+        flagName,
+        value,
+        bool: isBoolean(value),
+      });
       if (!isBoolean(value)) {
-        console.error("Unknown or misconfigured feature flag: ", flagName);
+        console.error(
+          "Unknown or misconfigured feature flag: ",
+          flagName,
+          value,
+        );
         return false;
       }
       return value;
@@ -44,5 +55,6 @@ export function useFeatureFlags(): {
     setFeatureFlag,
     checkFeatureFlag,
     featureFlags: userContext.featureFlags,
+    defaultFeatureFlags: userContext.defaultFeatureFlags,
   };
 }
