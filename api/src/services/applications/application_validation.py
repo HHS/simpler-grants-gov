@@ -150,7 +150,7 @@ def validate_application_form(
     application_form: ApplicationForm, action: ApplicationAction
 ) -> tuple[list[ValidationErrorDetail], list[ValidationErrorDetail]]:
     """Validate an application form, and set the current application form status
-    
+
     Returns:
         tuple: (form_validation_errors, inclusion_errors)
             - form_validation_errors: errors that should be wrapped in APPLICATION_FORM_VALIDATION
