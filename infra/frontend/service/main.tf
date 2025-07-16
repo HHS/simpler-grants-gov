@@ -184,4 +184,5 @@ module "service" {
   )
 
   is_temporary = local.is_temporary
+  healthcheck_path = "/api/health"
 }
