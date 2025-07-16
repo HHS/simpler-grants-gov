@@ -156,7 +156,7 @@ export const messages = {
         fundingDetails: "Funding Details",
         other: "Other",
       },
-      noDocuments: "No documents are currently available here",
+      noDocuments: "No documents are currently available.",
     },
     awardInfo: {
       yes: "Yes",
