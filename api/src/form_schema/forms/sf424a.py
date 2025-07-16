@@ -350,10 +350,11 @@ FORM_UI_SCHEMA = [
 
 
 SF424a_v1_0 = Form(
-    # legacy form ID - 241
     # https://grants.gov/forms/form-items-description/fid/241
     form_id=uuid.UUID("08e6603f-d197-4a60-98cd-d49acb1fc1fd"),
+    legacy_form_id=241,
     form_name="Budget Information for Non-Construction Programs (SF-424A)",
+    short_form_name="SF424A",
     form_version="1.0",
     agency_code="SGG",
     omb_number="4040-0006",
