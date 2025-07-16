@@ -911,7 +911,7 @@ export const messages = {
               "<p>All applicants will have the option to use our simpler workflow when applying through Grants.gov. We’ll continue scaling up to support the needs of all agencies.</p>",
           },
         ],
-      }
+      },
     },
   },
   // These values are currently for form enum translation, values coming fromt the API
