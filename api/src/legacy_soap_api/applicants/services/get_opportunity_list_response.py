@@ -32,7 +32,6 @@ def get_opportunity_list_response(
     db_session: db.Session,
     get_opportunity_list_request: GetOpportunityListRequest,
 ) -> GetOpportunityListResponse:
-    get_opportunity_list_request.package_id = "PKG-00260155"
     competitions = get_competitions_from_opportunity_list_request(
         db_session, get_opportunity_list_request
     )
