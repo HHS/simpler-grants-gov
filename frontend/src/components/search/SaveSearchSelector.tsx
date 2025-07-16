@@ -47,10 +47,6 @@ export const SaveSearchSelector = ({
     useState<boolean>(false);
   const [apiError, setApiError] = useState<Error | null>();
 
-  // allows us to avoid resetting the select option when params change after selection
-  const [applyingSavedSearch, setApplyingSavedSearch] =
-    useState<boolean>(false);
-
   const fetchSavedSearches = useCallback(() => {
     if (!user?.token) {
       setApiError(new Error("Not logged in, can't fetch saved searches"));
@@ -87,7 +83,6 @@ export const SaveSearchSelector = ({
           return;
         }
         const searchQueryParams = searchToQueryParams(searchToApply);
-        setApplyingSavedSearch(true);
         replaceQueryParams({ ...searchQueryParams, savedSearch: selectedId });
         updateQueryTerm(searchQueryParams.query || "");
       }
@@ -113,27 +108,27 @@ export const SaveSearchSelector = ({
         savedSearchQueryValue ||
         (newSavedSearches.length && newSavedSearches[0]);
       if (savedSearchToSetInSelectAfterFetch) {
-        // this works now but may not if once we introduce token refreshes.
-        // if a token changes without clearing the newSavedSearches list on the parent
-        // we could accidentally select a saved search on token refresh
-        // setApplyingSavedSearch(true);
         setSelectedSavedSearch(savedSearchToSetInSelectAfterFetch);
-        // if (savedSearchQueryValue) {
-        //   removeQueryParam("savedSearch");
-        // }
       }
       setRunPostFetchActions(false);
     }
   }, [runPostFetchActions, searchParams, newSavedSearches, removeQueryParam]);
 
-  // I think this works...
+  /*
+    If a user has selected a saved search, and then updates their filter / search options
+    we need to reset the selected saved search option.
+
+    We cannot simply do this by looking at inequality of previous and current search params though,
+    as this sort of condition will be hit in the process of applying a saved search, and we'd end up
+    resetting the selected state while selecting a search.
+
+    With the conditions here we can ensure we are only clearing a saved search:
+    * when search params are changing
+    * the process of applying a saved search is fully completed, as proven by both current and
+      previous search params containing the saved search param
+  */
+
   useEffect(() => {
-    console.log(
-      "####",
-      searchParams !== prevSearchParams,
-      searchParams.get("savedSearch"),
-      prevSearchParams?.get("savedSearch"),
-    );
     if (
       searchParams !== prevSearchParams &&
       searchParams.get("savedSearch") &&
@@ -143,31 +138,6 @@ export const SaveSearchSelector = ({
       removeQueryParam("savedSearch");
     }
   }, [searchParams, prevSearchParams, removeQueryParam]);
-
-  // // reset saved search selector on search change
-  // useEffect(() => {
-  //   // we want to display the name of selected saved search on selection, so opt out of clearing during apply
-  //   console.log(
-  //     "!!!",
-  //     !applyingSavedSearch,
-  //     searchParams !== prevSearchParams,
-  //     searchParams,
-  //     prevSearchParams,
-  //   );
-  //   // if (selectedSavedSearch && searchParams !== prevSearchParams) {
-  //   if (!applyingSavedSearch && searchParams !== prevSearchParams) {
-  //     setSelectedSavedSearch("");
-  //   }
-  //   if (applyingSavedSearch) {
-  //     setApplyingSavedSearch(false);
-  //   }
-  // }, [searchParams, prevSearchParams, applyingSavedSearch]);
-  // // }, [searchParams, prevSearchParams, selectedSavedSearch]);
-
-  // // clear applying saved flag when searchParams change
-  // useEffect(() => {
-  //   setApplyingSavedSearch(false);
-  // }, [searchParams]);
 
   if (apiError) {
     return (
