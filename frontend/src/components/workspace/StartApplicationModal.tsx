@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { LoginModalBody } from "src/components/LoginModal";
+import { LoginModal } from "src/components/LoginModal";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import CompetitionStartFormIndividiual from "src/components/workspace/CompetitionStartFormIndividiual";
+import { CompetitionStartForm } from "src/components/workspace/CompetitionStartFormIndividiual";
 
 type StartApplicationModalProps = {
   competitionId: string;
@@ -27,11 +27,13 @@ const StartApplicationModal = ({
   const router = useRouter();
   const t = useTranslations("OpportunityListing");
   const headerTranslation = useTranslations("HeaderLoginModal");
-  const modalId = "start-application";
+
   const [validationError, setValidationError] = useState<string>();
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
+  const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
+
   const token = user?.token || null;
 
   const handleSubmit = useCallback(() => {
@@ -42,7 +44,9 @@ const StartApplicationModal = ({
       setValidationError(undefined);
     }
     if (!savedApplicationName) {
-      setValidationError(t("startApplicationModal.validationError"));
+      setValidationError(
+        t("startApplicationModal.fields.name.validationError"),
+      );
       return;
     }
     setLoading(true);
@@ -69,10 +73,16 @@ const StartApplicationModal = ({
     setSavedApplicationName("");
   }, []);
 
-  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSavedApplicationName(e.target.value);
   }, []);
 
+  const onOrganizationChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedOrganization(e.target.value);
+    },
+    [],
+  );
   return (
     <div className="display-flex flex-align-start">
       <ModalToggleButton
@@ -84,41 +94,45 @@ const StartApplicationModal = ({
         <USWDSIcon name="add" />
         {t("startApplicationButtonText")}
       </ModalToggleButton>
-      <SimplerModal
-        modalRef={modalRef}
-        className="text-wrap"
-        modalId={modalId}
-        titleText={
-          token
-            ? t("startApplicationModal.title")
-            : t("startApplicationModal.login")
-        }
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit();
-        }}
-        onClose={onClose}
-      >
-        {token ? (
-          <CompetitionStartFormIndividiual
+      {token ? (
+        <SimplerModal
+          modalRef={modalRef}
+          className="text-wrap"
+          modalId={"start-application"}
+          titleText={
+            token
+              ? t("startApplicationModal.title")
+              : t("startApplicationModal.login")
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+          }}
+          onClose={onClose}
+        >
+          <CompetitionStartForm
             opportunityTitle={opportunityTitle}
             loading={loading}
             error={error}
             onClose={onClose}
             onSubmit={handleSubmit}
-            onChange={onChange}
+            onNameChange={onNameChange}
+            onOrganizationChange={onOrganizationChange}
             modalRef={modalRef}
             validationError={validationError}
+            selectedOrganization={selectedOrganization}
           />
-        ) : (
-          <LoginModalBody
-            helpText={headerTranslation("help")}
-            buttonText={headerTranslation("button")}
-            closeText={headerTranslation("close")}
-            descriptionText={headerTranslation("description")}
-            modalRef={modalRef}
-          />
-        )}
-      </SimplerModal>
+        </SimplerModal>
+      ) : (
+        <LoginModal
+          helpText={headerTranslation("help")}
+          buttonText={headerTranslation("button")}
+          closeText={headerTranslation("close")}
+          descriptionText={headerTranslation("description")}
+          titleText={headerTranslation("title")}
+          modalId="application-login-modal"
+          modalRef={modalRef as React.RefObject<ModalRef>}
+        />
+      )}
     </div>
   );
 };

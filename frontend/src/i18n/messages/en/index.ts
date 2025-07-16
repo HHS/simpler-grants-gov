@@ -116,17 +116,28 @@ export const messages = {
     startApplicationButtonText: "Start new application",
     startApplicationModal: {
       cancelButtonText: "Cancel",
-      description:
-        "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
-      name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",
       title: "New application",
-      validationError: "Please enter a name for your application.",
+      fields: {
+        name: {
+          label: "Name of this application",
+          description:
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+          validationError: "Enter a filing name. You can change this later.",
+        },
+        organizationSelect: {
+          label: "Who's applying?",
+          default: "-Select-",
+          notListed: "My organization isn't listed",
+          validationError:
+            "Select an organization. If yours isn't listed, you'll need toa pply through Grants.gov.",
+        },
+      },
     },
     intro: {
       agency: "Agency: ",
