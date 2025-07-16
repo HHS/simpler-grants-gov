@@ -489,8 +489,6 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    # Pre-populate should have federal program name and assistance listing number
-    # Post-populate should have signature, signature date
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
@@ -507,16 +505,16 @@ FORM_RULE_SCHEMA = {
 }
 
 SFLLL_v2_0 = Form(
-    # legacy form ID - 670
     # https://grants.gov/forms/form-items-description/fid/670
     form_id=uuid.UUID("778a1485-082a-463e-a61b-6615ccebe027"),
+    legacy_form_id=670,
     form_name="Disclosure of Lobbying Activities (SF-LLL)",
+    short_form_name="SFLLL_2_0",
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0013",
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
-    # No rule schema yet, we'll likely but automated sums in this
     form_rule_schema=FORM_RULE_SCHEMA,
     # No form instructions at the moment.
 )

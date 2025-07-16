@@ -43,6 +43,7 @@ const ApplicationContainer = ({
     if (!token) {
       return;
     }
+
     setLoading(true);
     submitApplication(applicationId)
       .then((data) => {
@@ -100,6 +101,7 @@ const ApplicationContainer = ({
         applicationSubmitHandler={handleSubmit}
         applicationSubmitted={applicationStatus === "submitted" || success}
         submissionLoading={loading}
+        opportunityName={opportunity.opportunity_title}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable

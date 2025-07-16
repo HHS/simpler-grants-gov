@@ -26,6 +26,27 @@ export const handleStartApplication = async (
   return (await response.json()) as ApplicationStartApiResponse;
 };
 
+export const updateApplicationFilingName = async (
+  token: string,
+  data: {
+    application_id: string;
+    application_name: string;
+  },
+): Promise<ApplicationDetailApiResponse> => {
+  const applicationId = data.application_id;
+  const applicationName = data.application_name;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchApplicationWithMethod("PUT")({
+    subPath: applicationId,
+    additionalHeaders: ssgToken,
+    body: { application_name: applicationName },
+  });
+
+  return (await response.json()) as ApplicationDetailApiResponse;
+};
+
 export const handleSubmitApplication = async (
   applicationId: string,
   token: string,
@@ -52,6 +73,9 @@ export const getApplicationDetails = async (
   const response = await fetchApplicationWithMethod("GET")({
     subPath: applicationId,
     additionalHeaders: ssgToken,
+    nextOptions: {
+      tags: [`application-${applicationId}`, "application-details"],
+    },
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;

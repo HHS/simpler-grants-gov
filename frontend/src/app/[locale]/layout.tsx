@@ -18,6 +18,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 
 import Layout from "src/components/Layout";
+import { ClientScriptInjector } from "src/components/ScriptInjector";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
@@ -67,17 +68,22 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         <NextIntlClientProvider messages={messages}>
           <Layout locale={locale}>{children}</Layout>
         </NextIntlClientProvider>
-        <Script
-          id="nr-browser-agent"
-          // By setting the strategy to "beforeInteractive" we guarantee that
-          // the script will be added to the document's `head` element.
-          // However, we cannot add this because it needs to be in the Root Layout, outside of the [locale] directory
-          // And we cannot add beneath the local directory because our HTML tag needs to know about the locale
-          // Come back to this to see if we can find a solution later on
-          // strategy="beforeInteractive"
+        {environment.IS_CI !== "true" && (
+          <>
+            <Script
+              id="nr-browser-agent"
+              // By setting the strategy to "beforeInteractive" we guarantee that
+              // the script will be added to the document's `head` element.
+              // However, we cannot add this because it needs to be in the Root Layout, outside of the [locale] directory
+              // And we cannot add beneath the local directory because our HTML tag needs to know about the locale
+              // Come back to this to see if we can find a solution later on
+              // strategy="beforeInteractive"
 
-          dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
-        />
+              dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
+            />
+            <ClientScriptInjector />
+          </>
+        )}
       </body>
     </html>
   );

@@ -57,7 +57,7 @@ describe("RadioButtonFilter", () => {
     expect(screen.getByText("Other")).toBeInTheDocument();
   });
 
-  it("checks radio buttons correctly and updates count", () => {
+  it("updates heading background color when options are selected", () => {
     const { rerender } = render(
       <RadioButtonFilter
         filterOptions={initialFilterOptions}
@@ -82,11 +82,10 @@ describe("RadioButtonFilter", () => {
       />,
     );
 
-    // Verify the count updates to 2
-    const countSpan = screen.getByText("2", {
-      selector: ".usa-tag.usa-tag--big.radius-pill.margin-left-1",
-    });
-    expect(countSpan).toBeInTheDocument();
+    // Verify the background updates after selecting options
+    // actual checkbox state is tested in AccordionContent
+    const titleHeading = screen.getByRole("heading");
+    expect(titleHeading).toHaveClass("simpler-selected-filter");
   });
   it("adds an any option radio by default", async () => {
     render(

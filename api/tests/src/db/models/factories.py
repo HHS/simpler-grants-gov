@@ -875,6 +875,7 @@ class OpportunityChangeAuditFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
     is_loaded_to_search = False
+    is_loaded_to_version_table = False
 
 
 ###################
@@ -1150,6 +1151,10 @@ class FormFactory(BaseFactory):
 
     form_id = Generators.UuidObj
     form_name = "Test form"
+    # short_form_name will look like AB123A_1_2
+    short_form_name = factory.LazyAttribute(
+        lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
+    )
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
