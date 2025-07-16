@@ -26,5 +26,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/nofos/${var.environment}/secret-key"
     }
+
+    AWS_STORAGE_BUCKET_NAME = {
+      manage_method     = "manual"
+      secret_store_name = "/nofos/${var.environment}/aws-storage-bucket-name"
+    }
   }
 }
