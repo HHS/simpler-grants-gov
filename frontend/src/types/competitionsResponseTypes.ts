@@ -11,6 +11,8 @@ export interface CompetitionInstructions {
 }
 export type CompetitionForms = [{ form: FormDetail; is_required: boolean }];
 
+export type ApplicantTypes = "individual" | "organization";
+
 export type Competition = {
   closing_date: string;
   competition_forms: CompetitionForms;
@@ -20,7 +22,7 @@ export type Competition = {
   competition_title: string;
   contact_info: null;
   is_open: boolean;
-  open_to_applicants: [string];
+  open_to_applicants: ApplicantTypes[];
   opening_date: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
