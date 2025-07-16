@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_client import (
@@ -13,69 +14,64 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPRequest,
     SOAPResponse,
 )
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException, get_soap_response
-from src.legacy_soap_api.soap_payload_handler import SOAPPayload
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
 
 def get_simpler_soap_response(
-    proxy_response: SOAPResponse, soap_request: SOAPRequest, db_session: db.Session
-) -> tuple:
-    try:
-        soap_operation_config = soap_request.get_soap_request_operation_config()
-    except (SOAPOperationNotSupported, SOAPInvalidEnvelope, SOAPInvalidRequestOperationName) as e:
-        logger.info(f"Unable to initialize simpler soap operation config: {e}")
-        return None, False
-
-    add_extra_data_to_current_request_logs(
-        {
-            "soap_request_operation": soap_operation_config.request_operation_name,
-            "soap_response_operation": soap_operation_config.response_operation_name,
-        }
-    )
-
+    soap_request: SOAPRequest, soap_proxy_response: SOAPResponse, db_session: db.Session
+) -> SOAPResponse:
     simpler_soap_client_type = (
         SimplerApplicantsS2SClient
         if soap_request.api_name == SimplerSoapAPI.APPLICANTS
         else SimplerGrantorsS2SClient
     )
 
-    simpler_soap_client = simpler_soap_client_type(
-        soap_request_xml=soap_request.data.decode(),
-        operation_config=soap_operation_config,
-        db_session=db_session,
-    )
+    use_simpler = False
 
-    simpler_soap_payload = None
     try:
-        simpler_soap_payload = simpler_soap_client.get_simpler_soap_response_payload()
-        simpler_soap_response = get_soap_response(
-            data=simpler_soap_payload.envelope_data.envelope.encode()
+        simpler_soap_client = simpler_soap_client_type(
+            soap_request=soap_request, db_session=db_session
         )
-    except SOAPFaultException as e:
+
+        add_extra_data_to_current_request_logs(
+            {
+                "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
+            }
+        )
+
+        simpler_soap_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
+            soap_proxy_response
+        )
+
+        if simpler_soap_response is not None and use_simpler:
+            logger.info(
+                "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
+                extra={"used_simpler_response": use_simpler},
+            )
+            return simpler_soap_response
+
         logger.info(
-            "simpler_soap_api_fault",
-            extra={"err": e.message, "fault": e.fault.model_dump()},
+            "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
+            extra={"used_simpler_response": use_simpler},
         )
-        simpler_soap_response = get_soap_response(
-            data=e.fault.to_xml(),
-            status_code=500,
+        return soap_proxy_response
+    except (SOAPOperationNotSupported, SOAPInvalidEnvelope, SOAPInvalidRequestOperationName) as e:
+        err = f"Unable to initialize Simpler SOAP client: {e}"
+        logger.info(
+            f"simpler_soap_api: {err}",
+            extra={"simpler_soap_api_error": err, "used_simpler_response": use_simpler},
         )
-    return simpler_soap_response, should_use_simpler_soap_response(
-        simpler_soap_payload, proxy_response
-    )
-
-
-def should_use_simpler_soap_response(
-    simpler_soap_payload: SOAPPayload | None, proxy_response: SOAPResponse
-) -> bool:
-    if simpler_soap_payload is None:
-        return False
-    try:
-        simpler_dict = simpler_soap_payload.to_dict()
-        proxy_dict = SOAPPayload(proxy_response.data.decode()).to_dict()
-        return simpler_dict == proxy_dict
-    except Exception:
-        return False
+        return soap_proxy_response
+    except Exception as e:
+        err = "Unable to initialize Simpler SOAP client: Unknown error"
+        logger.info(
+            f"simpler_soap_api: {err}",
+            extra={
+                "simpler_soap_api_error": err,
+                "used_simpler_response": use_simpler,
+                "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
+            },
+        )
+        return soap_proxy_response

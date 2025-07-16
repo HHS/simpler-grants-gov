@@ -2,7 +2,6 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable
-from xml.etree import ElementTree
 
 import xmltodict
 from defusedxml import ElementTree as DET
@@ -202,19 +201,21 @@ def get_soap_envelope_from_payload(soap_message: str) -> SOAPEnvelopeData:
     return envelope_data
 
 
-def get_soap_operation_name(soap_xml: str) -> str:
+def get_soap_operation_name(soap_xml: str | bytes) -> str:
     """Get operation name
 
     Get the SOAP operation name. Every valid SOAP request Body should
     have the global SOAP envelope namespace.
     """
     try:
+        if isinstance(soap_xml, bytes):
+            soap_xml = soap_xml.decode()
         root = DET.fromstring(soap_xml)
         body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
         if body is not None and len(body) > 0:
             return body[0].tag.split("}")[-1]
         return ""
-    except ElementTree.ParseError:
+    except Exception:
         return ""
 
 

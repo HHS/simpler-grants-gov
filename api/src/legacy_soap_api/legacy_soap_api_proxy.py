@@ -14,7 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     filter_headers,
-    get_soap_error,
+    get_soap_error_response,
     get_streamed_soap_response,
 )
 
@@ -30,7 +30,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     # Use X-Gg-S2S-Uri header locally if passed, otherwise defualt to GRANTS_GOV_URI:GRANTS_GOV_PORT.
     proxy_url = join(
         soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
-        soap_request.full_path.lstrip("/")
+        soap_request.full_path.lstrip("/"),
     )
 
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
@@ -59,7 +59,9 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             # This exception handles the case of a valid cert being passed, but not configured
             # to use Simpler SOAP API.
             logger.info(f"soap_client_certicate: Certificate validated but not configured: {e}")
-            return get_soap_error(faultstring="Client certificate not configured for Simpler SOAP.")
+            return get_soap_error_response(
+                faultstring="Client certificate not configured for Simpler SOAP."
+            )
         temp_cert_file.write(cert)
         temp_cert_file.flush()
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
