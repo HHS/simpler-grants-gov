@@ -114,6 +114,8 @@ export const CompetitionStartForm = ({
   onSubmit,
   validationError = "",
   selectedOrganization,
+  applicantTypes,
+  organizations,
 }: {
   opportunityTitle: string;
   loading?: boolean;
@@ -125,11 +127,10 @@ export const CompetitionStartForm = ({
   onSubmit: () => void;
   validationError?: string;
   selectedOrganization?: string;
+  applicantTypes: ApplicantTypes[];
+  organizations: Organization[];
 }) => {
   const t = useTranslations("OpportunityListing");
-
-  const applicantTypes: ApplicantTypes[] = [];
-  const organizations: Organization[] = [];
 
   return (
     <div className="display-flex flex-align-start">

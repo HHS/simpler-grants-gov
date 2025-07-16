@@ -1,11 +1,16 @@
 "use client";
 
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+import { clientFetchCompetition } from "src/services/fetch/fetchers/clientCompetitionsFetcher";
+import { userOrganizationFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
+import { ApplicantTypes } from "src/types/competitionsResponseTypes";
+import { Organization } from "src/types/UserTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
@@ -25,6 +30,8 @@ const StartApplicationModal = ({
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
   const router = useRouter();
+  const { clientFetch } = useClientFetch();
+
   const t = useTranslations("OpportunityListing");
   const headerTranslation = useTranslations("HeaderLoginModal");
 
@@ -33,8 +40,43 @@ const StartApplicationModal = ({
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>();
+  const [competitionApplicantTypes, setCompetitionApplicantTypes] = useState<
+    ApplicantTypes[]
+  >([]);
+  const [userOrganizations, setUserOrganizations] = useState<Organization[]>(
+    [],
+  );
 
   const token = user?.token || null;
+
+  // see what the accepted applicant types are for this particular competition
+  useEffect(() => {
+    setLoading(true);
+    clientFetchCompetition(competitionId)
+      .then((competition) => {
+        if (competition.open_to_applicants) {
+          return setCompetitionApplicantTypes(competition.open_to_applicants);
+        }
+        console.error("Unable to find competition applicant designation");
+      })
+      .catch((e) => {
+        console.error("Error fetching competition", e);
+      });
+  }, [competitionId]);
+
+  // see what organizations the user belongs to, in order to handle organzation or
+  // organization / individual competition types
+
+  useEffect(() => {
+    setLoading(true);
+    userOrganizationFetcher(token)
+      .then((organizations) => {
+        return setUserOrganizations(organizations);
+      })
+      .catch((e) => {
+        console.error("Error fetching user organizations", e);
+      });
+  }, [token]);
 
   const handleSubmit = useCallback(() => {
     if (!token) {
@@ -120,6 +162,8 @@ const StartApplicationModal = ({
             modalRef={modalRef}
             validationError={validationError}
             selectedOrganization={selectedOrganization}
+            applicantTypes={competitionApplicantTypes}
+            organizations={userOrganizations}
           />
         </SimplerModal>
       ) : (
