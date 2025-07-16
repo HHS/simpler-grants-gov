@@ -187,6 +187,18 @@ def _build_competitions(db_session: db.Session) -> None:
     _build_simple_competition()
     _build_pilot_competition(db_session)
 
+def _build_user_organizations(db_session: db.Session) -> None:
+    logger.info("Creating user organizations")
+
+    batch_size = 2
+
+    users = factories.UserFactory.create_batch(size=batch_size)
+    organizations = factories.OrganizationFactory.create_batch(size=batch_size)
+    for index in range(batch_size):
+      user = users[index - 1]
+      organization = organizations[index - 1]
+      factories.OrganizationUserFactory.create(user=user, organization=organization)
+
 
 @click.command()
 @click.option(
@@ -217,4 +229,5 @@ def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
             _build_agencies(db_session)
             _build_competitions(db_session)
             _build_user_saved_opportunities_and_searches(db_session)
+            _build_user_organizations(db_session)
             db_session.commit()
