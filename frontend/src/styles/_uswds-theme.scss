@@ -101,6 +101,9 @@ in the form $setting: value,
   $theme-text-measure-narrow: 4,
   $theme-text-measure: 6,
   $theme-text-measure-wide: none,
+  $text-align-settings: (
+    responsive: "true",
+  ),
 
   // Breadcrumbs
   $theme-breadcrumb-font-size: 3xs,
