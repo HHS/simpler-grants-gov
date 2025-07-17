@@ -1237,4 +1237,11 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
+  BookmarkBanner: {
+    title: "Bookmark this page",
+    message:
+      "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
+    technicalSupportMessage:
+      "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
+  },
 };
