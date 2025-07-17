@@ -49,6 +49,9 @@ const StartApplicationModal = ({
 
   const token = user?.token || null;
 
+  // TODO: these fetches should likely only happen if the user opens the modal, or if user is logged in so as not to overfetch
+  // We could either move them around or just gate off of the presence of the token
+
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
     setLoading(true);
@@ -66,10 +69,12 @@ const StartApplicationModal = ({
 
   // see what organizations the user belongs to, in order to handle organzation or
   // organization / individual competition types
-
   useEffect(() => {
+    if (!token) {
+      return;
+    }
     setLoading(true);
-    userOrganizationFetcher(token)
+    userOrganizationFetcher()
       .then((organizations) => {
         return setUserOrganizations(organizations);
       })
