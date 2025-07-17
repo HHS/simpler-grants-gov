@@ -32,7 +32,7 @@ class TestGetOpportunityList:
             method="POST",
             headers={},
             data=b"",
-            full_path="/",
+            full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
             api_name=SimplerSoapAPI.APPLICANTS,
         )
 

@@ -119,6 +119,12 @@ def bool_to_string(value: bool | None) -> str | None:
     return "true" if value else "false"
 
 
+def get_invalid_path_response() -> SOAPResponse:
+    return get_soap_response(
+        data=b"<html><body>No service was found.</body></html>", status_code=404
+    )
+
+
 def diff_soap_dicts(dict1: dict, dict2: dict) -> None:
     # TODO: See https://github.com/HHS/simpler-grants-gov/issues/5224
     pass
