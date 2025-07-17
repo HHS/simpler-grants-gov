@@ -60,7 +60,6 @@ const ApplyForm = ({
     fields = buildFormTreeRecursive({
       errors: saved ? validationWarnings : null,
       formData: formObject,
-      // onChangeFormData,
       schema: formSchema,
       uiSchema,
     });
