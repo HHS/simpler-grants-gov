@@ -9,7 +9,6 @@ import {
 } from "@trussworks/react-uswds";
 
 export const StartApplicationOrganizationInput = ({
-  error = "",
   onOrganizationChange,
   validationError = "",
   organizations,
@@ -18,7 +17,6 @@ export const StartApplicationOrganizationInput = ({
   onOrganizationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   organizations: Organization[];
   selectedOrganization?: string; // organization_id
-  error?: string;
   validationError?: string;
 }) => {
   const t = useTranslations(
@@ -35,9 +33,9 @@ export const StartApplicationOrganizationInput = ({
         {t("label")}
       </Label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <Select
+        validationStatus={validationError ? "error" : undefined}
         id="create-application-organization-select"
         name="application-orgnization"
         onChange={onOrganizationChange}
@@ -61,11 +59,9 @@ export const StartApplicationOrganizationInput = ({
 };
 
 export const StartApplicationNameInput = ({
-  error = "",
   onNameChange,
   validationError = "",
 }: {
-  error?: string;
   onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   validationError?: string;
 }) => {
@@ -84,9 +80,9 @@ export const StartApplicationNameInput = ({
         <div>{t("description")}</div>
       </Label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <TextInput
+        validationStatus={validationError ? "error" : undefined}
         type="text"
         name="application-name"
         id="application-name"
