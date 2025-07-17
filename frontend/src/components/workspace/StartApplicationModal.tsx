@@ -23,6 +23,20 @@ type StartApplicationModalProps = {
   opportunityTitle: string;
 };
 
+const getTitleTextKey = (
+  token: string | null,
+  organizations: Organization[],
+  applicantTypes: ApplicantTypes[],
+) => {
+  if (!token) {
+    return "login";
+  }
+  if (!organizations.length && !applicantTypes.includes("individual")) {
+    return "ineligibleTitle";
+  }
+  return "title";
+};
+
 const StartApplicationModal = ({
   competitionId,
   opportunityTitle,
@@ -32,7 +46,7 @@ const StartApplicationModal = ({
   const router = useRouter();
   const { clientFetch } = useClientFetch();
 
-  const t = useTranslations("OpportunityListing");
+  const t = useTranslations("OpportunityListing.startApplicationModal");
   const headerTranslation = useTranslations("HeaderLoginModal");
 
   const [validationError, setValidationError] = useState<string>();
@@ -97,9 +111,7 @@ const StartApplicationModal = ({
       setValidationError(undefined);
     }
     if (!savedApplicationName) {
-      setValidationError(
-        t("startApplicationModal.fields.name.validationError"),
-      );
+      setValidationError(t("fields.name.validationError"));
       return;
     }
     setLoading(true);
@@ -111,9 +123,9 @@ const StartApplicationModal = ({
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.cause === "401") {
-          setError(t("startApplicationModal.loggedOut"));
+          setError(t("loggedOut"));
         } else {
-          setError(t("startApplicationModal.error"));
+          setError(t("error"));
         }
         console.error(error);
       });
@@ -150,13 +162,15 @@ const StartApplicationModal = ({
       {token ? (
         <SimplerModal
           modalRef={modalRef}
-          className="text-wrap"
+          className="text-wrap maxw-tablet-lg font-sans-xs"
           modalId={"start-application"}
-          titleText={
-            token
-              ? t("startApplicationModal.title")
-              : t("startApplicationModal.login")
-          }
+          titleText={t(
+            getTitleTextKey(
+              token,
+              userOrganizations,
+              competitionApplicantTypes,
+            ),
+          )}
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSubmit();
           }}
