@@ -110,7 +110,19 @@ const ApplicationStartDescription = ({
       <p>{t("organizationIntro")}</p>
       <ul>
         <li>{t("poc")}</li>
-        <li>{t("uei")}</li>
+        <li>
+          {t.rich("uei", {
+            link: (chunk) => (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://sam.gov"
+              >
+                {chunk}
+              </a>
+            ),
+          })}
+        </li>
       </ul>
       <p>
         {t.rich("goToGrants", {
