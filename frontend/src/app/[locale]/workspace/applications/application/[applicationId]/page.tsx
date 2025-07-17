@@ -14,7 +14,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
-import BookmarkBanner from "src/components/BookmarkBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +78,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
 
   return (
     <>
-      <BookmarkBanner />
       <GridContainer>
         <h1>{t("title")}</h1>
         <ApplicationContainer
