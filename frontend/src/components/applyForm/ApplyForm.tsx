@@ -5,7 +5,7 @@ import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
 import { useTranslations } from "next-intl";
-import { JSX, useActionState, useMemo, useRef } from "react";
+import { JSX, useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -51,7 +51,6 @@ const ApplyForm = ({
   });
 
   const { formData, error, saved } = formState;
-  const formRef = useRef<HTMLFormElement>(null);
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);

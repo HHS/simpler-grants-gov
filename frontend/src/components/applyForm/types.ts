@@ -54,10 +54,8 @@ export type WidgetTypes =
   | "TextArea"
   | "Radio"
   | "Select"
-  | "Budget424a"
   | "Budget424aSectionA"
-    | "Budget424aSectionB"
-
+  | "Budget424aSectionB"
   | "Budget424aTotalBudgetSummary";
 
 export type UiSchemaField = {

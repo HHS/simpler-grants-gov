@@ -18,7 +18,7 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
-import Budget424a from "./widgets/budget/Budget424a";
+
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import Budget424aTotalBudgetSummary from "./widgets/budget/Budget424aTotalBudgetSummary";
@@ -184,12 +184,10 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Budget424a: (widgetProps: UswdsWidgetProps) => Budget424a(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionB(widgetProps),
-
   Budget424aTotalBudgetSummary: (widgetProps: UswdsWidgetProps) =>
     Budget424aTotalBudgetSummary(widgetProps),
 };
