@@ -2,6 +2,7 @@
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
+import { get } from "lodash";
 
 import { Table } from "@trussworks/react-uswds";
 
@@ -39,7 +40,6 @@ function Budget424aSectionA<
   };
 
   const errors = rawErrors as [Record<string, unknown>];
-  const tableValues = value as Record<string, unknown>[];
 
   // TODO: use json pointer / ref for this
   const activityTitleSchema = schemaItems.properties.activity_title;
@@ -89,11 +89,7 @@ function Budget424aSectionA<
                     row,
                     key: "activity_title",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "activity_title",
-                  })}
+                  value={get(value, `[${row}].activity_title`)}
                 />
               </td>
               <td key={`${id}_row_${row}_assistance_listing_number`}>
@@ -105,11 +101,8 @@ function Budget424aSectionA<
                     row,
                     key: "assistance_listing_number",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "assistance_listing_number",
-                  })}
+                  value={get(value, `[${row}].assistance_listing_number`)}
+
                 />
               </td>
               <td
@@ -123,11 +116,7 @@ function Budget424aSectionA<
                     row,
                     key: "federal_estimated_unobligated_amount",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "federal_estimated_unobligated_amount",
-                  })}
+                  value={get(value, `[${row}].federal_estimated_unobligated_amount`)}
                 />
               </td>
               <td
@@ -141,11 +130,7 @@ function Budget424aSectionA<
                     row,
                     key: "non_federal_estimated_unobligated_amount",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "non_federal_estimated_unobligated_amount",
-                  })}
+                  value={get(value, `[${row}].non_federal_estimated_unobligated_amount`)}
                 />
               </td>
               <td key={`${id}_row_${row}_federal_new_or_revised_amount`}>
@@ -157,11 +142,7 @@ function Budget424aSectionA<
                     row,
                     key: "federal_new_or_revised_amount",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "federal_new_or_revised_amount",
-                  })}
+                  value={get(value, `[${row}].federal_new_or_revised_amount`)}
                 />
               </td>
               <td key={`${id}_row_${row}_non_federal_new_or_revised_amount`}>
@@ -173,11 +154,7 @@ function Budget424aSectionA<
                     row,
                     key: "non_federal_new_or_revised_amount",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "non_federal_new_or_revised_amount",
-                  })}
+                  value={get(value, `[${row}].non_federal_new_or_revised_amount`)}
                 />
               </td>
               <td key={`${id}_row_${row}_total_amount`}>
@@ -189,11 +166,7 @@ function Budget424aSectionA<
                     row,
                     key: "total_amount",
                   })}
-                  value={getValue({
-                    tableValues,
-                    row,
-                    key: "total_amount",
-                  })}
+                  value={get(value, `[${row}].total_amount`)}
                 />
               </td>
             </tr>
@@ -203,26 +176,6 @@ function Budget424aSectionA<
     </div>
   );
 }
-
-export const getValue = <T extends Record<string, unknown>>({
-  key,
-  row,
-  tableValues,
-}: {
-  key: string;
-  row: number;
-  tableValues: Array<T>;
-}): string | number => {
-  if (
-    tableValues.length > 0 &&
-    tableValues.length > row &&
-    tableValues[row] &&
-    (typeof tableValues[row][key] === "string" || typeof tableValues[row][key] === "number")
-  ) {
-    return tableValues[row][key];
-  }
-  return "";
-};
 
 export const getErrors = ({
   key,
