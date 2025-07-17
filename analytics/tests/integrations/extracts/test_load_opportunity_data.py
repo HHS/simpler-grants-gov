@@ -89,11 +89,11 @@ def test_extract_copy_opportunity_data(
         # test table records were inserted for each table
         assert lk_opp_sts_result.fetchone()[0] == 4
         assert lk_opp_ctgry_result.fetchone()[0] == 5
-        assert opp_result.fetchone()[0] == 37
-        assert opp_smry_result.fetchone()[0] == 32
-        assert curr_opp_smry_result.fetchone()[0] == 32
-        assert user_save_opp_result.fetchone()[0] == 8
-        assert user_save_search_result.fetchone()[0] == 4
+        assert opp_result.fetchone()[0] == 144
+        assert opp_smry_result.fetchone()[0] == 139
+        assert curr_opp_smry_result.fetchone()[0] == 139
+        assert user_save_opp_result.fetchone()[0] == 25
+        assert user_save_search_result.fetchone()[0] == 25
 
     # running again to verify that it does not break on the next call
     extract_copy_opportunity_data()
