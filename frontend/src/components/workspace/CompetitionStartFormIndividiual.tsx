@@ -33,7 +33,7 @@ const ApplicationStartDescription = ({
   if (!organizations.length && !applicantTypes.includes("individual")) {
     return (
       <div>
-        <span>{t("organizationIntro")}</span>
+        <p>{t("organizationIntro")}</p>
         <ul>
           <li>{t("applyingForOrg")}</li>
           <li>{t("poc")}</li>
@@ -51,7 +51,7 @@ const ApplicationStartDescription = ({
             })}
           </li>
         </ul>
-        <div>
+        <p>
           {t.rich("ineligibleGoToGrants", {
             link: (chunk) => (
               <a
@@ -63,7 +63,7 @@ const ApplicationStartDescription = ({
               </a>
             ),
           })}
-        </div>
+        </p>
       </div>
     );
   }
@@ -71,7 +71,7 @@ const ApplicationStartDescription = ({
   if (applicantTypes.length === 2) {
     return (
       <div>
-        <div>
+        <p>
           {t.rich("pilotGoToGrants", {
             link: (chunk) => (
               <a
@@ -83,8 +83,8 @@ const ApplicationStartDescription = ({
               </a>
             ),
           })}
-        </div>
-        <span>{t("organizationIndividualIntro")}</span>
+        </p>
+        <p>{t("organizationIndividualIntro")}</p>
         <ul>
           <li>{t("poc")}</li>
           <li>
@@ -107,12 +107,12 @@ const ApplicationStartDescription = ({
   // organization
   return (
     <div>
-      <span>{t("organizationIntro")}</span>
+      <p>{t("organizationIntro")}</p>
       <ul>
         <li>{t("poc")}</li>
         <li>{t("uei")}</li>
       </ul>
-      <div>
+      <p>
         {t.rich("goToGrants", {
           link: (chunk) => (
             <a
@@ -124,7 +124,7 @@ const ApplicationStartDescription = ({
             </a>
           ),
         })}
-      </div>
+      </p>
     </div>
   );
 };
@@ -217,6 +217,39 @@ export const CreateApplicationNameInput = ({
   );
 };
 
+const IneligibleApplicationStart = ({
+  organizations,
+  applicantTypes,
+  modalRef,
+  onClose,
+  cancelText,
+}: {
+  organizations: Organization[];
+  applicantTypes: ApplicantTypes[];
+  modalRef: RefObject<ModalRef | null>;
+  onClose: () => void;
+  cancelText: string;
+}) => {
+  return (
+    <div>
+      <ApplicationStartDescription
+        organizations={organizations}
+        applicantTypes={applicantTypes}
+      />
+      <ModalFooter>
+        <ModalToggleButton
+          modalRef={modalRef}
+          closer
+          className="padding-105 text-center"
+          onClick={onClose}
+        >
+          {cancelText}
+        </ModalToggleButton>
+      </ModalFooter>
+    </div>
+  );
+};
+
 export const CompetitionStartForm = ({
   opportunityTitle,
   error = "",
@@ -246,6 +279,17 @@ export const CompetitionStartForm = ({
 }) => {
   const t = useTranslations("OpportunityListing.startApplicationModal");
 
+  if (!organizations.length && !applicantTypes.includes("individual")) {
+    return (
+      <IneligibleApplicationStart
+        modalRef={modalRef}
+        cancelText={t("cancelButtonText")}
+        onClose={onClose}
+        organizations={organizations}
+        applicantTypes={applicantTypes}
+      />
+    );
+  }
   return (
     <div>
       <ApplicationStartDescription
@@ -271,26 +315,26 @@ export const CompetitionStartForm = ({
           validationError={validationError}
           onNameChange={onNameChange}
         />
-        <ModalFooter>
-          <Button
-            onClick={onSubmit}
-            type="button"
-            data-testid="competition-start-individual-save"
-            disabled={!!loading}
-          >
-            {loading ? "Loading..." : t("saveButtonText")}
-          </Button>
-          <ModalToggleButton
-            modalRef={modalRef}
-            closer
-            unstyled
-            className="padding-105 text-center"
-            onClick={onClose}
-          >
-            {t("cancelButtonText")}
-          </ModalToggleButton>
-        </ModalFooter>
       </FormGroup>
+      <ModalFooter>
+        <Button
+          onClick={onSubmit}
+          type="button"
+          data-testid="competition-start-individual-save"
+          disabled={!!loading}
+        >
+          {loading ? "Loading..." : t("saveButtonText")}
+        </Button>
+        <ModalToggleButton
+          modalRef={modalRef}
+          closer
+          unstyled
+          className="padding-105 text-center"
+          onClick={onClose}
+        >
+          {t("cancelButtonText")}
+        </ModalToggleButton>
+      </ModalFooter>
     </div>
   );
 };
