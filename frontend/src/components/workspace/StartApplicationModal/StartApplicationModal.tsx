@@ -1,3 +1,4 @@
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { Organization } from "src/types/UserTypes";
@@ -41,6 +42,9 @@ export const StartApplicationModal = ({
 }) => {
   const t = useTranslations("OpportunityListing.startApplicationModal");
   const router = useRouter();
+  const { clientFetch } = useClientFetch<{ applicationId: string }>(
+    "Error starting application",
+  );
 
   const [nameValidationError, setNameValidationError] = useState<string>();
   const [orgValidationError, setOrgValidationError] = useState<string>();
@@ -72,14 +76,14 @@ export const StartApplicationModal = ({
       return;
     }
     setUpdating(true);
-    startApplication(
-      // eslint-disable-next-line
-      savedApplicationName!,
-      competitionId,
-      selectedOrganization,
-      // eslint-disable-next-line
-      token!,
-    )
+    clientFetch("/api/applications/start", {
+      method: "POST",
+      body: JSON.stringify({
+        applicationName: savedApplicationName,
+        competitionId,
+        organization: selectedOrganization,
+      }),
+    })
       .then((data) => {
         const { applicationId } = data;
         router.push(`/workspace/applications/application/${applicationId}`);
@@ -101,9 +105,9 @@ export const StartApplicationModal = ({
     router,
     savedApplicationName,
     t,
-    token,
     selectedOrganization,
     validateSubmission,
+    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
