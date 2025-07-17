@@ -75,7 +75,6 @@ const ApplyForm = ({
   return (
     <>
       <form
-        ref={formRef}
         className="flex-1 margin-top-2"
         action={formAction}
         // turns off html5 validation so all error displays are consistent
