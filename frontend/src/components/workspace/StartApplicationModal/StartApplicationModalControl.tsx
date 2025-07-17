@@ -1,9 +1,11 @@
 "use client";
 
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
-import { clientFetchCompetition } from "src/services/fetch/fetchers/clientCompetitionsFetcher";
-import { userOrganizationFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
-import { ApplicantTypes } from "src/types/competitionsResponseTypes";
+import {
+  ApplicantTypes,
+  Competition,
+} from "src/types/competitionsResponseTypes";
 import { Organization } from "src/types/UserTypes";
 
 import { useTranslations } from "next-intl";
@@ -11,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
+import Spinner from "src/components/Spinner";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
 
@@ -26,9 +29,16 @@ export const StartApplicationModalControl = ({
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
 
+  const { clientFetch: fetchUserOrganizations } = useClientFetch<
+    Organization[]
+  >("Error fetching user organizations");
+  const { clientFetch: fetchCompetition } = useClientFetch<Competition>(
+    "Error fetching competition",
+  );
   const t = useTranslations("OpportunityListing.startApplicationModal");
   const headerTranslation = useTranslations("HeaderLoginModal");
-  const [loading, setLoading] = useState<boolean>();
+  const [organizationsLoading, setOrganizationsLoading] = useState<boolean>();
+  const [competitionsLoading, setCompetitionLoading] = useState<boolean>();
   const [competitionApplicantTypes, setCompetitionApplicantTypes] = useState<
     ApplicantTypes[]
   >([]);
@@ -43,8 +53,9 @@ export const StartApplicationModalControl = ({
 
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
-    setLoading(true);
-    clientFetchCompetition(competitionId)
+    setCompetitionLoading(true);
+    // clientFetchCompetition(competitionId)
+    fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
         if (competition.open_to_applicants) {
           return setCompetitionApplicantTypes(competition.open_to_applicants);
@@ -55,9 +66,9 @@ export const StartApplicationModalControl = ({
         console.error("Error fetching competition", e);
       })
       .finally(() => {
-        setLoading(false);
+        setCompetitionLoading(false);
       });
-  }, [competitionId]);
+  }, [competitionId, fetchCompetition]);
 
   // see what organizations the user belongs to, in order to handle organzation or
   // organization / individual competition types
@@ -65,8 +76,10 @@ export const StartApplicationModalControl = ({
     if (!token) {
       return;
     }
-    setLoading(true);
-    userOrganizationFetcher()
+    setOrganizationsLoading(true);
+    fetchUserOrganizations("/api/user/organizations", {
+      cache: "no-store",
+    })
       .then((organizations) => {
         return setUserOrganizations(organizations);
       })
@@ -74,9 +87,9 @@ export const StartApplicationModalControl = ({
         console.error("Error fetching user organizations", e);
       })
       .finally(() => {
-        setLoading(false);
+        setOrganizationsLoading(false);
       });
-  }, [token]);
+  }, [fetchUserOrganizations, token]);
 
   return (
     <div className="display-flex flex-align-start">
@@ -84,10 +97,19 @@ export const StartApplicationModalControl = ({
         modalRef={modalRef}
         data-testid="open-start-application-modal-button"
         opener
+        disabled={organizationsLoading || competitionsLoading}
         className="usa-button"
       >
-        <USWDSIcon name="add" />
-        {t("startApplicationButtonText")}
+        {organizationsLoading || competitionsLoading ? (
+          <>
+            <Spinner className="height-105 width-105 button-icon-large" />{" "}
+            {"Loading"}
+          </>
+        ) : (
+          <>
+            <USWDSIcon name="add" /> {t("startApplicationButtonText")}
+          </>
+        )}
       </ModalToggleButton>
       {token ? (
         <StartApplicationModal
@@ -96,7 +118,7 @@ export const StartApplicationModalControl = ({
           modalRef={modalRef}
           applicantTypes={competitionApplicantTypes}
           organizations={userOrganizations}
-          loading={loading || false}
+          loading={organizationsLoading || competitionsLoading || false}
           competitionId={competitionId}
         />
       ) : (
