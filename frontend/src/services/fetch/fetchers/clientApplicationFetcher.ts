@@ -16,7 +16,7 @@ export const startApplication = async (
   token?: string,
 ): Promise<ClientApplicationStartResponse> => {
   if (!token) {
-    throw new Error(`Error starting application`);
+    throw new Error("Error starting application, not logged in");
   }
   const res = await fetch("/api/applications/start", {
     method: "POST",
