@@ -1,6 +1,5 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { clientFetchCompetition } from "src/services/fetch/fetchers/clientCompetitionsFetcher";
 import { userOrganizationFetcher } from "src/services/fetch/fetchers/clientUserFetcher";

@@ -138,7 +138,7 @@ export const messages = {
           default: "-Select-",
           notListed: "My organization isn't listed",
           validationError:
-            "Select an organization. If yours isn't listed, you'll need toa pply through Grants.gov.",
+            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
         },
       },
       description: {

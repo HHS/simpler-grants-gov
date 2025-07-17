@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useState } from "react";
 import {
   Button,
+  ErrorMessage,
   FormGroup,
   ModalFooter,
   ModalRef,
@@ -14,51 +15,12 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
+import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import {
   StartApplicationNameInput,
   StartApplicationOrganizationInput,
 } from "./StartApplicationInputs";
-
-const IneligibleApplicationStart = ({
-  organizations,
-  applicantTypes,
-  modalRef,
-  onClose,
-  cancelText,
-}: {
-  organizations: Organization[];
-  applicantTypes: ApplicantTypes[];
-  modalRef: RefObject<ModalRef | null>;
-  onClose: () => void;
-  cancelText: string;
-}) => {
-  const t = useTranslations("OpportunityListing.startApplicationModal");
-  return (
-    <SimplerModal
-      modalRef={modalRef}
-      className="text-wrap maxw-tablet-lg font-sans-xs"
-      modalId="start-application"
-      titleText={t("ineligibleTitle")}
-      onClose={onClose}
-    >
-      <StartApplicationDescription
-        organizations={organizations}
-        applicantTypes={applicantTypes}
-      />
-      <ModalFooter>
-        <ModalToggleButton
-          modalRef={modalRef}
-          closer
-          className="padding-105 text-center"
-          onClick={onClose}
-        >
-          {cancelText}
-        </ModalToggleButton>
-      </ModalFooter>
-    </SimplerModal>
-  );
-};
 
 export const StartApplicationModal = ({
   opportunityTitle,
@@ -80,29 +42,43 @@ export const StartApplicationModal = ({
   const t = useTranslations("OpportunityListing.startApplicationModal");
   const router = useRouter();
 
-  const [validationError, setValidationError] = useState<string>();
+  const [nameValidationError, setNameValidationError] = useState<string>();
+  const [orgValidationError, setOrgValidationError] = useState<string>();
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
   const [updating, setUpdating] = useState<boolean>();
 
-  const handleSubmit = useCallback(() => {
-    if (!token) {
-      return;
-    }
-    if (validationError) {
-      setValidationError(undefined);
-    }
+  const validateSubmission = useCallback((): boolean => {
+    let valid = !!token;
+
+    setOrgValidationError("");
+    setNameValidationError("");
+
     if (!savedApplicationName) {
-      setValidationError(t("fields.name.validationError"));
+      setNameValidationError(t("fields.name.validationError"));
+      valid = false;
+    }
+    if (!applicantTypes.includes("individual") && !selectedOrganization) {
+      setOrgValidationError(t("fields.organizationSelect.validationError"));
+      valid = false;
+    }
+    return valid;
+  }, [token, savedApplicationName, applicantTypes, selectedOrganization, t]);
+
+  const handleSubmit = useCallback(() => {
+    const valid = validateSubmission();
+    if (!valid) {
       return;
     }
     setUpdating(true);
     startApplication(
-      savedApplicationName,
+      // eslint-disable-next-line
+      savedApplicationName!,
       competitionId,
       selectedOrganization,
-      token,
+      // eslint-disable-next-line
+      token!,
     )
       .then((data) => {
         const { applicationId } = data;
@@ -126,14 +102,15 @@ export const StartApplicationModal = ({
     savedApplicationName,
     t,
     token,
-    validationError,
     selectedOrganization,
+    validateSubmission,
   ]);
 
   const onClose = useCallback(() => {
     setError("");
     setUpdating(false);
-    setValidationError(undefined);
+    setNameValidationError("");
+    setOrgValidationError("");
     setSavedApplicationName("");
   }, []);
 
@@ -178,21 +155,23 @@ export const StartApplicationModal = ({
         {t("applyingFor")} {opportunityTitle}
       </p>
       <p className="font-sans-3xs">{t("requiredText")}</p>
-      <FormGroup error={!!validationError} className="margin-top-1">
+      <FormGroup
+        error={!!(nameValidationError || orgValidationError || error)}
+        className="margin-top-1"
+      >
         {applicantTypes.includes("organization") && (
           <StartApplicationOrganizationInput
-            error={error}
             onOrganizationChange={onOrganizationChange}
-            validationError={validationError}
+            validationError={orgValidationError}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
           />
         )}
         <StartApplicationNameInput
-          error={error}
-          validationError={validationError}
+          validationError={nameValidationError}
           onNameChange={onNameChange}
         />
+        {error && <ErrorMessage>{error}</ErrorMessage>}
       </FormGroup>
       <ModalFooter>
         <Button
