@@ -4,7 +4,6 @@ import {
   ApplicationSubmitApiResponse,
   ApplicationSubmitResponse,
 } from "src/types/applicationResponseTypes";
-import { Organization } from "src/types/UserTypes";
 
 interface ClientApplicationStartResponse {
   message: string;

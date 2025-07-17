@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import StartApplicationModal from "src/components/workspace/StartApplicationModal";
+import StartApplicationModal from "src/components/workspace/StartApplicationModal/StartApplicationModal";
 
 const mockUseUser = jest.fn(() => ({
   user: {
