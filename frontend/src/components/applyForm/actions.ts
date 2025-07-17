@@ -2,7 +2,6 @@
 
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
-import { formDataToJson } from "formdata2json";
 import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
@@ -45,12 +44,9 @@ export async function handleFormAction(
       saved: true,
     };
   }
-  console.log("fd", formData);
-  console.log("fs", formSchema);
   const applicationFormData =
     shapeFormData<ApplicationResponseDetail>(formData);
 
-  console.log("afd", typeof applicationFormData, applicationFormData);
 
   const saveSuccess = await handleSave(
     applicationFormData,
