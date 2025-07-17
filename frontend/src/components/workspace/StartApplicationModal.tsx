@@ -64,6 +64,9 @@ const StartApplicationModal = ({
       })
       .catch((e) => {
         console.error("Error fetching competition", e);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [competitionId]);
 
@@ -80,6 +83,9 @@ const StartApplicationModal = ({
       })
       .catch((e) => {
         console.error("Error fetching user organizations", e);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [token]);
 

@@ -141,11 +141,6 @@ export const CompetitionStartForm = ({
         <p className="font-sans-3xs">
           {t("startApplicationModal.requiredText")}
         </p>
-        <CreateApplicationNameInput
-          error={error}
-          validationError={validationError}
-          onNameChange={onNameChange}
-        />
         {applicantTypes.includes("organization") && (
           <CreateApplicationOrganizationInput
             error={error}
@@ -155,6 +150,11 @@ export const CompetitionStartForm = ({
             selectedOrganization={selectedOrganization}
           />
         )}
+        <CreateApplicationNameInput
+          error={error}
+          validationError={validationError}
+          onNameChange={onNameChange}
+        />
         <ModalFooter>
           <Button
             onClick={onSubmit}
@@ -162,7 +162,7 @@ export const CompetitionStartForm = ({
             data-testid="competition-start-individual-save"
             disabled={!!loading}
           >
-            {loading ? "loading..." : t("startApplicationModal.saveButtonText")}
+            {loading ? "Loading..." : t("startApplicationModal.saveButtonText")}
           </Button>
           <ModalToggleButton
             modalRef={modalRef}
