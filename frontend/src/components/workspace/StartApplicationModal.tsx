@@ -128,6 +128,9 @@ const StartApplicationModal = ({
           setError(t("error"));
         }
         console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [competitionId, router, savedApplicationName, t, token, validationError]);
 
