@@ -4,6 +4,7 @@ import {
   ApplicationSubmitApiResponse,
   ApplicationSubmitResponse,
 } from "src/types/applicationResponseTypes";
+import { Organization } from "src/types/UserTypes";
 
 interface ClientApplicationStartResponse {
   message: string;
@@ -13,6 +14,7 @@ interface ClientApplicationStartResponse {
 export const startApplication = async (
   applicationName: string,
   competitionId: string,
+  organization?: string,
   token?: string,
 ): Promise<ClientApplicationStartResponse> => {
   if (!token) {
@@ -23,6 +25,7 @@ export const startApplication = async (
     body: JSON.stringify({
       applicationName,
       competitionId,
+      organization,
     }),
   });
 
