@@ -44,10 +44,22 @@ export const mockMessages = {
       timeline: {
         title: "timeline test title",
         contentItems: [
-          [{date: "Smarch 13", title: "test title 1", content: "test content 1"}],
-          [{date: "Smarch 14", title: "test title 2", content: "test content 2"}],
+          [
+            {
+              date: "Smarch 13",
+              title: "test title 1",
+              content: "test content 1",
+            },
+          ],
+          [
+            {
+              date: "Smarch 14",
+              title: "test title 2",
+              content: "test content 2",
+            },
+          ],
         ],
-      }
+      },
     },
   },
   Homepage: {
