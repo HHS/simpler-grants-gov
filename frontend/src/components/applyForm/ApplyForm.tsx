@@ -5,7 +5,7 @@ import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 
 import { useTranslations } from "next-intl";
-import { JSX, useActionState, useMemo } from "react";
+import { JSX, useActionState, useMemo, useRef } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -51,6 +51,7 @@ const ApplyForm = ({
   });
 
   const { formData, error, saved } = formState;
+  const formRef = useRef<HTMLFormElement>(null);
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
@@ -59,10 +60,12 @@ const ApplyForm = ({
     fields = buildFormTreeRecursive({
       errors: saved ? validationWarnings : null,
       formData: formObject,
+      // onChangeFormData,
       schema: formSchema,
       uiSchema,
     });
   } catch (e) {
+    console.error(e);
     return (
       <Alert type="error" heading="Error" headingLevel="h4">
         Error rendering form
@@ -73,6 +76,7 @@ const ApplyForm = ({
   return (
     <>
       <form
+        ref={formRef}
         className="flex-1 margin-top-2"
         action={formAction}
         // turns off html5 validation so all error displays are consistent

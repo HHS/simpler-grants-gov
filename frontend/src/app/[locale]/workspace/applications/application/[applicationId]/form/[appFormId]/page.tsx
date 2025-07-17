@@ -106,7 +106,7 @@ async function FormPage({ params }: formPageProps) {
       form_ui_schema,
       schemaErrors,
     );
-    return <TopLevelError />;
+    // return <TopLevelError />;
   }
 
   let formSchema = {};

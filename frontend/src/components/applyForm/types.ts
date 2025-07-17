@@ -48,19 +48,30 @@ export type FormValidationWarning = {
   value: string;
 };
 
-export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+export type WidgetTypes =
+  | "Checkbox"
+  | "Text"
+  | "TextArea"
+  | "Radio"
+  | "Select"
+  | "Budget424a"
+  | "Budget424aSectionA"
+    | "Budget424aSectionB"
+
+  | "Budget424aTotalBudgetSummary";
 
 export type UiSchemaField = {
-  type: "field";
+  type: "field" | "multiField";
   widget?: WidgetTypes;
+  name?: string;
 } & (
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema: SchemaField;
     }
 );
@@ -94,7 +105,7 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | unknown;
+  value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
   schema: RJSFSchema;
@@ -105,7 +116,7 @@ export interface UswdsWidgetProps<
   hideError?: boolean;
   autofocus?: boolean;
   placeholder?: string;
-  options: NonNullable<UIOptionsType<T, S, F>> & {
+  options?: NonNullable<UIOptionsType<T, S, F>> & {
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
@@ -113,7 +124,7 @@ export interface UswdsWidgetProps<
   };
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[] | undefined;
+  rawErrors?: string[] | [Record<string, unknown>] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;

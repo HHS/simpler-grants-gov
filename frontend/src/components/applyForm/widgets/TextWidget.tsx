@@ -46,6 +46,7 @@ function TextWidget<
     type,
     examples,
     default: defaultValue,
+    pattern,
   } = schema as S;
 
   let inputValue: string | number | undefined;
@@ -97,7 +98,9 @@ function TextWidget<
         description={description}
       />
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+        <ErrorMessage id={`error-for-${id}`}>
+          {String(rawErrors[0])}
+        </ErrorMessage>
       )}
       <TextInput
         data-testid={id}
@@ -119,6 +122,7 @@ function TextWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         validationStatus={error ? "error" : undefined}
+        pattern={pattern || undefined}
       />
       {Array.isArray(examples) && (
         <datalist
