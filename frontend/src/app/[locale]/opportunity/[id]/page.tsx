@@ -8,7 +8,7 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -109,6 +109,13 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     }
     throw error;
   }
+  if (id !== opportunityData.opportunity_id) {
+    redirect(
+      `/opportunity/${opportunityData.opportunity_id}`,
+      RedirectType.push,
+    );
+  }
+
   opportunityData.summary = opportunityData?.summary
     ? opportunityData.summary
     : emptySummary();
