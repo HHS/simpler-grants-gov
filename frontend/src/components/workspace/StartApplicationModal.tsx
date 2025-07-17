@@ -115,7 +115,12 @@ const StartApplicationModal = ({
       return;
     }
     setLoading(true);
-    startApplication(savedApplicationName, competitionId, token)
+    startApplication(
+      savedApplicationName,
+      competitionId,
+      selectedOrganization,
+      token,
+    )
       .then((data) => {
         const { applicationId } = data;
         router.push(`/workspace/applications/application/${applicationId}`);
