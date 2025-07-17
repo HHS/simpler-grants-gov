@@ -889,6 +889,29 @@ export const messages = {
           },
         ],
       },
+      timeline: {
+        title: "Key milestones",
+        contentItems: [
+          {
+            date: "Summer 2025",
+            title: "Simpler search, by default",
+            content:
+              "<p>Our easier-to-use search experience will become the default way to discover funding opportunities on Grants.gov. It’s built to deliver stronger results with less fuss.</p><p><link-search>Try the new search now</link-search>.</p>",
+          },
+          {
+            date: "Fall 2025",
+            title: "Piloting a new way to apply",
+            content:
+              "<p>We'll test a simpler, more intuitive application workflow with a small group of partner agencies and funding opportunities.</p><p>Is your agency interested in participating? <link-form>Complete our interest form</link-form>, and we’ll be in touch.</p>",
+          },
+          {
+            date: "Next year",
+            title: "A better application experience for everyone",
+            content:
+              "<p>All applicants will have the option to use our simpler workflow when applying through Grants.gov. We’ll continue scaling up to support the needs of all agencies.</p>",
+          },
+        ],
+      },
     },
   },
   // These values are currently for form enum translation, values coming fromt the API
