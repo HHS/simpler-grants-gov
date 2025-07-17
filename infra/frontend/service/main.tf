@@ -58,7 +58,7 @@ locals {
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  network_config   = module.project_config.network_configs[local.environment_config.network_name]
   healthcheck_path = "/api/health"
 }
 
