@@ -69,7 +69,7 @@ class BaseSOAPClient:
         if simpler_response_schema is not None:
             proxy_response_dict = get_envelope_dict(
                 SOAPPayload(
-                    proxy_response.data.decode(),
+                    proxy_response.data.decode(errors="replace"),
                     force_list_attributes=self.operation_config.force_list_attributes,
                 ).to_dict(),
                 self.operation_config.response_operation_name,
