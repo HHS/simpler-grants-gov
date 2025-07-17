@@ -15,6 +15,120 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+const ApplicationStartDescription = ({
+  organizations,
+  applicantTypes,
+}: {
+  organizations: Organization[];
+  applicantTypes: ApplicantTypes[];
+}) => {
+  const t = useTranslations(
+    "OpportunityListing.startApplicationModal.description",
+  );
+  // individual
+  if (!applicantTypes.includes("organization")) {
+    return;
+  }
+  // ineligible
+  if (!organizations.length && !applicantTypes.includes("individual")) {
+    return (
+      <div>
+        <span>{t("organizationIntro")}</span>
+        <ul>
+          <li>{t("applyingForOrg")}</li>
+          <li>{t("poc")}</li>
+          <li>
+            {t.rich("uei", {
+              link: (chunk) => (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://sam.gov"
+                >
+                  {chunk}
+                </a>
+              ),
+            })}
+          </li>
+        </ul>
+        <div>
+          {t.rich("ineligibleGoToGrants", {
+            link: (chunk) => (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://grants.gov"
+              >
+                {chunk}
+              </a>
+            ),
+          })}
+        </div>
+      </div>
+    );
+  }
+  // individual or organization
+  if (applicantTypes.length === 2) {
+    return (
+      <div>
+        <div>
+          {t.rich("pilotGoToGrants", {
+            link: (chunk) => (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://grants.gov"
+              >
+                {chunk}
+              </a>
+            ),
+          })}
+        </div>
+        <span>{t("organizationIndividualIntro")}</span>
+        <ul>
+          <li>{t("poc")}</li>
+          <li>
+            {t.rich("uei", {
+              link: (chunk) => (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://sam.gov"
+                >
+                  {chunk}
+                </a>
+              ),
+            })}
+          </li>
+        </ul>
+      </div>
+    );
+  }
+  // organization
+  return (
+    <div>
+      <span>{t("organizationIntro")}</span>
+      <ul>
+        <li>{t("poc")}</li>
+        <li>{t("uei")}</li>
+      </ul>
+      <div>
+        {t.rich("goToGrants", {
+          link: (chunk) => (
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://grants.gov"
+            >
+              {chunk}
+            </a>
+          ),
+        })}
+      </div>
+    </div>
+  );
+};
+
 export const CreateApplicationOrganizationInput = ({
   error = "",
   onOrganizationChange,
@@ -130,17 +244,19 @@ export const CompetitionStartForm = ({
   applicantTypes: ApplicantTypes[];
   organizations: Organization[];
 }) => {
-  const t = useTranslations("OpportunityListing");
+  const t = useTranslations("OpportunityListing.startApplicationModal");
 
   return (
-    <div className="display-flex flex-align-start">
+    <div>
+      <ApplicationStartDescription
+        organizations={organizations}
+        applicantTypes={applicantTypes}
+      />
+      <p className="font-sans-sm text-bold" data-testid="opportunity-title">
+        {t("applyingFor")} {opportunityTitle}
+      </p>
+      <p className="font-sans-3xs">{t("requiredText")}</p>
       <FormGroup error={!!validationError} className="margin-top-1">
-        <p className="font-sans-sm" data-testid="opportunity-title">
-          {opportunityTitle}
-        </p>
-        <p className="font-sans-3xs">
-          {t("startApplicationModal.requiredText")}
-        </p>
         {applicantTypes.includes("organization") && (
           <CreateApplicationOrganizationInput
             error={error}
@@ -162,7 +278,7 @@ export const CompetitionStartForm = ({
             data-testid="competition-start-individual-save"
             disabled={!!loading}
           >
-            {loading ? "Loading..." : t("startApplicationModal.saveButtonText")}
+            {loading ? "Loading..." : t("saveButtonText")}
           </Button>
           <ModalToggleButton
             modalRef={modalRef}
@@ -171,7 +287,7 @@ export const CompetitionStartForm = ({
             className="padding-105 text-center"
             onClick={onClose}
           >
-            {t("startApplicationModal.cancelButtonText")}
+            {t("cancelButtonText")}
           </ModalToggleButton>
         </ModalFooter>
       </FormGroup>
