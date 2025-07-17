@@ -188,6 +188,6 @@ module "service" {
   healthcheck_path = local.healthcheck_path
   healthcheck_command = [
     "CMD-SHELL",
-    "wget --no-verbose --tries=1 --spider http://localhost:8000/${local.healthcheck_path} || exit 1"
+    "wget --no-verbose --tries=1 --spider http://localhost:8000${local.healthcheck_path} || exit 1"
   ]
 }
