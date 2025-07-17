@@ -1,6 +1,15 @@
 -- Migration to update opportunity tables to use UUID primary keys
 -- This migration handles foreign key constraints properly by dropping and recreating them
 
+-- Step 0: Truncate all table data to support column changes
+TRUNCATE TABLE lk_opportunity_status CASCADE;
+TRUNCATE TABLE lk_opportunity_category CASCADE;
+TRUNCATE TABLE opportunity CASCADE;
+TRUNCATE TABLE opportunity_summary CASCADE;
+TRUNCATE TABLE current_opportunity_summary CASCADE;
+TRUNCATE TABLE user_saved_opportunity CASCADE;
+TRUNCATE TABLE user_saved_search CASCADE;
+
 -- Step 1: Drop foreign key constraints that reference the tables we need to modify
 ALTER TABLE IF EXISTS current_opportunity_summary 
     DROP CONSTRAINT IF EXISTS current_opportunity_summary_opportunity_id_opportunity_fkey;
