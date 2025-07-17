@@ -79,7 +79,7 @@ class BaseSOAPClient:
                 # schema is not None above.
                 proxy_response_schema_data = self.get_simpler_soap_response_schema()(
                     **proxy_response_dict
-                )   # type: ignore[misc]
+                )  # type: ignore[misc]
             except ValidationError as e:
                 msg = "Could not parse proxy response into Simpler SOAP response pydantic schema."
                 error_fields = {err["loc"] for err in e.errors()}

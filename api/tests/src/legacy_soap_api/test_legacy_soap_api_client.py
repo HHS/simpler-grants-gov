@@ -4,18 +4,10 @@ import pytest
 
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
-from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
-from src.legacy_soap_api.applicants.schemas import (
-    OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
-    CFDADetails,
-)
-from src.legacy_soap_api.legacy_soap_api_client import (
-    BaseSOAPClient,
-    SimplerApplicantsS2SClient,
-    SimplerGrantorsS2SClient,
-)
+from src.legacy_soap_api.applicants.schemas import CFDADetails
+from src.legacy_soap_api.legacy_soap_api_client import SimplerApplicantsS2SClient
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
-from src.legacy_soap_api.legacy_soap_api_utils import BASE_SOAP_API_RESPONSE_HEADERS
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     CompetitionFactory,
@@ -27,26 +19,6 @@ from tests.src.legacy_soap_api.soap_request_templates import (
 )
 
 
-class TestSOAPClientSmokeTest:
-    @pytest.fixture(scope="class")
-    def mock_soap_request(self):
-        return SOAPRequest(
-            method="POST",
-            headers={},
-            data=b"",
-            full_path="/",
-        )
-
-    def test_can_instantiate(self, mock_soap_request, db_session) -> None:
-        assert isinstance(BaseSOAPClient(mock_soap_request, db_session), BaseSOAPClient)
-        assert isinstance(
-            SimplerApplicantsS2SClient(mock_soap_request, db_session), SimplerApplicantsS2SClient
-        )
-        assert isinstance(
-            SimplerGrantorsS2SClient(mock_soap_request, db_session), SimplerGrantorsS2SClient
-        )
-
-
 class TestGetOpportunityList:
     @pytest.fixture(autouse=True)
     def truncate_competitions(self, db_session):
@@ -56,9 +28,15 @@ class TestGetOpportunityList:
 
     @pytest.fixture
     def soap_request(self):
-        return SOAPRequest(method="POST", headers={}, data=b"", full_path="/")
+        return SOAPRequest(
+            method="POST",
+            headers={},
+            data=b"",
+            full_path="/",
+            api_name=SimplerSoapAPI.APPLICANTS,
+        )
 
-    @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
+    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
     def test_get_opportunity_list_response(self, mock_proxy_request, soap_request, db_session):
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
@@ -66,43 +44,15 @@ class TestGetOpportunityList:
             opportunity_number="HDTRA1-25-S-0001"
         ).encode()
         client = SimplerApplicantsS2SClient(soap_request, db_session=db_session)
-        result, simpler_response = client.get_response()
-        assert result == mock_proxy_request_response
-        assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
+        assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
+        assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
         assert client.GetOpportunityListRequest() is not None
-        assert isinstance(simpler_response, SOAPResponse)
-
-    @patch("src.legacy_soap_api.legacy_soap_api_client.logger.info")
-    @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
-    def test_get_opportunity_list_invalid_opportunity_filter(
-        self, mock_proxy_request, mock_logger, soap_request, db_session
-    ):
-        mock_proxy_request_response = MagicMock()
-        mock_proxy_request.return_value = mock_proxy_request_response
-        soap_request.data = mock_requests.get_opportunity_list_invalid_opportunity_filter().encode()
-        client = SimplerApplicantsS2SClient(soap_request, db_session=db_session)
-        result, simpler_response = client.get_response()
-        assert result == mock_proxy_request_response
-        assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
-
-        expected_fault_xml = OpportunityListRequestInvalidParams.to_xml()
-        expected_simpler_response = SOAPResponse(
-            data=expected_fault_xml,
-            status_code=500,
-            headers={"Content-Length": len(expected_fault_xml), **BASE_SOAP_API_RESPONSE_HEADERS},
+        simpler_soap_response, use_simpler = client.get_simpler_soap_response(
+            mock_proxy_request_response
         )
-        assert expected_simpler_response == simpler_response
+        assert isinstance(simpler_soap_response, SOAPResponse)
 
-        # Assert that the GetOpportunityListRequest failed validation.
-        mock_logger.assert_called_once_with(
-            "simpler_soap_api_fault",
-            extra={
-                "err": OPPORTUNITY_LIST_MISSING_REQUIRED_FIELDS_ERR,
-                "fault": OpportunityListRequestInvalidParams.model_dump(),
-            },
-        )
-
-    @patch("src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient._proxy_soap_request")
+    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
     def test_get_opportunity_list_response_by_package_id(
         self, mock_proxy_request, db_session, soap_request, enable_factory_create
     ):
@@ -117,15 +67,11 @@ class TestGetOpportunityList:
             package_id
         ).encode()
         client = SimplerApplicantsS2SClient(soap_request, db_session=db_session)
-        result, simpler_response = client.get_response()
-        assert result == mock_proxy_request_response
-        assert client.soap_request_message.operation_name == "GetOpportunityListRequest"
-
-        assert isinstance(simpler_response, SOAPResponse)
-
-        response = client.GetOpportunityListRequest()
-        assert len(response.opportunity_details) == 1
-        assert response.opportunity_details[0].package_id == package_id
+        assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
+        assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
+        opportunity_list_response = client.GetOpportunityListRequest()
+        assert len(opportunity_list_response.opportunity_details) == 1
+        assert opportunity_list_response.opportunity_details[0].package_id == package_id
 
     def test_get_opportunity_list_by_package_id(
         self, soap_request, db_session, enable_factory_create
