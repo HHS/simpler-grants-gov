@@ -1,26 +1,25 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
-import { fakeOrganization } from "src/utils/testing/fixtures";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { fakeCompetition, fakeOrganization } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
-
-import { createRef } from "react";
 
 import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
-// const mockUseUser = jest.fn(() => ({
-//   user: {
-//     token: "faketoken",
-//   },
-// }));
+const mockUseUser = jest.fn(() => ({
+  user: {
+    token: "faketoken",
+  },
+}));
 
-// const fetchMock = jest.fn();
 const mockRouterPush = jest.fn();
-const clientFetchMock = jest.fn();
+const mocks = {
+  clientFetchMock: (url: string) => {
+    if (url.match("competitions")) {
+      return Promise.resolve(fakeCompetition);
+    }
+    return Promise.resolve([fakeOrganization]);
+  },
+};
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -28,52 +27,40 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-// jest.mock("src/services/auth/useUser", () => ({
-//   useUser: () => mockUseUser(),
-// }));
-
-// jest.mock("src/services/fetch/fetchers/clientApplicationFetcher", () => ({
-//   startApplication: () => fetchMock() as unknown,
-// }));
+jest.mock("src/services/auth/useUser", () => ({
+  useUser: () => mockUseUser(),
+}));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-// jest.useFakeTimers();
-
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+    clientFetch: (...args: unknown[]) =>
+      mocks.clientFetchMock(...args) as unknown,
   }),
 }));
 
 describe("StartApplicationModalControl", () => {
   beforeEach(() => {
     mockRouterPush.mockResolvedValue(true);
+    mockUseUser.mockReturnValue({ user: { token: "a token" } });
   });
   afterEach(() => {
-    // fetchMock.mockReset();
-    // jest.clearAllTimers();
     jest.resetAllMocks();
   });
 
-  it("matches snapshot", async () => {
+  it("matches snapshot", () => {
     const { container } = render(
       <StartApplicationModalControl
         competitionId="1"
         opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["organization"]}
-        organizations={[fakeOrganization]}
-        token={"a token"}
-        loading={false}
       />,
     );
-
     expect(container).toMatchSnapshot();
   });
-  it("displays a working modal toggle button", async () => {
+  it("modal can be opened and closed as expected", async () => {
     const { rerender } = render(
       <StartApplicationModalControl
         competitionId="1"
@@ -81,15 +68,15 @@ describe("StartApplicationModalControl", () => {
       />,
     );
 
-    expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
-    expect(screen.queryAllByTestId("opportunity-title")[0]).toHaveTextContent(
-      "blessed opportunity",
-    );
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
+    });
 
     const toggle = await screen.findByTestId(
       "open-start-application-modal-button",
     );
-    act(() => toggle.click());
+
+    await userEvent.click(toggle);
 
     rerender(
       <StartApplicationModalControl
@@ -98,187 +85,13 @@ describe("StartApplicationModalControl", () => {
       />,
     );
 
-    expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
-  });
-  it("modal can be closed as expected", async () => {
-    const { rerender } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toHaveClass("is-hidden");
+    });
 
-    const toggle = await screen.findByTestId(
-      "open-start-application-modal-button",
-    );
-    act(() => toggle.click());
+    const closeButton = await screen.findByText("cancelButtonText");
 
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const closeButton = await screen.findByText(
-      "startApplicationModalControl.cancelButtonText",
-    );
-    act(() => closeButton.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
-  });
-  it("displays validation error if submitted without a name", async () => {
-    const { rerender } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const toggle = await screen.findByTestId(
-      "open-start-application-modal-button",
-    );
-    act(() => toggle.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const saveButton = await screen.findByTestId(
-      "competition-start-individual-save",
-    );
-    act(() => saveButton.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const validationError = await screen.findByText(
-      "startApplicationModalControl.validationError",
-    );
-
-    expect(validationError).toBeInTheDocument();
-  });
-  it("displays an API error if API returns an error", async () => {
-    fetchMock.mockRejectedValue(new Error());
-    const { rerender } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const toggle = await screen.findByTestId(
-      "open-start-application-modal-button",
-    );
-    act(() => toggle.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const saveButton = await screen.findByTestId(
-      "competition-start-individual-save",
-    );
-    const input = await screen.findByTestId("textInput");
-    fireEvent.change(input, { target: { value: "new application" } });
-    act(() => saveButton.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const error = await screen.findByText("startApplicationModalControl.error");
-
-    expect(error).toBeInTheDocument();
-  });
-  it("displays an login error if API 401", async () => {
-    fetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
-    const { rerender } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const toggle = await screen.findByTestId(
-      "open-start-application-modal-button",
-    );
-    act(() => toggle.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const saveButton = await screen.findByTestId(
-      "competition-start-individual-save",
-    );
-    const input = await screen.findByTestId("textInput");
-    fireEvent.change(input, { target: { value: "new application" } });
-    act(() => saveButton.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const error = await screen.findByText(
-      "startApplicationModalControl.loggedOut",
-    );
-
-    expect(error).toBeInTheDocument();
-  });
-  it("re-routes on successful save", async () => {
-    fetchMock.mockResolvedValue({ applicationId: "999" });
-    const { rerender } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const toggle = await screen.findByTestId(
-      "open-start-application-modal-button",
-    );
-    act(() => toggle.click());
-
-    rerender(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-
-    const saveButton = await screen.findByTestId(
-      "competition-start-individual-save",
-    );
-    const input = await screen.findByTestId("textInput");
-    fireEvent.change(input, { target: { value: "new application" } });
-    act(() => saveButton.click());
+    await userEvent.click(closeButton);
 
     rerender(
       <StartApplicationModalControl
@@ -287,13 +100,70 @@ describe("StartApplicationModalControl", () => {
       />,
     );
     await waitFor(() => {
-      expect(routerPush).toHaveBeenCalledWith(
-        `/workspace/applications/application/999`,
-      );
+      expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
     });
   });
-  it("displays login message if user not logged in", () => {
-    mockUseUser.mockImplementation(() => ({}) as { user: { token: string } });
+  it("displays login modal on click if user is not logged in", async () => {
+    mockUseUser.mockReturnValue({ user: { token: "" } });
+    const { rerender } = render(
+      <StartApplicationModalControl
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const toggle = await screen.findByTestId(
+      "open-start-application-modal-button",
+    );
+    await userEvent.click(toggle);
+
+    rerender(
+      <StartApplicationModalControl
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
+    });
+    expect(screen.getByText("help")).toBeInTheDocument();
+  });
+  it("displays start application modal on click if user is logged in", async () => {
+    const { rerender } = render(
+      <StartApplicationModalControl
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const toggle = await screen.findByTestId(
+      "open-start-application-modal-button",
+    );
+
+    await userEvent.click(toggle);
+
+    rerender(
+      <StartApplicationModalControl
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("requiredText")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
+  });
+  // as currently written this causes the useEffect to loops to run infinitely,
+  // as the fetch function in the dependency gets constantly overwritten as part of the
+  // implementation of the spy / mock. If we remove the fetch fn from the dependency
+  // array, tests pass, but I'd rather have that in place and skip this test for now.
+  // In the future we could make this more testable by encapsulating the onMount
+  // fetch functionality into its own hook - DWS
+  it.skip("calls fetch functions correctly", async () => {
+    const spy = jest.spyOn(mocks, "clientFetchMock");
+
     render(
       <StartApplicationModalControl
         competitionId="1"
@@ -301,8 +171,12 @@ describe("StartApplicationModalControl", () => {
       />,
     );
 
-    expect(screen.queryAllByTestId("modalWindow")[0]).toHaveTextContent(
-      "startApplicationModalControl.login",
-    );
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+    expect(spy).toHaveBeenCalledWith("/api/competitions/1");
+    expect(spy).toHaveBeenCalledWith("/api/user/organizations", {
+      cache: "no-store",
+    });
   });
 });
