@@ -473,10 +473,7 @@ def test_validate_application_form_required_form_ignores_is_included_in_submissi
         is_included_in_submission=None,
     )
 
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
-    validation_errors = form_errors + inclusion_errors
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
     # Should have JSON schema validation error (type error for str_a)
     assert len(validation_errors) == 1
@@ -485,10 +482,7 @@ def test_validate_application_form_required_form_ignores_is_included_in_submissi
 
     # Test with is_included_in_submission = False (should still validate for required forms)
     application_form.is_included_in_submission = False
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
-    validation_errors = form_errors + inclusion_errors
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
     # Should still have JSON schema validation error
     assert len(validation_errors) == 1
@@ -511,20 +505,15 @@ def test_validate_application_form_non_required_form_null_is_included_in_submiss
         is_included_in_submission=None,
     )
 
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
-    # Should have no form validation errors (JSON schema validation shouldn't run)
-    assert len(form_errors) == 0
-
-    # Should have exactly one inclusion error for missing is_included_in_submission
-    assert len(inclusion_errors) == 1
-    assert inclusion_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
-    assert inclusion_errors[0].field == "is_included_in_submission"
-    assert inclusion_errors[0].value is None
+    # Should have exactly one validation error for missing is_included_in_submission
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+    assert validation_errors[0].field == "is_included_in_submission"
+    assert validation_errors[0].value is None
     assert (
-        inclusion_errors[0].message
+        validation_errors[0].message
         == "is_included_in_submission must be set on all non-required forms"
     )
 
@@ -545,13 +534,10 @@ def test_validate_application_form_non_required_form_false_is_included_in_submis
         is_included_in_submission=False,
     )
 
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
     # Should have no validation errors because JSON schema validation is skipped
-    assert len(form_errors) == 0
-    assert len(inclusion_errors) == 0
+    assert len(validation_errors) == 0
 
 
 def test_validate_application_form_non_required_form_true_is_included_in_submission(form_c):
@@ -570,17 +556,12 @@ def test_validate_application_form_non_required_form_true_is_included_in_submiss
         is_included_in_submission=True,
     )
 
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
-    # Should have JSON schema validation error in form_errors
-    assert len(form_errors) == 1
-    assert form_errors[0].type == "type"
-    assert "$.str_c" in form_errors[0].field
-
-    # Should have no inclusion errors
-    assert len(inclusion_errors) == 0
+    # Should have JSON schema validation error
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == "type"
+    assert "$.str_c" in validation_errors[0].field
 
 
 def test_validate_application_form_non_required_form_valid_response_true_is_included_in_submission(
@@ -601,13 +582,10 @@ def test_validate_application_form_non_required_form_valid_response_true_is_incl
         is_included_in_submission=True,
     )
 
-    form_errors, inclusion_errors = validate_application_form(
-        application_form, ApplicationAction.GET
-    )
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
 
     # Should have no validation errors
-    assert len(form_errors) == 0
-    assert len(inclusion_errors) == 0
+    assert len(validation_errors) == 0
 
 
 def test_get_application_form_errors_with_is_included_in_submission_validation(
