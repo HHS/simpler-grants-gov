@@ -40,30 +40,6 @@ def get_simpler_soap_response(
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
             }
         )
-
-        simpler_soap_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
-            soap_proxy_response
-        )
-
-        if simpler_soap_response is not None and use_simpler:
-            logger.info(
-                "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
-                extra={"used_simpler_response": use_simpler},
-            )
-            return simpler_soap_response
-
-        logger.info(
-            "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
-            extra={"used_simpler_response": use_simpler},
-        )
-        return soap_proxy_response
-    except (SOAPOperationNotSupported, SOAPInvalidEnvelope, SOAPInvalidRequestOperationName) as e:
-        err = f"Unable to initialize Simpler SOAP client: {e}"
-        logger.info(
-            f"simpler_soap_api: {err}",
-            extra={"simpler_soap_api_error": err, "used_simpler_response": use_simpler},
-        )
-        return soap_proxy_response
     except Exception as e:
         err = "Unable to initialize Simpler SOAP client: Unknown error"
         logger.info(
@@ -75,3 +51,28 @@ def get_simpler_soap_response(
             },
         )
         return soap_proxy_response
+
+    try:
+        simpler_soap_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
+            soap_proxy_response
+        )
+
+        if simpler_soap_response is not None and use_simpler:
+            logger.info(
+                "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
+                extra={"used_simpler_response": use_simpler},
+            )
+            return simpler_soap_response
+    except (SOAPOperationNotSupported, SOAPInvalidEnvelope, SOAPInvalidRequestOperationName) as e:
+        err = f"Unable to initialize Simpler SOAP client: {e}"
+        logger.info(
+            f"simpler_soap_api: {err}",
+            extra={"simpler_soap_api_error": err, "used_simpler_response": use_simpler},
+        )
+        return soap_proxy_response
+
+    logger.info(
+        "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
+        extra={"used_simpler_response": use_simpler},
+    )
+    return soap_proxy_response

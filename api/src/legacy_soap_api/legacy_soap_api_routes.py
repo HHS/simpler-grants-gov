@@ -25,13 +25,11 @@ logger = logging.getLogger(__name__)
 def simpler_soap_api_route(
     db_session: db.Session, service_name: str, service_port_name: str
 ) -> tuple:
-    if service_name == "grantsws-agency" and service_port_name == "AgencyWebServicesSoapPort":
-        api_name = SimplerSoapAPI.GRANTORS
-    elif (
-        service_name == "grantsws-applicant" and service_port_name == "ApplicantWebServicesSoapPort"
-    ):
-        api_name = SimplerSoapAPI.APPLICANTS
-    else:
+    api_name = SimplerSoapAPI.get_soap_api(service_name, service_port_name)
+    if not api_name:
+        logger.info(
+            f"Could not determine Simpler SOAP API from {service_name=} {service_port_name=}"
+        )
         return get_invalid_path_response().to_flask_response()
 
     operation_name = get_soap_operation_name(request.data)
@@ -41,7 +39,7 @@ def simpler_soap_api_route(
             "soap_request_operation_name": operation_name if operation_name else "Unknown",
         }
     )
-    logger.info("SOAP applicants request received")
+    logger.info("SOAP request received")
 
     try:
         soap_request = SOAPRequest(
@@ -51,6 +49,7 @@ def simpler_soap_api_route(
             headers=dict(request.headers),
             data=request.data,
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
+            operation_name=operation_name,
         )
         soap_proxy_response = get_proxy_response(soap_request)
     except Exception as e:

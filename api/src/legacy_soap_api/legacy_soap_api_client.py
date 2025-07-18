@@ -35,15 +35,87 @@ class BaseSOAPClient:
             self.soap_request.data.decode(), self.operation_config.request_operation_name
         )
 
-    def get_simpler_soap_response_payload(self) -> SOAPPayload:
+    def get_soap_response_dict(self) -> dict:
+        """Get Simpler SOAP response dict
+
+        This method will return the validated pydantic schema returned from the
+        SOAP response operation. It will be in the format necessary to convert to and
+        from XML utilizing SOAPPayload class.
+
+        Example:
+            {'Envelope': {'Body': {'GetOpportunityListResponse': {...}}}}
+        """
         operation_method = getattr(self, self.operation_config.request_operation_name)
+        return operation_method().to_soap_envelope_dict(
+            self.operation_config.response_operation_name
+        )
+
+    def get_proxy_soap_response_dict(self, proxy_response: SOAPResponse) -> dict:
+        """
+        This method does the following:
+
+        1. Gets the pydantic schema defined in self.operation_config.
+        2. Converts the SOAP proxy response XML to a dict.
+        3. Validates the XML dict.
+        4. Returns the proxy XML dict from the pydantic schema data.
+
+        This ensures parity when we need to compare proxy response to simpler
+        SOAP response.
+
+        Note: Ignoring type checking in return statement since we already check
+        that the schema is not None prior to statement.
+        """
+        proxy_response_schema_data = wrap_envelope_dict(
+            {}, self.operation_config.response_operation_name
+        )
+
+        simpler_response_schema = self._get_simpler_soap_response_schema()
+        if simpler_response_schema is None:
+            logger.info(
+                "Unable to validate SOAP proxy response. No Simpler SOAP pydantic schema found."
+            )
+            return proxy_response_schema_data
+
         try:
-            simpler_soap_data = operation_method()
-            return SOAPPayload(
-                soap_payload=wrap_envelope_dict(
-                    soap_xml_dict=simpler_soap_data.model_dump(mode="json", by_alias=True),
-                    operation_name=self.operation_config.response_operation_name,
-                ),
+            validated_proxy_response = self._get_simpler_soap_response_schema()(
+                **get_envelope_dict(
+                    SOAPPayload(
+                        proxy_response.data.decode(errors="replace"),
+                        operation_name=self.operation_config.response_operation_name,
+                        force_list_attributes=self.operation_config.force_list_attributes,
+                    ).to_dict(),
+                    self.operation_config.response_operation_name,
+                )
+            )  # type: ignore[misc]
+            return validated_proxy_response.to_soap_envelope_dict(
+                self.operation_config.response_operation_name
+            )
+        except ValidationError as e:
+            msg = "Could not parse proxy response into Simpler SOAP response pydantic schema."
+            error_fields = {err["loc"] for err in e.errors()}
+            logger.info(msg=msg, extra={"simpler_soap_api_error": error_fields})
+        except Exception as e:
+            logger.info(
+                msg="Could not parse proxy response",
+                extra={"soap_traceback": "".join(traceback.format_tb(e.__traceback__))},
+            )
+        return proxy_response_schema_data
+
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
+        """
+        This method is responsible getting the simpler soap xml payload.
+
+        We first compare validated SOAP response dicts from simpler and
+        proxy responses. We then utilize the SOAPPayload class to get the
+        XML soap response from the validated XML dicts.
+        """
+        proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
+        simpler_response_soap_dict = self.get_soap_response_dict()
+        diff_soap_dicts(simpler_response_soap_dict, proxy_response_soap_dict)
+
+        try:
+            simpler_soap_response_payload = SOAPPayload(
+                soap_payload=simpler_response_soap_dict,
                 force_list_attributes=self.operation_config.force_list_attributes,
                 operation_name=self.operation_config.response_operation_name,
             )
@@ -54,64 +126,18 @@ class BaseSOAPClient:
             logger.info(
                 "simpler_soap_api: Fault", extra={"err": e.message, "fault": e.fault.model_dump()}
             )
-            return SOAPPayload(e.fault.model_dump())
-
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
-        """
-        This method is responsible getting the simpler soap xml payload as well as the following:
-
-        1. Validate the proxy response into our Simpler SOAP response pydantic schema.
-        2. Comparing simpler soap response to the proxy response.
-        3. Indicating whether the response pydantic schemas matches.
-        """
-        simpler_response_schema = self.get_simpler_soap_response_schema()
-        proxy_response_schema_data = None
-        if simpler_response_schema is not None:
-            proxy_response_dict = get_envelope_dict(
-                SOAPPayload(
-                    proxy_response.data.decode(errors="replace"),
-                    force_list_attributes=self.operation_config.force_list_attributes,
-                ).to_dict(),
-                self.operation_config.response_operation_name,
-            )
-            try:
-                # Ignoring type checking here since we already checked that the
-                # schema is not None above.
-                proxy_response_schema_data = self.get_simpler_soap_response_schema()(
-                    **proxy_response_dict
-                )  # type: ignore[misc]
-            except ValidationError as e:
-                msg = "Could not parse proxy response into Simpler SOAP response pydantic schema."
-                error_fields = {err["loc"] for err in e.errors()}
-                logger.info(msg=msg, extra={"simpler_soap_api_error": error_fields})
-            except Exception as e:
-                logger.info(
-                    msg="Could not parse proxy response",
-                    extra={"soap_traceback": "".join(traceback.format_tb(e.__traceback__))},
-                )
-
-        # We will catch and handle any relevant exceptions in the router.
-        simpler_soap_payload = self.get_simpler_soap_response_payload()
-        simpler_response_soap_dict = simpler_soap_payload.to_dict()
-        proxy_response_soap_dict = {}
-        if proxy_response_schema_data is not None:
-            proxy_response_soap_dict = wrap_envelope_dict(
-                proxy_response_schema_data.model_dump(mode="json", by_alias=True),
-                self.operation_config.response_operation_name,
-            )
-
-        diff_soap_dicts(simpler_response_soap_dict, proxy_response_soap_dict)
+            simpler_soap_response_payload = SOAPPayload(e.fault.to_xml().decode())
 
         # This will always be false until the following have been implemented:
         # https://github.com/HHS/simpler-grants-gov/issues/5224
         # https://github.com/HHS/simpler-grants-gov/issues/5234
         use_simpler_response = False
         return (
-            get_soap_response(data=simpler_soap_payload.envelope_data.envelope.encode()),
+            get_soap_response(data=simpler_soap_response_payload.envelope_data.envelope.encode()),
             use_simpler_response,
         )
 
-    def get_simpler_soap_response_schema(self) -> Any | None:
+    def _get_simpler_soap_response_schema(self) -> Any | None:
         if self.soap_request.api_name == SimplerSoapAPI.APPLICANTS:
             return getattr(applicants_schemas, self.operation_config.response_operation_name)
         # Grantors SOAP API schemas will be returned once they exist but will return None for now.

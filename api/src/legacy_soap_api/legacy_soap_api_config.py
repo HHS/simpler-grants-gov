@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from functools import cache, lru_cache
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import Field
 
@@ -45,6 +45,19 @@ def get_soap_config() -> LegacySoapAPIConfig:
 class SimplerSoapAPI(Enum):
     GRANTORS = "grantors"
     APPLICANTS = "applicants"
+
+    @staticmethod
+    def get_soap_api(
+        service_name: str, service_port_name: str
+    ) -> Optional["SimplerSoapAPI"]:  # "SimplerSoapAPI" | None:
+        if service_name == "grantsws-agency" and service_port_name == "AgencyWebServicesSoapPort":
+            return SimplerSoapAPI.GRANTORS
+        elif (
+            service_name == "grantsws-applicant"
+            and service_port_name == "ApplicantWebServicesSoapPort"
+        ):
+            return SimplerSoapAPI.APPLICANTS
+        return None
 
 
 @dataclass

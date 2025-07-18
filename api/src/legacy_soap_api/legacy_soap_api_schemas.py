@@ -39,6 +39,7 @@ class SOAPRequest(BaseModel):
     method: str
     api_name: SimplerSoapAPI
     auth: SOAPAuth | None = None
+    operation_name: str = ""
 
     def get_soap_request_operation_config(self) -> SOAPOperationConfig:
         """Get operation config
@@ -57,7 +58,9 @@ class SOAPRequest(BaseModel):
         if not envelope:
             raise SOAPInvalidEnvelope(f"Error processing SOAP envelope for {self.api_name.value}")
 
-        operation_name = get_soap_operation_name(envelope)
+        operation_name = (
+            get_soap_operation_name(envelope) if not self.operation_name else self.operation_name
+        )
         if not operation_name:
             raise SOAPInvalidRequestOperationName(
                 f"Could not get SOAP operation name for {self.api_name.value}"
@@ -92,6 +95,17 @@ class BaseSOAPSchema(BaseModel):
     """
 
     model_config = ConfigDict(populate_by_name=True)
+
+    def to_soap_envelope_dict(self, operation_name: str) -> dict:
+        return {
+            "Envelope": {
+                "Body": {
+                    operation_name: {
+                        **self.model_dump(mode="json", by_alias=True, exclude_none=True)
+                    }
+                }
+            }
+        }
 
 
 class FaultMessage(BaseModel):
