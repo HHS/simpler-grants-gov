@@ -63,6 +63,7 @@ const ApplyForm = ({
       uiSchema,
     });
   } catch (e) {
+    console.error(e);
     return (
       <Alert type="error" heading="Error" headingLevel="h4">
         Error rendering form
