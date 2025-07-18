@@ -13,16 +13,18 @@ interface ClientApplicationStartResponse {
 export const startApplication = async (
   applicationName: string,
   competitionId: string,
+  organization?: string,
   token?: string,
 ): Promise<ClientApplicationStartResponse> => {
   if (!token) {
-    throw new Error(`Error starting application`);
+    throw new Error("Error starting application, not logged in");
   }
   const res = await fetch("/api/applications/start", {
     method: "POST",
     body: JSON.stringify({
       applicationName,
       competitionId,
+      organization,
     }),
   });
 
