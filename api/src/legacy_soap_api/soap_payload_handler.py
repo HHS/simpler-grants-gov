@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any, Callable, Iterable
-from xml.etree import ElementTree
 
 import xmltodict
 from defusedxml import ElementTree as DET
@@ -12,7 +12,7 @@ XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 
 
-class SoapPayload:
+class SOAPPayload:
     def __init__(
         self,
         soap_payload: str | dict,
@@ -28,15 +28,9 @@ class SoapPayload:
         self._operation_name = operation_name
 
         # Get SOAP XML between, and including the <soap:Envelope> and </soap:Envelope> tags and preserve the content before and after the envelope.
-        self.pre_envelope = ""
-        self.envelope = ""
-        self.post_envelope = ""
+        self.envelope_data = SOAPEnvelopeData()
         if isinstance(self.payload, str):
-            if match := re.search(ENVELOPE_REGEX, self.payload, re.DOTALL):
-                start, end = match.span()
-                self.pre_envelope = self.payload[:start]
-                self.envelope = self.payload[start:end]
-                self.post_envelope = self.payload[end:]
+            self.envelope_data = get_soap_envelope_from_payload(self.payload)
         elif isinstance(self.payload, dict):
             self.update_envelope_from_dict(self.payload)
 
@@ -47,21 +41,14 @@ class SoapPayload:
         Get the SOAP operation name. Every valid SOAP request Body should
         have the global SOAP envelope namespace.
         """
-        if not self.envelope:
+        if not self.envelope_data.envelope:
             return ""
         if self._operation_name:
             return self._operation_name
-        try:
-            root = DET.fromstring(self.envelope)
-            body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
-            if body is not None and len(body) > 0:
-                return body[0].tag.split("}")[-1]
-            return ""
-        except ElementTree.ParseError:
-            return ""
+        return get_soap_operation_name(self.envelope_data.envelope)
 
     def update_envelope_from_dict(self, envelope: dict) -> None:
-        self.envelope = (
+        self.envelope_data.envelope = (
             xmltodict.unparse(
                 transform_soap_xml_dict(
                     envelope,
@@ -81,10 +68,10 @@ class SoapPayload:
         dict with keys that omit the namespace prefixes. The namespaces will be remapped
         when/if the dict is updated in self.update_envelope_from_dict.
         """
-        if not self.envelope:
+        if not self.envelope_data.envelope:
             return {}
         return transform_soap_xml_dict(
-            xmltodict.parse(self.envelope),
+            xmltodict.parse(self.envelope_data.envelope),
             key_modifier=non_namespace_or_attribute_key_modifier,
             value_modifier=self._value_modifier,
             keymap_handler=self._keymap_handler,
@@ -173,3 +160,68 @@ def _transform_soap_xml_dict(
 
 def is_namespace_key(key: str) -> bool:
     return key.startswith(XML_DICT_KEY_ATTRIBUTE_PREFIX) and XML_DICT_KEY_NAMESPACE_DELIMITER in key
+
+
+@dataclass
+class SOAPEnvelopeData:
+    """Certain SOAP payloads will have data before and after the XML Envelope
+    tag. This class has attributes that can be referenced when only certain data needs
+    to be processed and later needs to be put back into original form.
+
+    For example, if you need to manipulate only the Envelope tag data but need
+    to preserve the original SOAP data, you can use this to retain that data.
+
+    An example SOAP message containing multiple parts is:
+
+        --uuid:bdbceae0-7555-400e-8865-1eef914f9ca8
+        Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"
+        Content-Transfer-Encoding: binary
+        Content-ID:
+        <root.message@cxf.apache.org>
+            <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        ...
+        --uuid:bdbceae0-7555-400e-8865-1eef914f9ca8--
+    """
+
+    pre_envelope: str = ""
+    post_envelope: str = ""
+    envelope: str = ""
+
+
+def get_soap_envelope_from_payload(soap_message: str) -> SOAPEnvelopeData:
+    envelope_data = SOAPEnvelopeData()
+    if not soap_message:
+        return envelope_data
+    if match := re.search(ENVELOPE_REGEX, soap_message, re.DOTALL):
+        start, end = match.span()
+        envelope_data.pre_envelope = soap_message[:start]
+        envelope_data.envelope = soap_message[start:end]
+        envelope_data.post_envelope = soap_message[end:]
+        return envelope_data
+    return envelope_data
+
+
+def get_soap_operation_name(soap_xml: str | bytes) -> str:
+    """Get operation name
+
+    Get the SOAP operation name. Every valid SOAP request Body should
+    have the global SOAP envelope namespace.
+    """
+    try:
+        if isinstance(soap_xml, bytes):
+            soap_xml = soap_xml.decode()
+        root = DET.fromstring(soap_xml)
+        body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
+        if body is not None and len(body) > 0:
+            return body[0].tag.split("}")[-1]
+        return ""
+    except Exception:
+        return ""
+
+
+def get_soap_operation_dict(soap_xml: str, operation_name: str) -> dict:
+    return get_envelope_dict(SOAPPayload(soap_xml).to_dict(), operation_name)
+
+
+def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
+    return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})

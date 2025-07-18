@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import dataclass
 from typing import Any
 
 import requests
@@ -7,25 +6,7 @@ import requests
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 
 BASE_SOAP_API_RESPONSE_HEADERS = {
-    "Strict-Transport-Security": "max-age=31536000",
     "Content-Type": 'multipart/related; type="application/xop+xml"',
-}
-
-
-@dataclass
-class SOAPOperationConfig:
-    response_operation_name: str
-    force_list_attributes: tuple | None = tuple()
-
-
-SOAP_OPERATION_CONFIGS = {
-    "applicants": {
-        "GetOpportunityListRequest": SOAPOperationConfig(
-            response_operation_name="GetOpportunityListResponse",
-            force_list_attributes=("OpportunityDetails",),
-        )
-    },
-    "grantors": {},
 }
 
 
@@ -39,7 +20,7 @@ def format_local_soap_response(response_data: bytes) -> bytes:
 --uuid:{response_id}
 Content-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"
 Content-Transfer-Encoding: binary
-Content-ID: <root.message@cxf.apache.org>{response_data.decode('utf-8')}
+Content-ID: <root.message@cxf.apache.org>{response_data.decode()}
 --uuid:{response_id}--
         """.replace(
             '<?xml version="1.0" encoding="UTF-8"?>', ""
@@ -63,7 +44,6 @@ def get_soap_response(
     all_headers = {
         **BASE_SOAP_API_RESPONSE_HEADERS,
         **extra_headers,
-        "Content-Length": len(data),
     }
     return SOAPResponse(data=data, status_code=status_code, headers=all_headers)
 
@@ -75,27 +55,31 @@ class SOAPFaultException(Exception):
         super().__init__(message, fault, *args)
 
 
-def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
-    return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})
-
-
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
     body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
     return {"Envelope": {"Body": {**body}}}
 
 
-def get_auth_error_response() -> SOAPResponse:
-    data = b"""
+def get_soap_error_response(
+    faultcode: str = "soap:Server",
+    faultstring: str = "Server error has occurred",
+    headers: dict | None = None,
+) -> SOAPResponse:
+    err = f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <soap:Fault>
-            <faultcode>soap:Server</faultcode>
-            <faultstring>Auth error</faultstring>
+            <faultcode>{faultcode}</faultcode>
+            <faultstring>{faultstring}</faultstring>
         </soap:Fault>
     </soap:Body>
 </soap:Envelope>
-"""
-    return SOAPResponse(data=format_local_soap_response(data), status_code=500, headers={})
+""".encode()
+    return get_soap_response(data=err, status_code=500, headers=headers)
+
+
+def get_auth_error_response() -> SOAPResponse:
+    return get_soap_error_response(faultstring="Authorization error")
 
 
 def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
@@ -115,7 +99,7 @@ def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
         dict(response.headers), ["transfer-encoding", "keep-alive", "connection"]
     )
 
-    return SOAPResponse(data=data, status_code=response.status_code, headers=response_headers)
+    return get_soap_response(data, status_code=response.status_code, headers=response_headers)
 
 
 def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
@@ -133,3 +117,14 @@ def bool_to_string(value: bool | None) -> str | None:
     if value is None:
         return None
     return "true" if value else "false"
+
+
+def get_invalid_path_response() -> SOAPResponse:
+    return get_soap_response(
+        data=b"<html><body>No service was found.</body></html>", status_code=404
+    )
+
+
+def diff_soap_dicts(dict1: dict, dict2: dict) -> None:
+    # TODO: See https://github.com/HHS/simpler-grants-gov/issues/5224
+    pass
