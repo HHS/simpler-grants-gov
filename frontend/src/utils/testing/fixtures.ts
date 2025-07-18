@@ -365,3 +365,13 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
     queryParamValue: "again",
   },
 ];
+
+export const fakeOrganization = {
+  is_organization_owner: true,
+  organization_id: "great id",
+  sam_gov_entity: {
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
