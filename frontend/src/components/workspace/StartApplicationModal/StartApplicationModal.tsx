@@ -181,7 +181,7 @@ export const StartApplicationModal = ({
         <Button
           onClick={handleSubmit}
           type="button"
-          data-testid="competition-start-individual-save"
+          data-testid="application-start-save"
           disabled={!!loading}
         >
           {loading || updating ? "Loading..." : t("saveButtonText")}
