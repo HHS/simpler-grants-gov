@@ -150,12 +150,10 @@ def _add_aggregations(
         "is_cost_sharing",
         _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
     )
-    if filters and filters.close_date:
-        builder.aggregation_relative_date_range(
-            "close_date",
-            _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
-            filters.close_date,
-        )
+    builder.aggregation_relative_date_range(
+        "close_date",
+        _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+    )
 
 
 def _add_top_level_agency_prefix(

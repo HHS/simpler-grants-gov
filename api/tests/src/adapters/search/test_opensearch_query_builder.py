@@ -2,10 +2,10 @@ import uuid
 from datetime import date
 
 import pytest
+from freezegun import freeze_time
 
-from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
+from src.adapters.search.opensearch_query_builder import STATIC_DATE_RANGES, SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
-from src.search.search_models import DateSearchFilter
 from tests.conftest import BaseTestClass
 
 WAY_OF_KINGS = {
@@ -104,6 +104,47 @@ RETURN_OF_THE_KING = {
     "page_count": 416,
     "publication_date": "1955-10-20",
 }
+WINDS_OF_WINTER = {
+    "id": 13,
+    "title": "Winds of Winter",
+    "author": "George R.R. Martin",
+    "in_stock": False,
+    "page_count": 2000,
+    "publication_date": "2025-11-17",
+}
+CALL_OF_WINTER = {
+    "id": 14,
+    "title": "The Call of Winter",
+    "author": "Tasha Suri",
+    "in_stock": False,
+    "page_count": 880,
+    "publication_date": "2025-09-18",
+}
+SHADOWS_OF_WINTER = {
+    "id": 15,
+    "title": "Shadows of Winter",
+    "author": "Katherine Arden",
+    "in_stock": True,
+    "page_count": 1040,
+    "publication_date": "2025-09-19",
+}
+WINTERBORN_LEGACY = {
+    "id": 16,
+    "title": "The Winter born Legacy",
+    "author": "Naomi Novik",
+    "in_stock": True,
+    "page_count": 720,
+    "publication_date": "2025-08-19",
+}
+
+WINTER = {
+    "id": 17,
+    "title": "Winter",
+    "author": "Melissa Albert",
+    "in_stock": True,
+    "page_count": 560,
+    "publication_date": "2025-07-23",
+}
 
 FULL_DATA = [
     WAY_OF_KINGS,
@@ -133,7 +174,6 @@ def validate_valid_request(
         pytest.fail(
             f"Request generated was invalid and caused an error in search client: {json_value}"
         )
-
     assert (
         resp.records == expected_results
     ), f"{[record['title'] for record in resp.records]} != {[expected['title'] for expected in expected_results]}"
@@ -795,68 +835,36 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         validate_valid_request(search_client, search_index, builder, expected_results)
 
     @pytest.mark.parametrize(
-        "query,fields,date_filter,expected_results,expected_agg_count",
+        "query,fields,expected_results,expected_aggregations",
         [
             (
-                "king",
+                "winter",
                 ["title"],
-                DateSearchFilter(start_date=date(1900, 1, 1), end_date=date(2025, 12, 31)),
-                [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
-                3,
-            ),
-            (
-                "king",
-                ["title"],
-                DateSearchFilter(end_date_relative=15),
-                [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
-                3,
+                [WINDS_OF_WINTER, CALL_OF_WINTER, SHADOWS_OF_WINTER, WINTERBORN_LEGACY, WINTER],
+                {"publication_date": {"120": 5, "90": 4, "60": 3, "30": 2, "7": 1}},
             ),
         ],
     )
+    @freeze_time("2025-07-21")
     def test_query_builder_simple_query_and_date_range_aggregations(
-        self,
-        search_client,
-        search_index,
-        query,
-        fields,
-        date_filter,
-        expected_results,
-        expected_agg_count,
+        self, search_client, query, fields, expected_results, expected_aggregations
     ):
+        # seed data
+        index_name = f"test-search-index-{uuid.uuid4().int}"
+        search_client.create_index(index_name)
+
+        search_client.bulk_upsert(
+            index_name,
+            [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER, WINDS_OF_WINTER, SHADOWS_OF_WINTER],
+            primary_key_field="id",
+        )
+
         # Add a sort by ID ascending to make it so any relevancy from this is ignored, just testing that values returned
         builder = SearchQueryBuilder().sort_by([("id", SortDirection.ASCENDING)])
 
         builder.simple_query(query, fields, "AND")
 
-        builder.aggregation_relative_date_range("publication_date", "publication_date", date_filter)
-
-        if date_filter.start_date:
-            start_label = date_filter.start_date.isoformat()
-        elif date_filter.start_date_relative is not None:
-            start_label = str(date_filter.start_date_relative)
-        else:
-            start_label = "*"
-
-        if date_filter.end_date:
-            end_label = date_filter.end_date.isoformat()
-        elif date_filter.end_date_relative is not None:
-            end_label = str(date_filter.end_date_relative)
-        else:
-            end_label = "*"
-
-        expected_key = f"{start_label}_to_{end_label}"
-
-        expected_aggregations = {"publication_date": {expected_key: expected_agg_count}}
-
-        built_aggs = builder.build()["aggs"]
-        actual_range = built_aggs["publication_date"]["date_range"]["ranges"][0]
-
-        expected_range = {"key": expected_key}
-
-        if "from" in actual_range:
-            expected_range["from"] = actual_range["from"]
-        if "to" in actual_range:
-            expected_range["to"] = actual_range["to"]
+        builder.aggregation_relative_date_range("publication_date", "publication_date")
 
         assert builder.build() == {
             "size": 25,
@@ -881,13 +889,13 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
                 "publication_date": {
                     "date_range": {
                         "field": "publication_date",
-                        "keyed": True,
-                        "ranges": [expected_range],
+                        "format": "YYYY-MM-dd",
+                        "ranges": STATIC_DATE_RANGES,
                     }
                 }
             },
         }
 
         validate_valid_request(
-            search_client, search_index, builder, expected_results, expected_aggregations
+            search_client, index_name, builder, expected_results, expected_aggregations
         )

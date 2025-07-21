@@ -1573,25 +1573,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "funding_category",
             "opportunity_status",
             "is_cost_sharing",
-        }
-
-    def test_search_query_facets_with_closed_date_200(self, client, api_auth_token):
-        search_response = client.post(
-            "/v1/opportunities/search",
-            json=get_search_request(close_date={"start_date": "2019-01-01"}),
-            headers={"X-Auth": api_auth_token},
-        )
-
-        assert search_response.status_code == 200
-        facet_counts = search_response.get_json()["facet_counts"]
-        assert facet_counts.keys() == {
-            "agency",
-            "applicant_type",
-            "funding_instrument",
-            "funding_category",
-            "opportunity_status",
-            "is_cost_sharing",
-            "close_date",
+            "closed_date"
         }
 
     @pytest.mark.parametrize(

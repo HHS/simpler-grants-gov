@@ -69,10 +69,8 @@ class SearchResponse:
 def _parse_aggregations(
     raw_aggs: dict[str, dict[str, typing.Any]] | None
 ) -> dict[str, dict[str, int]]:
-    # Note that this is assuming the response from a terms or date-range aggregation
+    # Note that this is assuming the response from a terms aggregation
     # https://opensearch.org/docs/latest/aggregations/bucket/terms/
-    # https://opensearch.org/docs/latest/aggregations/bucket/date-range/
-
     if raw_aggs is None:
         return {}
 
@@ -109,41 +107,27 @@ def _parse_aggregations(
           ]
         },
         "close_date": {
-            "buckets": {'-2314_to_*': {
-                    'from': 1553126400000.0,
-                    'from_as_string': '2019-03-21T00:00:00.000Z',
-                    'doc_count': 5
-                }
-            }
+            {'buckets': [{'key': '7', 'from': 1753660800000.0, 'from_as_string': '2025-07-28', 'to': 1753119560446.0, 'to_as_string': '2025-07-21', 'doc_count': 0}
         }
     }
     """
 
     aggregations: dict[str, dict[str, int]] = {}
+    import pdb
+
+    pdb.set_trace()
     for field, raw_agg_value in raw_aggs.items():
-        buckets: list[dict[str, typing.Any]] | dict[str, dict[str, typing.Any]] | None = (
-            raw_agg_value.get("buckets")
-        )
-        if buckets is None:
-            continue
+        buckets: list[dict[str, typing.Any]] = raw_agg_value.get("buckets", [])
         field_aggregation: dict[str, int] = {}
-        if isinstance(buckets, dict):
-            # Date_range aggregation
-            for k, v in buckets.items():
-                field_aggregation[k] = v.get("doc_count", 0)
-            aggregations[field] = field_aggregation
+        for bucket in buckets:
+            key = bucket.get("key")
+            count = bucket.get("doc_count", 0)
 
-        elif isinstance(buckets, list):
-            # Terms aggregation
-            for bucket in buckets:
-                key = bucket.get("key")
-                count = bucket.get("doc_count", 0)
+            if key is None:
+                raise ValueError("Unable to parse aggregation, null key for %s" % field)
 
-                if key is None:
-                    raise ValueError("Unable to parse aggregation, null key for %s" % field)
+            field_aggregation[key] = count
 
-                field_aggregation[key] = count
-
-            aggregations[field] = field_aggregation
+        aggregations[field] = field_aggregation
 
     return aggregations
