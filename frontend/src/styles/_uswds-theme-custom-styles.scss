@@ -503,6 +503,21 @@ button.usa-pagination__button.usa-button {
   &.overflow-wrap {
     overflow-wrap: break-word;
   }
+  &.application-attachments-table {
+    td {
+      height: 65px;
+    }
+    .grants-spinner {
+      float: left;
+      margin-right: 0.5rem;
+    }
+    .highlight {
+      td {
+        background-color: color(gold-5v);
+        line-height: 1rem;
+      }
+    }
+  }
 }
 
 // Accordions
