@@ -1765,7 +1765,7 @@ def test_application_submit_rule_validation_issue(
     ]
 
 
-def test_application_submit_missing_required_form(
+def test_application_submit_invalid_required_form(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     today = get_now_us_eastern_date()
@@ -1786,7 +1786,7 @@ def test_application_submit_missing_required_form(
     ApplicationUserFactory.create(application=application, user=user)
 
     # Setup an application form without any answers yet
-    ApplicationFormFactory.create(
+    application_form = ApplicationFormFactory.create(
         application=application, competition_form=competition_form, application_response={}
     )
 
@@ -1798,12 +1798,14 @@ def test_application_submit_missing_required_form(
     # Assert response
     assert response.status_code == 422
     assert response.json["message"] == "The application has issues in its form responses."
+    # With the new validation logic, empty required forms generate APPLICATION_FORM_VALIDATION errors
+    # instead of MISSING_REQUIRED_FORM errors
     assert response.json["errors"] == [
         {
-            "field": "form_id",
-            "message": "Form ExampleForm-ABC is required",
-            "type": "missing_required_form",
-            "value": str(form.form_id),
+            "field": "application_form_id",
+            "message": "The application form has outstanding errors.",
+            "type": "application_form_validation",
+            "value": str(application_form.application_form_id),
         }
     ]
 

@@ -11,7 +11,6 @@ describe("getNextRoutes", () => {
       "/dev/feature-flags",
       "/error",
       "/events",
-      "/health",
       "/login",
       "/maintenance",
       "/opportunity/1",

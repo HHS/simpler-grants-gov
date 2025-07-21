@@ -91,7 +91,7 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_not_started_required_form(enable_factory_create, db_session, user):
+def test_submit_application_with_invalid_required_form(enable_factory_create, db_session, user):
     competition = CompetitionFactory.create(competition_forms=[])
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
@@ -112,9 +112,11 @@ def test_submit_application_with_not_started_required_form(enable_factory_create
 
     assert excinfo.value.status_code == 422
     assert excinfo.value.message == "The application has issues in its form responses."
+    # With the new validation logic, empty required forms generate APPLICATION_FORM_VALIDATION errors
+    # instead of MISSING_REQUIRED_FORM errors
     assert (
         excinfo.value.extra_data["validation_issues"][0].type
-        == ValidationErrorType.MISSING_REQUIRED_FORM
+        == ValidationErrorType.APPLICATION_FORM_VALIDATION
     )
 
 

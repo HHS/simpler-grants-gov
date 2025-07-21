@@ -13,7 +13,11 @@ export const injectableScriptConfig = {
       />
     ),
     gate: (path: string, env: typeof environment) => {
-      return path.includes("/search") && env.IS_CI !== "true";
+      return (
+        path.includes("/search") &&
+        env.IS_CI !== "true" &&
+        env.ENVIRONMENT !== "dev"
+      );
     },
   },
 };
