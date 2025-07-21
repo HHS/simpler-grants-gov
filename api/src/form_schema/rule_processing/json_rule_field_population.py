@@ -7,6 +7,7 @@ from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
+INDIVIDUAL_UEI = "000000000INDV"
 
 def get_opportunity_number(context: JsonRuleContext) -> str | None:
     return context.opportunity.opportunity_number
@@ -26,6 +27,42 @@ def get_agency_name(context: JsonRuleContext) -> str | None:
 def get_current_date(context: JsonRuleContext) -> str:
     return get_now_us_eastern_date().isoformat()
 
+def get_uei(context: JsonRuleContext) -> str:
+    organization = context.application_form.application.organization
+    if organization is None:
+        return INDIVIDUAL_UEI
+
+    # This shouldn't happen during our pilot as all orgs should be created
+    # from sam.gov entity data in the first place, but just as a safety net
+    if organization.sam_gov_entity is None:
+        logger.error("Organization does not have a sam.gov entity, cannot determine UEI", extra={"organization_id": organization.organization_id})
+        return INDIVIDUAL_UEI
+
+    return organization.sam_gov_entity.uei
+
+def get_assistance_listing_number(context: JsonRuleContext) -> str | None:
+    competition = context.application_form.application.competition
+
+    if competition.opportunity_assistance_listing is None:
+        return None
+
+    return competition.opportunity_assistance_listing.assistance_listing_number
+
+def get_assistance_listing_program_title(context: JsonRuleContext) -> str | None:
+    competition = context.application_form.application.competition
+
+    if competition.opportunity_assistance_listing is None:
+        return None
+
+    return competition.opportunity_assistance_listing.program_title
+
+def get_public_competition_id(context: JsonRuleContext) -> str | None:
+    competition = context.application_form.application.competition
+    return competition.public_competition_id
+
+def get_competition_title(context: JsonRuleContext) -> str | None:
+    competition = context.application_form.application.competition
+    return competition.competition_title
 
 def get_signature(context: JsonRuleContext) -> str | None:
     # TODO - we don't yet have users names, so this arbitrarily grabs
@@ -43,6 +80,11 @@ PRE_POPULATION_MAPPER: dict[str, population_func] = {
     "opportunity_number": get_opportunity_number,
     "opportunity_title": get_opportunity_title,
     "agency_name": get_agency_name,
+    "uei": get_uei,
+    "assistance_listing_number": get_assistance_listing_number,
+    "assistance_listing_program_title": get_assistance_listing_program_title,
+    "public_competition_id": get_public_competition_id,
+    "competition_title": get_competition_title,
 }
 
 POST_POPULATION_MAPPER: dict[str, population_func] = {
