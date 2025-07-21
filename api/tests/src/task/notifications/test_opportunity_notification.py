@@ -998,7 +998,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on Simpler.Grants.gov",
+                    subject="Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
@@ -1022,7 +1022,7 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
+                    subject="Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
                         f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
@@ -1091,7 +1091,7 @@ class TestOpportunityNotification:
         )
 
         expected = UserOpportunityUpdateContent(
-            subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
+            subject="Your saved funding opportunity changed on Simpler.Grants.gov",
             message=(
                 f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                 '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
