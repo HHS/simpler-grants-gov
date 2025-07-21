@@ -351,8 +351,8 @@ class SearchQueryBuilder:
         self, aggregation_name: str, field_name: str, date_filter: DateSearchFilter
     ) -> typing.Self:
         """
-        Add a relative date range aggregation to the request. Date range aggregations group documents
-        into custom time ranges (e.g., "last 30 days", "past year") and return counts for each range.
+        Add a date range aggregation to the request. Date range aggregations group documents
+        into custom time ranges and return counts for each range.
 
         The date_filter provides either absolute or relative date boundaries.
         Only one of each side (start or end) should be set.
