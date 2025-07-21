@@ -62,16 +62,5 @@ def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict) -> 
     # Set the form instruction relationship
     form.form_instruction = form_instruction
 
-    # Re-fetch with relationships loaded if we created a new form
-    if existing_form is None:
-        form_with_relationships = db_session.scalar(
-            select(Form).options(selectinload(Form.form_instruction)).where(Form.form_id == form_id)
-        )
-
-        # This should never be None since we just created it, but handle it to satisfy mypy
-        if form_with_relationships is None:
-            raise_flask_error(500, "Failed to create form")
-
-        return form_with_relationships
 
     return form
