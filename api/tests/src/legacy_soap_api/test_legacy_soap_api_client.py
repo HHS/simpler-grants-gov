@@ -172,6 +172,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
                     ),
                     package_id=mock_competition.legacy_package_id,
                     agency_contact_info=mock_competition.contact_info,
+                    offering_agency=mock_competition.opportunity.agency_name,
                     schema_url=f"http://mock-applicants-soap-api/apply/opportunities/schemas/applicant/{mock_competition.legacy_package_id}.xsd",
                     funding_opportunity_title=mock_competition.opportunity.opportunity_title,
                     funding_opportunity_number=mock_competition.opportunity.opportunity_number,
