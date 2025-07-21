@@ -27,6 +27,7 @@ describe("SearchResultsTable", () => {
   it("passes accessibility test", async () => {
     const component = await SearchResultsTable({
       searchResults: [mockOpportunity],
+      page: 1,
     });
     const { container } = render(component);
     const results = await axe(container);
@@ -94,6 +95,7 @@ describe("SearchResultsTable", () => {
           summary: { ...mockOpportunity.summary, expected_number_of_awards: 1 },
         },
       ],
+      page: 1,
     });
     render(component);
 
@@ -143,6 +145,7 @@ describe("SearchResultsTable", () => {
           },
         },
       ],
+      page: 1,
     });
     render(component);
 
@@ -171,6 +174,7 @@ describe("SearchResultsTable", () => {
   it("displays a proper message when there are no results", async () => {
     const component = await SearchResultsTable({
       searchResults: [],
+      page: 1,
     });
     render(component);
     expect(screen.queryAllByRole("row")).toHaveLength(0);
