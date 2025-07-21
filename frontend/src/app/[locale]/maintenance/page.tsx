@@ -5,6 +5,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import ClientMaintenanceCheck from "src/components/ClientMaintenanceCheck";
+
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -25,10 +27,13 @@ export default function Maintenance({ params }: LocalizedPageProps) {
   });
 
   return (
-    <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 padding-x-5 tablet:padding-x-7 desktop-lg:padding-x-10 text-center">
-      <h2 className="margin-bottom-0">{t("heading")}</h2>
-      <p className="margin-x-auto">{body}</p>
-      <p className="margin-x-auto">{t("signOff")}</p>
-    </GridContainer>
+    <>
+      <ClientMaintenanceCheck />
+      <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 padding-x-5 tablet:padding-x-7 desktop-lg:padding-x-10 text-center">
+        <h2 className="margin-bottom-0">{t("heading")}</h2>
+        <p className="margin-x-auto">{body}</p>
+        <p className="margin-x-auto">{t("signOff")}</p>
+      </GridContainer>
+    </>
   );
 }
