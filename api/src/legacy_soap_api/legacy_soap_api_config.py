@@ -65,7 +65,6 @@ class SOAPOperationConfig:
     force_list_attributes: tuple | None = tuple()
 
 
-SIMPLER_SOAP_OPERATION_CONFIG_CACHE_SIZE = 10
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
     SimplerSoapAPI.APPLICANTS: {
         "GetOpportunityListRequest": SOAPOperationConfig(
@@ -78,7 +77,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
 }
 
 
-@lru_cache(maxsize=SIMPLER_SOAP_OPERATION_CONFIG_CACHE_SIZE)
+@lru_cache()
 def get_soap_operation_config(
     simpler_api: SimplerSoapAPI, request_operation_name: str
 ) -> SOAPOperationConfig | None:
