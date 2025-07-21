@@ -43,11 +43,11 @@ const legacyHost = (): string => {
     case "training":
       return "https://training.grants.gov";
     case "staging":
-      return "https://staging.grants.gov";
+      return "https://test.grants.gov";
     case "test":
       return "https://test.grants.gov";
     default:
-      return "https://dev.grants.gov";
+      return "https://test.grants.gov";
   }
 };
 
