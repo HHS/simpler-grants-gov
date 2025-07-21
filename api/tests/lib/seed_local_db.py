@@ -13,6 +13,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
@@ -93,6 +94,11 @@ def _build_pilot_competition(db_session: db.Session) -> None:
     project_abstract_summary = db_session.merge(ProjectAbstractSummary_v2_0, load=True)
     factories.CompetitionFormFactory.create(
         competition=pilot_competition, form=project_abstract_summary, is_required=True
+    )
+
+    sf424b = db_session.merge(SF424b_v1_1, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sf424b, is_required=True
     )
 
     sflll = db_session.merge(SFLLL_v2_0, load=True)
