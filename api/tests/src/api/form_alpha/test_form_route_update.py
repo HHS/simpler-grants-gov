@@ -8,6 +8,7 @@ def test_form_update_success_new_form(client, api_auth_token, enable_factory_cre
     form_id = uuid.uuid4()
     form_data = {
         "form_name": "New Test Form",
+        "short_form_name": "new_test_form",
         "form_version": "2.0",
         "agency_code": "TEST",
         "omb_number": "4040-0002",
@@ -26,6 +27,7 @@ def test_form_update_success_new_form(client, api_auth_token, enable_factory_cre
     form = response_data["data"]
     assert form["form_id"] == str(form_id)
     assert form["form_name"] == "New Test Form"
+    assert form["short_form_name"] == "new_test_form"
     assert form["form_version"] == "2.0"
     assert form["agency_code"] == "TEST"
     assert form["omb_number"] == "4040-0002"
@@ -34,11 +36,15 @@ def test_form_update_success_new_form(client, api_auth_token, enable_factory_cre
 def test_form_update_success_existing_form(client, api_auth_token, enable_factory_create):
     """Test successfully updating an existing form via PUT endpoint"""
     existing_form = FormFactory.create(
-        form_name="Original Name", form_version="1.0", agency_code="ORIG"
+        form_name="Original Name",
+        short_form_name="original_name",
+        form_version="1.0",
+        agency_code="ORIG",
     )
 
     form_data = {
         "form_name": "Updated Name",
+        "short_form_name": "updated_name",
         "form_version": "2.0",
         "agency_code": "UPD",
         "omb_number": "4040-0003",
@@ -59,6 +65,7 @@ def test_form_update_success_existing_form(client, api_auth_token, enable_factor
     form = response_data["data"]
     assert form["form_id"] == str(existing_form.form_id)
     assert form["form_name"] == "Updated Name"
+    assert form["short_form_name"] == "updated_name"
     assert form["form_version"] == "2.0"
     assert form["agency_code"] == "UPD"
     assert form["omb_number"] == "4040-0003"
@@ -71,6 +78,7 @@ def test_form_update_with_form_instruction(client, api_auth_token, enable_factor
 
     form_data = {
         "form_name": "Form with Instruction",
+        "short_form_name": "form_with_instruction",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -98,6 +106,7 @@ def test_form_update_invalid_form_instruction(client, api_auth_token, enable_fac
 
     form_data = {
         "form_name": "Form with Invalid Instruction",
+        "short_form_name": "form_with_invalid_instruction",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -120,7 +129,7 @@ def test_form_update_missing_required_fields(client, api_auth_token, enable_fact
     """Test updating a form with missing required fields"""
     form_id = uuid.uuid4()
 
-    # Missing form_name
+    # Missing form_name and short_form_name
     form_data = {
         "form_version": "1.0",
         "agency_code": "TEST",
@@ -139,6 +148,7 @@ def test_form_update_unauthorized_user(client, all_api_auth_tokens, enable_facto
 
     form_data = {
         "form_name": "Test Form",
+        "short_form_name": "test_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -166,6 +176,7 @@ def test_form_update_no_auth_token(client, enable_factory_create):
 
     form_data = {
         "form_name": "Test Form",
+        "short_form_name": "test_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,

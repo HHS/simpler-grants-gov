@@ -28,6 +28,13 @@ class FormAlphaSchema(Schema):
         metadata={"description": "The name of the form", "example": "ABC Project Form"}
     )
 
+    short_form_name = fields.String(
+        metadata={
+            "description": "The short name of the form used for making files",
+            "example": "abc_project",
+        }
+    )
+
     form_version = fields.String(
         metadata={"description": "The version of the form", "example": "1.0"}
     )
@@ -39,6 +46,11 @@ class FormAlphaSchema(Schema):
     omb_number = fields.String(
         allow_none=True,
         metadata={"description": "The OMB number for the form", "example": "4040-0001"},
+    )
+
+    legacy_form_id = fields.Integer(
+        allow_none=True,
+        metadata={"description": "The legacy form ID", "example": 123},
     )
 
     form_json_schema = fields.Dict(
@@ -106,6 +118,14 @@ class FormUpdateRequestSchema(Schema):
         metadata={"description": "The name of the form", "example": "ABC Project Form"},
     )
 
+    short_form_name = fields.String(
+        required=True,
+        metadata={
+            "description": "The short name of the form used for making files",
+            "example": "abc_project",
+        },
+    )
+
     form_version = fields.String(
         required=True, metadata={"description": "The version of the form", "example": "1.0"}
     )
@@ -117,6 +137,11 @@ class FormUpdateRequestSchema(Schema):
     omb_number = fields.String(
         allow_none=True,
         metadata={"description": "The OMB number for the form", "example": "4040-0001"},
+    )
+
+    legacy_form_id = fields.Integer(
+        allow_none=True,
+        metadata={"description": "The legacy form ID", "example": 123},
     )
 
     form_json_schema = fields.Dict(

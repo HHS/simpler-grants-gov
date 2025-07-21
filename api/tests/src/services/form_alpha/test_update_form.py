@@ -12,6 +12,7 @@ def test_update_form_create_new(enable_factory_create, db_session):
     form_id = uuid.uuid4()
     form_data = {
         "form_name": "New Test Form",
+        "short_form_name": "new_test_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": "4040-0001",
@@ -26,6 +27,7 @@ def test_update_form_create_new(enable_factory_create, db_session):
 
     assert form.form_id == form_id
     assert form.form_name == "New Test Form"
+    assert form.short_form_name == "new_test_form"
     assert form.form_version == "1.0"
     assert form.agency_code == "TEST"
     assert form.omb_number == "4040-0001"
@@ -33,16 +35,22 @@ def test_update_form_create_new(enable_factory_create, db_session):
     assert form.form_ui_schema == [{"type": "field"}]
     assert form.form_instruction_id is None
     assert form.form_rule_schema is None
+    assert form.legacy_form_id is None
 
 
 def test_update_form_update_existing(enable_factory_create, db_session):
     """Test updating an existing form"""
     existing_form = FormFactory.create(
-        form_name="Original Name", form_version="1.0", agency_code="ORIG", omb_number="0000-0001"
+        form_name="Original Name",
+        short_form_name="original_name",
+        form_version="1.0",
+        agency_code="ORIG",
+        omb_number="0000-0001",
     )
 
     form_data = {
         "form_name": "Updated Name",
+        "short_form_name": "updated_name",
         "form_version": "2.0",
         "agency_code": "UPD",
         "omb_number": "4040-0002",
@@ -57,6 +65,7 @@ def test_update_form_update_existing(enable_factory_create, db_session):
 
     assert form.form_id == existing_form.form_id
     assert form.form_name == "Updated Name"
+    assert form.short_form_name == "updated_name"
     assert form.form_version == "2.0"
     assert form.agency_code == "UPD"
     assert form.omb_number == "4040-0002"
@@ -72,6 +81,7 @@ def test_update_form_with_form_instruction(enable_factory_create, db_session):
 
     form_data = {
         "form_name": "Form with Instruction",
+        "short_form_name": "form_with_instruction",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -85,15 +95,17 @@ def test_update_form_with_form_instruction(enable_factory_create, db_session):
         form = update_form(db_session, form_id, form_data)
 
     assert form.form_instruction_id == form_instruction.form_instruction_id
+    assert form.form_instruction == form_instruction
 
 
-def test_update_form_invalid_form_instruction(enable_factory_create, db_session):
-    """Test updating a form with an invalid form instruction ID raises error"""
+def test_update_form_invalid_instruction(enable_factory_create, db_session):
+    """Test updating a form with invalid form instruction ID"""
     form_id = uuid.uuid4()
     invalid_instruction_id = uuid.uuid4()
 
     form_data = {
-        "form_name": "Form with Invalid Instruction",
+        "form_name": "Test Form",
+        "short_form_name": "test_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -107,7 +119,6 @@ def test_update_form_invalid_form_instruction(enable_factory_create, db_session)
         with db_session.begin():
             update_form(db_session, form_id, form_data)
 
-    # The exception should be a 404 error
     assert exc_info.value.status_code == 404
     assert f"Form instruction with ID {invalid_instruction_id} not found" in exc_info.value.message
 
@@ -117,6 +128,7 @@ def test_update_form_nullable_fields(enable_factory_create, db_session):
     form_id = uuid.uuid4()
     form_data = {
         "form_name": "Test Form",
+        "short_form_name": "test_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -132,6 +144,7 @@ def test_update_form_nullable_fields(enable_factory_create, db_session):
     assert form.omb_number is None
     assert form.form_instruction_id is None
     assert form.form_rule_schema is None
+    assert form.legacy_form_id is None
 
 
 def test_update_form_overwrite_instruction(enable_factory_create, db_session):
@@ -141,6 +154,7 @@ def test_update_form_overwrite_instruction(enable_factory_create, db_session):
 
     form_data = {
         "form_name": "Updated Form",
+        "short_form_name": "updated_form",
         "form_version": "1.0",
         "agency_code": "TEST",
         "omb_number": None,
@@ -154,3 +168,4 @@ def test_update_form_overwrite_instruction(enable_factory_create, db_session):
         form = update_form(db_session, existing_form.form_id, form_data)
 
     assert form.form_instruction_id is None
+    assert form.form_instruction is None
