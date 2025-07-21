@@ -58,7 +58,8 @@ locals {
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  network_config   = module.project_config.network_configs[local.environment_config.network_name]
+  healthcheck_path = "/api/health"
 }
 
 terraform {
@@ -183,5 +184,10 @@ module "service" {
     } : {}
   )
 
-  is_temporary = local.is_temporary
+  is_temporary     = local.is_temporary
+  healthcheck_path = local.healthcheck_path
+  healthcheck_command = [
+    "CMD-SHELL",
+    "wget --no-verbose --tries=1 --spider http://localhost:8000${local.healthcheck_path} || exit 1"
+  ]
 }
