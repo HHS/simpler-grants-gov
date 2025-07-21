@@ -107,7 +107,7 @@ def _parse_aggregations(
           ]
         },
         "close_date": {
-            {'buckets': [{'key': '7', 'from': 1753660800000.0, 'from_as_string': '2025-07-28', 'to': 1753119560446.0, 'to_as_string': '2025-07-21', 'doc_count': 0}
+            {'buckets': [{'key': '7', 'from': 1753119560446.0, 'from_as_string': '2025-07-21', 'to': 1753660800000.0, 'to_as_string': '2025-07-28', 'doc_count': 0}
         }
     }
     """
