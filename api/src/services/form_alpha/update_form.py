@@ -62,5 +62,4 @@ def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict) -> 
     # Set the form instruction relationship
     form.form_instruction = form_instruction
 
-
     return form
