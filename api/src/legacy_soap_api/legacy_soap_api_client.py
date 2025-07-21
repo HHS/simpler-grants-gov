@@ -91,9 +91,12 @@ class BaseSOAPClient:
                 self.operation_config.response_operation_name
             )
         except ValidationError as e:
-            msg = "Could not parse proxy response into Simpler SOAP response pydantic schema."
-            error_fields = {err["loc"] for err in e.errors()}
-            logger.info(msg=msg, extra={"simpler_soap_api_error": error_fields})
+            msg = f"Could not parse proxy response {str(simpler_response_schema)} into Simpler SOAP response pydantic schema."
+            error_fields = {(err["type"], err["loc"]) for err in e.errors()}
+            logger.info(
+                msg=f"{msg} {error_fields}",
+                extra={"simpler_soap_api_error": "proxy_response_validation"},
+            )
         except Exception as e:
             logger.info(
                 msg="Could not parse proxy response",
