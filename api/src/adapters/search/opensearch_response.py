@@ -113,9 +113,6 @@ def _parse_aggregations(
     """
 
     aggregations: dict[str, dict[str, int]] = {}
-    import pdb
-
-    pdb.set_trace()
     for field, raw_agg_value in raw_aggs.items():
         buckets: list[dict[str, typing.Any]] = raw_agg_value.get("buckets", [])
         field_aggregation: dict[str, int] = {}
