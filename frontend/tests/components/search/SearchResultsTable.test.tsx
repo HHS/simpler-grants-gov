@@ -35,6 +35,7 @@ describe("SearchResultsTable", () => {
   it("matches snapshot", async () => {
     const component = await SearchResultsTable({
       searchResults: [mockOpportunity],
+      page: 1,
     });
     const { container } = render(component);
     expect(container).toMatchSnapshot();
@@ -48,6 +49,7 @@ describe("SearchResultsTable", () => {
           opportunity_id: "0bfdd67c-e58a-4005-bfd1-12cfe592b17e",
         },
       ],
+      page: 1,
     });
     render(component);
 
@@ -59,6 +61,7 @@ describe("SearchResultsTable", () => {
   it("displays headings for all columns as expected", async () => {
     const component = await SearchResultsTable({
       searchResults: [mockOpportunity],
+      page: 1,
     });
     render(component);
 
