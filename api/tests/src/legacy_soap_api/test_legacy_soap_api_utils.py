@@ -3,12 +3,17 @@ from unittest.mock import Mock, patch
 
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    HIDDEN_VALUE,
+    _hide_value,
     bool_to_string,
+    diff_list_of_dicts,
+    diff_soap_dicts,
     ensure_dot_prefix,
     filter_headers,
     format_local_soap_response,
     get_auth_error_response,
     get_streamed_soap_response,
+    is_list_of_dicts,
 )
 
 
@@ -78,69 +83,6 @@ def test_bool_to_string() -> None:
     assert bool_to_string(None) is None
 
 
-def is_list_of_dicts(lst: list) -> bool:
-    return isinstance(lst, list) and all(isinstance(item, dict) for item in lst)
-
-
-def dict_diff(
-    sgg_dict: dict, gg_dict: dict, key_indexes: dict | None = None, keys_only: bool = False
-):
-    # if a dict key, value pair are not equal and are instances of a list of dicts, use list_of_dict_key_indexes
-    # to determine how to match up entries based on the key name and which key name to use to find and compare
-    # the dicts with the specified matching key name.
-    key_indexes = key_indexes if key_indexes else {}
-    sgg_keys = set(sgg_dict.keys())
-    gg_keys = set(gg_dict.keys())
-
-    key_diffs = {}
-    if keys_only_in_sgg := sgg_keys - gg_keys:
-        key_diffs["keys_only_in_sgg"] = {k: sgg_dict[k] for k in keys_only_in_sgg}
-    if keys_only_in_gg := gg_keys - sgg_keys:
-        key_diffs["keys_only_in_gg"] = {k: gg_dict[k] for k in keys_only_in_gg}
-
-    differing = {}
-    for k in sgg_keys & gg_keys:
-        sgg_value, gg_value = sgg_dict[k], gg_dict[k]
-        if isinstance(sgg_value, dict) and isinstance(gg_value, dict):
-            nested_diff = dict_diff(sgg_value, gg_value, key_indexes, keys_only)
-            if nested_diff:
-                differing[k] = nested_diff
-        elif sgg_value != gg_value:
-            # Only support diffing list of dicts if key_indexes is specified
-            if key_indexes and is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
-                key_index = key_indexes.get(k)
-                if key_index:
-                    differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index)
-            else:
-                differing[k] = {"sgg_dict": sgg_value, "gg_dict": gg_value}
-
-    return {**key_diffs, **differing}
-
-
-def diff_list_of_dicts(sgg_list: list[dict], gg_list: list[dict], index_key: str):
-    """
-    Get the differences from dicts within a list of dicts.
-
-    The index_key param indicates how to find the corresponding dict in the list.
-    """
-    sgg_dict = {item[index_key]: item for item in sgg_list if index_key in item}
-    sgg_dict_keys = sgg_dict.keys()
-    gg_dict = {item[index_key]: item for item in gg_list if index_key in item}
-    gg_dict_keys = gg_dict.keys()
-    only_in_sgg = {k: sgg_dict[k] for k in sgg_dict_keys - gg_dict_keys}
-    only_in_gg = {k: gg_dict[k] for k in gg_dict_keys - sgg_dict_keys}
-    return {
-        "index_key": index_key,
-        "found_only_in_sgg": list(only_in_sgg.values()),
-        "found_only_in_gg": list(only_in_gg.values()),
-        "different_values": {
-            k: {"sgg_dict": sgg_dict[k], "gg_dict": gg_dict[k]}
-            for k in sgg_dict_keys & gg_dict_keys
-            if sgg_dict[k] != gg_dict[k]
-        },
-    }
-
-
 def test_is_list_of_dicts_true():
     assert is_list_of_dicts([{"a": 1}, {"b": 2}]) is True
 
@@ -153,34 +95,114 @@ def test_is_list_of_dicts_false_list_not_all_dicts():
     assert is_list_of_dicts([{"a": 1}, 2, "x"]) is False
 
 
-def test_dict_diff_simple_difference():
+def test_diff_soap_dicts_simple_difference_keys_only():
     sgg = {"a": 1, "b": 2}
     gg = {"a": 1, "b": 3}
-    result = dict_diff(sgg, gg)
+    result = diff_soap_dicts(sgg, gg, keys_only=True)
+    expected = {"b": {"sgg_dict": HIDDEN_VALUE, "gg_dict": HIDDEN_VALUE}}
+    assert result == expected
+
+
+def test_diff_soap_dicts_missing_keys_keys_only():
+    sgg = {"a": 1, "b": 2}
+    gg = {"a": 1, "c": 3}
+    result = diff_soap_dicts(sgg, gg, keys_only=True)
+    expected = {"keys_only_in_sgg": {"b": HIDDEN_VALUE}, "keys_only_in_gg": {"c": HIDDEN_VALUE}}
+    assert result == expected
+
+
+def test_diff_soap_dicts_nested_dict_keys_only():
+    sgg = {"a": {"x": 1, "y": 2}}
+    gg = {"a": {"x": 1, "y": 3}}
+    result = diff_soap_dicts(sgg, gg, keys_only=True)
+    expected = {"a": {"y": {"sgg_dict": HIDDEN_VALUE, "gg_dict": HIDDEN_VALUE}}}
+    assert result == expected
+
+
+def test_diff_soap_dicts_list_of_dicts_keys_only():
+    sgg = {"a": [{"id": 1, "val": 10}, {"id": 2, "val": 20}]}
+    gg = {"a": [{"id": 2, "val": 20}, {"id": 3, "val": 30}]}
+    result = diff_soap_dicts(sgg, gg, key_indexes={"a": "id"}, keys_only=True)
+    expected = {
+        "a": {
+            "index_key": "id",
+            "count_found_only_in_sgg": 1,
+            "count_found_only_in_gg": 1,
+            "count_different_values": 0,
+        }
+    }
+    assert result == expected
+
+
+def test_diff_soap_dicts_list_of_dicts_with_value_diff_keys_only():
+    sgg = {"a": [{"id": 1, "val": 10}, {"id": 2, "val": 32}]}
+    gg = {"a": [{"id": 1, "val": 99}, {"id": 2, "val": 322}]}
+    result = diff_soap_dicts(sgg, gg, key_indexes={"a": "id"}, keys_only=True)
+    expected = {
+        "a": {
+            "index_key": "id",
+            "count_found_only_in_sgg": 0,
+            "count_found_only_in_gg": 0,
+            "count_different_values": 2,
+        }
+    }
+    assert result == expected
+
+
+def test_diff_list_of_dicts_basic_keys_only():
+    sgg_list = [{"id": 1, "val": 100}, {"id": 2, "val": 200}]
+    gg_list = [{"id": 2, "val": 200}, {"id": 3, "val": 300}]
+    result = diff_list_of_dicts(sgg_list, gg_list, index_key="id", keys_only=True)
+    expected = {
+        "index_key": "id",
+        "count_found_only_in_sgg": 1,
+        "count_found_only_in_gg": 1,
+        "count_different_values": 0,
+    }
+    assert result == expected
+
+
+def test_diff_list_of_dicts_value_mismatch_keys_only():
+    sgg_list = [{"id": 1, "val": 100}]
+    gg_list = [{"id": 1, "val": 101}]
+    result = diff_list_of_dicts(sgg_list, gg_list, index_key="id", keys_only=True)
+    expected = {
+        "index_key": "id",
+        "count_found_only_in_sgg": 0,
+        "count_found_only_in_gg": 0,
+        "count_different_values": 1,
+    }
+    assert result == expected
+
+
+def test_diff_soap_dicts_simple_difference():
+    sgg = {"a": 1, "b": 2}
+    gg = {"a": 1, "b": 3}
+    result = diff_soap_dicts(sgg, gg)
     expected = {"b": {"sgg_dict": 2, "gg_dict": 3}}
     assert result == expected
 
 
-def test_dict_diff_missing_keys():
+def test_diff_soap_dicts_missing_keys():
     sgg = {"a": 1, "b": 2}
     gg = {"a": 1, "c": 3}
-    result = dict_diff(sgg, gg)
+    result = diff_soap_dicts(sgg, gg)
     expected = {"keys_only_in_sgg": {"b": 2}, "keys_only_in_gg": {"c": 3}}
     assert result == expected
 
 
-def test_dict_diff_nested_dict():
+def test_diff_soap_dicts_nested_dict():
     sgg = {"a": {"x": 1, "y": 2}}
     gg = {"a": {"x": 1, "y": 3}}
-    result = dict_diff(sgg, gg)
+    result = diff_soap_dicts(sgg, gg)
     expected = {"a": {"y": {"sgg_dict": 2, "gg_dict": 3}}}
     assert result == expected
 
 
-def test_dict_diff_list_of_dicts():
+def test_diff_soap_dicts_list_of_dicts():
     sgg = {"a": [{"id": 1, "val": 10}, {"id": 2, "val": 20}]}
     gg = {"a": [{"id": 2, "val": 20}, {"id": 3, "val": 30}]}
-    result = dict_diff(sgg, gg, key_indexes={"a": "id"})
+    result = diff_soap_dicts(sgg, gg, key_indexes={"a": "id"})
     expected = {
         "a": {
             "index_key": "id",
@@ -192,17 +214,18 @@ def test_dict_diff_list_of_dicts():
     assert result == expected
 
 
-def test_dict_diff_list_of_dicts_with_value_diff():
-    sgg = {"a": [{"id": 1, "val": 10}]}
-    gg = {"a": [{"id": 1, "val": 99}]}
-    result = dict_diff(sgg, gg, key_indexes={"a": "id"})
+def test_diff_soap_dicts_list_of_dicts_with_value_diff():
+    sgg = {"a": [{"id": 1, "val": 10}, {"id": 2, "val": 32}]}
+    gg = {"a": [{"id": 1, "val": 99}, {"id": 2, "val": 322}]}
+    result = diff_soap_dicts(sgg, gg, key_indexes={"a": "id"})
     expected = {
         "a": {
             "index_key": "id",
             "found_only_in_sgg": [],
             "found_only_in_gg": [],
             "different_values": {
-                1: {"sgg_dict": {"id": 1, "val": 10}, "gg_dict": {"id": 1, "val": 99}}
+                1: {"sgg_dict": {"id": 1, "val": 10}, "gg_dict": {"id": 1, "val": 99}},
+                2: {"sgg_dict": {"id": 2, "val": 32}, "gg_dict": {"id": 2, "val": 322}},
             },
         }
     }
@@ -235,3 +258,8 @@ def test_diff_list_of_dicts_value_mismatch():
         },
     }
     assert result == expected
+
+
+def test_hidden_value():
+    assert _hide_value("a", False) == "a"
+    assert _hide_value("a", True) == HIDDEN_VALUE
