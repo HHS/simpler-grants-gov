@@ -807,9 +807,9 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             (
                 "king",
                 ["title"],
-                DateSearchFilter(start_date_relative=-20000),
+                DateSearchFilter(end_date_relative=15),
                 [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
-                2,
+                3,
             ),
         ],
     )
