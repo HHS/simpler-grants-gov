@@ -3129,6 +3129,10 @@ components:
           type: string
           description: The name of the form
           example: ABC Project Form
+        short_form_name:
+          type: string
+          description: The short name of the form used for making files
+          example: abc_project
         form_version:
           type: string
           description: The version of the form
@@ -3143,6 +3147,12 @@ components:
           - 'null'
           description: The OMB number for the form
           example: 4040-0001
+        legacy_form_id:
+          type:
+          - integer
+          - 'null'
+          description: The legacy form ID
+          example: 123
         form_json_schema:
           type: object
           description: The JSON Schema representation of the form
@@ -3233,6 +3243,10 @@ components:
           type: string
           description: The name of the form
           example: ABC Project Form
+        short_form_name:
+          type: string
+          description: The short name of the form used for making files
+          example: abc_project
         form_version:
           type: string
           description: The version of the form
@@ -3247,6 +3261,12 @@ components:
           - 'null'
           description: The OMB number for the form
           example: 4040-0001
+        legacy_form_id:
+          type:
+          - integer
+          - 'null'
+          description: The legacy form ID
+          example: 123
         form_json_schema:
           type: object
           description: The JSON Schema representation of the form
@@ -3304,6 +3324,7 @@ components:
       - form_name
       - form_ui_schema
       - form_version
+      - short_form_name
     FormUpdateResponse:
       type: object
       properties:
