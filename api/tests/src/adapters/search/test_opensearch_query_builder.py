@@ -5,6 +5,7 @@ import pytest
 
 from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
+from src.search.search_models import DateSearchFilter
 from tests.conftest import BaseTestClass
 
 WAY_OF_KINGS = {
@@ -792,3 +793,101 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         }
 
         validate_valid_request(search_client, search_index, builder, expected_results)
+
+    @pytest.mark.parametrize(
+        "query,fields,date_filter,expected_results,expected_agg_count",
+        [
+            (
+                "king",
+                ["title"],
+                DateSearchFilter(start_date=date(1900, 1, 1), end_date=date(2025, 12, 31)),
+                [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
+                3,
+            ),
+            (
+                "king",
+                ["title"],
+                DateSearchFilter(start_date_relative=-20000),
+                [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
+                2,
+            ),
+        ],
+    )
+    def test_query_builder_simple_query_and_date_range_aggregations(
+        self,
+        search_client,
+        search_index,
+        query,
+        fields,
+        date_filter,
+        expected_results,
+        expected_agg_count,
+    ):
+        # Add a sort by ID ascending to make it so any relevancy from this is ignored, just testing that values returned
+        builder = SearchQueryBuilder().sort_by([("id", SortDirection.ASCENDING)])
+
+        builder.simple_query(query, fields, "AND")
+
+        builder.aggregation_relative_date_range("publication_date", "publication_date", date_filter)
+
+        if date_filter.start_date:
+            start_label = date_filter.start_date.isoformat()
+        elif date_filter.start_date_relative is not None:
+            start_label = str(date_filter.start_date_relative)
+        else:
+            start_label = "*"
+
+        if date_filter.end_date:
+            end_label = date_filter.end_date.isoformat()
+        elif date_filter.end_date_relative is not None:
+            end_label = str(date_filter.end_date_relative)
+        else:
+            end_label = "*"
+
+        expected_key = f"{start_label}_to_{end_label}"
+
+        expected_aggregations = {"publication_date": {expected_key: expected_agg_count}}
+
+        built_aggs = builder.build()["aggs"]
+        actual_range = built_aggs["publication_date"]["date_range"]["ranges"][0]
+
+        expected_range = {"key": expected_key}
+
+        if "from" in actual_range:
+            expected_range["from"] = actual_range["from"]
+        if "to" in actual_range:
+            expected_range["to"] = actual_range["to"]
+
+        assert builder.build() == {
+            "size": 25,
+            "from": 0,
+            "track_scores": True,
+            "track_total_hits": True,
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "simple_query_string": {
+                                "query": query,
+                                "fields": fields,
+                                "default_operator": "AND",
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": [{"id": {"order": "asc"}}],
+            "aggs": {
+                "publication_date": {
+                    "date_range": {
+                        "field": "publication_date",
+                        "keyed": True,
+                        "ranges": [expected_range],
+                    }
+                }
+            },
+        }
+
+        validate_valid_request(
+            search_client, search_index, builder, expected_results, expected_aggregations
+        )

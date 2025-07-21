@@ -124,7 +124,9 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     return sort_by
 
 
-def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
+def _add_aggregations(
+    builder: search.SearchQueryBuilder, filters: OpportunityFilters | None
+) -> None:
     # TODO - we'll likely want to adjust the total number of values returned, especially
     # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
     builder.aggregation_terms(
@@ -148,6 +150,12 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         "is_cost_sharing",
         _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
     )
+    if filters and filters.close_date:
+        builder.aggregation_relative_date_range(
+            "close_date",
+            _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+            filters.close_date,
+        )
 
 
 def _add_top_level_agency_prefix(
@@ -206,7 +214,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     if aggregation:
         # Aggregations / Facet / Filter Counts
-        _add_aggregations(builder)
+        _add_aggregations(builder, params.filters)
 
     return builder.build()
 
@@ -217,12 +225,10 @@ def _search_opportunities(
     includes: list | None = None,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
-
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
-
     response = search_client.search(
         index_alias, search_request, includes=includes, excludes=["attachments"]
     )

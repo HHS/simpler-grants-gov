@@ -2,6 +2,7 @@ import datetime
 import typing
 
 from src.pagination.pagination_models import SortDirection
+from src.search.search_models import DateSearchFilter
 
 
 class SearchQueryBuilder:
@@ -345,3 +346,48 @@ class SearchQueryBuilder:
             request["aggs"] = self.aggregations
 
         return request
+
+    def aggregation_relative_date_range(
+        self, aggregation_name: str, field_name: str, date_filter: DateSearchFilter
+    ) -> typing.Self:
+        """
+        Add a relative date range aggregation to the request. Date range aggregations group documents
+        into custom time ranges (e.g., "last 30 days", "past year") and return counts for each range.
+
+        The date_filter provides either absolute or relative date boundaries.
+        Only one of each side (start or end) should be set.
+
+        See: https://opensearch.org/docs/latest/aggregations/bucket/date-range/
+        """
+
+        def format_bound(absolute: datetime.date | None, relative: int | None) -> str | None:
+            if absolute:
+                return absolute.isoformat()
+            elif relative is not None:
+                sign = "+" if relative >= 0 else "-"
+                return f"now{sign}{abs(relative)}d/d"
+            return None
+
+        from_val = format_bound(date_filter.start_date, date_filter.start_date_relative)
+        to_val = format_bound(date_filter.end_date, date_filter.end_date_relative)
+
+        def key_label(val: datetime.date | int | None) -> str:
+            if isinstance(val, datetime.date):
+                return val.isoformat()
+            elif isinstance(val, int):
+                return str(val)
+            return "*"
+
+        key = f"{key_label(date_filter.start_date or date_filter.start_date_relative)}_to_{key_label(date_filter.end_date or date_filter.end_date_relative)}"
+
+        range_def = {"key": key}
+        if from_val:
+            range_def["from"] = from_val
+        if to_val:
+            range_def["to"] = to_val
+
+        self.aggregations[aggregation_name] = {
+            "date_range": {"field": field_name, "keyed": True, "ranges": [range_def]}
+        }
+
+        return self
