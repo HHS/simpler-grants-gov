@@ -44,36 +44,15 @@ def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict) -> 
         if form_instruction is None:
             raise_flask_error(404, f"Form instruction with ID {form_instruction_id} not found")
 
-    if existing_form:
-        # Update existing form
-        logger.info("Updating existing form", extra={"form_id": form_id})
-        existing_form.form_name = form_data["form_name"]
-        existing_form.form_version = form_data["form_version"]
-        existing_form.agency_code = form_data["agency_code"]
-        existing_form.omb_number = form_data.get("omb_number")
-        existing_form.form_json_schema = form_data["form_json_schema"]
-        existing_form.form_ui_schema = form_data["form_ui_schema"]
-        existing_form.form_instruction_id = form_instruction_id
-        existing_form.form_rule_schema = form_data.get("form_rule_schema")
-
-        # Return the updated form with eagerly loaded relationships
-        return existing_form
-    else:
-        # Create new form
+    if form is None:
         logger.info("Creating new form", extra={"form_id": form_id})
-        new_form = Form(
-            form_id=form_id,
-            form_name=form_data["form_name"],
-            form_version=form_data["form_version"],
-            agency_code=form_data["agency_code"],
-            omb_number=form_data.get("omb_number"),
-            form_json_schema=form_data["form_json_schema"],
-            form_ui_schema=form_data["form_ui_schema"],
-            form_instruction_id=form_instruction_id,
-            form_rule_schema=form_data.get("form_rule_schema"),
-        )
-        db_session.add(new_form)
-        db_session.flush()  # Flush to get the ID assigned
+        form = Form()
+        db_session.add(form)
+   else:
+        logger.info("Updating existing form", extra={"form_id": form_id})
+        
+    for field, value in form_data.items():
+         setattr(form, field, value)
 
         # Re-fetch with relationships loaded
         form_with_relationships = db_session.scalar(
