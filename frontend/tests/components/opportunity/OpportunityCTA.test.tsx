@@ -24,7 +24,7 @@ describe("OpportunityCTA", () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute(
       "href",
-      "https://dev.grants.gov/search-results-detail/1",
+      "https://test.grants.gov/search-results-detail/1",
     );
   });
 });
