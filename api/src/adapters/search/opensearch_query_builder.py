@@ -3,14 +3,6 @@ import typing
 
 from src.pagination.pagination_models import SortDirection
 
-STATIC_DATE_RANGES: list = [
-    {"from": "now", "to": "now+7d/d", "key": "7"},
-    {"from": "now", "to": "now+30d/d", "key": "30"},
-    {"from": "now", "to": "now+60d/d", "key": "60"},
-    {"from": "now", "to": "now+90d/d", "key": "90"},
-    {"from": "now", "to": "now+120d/d", "key": "120"},
-]
-
 
 class SearchQueryBuilder:
     """
@@ -358,9 +350,10 @@ class SearchQueryBuilder:
         self,
         aggregation_name: str,
         field_name: str,
+        ranges: list[dict]
     ) -> typing.Self:
         """
-        Add a static relative date range aggregation to the request. Date range aggregations group documents
+        Add a relative date range aggregation to the request. Date range aggregations group documents
         into custom time ranges and return counts for each range.
 
         See: https://opensearch.org/docs/latest/aggregations/bucket/date-range/
@@ -369,7 +362,7 @@ class SearchQueryBuilder:
             "date_range": {
                 "field": field_name,
                 "format": "YYYY-MM-dd",
-                "ranges": STATIC_DATE_RANGES,
+                "ranges": ranges,
             }
         }
         return self

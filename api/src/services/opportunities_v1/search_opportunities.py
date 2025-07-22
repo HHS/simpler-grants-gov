@@ -73,6 +73,14 @@ STATIC_PAGINATION = {
     }
 }
 
+STATIC_DATE_RANGES: list = [
+    {"from": "now", "to": "now+7d/d", "key": "7"},
+    {"from": "now", "to": "now+30d/d", "key": "30"},
+    {"from": "now", "to": "now+60d/d", "key": "60"},
+    {"from": "now", "to": "now+90d/d", "key": "90"},
+    {"from": "now", "to": "now+120d/d", "key": "120"},
+]
+
 SCHEMA = OpportunityV1Schema()
 
 
@@ -124,9 +132,7 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     return sort_by
 
 
-def _add_aggregations(
-    builder: search.SearchQueryBuilder, filters: OpportunityFilters | None
-) -> None:
+def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     # TODO - we'll likely want to adjust the total number of values returned, especially
     # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
     builder.aggregation_terms(
@@ -153,6 +159,7 @@ def _add_aggregations(
     builder.aggregation_relative_date_range(
         "close_date",
         _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+        STATIC_DATE_RANGES,
     )
 
 
@@ -212,7 +219,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     if aggregation:
         # Aggregations / Facet / Filter Counts
-        _add_aggregations(builder, params.filters)
+        _add_aggregations(builder)
 
     return builder.build()
 

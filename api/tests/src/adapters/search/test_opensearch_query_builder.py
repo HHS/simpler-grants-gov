@@ -4,8 +4,9 @@ from datetime import date
 import pytest
 from freezegun import freeze_time
 
-from src.adapters.search.opensearch_query_builder import STATIC_DATE_RANGES, SearchQueryBuilder
+from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
+from src.services.opportunities_v1.search_opportunities import STATIC_DATE_RANGES
 from tests.conftest import BaseTestClass
 
 WAY_OF_KINGS = {
@@ -126,7 +127,7 @@ SHADOWS_OF_WINTER = {
     "author": "Katherine Arden",
     "in_stock": True,
     "page_count": 1040,
-    "publication_date": "2025-09-19",
+    "publication_date": "2025-10-10",
 }
 WINTERBORN_LEGACY = {
     "id": 16,
@@ -177,7 +178,6 @@ def validate_valid_request(
     assert (
         resp.records == expected_results
     ), f"{[record['title'] for record in resp.records]} != {[expected['title'] for expected in expected_results]}"
-
     if expected_aggregations is not None:
         assert resp.aggregations == expected_aggregations
 
@@ -864,7 +864,9 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
 
         builder.simple_query(query, fields, "AND")
 
-        builder.aggregation_relative_date_range("publication_date", "publication_date")
+        builder.aggregation_relative_date_range(
+            "publication_date", "publication_date", STATIC_DATE_RANGES
+        )
 
         assert builder.build() == {
             "size": 25,
