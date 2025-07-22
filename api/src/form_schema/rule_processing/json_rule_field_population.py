@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 INDIVIDUAL_UEI = "000000000INDV"
 
+
 def get_opportunity_number(context: JsonRuleContext) -> str | None:
     return context.opportunity.opportunity_number
 
@@ -27,6 +28,7 @@ def get_agency_name(context: JsonRuleContext) -> str | None:
 def get_current_date(context: JsonRuleContext) -> str:
     return get_now_us_eastern_date().isoformat()
 
+
 def get_uei(context: JsonRuleContext) -> str:
     organization = context.application_form.application.organization
     if organization is None:
@@ -35,10 +37,14 @@ def get_uei(context: JsonRuleContext) -> str:
     # This shouldn't happen during our pilot as all orgs should be created
     # from sam.gov entity data in the first place, but just as a safety net
     if organization.sam_gov_entity is None:
-        logger.error("Organization does not have a sam.gov entity, cannot determine UEI", extra={"organization_id": organization.organization_id})
+        logger.error(
+            "Organization does not have a sam.gov entity, cannot determine UEI",
+            extra={"organization_id": organization.organization_id},
+        )
         return INDIVIDUAL_UEI
 
     return organization.sam_gov_entity.uei
+
 
 def get_assistance_listing_number(context: JsonRuleContext) -> str | None:
     competition = context.application_form.application.competition
@@ -48,6 +54,7 @@ def get_assistance_listing_number(context: JsonRuleContext) -> str | None:
 
     return competition.opportunity_assistance_listing.assistance_listing_number
 
+
 def get_assistance_listing_program_title(context: JsonRuleContext) -> str | None:
     competition = context.application_form.application.competition
 
@@ -56,13 +63,16 @@ def get_assistance_listing_program_title(context: JsonRuleContext) -> str | None
 
     return competition.opportunity_assistance_listing.program_title
 
+
 def get_public_competition_id(context: JsonRuleContext) -> str | None:
     competition = context.application_form.application.competition
     return competition.public_competition_id
 
+
 def get_competition_title(context: JsonRuleContext) -> str | None:
     competition = context.application_form.application.competition
     return competition.competition_title
+
 
 def get_signature(context: JsonRuleContext) -> str | None:
     # TODO - we don't yet have users names, so this arbitrarily grabs
