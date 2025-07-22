@@ -115,6 +115,7 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               >
                 <a
                   href="/opportunity/63588df8-f2d1-44ed-a201-5804abba696a"
+                  id="search-result-link-1-1"
                 >
                   Test Opportunity
                 </a>
