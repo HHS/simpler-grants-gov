@@ -114,7 +114,27 @@ class BaseSOAPClient:
         """
         proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
         simpler_response_soap_dict = self.get_soap_response_dict()
-        diff_soap_dicts(simpler_response_soap_dict, proxy_response_soap_dict)
+
+        try:
+            diff_results = diff_soap_dicts(
+                sgg_dict=get_envelope_dict(
+                    simpler_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                gg_dict=get_envelope_dict(
+                    proxy_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                key_indexes=self.operation_config.key_indexes,
+                keys_only=True,
+            )
+            logger.info("soap_api_diff complete", extra={"soap_api_diff": diff_results})
+        except Exception as e:
+            logger.info(
+                "soap_api_diff incomplete",
+                {
+                    "soap_api_error": "soap_response_diff",
+                    "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
+                },
+            )
 
         try:
             simpler_soap_response_payload = SOAPPayload(
