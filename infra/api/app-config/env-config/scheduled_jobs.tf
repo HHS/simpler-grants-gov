@@ -76,7 +76,7 @@ locals {
     email_notification_opportunity = {
       task_command = ["poetry", "run", "flask", "task", "email-notifications"]
       # Every day at 11:40am Eastern Time during DST. 12:40pm during non-DST.
-      schedule_expression = "cron(40 15 * * ? *)"
+      schedule_expression = "cron(40 16 * * ? *)"
       state               = "ENABLED"
     }
   }
