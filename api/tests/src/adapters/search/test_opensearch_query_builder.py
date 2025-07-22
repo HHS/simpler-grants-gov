@@ -2,9 +2,11 @@ import uuid
 from datetime import date
 
 import pytest
+from freezegun import freeze_time
 
 from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
+from src.services.opportunities_v1.search_opportunities import STATIC_DATE_RANGES
 from tests.conftest import BaseTestClass
 
 WAY_OF_KINGS = {
@@ -103,6 +105,47 @@ RETURN_OF_THE_KING = {
     "page_count": 416,
     "publication_date": "1955-10-20",
 }
+WINDS_OF_WINTER = {
+    "id": 13,
+    "title": "Winds of Winter",
+    "author": "George R.R. Martin",
+    "in_stock": False,
+    "page_count": 2000,
+    "publication_date": "2025-11-17",
+}
+CALL_OF_WINTER = {
+    "id": 14,
+    "title": "The Call of Winter",
+    "author": "Tasha Suri",
+    "in_stock": False,
+    "page_count": 880,
+    "publication_date": "2025-09-18",
+}
+SHADOWS_OF_WINTER = {
+    "id": 15,
+    "title": "Shadows of Winter",
+    "author": "Katherine Arden",
+    "in_stock": True,
+    "page_count": 1040,
+    "publication_date": "2025-10-10",
+}
+WINTERBORN_LEGACY = {
+    "id": 16,
+    "title": "The Winter born Legacy",
+    "author": "Naomi Novik",
+    "in_stock": True,
+    "page_count": 720,
+    "publication_date": "2025-08-19",
+}
+
+WINTER = {
+    "id": 17,
+    "title": "Winter",
+    "author": "Melissa Albert",
+    "in_stock": True,
+    "page_count": 560,
+    "publication_date": "2025-07-23",
+}
 
 FULL_DATA = [
     WAY_OF_KINGS,
@@ -132,11 +175,9 @@ def validate_valid_request(
         pytest.fail(
             f"Request generated was invalid and caused an error in search client: {json_value}"
         )
-
     assert (
         resp.records == expected_results
     ), f"{[record['title'] for record in resp.records]} != {[expected['title'] for expected in expected_results]}"
-
     if expected_aggregations is not None:
         assert resp.aggregations == expected_aggregations
 
@@ -792,3 +833,71 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         }
 
         validate_valid_request(search_client, search_index, builder, expected_results)
+
+    @pytest.mark.parametrize(
+        "query,fields,expected_results,expected_aggregations",
+        [
+            (
+                "winter",
+                ["title"],
+                [WINDS_OF_WINTER, CALL_OF_WINTER, SHADOWS_OF_WINTER, WINTERBORN_LEGACY, WINTER],
+                {"publication_date": {"120": 5, "90": 4, "60": 3, "30": 2, "7": 1}},
+            ),
+        ],
+    )
+    @freeze_time("2025-07-21")
+    def test_query_builder_simple_query_and_date_range_aggregations(
+        self, search_client, query, fields, expected_results, expected_aggregations
+    ):
+        # seed data
+        index_name = f"test-search-index-{uuid.uuid4().int}"
+        search_client.create_index(index_name)
+
+        search_client.bulk_upsert(
+            index_name,
+            [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER, WINDS_OF_WINTER, SHADOWS_OF_WINTER],
+            primary_key_field="id",
+        )
+
+        # Add a sort by ID ascending to make it so any relevancy from this is ignored, just testing that values returned
+        builder = SearchQueryBuilder().sort_by([("id", SortDirection.ASCENDING)])
+
+        builder.simple_query(query, fields, "AND")
+
+        builder.aggregation_relative_date_range(
+            "publication_date", "publication_date", STATIC_DATE_RANGES
+        )
+
+        assert builder.build() == {
+            "size": 25,
+            "from": 0,
+            "track_scores": True,
+            "track_total_hits": True,
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "simple_query_string": {
+                                "query": query,
+                                "fields": fields,
+                                "default_operator": "AND",
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": [{"id": {"order": "asc"}}],
+            "aggs": {
+                "publication_date": {
+                    "date_range": {
+                        "field": "publication_date",
+                        "format": "YYYY-MM-dd",
+                        "ranges": STATIC_DATE_RANGES,
+                    }
+                }
+            },
+        }
+
+        validate_valid_request(
+            search_client, index_name, builder, expected_results, expected_aggregations
+        )
