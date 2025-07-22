@@ -69,8 +69,6 @@ FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
-    # TODO - before we can enable prepopulation we need the following rules:
-    #   * assistance listing number
     "funding_opportunity_number": {"gg_pre_population": {"rule": "opportunity_number"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
 }
