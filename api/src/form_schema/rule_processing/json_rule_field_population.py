@@ -11,14 +11,17 @@ INDIVIDUAL_UEI = "000000000INDV"
 
 
 def get_opportunity_number(context: JsonRuleContext) -> str | None:
+    """Get the opportunity number"""
     return context.opportunity.opportunity_number
 
 
 def get_opportunity_title(context: JsonRuleContext) -> str | None:
+    """Get the opportunity title"""
     return context.opportunity.opportunity_title
 
 
 def get_agency_name(context: JsonRuleContext) -> str | None:
+    """Get the agency's name, falling back to agency code if no agency name"""
     if context.opportunity.agency_name is None:
         return context.opportunity.agency_code
 
@@ -26,10 +29,17 @@ def get_agency_name(context: JsonRuleContext) -> str | None:
 
 
 def get_current_date(context: JsonRuleContext) -> str:
+    """Get the current date"""
     return get_now_us_eastern_date().isoformat()
 
 
 def get_uei(context: JsonRuleContext) -> str:
+    """Get a UEI from an application's organization
+
+    If the application does not have an organization,
+    defaults to a static one representing an individual
+    like Grants.gov did.
+    """
     organization = context.application_form.application.organization
     if organization is None:
         return INDIVIDUAL_UEI
@@ -47,6 +57,7 @@ def get_uei(context: JsonRuleContext) -> str:
 
 
 def get_assistance_listing_number(context: JsonRuleContext) -> str | None:
+    """Get the assistance listing number attached to the competition"""
     competition = context.application_form.application.competition
 
     if competition.opportunity_assistance_listing is None:
@@ -56,6 +67,7 @@ def get_assistance_listing_number(context: JsonRuleContext) -> str | None:
 
 
 def get_assistance_listing_program_title(context: JsonRuleContext) -> str | None:
+    """Get the assistance listing program title attached to the competition"""
     competition = context.application_form.application.competition
 
     if competition.opportunity_assistance_listing is None:
@@ -65,16 +77,19 @@ def get_assistance_listing_program_title(context: JsonRuleContext) -> str | None
 
 
 def get_public_competition_id(context: JsonRuleContext) -> str | None:
+    """Get the public competition ID from the competition"""
     competition = context.application_form.application.competition
     return competition.public_competition_id
 
 
 def get_competition_title(context: JsonRuleContext) -> str | None:
+    """Get the competition title from the competition"""
     competition = context.application_form.application.competition
     return competition.competition_title
 
 
 def get_signature(context: JsonRuleContext) -> str | None:
+    """Get the name of the owner of the application"""
     # TODO - we don't yet have users names, so this arbitrarily grabs
     # one users email attached to the app - not ideal, will fix when we can.
     app_users = context.application_form.application.application_users
