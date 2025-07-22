@@ -1,3 +1,6 @@
+from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+
+
 def test_successful_request(client, fixture_from_file) -> None:
     full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
     fixture_path = (
@@ -11,7 +14,9 @@ def test_successful_request(client, fixture_from_file) -> None:
 def test_invalid_service_name_not_found(client) -> None:
     full_path = "/invalid/services/v2/ApplicantWebServicesSoapPort"
     response = client.post(full_path, data="mock")
+    expected_response = get_invalid_path_response()
     assert response.status_code == 404
+    assert response.data == expected_response.data
 
 
 def test_invalid_xml_server_error_500(client) -> None:

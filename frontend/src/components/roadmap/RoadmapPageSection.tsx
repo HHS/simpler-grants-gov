@@ -14,7 +14,7 @@ export default function RoadmapPageSection({
 }: RoadmapPageSectionProps) {
   return (
     <div className={className}>
-      <GridContainer className="display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6">
+      <GridContainer className="padding-y-4 grid-container tablet-lg:padding-y-6">
         <Grid row gap>
           <Grid tabletLg={{ col: 4 }}>
             <h2>{title}</h2>

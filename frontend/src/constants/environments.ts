@@ -36,10 +36,24 @@ export const featureFlags = {
   searchTableOn: FEATURE_SEARCH_TABLE_ON,
 };
 
+const legacyHost = (): string => {
+  switch (ENVIRONMENT) {
+    case "prod":
+      return "https://www.grants.gov";
+    case "training":
+      return "https://training.grants.gov";
+    case "staging":
+      return "https://test.grants.gov";
+    case "test":
+      return "https://test.grants.gov";
+    default:
+      return "https://test.grants.gov";
+  }
+};
+
 // home for all interpreted server side environment variables
 export const environment: { [key: string]: string } = {
-  LEGACY_HOST:
-    ENVIRONMENT === "prod" ? "https://grants.gov" : "https://test.grants.gov",
+  LEGACY_HOST: legacyHost(),
   NEXT_PUBLIC_BASE_PATH: NEXT_PUBLIC_BASE_PATH ?? "",
   USE_SEARCH_MOCK_DATA: USE_SEARCH_MOCK_DATA || "",
   SENDY_API_URL: SENDY_API_URL || "",
