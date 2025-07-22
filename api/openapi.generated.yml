@@ -2995,6 +2995,11 @@ components:
             'false': 3
           additionalProperties:
             type: integer
+        close_date:
+          type: object
+          description: The counts of close_date values in the full response
+          additionalProperties:
+            type: integer
     OpportunitySearchResponseV1:
       type: object
       properties:
