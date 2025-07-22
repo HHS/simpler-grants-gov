@@ -347,10 +347,7 @@ class SearchQueryBuilder:
         return request
 
     def aggregation_relative_date_range(
-        self,
-        aggregation_name: str,
-        field_name: str,
-        ranges: list[dict]
+        self, aggregation_name: str, field_name: str, ranges: list[dict]
     ) -> typing.Self:
         """
         Add a relative date range aggregation to the request. Date range aggregations group documents
