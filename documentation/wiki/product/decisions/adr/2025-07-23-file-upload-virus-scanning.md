@@ -1,5 +1,7 @@
 # File Upload Virus Scanning Architecture
 
+- **Status:** Active
+- **Last Modified:** 2025-07-23
 * **Related Issue:** [#5686](https://github.com/HHS/simpler-grants-gov/pull/5686)
 
 ## Context and Problem Statement
