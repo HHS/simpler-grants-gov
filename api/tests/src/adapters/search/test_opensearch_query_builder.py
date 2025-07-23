@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from freezegun import freeze_time
@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
 from src.services.opportunities_v1.search_opportunities import STATIC_DATE_RANGES
+from src.util.datetime_util import get_now_us_eastern_date
 from tests.conftest import BaseTestClass
 
 WAY_OF_KINGS = {
@@ -111,7 +112,7 @@ WINDS_OF_WINTER = {
     "author": "George R.R. Martin",
     "in_stock": False,
     "page_count": 2000,
-    "publication_date": "2025-11-17",
+    "publication_date": (get_now_us_eastern_date() + timedelta(days=110)).strftime("%Y-%m-%d"),
 }
 CALL_OF_WINTER = {
     "id": 14,
@@ -119,7 +120,7 @@ CALL_OF_WINTER = {
     "author": "Tasha Suri",
     "in_stock": False,
     "page_count": 880,
-    "publication_date": "2025-09-18",
+    "publication_date": (get_now_us_eastern_date() + timedelta(days=85)).strftime("%Y-%m-%d"),
 }
 SHADOWS_OF_WINTER = {
     "id": 15,
@@ -127,7 +128,7 @@ SHADOWS_OF_WINTER = {
     "author": "Katherine Arden",
     "in_stock": True,
     "page_count": 1040,
-    "publication_date": "2025-10-10",
+    "publication_date": (get_now_us_eastern_date() + timedelta(days=55)).strftime("%Y-%m-%d"),
 }
 WINTERBORN_LEGACY = {
     "id": 16,
@@ -135,7 +136,7 @@ WINTERBORN_LEGACY = {
     "author": "Naomi Novik",
     "in_stock": True,
     "page_count": 720,
-    "publication_date": "2025-08-19",
+    "publication_date": (get_now_us_eastern_date() + timedelta(days=25)).strftime("%Y-%m-%d"),
 }
 
 WINTER = {
@@ -144,7 +145,7 @@ WINTER = {
     "author": "Melissa Albert",
     "in_stock": True,
     "page_count": 560,
-    "publication_date": "2025-07-23",
+    "publication_date": (get_now_us_eastern_date() + timedelta(days=5)).strftime("%Y-%m-%d"),
 }
 
 FULL_DATA = [
@@ -845,7 +846,6 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             ),
         ],
     )
-    @freeze_time("2025-07-21")
     def test_query_builder_simple_query_and_date_range_aggregations(
         self, search_client, query, fields, expected_results, expected_aggregations
     ):
