@@ -2,7 +2,6 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
-from freezegun import freeze_time
 
 from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
 from src.pagination.pagination_models import SortDirection
