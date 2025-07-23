@@ -72,7 +72,7 @@ const TitleDisplay = ({
         <span className="text-bold">{t("number")}:</span>{" "}
         {opportunity.opportunity_number}
       </div>
-      <div className="margin-top-2">
+      <div className="margin-top-2 search-table-save-wrapper">
         <OpportunitySaveUserControl
           opportunityId={opportunity.opportunity_id}
         />
