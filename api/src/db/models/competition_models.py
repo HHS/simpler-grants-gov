@@ -256,7 +256,7 @@ class Application(ApiSchemaTable, TimestampMixin):
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(Organization.organization_id)
     )
-    organization: Mapped[Organization] = relationship(
+    organization: Mapped[Organization | None] = relationship(
         Organization, uselist=False, back_populates="applications"
     )
 
