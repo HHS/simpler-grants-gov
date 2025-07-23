@@ -1,5 +1,3 @@
-// import { APIResponse } from "src/types/apiResponseTypes";
-
 import { FormDetail } from "./formResponseTypes";
 import { OpportunityAssistanceListing } from "./opportunity/opportunityResponseTypes";
 
@@ -27,12 +25,3 @@ export type Competition = {
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
 };
-
-// export interface CompetitionsDetailApiResponse extends APIResponse {
-//   data: {
-//     competition_forms: [{ form: FormDetail }];
-//     competition_id: string;
-//     opportunity_id: number;
-//     competition_instructions: CompetitionInstructions[];
-//   };
-// }

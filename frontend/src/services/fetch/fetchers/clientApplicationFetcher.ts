@@ -5,38 +5,6 @@ import {
   ApplicationSubmitResponse,
 } from "src/types/applicationResponseTypes";
 
-interface ClientApplicationStartResponse {
-  message: string;
-  applicationId: string;
-}
-
-export const startApplication = async (
-  applicationName: string,
-  competitionId: string,
-  organization?: string,
-  token?: string,
-): Promise<ClientApplicationStartResponse> => {
-  if (!token) {
-    throw new Error("Error starting application, not logged in");
-  }
-  const res = await fetch("/api/applications/start", {
-    method: "POST",
-    body: JSON.stringify({
-      applicationName,
-      competitionId,
-      organization,
-    }),
-  });
-
-  if (res.ok && res.status === 200) {
-    return (await res.json()) as ClientApplicationStartResponse;
-  } else {
-    throw new Error(`Error starting application: ${res.status}`, {
-      cause: `${res.status}`,
-    });
-  }
-};
-
 export const submitApplication = async (
   applicationId: string,
 ): Promise<ApplicationSubmitResponse> => {

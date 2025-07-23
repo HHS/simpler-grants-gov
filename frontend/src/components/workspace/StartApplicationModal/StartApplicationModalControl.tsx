@@ -54,8 +54,6 @@ export const StartApplicationModalControl = ({
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
     setCompetitionLoading(true);
-    // clientFetchCompetition(competitionId)
-    // console.log("%%%", competitionId, fetchCompetition);
     fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
         if (competition.open_to_applicants) {
