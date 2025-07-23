@@ -1,4 +1,5 @@
 import {
+  ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationResponseDetail,
@@ -7,6 +8,8 @@ import {
 } from "src/types/applicationResponseTypes";
 
 import { fetchApplicationWithMethod } from "./fetchers";
+import { createRequestUrl } from "../fetcherHelpers";
+import { environment } from "src/constants/environments";
 
 export const handleStartApplication = async (
   applicationName: string,
@@ -108,4 +111,32 @@ export const handleUpdateApplicationForm = async (
   });
 
   return (await response.json()) as ApplicationStartApiResponse;
+};
+
+
+export const uploadAttachment = async (
+  applicationId: string,
+  token: string,
+  file: FormData,
+): Promise<ApplicationAttachmentUploadResponse> => {
+  const additionalHeaders = {
+    Accept: "application/json",
+    "X-SGG-Token": token,
+  };
+
+  const url = createRequestUrl(
+    "POST",
+    `${environment.API_URL}`,
+    "alpha",
+    "applications",
+    `${applicationId}/attachments`,
+  );
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: additionalHeaders,
+    body: file,
+  });
+
+  return (await response.json()) as ApplicationAttachmentUploadResponse;
 };

@@ -48,7 +48,7 @@ export type FormValidationWarning = {
   value: string;
 };
 
-export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select" | "Attachment" | "AttachmentArray";
 
 export type UiSchemaField = {
   type: "field";

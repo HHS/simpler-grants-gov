@@ -1,6 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get } from "lodash";
+import { get as getPointer } from "json-pointer";
+import { JSONSchema7, JSONSchema7Definition } from "json-schema";
+import { filter, get, set } from "lodash";
+import merge from "lodash/merge";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
@@ -22,6 +24,89 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+import FileUploadWidget from "./widgets/FileUploadWidget";
+import AttachmentArrayWidget from "./widgets/AttachmentArrayWidget";
+
+export function getSchemaObjectFromPointer(
+  rootSchema: JSONSchema7,
+  pointer: string,
+): JSONSchema7 | undefined {
+  try {
+    const tokens = pointer.split("/").filter(Boolean);
+
+    const isObjectSchema = (
+      schema: JSONSchema7Definition,
+    ): schema is JSONSchema7 => {
+      return (
+        typeof schema === "object" && schema !== null && !Array.isArray(schema)
+      );
+    };
+
+    const resolveRef = (schema: JSONSchema7, ref: string): JSONSchema7 => {
+      const refPath = ref.replace(/^#/, "");
+      const resolved = getPointer(schema, refPath);
+      if (!isObjectSchema(resolved)) return {};
+      if (resolved.$ref) {
+        return resolveRef(schema, resolved.$ref);
+      }
+      return resolved;
+    };
+
+    const resolveAllOf = (schema: JSONSchema7): JSONSchema7 => {
+      if (!schema.allOf) return schema;
+
+      const merged = schema.allOf.reduce((acc, subschema) => {
+        if (!isObjectSchema(subschema)) return acc;
+
+        let resolved = subschema;
+        if (resolved.$ref) {
+          resolved = resolveRef(rootSchema, resolved.$ref);
+        }
+        return merge(acc, resolveAllOf(resolved));
+      }, {} as JSONSchema7);
+
+      return merge({}, merged, { ...schema, allOf: undefined });
+    };
+
+    let current: any = rootSchema;
+
+    for (const token of tokens) {
+      if (!current) return undefined;
+
+      while (current?.$ref) {
+        current = resolveRef(rootSchema, current.$ref);
+      }
+
+      if (current?.allOf) {
+        current = resolveAllOf(current);
+      }
+
+      if (current.properties && token in current.properties) {
+        current = current.properties[token];
+      } else {
+        current = current[token];
+      }
+    }
+
+    while (current?.$ref) {
+      current = resolveRef(rootSchema, current.$ref);
+    }
+
+    if (current?.allOf) {
+      current = resolveAllOf(current);
+    }
+
+    if (typeof current !== "object" || Array.isArray(current)) {
+      console.warn("Pointer resolved to a non-object:", current);
+      return undefined;
+    }
+
+    return current;
+  } catch (err) {
+    console.warn("Failed to resolve pointer:", pointer, err);
+    return undefined;
+  }
+}
 
 export function buildFormTreeRecursive({
   errors,
@@ -109,7 +194,6 @@ export function buildFormTreeRecursive({
   return acc;
 }
 
-// json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -119,34 +203,52 @@ export const determineFieldType = ({
 }): WidgetTypes => {
   const { widget } = uiFieldObject;
   if (widget) return widget;
-  if (fieldSchema.enum?.length) {
-    return "Select";
-  } else if (fieldSchema.type === "boolean") {
-    return "Checkbox";
-  } else if (fieldSchema.maxLength && fieldSchema.maxLength > 255) {
-    return "TextArea";
+
+  if (fieldSchema.type === "string" && fieldSchema.format === "attachment-id") {
+    return "Attachment";
   }
+
+  if (fieldSchema.type === "array" && fieldSchema.format === "attachment-id") {
+    return "AttachmentArray";
+  }
+
+if (fieldSchema.type === "array" && fieldSchema.items) {
+  const item = Array.isArray(fieldSchema.items)
+    ? fieldSchema.items[0]
+    : fieldSchema.items;
+
+  if (
+    typeof item === "object" &&
+    "format" in item &&
+    item.format === "attachment-id"
+  ) {
+    return "AttachmentArray";
+  }
+}
+
+
+  if (fieldSchema.enum?.length) return "Select";
+  if (fieldSchema.type === "boolean") return "Checkbox";
+  if (fieldSchema.maxLength && fieldSchema.maxLength > 255) return "TextArea";
+
   return "Text";
 };
 
-// either schema or definition is required, and schema fields take precedence
-export const getFieldSchema = ({
-  uiFieldObject,
-  formSchema,
-}: {
-  uiFieldObject: UiSchemaField;
-  formSchema: RJSFSchema;
-}): RJSFSchema => {
-  const { definition, schema } = uiFieldObject;
-  if (definition && schema) {
-    return {
-      ...getSchemaObjectFromPointer(formSchema, definition),
-      ...schema,
-    } as RJSFSchema;
-  } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
-  }
-  return schema as RJSFSchema;
+export const getFieldSchema = (
+  schema: RJSFSchema,
+  field: UiSchemaField,
+): RJSFSchema => {
+  const base = field.definition
+    ? ((getSchemaObjectFromPointer(schema, field.definition) as
+        | RJSFSchema
+        | undefined) ?? {})
+    : {};
+
+  const result = {
+    ...base,
+    ...(field.schema ?? {}),
+  } as RJSFSchema;
+  return result;
 };
 
 const widgetComponents: Record<
@@ -158,6 +260,9 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) => FileUploadWidget(widgetProps),
+  AttachmentArray: (widgetProps: UswdsWidgetProps) => AttachmentArrayWidget(widgetProps),
+
 };
 
 export const buildField = ({
@@ -172,17 +277,25 @@ export const buildField = ({
   uiFieldObject: UiSchemaField;
 }) => {
   const { definition, schema } = uiFieldObject;
-  const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
-  const name = definition
-    ? definition.split("/")[definition.split("/").length - 1]
-    : (schema?.title ?? "untitled").replace(" ", "-");
+  const fieldSchema = getFieldSchema(formSchema, uiFieldObject);
+
+const name = definition
+  ? definition
+      .replace(/^\/properties\//, "") // remove leading prefix
+      .replace(/\/properties\//g, ".") // flatten additional nested levels
+      .replace(/\//g, ".") // convert any leftover slashes
+  : (schema?.title || fieldSchema?.title || "untitled").replace(/\s/g, "-");
 
   const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
   const value = get(formData, name) as string | number | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
-  // TODO: move schema mutations to own function
   const disabled = fieldSchema.type === "null";
+  const requiredList = Array.isArray(formSchema.required)
+    ? formSchema.required
+    : [];
+  const isRequired = requiredList.includes(name.split(".").slice(-1)[0]);
+
   let options = {};
   if (type === "Select") {
     const enums = fieldSchema.enum ? fieldSchema.enum : [];
@@ -201,9 +314,10 @@ export const buildField = ({
   return widgetComponents[type]({
     id: name,
     disabled,
-    required: (formSchema.required ?? []).includes(name),
+    required: isRequired,
     minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
     maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
+    label: fieldSchema?.title ?? name.replace(/_/g, " "),
     schema: fieldSchema,
     rawErrors,
     value,
@@ -276,102 +390,31 @@ export const shapeFormData = <T extends object>(
   const filteredData = Object.fromEntries(
     Array.from(formData.keys())
       .filter((key) => !key.startsWith("$ACTION_"))
-      .map((key) => [
-        key,
-        formData.getAll(key).length > 1
-          ? formData.getAll(key)
-          : formData.get(key),
-      ]),
+      .map((key) => {
+        const allValues = formData.getAll(key);
+        const value = allValues.length > 1 ? allValues : formData.get(key);
+
+        // Strip empty arrays or empty strings
+        if (
+          (Array.isArray(value) && value.length === 0) ||
+          value === "" ||
+          value === null
+        ) {
+          return [key, undefined];
+        }
+
+        return [key, value];
+      }),
   );
 
-  // arrays from FormData() look like item[0]:value or item[0][key]: value
-  // this accepts flat objects or strings
-  const formDataArrayToArray = (
-    field: string,
-    data: Record<string, unknown>,
-  ) => {
-    const result: Array<Record<string, unknown>> | string[] = [];
-    Object.entries(data).forEach(([key, value]) => {
-      if (!key.includes(field)) return;
-      const match = key.match(/([a-z]+)\[(\d+)\]?\[?([a-z]+)?]/);
-      if (!match?.length) return;
-      const dataField = match[1];
-      if (dataField !== field) return;
-      const dataIndex = Number(match[2]);
-      if (Number.isNaN(dataIndex)) return;
-      const dataItem = match[3];
-      if (dataItem) {
-        if (result[dataIndex] && typeof result[dataIndex] === "object") {
-          result[dataIndex][dataItem] = value;
-        } else {
-          result[dataIndex] = { [dataItem]: value };
-        }
-      } else {
-        result[dataIndex] = value as string;
-      }
-    });
-    return result;
-  };
+  const shaped: Record<string, any> = {};
 
-  const shapeData = (
-    schema: RJSFSchema,
-    data: Record<string, unknown>,
-  ): Record<string, unknown> => {
-    const result: Record<string, unknown> = {};
+  // Reconstruct nested structure from dotted keys
+  Object.entries(filteredData).forEach(([key, value]) => {
+    set(shaped, key, value);
+  });
 
-    if (schema.properties) {
-      for (const key of Object.keys(schema.properties)) {
-        if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "object"
-        ) {
-          result[key] = shapeData(
-            schema.properties[key] as RJSFSchema,
-            (data[key] as Record<string, unknown>) || data,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "array" &&
-          typeof data === "object"
-        ) {
-          const arrayData = formDataArrayToArray(key, data);
-          result[key] = (arrayData as unknown[]).map((item) =>
-            typeof item === "object" &&
-            schema.properties &&
-            typeof schema.properties[key] !== "boolean" &&
-            schema.properties[key].items
-              ? shapeData(
-                  schema.properties[key].items as RJSFSchema,
-                  item as Record<string, unknown>,
-                )
-              : item,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "boolean" &&
-          typeof data === "object"
-        ) {
-          // if the schema is a boolean, we need to check if the data has a value
-          if (data[key] === "true" || data[key] === true) {
-            result[key] = true;
-          } else if (data[key] === "false" || data[key] === false) {
-            result[key] = false;
-          } else {
-            result[key] = undefined; // or some default value
-          }
-          // if the array is flat, just return the values
-        } else {
-          if (data[key]) {
-            result[key] = data[key];
-          }
-        }
-      }
-    }
-
-    return result;
-  };
-
-  return shapeData(formSchema, filteredData) as T;
+  return shaped as T;
 };
 
 // the application detail contains an empty array for the form response if no

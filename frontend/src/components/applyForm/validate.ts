@@ -2,34 +2,24 @@ import { RJSFSchema } from "@rjsf/utils";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
-// JSON Schema for the UiSchema, accepts either a "field" or "section"
 export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
   items: {
     anyOf: [
-      {
-        $ref: "#/$defs/field",
-      },
-      {
-        $ref: "#/$defs/section",
-      },
+      { $ref: "#/$defs/field" },
+      { $ref: "#/$defs/section" },
     ],
   },
   $defs: {
     field: {
       type: "object",
       properties: {
-        type: {
-          type: "string",
-          enum: ["field"],
-        },
-        schema: {
-          $ref: "#/$defs/schema",
-        },
+        type: { type: "string", enum: ["field"] },
+        schema: { $ref: "#/$defs/schema" },
         definition: {
           type: "string",
-          pattern: "^/properties/[a-zA-Z0-9_]+$",
+          pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$"
         },
         widget: {
           type: "string",
@@ -38,70 +28,40 @@ export const UiJsonSchema: RJSFSchema = {
       },
       required: ["type"],
       anyOf: [
-        {
-          required: ["schema"],
-        },
-        {
-          required: ["definition"],
-        },
+        { required: ["schema"] },
+        { required: ["definition"] },
       ],
-      additionalProperties: false,
+      additionalProperties: true,
     },
     schema: {
       type: "object",
       properties: {
-        schema: {
-          type: "object",
-          properties: {
-            title: {
-              type: "string",
-            },
-            type: {
-              type: "string",
-              enum: ["boolean", "string", "number", "integer", "null"],
-            },
-            enum: {
-              type: "array",
-            },
-            pattern: {
-              type: "string",
-              enum: ["date", "email"],
-            },
-          },
-          required: ["title", "type"],
-          additionalProperties: false,
-        },
+        title: { type: "string" },
+        type: { type: "string", enum: ["boolean", "string", "number", "integer", "null"] },
+        enum: { type: "array" },
+        pattern: { type: "string", enum: ["date", "email"] },
       },
+      required: ["title", "type"],
+      additionalProperties: false, // or true, based on how strict you want it
     },
     section: {
       type: "object",
       properties: {
-        type: {
-          type: "string",
-          enum: ["section"],
-        },
-        label: {
-          type: "string",
-        },
-        name: {
-          type: "string",
-        },
+        type: { type: "string", enum: ["section"] },
+        label: { type: "string" },
+        name: { type: "string" },
         children: {
           type: "array",
           items: {
             anyOf: [
-              {
-                $ref: "#/$defs/field",
-              },
-              {
-                $ref: "#/$defs/section",
-              },
+              { $ref: "#/$defs/field" },
+              { $ref: "#/$defs/section" },
             ],
           },
         },
       },
       required: ["type", "label", "name", "children"],
-      additionalProperties: false,
+      additionalProperties: true, // <- this was previously false, which broke validation
     },
   },
 };
@@ -115,9 +75,9 @@ export const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
   addFormats(ajv);
   const validate = ajv.compile(schema);
 
-  if (validate(json)) {
-    return false;
-  } else {
+  const valid = validate(json);
+  if (!valid) {
     return validate.errors;
   }
+  return false;
 };
