@@ -89,6 +89,7 @@
     * [Cross-Program Team Health Survey Tool](product/decisions/adr/2024-12-06-team-health-survey-tool.md)
     * [Adding Slack Users to SimplerGrants Slack Workspace](product/decisions/adr/2024-12-17-adding-slack-users.md)
     * [Repo organization](product/decisions/adr/2025-01-02-repo-organization.md)
+    * [File Upload Virus Scanning Architecture](product/decisions/adr/2025-01-16-file-upload-virus-scanning.md)
     * [Dedicated Forum for Simpler.Grants.gov Community](product/decisions/adr/2025-02-25-community-forum.md)
     * [Migrate Existing API Consumers](product/decisions/adr/2025-03-24-migrate-existing-api-consumers.md)
     * [Internal knowledge management](product/decisions/adr/2025-04-18-internal-knowledge-management.md)
