@@ -37,8 +37,7 @@ jest.mock("next-intl", () => ({
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) =>
-      mocks.clientFetchMock(...args) as unknown,
+    clientFetch: (url: string) => mocks.clientFetchMock(url),
   }),
 }));
 

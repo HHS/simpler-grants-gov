@@ -1,11 +1,8 @@
 import { getCompetitionDetails } from "src/services/fetch/fetchers/competitionsFetcher";
 
+const mockfetchCompetition = jest.fn();
+const mockJson = jest.fn();
 const fakeResponseBody = { some: "response body" };
-const mockJson = jest.fn(() => fakeResponseBody);
-
-const mockfetchCompetition = jest.fn().mockResolvedValue({
-  json: mockJson,
-});
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchCompetition: (params: unknown): unknown => {
@@ -14,6 +11,12 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 }));
 
 describe("getCompetitionDetails", () => {
+  beforeEach(() => {
+    mockJson.mockResolvedValue({ data: fakeResponseBody });
+    mockfetchCompetition.mockResolvedValue({
+      json: mockJson,
+    });
+  });
   afterEach(() => jest.clearAllMocks());
   it("calls fetchCompetition with the correct arguments", async () => {
     await getCompetitionDetails("an id");

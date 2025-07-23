@@ -1,5 +1,5 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+// import { startApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { Organization } from "src/types/UserTypes";
 
