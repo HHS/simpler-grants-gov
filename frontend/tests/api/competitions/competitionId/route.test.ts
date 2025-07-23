@@ -3,60 +3,48 @@
  */
 
 import { getCompetition } from "src/app/api/competitions/[competitionId]/handler";
+import { Competition } from "src/types/competitionsResponseTypes";
+import { fakeCompetition } from "src/utils/testing/fixtures";
+
+import { NextRequest } from "next/server";
+
+const mockGetCompetitionDetails = jest.fn();
+
+jest.mock("src/services/fetch/fetchers/competitionsFetcher", () => ({
+  getCompetitionDetails: (id: string) =>
+    mockGetCompetitionDetails(id) as unknown,
+}));
 
 describe("competitions/[competitionId] GET requests", () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => jest.resetAllMocks());
   it("calls opportunityDetails with expected arguments", async () => {
-    await getAttachmentsDownload(fakeRequestForOpportunity(), {
+    await getCompetition(new NextRequest("http://hi.gov"), {
       params: Promise.resolve({
-        opportunityId: "43",
+        competitionId: "1",
       }),
     });
-    expect(mockGetOpportunityDetails).toHaveBeenCalledWith(paramForAttachment);
+    expect(mockGetCompetitionDetails).toHaveBeenCalledWith("1");
   });
 
-  it("returns a new response with zip data", async () => {
-    mockAttachmentsToZipEntries.mockReturnValue([]);
-    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+  it("returns a new response with competition data", async () => {
+    mockGetCompetitionDetails.mockResolvedValue(fakeCompetition);
+    const response = await getCompetition(new NextRequest("http://hi.gov"), {
       params: Promise.resolve({
-        opportunityId: "43",
+        competitionId: "1",
       }),
     });
     expect(response.status).toEqual(200);
-
-    expect(response.headers.get("Content-Disposition")).toEqual(
-      `attachment; filename="opportunity-${paramForAttachment}-attachments.zip"`,
-    );
-    expect(response.body?.locked).toEqual(false);
-  });
-
-  it("returns a new response when no attachments", async () => {
-    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
-      params: Promise.resolve({
-        opportunityId: paramForNoAttachments,
-      }),
-    });
-    expect(response.status).toEqual(404);
-    expect(response.headers.get("Content-Disposition")).toBeNull();
-
-    expect(response.body?.locked).toEqual(false);
+    const body = (await response.json()) as Competition;
+    expect(body).toEqual(fakeCompetition);
   });
 
   it("returns a new response with with error if error on data fetch", async () => {
-    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+    mockGetCompetitionDetails.mockRejectedValue(new Error());
+    const response = await getCompetition(new NextRequest("http://hi.gov"), {
       params: Promise.resolve({
-        opportunityId: "-500",
+        competitionId: "1",
       }),
     });
     expect(response.status).toEqual(500);
-  });
-
-  it("returns a new response with with error if data is missing", async () => {
-    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
-      params: Promise.resolve({
-        opportunityId: "-404",
-      }),
-    });
-    expect(response.status).toEqual(404);
   });
 });
