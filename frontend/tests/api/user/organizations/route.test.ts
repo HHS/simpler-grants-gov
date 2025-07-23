@@ -6,13 +6,12 @@ import { getUserOrganizations } from "src/app/api/user/organizations/handler";
 import { Organization } from "src/types/UserTypes";
 import { fakeOrganization } from "src/utils/testing/fixtures";
 
-import { NextRequest } from "next/server";
-
 const mockFetchOrganizations = jest.fn();
 const getSessionMock = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchUserWithMethod: () => (opts) => mockFetchOrganizations(opts) as unknown,
+  fetchUserWithMethod: () => (opts: unknown) =>
+    mockFetchOrganizations(opts) as unknown,
 }));
 
 jest.mock("src/services/auth/session", () => ({
