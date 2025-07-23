@@ -5,7 +5,7 @@ import {
   deleteAttachment,
   uploadAttachment,
 } from "src/services/fetch/fetchers/applicationFetcher";
-import { createFormData } from "src/utils/fileUtils";
+import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { revalidateTag } from "next/cache";
 
