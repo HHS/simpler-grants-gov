@@ -1,6 +1,7 @@
 import logging
 
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
 
@@ -21,6 +22,7 @@ def check_user_application_access(application: Application, user: User) -> None:
             extra={
                 "user_id": user.user_id,
                 "application_id": application.application_id,
+                "submission_issue": SubmissionIssue.UNAUTHORIZED_APPLICATION_ACCESS
             },
         )
         raise_flask_error(403, "Unauthorized")

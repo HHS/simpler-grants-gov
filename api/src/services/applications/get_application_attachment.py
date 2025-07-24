@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
@@ -32,6 +33,10 @@ def get_application_attachment(
 
     # 404 if not found
     if not application_attachment:
+        logger.info(
+            "Application attachment not found",
+            extra={"submission_issue": SubmissionIssue.ATTACHMENT_NOT_FOUND}
+        )
         raise_flask_error(
             404, f"Application attachment with ID {application_attachment_id} not found"
         )

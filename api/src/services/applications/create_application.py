@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
+from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
@@ -34,6 +34,10 @@ def _validate_organization_membership(
     ).scalar_one_or_none()
 
     if not is_member:
+        logger.info(
+            "User is not a member of the organization",
+            extra={"submission_issue": SubmissionIssue.NOT_A_MEMBER_OF_ORG}
+        )
         raise_flask_error(403, "User is not a member of the organization")
 
 
@@ -49,6 +53,10 @@ def _validate_organization_expiration(organization: Organization) -> None:
     """
     # Check if organization has no sam.gov entity record
     if not organization.sam_gov_entity:
+        logger.info(
+            "Organization has no SAM.gov entity record",
+            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY}
+        )
         raise_flask_error(
             422,
             "This organization has no SAM.gov entity record and cannot be used for applications",
@@ -59,6 +67,10 @@ def _validate_organization_expiration(organization: Organization) -> None:
 
     # Check if organization is marked as inactive
     if sam_gov_entity.is_inactive is True:
+        logger.info(
+            "Organization is inactive in SAM.gov",
+            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV}
+        )
         raise_flask_error(
             422,
             "This organization is inactive in SAM.gov and cannot be used for applications",
@@ -66,6 +78,10 @@ def _validate_organization_expiration(organization: Organization) -> None:
 
     # Check if organization's registration has expired
     if sam_gov_entity.expiration_date < current_date:
+        logger.info(
+            "Organization SAM.gov registration has expired",
+            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED}
+        )
         raise_flask_error(
             422,
             f"This organization's SAM.gov registration expired on {sam_gov_entity.expiration_date.strftime('%B %d, %Y')} and cannot be used for applications",
@@ -85,6 +101,10 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
     if is_applying_as_organization:
         # Check if organization applications are allowed
         if CompetitionOpenToApplicant.ORGANIZATION not in allowed_applicant_types:
+            logger.info(
+                "Competition does not allow organization applications",
+                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_ORG_APPLICATIONS}
+            )
             raise_flask_error(
                 422,
                 "This competition does not allow organization applications",
@@ -92,6 +112,10 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
     else:
         # Check if individual applications are allowed
         if CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types:
+            logger.info(
+                "Competition does not allow individual applications",
+                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_INDIVIDUAL_APPLICATIONS}
+            )
             raise_flask_error(
                 422,
                 "This competition does not allow individual applications",
@@ -116,6 +140,10 @@ def create_application(
     ).scalar_one_or_none()
 
     if not competition:
+        logger.info(
+            "Competition not found",
+            extra={"submission_issue": SubmissionIssue.COMPETITION_NOT_FOUND}
+        )
         raise_flask_error(404, "Competition not found")
 
     # Verify the competition is open
@@ -137,6 +165,10 @@ def create_application(
         ).scalar_one_or_none()
 
         if not organization:
+            logger.info(
+                "Organization not found",
+                extra={"submission_issue": SubmissionIssue.ORGANIZATION_NOT_FOUND}
+            )
             raise_flask_error(404, "Organization not found")
 
         # Validate user membership and organization status
