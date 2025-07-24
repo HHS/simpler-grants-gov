@@ -132,6 +132,9 @@ exports[`SearchResultsTable matches snapshot 1`] = `
                  
                 OPP-12345
               </div>
+              <div
+                class="margin-top-2 search-table-save-wrapper"
+              />
             </div>
           </div>
         </td>

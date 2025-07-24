@@ -145,7 +145,7 @@ const toSearchResultsTableRow = (
   ];
 };
 
-export const SearchResultsTable = async ({
+export const SearchResultsTable = ({
   searchResults,
   page,
 }: {
