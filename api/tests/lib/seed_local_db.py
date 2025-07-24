@@ -187,6 +187,7 @@ def _build_competitions(db_session: db.Session) -> None:
     _build_simple_competition()
     _build_pilot_competition(db_session)
 
+
 def _build_user_organizations(db_session: db.Session) -> None:
     logger.info("Creating user organizations")
 
@@ -195,9 +196,9 @@ def _build_user_organizations(db_session: db.Session) -> None:
     users = factories.UserFactory.create_batch(size=batch_size)
     organizations = factories.OrganizationFactory.create_batch(size=batch_size)
     for index in range(batch_size):
-      user = users[index - 1]
-      organization = organizations[index - 1]
-      factories.OrganizationUserFactory.create(user=user, organization=organization)
+        user = users[index - 1]
+        organization = organizations[index - 1]
+        factories.OrganizationUserFactory.create(user=user, organization=organization)
 
 
 @click.command()
