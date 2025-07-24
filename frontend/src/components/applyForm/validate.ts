@@ -29,7 +29,7 @@ export const UiJsonSchema: RJSFSchema = {
         },
         definition: {
           type: "string",
-          pattern: "^/properties/[a-zA-Z0-9_]+$",
+          pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
         },
         widget: {
           type: "string",

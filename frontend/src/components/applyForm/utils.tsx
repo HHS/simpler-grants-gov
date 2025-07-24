@@ -137,16 +137,21 @@ export const getFieldSchema = ({
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
 }): RJSFSchema => {
-  const { definition, schema } = uiFieldObject;
-  if (definition && schema) {
-    return {
-      ...getSchemaObjectFromPointer(formSchema, definition),
-      ...schema,
-    } as RJSFSchema;
-  } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
+  try {
+    const { definition, schema } = uiFieldObject;
+    if (definition && schema) {
+      return {
+        ...getSchemaObjectFromPointer(formSchema, definition),
+        ...schema,
+      } as RJSFSchema;
+    } else if (definition) {
+      return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
+    }
+    return schema as RJSFSchema;
+  } catch (e) {
+    console.error("error accessing field schema");
+    throw e;
   }
-  return schema as RJSFSchema;
 };
 
 const widgetComponents: Record<
