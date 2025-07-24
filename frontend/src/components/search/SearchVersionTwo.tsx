@@ -59,18 +59,8 @@ export function SearchVersionTwo({
           containerClasses="padding-top-5"
           heading={t("betaAlert.alertTitle")}
           alertMessage={t.rich("betaAlert.alert", {
-            mailToGrants: (chunks) => (
-              <a href="mailto:simpler@grants.gov">{chunks}</a>
-            ),
-            bugReport: (chunks) => (
-              <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=1_bug_report.yml">
-                {chunks}
-              </a>
-            ),
-            featureRequest: (chunks) => (
-              <a href="https://github.com/HHS/simpler-grants-gov/issues/new?template=2_feature_request.yml">
-                {chunks}
-              </a>
+            ethnioSurveyLink: (chunks) => (
+              <a href="https://ethn.io/16188" target="_blank">{chunks}</a>
             ),
           })}
         />
