@@ -17,6 +17,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_error_response,
     get_streamed_soap_response,
 )
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -44,26 +45,30 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         logger.info("soap_client_certificate: Sending soap request without client certificate")
         return _get_soap_response(_request, timeout=timeout)
 
-    logger.info("soap_client_certificate: Sending soap request with client certificate")
+    logger.info("soap_client_certificate: Processing client certificate")
     # Handle cert based proxy request.
     with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
         temp_file_path = temp_cert_file.name
         try:
-            cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
+            cert, cert_id = soap_request.auth.certificate.get_pem(config.soap_auth_map)
         except SOAPClientCertificateLookupError as e:
             # This exception handles invalid client certs. We will continue to return the response
             # from GG.
             cert = ""
+            cert_id = "unknown"
             logger.info(f"soap_client_certificate: Unknown or invalid client certificate: {e}")
         except SOAPClientCertificateNotConfigured as e:
             # This exception handles the case of a valid cert being passed, but not configured
             # to use Simpler SOAP API.
-            logger.info(f"soap_client_certicate: Certificate validated but not configured: {e}")
+            logger.info(f"soap_client_certificate: Certificate validated but not configured: {e}")
             return get_soap_error_response(
                 faultstring="Client certificate not configured for Simpler SOAP."
             )
         temp_cert_file.write(cert)
         temp_cert_file.flush()
+
+        add_extra_data_to_current_request_logs({"cert_id": cert_id})
+        logger.info("soap_client_certificate: Sending soap request with client certificate")
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
 
 
