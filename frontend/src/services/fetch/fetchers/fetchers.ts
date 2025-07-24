@@ -112,8 +112,9 @@ export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
 );
 
-export const fetchApplicationWithMethod = (type: "POST" | "GET" | "PUT") =>
-  requesterForEndpoint(toDynamicApplicationsEndpoint(type));
+export const fetchApplicationWithMethod = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
@@ -121,8 +122,9 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
-  requesterForEndpoint(toDynamicUsersEndpoint(type));
+export const fetchUserWithMethod = (
+  type: "POST" | "DELETE" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicUsersEndpoint(type));
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
 

@@ -1,0 +1,258 @@
+"use client";
+
+import { Attachment, AttachmentCardItem } from "src/types/attachmentTypes";
+
+import { useTranslations } from "next-intl";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  FileInputRef,
+  Grid,
+  GridContainer,
+  ModalRef,
+} from "@trussworks/react-uswds";
+
+import {
+  deleteAttachmentAction,
+  DeleteAttachmentActionState,
+  uploadAttachmentAction,
+  UploadAttachmentActionState,
+} from "./actions";
+import { AttachmentsCardForm } from "./AttachmentsCardForm";
+import { AttachmentsCardTable } from "./AttachmentsCardTable";
+import {
+  createTempAttachment,
+  sortAttachments,
+  SortDirection,
+  SortKey,
+} from "./attachmentUtils";
+import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
+
+interface AttachmentsCardProps {
+  applicationId: string;
+  attachments: Attachment[];
+}
+
+export const AttachmentsCard = ({
+  applicationId,
+  attachments,
+}: AttachmentsCardProps) => {
+  /**
+   * Initial States
+   */
+
+  const uploadActionsInitialState = {
+    success: false,
+    error: undefined,
+    uploads: {
+      tempId: null,
+      abortController: null,
+    },
+  };
+
+  const deleteUploadActionsInitialState = { success: false, error: null };
+
+  /**
+   * Refs
+   */
+
+  const t = useTranslations("Application.attachments");
+
+  const deleteModalRef = useRef<ModalRef | null>(null);
+  const fileInputRef = useRef<FileInputRef | null>(null);
+  const lastDeletedIdRef = useRef<string | null>(null);
+
+  /**
+   * Local state
+   */
+
+  const [uploads, setUploads] = useState<AttachmentCardItem[]>([]);
+  const [sortBy, setSortBy] = useState<SortKey>("updated_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [attachmentIdsToDelete, setAttachmentIdsToDelete] = useState<
+    Set<string>
+  >(new Set());
+  const [attachmentToDeleteName, setAttachmentToDeleteName] = useState<
+    string | undefined
+  >(undefined);
+  const [fileInputErrorText, setFileInputErrorText] = useState<
+    string | undefined
+  >(undefined);
+
+  const sortedAttachments = useMemo(() => {
+    const sorted = sortAttachments(attachments, sortBy, sortDirection);
+    return sorted.filter(
+      (file) => !attachmentIdsToDelete.has(file.application_attachment_id),
+    );
+  }, [attachments, sortBy, sortDirection, attachmentIdsToDelete]);
+
+  const handleUploadAttachment = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const abortController = new AbortController();
+    const { tempId, tempAttachment } = createTempAttachment(
+      file,
+      abortController,
+    );
+
+    setUploads((prev) => [...prev, tempAttachment]);
+
+    const formData = new FormData();
+    formData.append("application_id", applicationId);
+    formData.append("file_attachment", file);
+
+    startTransition(() => {
+      formAction({ formData, tempId, abortController });
+    });
+  };
+
+  /**
+   * useActionStates
+   */
+
+  const [state, formAction] = useActionState(
+    uploadAttachmentAction,
+    uploadActionsInitialState satisfies UploadAttachmentActionState,
+  );
+
+  const [deleteState, deleteActionFormAction, deletePending] = useActionState(
+    deleteAttachmentAction,
+    deleteUploadActionsInitialState satisfies DeleteAttachmentActionState,
+  );
+
+  /**
+   * Helpers
+   */
+
+  const handleCancelUpload = (uploadId: string) => {
+    setUploads((prev) =>
+      prev.map((upload) =>
+        upload.id === uploadId ? { ...upload, status: "cancelled" } : upload,
+      ),
+    );
+
+    const target = uploads.find((u) => u.id === uploadId);
+    target?.abortController?.abort();
+  };
+
+  const handleDeleteAttachment = (
+    applicationAttachmentId: string,
+    attachmentToDeleteName: string,
+  ) => {
+    lastDeletedIdRef.current = applicationAttachmentId;
+
+    setAttachmentToDeleteName(attachmentToDeleteName);
+  };
+
+  const handleConfirmedDelete = () => {
+    const applicationAttachmentId = lastDeletedIdRef.current as string;
+
+    setAttachmentIdsToDelete((prev) =>
+      new Set(prev).add(applicationAttachmentId),
+    );
+
+    startTransition(() => {
+      deleteActionFormAction({
+        applicationId,
+        applicationAttachmentId,
+      });
+    });
+  };
+
+  /**
+   * Attachment Sorting
+   */
+  const handleAttachmentSort = (column: SortKey) => {
+    if (column === sortBy) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(column);
+      setSortDirection("asc");
+    }
+  };
+
+  /**
+   * UseEffects
+   */
+
+  // Delete State
+  useEffect(() => {
+    const lastDeletedId = lastDeletedIdRef.current;
+
+    if (deleteState?.success || deleteState?.error) {
+      setAttachmentIdsToDelete((prev) => {
+        const updated = new Set(prev);
+        if (lastDeletedId) updated.delete(lastDeletedId);
+
+        return updated;
+      });
+      deleteModalRef.current?.toggleModal();
+    }
+  }, [deleteState]);
+
+  // Upload State
+  useEffect(() => {
+    if (state?.success) {
+      fileInputRef.current?.clearFiles();
+      setUploads((prev) => prev.filter((u) => u.id !== state?.uploads.tempId));
+      setFileInputErrorText(state?.error);
+    }
+
+    if (state?.error) {
+      fileInputRef.current?.clearFiles();
+      setFileInputErrorText(state.error);
+    }
+  }, [state, fileInputRef]);
+
+  return (
+    <>
+      <GridContainer data-testid="opportunity-card" className="padding-x-0">
+        <h3 className="margin-top-4">{t("attachments")}</h3>
+        <Grid row gap>
+          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+            {t("attachmentsInstructions")}
+          </Grid>
+          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+            <AttachmentsCardForm
+              applicationId={applicationId}
+              errorText={fileInputErrorText}
+              handleUploadAttachment={handleUploadAttachment}
+              inputRef={fileInputRef}
+            />
+          </Grid>
+        </Grid>
+        <Grid row>
+          <AttachmentsCardTable
+            attachments={sortedAttachments}
+            deleteAttachmentModalRef={deleteModalRef}
+            handleAttachmentSort={handleAttachmentSort}
+            handleCancelUpload={handleCancelUpload}
+            handleDeleteAttachment={handleDeleteAttachment}
+            isDeleting={deletePending}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            uploads={uploads}
+          />
+        </Grid>
+      </GridContainer>
+      <DeleteAttachmentModal
+        buttonCtaText={t("deleteModal.deleteFileCta")}
+        deletePending={deletePending}
+        descriptionText={t("deleteModal.descriptionText")}
+        cancelCtaText={t("deleteModal.cancelDeleteCta")}
+        handleConfirmedDelete={handleConfirmedDelete}
+        modalId="delete-attachment-modal"
+        modalRef={deleteModalRef}
+        pendingDeleteName={attachmentToDeleteName}
+        titleText={t("deleteModal.titleText")}
+      />
+    </>
+  );
+};
