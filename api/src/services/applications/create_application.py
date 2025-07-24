@@ -7,7 +7,11 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, SubmissionIssue
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    SubmissionIssue,
+)
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
@@ -36,7 +40,7 @@ def _validate_organization_membership(
     if not is_member:
         logger.info(
             "User is not a member of the organization",
-            extra={"submission_issue": SubmissionIssue.NOT_A_MEMBER_OF_ORG}
+            extra={"submission_issue": SubmissionIssue.NOT_A_MEMBER_OF_ORG},
         )
         raise_flask_error(403, "User is not a member of the organization")
 
@@ -55,7 +59,7 @@ def _validate_organization_expiration(organization: Organization) -> None:
     if not organization.sam_gov_entity:
         logger.info(
             "Organization has no SAM.gov entity record",
-            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY}
+            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY},
         )
         raise_flask_error(
             422,
@@ -69,7 +73,7 @@ def _validate_organization_expiration(organization: Organization) -> None:
     if sam_gov_entity.is_inactive is True:
         logger.info(
             "Organization is inactive in SAM.gov",
-            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV}
+            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV},
         )
         raise_flask_error(
             422,
@@ -80,7 +84,7 @@ def _validate_organization_expiration(organization: Organization) -> None:
     if sam_gov_entity.expiration_date < current_date:
         logger.info(
             "Organization SAM.gov registration has expired",
-            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED}
+            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED},
         )
         raise_flask_error(
             422,
@@ -103,7 +107,7 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
         if CompetitionOpenToApplicant.ORGANIZATION not in allowed_applicant_types:
             logger.info(
                 "Competition does not allow organization applications",
-                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_ORG_APPLICATIONS}
+                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_ORG_APPLICATIONS},
             )
             raise_flask_error(
                 422,
@@ -114,7 +118,7 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
         if CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types:
             logger.info(
                 "Competition does not allow individual applications",
-                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_INDIVIDUAL_APPLICATIONS}
+                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_INDIVIDUAL_APPLICATIONS},
             )
             raise_flask_error(
                 422,
@@ -142,7 +146,7 @@ def create_application(
     if not competition:
         logger.info(
             "Competition not found",
-            extra={"submission_issue": SubmissionIssue.COMPETITION_NOT_FOUND}
+            extra={"submission_issue": SubmissionIssue.COMPETITION_NOT_FOUND},
         )
         raise_flask_error(404, "Competition not found")
 
@@ -167,7 +171,7 @@ def create_application(
         if not organization:
             logger.info(
                 "Organization not found",
-                extra={"submission_issue": SubmissionIssue.ORGANIZATION_NOT_FOUND}
+                extra={"submission_issue": SubmissionIssue.ORGANIZATION_NOT_FOUND},
             )
             raise_flask_error(404, "Organization not found")
 

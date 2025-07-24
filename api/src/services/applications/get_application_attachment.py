@@ -35,7 +35,7 @@ def get_application_attachment(
     if not application_attachment:
         logger.info(
             "Application attachment not found",
-            extra={"submission_issue": SubmissionIssue.ATTACHMENT_NOT_FOUND}
+            extra={"submission_issue": SubmissionIssue.ATTACHMENT_NOT_FOUND},
         )
         raise_flask_error(
             404, f"Application attachment with ID {application_attachment_id} not found"

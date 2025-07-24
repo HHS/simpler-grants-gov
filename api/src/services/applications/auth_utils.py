@@ -22,7 +22,7 @@ def check_user_application_access(application: Application, user: User) -> None:
             extra={
                 "user_id": user.user_id,
                 "application_id": application.application_id,
-                "submission_issue": SubmissionIssue.UNAUTHORIZED_APPLICATION_ACCESS
+                "submission_issue": SubmissionIssue.UNAUTHORIZED_APPLICATION_ACCESS,
             },
         )
         raise_flask_error(403, "Unauthorized")

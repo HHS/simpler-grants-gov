@@ -242,10 +242,10 @@ def validate_forms(application: Application, action: ApplicationAction) -> None:
             extra={
                 "submission_issue": SubmissionIssue.FORM_VALIDATION_ERRORS,
                 "error_types": error_types,
-                "error_count": len(form_errors)
-            }
+                "error_count": len(form_errors),
+            },
         )
-        
+
         detail = {}
         if form_error_map:
             detail["form_validation_errors"] = form_error_map
@@ -272,7 +272,7 @@ def validate_application_in_progress(application: Application, action: Applicati
                 "action": action,
                 "application_status": application.application_status,
                 "application_action": action,
-                "submission_issue": SubmissionIssue.APPLICATION_NOT_IN_PROGRESS
+                "submission_issue": SubmissionIssue.APPLICATION_NOT_IN_PROGRESS,
             },
         )
         raise_flask_error(
@@ -302,7 +302,7 @@ def validate_competition_open(competition: Competition, action: ApplicationActio
                 "closing_date": competition.closing_date,
                 "grace_period": competition.grace_period,
                 "application_action": action,
-                "submission_issue": SubmissionIssue.COMPETITION_NOT_OPEN
+                "submission_issue": SubmissionIssue.COMPETITION_NOT_OPEN,
             },
         )
         raise_flask_error(

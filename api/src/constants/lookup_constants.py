@@ -148,6 +148,7 @@ class CompetitionOpenToApplicant(StrEnum):
 
 class SubmissionIssue(StrEnum):
     """Submission issue types for metrics logging"""
+
     NOT_A_MEMBER_OF_ORG = "not_a_member_of_org"
     ORG_NO_SAM_GOV_ENTITY = "org_no_sam_gov_entity"
     ORG_INACTIVE_IN_SAM_GOV = "org_inactive_in_sam_gov"

@@ -50,7 +50,7 @@ def update_application_form(
     if application_response is None and is_included_in_submission is None:
         logger.info(
             "Neither application_response nor is_included_in_submission provided",
-            extra={"submission_issue": SubmissionIssue.NO_UPDATE_DATA_PROVIDED}
+            extra={"submission_issue": SubmissionIssue.NO_UPDATE_DATA_PROVIDED},
         )
         raise_flask_error(
             400,
@@ -74,7 +74,7 @@ def update_application_form(
     if not competition_form:
         logger.info(
             "Form not found or not attached to competition",
-            extra={"submission_issue": SubmissionIssue.FORM_NOT_FOUND_OR_NOT_ATTACHED}
+            extra={"submission_issue": SubmissionIssue.FORM_NOT_FOUND_OR_NOT_ATTACHED},
         )
         raise_flask_error(
             404,
@@ -100,7 +100,7 @@ def update_application_form(
         if application_response is None:
             logger.info(
                 "Application form not found and no response data provided",
-                extra={"submission_issue": SubmissionIssue.APPLICATION_FORM_NOT_FOUND_NO_RESPONSE}
+                extra={"submission_issue": SubmissionIssue.APPLICATION_FORM_NOT_FOUND_NO_RESPONSE},
             )
             raise_flask_error(
                 404,

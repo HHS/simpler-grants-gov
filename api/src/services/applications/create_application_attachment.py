@@ -51,7 +51,7 @@ def upsert_application_attachment(
     if file_attachment.filename is None:
         logger.info(
             "Invalid file name, cannot parse",
-            extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME}
+            extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME},
         )
         raise_flask_error(422, "Invalid file name, cannot parse")
 
