@@ -343,16 +343,30 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "1. Background",
+        "name": "Background",
         "children": [
             {"type": "field", "definition": "/properties/federal_action_type"},
             {"type": "field", "definition": "/properties/federal_action_status"},
             {"type": "field", "definition": "/properties/report_type"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "2. Material Change",
+        "name": "For Materical Change Only",
+        "children": [
             # Material Change
             {"type": "field", "definition": "/properties/material_change_year"},
             {"type": "field", "definition": "/properties/material_change_quarter"},
             {"type": "field", "definition": "/properties/last_report_date"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "3. Name and Address of Reporting Entity",
+        "name": "Name and Address of Reporting Entity",
+        "children": [
             # Reporting Entity
             {"type": "field", "definition": "/properties/reporting_entity/properties/entity_type"},
             {"type": "field", "definition": "/properties/reporting_entity/properties/tier"},
@@ -384,6 +398,13 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/congressional_district",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "4. Name and Address of Prime",
+        "name": "If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
+        "children": [
             {
                 "type": "field",
                 "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/organization_name",
@@ -412,12 +433,26 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/congressional_district",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "5. Details",
+        "name": "Details",
+        "children": [
             # Various fields in middle
             {"type": "field", "definition": "/properties/federal_agency_department"},
             {"type": "field", "definition": "/properties/federal_program_name"},
             {"type": "field", "definition": "/properties/assistance_listing_number"},
             {"type": "field", "definition": "/properties/federal_action_number"},
             {"type": "field", "definition": "/properties/award_amount"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "6. Name and Address of Lobbying Registrant",
+        "name": "Name and Address of Lobbying Registrant",
+        "children": [
             # Lobbying Registrant
             {
                 "type": "field",
@@ -459,6 +494,13 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/lobbying_registrant/properties/address/properties/zip_code",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "7. Individual Performing Services",
+        "name": "Individual Performing Services (including address if different from No. 6)",
+        "children": [
             # Individual performing services
             {
                 "type": "field",
@@ -500,6 +542,13 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/individual_performing_service/properties/address/properties/zip_code",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "8. Signature",
+        "name": "Information requested through this form is authorized by the title 31 U.S.C. section 1352. This disclosure of lobbying activities is a material representation of fact upon which reliance was placed by the tier above when the transaction was made or entered into. This disclosure is required pursuant to 31 U.S.C. 1352. This information will be reported to the Congress semi-annually and will be avilabable for public inspection. Any person who fails to file the rquried disclosureshall be subject to a civil penalty of not less thatn $10,000 and not more than $100,000 for each such failure.",
+        "children": [
             # Signature block
             {"type": "field", "definition": "/properties/signature_block/properties/signature"},
             {
@@ -524,7 +573,7 @@ FORM_UI_SCHEMA = [
             },
             {"type": "field", "definition": "/properties/signature_block/properties/signed_date"},
         ],
-    }
+    },
 ]
 
 FORM_RULE_SCHEMA = {
