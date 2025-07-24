@@ -652,11 +652,10 @@ iframe[id^="ethnio-screener-"] {
     @include at-media("widescreen") {
       flex-direction: row;
       align-items: flex-start;
-      
+
       button {
         margin-bottom: 0;
       }
     }
   }
 }
-

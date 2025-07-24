@@ -11,25 +11,29 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
-  OpportunitySaveUserControl: jest.fn().mockImplementation(({ opportunityId }: { opportunityId: string }) => {
-    return (
-      <div 
-        data-testid={`opportunity-save-control-${opportunityId}`}
-        data-opportunity-id={opportunityId}
-      >
-        {`Mocked Save Control for ${opportunityId}`}
-      </div>
-    );
-  }),
+  OpportunitySaveUserControl: jest
+    .fn()
+    .mockImplementation(({ opportunityId }: { opportunityId: string }) => {
+      return (
+        <div
+          data-testid={`opportunity-save-control-${opportunityId}`}
+          data-opportunity-id={opportunityId}
+        >
+          {`Mocked Save Control for ${opportunityId}`}
+        </div>
+      );
+    }),
 }));
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("SearchResultsTable", () => {
-  const mockOpportunitySaveUserControl = jest.mocked(OpportunitySaveUserControl);
-  
+  const mockOpportunitySaveUserControl = jest.mocked(
+    OpportunitySaveUserControl,
+  );
+
   afterEach(() => jest.resetAllMocks());
-  
+
   it("passes accessibility test", async () => {
     const component = SearchResultsTable({
       searchResults: [mockOpportunity],
@@ -69,11 +73,11 @@ describe("SearchResultsTable", () => {
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: mockOpportunity.opportunity_id },
-      undefined
+      undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "second-opportunity-id" },
-      undefined
+      undefined,
     );
   });
 
@@ -86,13 +90,13 @@ describe("SearchResultsTable", () => {
 
     // Check that the wrapper div with search-table-save-wrapper class exists
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrapper = container.querySelector('.search-table-save-wrapper');
+    const wrapper = container.querySelector(".search-table-save-wrapper");
     expect(wrapper).toBeInTheDocument();
-    
+
     // Verify the mock was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: mockOpportunity.opportunity_id },
-      undefined
+      undefined,
     );
   });
 
@@ -148,18 +152,18 @@ describe("SearchResultsTable", () => {
         name: "headings.status statuses.posted",
       }),
     ).toBeInTheDocument();
-    
+
     const titleCell = within(results[1]).getByRole("cell", {
       name: /headings\.title Test Opportunity number: OPP-12345/,
     });
     expect(titleCell).toBeInTheDocument();
-    
+
     // Verify that the save control component was called for this opportunity
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: mockOpportunity.opportunity_id },
-      undefined
+      undefined,
     );
-    
+
     expect(
       within(results[1]).getByRole("cell", {
         name: "headings.agency published : Jan 15, 2023 expectedAwards: 1",
@@ -246,24 +250,24 @@ describe("SearchResultsTable", () => {
 
     // Verify correct number of mock calls
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(3);
-    
+
     // Verify correct number of wrapper divs
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrappers = container.querySelectorAll('.search-table-save-wrapper');
+    const wrappers = container.querySelectorAll(".search-table-save-wrapper");
     expect(wrappers).toHaveLength(3);
-    
+
     // Verify each opportunity ID was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "opp-1" },
-      undefined
+      undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "opp-2" },
-      undefined
+      undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "opp-3" },
-      undefined
+      undefined,
     );
   });
 
@@ -281,15 +285,15 @@ describe("SearchResultsTable", () => {
 
     // Check that the mock was called with the correct parameters
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
-    
+
     // Check that the mock was called with the correct opportunity IDs
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "unique-id-1" },
-      undefined
+      undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
       { opportunityId: "unique-id-2" },
-      undefined
+      undefined,
     );
   });
 });

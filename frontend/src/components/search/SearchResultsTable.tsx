@@ -117,13 +117,7 @@ const toSearchResultsTableRow = (
       stackOrder: 1,
     },
     {
-      cellData: (
-        <TitleDisplay
-          opportunity={result}
-          page={page}
-          index={index}
-        />
-      ),
+      cellData: <TitleDisplay opportunity={result} page={page} index={index} />,
       stackOrder: 0,
     },
     {
@@ -167,11 +161,7 @@ export const SearchResultsTable = ({
     { cellData: t("headings.awardMax") },
   ];
   const tableRowData = searchResults.map((result, index) =>
-    toSearchResultsTableRow(
-      result,
-      page,
-      index,
-    ),
+    toSearchResultsTableRow(result, page, index),
   );
   return (
     <TableWithResponsiveHeader
