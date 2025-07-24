@@ -23,7 +23,7 @@ const CloseDateDescriptionDisplay = ({
 
   if (closeDateDescription?.length < 150) {
     return (
-      <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
+      <div className="border radius-md border-base-lighter padding-x-2">
         <p className="line-height-sans-5">{closeDateDescription}</p>
       </div>
     );
@@ -35,7 +35,7 @@ const CloseDateDescriptionDisplay = ({
   const postSplit = closeDateDescription.substring(splitAt + 1);
 
   return (
-    <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
+    <div className="border radius-md border-base-lighter padding-x-2">
       <p className="line-height-sans-5">{preSplit}...</p>
       <ContentDisplayToggle
         showCallToAction={t("showDescription")}
