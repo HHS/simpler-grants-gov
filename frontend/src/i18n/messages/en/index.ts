@@ -656,8 +656,7 @@ export const messages = {
       title: "Export results",
     },
     betaAlert: {
-      alertTitle:
-        "How can we build a simpler search experience?",
+      alertTitle: "How can we build a simpler search experience?",
       alert:
         "Fill out a <ethnioSurveyLink>1-minute survey</ethnioSurveyLink> and share your experience with Simpler and Classic Search.",
     },

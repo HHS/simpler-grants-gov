@@ -60,7 +60,9 @@ export function SearchVersionTwo({
           heading={t("betaAlert.alertTitle")}
           alertMessage={t.rich("betaAlert.alert", {
             ethnioSurveyLink: (chunks) => (
-              <a href="https://ethn.io/16188" target="_blank">{chunks}</a>
+              <a href="https://ethn.io/16188" target="_blank">
+                {chunks}
+              </a>
             ),
           })}
         />
