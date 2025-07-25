@@ -239,7 +239,7 @@ FORM_JSON_SCHEMA = {
                 },
                 "suffix": {
                     "type": "string",
-                    "title": "suffix",
+                    "title": "Suffix",
                     "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
                     "minLength": 1,
                     "maxLength": 10,
@@ -258,28 +258,28 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "street1": {
                     "type": "string",
-                    "title": "street1",
+                    "title": "Street 1",
                     "description": "Enter the first line of the Street Address.",
                     "minLength": 1,
                     "maxLength": 55,
                 },
                 "street2": {
                     "type": "string",
-                    "title": "street2",
+                    "title": "Street 2",
                     "description": "Enter the second line of the Street Address.",
                     "minLength": 1,
                     "maxLength": 55,
                 },
                 "city": {
                     "type": "string",
-                    "title": "city",
+                    "title": "City",
                     "description": "Enter the city.",
                     "minLength": 1,
                     "maxLength": 35,
                 },
                 "state": {
                     "allOf": [{"$ref": "#/$defs/state_code"}],
-                    "title": "state",
+                    "title": "State",
                     "description": "Enter the state.",
                 },
                 "zip_code": {
@@ -353,8 +353,8 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "2. Material Change",
-        "name": "For Materical Change Only",
+        "label": "2. For Material Change Only",
+        "name": "For Material Change Only",
         "children": [
             # Material Change
             {"type": "field", "definition": "/properties/material_change_year"},
@@ -402,7 +402,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "4. Name and Address of Prime",
+        "label": "4. If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
         "name": "If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
         "children": [
             {
@@ -498,7 +498,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "7. Individual Performing Services",
+        "label": "7. Individual Performing Services (including address if different from No. 6)",
         "name": "Individual Performing Services (including address if different from No. 6)",
         "children": [
             # Individual performing services
@@ -547,7 +547,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "label": "8. Signature",
-        "name": "Information requested through this form is authorized by the title 31 U.S.C. section 1352. This disclosure of lobbying activities is a material representation of fact upon which reliance was placed by the tier above when the transaction was made or entered into. This disclosure is required pursuant to 31 U.S.C. 1352. This information will be reported to the Congress semi-annually and will be avilabable for public inspection. Any person who fails to file the rquried disclosureshall be subject to a civil penalty of not less thatn $10,000 and not more than $100,000 for each such failure.",
+        "name": "Signature",
         "children": [
             # Signature block
             {"type": "field", "definition": "/properties/signature_block/properties/signature"},
