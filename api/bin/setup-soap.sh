@@ -53,7 +53,7 @@ for file in $applicantspub $applicantspk $grantorspub $grantorspk; do
   fi
 done
 
-soap_auth_content=$(printf '{"%s": "%s\n\n%s","%s": "%s\n\n%s"}' \
+soap_auth_content=$(printf '{"%s": {"id": "applicant_cert", "cert": "%s\n\n%s"},"%s": {"id": "grantor_cert", "cert": "%s\n\n%s"}}' \
 "`openssl x509 -in $applicantspub -noout -fingerprint -sha256 | sed 's/://g' | cut -d'=' -f2 | tr '[:upper:]' '[:lower:]'`" "`cat ${applicantspk}`" "`cat ${applicantspub}`" \
 "`openssl x509 -in $grantorspub -noout -fingerprint -sha256 | sed 's/://g' | cut -d'=' -f2 | tr '[:upper:]' '[:lower:]'`" "`cat ${grantorspk}`" "`cat ${grantorspub}`")
 

@@ -27,13 +27,17 @@ class SOAPClientCertificate(BaseModel):
     serial_number: int
     fingerprint: str
 
-    def get_pem(self, key_map: dict) -> str:
+    def get_pem(self, key_map: dict) -> tuple[str, str]:
         """Note that this auth mechanism will only be configured in lower environments
 
         There will be no prod configurations for this auth mechanism.
+        TODO - is the above true? I think this happens for prod as well?
         """
         try:
-            return f"{key_map[self.fingerprint]}\n\n{self.cert}"
+            value = key_map[self.fingerprint]
+            pem = f"{value['cert']}\n\n{self.cert}"
+            pem_id = value.get("id", "unknown")
+            return pem, pem_id
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
         except Exception:
