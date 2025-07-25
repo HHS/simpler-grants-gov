@@ -22,18 +22,40 @@ export const UiJsonSchema: RJSFSchema = {
       properties: {
         type: {
           type: "string",
-          enum: ["field"],
+          enum: ["field", "multiField"],
         },
+        name: { type: "string" },
         schema: {
           $ref: "#/$defs/schema",
         },
         definition: {
-          type: "string",
-          pattern: "^/properties/[a-zA-Z0-9_]+$",
+          oneOf: [
+            {
+              type: "string",
+              pattern: "^/properties/[a-zA-Z0-9_]+$",
+            },
+            {
+              type: "array",
+              items: {
+                type: "string",
+                pattern: "^/properties/[a-zA-Z0-9_]+$",
+              },
+            },
+          ],
         },
         widget: {
           type: "string",
-          enum: ["Checkbox", "Text", "TextArea", "Radio", "Select"],
+          enum: [
+            "Checkbox",
+            "Text",
+            "TextArea",
+            "Radio",
+            "Select",
+            "Budget424a",
+            "Budget424aSectionB",
+            "Budget424aSectionA",
+            "Budget424aTotalBudgetSummary",
+          ],
         },
       },
       required: ["type"],
