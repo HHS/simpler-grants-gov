@@ -3,7 +3,7 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
@@ -235,6 +235,17 @@ def validate_forms(application: Application, action: ApplicationAction) -> None:
     form_errors, form_error_map = get_application_form_errors(application, action)
 
     if len(form_errors) > 0:
+        # Log the specific validation issues for metrics
+        error_types = [error.type for error in form_errors]
+        logger.info(
+            "Application has form validation issues preventing submission",
+            extra={
+                "submission_issue": SubmissionIssue.FORM_VALIDATION_ERRORS,
+                "error_types": error_types,
+                "error_count": len(form_errors),
+            },
+        )
+
         detail = {}
         if form_error_map:
             detail["form_validation_errors"] = form_error_map
@@ -261,6 +272,7 @@ def validate_application_in_progress(application: Application, action: Applicati
                 "action": action,
                 "application_status": application.application_status,
                 "application_action": action,
+                "submission_issue": SubmissionIssue.APPLICATION_NOT_IN_PROGRESS,
             },
         )
         raise_flask_error(
@@ -290,6 +302,7 @@ def validate_competition_open(competition: Competition, action: ApplicationActio
                 "closing_date": competition.closing_date,
                 "grace_period": competition.grace_period,
                 "application_action": action,
+                "submission_issue": SubmissionIssue.COMPETITION_NOT_OPEN,
             },
         )
         raise_flask_error(
