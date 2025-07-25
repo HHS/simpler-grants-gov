@@ -11,6 +11,7 @@ import { JSX } from "react";
 
 import {
   FormValidationWarning,
+  SchemaField,
   UiSchema,
   UiSchemaField,
   UswdsWidgetProps,
@@ -160,6 +161,19 @@ const widgetComponents: Record<
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
 };
 
+export const getFieldName = (
+  definition?: string,
+  schema?: SchemaField,
+): string => {
+  if (definition) {
+    const definitionParts = definition.split("/");
+    return definitionParts
+      .filter((part) => part && part !== "properties")
+      .join("-");
+  }
+  return (schema?.title ?? "untitled").replace(" ", "-");
+};
+
 export const buildField = ({
   errors,
   formSchema,
@@ -173,12 +187,11 @@ export const buildField = ({
 }) => {
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
-  const name = definition
-    ? definition.split("/")[definition.split("/").length - 1]
-    : (schema?.title ?? "untitled").replace(" ", "-");
+  const name = getFieldName(definition, schema);
+  const pathToField = name.replace(/-/g, ".");
 
   const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
-  const value = get(formData, name) as string | number | undefined;
+  const value = get(formData, pathToField) as string | number | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
@@ -268,12 +281,10 @@ const wrapSection = (
   );
 };
 
-// filters, orders, and nests the form data to match the form schema
-export const shapeFormData = <T extends object>(
+const formatAndFilterFormData = (
   formData: FormData,
-  formSchema: RJSFSchema,
-): T => {
-  const filteredData = Object.fromEntries(
+): { [k: string]: FormDataEntryValue | FormDataEntryValue[] | null } => {
+  return Object.fromEntries(
     Array.from(formData.keys())
       .filter((key) => !key.startsWith("$ACTION_"))
       .map((key) => [
@@ -283,94 +294,101 @@ export const shapeFormData = <T extends object>(
           : formData.get(key),
       ]),
   );
+};
 
-  // arrays from FormData() look like item[0]:value or item[0][key]: value
-  // this accepts flat objects or strings
-  const formDataArrayToArray = (
-    field: string,
-    data: Record<string, unknown>,
-  ) => {
-    const result: Array<Record<string, unknown>> | string[] = [];
-    Object.entries(data).forEach(([key, value]) => {
-      if (!key.includes(field)) return;
-      const match = key.match(/([a-z]+)\[(\d+)\]?\[?([a-z]+)?]/);
-      if (!match?.length) return;
-      const dataField = match[1];
-      if (dataField !== field) return;
-      const dataIndex = Number(match[2]);
-      if (Number.isNaN(dataIndex)) return;
-      const dataItem = match[3];
-      if (dataItem) {
-        if (result[dataIndex] && typeof result[dataIndex] === "object") {
-          result[dataIndex][dataItem] = value;
-        } else {
-          result[dataIndex] = { [dataItem]: value };
-        }
+// arrays from FormData() look like item[0]:value or item[0][key]: value
+// this accepts flat objects or strings
+const formDataArrayToArray = (
+  field: string,
+  data: Record<string, unknown>,
+): Array<Record<string, unknown>> | string[] => {
+  const result: Array<Record<string, unknown>> | string[] = [];
+  Object.entries(data).forEach(([key, value]) => {
+    if (!key.includes(field)) return;
+    const match = key.match(/([a-z]+)\[(\d+)\]?\[?([a-z]+)?]/);
+    if (!match?.length) return;
+    const dataField = match[1];
+    if (dataField !== field) return;
+    const dataIndex = Number(match[2]);
+    if (Number.isNaN(dataIndex)) return;
+    const dataItem = match[3];
+    if (dataItem) {
+      if (result[dataIndex] && typeof result[dataIndex] === "object") {
+        result[dataIndex][dataItem] = value;
       } else {
-        result[dataIndex] = value as string;
+        result[dataIndex] = { [dataItem]: value };
       }
-    });
-    return result;
-  };
+    } else {
+      result[dataIndex] = value as string;
+    }
+  });
+  return result;
+};
 
-  const shapeData = (
-    schema: RJSFSchema,
-    data: Record<string, unknown>,
-  ): Record<string, unknown> => {
-    const result: Record<string, unknown> = {};
+const shapeData = (
+  schema: RJSFSchema,
+  data: Record<string, unknown>,
+): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
 
-    if (schema.properties) {
-      for (const key of Object.keys(schema.properties)) {
-        if (
+  if (schema.properties) {
+    for (const key of Object.keys(schema.properties)) {
+      if (
+        typeof schema.properties[key] !== "boolean" &&
+        schema.properties[key].type === "object"
+      ) {
+        result[key] = shapeData(
+          schema.properties[key] as RJSFSchema,
+          (data[key] as Record<string, unknown>) || data,
+        );
+      } else if (
+        typeof schema.properties[key] !== "boolean" &&
+        schema.properties[key].type === "array" &&
+        typeof data === "object"
+      ) {
+        const arrayData = formDataArrayToArray(key, data);
+        result[key] = (arrayData as unknown[]).map((item) =>
+          typeof item === "object" &&
+          schema.properties &&
           typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "object"
-        ) {
-          result[key] = shapeData(
-            schema.properties[key] as RJSFSchema,
-            (data[key] as Record<string, unknown>) || data,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "array" &&
-          typeof data === "object"
-        ) {
-          const arrayData = formDataArrayToArray(key, data);
-          result[key] = (arrayData as unknown[]).map((item) =>
-            typeof item === "object" &&
-            schema.properties &&
-            typeof schema.properties[key] !== "boolean" &&
-            schema.properties[key].items
-              ? shapeData(
-                  schema.properties[key].items as RJSFSchema,
-                  item as Record<string, unknown>,
-                )
-              : item,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "boolean" &&
-          typeof data === "object"
-        ) {
-          // if the schema is a boolean, we need to check if the data has a value
-          if (data[key] === "true" || data[key] === true) {
-            result[key] = true;
-          } else if (data[key] === "false" || data[key] === false) {
-            result[key] = false;
-          } else {
-            result[key] = undefined; // or some default value
-          }
-          // if the array is flat, just return the values
+          schema.properties[key].items
+            ? shapeData(
+                schema.properties[key].items as RJSFSchema,
+                item as Record<string, unknown>,
+              )
+            : item,
+        );
+      } else if (
+        typeof schema.properties[key] !== "boolean" &&
+        schema.properties[key].type === "boolean" &&
+        typeof data === "object"
+      ) {
+        // if the schema is a boolean, we need to check if the data has a value
+        if (data[key] === "true" || data[key] === true) {
+          result[key] = true;
+        } else if (data[key] === "false" || data[key] === false) {
+          result[key] = false;
         } else {
-          if (data[key]) {
-            result[key] = data[key];
-          }
+          result[key] = undefined; // or some default value
+        }
+        // if the array is flat, just return the values
+      } else {
+        if (data[key]) {
+          result[key] = data[key];
         }
       }
     }
+  }
 
-    return result;
-  };
+  return result;
+};
 
+// filters, orders, and nests the form data to match the form schema
+export const shapeFormData = <T extends object>(
+  formData: FormData,
+  formSchema: RJSFSchema,
+): T => {
+  const filteredData = formatAndFilterFormData(formData);
   return shapeData(formSchema, filteredData) as T;
 };
 

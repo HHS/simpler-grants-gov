@@ -103,7 +103,10 @@ export const handleUpdateApplicationForm = async (
   };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${applicationFormId}`,
-    body: { application_response: values },
+    // hardcoding is_included_in_submission for now in order to make sure validations run on save
+    // for non-required forms
+    // should be adjusted with https://github.com/HHS/simpler-grants-gov/issues/5580
+    body: { application_response: values, is_included_in_submission: true },
     additionalHeaders: ssgToken,
   });
 
