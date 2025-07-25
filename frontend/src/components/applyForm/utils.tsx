@@ -1,5 +1,9 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { get as getSchemaObjectFromPointer } from "json-pointer";
+import {
+  dict,
+  get as getSchemaObjectFromPointer,
+  set as setSchemaObjectFromPointer,
+} from "json-pointer";
 import { filter, get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
@@ -169,7 +173,7 @@ export const getFieldName = (
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("-");
+      .join("-"); // using hyphen since that will work better for html attributes than slashes
   }
   return (schema?.title ?? "untitled").replace(" ", "-");
 };
@@ -188,10 +192,13 @@ export const buildField = ({
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
   const name = getFieldName(definition, schema);
-  const pathToField = name.replace(/-/g, ".");
+  const pathToField = name.replace(/-/g, "/");
 
   const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
-  const value = get(formData, pathToField) as string | number | undefined;
+  const value = getSchemaObjectFromPointer(formData, pathToField) as
+    | string
+    | number
+    | undefined;
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
@@ -332,49 +339,66 @@ const shapeData = (
   const result: Record<string, unknown> = {};
 
   if (schema.properties) {
-    for (const key of Object.keys(schema.properties)) {
+    const { properties } = schema;
+    const propertyPaths = dict(properties);
+    for (const path of Object.keys(propertyPaths)) {
+      const propertyValueAtPath: unknown = getSchemaObjectFromPointer(
+        properties,
+        path,
+      );
+      const dataValueAtPath: unknown = getSchemaObjectFromPointer(data, path);
+
       if (
-        typeof schema.properties[key] !== "boolean" &&
-        schema.properties[key].type === "object"
+        typeof propertyValueAtPath !== "boolean" &&
+        propertyValueAtPath.type === "object"
       ) {
-        result[key] = shapeData(
-          schema.properties[key] as RJSFSchema,
-          (data[key] as Record<string, unknown>) || data,
+        setSchemaObjectFromPointer(
+          result,
+          path,
+          shapeData(
+            propertyValueAtPath as RJSFSchema,
+            (data[key] as Record<string, unknown>) || data,
+          ),
         );
       } else if (
-        typeof schema.properties[key] !== "boolean" &&
-        schema.properties[key].type === "array" &&
+        typeof propertyValueAtPath !== "boolean" &&
+        propertyValueAtPath.type === "array" &&
         typeof data === "object"
       ) {
         const arrayData = formDataArrayToArray(key, data);
-        result[key] = (arrayData as unknown[]).map((item) =>
+        const recursedValue = (arrayData as unknown[]).map((item) =>
           typeof item === "object" &&
-          schema.properties &&
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].items
+          properties &&
+          typeof propertyValueAtPath !== "boolean" &&
+          propertyValueAtPath.items
             ? shapeData(
-                schema.properties[key].items as RJSFSchema,
+                propertyValueAtPath.items as RJSFSchema,
                 item as Record<string, unknown>,
               )
             : item,
         );
+        setSchemaObjectFromPointer(result, path, recursedValue);
       } else if (
-        typeof schema.properties[key] !== "boolean" &&
-        schema.properties[key].type === "boolean" &&
+        typeof propertyValueAtPath !== "boolean" &&
+        propertyValueAtPath.type === "boolean" &&
         typeof data === "object"
       ) {
         // if the schema is a boolean, we need to check if the data has a value
-        if (data[key] === "true" || data[key] === true) {
-          result[key] = true;
-        } else if (data[key] === "false" || data[key] === false) {
-          result[key] = false;
+        if (dataValueAtPath === "true" || dataValueAtPath === true) {
+          // result[key] = true;
+          setSchemaObjectFromPointer(result, path, true);
+        } else if (dataValueAtPath === "false" || dataValueAtPath === false) {
+          // result[key] = false;
+          setSchemaObjectFromPointer(result, path, false);
         } else {
-          result[key] = undefined; // or some default value
+          // result[key] = undefined; // or some default value
+          setSchemaObjectFromPointer(result, path, undefined);
         }
         // if the array is flat, just return the values
       } else {
-        if (data[key]) {
-          result[key] = data[key];
+        if (dataValueAtPath) {
+          // result[key] = dataValueAtPath;
+          setSchemaObjectFromPointer(result, path, dataValueAtPath);
         }
       }
     }
