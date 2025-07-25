@@ -75,7 +75,8 @@ RUN apt-get update \
   # Install wget, required for health checks
   wget \
   # Reduce the image size by clearing apt cached lists
-  && rm -fr /var/lib/apt/lists/*
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production
