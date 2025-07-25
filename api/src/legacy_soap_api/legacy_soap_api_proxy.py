@@ -27,7 +27,7 @@ PROXY_TIMEOUT = 3600
 def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
     config = get_soap_config()
 
-    # Use X-Gg-S2S-Uri header locally if passed, otherwise defualt to GRANTS_GOV_URI:GRANTS_GOV_PORT.
+    # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
     proxy_url = join(
         soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
         soap_request.full_path.lstrip("/"),

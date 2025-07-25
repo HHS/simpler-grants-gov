@@ -25,17 +25,23 @@ logger = logging.getLogger(__name__)
 def simpler_soap_api_route(
     db_session: db.Session, service_name: str, service_port_name: str
 ) -> tuple:
+    add_extra_data_to_current_request_logs(
+        {
+            "service_name": service_name,
+            "service_port_name": service_port_name,
+        }
+    )
+    logger.info("POST /<service_name>/services/v2/<service_port_name>")
+
     api_name = SimplerSoapAPI.get_soap_api(service_name, service_port_name)
     if not api_name:
-        logger.info(
-            f"Could not determine Simpler SOAP API from {service_name=} {service_port_name=}"
-        )
+        logger.info("Could not determine Simpler SOAP API from service_name and service_port_name")
         return get_invalid_path_response().to_flask_response()
 
     operation_name = get_soap_operation_name(request.data)
     add_extra_data_to_current_request_logs(
         {
-            "soap_api": api_name.value,
+            "soap_api": api_name,
             "soap_request_operation_name": operation_name if operation_name else "Unknown",
         }
     )
@@ -52,13 +58,10 @@ def simpler_soap_api_route(
             operation_name=operation_name,
         )
         soap_proxy_response = get_proxy_response(soap_request)
-    except Exception as e:
-        msg = "Error getting soap proxy response"
-        logger.error(
-            msg=msg,
+    except Exception:
+        logger.exception(
+            msg="Error getting soap proxy response",
             extra={
-                "simpler_soap_api_error": msg,
-                "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
                 "used_simpler_response": False,
             },
         )
@@ -70,11 +73,9 @@ def simpler_soap_api_route(
         ).to_flask_response()
     except Exception as e:
         msg = "Unable to process Simpler SOAP proxy response"
-        logger.info(
+        logger.exception(
             msg=msg,
             extra={
-                "simpler_soap_api_error": msg,
-                "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
                 "used_simpler_response": False,
             },
         )

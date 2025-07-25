@@ -223,6 +223,10 @@ def _add_error_info_to_log_record(record: logging.LogRecord) -> bool:
     exc_info = getattr(record, "exc_info", None)
     # exc_info is a 3-part tuple with the class, error obj, and traceback
     if exc_info and len(exc_info) == 3:
+        # Add the exception class name to the logs, check that it
+        # is a class just in case there is some code path that sets this different.
+        if isinstance(exc_info[0], type):
+            record.__dict__["exc_info_cls"] = exc_info[0].__name__
         # If the error were `raise ValueError("example")`, the
         # value of this would be "ValueError('example')"
         record.__dict__["exc_info_short"] = repr(exc_info[1])
