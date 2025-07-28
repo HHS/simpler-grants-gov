@@ -4,11 +4,48 @@ import typing
 from apiflask import validators
 from marshmallow import ValidationError
 from marshmallow.validate import _SizedT
+from werkzeug.datastructures import FileStorage
 
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
 
 Validator = validators.Validator  # re-export
+
+
+class FileSize(Validator):
+    """Validator which succeeds if the file size is within the specified limits."""
+
+    def __init__(self, max_size_bytes: int, error: str | None = None):
+        self.max_size_bytes = max_size_bytes
+        self.max_size_mb = max_size_bytes / (1024 * 1024)
+        self.error: str = error or "File size must be less than {max_size_mb:.1f} MB"
+
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "message": MarshmallowErrorContainer(
+            ValidationErrorType.MAX_VALUE, "File size must be less than {max_size_mb:.1f} MB"
+        ),
+    }
+
+    def _make_error(self) -> ValidationError:
+        error_container = copy.copy(self.error_mapping["message"])
+        error_container.message = self.error.format(
+            max_size_bytes=self.max_size_bytes, max_size_mb=self.max_size_mb
+        )
+        return ValidationError([error_container])
+
+    def __call__(self, value: FileStorage) -> FileStorage:
+        # Check if the value has the required attributes for file validation
+        if not hasattr(value, "content_length") or not hasattr(value, "filename"):
+            raise ValidationError(
+                [MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file.")]
+            )
+
+        # Check if the file has content length set
+        if value.content_length is not None:
+            if value.content_length > self.max_size_bytes:
+                raise self._make_error()
+
+        return value
 
 
 class Regexp(validators.Regexp):

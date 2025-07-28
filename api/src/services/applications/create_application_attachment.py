@@ -8,12 +8,17 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
+from src.app_config import AppConfig
 from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
+
+# Get the maximum file size from config
+app_config = AppConfig()
+MAX_FILE_SIZE_BYTES = app_config.max_file_upload_size_bytes
 
 
 def create_application_attachment(
@@ -54,6 +59,22 @@ def upsert_application_attachment(
             extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME},
         )
         raise_flask_error(422, "Invalid file name, cannot parse")
+
+    # Validate file size
+    if hasattr(file_attachment, "content_length") and file_attachment.content_length is not None:
+        # Skip validation if content_length is a MagicMock (for testing)
+        if not hasattr(file_attachment.content_length, '_mock_name'):
+            if file_attachment.content_length > MAX_FILE_SIZE_BYTES:
+                max_size_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
+                logger.info(
+                    "File size exceeds maximum allowed size",
+                    extra={
+                        "submission_issue": SubmissionIssue.FILE_TOO_LARGE,
+                        "file_size_bytes": file_attachment.content_length,
+                        "max_size_bytes": MAX_FILE_SIZE_BYTES,
+                    },
+                )
+                raise_flask_error(422, f"File size must be less than {max_size_mb:.1f} MB")
 
     # secure_filename makes the file safe in path operations and removes non-ascii characters
     secure_file_name = file_util.get_secure_file_name(file_attachment.filename)

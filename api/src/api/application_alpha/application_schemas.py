@@ -1,11 +1,17 @@
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import FileSize
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
     WarningMixinSchema,
 )
+from src.app_config import AppConfig
 from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+
+# Get the maximum file size from config
+app_config = AppConfig()
+MAX_FILE_SIZE_BYTES = app_config.max_file_upload_size_bytes
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -191,6 +197,7 @@ class ApplicationAttachmentCreateRequestSchema(Schema):
     file_attachment = fields.File(
         required=True,
         allow_none=False,
+        validate=FileSize(MAX_FILE_SIZE_BYTES),
         metadata={"description": "The file to attach to an application"},
     )
 
@@ -227,6 +234,7 @@ class ApplicationAttachmentUpdateRequestSchema(Schema):
     file_attachment = fields.File(
         required=True,
         allow_none=False,
+        validate=FileSize(MAX_FILE_SIZE_BYTES),
         metadata={"description": "The file to attach to an application"},
     )
 

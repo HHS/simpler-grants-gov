@@ -114,6 +114,9 @@ def register_search_client(app: APIFlask) -> None:
 def configure_app(app: APIFlask) -> None:
     app_config = AppConfig()
 
+    # Set maximum file upload size (2 GB)
+    app.config["MAX_CONTENT_LENGTH"] = app_config.max_file_upload_size_bytes
+
     # Modify the response schema to instead use the format of our ApiResponse class
     # which adds additional details to the object.
     # https://apiflask.com/schema/#base-response-schema-customization
