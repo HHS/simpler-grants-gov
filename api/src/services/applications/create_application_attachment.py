@@ -63,7 +63,7 @@ def upsert_application_attachment(
     # Validate file size
     if hasattr(file_attachment, "content_length") and file_attachment.content_length is not None:
         # Skip validation if content_length is a MagicMock (for testing)
-        if not hasattr(file_attachment.content_length, '_mock_name'):
+        if not hasattr(file_attachment.content_length, "_mock_name"):
             if file_attachment.content_length > MAX_FILE_SIZE_BYTES:
                 max_size_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
                 logger.info(
