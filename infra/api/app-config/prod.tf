@@ -81,6 +81,9 @@ module "prod_config" {
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api.sam.gov"
+
+    # Email notification
+    RESET_EMAILS_WITHOUT_SENDING = "false"
   }
   instance_cpu    = 1024
   instance_memory = 4096

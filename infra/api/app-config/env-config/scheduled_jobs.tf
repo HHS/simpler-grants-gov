@@ -69,8 +69,14 @@ locals {
     }
     load-search-agency-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
-      # Every day at 8am Eastern Time during DST. 9am during non-DST.
-      schedule_expression = "cron(0 13 * * ? *)"
+      # Every 1 hour
+      schedule_expression = "cron(0 * * * ? *)"
+      state               = "ENABLED"
+    }
+    email_notification_opportunity = {
+      task_command = ["poetry", "run", "flask", "task", "email-notifications"]
+      # Every day at 11:40am Eastern Time during DST. 12:40pm during non-DST.
+      schedule_expression = "cron(40 16 * * ? *)"
       state               = "ENABLED"
     }
   }

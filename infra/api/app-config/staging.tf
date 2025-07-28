@@ -46,6 +46,8 @@ module "staging_config" {
     ENABLE_AUTH_ENDPOINT   = 1
     ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_SOAP_API        = 1
+    # Email notification
+    RESET_EMAILS_WITHOUT_SENDING = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
