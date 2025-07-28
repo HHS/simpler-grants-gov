@@ -340,14 +340,14 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "widget": "Budget424aSectionA",
-                "definition": "/properties/activity_line_items"
+                "definition": "/properties/activity_line_items",
             },
             {
                 "type": "field",
                 "widget": "Budget424aTotalBudgetSummary",
-                "definition": "/properties/total_budget_summary"
-            }
-        ]
+                "definition": "/properties/total_budget_summary",
+            },
+        ],
     },
     {
         "name": "SectionB",
@@ -360,11 +360,11 @@ FORM_UI_SCHEMA = [
                 "widget": "Budget424aSectionB",
                 "definition": [
                     "/properties/activity_line_items",
-                    "/properties/total_budget_categories"
-                ]
+                    "/properties/total_budget_categories",
+                ],
             }
-        ]
-    }
+        ],
+    },
 ]
 
 
