@@ -1,5 +1,4 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { formDataToObject } from "formdata2json";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
@@ -10,6 +9,7 @@ import {
 
 import { JSX } from "react";
 
+import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
   SchemaField,
@@ -183,10 +183,13 @@ export const getFieldName = (
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("."); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
   }
   return (schema?.title ?? "untitled").replace(" ", "-");
 };
+
+export const getFieldPath = (fieldName: string) =>
+  `/${fieldName.replace(/--/g, "/")}`;
 
 const widgetComponents: Record<
   WidgetTypes,
@@ -243,7 +246,11 @@ export const buildField = ({
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
 
     name = getFieldName(definition, schema);
-    value = get(formData, name) as string | number | undefined;
+    const path = getFieldPath(name);
+    value = getSchemaObjectFromPointer(formData, path) as
+      | string
+      | number
+      | undefined;
   }
   if (!name || !fieldSchema) {
     throw new Error("Could not build field");
@@ -382,10 +389,10 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_REF_1");
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
-  // const preStructuredFormData = Array.from(formData.entries()).reduc
-  // const formattedFormData = formDataToObject(restructuredFormData) as T;
-  const formattedFormData = formDataToObject(formData) as T;
-  return formattedFormData;
+
+  return formDataToObject(formData, {
+    delimiter: "--",
+  }) as T;
 };
 
 // arrays from the html look like field_[row]_item
