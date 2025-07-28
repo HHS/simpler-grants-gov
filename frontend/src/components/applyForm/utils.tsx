@@ -174,6 +174,20 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
+// new, not used in multifield
+export const getFieldName = (
+  definition?: string,
+  schema?: SchemaField,
+): string => {
+  if (definition) {
+    const definitionParts = definition.split("/");
+    return definitionParts
+      .filter((part) => part && part !== "properties")
+      .join("."); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+  }
+  return (schema?.title ?? "untitled").replace(" ", "-");
+};
+
 const widgetComponents: Record<
   WidgetTypes,
   (widgetProps: UswdsWidgetProps) => JSX.Element
@@ -228,7 +242,7 @@ export const buildField = ({
   } else if (typeof definition === "string") {
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
 
-    name = getNameFromDef({ definition, schema });
+    name = getFieldName(definition, schema);
     value = get(formData, name) as string | number | undefined;
   }
   if (!name || !fieldSchema) {
@@ -368,8 +382,10 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_REF_1");
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
-
-  return formDataToObject(formData) as T;
+  // const preStructuredFormData = Array.from(formData.entries()).reduc
+  // const formattedFormData = formDataToObject(restructuredFormData) as T;
+  const formattedFormData = formDataToObject(formData) as T;
+  return formattedFormData;
 };
 
 // arrays from the html look like field_[row]_item
