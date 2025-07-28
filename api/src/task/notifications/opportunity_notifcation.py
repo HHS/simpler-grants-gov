@@ -80,6 +80,8 @@ BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
 TRUNCATION_THRESHOLD = 250
 
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
+
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
@@ -515,7 +517,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         closing_msg = (
             "<div>"
             "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
 
@@ -531,7 +533,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
             all_sections += (
                 "<div>"
-                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}{UTM_TAG}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
