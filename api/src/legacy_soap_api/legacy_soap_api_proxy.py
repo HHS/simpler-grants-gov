@@ -11,6 +11,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateNotConfigured,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     filter_headers,
@@ -50,15 +51,23 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         temp_file_path = temp_cert_file.name
         try:
             cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
-        except SOAPClientCertificateLookupError as e:
+        except SOAPClientCertificateLookupError:
             # This exception handles invalid client certs. We will continue to return the response
             # from GG.
             cert = ""
-            logger.info(f"soap_client_certificate: Unknown or invalid client certificate: {e}")
-        except SOAPClientCertificateNotConfigured as e:
+            logger.info(
+                "soap_client_certificate: Unknown or invalid client certificate",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_INVALID_CLIENT_CERT},
+            )
+        except SOAPClientCertificateNotConfigured:
             # This exception handles the case of a valid cert being passed, but not configured
             # to use Simpler SOAP API.
-            logger.info(f"soap_client_certicate: Certificate validated but not configured: {e}")
+            logger.info(
+                "soap_client_certificate: Certificate validated but not configured",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
+            )
             return get_soap_error_response(
                 faultstring="Client certificate not configured for Simpler SOAP."
             )

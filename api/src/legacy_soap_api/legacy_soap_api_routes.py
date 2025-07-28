@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from flask import request
 
@@ -71,7 +70,7 @@ def simpler_soap_api_route(
         return get_simpler_soap_response(
             soap_request, soap_proxy_response, db_session
         ).to_flask_response()
-    except Exception as e:
+    except Exception:
         msg = "Unable to process Simpler SOAP proxy response"
         logger.exception(
             msg=msg,
