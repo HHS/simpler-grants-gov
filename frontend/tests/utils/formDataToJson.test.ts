@@ -1,5 +1,3 @@
-import { isNull } from "node:util";
-
 import { formDataToObject } from "src/components/applyForm/formDataToJson";
 
 describe("formDataToObject", () => {
@@ -43,6 +41,8 @@ describe("formDataToObject", () => {
     const result = formDataToObject(formData);
 
     expect(result.any).toEqual(undefined);
+    // eslint-disable-next-line
+    // @ts-ignore
     expect(result.something.somethingElse).toEqual(undefined);
   });
 });

@@ -58,19 +58,20 @@ export function formDataToObject(
         }
 
         const actualChunkName = chunkName.substring(0, indexStart);
-        const currentValue =
-          (current[actualChunkName] as NestedObject[]) ??
-          ([] as NestedObject[]);
+        current[actualChunkName] =
+          (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
 
-        current[actualChunkName] = currentValue;
-
-        // const currentChunk: NestedObject[] = current[actualChunkName];
+        // const currentChunk: unknown[] = current[actualChunkName];
+        const currentChunk = current[actualChunkName] as unknown[];
         if (chunkIdx === chunks.length - 1) {
-          current[actualChunkName][arrayIndex] = parsedValue;
+          currentChunk[arrayIndex] = parsedValue;
         } else {
-          current[actualChunkName][arrayIndex] =
-            current[actualChunkName][arrayIndex] ?? {};
-          current = current[actualChunkName][arrayIndex] as NestedObject;
+          // this is here to satisfy the TS, would love to find a way to remove this check
+          if (Array.isArray(current[actualChunkName])) {
+            current[actualChunkName][arrayIndex] =
+              currentChunk[arrayIndex] ?? {};
+            current = currentChunk[arrayIndex] as NestedObject;
+          }
         }
       } else {
         if (chunkIdx === chunks.length - 1) {
