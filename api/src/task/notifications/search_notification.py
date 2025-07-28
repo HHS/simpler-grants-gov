@@ -139,9 +139,9 @@ class SearchNotificationTask(BaseNotificationTask):
 
             formatted_date = datetime_util.utcnow().strftime("%-m/%-d/%Y")
             subject = (
-                f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {formatted_date}"
+                f"New Grant Published on {formatted_date}"
                 if len(opportunities) == 1
-                else f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] {len(opportunities)} New Grants Published on {formatted_date}"
+                else f"{len(opportunities)} New Grants Published on {formatted_date}"
             )
             users_email_notifications.append(
                 UserEmailNotification(

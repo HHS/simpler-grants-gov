@@ -33,14 +33,14 @@ def extract_copy_opportunity_data() -> None:
     etldb_conn = EtlDb()
 
     with etldb_conn.connection() as conn, conn.begin():
-        _trancate_opportunity_table_records(conn)
+        _truncate_opportunity_table_records(conn)
 
         _fetch_insert_opportunity_data(conn)
 
     logger.info("Extract opportunity data completed successfully")
 
 
-def _trancate_opportunity_table_records(conn: Connection) -> None:
+def _truncate_opportunity_table_records(conn: Connection) -> None:
     """Truncate existing records from all tables."""
     cursor = conn.connection.cursor()
     schema = os.environ["DB_SCHEMA"]

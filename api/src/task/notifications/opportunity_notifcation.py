@@ -437,15 +437,27 @@ class OpportunityNotificationTask(BaseNotificationTask):
             return NOT_SPECIFIED
         return value
 
-    def _build_important_dates_content(self, imp_dates_change: dict) -> str:
-        important_section = SECTION_STYLING.format("Important dates")
+    def _build_important_dates_content(
+        self, imp_dates_change: dict, opportunity_status: dict | None
+    ) -> str:
+        relevant_changes = []
         for field, change in imp_dates_change.items():
             before = self._normalize_date_field(change["before"])
             after = self._normalize_date_field(change["after"])
-            important_section += (
+            if field != "close_date":
+                if (
+                    opportunity_status
+                    and opportunity_status["before"] == OpportunityStatus.FORECASTED
+                ):
+                    continue
+            relevant_changes.append(
                 f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
             )
-        return important_section
+
+        if not relevant_changes:
+            return ""
+        important_section = SECTION_STYLING.format("Important dates")
+        return important_section + "".join(relevant_changes)
 
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
@@ -477,7 +489,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
         if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
-            sections.append(self._build_important_dates_content(important_date_diffs))
+            sections.append(
+                self._build_important_dates_content(
+                    important_date_diffs, changes.get("opportunity_status", None)
+                )
+            )
         if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
             sections.append(self._build_award_fields_content(award_fields_diffs))
         if categorization_fields_diffs := {
@@ -550,9 +566,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
+            "Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
+            else "Your saved funding opportunity changed on "
         )
         subject += "Simpler.Grants.gov"
 

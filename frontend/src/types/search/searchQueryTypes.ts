@@ -21,6 +21,13 @@ export const validSearchQueryParamKeys = [
   "sortby",
 ] as const;
 
+// an allow list for any paramaters we expect and would like to keep track of in New Relic or elsewhere
+export const expectedQueryParamKeys = [
+  ...validSearchQueryParamKeys,
+  "utm_source",
+  "savedSearch",
+];
+
 // Only a few defined keys possible
 // URL example => ?query=abcd&status=closed,archived
 export type ValidSearchQueryParam = (typeof validSearchQueryParamKeys)[number];

@@ -69,17 +69,16 @@ FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
-    # TODO - before we can enable prepopulation we need the following rules:
-    #   * assistance listing number
     "funding_opportunity_number": {"gg_pre_population": {"rule": "opportunity_number"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
 }
 
 ProjectAbstractSummary_v2_0 = Form(
-    # legacy form ID - 591
     # https://grants.gov/forms/form-items-description/fid/591
     form_id=uuid.UUID("bf683068-23a4-43fa-ac7a-0f046b83cb14"),
+    legacy_form_id=591,
     form_name="Project Abstract Summary",
+    short_form_name="Project_AbstractSummary_2_0",
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0019",
