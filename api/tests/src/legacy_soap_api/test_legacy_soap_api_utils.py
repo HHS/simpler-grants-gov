@@ -95,6 +95,30 @@ def test_is_list_of_dicts_false_list_not_all_dicts():
     assert is_list_of_dicts([{"a": 1}, 2, "x"]) is False
 
 
+def test_diff_soap_dicts_match():
+    match = {"a": 1}
+    assert diff_soap_dicts(match, match, keys_only=False) == {}
+    assert diff_soap_dicts(match, match, keys_only=True) == {}
+
+
+def test_diff_soap_dicts_lists_sorted_when_compared_when_possible():
+    sgg = {"a": [1, 2]}
+    gg = {"a": [2, 1]}
+    assert diff_soap_dicts(sgg, gg, keys_only=False) == {}
+    assert diff_soap_dicts(sgg, gg, keys_only=True) == {}
+
+
+def test_diff_soap_dicts_lists_sorted_when_compared_when_not_possible():
+    sgg = {"a": [None, 1]}
+    gg = {"a": [set(), {}]}
+    assert diff_soap_dicts(sgg, gg, keys_only=False) == {
+        "a": {"sgg_dict": [None, 1], "gg_dict": [set(), {}]}
+    }
+    assert diff_soap_dicts(sgg, gg, keys_only=True) == {
+        "a": {"sgg_dict": "hidden", "gg_dict": "hidden"}
+    }
+
+
 def test_diff_soap_dicts_simple_difference():
     sgg = {"a": 1, "b": 2}
     gg = {"a": 1, "b": 3}

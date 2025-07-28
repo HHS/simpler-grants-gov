@@ -159,11 +159,19 @@ def diff_soap_dicts(
                 differing[k] = nested_diff
         elif sgg_value != gg_value:
             # Only support diffing list of dicts if key_indexes is specified
-            if key_indexes and is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
-                key_index = key_indexes.get(k)
-                if key_index:
-                    differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
+            if is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
+                if key_indexes:
+                    key_index = key_indexes.get(k)
+                    if key_index:
+                        differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
             else:
+                if isinstance(sgg_value, list) and isinstance(gg_value, list):
+                    try:
+                        if sgg_value.sort() == gg_value.sort():
+                            continue
+                    except TypeError:
+                        # Could not sort this type list
+                        pass
                 differing[k] = {
                     "sgg_dict": _hide_value(sgg_value, keys_only),
                     "gg_dict": _hide_value(gg_value, keys_only),

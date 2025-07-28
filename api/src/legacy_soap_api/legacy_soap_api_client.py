@@ -118,7 +118,7 @@ class BaseSOAPClient:
             )
             logger.info(
                 "soap_api_diff complete",
-                extra={"soap_api_diff": diff_results, "soap_responses_match": False},
+                extra={"soap_api_diff": diff_results, "soap_responses_match": diff_results == {}},
             )
         except Exception as e:
             logger.info(
