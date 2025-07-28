@@ -102,7 +102,6 @@ function Budget424aSectionA<
                     key: "assistance_listing_number",
                   })}
                   value={get(value, `[${row}].assistance_listing_number`)}
-
                 />
               </td>
               <td
@@ -116,7 +115,10 @@ function Budget424aSectionA<
                     row,
                     key: "federal_estimated_unobligated_amount",
                   })}
-                  value={get(value, `[${row}].federal_estimated_unobligated_amount`)}
+                  value={get(
+                    value,
+                    `[${row}].federal_estimated_unobligated_amount`,
+                  )}
                 />
               </td>
               <td
@@ -130,7 +132,10 @@ function Budget424aSectionA<
                     row,
                     key: "non_federal_estimated_unobligated_amount",
                   })}
-                  value={get(value, `[${row}].non_federal_estimated_unobligated_amount`)}
+                  value={get(
+                    value,
+                    `[${row}].non_federal_estimated_unobligated_amount`,
+                  )}
                 />
               </td>
               <td key={`${id}_row_${row}_federal_new_or_revised_amount`}>
@@ -154,7 +159,10 @@ function Budget424aSectionA<
                     row,
                     key: "non_federal_new_or_revised_amount",
                   })}
-                  value={get(value, `[${row}].non_federal_new_or_revised_amount`)}
+                  value={get(
+                    value,
+                    `[${row}].non_federal_new_or_revised_amount`,
+                  )}
                 />
               </td>
               <td key={`${id}_row_${row}_total_amount`}>

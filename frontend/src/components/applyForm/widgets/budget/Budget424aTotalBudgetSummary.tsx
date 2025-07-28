@@ -37,7 +37,7 @@ function Budget424aTotalBudgetSummary<
                 schema={{ ...fieldSchema, ...{ title: "Sum of column C" } }}
                 id={"total_budget_summary.federal_estimated_unobligated_amount"}
                 rawErrors={rawErrors}
-                value={get(value, 'federal_estimated_unobligated_amount')}
+                value={get(value, "federal_estimated_unobligated_amount")}
               />
             </td>
             <td>
@@ -47,7 +47,7 @@ function Budget424aTotalBudgetSummary<
                   "total_budget_summary.non_federal_estimated_unobligated_amount"
                 }
                 rawErrors={rawErrors}
-                value={get(value, 'non_federal_estimated_unobligated_amount')}
+                value={get(value, "non_federal_estimated_unobligated_amount")}
               />
             </td>
             <td>
@@ -55,8 +55,7 @@ function Budget424aTotalBudgetSummary<
                 schema={{ ...fieldSchema, ...{ title: "Sum of column E" } }}
                 id={"total_budget_summary.federal_new_or_revised_amount"}
                 rawErrors={rawErrors}
-                value={get(value, 'federal_new_or_revised_amount')}
-
+                value={get(value, "federal_new_or_revised_amount")}
               />
             </td>
             <td>
@@ -64,7 +63,7 @@ function Budget424aTotalBudgetSummary<
                 schema={{ ...fieldSchema, ...{ title: "Sum of column F" } }}
                 id={"total_budget_summary.non_federal_new_or_revised_amount"}
                 rawErrors={rawErrors}
-                value={get(value, 'non_federal_new_or_revised_amount')}
+                value={get(value, "non_federal_new_or_revised_amount")}
               />
             </td>
             <td>
@@ -72,7 +71,7 @@ function Budget424aTotalBudgetSummary<
                 schema={{ ...fieldSchema, ...{ title: "Sum of column G" } }}
                 id={"total_budget_summary.total_amount"}
                 rawErrors={rawErrors}
-                value={get(value, 'total_amount')}
+                value={get(value, "total_amount")}
               />
             </td>
           </tr>

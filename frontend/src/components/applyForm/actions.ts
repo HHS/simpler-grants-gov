@@ -46,7 +46,7 @@ export async function handleFormAction(
   }
 
   const applicationFormData =
-  shapeFormData<ApplicationResponseDetail>(formData);
+    shapeFormData<ApplicationResponseDetail>(formData);
 
   const saveSuccess = await handleSave(
     applicationFormData,

@@ -18,7 +18,6 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
-
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import Budget424aTotalBudgetSummary from "./widgets/budget/Budget424aTotalBudgetSummary";

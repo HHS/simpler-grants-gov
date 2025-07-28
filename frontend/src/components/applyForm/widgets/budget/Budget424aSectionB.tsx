@@ -3,6 +3,7 @@
 // changes made to include USWDS and allow to functional as non-reactive form field
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
+
 import { Table } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
@@ -42,9 +43,12 @@ function Budget424aSectionB<
           </tr>
         </thead>
         <tbody>
-          <tr><td>6. Object Categories</td></tr>
-          <tr><td>a. Personal</td>
-             {Array.from({ length: 4 }).map((_, row) => (
+          <tr>
+            <td>6. Object Categories</td>
+          </tr>
+          <tr>
+            <td>a. Personal</td>
+            {Array.from({ length: 4 }).map((_, row) => (
               <td key={`${id}_row_${row}_activity_title`}>
                 <TextWidget
                   schema={fieldSchema}
@@ -54,13 +58,14 @@ function Budget424aSectionB<
                     row,
                     key: "personnel_amount",
                   })}
-                  value={get(value, `[${row}].budget_categories.personnel_amount`)}
+                  value={get(
+                    value,
+                    `[${row}].budget_categories.personnel_amount`,
+                  )}
                 />
               </td>
-             ))}
-
-              </tr>
-  
+            ))}
+          </tr>
         </tbody>
       </Table>
     </div>
