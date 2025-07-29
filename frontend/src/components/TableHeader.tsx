@@ -1,24 +1,24 @@
 import { ReactElement } from "react";
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
+import { SortDirection } from "src/types/sortDirectionType";
 
-import { SortDirection } from "src/components/application/attachments/attachmentUtils";
-
-interface TableHeaderProps<SortKey extends string> {
+interface TableHeaderProps {
   isSortable?: boolean;
-  sortKey?: SortKey;
+  sortKey?: AttachmentSortKey;
   value: string;
-  currentSortKey?: SortKey;
+  currentSortKey?: AttachmentSortKey;
   currentSortDirection?: SortDirection;
-  onSort?: (key: SortKey) => void;
+  onSort?: (key: AttachmentSortKey) => void;
 }
 
-export const TableHeader = <SortKey extends string>({
+export const TableHeader = ({
   isSortable = false,
   sortKey,
   value,
   currentSortKey,
   currentSortDirection,
   onSort,
-}: TableHeaderProps<SortKey>): ReactElement<HTMLTableCellElement> => (
+}: TableHeaderProps): ReactElement<HTMLTableCellElement> => (
   <th
     {...(isSortable ? { "data-sortable": null } : {})}
     scope="col"

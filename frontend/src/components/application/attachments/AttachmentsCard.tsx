@@ -7,7 +7,6 @@ import {
   startTransition,
   useActionState,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,11 +27,10 @@ import { AttachmentsCardForm } from "./AttachmentsCardForm";
 import { AttachmentsCardTable } from "./AttachmentsCardTable";
 import {
   createTempAttachment,
-  sortAttachments,
-  SortDirection,
-  SortKey,
 } from "./attachmentUtils";
 import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
+import { uploadActionsInitialState } from "src/constants/attachment/uploadActionsInitialState";
+import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
 
 interface AttachmentsCardProps {
   applicationId: string;
@@ -43,20 +41,6 @@ export const AttachmentsCard = ({
   applicationId,
   attachments,
 }: AttachmentsCardProps) => {
-  /**
-   * Initial States
-   */
-
-  const uploadActionsInitialState = {
-    success: false,
-    error: undefined,
-    uploads: {
-      tempId: null,
-      abortController: null,
-    },
-  };
-
-  const deleteUploadActionsInitialState = { success: false, error: null };
 
   /**
    * Refs
@@ -73,8 +57,6 @@ export const AttachmentsCard = ({
    */
 
   const [uploads, setUploads] = useState<AttachmentCardItem[]>([]);
-  const [sortBy, setSortBy] = useState<SortKey>("updated_at");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [attachmentIdsToDelete, setAttachmentIdsToDelete] = useState<
     Set<string>
   >(new Set());
@@ -84,13 +66,6 @@ export const AttachmentsCard = ({
   const [fileInputErrorText, setFileInputErrorText] = useState<
     string | undefined
   >(undefined);
-
-  const sortedAttachments = useMemo(() => {
-    const sorted = sortAttachments(attachments, sortBy, sortDirection);
-    return sorted.filter(
-      (file) => !attachmentIdsToDelete.has(file.application_attachment_id),
-    );
-  }, [attachments, sortBy, sortDirection, attachmentIdsToDelete]);
 
   const handleUploadAttachment = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -167,18 +142,6 @@ export const AttachmentsCard = ({
   };
 
   /**
-   * Attachment Sorting
-   */
-  const handleAttachmentSort = (column: SortKey) => {
-    if (column === sortBy) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(column);
-      setSortDirection("asc");
-    }
-  };
-
-  /**
    * UseEffects
    */
 
@@ -230,14 +193,12 @@ export const AttachmentsCard = ({
         </Grid>
         <Grid row>
           <AttachmentsCardTable
-            attachments={sortedAttachments}
+            attachments={attachments}
+            attachmentIdsToDelete={attachmentIdsToDelete}
             deleteAttachmentModalRef={deleteModalRef}
-            handleAttachmentSort={handleAttachmentSort}
             handleCancelUpload={handleCancelUpload}
             handleDeleteAttachment={handleDeleteAttachment}
             isDeleting={deletePending}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
             uploads={uploads}
           />
         </Grid>

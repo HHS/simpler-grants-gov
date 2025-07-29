@@ -5,47 +5,70 @@ import { formatDateTime } from "src/utils/dateUtil";
 import { formatFileSize } from "src/utils/fileUtils/formatFileSizeUtil";
 import { useTranslations } from "use-intl";
 
-import { RefObject } from "react";
+import { RefObject, useMemo, useState } from "react";
 import { Link, ModalRef, Table } from "@trussworks/react-uswds";
 
-import {
-  SortDirection,
-  SortKey,
-} from "src/components/application/attachments/attachmentUtils";
 import { PopoverMenu } from "src/components/PopoverMenu";
 import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
 import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
 import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
 import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
 import { DeleteAttachmentButton } from "./DeleteAttachmentButton";
+import { SortDirection } from "src/types/sortDirectionType";
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
+import {
+  sortAttachments,
+} from "./attachmentUtils";
 
 interface Props {
   attachments: Attachment[];
+  attachmentIdsToDelete: Set<string>;
   deleteAttachmentModalRef: RefObject<ModalRef | null>;
-  handleAttachmentSort: (column: SortKey) => void;
   handleCancelUpload: (uploadId: string) => void;
   handleDeleteAttachment: (
     application_attachment_id: string,
     attachmentToDeleteName: string,
   ) => void;
   isDeleting: boolean;
-  sortBy: SortKey;
-  sortDirection: SortDirection;
   uploads: AttachmentCardItem[];
 }
 
 export const AttachmentsCardTable = ({
   attachments,
+  attachmentIdsToDelete,
   deleteAttachmentModalRef,
-  handleAttachmentSort,
   handleCancelUpload,
   handleDeleteAttachment,
   isDeleting,
-  sortBy,
-  sortDirection,
   uploads,
 }: Props) => {
   const t = useTranslations("Application.attachments");
+
+  /**
+   * Local state
+   */
+
+    const [sortBy, setSortBy] = useState<AttachmentSortKey>("updated_at");
+    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  
+    const sortedAttachments = useMemo(() => {
+      const sorted = sortAttachments(attachments, sortBy, sortDirection);
+      return sorted.filter(
+        (file) => !attachmentIdsToDelete.has(file.application_attachment_id),
+      );
+    }, [attachments, sortBy, sortDirection, attachmentIdsToDelete]);
+
+  /**
+   * Attachment Sorting
+   */
+  const handleAttachmentSort = (column: AttachmentSortKey) => {
+    if (column === sortBy) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(column);
+      setSortDirection("asc");
+    }
+  };
 
   return (
     <Table className="application-attachments-table width-full overflow-wrap">
@@ -66,8 +89,8 @@ export const AttachmentsCardTable = ({
           ) : null,
         )}
 
-        {attachments.length ? (
-          attachments.map((file) => (
+        {sortedAttachments.length ? (
+          sortedAttachments.map((file) => (
             <tr key={file.application_attachment_id}>
               <td suppressHydrationWarning>{file.file_name}</td>
               <td>

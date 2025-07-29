@@ -2,15 +2,13 @@
 
 import { useTranslations } from "use-intl";
 
-import {
-  SortDirection,
-  SortKey,
-} from "src/components/application/attachments/attachmentUtils";
 import { TableHeader } from "src/components/TableHeader";
+import { SortDirection } from "src/types/sortDirectionType";
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 
 interface Props {
-  handleAttachmentSort: (column: SortKey) => void;
-  sortBy: SortKey;
+  handleAttachmentSort: (column: AttachmentSortKey) => void;
+  sortBy: AttachmentSortKey;
   sortDirection: SortDirection;
 }
 
@@ -24,7 +22,7 @@ export const AttachmentsCardTableHeaders = ({
   return (
     <thead>
       <tr>
-        <TableHeader<SortKey>
+        <TableHeader
           isSortable
           sortKey="file_name"
           value={t("attachedDocument")}
@@ -33,7 +31,7 @@ export const AttachmentsCardTableHeaders = ({
           onSort={handleAttachmentSort}
         />
         <TableHeader value={t("action")} />
-        <TableHeader<SortKey>
+        <TableHeader
           isSortable
           sortKey="file_size_bytes"
           value={t("fileSize")}
@@ -41,7 +39,7 @@ export const AttachmentsCardTableHeaders = ({
           currentSortDirection={sortDirection}
           onSort={handleAttachmentSort}
         />
-        <TableHeader<SortKey>
+        <TableHeader
           isSortable
           sortKey="updated_at"
           value={t("uploadDate")}

@@ -1,8 +1,7 @@
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 import { Attachment, AttachmentCardItem } from "src/types/attachmentTypes";
+import { SortDirection } from "src/types/sortDirectionType";
 import { v4 as uuidv4 } from "uuid";
-
-export type SortKey = "file_name" | "file_size_bytes" | "updated_at";
-export type SortDirection = "asc" | "desc";
 
 /**
  * Attachments Temp
@@ -33,7 +32,7 @@ export const createTempAttachment = (
 
 export function sortAttachments(
   attachments: Attachment[],
-  sortBy: SortKey,
+  sortBy: AttachmentSortKey,
   sortDirection: SortDirection,
 ): Attachment[] {
   return [...attachments].sort((a, b) => {
