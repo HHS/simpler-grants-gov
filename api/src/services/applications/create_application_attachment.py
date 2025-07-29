@@ -60,22 +60,6 @@ def upsert_application_attachment(
         )
         raise_flask_error(422, "Invalid file name, cannot parse")
 
-    # Validate file size
-    if hasattr(file_attachment, "content_length") and file_attachment.content_length is not None:
-        # Skip validation if content_length is a MagicMock (for testing)
-        if not hasattr(file_attachment.content_length, "_mock_name"):
-            if file_attachment.content_length > MAX_FILE_SIZE_BYTES:
-                max_size_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
-                logger.info(
-                    "File size exceeds maximum allowed size",
-                    extra={
-                        "submission_issue": SubmissionIssue.FILE_TOO_LARGE,
-                        "file_size_bytes": file_attachment.content_length,
-                        "max_size_bytes": MAX_FILE_SIZE_BYTES,
-                    },
-                )
-                raise_flask_error(422, f"File size must be less than {max_size_mb:.1f} MB")
-
     # secure_filename makes the file safe in path operations and removes non-ascii characters
     secure_file_name = file_util.get_secure_file_name(file_attachment.filename)
 
