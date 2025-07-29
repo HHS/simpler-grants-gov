@@ -25,11 +25,11 @@ interface Props {
   attachmentIdsToDelete: Set<string>;
   deleteAttachmentModalRef: RefObject<ModalRef | null>;
   handleCancelUpload: (uploadId: string) => void;
-  handleDeleteAttachment: (
+  isDeleting: boolean;
+  markAttachmentForDeletion: (
     application_attachment_id: string,
     attachmentToDeleteName: string,
   ) => void;
-  isDeleting: boolean;
   uploads: AttachmentCardItem[];
 }
 
@@ -38,8 +38,8 @@ export const AttachmentsCardTable = ({
   attachmentIdsToDelete,
   deleteAttachmentModalRef,
   handleCancelUpload,
-  handleDeleteAttachment,
   isDeleting,
+  markAttachmentForDeletion,
   uploads,
 }: Props) => {
   const t = useTranslations("Application.attachments");
@@ -48,15 +48,15 @@ export const AttachmentsCardTable = ({
    * Local state
    */
 
-    const [sortBy, setSortBy] = useState<AttachmentSortKey>("updated_at");
-    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortBy, setSortBy] = useState<AttachmentSortKey>("updated_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   
-    const sortedAttachments = useMemo(() => {
-      const sorted = sortAttachments(attachments, sortBy, sortDirection);
-      return sorted.filter(
-        (file) => !attachmentIdsToDelete.has(file.application_attachment_id),
-      );
-    }, [attachments, sortBy, sortDirection, attachmentIdsToDelete]);
+  const sortedAttachments = useMemo(() => {
+    const sorted = sortAttachments(attachments, sortBy, sortDirection);
+    return sorted.filter(
+      (file) => !attachmentIdsToDelete.has(file.application_attachment_id),
+    );
+  }, [attachments, sortBy, sortDirection, attachmentIdsToDelete]);
 
   /**
    * Attachment Sorting
@@ -104,7 +104,7 @@ export const AttachmentsCardTable = ({
                   <DeleteAttachmentButton
                     file={file}
                     buttonText={t("delete")}
-                    handleDeleteAttachment={handleDeleteAttachment}
+                    markAttachmentForDeletion={markAttachmentForDeletion}
                     modalRef={deleteAttachmentModalRef}
                   />
                 </PopoverMenu>

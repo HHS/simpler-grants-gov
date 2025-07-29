@@ -10,7 +10,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 interface AttachmentDeleteButtonProps {
   buttonText: string;
   file: Attachment;
-  handleDeleteAttachment: (
+  markAttachmentForDeletion: (
     application_attachment_id: string,
     attachmentToDeleteName: string,
   ) => void;
@@ -20,7 +20,7 @@ interface AttachmentDeleteButtonProps {
 export const DeleteAttachmentButton = ({
   buttonText,
   file,
-  handleDeleteAttachment,
+  markAttachmentForDeletion,
   modalRef,
 }: AttachmentDeleteButtonProps) => {
   return (
@@ -31,7 +31,7 @@ export const DeleteAttachmentButton = ({
       className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
       data-testid="delete-attachment-modal-toggle-button"
       onClick={() =>
-        handleDeleteAttachment(file.application_attachment_id, file.file_name)
+        markAttachmentForDeletion(file.application_attachment_id, file.file_name)
       }
     >
       <USWDSIcon

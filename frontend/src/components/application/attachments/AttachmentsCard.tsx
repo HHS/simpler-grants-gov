@@ -67,26 +67,6 @@ export const AttachmentsCard = ({
     string | undefined
   >(undefined);
 
-  const handleUploadAttachment = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-    const abortController = new AbortController();
-    const { tempId, tempAttachment } = createTempAttachment(
-      file,
-      abortController,
-    );
-
-    setUploads((prev) => [...prev, tempAttachment]);
-
-    const formData = new FormData();
-    formData.append("application_id", applicationId);
-    formData.append("file_attachment", file);
-
-    startTransition(() => {
-      uploadFormAction({ formData, tempId, abortController });
-    });
-  };
 
   /**
    * useActionStates
@@ -117,16 +97,7 @@ export const AttachmentsCard = ({
     target?.abortController?.abort();
   };
 
-  const handleDeleteAttachment = (
-    applicationAttachmentId: string,
-    attachmentToDeleteName: string,
-  ) => {
-    lastDeletedIdRef.current = applicationAttachmentId;
-
-    setAttachmentToDeleteName(attachmentToDeleteName);
-  };
-
-  const handleConfirmedDelete = () => {
+  const handleDeleteAttachment = () => {
     const applicationAttachmentId = lastDeletedIdRef.current as string;
 
     setAttachmentIdsToDelete((prev) =>
@@ -140,6 +111,37 @@ export const AttachmentsCard = ({
       });
     });
   };
+
+    const handleUploadAttachment = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const abortController = new AbortController();
+    const { tempId, tempAttachment } = createTempAttachment(
+      file,
+      abortController,
+    );
+
+    setUploads((prev) => [...prev, tempAttachment]);
+
+    const formData = new FormData();
+    formData.append("application_id", applicationId);
+    formData.append("file_attachment", file);
+
+    startTransition(() => {
+      uploadFormAction({ formData, tempId, abortController });
+    });
+  };
+
+  const markAttachmentForDeletion = (
+    applicationAttachmentId: string,
+    attachmentToDeleteName: string,
+  ) => {
+    lastDeletedIdRef.current = applicationAttachmentId;
+
+    setAttachmentToDeleteName(attachmentToDeleteName);
+  };
+
 
   /**
    * UseEffects
@@ -193,7 +195,7 @@ export const AttachmentsCard = ({
             attachmentIdsToDelete={attachmentIdsToDelete}
             deleteAttachmentModalRef={deleteModalRef}
             handleCancelUpload={handleCancelUpload}
-            handleDeleteAttachment={handleDeleteAttachment}
+            markAttachmentForDeletion={markAttachmentForDeletion}
             isDeleting={deletePending}
             uploads={uploads}
           />
@@ -204,7 +206,7 @@ export const AttachmentsCard = ({
         deletePending={deletePending}
         descriptionText={t("deleteModal.descriptionText")}
         cancelCtaText={t("deleteModal.cancelDeleteCta")}
-        handleConfirmedDelete={handleConfirmedDelete}
+        handleDeleteAttachment={handleDeleteAttachment}
         modalId="delete-attachment-modal"
         modalRef={deleteModalRef}
         pendingDeleteName={attachmentToDeleteName}

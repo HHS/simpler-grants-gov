@@ -18,7 +18,7 @@ interface Props {
   cancelCtaText: string;
   deletePending: boolean;
   descriptionText: string;
-  handleConfirmedDelete: () => void;
+  handleDeleteAttachment: () => void;
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
   pendingDeleteName: string | undefined;
@@ -30,7 +30,7 @@ export const DeleteAttachmentModal = ({
   cancelCtaText,
   deletePending,
   descriptionText,
-  handleConfirmedDelete,
+  handleDeleteAttachment,
   modalId,
   modalRef,
   pendingDeleteName,
@@ -54,7 +54,7 @@ export const DeleteAttachmentModal = ({
           <Button
             disabled={deletePending}
             type="button"
-            onClick={handleConfirmedDelete}
+            onClick={handleDeleteAttachment}
           >
             {deletePending ? (
               <>
