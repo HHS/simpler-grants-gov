@@ -111,6 +111,32 @@ class BaseSOAPClient:
             )
         return proxy_response_schema_data
 
+    def log_diffs(self, proxy_response_soap_dict: dict, simpler_response_soap_dict: dict) -> None:
+        try:
+            diff_results = diff_soap_dicts(
+                sgg_dict=get_envelope_dict(
+                    simpler_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                gg_dict=get_envelope_dict(
+                    proxy_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                key_indexes=self.operation_config.key_indexes,
+                keys_only=True,
+            )
+            logger.info(
+                "soap_api_diff complete",
+                extra={"soap_api_diff": diff_results, "soap_responses_match": diff_results == {}},
+            )
+        except Exception as e:
+            logger.info(
+                "soap_api_diff incomplete",
+                {
+                    "soap_responses_match": False,
+                    "soap_api_error": "soap_response_diff",
+                    "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
+                },
+            )
+
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
         """
         This method is responsible getting the simpler soap xml payload.
@@ -121,7 +147,12 @@ class BaseSOAPClient:
         """
         proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
         simpler_response_soap_dict = self.get_soap_response_dict()
-        diff_soap_dicts(simpler_response_soap_dict, proxy_response_soap_dict)
+
+        # We will only run diffs for responses that do not match.
+        if proxy_response_soap_dict == simpler_response_soap_dict:
+            logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
+        else:
+            self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
         try:
             simpler_soap_response_payload = SOAPPayload(

@@ -66,7 +66,14 @@ class SimplerSoapAPI(StrEnum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+
+    # Some SOAP XML payloads will not force a list of objects when converting to
+    # dicts if there is only one child element entry in the sequence. This config
+    # forces elements specified here to be a list when converting XML to a dict.
     force_list_attributes: tuple | None = tuple()
+
+    # This config is used for insights when diffing proxy and simpler soap responses.
+    key_indexes: dict[str, str] | None = None
 
 
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
@@ -75,6 +82,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetOpportunityListRequest",
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
+            key_indexes={"OpportunityDetails": "CompetitionID"},
         )
     },
     SimplerSoapAPI.GRANTORS: {},

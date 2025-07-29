@@ -30,6 +30,7 @@ RUN apt-get update \
     libgnutls30 \
   # Reduce the image size by clear apt cached lists
   # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
+  && apt-get clean \
   && rm -fr /var/lib/apt/lists/* \
   && rm /etc/ssl/private/ssl-cert-snakeoil.key
 

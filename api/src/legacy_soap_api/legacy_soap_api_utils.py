@@ -8,6 +8,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRespon
 BASE_SOAP_API_RESPONSE_HEADERS = {
     "Content-Type": 'multipart/related; type="application/xop+xml"',
 }
+HIDDEN_VALUE = "hidden"
 
 
 def format_local_soap_response(response_data: bytes) -> bytes:
@@ -125,6 +126,93 @@ def get_invalid_path_response() -> SOAPResponse:
     )
 
 
-def diff_soap_dicts(dict1: dict, dict2: dict) -> None:
-    # TODO: See https://github.com/HHS/simpler-grants-gov/issues/5224
-    pass
+def is_list_of_dicts(data: list) -> bool:
+    return isinstance(data, list) and all(isinstance(item, dict) for item in data)
+
+
+def diff_soap_dicts(
+    sgg_dict: dict, gg_dict: dict, key_indexes: dict | None = None, keys_only: bool = False
+) -> dict:
+    # if a dict key, value pair are not equal and are instances of a list of dicts, use list_of_dict_key_indexes
+    # to determine how to match up entries based on the key name and which key name to use to find and compare
+    # the dicts with the specified matching key name.
+    key_indexes = key_indexes if key_indexes else {}
+    sgg_keys = set(sgg_dict.keys())
+    gg_keys = set(gg_dict.keys())
+
+    key_diffs = {}
+    if keys_only_in_sgg := sgg_keys - gg_keys:
+        key_diffs["keys_only_in_sgg"] = {
+            k: _hide_value(sgg_dict[k], keys_only) for k in keys_only_in_sgg
+        }
+    if keys_only_in_gg := gg_keys - sgg_keys:
+        key_diffs["keys_only_in_gg"] = {
+            k: _hide_value(gg_dict[k], keys_only) for k in keys_only_in_gg
+        }
+
+    differing = {}
+    for k in sgg_keys & gg_keys:
+        sgg_value, gg_value = sgg_dict[k], gg_dict[k]
+        if isinstance(sgg_value, dict) and isinstance(gg_value, dict):
+            nested_diff = diff_soap_dicts(sgg_value, gg_value, key_indexes, keys_only)
+            if nested_diff:
+                differing[k] = nested_diff
+        elif sgg_value != gg_value:
+            # Only support diffing list of dicts if key_indexes is specified
+            if is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
+                if key_indexes:
+                    key_index = key_indexes.get(k)
+                    if key_index:
+                        differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
+            else:
+                if isinstance(sgg_value, list) and isinstance(gg_value, list):
+                    try:
+                        if sgg_value.sort() == gg_value.sort():
+                            continue
+                    except TypeError:
+                        # Could not sort this type list
+                        pass
+                differing[k] = {
+                    "sgg_dict": _hide_value(sgg_value, keys_only),
+                    "gg_dict": _hide_value(gg_value, keys_only),
+                }
+    return {**key_diffs, **differing}
+
+
+def diff_list_of_dicts(
+    sgg_list: list[dict], gg_list: list[dict], index_key: str, keys_only: bool = False
+) -> dict:
+    """
+    Get the differences from dicts within a list of dicts.
+
+    The index_key param indicates how to find the corresponding dict in the list.
+    """
+    sgg_dict = {item[index_key]: item for item in sgg_list if index_key in item}
+    sgg_dict_keys = sgg_dict.keys()
+    gg_dict = {item[index_key]: item for item in gg_list if index_key in item}
+    gg_dict_keys = gg_dict.keys()
+    only_in_sgg = {k: sgg_dict[k] for k in sgg_dict_keys - gg_dict_keys}
+    only_in_gg = {k: gg_dict[k] for k in gg_dict_keys - sgg_dict_keys}
+    if keys_only:
+        return {
+            "index_key": index_key,
+            "count_found_only_in_sgg": len(only_in_sgg.keys()),
+            "count_found_only_in_gg": len(only_in_gg.keys()),
+            "count_different_values": len(
+                [k for k in sgg_dict_keys & gg_dict_keys if sgg_dict[k] != gg_dict[k]]
+            ),
+        }
+    return {
+        "index_key": index_key,
+        "found_only_in_sgg": list(only_in_sgg.values()),
+        "found_only_in_gg": list(only_in_gg.values()),
+        "different_values": {
+            k: {"sgg_dict": sgg_dict[k], "gg_dict": gg_dict[k]}
+            for k in sgg_dict_keys & gg_dict_keys
+            if sgg_dict[k] != gg_dict[k]
+        },
+    }
+
+
+def _hide_value(value: Any, hide: bool) -> Any:
+    return HIDDEN_VALUE if hide else value

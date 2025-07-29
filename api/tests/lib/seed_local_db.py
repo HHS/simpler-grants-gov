@@ -47,6 +47,9 @@ def _build_opportunities(
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
         factories.OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, has_long_descriptions=True, has_attachments=True
+        )
+        factories.OpportunityFactory.create_batch(
             size=2, agency_code="CLOSED", is_closed_summary=True
         )
         factories.OpportunityFactory.create_batch(
