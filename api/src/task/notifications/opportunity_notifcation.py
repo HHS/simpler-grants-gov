@@ -15,7 +15,6 @@ from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
-    Metrics,
     NotificationReason,
     OpportunityVersionChange,
     UserEmailNotification,
@@ -80,6 +79,8 @@ BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
 TRUNCATION_THRESHOLD = 250
 
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
+
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
@@ -132,7 +133,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
                 user_opportunity_pairs.append((user_id, opp_id))
 
-        self.increment(Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
+        self.increment(self.Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
 
         # Grab last notified versions.
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
@@ -531,7 +532,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         closing_msg = (
             "<div>"
             "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
 
@@ -547,7 +548,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
             all_sections += (
                 "<div>"
-                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}{UTM_TAG}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
@@ -564,9 +565,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
+            "Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
+            else "Your saved funding opportunity changed on "
         )
         subject += "Simpler.Grants.gov"
 
@@ -589,7 +590,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     )
                     .values(last_notified_at=datetime_util.utcnow())
                 )
-
                 logger.info(
                     "Updated notification log",
                     extra={
@@ -600,5 +600,5 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
 
                 self.increment(
-                    Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
+                    self.Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
                 )

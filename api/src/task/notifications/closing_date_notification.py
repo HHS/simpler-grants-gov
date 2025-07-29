@@ -27,6 +27,8 @@ PLEASE_CAREFULLY_REVIEW_MSG = (
     ", please contact the grantor using the contact information on the listing page.\n\n"
 )
 
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=closing_date"
+
 
 class ClosingDateNotificationTask(BaseNotificationTask):
 
@@ -120,9 +122,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
                 subject = (
-                    "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunity are due soon"
+                    "Applications for your bookmarked funding opportunity are due soon"
                     if len(closing_opportunities) == 1
-                    else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Applications for your bookmarked funding opportunities are due soon"
+                    else "Applications for your bookmarked funding opportunities are due soon"
                 )
                 users_email_notifications.append(
                     UserEmailNotification(
@@ -160,21 +162,21 @@ class ClosingDateNotificationTask(BaseNotificationTask):
 
         for closing_opp in closing_opportunities:
             message += (
-                f"<a href='{self.notification_config.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
+                f"<a href='{self.notification_config.frontend_base_url}/opportunity/{closing_opp["opportunity_id"]}{UTM_TAG}' target='_blank'>{closing_opp["opportunity_title"]}</a>\n"
                 f"Application due date: {closing_opp["close_date"].strftime('%B %d, %Y')}\n\n"
             )
 
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )
@@ -213,4 +215,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         "opportunity_ids": opportunity_ids,
                         "notification_reason": user_notification.notification_reason,
                     },
+                )
+
+                self.increment(
+                    self.Metrics.CLOSING_SOON_OPPORTUNITIES_TRACKED,
+                    len(user_notification.notified_object_ids),
                 )

@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import dataclass
 from typing import Any
 
 import requests
@@ -7,26 +6,9 @@ import requests
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 
 BASE_SOAP_API_RESPONSE_HEADERS = {
-    "Strict-Transport-Security": "max-age=31536000",
     "Content-Type": 'multipart/related; type="application/xop+xml"',
 }
-
-
-@dataclass
-class SOAPOperationConfig:
-    response_operation_name: str
-    force_list_attributes: tuple | None = tuple()
-
-
-SOAP_OPERATION_CONFIGS = {
-    "applicants": {
-        "GetOpportunityListRequest": SOAPOperationConfig(
-            response_operation_name="GetOpportunityListResponse",
-            force_list_attributes=("OpportunityDetails",),
-        )
-    },
-    "grantors": {},
-}
+HIDDEN_VALUE = "hidden"
 
 
 def format_local_soap_response(response_data: bytes) -> bytes:
@@ -39,7 +21,7 @@ def format_local_soap_response(response_data: bytes) -> bytes:
 --uuid:{response_id}
 Content-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"
 Content-Transfer-Encoding: binary
-Content-ID: <root.message@cxf.apache.org>{response_data.decode('utf-8')}
+Content-ID: <root.message@cxf.apache.org>{response_data.decode()}
 --uuid:{response_id}--
         """.replace(
             '<?xml version="1.0" encoding="UTF-8"?>', ""
@@ -63,7 +45,6 @@ def get_soap_response(
     all_headers = {
         **BASE_SOAP_API_RESPONSE_HEADERS,
         **extra_headers,
-        "Content-Length": len(data),
     }
     return SOAPResponse(data=data, status_code=status_code, headers=all_headers)
 
@@ -75,27 +56,31 @@ class SOAPFaultException(Exception):
         super().__init__(message, fault, *args)
 
 
-def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
-    return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})
-
-
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
     body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
     return {"Envelope": {"Body": {**body}}}
 
 
-def get_auth_error_response() -> SOAPResponse:
-    data = b"""
+def get_soap_error_response(
+    faultcode: str = "soap:Server",
+    faultstring: str = "Server error has occurred",
+    headers: dict | None = None,
+) -> SOAPResponse:
+    err = f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <soap:Fault>
-            <faultcode>soap:Server</faultcode>
-            <faultstring>Auth error</faultstring>
+            <faultcode>{faultcode}</faultcode>
+            <faultstring>{faultstring}</faultstring>
         </soap:Fault>
     </soap:Body>
 </soap:Envelope>
-"""
-    return SOAPResponse(data=format_local_soap_response(data), status_code=500, headers={})
+""".encode()
+    return get_soap_response(data=err, status_code=500, headers=headers)
+
+
+def get_auth_error_response() -> SOAPResponse:
+    return get_soap_error_response(faultstring="Authorization error")
 
 
 def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
@@ -115,7 +100,7 @@ def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
         dict(response.headers), ["transfer-encoding", "keep-alive", "connection"]
     )
 
-    return SOAPResponse(data=data, status_code=response.status_code, headers=response_headers)
+    return get_soap_response(data, status_code=response.status_code, headers=response_headers)
 
 
 def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
@@ -133,3 +118,101 @@ def bool_to_string(value: bool | None) -> str | None:
     if value is None:
         return None
     return "true" if value else "false"
+
+
+def get_invalid_path_response() -> SOAPResponse:
+    return get_soap_response(
+        data=b"<html><body>No service was found.</body></html>", status_code=404
+    )
+
+
+def is_list_of_dicts(data: list) -> bool:
+    return isinstance(data, list) and all(isinstance(item, dict) for item in data)
+
+
+def diff_soap_dicts(
+    sgg_dict: dict, gg_dict: dict, key_indexes: dict | None = None, keys_only: bool = False
+) -> dict:
+    # if a dict key, value pair are not equal and are instances of a list of dicts, use list_of_dict_key_indexes
+    # to determine how to match up entries based on the key name and which key name to use to find and compare
+    # the dicts with the specified matching key name.
+    key_indexes = key_indexes if key_indexes else {}
+    sgg_keys = set(sgg_dict.keys())
+    gg_keys = set(gg_dict.keys())
+
+    key_diffs = {}
+    if keys_only_in_sgg := sgg_keys - gg_keys:
+        key_diffs["keys_only_in_sgg"] = {
+            k: _hide_value(sgg_dict[k], keys_only) for k in keys_only_in_sgg
+        }
+    if keys_only_in_gg := gg_keys - sgg_keys:
+        key_diffs["keys_only_in_gg"] = {
+            k: _hide_value(gg_dict[k], keys_only) for k in keys_only_in_gg
+        }
+
+    differing = {}
+    for k in sgg_keys & gg_keys:
+        sgg_value, gg_value = sgg_dict[k], gg_dict[k]
+        if isinstance(sgg_value, dict) and isinstance(gg_value, dict):
+            nested_diff = diff_soap_dicts(sgg_value, gg_value, key_indexes, keys_only)
+            if nested_diff:
+                differing[k] = nested_diff
+        elif sgg_value != gg_value:
+            # Only support diffing list of dicts if key_indexes is specified
+            if is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
+                if key_indexes:
+                    key_index = key_indexes.get(k)
+                    if key_index:
+                        differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
+            else:
+                if isinstance(sgg_value, list) and isinstance(gg_value, list):
+                    try:
+                        if sgg_value.sort() == gg_value.sort():
+                            continue
+                    except TypeError:
+                        # Could not sort this type list
+                        pass
+                differing[k] = {
+                    "sgg_dict": _hide_value(sgg_value, keys_only),
+                    "gg_dict": _hide_value(gg_value, keys_only),
+                }
+    return {**key_diffs, **differing}
+
+
+def diff_list_of_dicts(
+    sgg_list: list[dict], gg_list: list[dict], index_key: str, keys_only: bool = False
+) -> dict:
+    """
+    Get the differences from dicts within a list of dicts.
+
+    The index_key param indicates how to find the corresponding dict in the list.
+    """
+    sgg_dict = {item[index_key]: item for item in sgg_list if index_key in item}
+    sgg_dict_keys = sgg_dict.keys()
+    gg_dict = {item[index_key]: item for item in gg_list if index_key in item}
+    gg_dict_keys = gg_dict.keys()
+    only_in_sgg = {k: sgg_dict[k] for k in sgg_dict_keys - gg_dict_keys}
+    only_in_gg = {k: gg_dict[k] for k in gg_dict_keys - sgg_dict_keys}
+    if keys_only:
+        return {
+            "index_key": index_key,
+            "count_found_only_in_sgg": len(only_in_sgg.keys()),
+            "count_found_only_in_gg": len(only_in_gg.keys()),
+            "count_different_values": len(
+                [k for k in sgg_dict_keys & gg_dict_keys if sgg_dict[k] != gg_dict[k]]
+            ),
+        }
+    return {
+        "index_key": index_key,
+        "found_only_in_sgg": list(only_in_sgg.values()),
+        "found_only_in_gg": list(only_in_gg.values()),
+        "different_values": {
+            k: {"sgg_dict": sgg_dict[k], "gg_dict": gg_dict[k]}
+            for k in sgg_dict_keys & gg_dict_keys
+            if sgg_dict[k] != gg_dict[k]
+        },
+    }
+
+
+def _hide_value(value: Any, hide: bool) -> Any:
+    return HIDDEN_VALUE if hide else value

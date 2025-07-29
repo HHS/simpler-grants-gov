@@ -16,10 +16,12 @@ from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
+from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
+
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=search"
 
 
 def _strip_pagination_params(search_query: dict) -> dict:
@@ -137,9 +139,9 @@ class SearchNotificationTask(BaseNotificationTask):
 
             formatted_date = datetime_util.utcnow().strftime("%-m/%-d/%Y")
             subject = (
-                f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {formatted_date}"
+                f"New Grant Published on {formatted_date}"
                 if len(opportunities) == 1
-                else f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] {len(opportunities)} New Grants Published on {formatted_date}"
+                else f"{len(opportunities)} New Grants Published on {formatted_date}"
             )
             users_email_notifications.append(
                 UserEmailNotification(
@@ -190,7 +192,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 continue
 
             # Add opportunity title (empty line before title)
-            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
+            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}{UTM_TAG}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
             # Add status
             status = (
                 str(opportunity.opportunity_status).capitalize()
@@ -264,5 +266,5 @@ class SearchNotificationTask(BaseNotificationTask):
                         },
                     )
                     self.increment(
-                        Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
+                        self.Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
                     )

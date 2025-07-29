@@ -203,7 +203,8 @@ class OpportunitySummaryV1Schema(Schema):
     )
 
     version_number = fields.Integer(
-        metadata={"description": "The version number of the opportunity summary", "example": 1}
+        allow_none=True,
+        metadata={"description": "The version number of the opportunity summary", "example": 1},
     )
 
     funding_instruments = fields.List(fields.Enum(FundingInstrument))
@@ -452,6 +453,14 @@ class OpportunityFacetV1Schema(Schema):
         metadata={
             "description": "The counts of is_cost_sharing values in the full response",
             "example": {"true": 1, "false": 3},
+        },
+    )
+
+    close_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of close_date values in the full response",
         },
     )
 

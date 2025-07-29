@@ -3,7 +3,7 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { omit } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
+import { expectedQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
   setNewRelicCustomAttribute,
   unsetAllNewRelicQueryAttributes,
@@ -44,7 +44,7 @@ function SearchAnalytics({
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         // only pass on valid query params to NR
-        if ((validSearchQueryParamKeys as readonly string[]).includes(key)) {
+        if ((expectedQueryParamKeys as readonly string[]).includes(key)) {
           setNewRelicCustomAttribute(key, value || "");
         }
       });

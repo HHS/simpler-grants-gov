@@ -121,7 +121,7 @@ const SearchResultsTableView = ({
         totalResults={totalResults}
         totalPages={totalPages}
       />
-      <SearchResultsTable searchResults={searchResults.data} />
+      <SearchResultsTable searchResults={searchResults.data} page={page} />
     </>
   );
 };

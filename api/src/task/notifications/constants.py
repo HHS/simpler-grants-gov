@@ -13,12 +13,12 @@ class NotificationReason(StrEnum):
 
 # TODO: Confirm with team if we want to use these metrics
 class Metrics(StrEnum):
-    USERS_NOTIFIED = "users_notified"
     OPPORTUNITIES_TRACKED = "opportunities_tracked"
-    SEARCHES_TRACKED = "searches_tracked"
-    NOTIFICATIONS_SENT = "notifications_sent"
-    FAILED_TO_SEND = "failed_to_send"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
+    SEARCHES_TRACKED = "searches_tracked"
+    CLOSING_SOON_OPPORTUNITIES_TRACKED = "closing_soon_opportunities_tracked"
+    USERS_NOTIFIED = "users_notified"
+    FAILED_TO_SEND = "failed_to_send"
     NOTIFICATIONS_RESET = "notifications_reset"
 
 
