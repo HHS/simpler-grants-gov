@@ -78,7 +78,10 @@ def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
     auth = None
     try:
         auth = SOAPAuth(certificate=get_soap_client_certificate(mtls_cert))
-        logger.info("soap_client_certificate: successfully extracted certificate and serial number")
+        logger.info(
+            "soap_client_certificate: successfully extracted certificate and serial number",
+            extra={"soap_api_event": LegacySoapApiEvent.PARSED_CERT},
+        )
     except Exception:
         logger.info(
             "soap_client_certificate: could not parse and extract serial number",

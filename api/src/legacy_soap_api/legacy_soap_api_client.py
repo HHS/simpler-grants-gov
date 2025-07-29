@@ -127,13 +127,13 @@ class BaseSOAPClient:
                 "soap_api_diff complete",
                 extra={"soap_api_diff": diff_results, "soap_responses_match": diff_results == {}},
             )
-        except Exception as e:
+        except Exception:
             logger.info(
                 "soap_api_diff incomplete",
-                {
+                exc_info=True,
+                extra={
                     "soap_responses_match": False,
-                    "soap_api_error": "soap_response_diff",
-                    "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
+                    "soap_api_event": LegacySoapApiEvent.SOAP_DIFF_FAILED,
                 },
             )
 

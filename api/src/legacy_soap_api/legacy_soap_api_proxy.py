@@ -13,11 +13,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
-from src.legacy_soap_api.legacy_soap_api_utils import (
-    filter_headers,
-    get_soap_error_response,
-    get_streamed_soap_response,
-)
+from src.legacy_soap_api.legacy_soap_api_utils import filter_headers, get_streamed_soap_response
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -43,7 +39,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     if not soap_request.auth or config.soap_auth_map == {}:
-        logger.info("soap_client_certificate: Sending soap request without client certificate")
+        logger.info(
+            "soap_client_certificate: Sending soap request without client certificate",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
+        )
         return _get_soap_response(_request, timeout=timeout)
 
     logger.info("soap_client_certificate: Processing client certificate")
@@ -75,7 +74,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         temp_cert_file.flush()
 
         add_extra_data_to_current_request_logs({"cert_id": cert_id})
-        logger.info("soap_client_certificate: Sending soap request with client certificate")
+        logger.info(
+            "soap_client_certificate: Sending soap request with client certificate",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
+        )
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
 
 
