@@ -277,9 +277,8 @@ const Header = ({ locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
-  const { checkFeatureFlag, featureFlags } = useFeatureFlags();
+  const { checkFeatureFlag } = useFeatureFlags();
   const showLoginLink = checkFeatureFlag("authOn");
-  console.dir({ showLoginLink, featureFlags });
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {

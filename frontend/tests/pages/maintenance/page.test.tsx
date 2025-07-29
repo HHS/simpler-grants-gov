@@ -8,6 +8,7 @@ import {
   mockMessages,
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
+import { createFakeUserContext } from "src/utils/testing/providerMocks";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
@@ -48,36 +49,7 @@ describe("Maintenance", () => {
   it("renders intro text", () => {
     // set a major feature offline so we don't redirect to homepage
     render(
-      <UserContext
-        value={{
-          user: undefined,
-          error: undefined,
-          isLoading: false,
-          refreshUser: function (): Promise<void> {
-            throw new Error("Function not implemented.");
-          },
-          hasBeenLoggedOut: false,
-          logoutLocalUser: function (): void {
-            throw new Error("Function not implemented.");
-          },
-          resetHasBeenLoggedOut: function (): void {
-            throw new Error("Function not implemented.");
-          },
-          refreshIfExpired: function (): Promise<boolean | undefined> {
-            throw new Error("Function not implemented.");
-          },
-          refreshIfExpiring: function (): Promise<boolean | undefined> {
-            throw new Error("Function not implemented.");
-          },
-          featureFlags: {
-            authOn: false,
-            opportunityOff: false,
-            searchOff: false,
-          },
-          userFeatureFlags: {},
-          defaultFeatureFlags: {},
-        }}
-      >
+      <UserContext value={createFakeUserContext()}>
         <Maintenance params={localeParams} />{" "}
       </UserContext>,
     );
@@ -128,36 +100,7 @@ describe("Maintenance", () => {
 
   it("passes accessibility scan", async () => {
     const { container } = render(
-      <UserContext
-        value={{
-          user: undefined,
-          error: undefined,
-          isLoading: false,
-          refreshUser: function (): Promise<void> {
-            throw new Error("Function not implemented.");
-          },
-          hasBeenLoggedOut: false,
-          logoutLocalUser: function (): void {
-            throw new Error("Function not implemented.");
-          },
-          resetHasBeenLoggedOut: function (): void {
-            throw new Error("Function not implemented.");
-          },
-          refreshIfExpired: function (): Promise<boolean | undefined> {
-            throw new Error("Function not implemented.");
-          },
-          refreshIfExpiring: function (): Promise<boolean | undefined> {
-            throw new Error("Function not implemented.");
-          },
-          featureFlags: {
-            authOn: false,
-            opportunityOff: false,
-            searchOff: false,
-          },
-          userFeatureFlags: {},
-          defaultFeatureFlags: {},
-        }}
-      >
+      <UserContext value={createFakeUserContext()}>
         <Maintenance params={localeParams} />
       </UserContext>,
     );

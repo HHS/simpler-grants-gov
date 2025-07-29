@@ -33,11 +33,6 @@ export function useFeatureFlags(): {
     (flagName: string): boolean => {
       const value = userContext.featureFlags[flagName];
 
-      console.dir({
-        flagName,
-        value,
-        bool: isBoolean(value),
-      });
       if (!isBoolean(value)) {
         console.error(
           "Unknown or misconfigured feature flag: ",

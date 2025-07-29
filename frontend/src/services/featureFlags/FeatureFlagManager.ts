@@ -137,14 +137,16 @@ export class FeatureFlagsManager {
     // beyond default values. Unfortunately, this breaks the implementation of the feature
     // flag admin view, which depends on reading all flags from cookies, so the logic has been removed
 
-    const featureFlags = {
+    const userFeatureFlags = {
       ...getFeatureFlagsFromCookie(request.cookies),
       ...featureFlagsFromQuery,
     };
 
     const nonDefaultFlags: { [key: string]: boolean } = {};
-    Object.keys(featureFlags).forEach((key) => {
-      const value = featureFlags[key];
+    console.dir({ userFeatureFlags });
+    Object.keys(userFeatureFlags).forEach((key) => {
+      const value = userFeatureFlags[key];
+      console.dir({ key, value, current: this.featureFlags[key] });
       if (value !== this.featureFlags[key]) {
         nonDefaultFlags[key] = value;
       }
@@ -153,6 +155,7 @@ export class FeatureFlagsManager {
     if (Object.keys(nonDefaultFlags).length > 0) {
       setCookie(JSON.stringify(nonDefaultFlags), response.cookies);
     } else {
+      console.dir({ nonDefaultFlags, cookies: response.cookies });
       deleteCookie(response.cookies);
     }
 
