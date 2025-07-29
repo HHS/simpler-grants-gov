@@ -29,7 +29,7 @@ export const deleteAttachmentHandler = async (
 
     revalidateTag(`application-${applicationId}`);
 
-    if (!response || (status !== 200 && status !== 422)) {
+    if (!response || status !== 200) {
       throw new ApiRequestError(
         `Error deleting attachment: ${response.message}`,
         "APIRequestError",
