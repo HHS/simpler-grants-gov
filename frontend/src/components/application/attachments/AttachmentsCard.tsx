@@ -162,15 +162,11 @@ export const AttachmentsCard = ({
 
   // Upload State
   useEffect(() => {
-    if (uploadState?.success) {
-      fileInputRef.current?.clearFiles();
-      setUploads((prev) => prev.filter((u) => u.id !== uploadState?.uploads.tempId));
-      setFileInputErrorText(uploadState?.error);
-    }
+    fileInputRef.current?.clearFiles();
+    setFileInputErrorText(uploadState?.error);
 
-    if (uploadState?.error) {
-      fileInputRef.current?.clearFiles();
-      setFileInputErrorText(uploadState.error);
+    if (uploadState?.success) {
+      setUploads((prev) => prev.filter((u) => u.id !== uploadState?.uploads.tempId));
     }
   }, [uploadState, fileInputRef]);
 
