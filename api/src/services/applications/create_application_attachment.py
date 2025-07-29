@@ -16,10 +16,6 @@ from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
 
-# Get the maximum file size from config
-app_config = AppConfig()
-MAX_FILE_SIZE_BYTES = app_config.max_file_upload_size_bytes
-
 
 def create_application_attachment(
     db_session: db.Session, application_id: uuid.UUID, user: User, form_and_files_data: dict

@@ -166,7 +166,6 @@ class SubmissionIssue(StrEnum):
     APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
     INVALID_FILE_NAME = "invalid_file_name"
     ATTACHMENT_NOT_FOUND = "attachment_not_found"
-    FILE_TOO_LARGE = "file_too_large"
 
 
 class SamGovExtractType(StrEnum):
