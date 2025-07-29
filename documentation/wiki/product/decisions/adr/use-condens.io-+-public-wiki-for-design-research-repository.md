@@ -56,6 +56,8 @@ Use Condens.io for internal research operations and the Public Wiki for external
 
 **(Problem 2)** The Public Wiki is already being used for our public-facing documentation needs. Sharing research findings there will avoid the need for stakeholders to visit yet another tool. And it enforces a clear separation of data that'd public on the wiki (anonymized findings reports, recommendations) and what should remain in Condens (session notes, PII).&#x20;
 
+[Condens Overview - Watch Video](https://www.loom.com/share/74be84e0f1b04fe782dc024e42608e0f) [![](https://cdn.loom.com/sessions/thumbnails/74be84e0f1b04fe782dc024e42608e0f-ad2d8f58dd7753eb-full-play.gif)](https://www.loom.com/share/74be84e0f1b04fe782dc024e42608e0f)
+
 ### Positive Consequences
 
 * Increased research operations efficiency&#x20;
