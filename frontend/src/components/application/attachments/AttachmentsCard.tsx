@@ -27,7 +27,7 @@ import { AttachmentsCardForm } from "./AttachmentsCardForm";
 import { AttachmentsCardTable } from "./AttachmentsCardTable";
 import {
   createTempAttachment,
-} from "./attachmentUtils";
+} from "src/utils/attachment/createTempAttachment";
 import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
 import { uploadActionsInitialState } from "src/constants/attachment/uploadActionsInitialState";
 import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";

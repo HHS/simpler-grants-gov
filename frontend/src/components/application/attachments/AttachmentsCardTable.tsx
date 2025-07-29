@@ -18,7 +18,7 @@ import { SortDirection } from "src/types/sortDirectionType";
 import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 import {
   sortAttachments,
-} from "./attachmentUtils";
+} from "src/utils/attachment/sortAttachments";
 
 interface Props {
   attachments: Attachment[];
