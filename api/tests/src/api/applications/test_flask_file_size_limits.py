@@ -65,12 +65,8 @@ def test_flask_max_content_length_file_within_limit(
     assert "application_attachment_id" in response.json["data"]
 
 
-def test_flask_max_content_length_configuration():
+def test_flask_max_content_length_configuration(app):
     """Test that the Flask app is configured with the correct MAX_CONTENT_LENGTH."""
-    from src.app import create_app
-    from src.app_config import AppConfig
-
-    app = create_app()
     app_config = AppConfig()
 
     # Verify that Flask's MAX_CONTENT_LENGTH is set to the app config value
