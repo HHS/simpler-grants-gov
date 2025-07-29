@@ -61,7 +61,6 @@ export function formDataToObject(
         current[actualChunkName] =
           (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
 
-        // const currentChunk: unknown[] = current[actualChunkName];
         const currentChunk = current[actualChunkName] as unknown[];
         if (chunkIdx === chunks.length - 1) {
           currentChunk[arrayIndex] = parsedValue;
