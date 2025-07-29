@@ -84,7 +84,7 @@ export const AttachmentsCard = ({
     formData.append("file_attachment", file);
 
     startTransition(() => {
-      formAction({ formData, tempId, abortController });
+      uploadFormAction({ formData, tempId, abortController });
     });
   };
 
@@ -92,7 +92,7 @@ export const AttachmentsCard = ({
    * useActionStates
    */
 
-  const [state, formAction] = useActionState(
+  const [uploadState, uploadFormAction] = useActionState(
     uploadAttachmentAction,
     uploadActionsInitialState satisfies UploadAttachmentActionState,
   );
@@ -162,17 +162,17 @@ export const AttachmentsCard = ({
 
   // Upload State
   useEffect(() => {
-    if (state?.success) {
+    if (uploadState?.success) {
       fileInputRef.current?.clearFiles();
-      setUploads((prev) => prev.filter((u) => u.id !== state?.uploads.tempId));
-      setFileInputErrorText(state?.error);
+      setUploads((prev) => prev.filter((u) => u.id !== uploadState?.uploads.tempId));
+      setFileInputErrorText(uploadState?.error);
     }
 
-    if (state?.error) {
+    if (uploadState?.error) {
       fileInputRef.current?.clearFiles();
-      setFileInputErrorText(state.error);
+      setFileInputErrorText(uploadState.error);
     }
-  }, [state, fileInputRef]);
+  }, [uploadState, fileInputRef]);
 
   return (
     <>
