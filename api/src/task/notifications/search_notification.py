@@ -21,6 +21,8 @@ from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=search"
+
 
 def _strip_pagination_params(search_query: dict) -> dict:
     """Remove pagination parameters from a search query"""
@@ -190,7 +192,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 continue
 
             # Add opportunity title (empty line before title)
-            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
+            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}{UTM_TAG}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
             # Add status
             status = (
                 str(opportunity.opportunity_status).capitalize()
