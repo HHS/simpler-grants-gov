@@ -301,7 +301,6 @@ export const messages = {
       action: "Action",
       cancelUpload: "Cancel upload",
       delete: "Delete",
-      deleting: "Deleting...",
       uploading: "Uploading...",
       download: "Download",
       emptyTable: "No attachments uploaded",
@@ -310,11 +309,13 @@ export const messages = {
       uploadDate: "Upload date",
       deleteModal: {
         titleText: "Delete",
+        cancelDeleteCta: "Cancel",
+        cautionDeletingAttachment: "Caution, deleting attachment",
         descriptionText:
           "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
         deleteFileCta: "Delete file",
         deleteFilesCta: "Delete files",
-        cancelDeleteCta: "Cancel",
+        deleting: "Deleting..."
       },
     },
     applyForm: {

@@ -28,19 +28,19 @@ export const DeleteAttachmentModal = ({
   modalRef,
   pendingDeleteName
 }: Props) => {
-  const t = useTranslations("Application.attachments");
+  const t = useTranslations("Application.attachments.deleteModal");
   return (
     <SimplerModal
       modalId={modalId}
       modalRef={modalRef}
       titleText={
         pendingDeleteName
-          ? `${t("deleteModal.titleText")} ${pendingDeleteName}?`
-          : "Caution, deleting attachment"
+          ? `${t("titleText")} ${pendingDeleteName}?`
+          : t("cautionDeletingAttachment")
       }
       className="text-wrap"
     >
-      <p className="font-sans-2xs margin-y-4">{t("deleteModal.descriptionText")}</p>
+      <p className="font-sans-2xs margin-y-4">{t("descriptionText")}</p>
       <ModalFooter>
         <ButtonGroup>
           <Button
@@ -54,7 +54,7 @@ export const DeleteAttachmentModal = ({
                 {t("deleting")}
               </>
             ) : (
-              t("deleteModal.deleteFileCta")
+              t("deleteFileCta")
             )}
           </Button>
           <ModalToggleButton
@@ -64,7 +64,7 @@ export const DeleteAttachmentModal = ({
             modalRef={modalRef}
             unstyled
           >
-            {t("deleteModal.cancelDeleteCta")}
+            {t("cancelDeleteCta")}
           </ModalToggleButton>
         </ButtonGroup>
       </ModalFooter>
