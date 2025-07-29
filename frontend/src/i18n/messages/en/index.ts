@@ -680,10 +680,9 @@ export const messages = {
       title: "Export results",
     },
     betaAlert: {
-      alertTitle:
-        "We're actively building this search experience. Help us improve!",
+      alertTitle: "How can we build a simpler search experience?",
       alert:
-        "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
+        "Fill out a <ethnioSurveyLink>1-minute survey</ethnioSurveyLink> and share your experience with Simpler and Classic Search.",
     },
     saveSearch: {
       heading: "Current search query",

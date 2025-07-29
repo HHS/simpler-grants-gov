@@ -6,6 +6,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
 from src.services.applications.application_validation import (
@@ -47,6 +48,10 @@ def update_application_form(
     """
     # Validate that at least one update is being made
     if application_response is None and is_included_in_submission is None:
+        logger.info(
+            "Neither application_response nor is_included_in_submission provided",
+            extra={"submission_issue": SubmissionIssue.NO_UPDATE_DATA_PROVIDED},
+        )
         raise_flask_error(
             400,
             "Either application_response or is_included_in_submission must be provided",
@@ -67,6 +72,10 @@ def update_application_form(
     ).scalar_one_or_none()
 
     if not competition_form:
+        logger.info(
+            "Form not found or not attached to competition",
+            extra={"submission_issue": SubmissionIssue.FORM_NOT_FOUND_OR_NOT_ATTACHED},
+        )
         raise_flask_error(
             404,
             f"Form with ID {form_id} not found or not attached to this application's competition",
@@ -89,6 +98,10 @@ def update_application_form(
     else:
         # Create new application form (requires application_response)
         if application_response is None:
+            logger.info(
+                "Application form not found and no response data provided",
+                extra={"submission_issue": SubmissionIssue.APPLICATION_FORM_NOT_FOUND_NO_RESPONSE},
+            )
             raise_flask_error(
                 404,
                 f"Application form not found for application {application_id} and form {form_id}",
