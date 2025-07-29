@@ -2609,6 +2609,8 @@ class ApplicationUserFactory(BaseFactory):
     class Meta:
         model = user_models.ApplicationUser
 
+    application_user_id = factory.LazyFunction(uuid.uuid4)
+
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
 

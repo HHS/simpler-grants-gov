@@ -182,14 +182,24 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
 
     __tablename__ = "application_user"
 
+    __table_args__ = (
+        # A user can only be associated with an application once
+        UniqueConstraint("application_id", "user_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    application_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
     application_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey("api.application.application_id"),
-        primary_key=True,
+        index=True,
     )
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("api.user.user_id"), primary_key=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
 
     is_application_owner: Mapped[bool | None]
 
