@@ -14,14 +14,17 @@ We want research tooling that supports both 1) internal research operations and 
 
 ### **Problem 1: Internal Research Repository Needs**
 
-* Reduce manual labor; introduce automation for organizing and categorizing research data
-* Enable easy querying of past research&#x20;
-* Support secure handling of PII and sensitive information&#x20;
+The appropriate internal research repository tool will…&#x20;
+
+* Increase efficiency by reducing the time spent manually organizing, categorizing, annotating, and searching through research notes/videos/spreadsheets/etc.&#x20;
+* Allow for improved cross referencing of study efforts and past research
+* Provide data access to the entire internal team, documenting researchers' thinking and allowing anyone to interpret findings on their own&#x20;
+* Securely handle PII and sensitive information (storing it in a single dedicated space)
 * Simplify anonymization and exporting/copying findings for public sharing&#x20;
 * Allow robust sorting, filtering, and grouping of research&#x20;
 * Include strong transcription capabilities&#x20;
 * Support multiple media inputs (video, audio, documents, etc.)&#x20;
-* Offer good export options (e.g., spreadsheets, documents, PDFs)&#x20;
+* Offer good export options (e.g. spreadsheets, documents, PDFs)&#x20;
 * Be a Nava-approved tool (security, compliance)&#x20;
 
 ### **Problem 2: Public-Facing Research Repository Needs**
@@ -40,15 +43,24 @@ We want research tooling that supports both 1) internal research operations and 
 
 ## Decision Outcome
 
-**Problem 1:** Use Condens.io for internal research operations, because it exceeds all of our requirements. We've extensively trialed of all options and have continued to use Condens, as it's remained invaluable. A strong highlight is its unlimited "Viewer" accounts which provide a self-serve knowledge hub for stakeholders. We can give read-only access to the entire internal team, so they can explore the data, leave comments, and come to their own conclusions/findings. Condense provides excellent querying capabilities. You can even use its AI to ask complex questions! This solution can be shared across research efforts for Simpler.Grants.gov and SimplerNOFOs.&#x20;
+Use Condens.io for internal research operations and the Public Wiki for external transparency.
 
-**Problem 2:** Use the Public Wiki for research transparency, because considering other tools' sharing features, it's obvious that the Public Wiki already addresses our public-facing documentation needs, enforces a clear separation of what data can be made public (anonymized findings reports, recommendations) and what should remain in a separate private tool (session notes, PII). This also avoids the need for stakeholders to visit yet another tool.&#x20;
+**(Problem 1)** Condens meets/exceeds all requirements, including:&#x20;
+
+* **AI-powered transcription** — Automatically transcribes audio and video recordings, saving time and effort in data processing.&#x20;
+* **Data organization** — Centralizes all research data (recordings, notes, comments, findings) in a single secure and searchable repo, which can be shared across research efforts for Simpler.Grants.gov _**and**_ SimplerNOFOs.&#x20;
+* **Powerful search capabilities** — Quickly find specific insights using keywords/tags/filters. You can ask its AI complex questions, and it packages up the relevant data.&#x20;
+* **Collaboration & transparency** — Unlimited read-only accounts provide a self-serve knowledge hub for entire internal team to explore the data, leave comments, share insights, come to their own conclusions/findings, and build reports together.&#x20;
+* **Reporting** — Create reports, visualizations, affinity diagrams, and artifacts to identify patterns and themes in research data that can be shared with team (and anonymized for the public).
+* **Integration** — Zoom and Google Drive make importing/exporting easy.&#x20;
+
+**(Problem 2)** The Public Wiki is already being used for our public-facing documentation needs. Sharing research findings there will avoid the need for stakeholders to visit yet another tool. And it enforces a clear separation of data that'd public on the wiki (anonymized findings reports, recommendations) and what should remain in Condens (session notes, PII).&#x20;
 
 ### Positive Consequences
 
 * Increased research operations efficiency&#x20;
 * Improved transparency (internal and public)&#x20;
-* Easily-shared data allowing whole team to arrive at conclusions/findings
+* Easily-shared data allowing whole team to arrive at conclusions/findings (with unlimited veiw-only accounts)&#x20;
 * Separation of concerns having both _private_ and _public_ research repositories&#x20;
 
 ### Negative Consequences
