@@ -2769,7 +2769,9 @@ components:
           description: The text for the link to the agency email address
           example: Click me to email the agency
         version_number:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: The version number of the opportunity summary
           example: 1
         funding_instruments:
