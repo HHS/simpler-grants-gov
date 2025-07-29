@@ -19,10 +19,10 @@ type ApplyFormResponse = {
 };
 
 export async function handleFormAction(
-  _prevState: ApplyFormResponse,
+  prevState: ApplyFormResponse,
   formData: FormData,
 ) {
-  const { formId, applicationId } = _prevState;
+  const { formId, applicationId } = prevState;
   const session = await getSession();
   if (!session || !session.token) {
     return {

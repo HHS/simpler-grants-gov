@@ -208,6 +208,22 @@ const widgetComponents: Record<
     Budget424aTotalBudgetSummary(widgetProps),
 };
 
+const getByPointer = (target: object, path: string): unknown => {
+  if (!Object.keys(target).length) {
+    return;
+  }
+  try {
+    // console.log("trying", target, path);
+    return getSchemaObjectFromPointer(target, path);
+  } catch (e) {
+    if (e.message.includes("Invalid reference token")) {
+      return undefined;
+    }
+    console.error("!!! error referencing schema path", e, target, path);
+    throw e;
+  }
+};
+
 export const buildField = ({
   errors,
   formSchema,
@@ -247,15 +263,13 @@ export const buildField = ({
 
     name = getFieldName(definition, schema);
     const path = getFieldPath(name);
-    value = getSchemaObjectFromPointer(formData, path) as
-      | string
-      | number
-      | undefined;
+    value = getByPointer(formData, path) as string | number | undefined;
   }
   if (!name || !fieldSchema) {
     throw new Error("Could not build field");
   }
 
+  // should filter and match warnings to field earlier in the process
   const rawErrors = errors
     ? formatFieldWarnings(
         errors,
@@ -312,6 +326,11 @@ export const buildField = ({
   });
 };
 
+const fieldNameToWarningName = (fieldName: string): string => {
+  const warningName = fieldName.replace(/--/g, ".");
+  return `$.${warningName}`;
+};
+
 const formatFieldWarnings = (
   warnings: FormValidationWarning[],
   name: string,
@@ -330,7 +349,7 @@ const formatFieldWarnings = (
   }
   const warningsforField = filter(
     warnings,
-    (warning) => `$.${name}` === warning.field,
+    (warning) => fieldNameToWarningName(name) === warning.field,
   );
   return warningsforField.map((warning) => {
     return warning.message;
