@@ -1,6 +1,9 @@
 "use client";
 
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 import { Attachment, AttachmentCardItem } from "src/types/attachmentTypes";
+import { SortDirection } from "src/types/sortDirectionType";
+import { sortAttachments } from "src/utils/attachment/sortAttachments";
 import { formatDateTime } from "src/utils/dateUtil";
 import { formatFileSize } from "src/utils/fileUtils/formatFileSizeUtil";
 import { useTranslations } from "use-intl";
@@ -14,11 +17,6 @@ import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleti
 import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
 import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
 import { DeleteAttachmentButton } from "./DeleteAttachmentButton";
-import { SortDirection } from "src/types/sortDirectionType";
-import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
-import {
-  sortAttachments,
-} from "src/utils/attachment/sortAttachments";
 
 interface Props {
   attachments: Attachment[];
@@ -50,7 +48,7 @@ export const AttachmentsCardTable = ({
 
   const [sortBy, setSortBy] = useState<AttachmentSortKey>("updated_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  
+
   const sortedAttachments = useMemo(() => {
     const sorted = sortAttachments(attachments, sortBy, sortDirection);
     return sorted.filter(

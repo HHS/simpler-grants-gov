@@ -31,7 +31,10 @@ export const DeleteAttachmentButton = ({
       className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
       data-testid="delete-attachment-modal-toggle-button"
       onClick={() =>
-        markAttachmentForDeletion(file.application_attachment_id, file.file_name)
+        markAttachmentForDeletion(
+          file.application_attachment_id,
+          file.file_name,
+        )
       }
     >
       <USWDSIcon

@@ -315,7 +315,7 @@ export const messages = {
           "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
         deleteFileCta: "Delete file",
         deleteFilesCta: "Delete files",
-        deleting: "Deleting..."
+        deleting: "Deleting...",
       },
     },
     applyForm: {

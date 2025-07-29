@@ -40,11 +40,7 @@ export interface UploadAttachmentAction {
 
 export const uploadAttachmentAction = async (
   _prevState: UploadAttachmentActionState | undefined,
-  {
-    formData,
-    tempId,
-    abortController,
-  }: UploadAttachmentAction,
+  { formData, tempId, abortController }: UploadAttachmentAction,
 ): Promise<UploadAttachmentActionState> => {
   const session = await getSession();
 

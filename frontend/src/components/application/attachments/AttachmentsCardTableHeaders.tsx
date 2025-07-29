@@ -1,10 +1,10 @@
 "use client";
 
+import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
+import { SortDirection } from "src/types/sortDirectionType";
 import { useTranslations } from "use-intl";
 
 import { TableHeader } from "src/components/TableHeader";
-import { SortDirection } from "src/types/sortDirectionType";
-import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 
 interface Props {
   handleAttachmentSort: (column: AttachmentSortKey) => void;

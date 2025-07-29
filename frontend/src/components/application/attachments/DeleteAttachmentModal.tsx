@@ -26,7 +26,7 @@ export const DeleteAttachmentModal = ({
   handleDeleteAttachment,
   modalId,
   modalRef,
-  pendingDeleteName
+  pendingDeleteName,
 }: Props) => {
   const t = useTranslations("Application.attachments.deleteModal");
   return (

@@ -1,6 +1,9 @@
 "use client";
 
+import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
+import { uploadActionsInitialState } from "src/constants/attachment/uploadActionsInitialState";
 import { Attachment, AttachmentCardItem } from "src/types/attachmentTypes";
+import { createTempAttachment } from "src/utils/attachment/createTempAttachment";
 
 import { useTranslations } from "next-intl";
 import {
@@ -25,12 +28,7 @@ import {
 } from "./actions";
 import { AttachmentsCardForm } from "./AttachmentsCardForm";
 import { AttachmentsCardTable } from "./AttachmentsCardTable";
-import {
-  createTempAttachment,
-} from "src/utils/attachment/createTempAttachment";
 import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
-import { uploadActionsInitialState } from "src/constants/attachment/uploadActionsInitialState";
-import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
 
 interface AttachmentsCardProps {
   applicationId: string;
@@ -41,7 +39,6 @@ export const AttachmentsCard = ({
   applicationId,
   attachments,
 }: AttachmentsCardProps) => {
-
   /**
    * Refs
    */
@@ -66,7 +63,6 @@ export const AttachmentsCard = ({
   const [fileInputErrorText, setFileInputErrorText] = useState<
     string | undefined
   >(undefined);
-
 
   /**
    * useActionStates
@@ -112,7 +108,7 @@ export const AttachmentsCard = ({
     });
   };
 
-    const handleUploadAttachment = (files: FileList | null) => {
+  const handleUploadAttachment = (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const file = files[0];
@@ -142,7 +138,6 @@ export const AttachmentsCard = ({
     setAttachmentToDeleteName(attachmentToDeleteName);
   };
 
-
   /**
    * UseEffects
    */
@@ -168,7 +163,9 @@ export const AttachmentsCard = ({
     setFileInputErrorText(uploadState?.error);
 
     if (uploadState?.success) {
-      setUploads((prev) => prev.filter((u) => u.id !== uploadState?.uploads.tempId));
+      setUploads((prev) =>
+        prev.filter((u) => u.id !== uploadState?.uploads.tempId),
+      );
     }
   }, [uploadState, fileInputRef]);
 

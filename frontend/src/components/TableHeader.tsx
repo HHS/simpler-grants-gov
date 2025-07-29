@@ -1,6 +1,7 @@
-import { ReactElement } from "react";
 import { AttachmentSortKey } from "src/types/attachment/attachmentSortKeyType";
 import { SortDirection } from "src/types/sortDirectionType";
+
+import { ReactElement } from "react";
 
 interface TableHeaderProps {
   isSortable?: boolean;
