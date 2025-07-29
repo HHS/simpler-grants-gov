@@ -15,18 +15,24 @@ FORM_JSON_SCHEMA = {
         "individual_performing_service",
         "signature_block",
     ],
-    # Conditionally required
+    # If report_type is MaterialChange, the 3 material change fields become required
+    # Unfortunately, "required" seems to conflict with other validators here, so enforcing on formatting
     "allOf": [
-        # If report_type is MaterialChange, the 3 material change fields become required
         {
             "if": {
+                "required": ["report_type"],
                 "properties": {"report_type": {"const": "MaterialChange"}},
-                "required": ["report_type"],  # Only run rule if report_type is set
             },
             "then": {
-                "required": ["material_change_year", "material_change_quarter", "last_report_date"]
+                "properties": {
+                    "material_change_quarter": {
+                        "allOf": [{"type": "integer"}, {"maximum": 4}, {"minimum": 1}]
+                    },
+                    "material_change_year": {"allOf": [{"pattern": "^[1-9][0-9]{3}$"}]},
+                    "last_report_date": {"allOf": [{"format": "date"}]},
+                }
             },
-        },
+        }
     ],
     "properties": {
         "federal_action_type": {
@@ -50,22 +56,19 @@ FORM_JSON_SCHEMA = {
         "material_change_year": {
             "type": "string",
             "title": "Material Change Year",
+            "anyOf": [{"pattern": "^[1-9][0-9]{3}$"}, {"maxLength": 0}],
             "description": "If this is a follow up report caused by a material change to the information previously reported, enter the year in which the change occurred.",
-            # Allow all years 1000-9999
-            "pattern": r"^[1-9][0-9]{3}$",
         },
         "material_change_quarter": {
-            "type": "integer",
             "title": "Material Change Quarter",
+            "anyOf": [{"allOf": [{"maximum": 4}, {"minimum": 1}]}, {"maxLength": 0}],
             "description": "If this is a follow up report caused by a material change to the information previously reported, enter the quarter in which the change occurred.",
-            "minimum": 1,
-            "maximum": 4,
         },
         "last_report_date": {
             "type": "string",
+            "allOf": [{"anyOf": [{"format": "date"}, {"maxLength": 0}]}],
             "title": "Material Change Date of Last Report",
             "description": "Enter the date of the previously submitted report by this reporting entity for this covered Federal action.",
-            "format": "date",
         },
         "reporting_entity": {
             "type": "object",
