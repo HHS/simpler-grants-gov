@@ -13,7 +13,6 @@ from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
-from src.task.notifications.generate_notifications import NotificationConstants
 from src.task.notifications.search_notification import (
     UTM_TAG,
     SearchNotificationTask,
@@ -108,7 +107,7 @@ def test_search_notifications_cli(
 
     notification_logs_count = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationReason.SEARCH_UPDATES)
         .count()
     )
 

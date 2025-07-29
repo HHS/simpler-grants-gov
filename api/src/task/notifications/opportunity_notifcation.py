@@ -15,7 +15,6 @@ from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
-    Metrics,
     NotificationReason,
     OpportunityVersionChange,
     UserEmailNotification,
@@ -134,7 +133,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
                 user_opportunity_pairs.append((user_id, opp_id))
 
-        self.increment(Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
+        self.increment(self.Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
 
         # Grab last notified versions.
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
@@ -591,7 +590,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     )
                     .values(last_notified_at=datetime_util.utcnow())
                 )
-
                 logger.info(
                     "Updated notification log",
                     extra={
@@ -602,5 +600,5 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
 
                 self.increment(
-                    Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
+                    self.Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
                 )
