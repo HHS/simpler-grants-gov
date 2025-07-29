@@ -16,7 +16,7 @@ from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
+from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -264,5 +264,5 @@ class SearchNotificationTask(BaseNotificationTask):
                         },
                     )
                     self.increment(
-                        Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
+                        self.Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
                     )

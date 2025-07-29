@@ -214,3 +214,8 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         "notification_reason": user_notification.notification_reason,
                     },
                 )
+
+                self.increment(
+                    self.Metrics.CLOSING_SOON_OPPORTUNITIES_TRACKED,
+                    len(user_notification.notified_object_ids),
+                )
