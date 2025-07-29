@@ -8,7 +8,6 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
-from src.app_config import AppConfig
 from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
