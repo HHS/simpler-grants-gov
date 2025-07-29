@@ -202,15 +202,11 @@ export const AttachmentsCard = ({
         </Grid>
       </GridContainer>
       <DeleteAttachmentModal
-        buttonCtaText={t("deleteModal.deleteFileCta")}
         deletePending={deletePending}
-        descriptionText={t("deleteModal.descriptionText")}
-        cancelCtaText={t("deleteModal.cancelDeleteCta")}
         handleDeleteAttachment={handleDeleteAttachment}
         modalId="delete-attachment-modal"
         modalRef={deleteModalRef}
         pendingDeleteName={attachmentToDeleteName}
-        titleText={t("deleteModal.titleText")}
       />
     </>
   );

@@ -14,27 +14,19 @@ import { SimplerModal } from "src/components/SimplerModal";
 import Spinner from "src/components/Spinner";
 
 interface Props {
-  buttonCtaText: string;
-  cancelCtaText: string;
   deletePending: boolean;
-  descriptionText: string;
   handleDeleteAttachment: () => void;
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
   pendingDeleteName: string | undefined;
-  titleText: string;
 }
 
 export const DeleteAttachmentModal = ({
-  buttonCtaText,
-  cancelCtaText,
   deletePending,
-  descriptionText,
   handleDeleteAttachment,
   modalId,
   modalRef,
-  pendingDeleteName,
-  titleText,
+  pendingDeleteName
 }: Props) => {
   const t = useTranslations("Application.attachments");
   return (
@@ -43,12 +35,12 @@ export const DeleteAttachmentModal = ({
       modalRef={modalRef}
       titleText={
         pendingDeleteName
-          ? `${titleText} ${pendingDeleteName}?`
+          ? `${t("deleteModal.titleText")} ${pendingDeleteName}?`
           : "Caution, deleting attachment"
       }
       className="text-wrap"
     >
-      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+      <p className="font-sans-2xs margin-y-4">{t("deleteModal.descriptionText")}</p>
       <ModalFooter>
         <ButtonGroup>
           <Button
@@ -62,7 +54,7 @@ export const DeleteAttachmentModal = ({
                 {t("deleting")}
               </>
             ) : (
-              buttonCtaText
+              t("deleteModal.deleteFileCta")
             )}
           </Button>
           <ModalToggleButton
@@ -72,7 +64,7 @@ export const DeleteAttachmentModal = ({
             modalRef={modalRef}
             unstyled
           >
-            {cancelCtaText}
+            {t("deleteModal.cancelDeleteCta")}
           </ModalToggleButton>
         </ButtonGroup>
       </ModalFooter>
