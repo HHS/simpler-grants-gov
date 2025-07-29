@@ -14,9 +14,7 @@ class TestApplicationUser:
         application = ApplicationFactory.create()
 
         application_user = ApplicationUserFactory.create(
-            user=user,
-            application=application,
-            is_application_owner=True
+            user=user, application=application, is_application_owner=True
         )
 
         # Verify the dedicated primary key exists and is a UUID
@@ -52,14 +50,10 @@ class TestApplicationUser:
         application = ApplicationFactory.create()
 
         app_user1 = ApplicationUserFactory.create(
-            user=user1,
-            application=application,
-            is_application_owner=True
+            user=user1, application=application, is_application_owner=True
         )
         app_user2 = ApplicationUserFactory.create(
-            user=user2,
-            application=application,
-            is_application_owner=False
+            user=user2, application=application, is_application_owner=False
         )
 
         # Both should have different primary keys
@@ -78,14 +72,10 @@ class TestApplicationUser:
         application2 = ApplicationFactory.create()
 
         app_user1 = ApplicationUserFactory.create(
-            user=user,
-            application=application1,
-            is_application_owner=True
+            user=user, application=application1, is_application_owner=True
         )
         app_user2 = ApplicationUserFactory.create(
-            user=user,
-            application=application2,
-            is_application_owner=False
+            user=user, application=application2, is_application_owner=False
         )
 
         # Both should have different primary keys
@@ -111,7 +101,7 @@ class TestApplicationUser:
         unique_constraint_found = False
 
         for constraint in unique_constraints:
-            if hasattr(constraint, 'columns') and len(constraint.columns) == 2:
+            if hasattr(constraint, "columns") and len(constraint.columns) == 2:
                 column_names = [col.name for col in constraint.columns]
                 if "application_id" in column_names and "user_id" in column_names:
                     unique_constraint_found = True
@@ -127,7 +117,7 @@ class TestApplicationUser:
             "user_id",
             "is_application_owner",
             "created_at",
-            "updated_at"
+            "updated_at",
         ]
 
         for expected_col in expected_columns:
@@ -143,4 +133,4 @@ class TestApplicationUser:
         assert isinstance(app_user2.application_user_id, uuid.UUID)
 
         # UUIDs should be different
-        assert app_user1.application_user_id != app_user2.application_user_id 
+        assert app_user1.application_user_id != app_user2.application_user_id
