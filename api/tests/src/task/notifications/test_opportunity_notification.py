@@ -306,8 +306,7 @@ class TestOpportunityNotification:
             .all()
         )
         assert len(notification_logs) == 2
-        assert notification_logs[0].user_id == user.user_id
-        assert notification_logs[1].user_id == user_2.user_id
+        assert {n.user_id for n in notification_logs} == {user.user_id, user_2.user_id}
 
         # Verify the log contains the correct metrics
         log_records = [
