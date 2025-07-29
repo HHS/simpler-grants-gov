@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from src.app_config import AppConfig
 from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
 
 attachment_dir = Path(__file__).parent / "attachments"
