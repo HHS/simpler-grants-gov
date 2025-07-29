@@ -44,11 +44,7 @@ export const uploadAttachmentAction = async (
     formData,
     tempId,
     abortController,
-  }: {
-    formData: FormData;
-    tempId: string;
-    abortController: AbortController;
-  },
+  }: UploadAttachmentAction,
 ): Promise<UploadAttachmentActionState> => {
   const session = await getSession();
 
