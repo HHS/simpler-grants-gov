@@ -35,7 +35,6 @@ export default function UserProvider({
   }, [cookie]);
 
   const featureFlags = useMemo(() => {
-    console.dir({ defaultFeatureFlags, userFeatureFlags });
     return {
       ...defaultFeatureFlags,
       ...userFeatureFlags,

@@ -143,10 +143,8 @@ export class FeatureFlagsManager {
     };
 
     const nonDefaultFlags: { [key: string]: boolean } = {};
-    console.dir({ userFeatureFlags });
     Object.keys(userFeatureFlags).forEach((key) => {
       const value = userFeatureFlags[key];
-      console.dir({ key, value, current: this.featureFlags[key] });
       if (value !== this.featureFlags[key]) {
         nonDefaultFlags[key] = value;
       }
@@ -155,7 +153,6 @@ export class FeatureFlagsManager {
     if (Object.keys(nonDefaultFlags).length > 0) {
       setCookie(JSON.stringify(nonDefaultFlags), response.cookies);
     } else {
-      console.dir({ nonDefaultFlags, cookies: response.cookies });
       deleteCookie(response.cookies);
     }
 

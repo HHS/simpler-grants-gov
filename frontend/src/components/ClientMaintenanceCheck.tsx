@@ -14,13 +14,6 @@ export default function ClientMaintenanceCheck() {
   } = useFeatureFlags();
 
   useEffect(() => {
-    console.dir({
-      msg: "redir",
-      search: !checkFeatureFlag("searchOff"),
-      opp: !checkFeatureFlag("opportunityOff"),
-      auth: checkFeatureFlag("authOn"),
-    });
-
     if (
       !checkFeatureFlag("searchOff") &&
       !checkFeatureFlag("opportunityOff") &&

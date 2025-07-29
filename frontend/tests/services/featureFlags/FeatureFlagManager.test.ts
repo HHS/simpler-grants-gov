@@ -152,7 +152,6 @@ describe("FeatureFlagsManager", () => {
       );
       const request = new NextRequest(new Request("fakeUrl://not.real"), {});
 
-      console.log("new test");
       const mockSet = jest.fn();
       const mockDelete = jest.fn();
       jest.spyOn(NextResponse.prototype, "cookies", "get").mockReturnValue({
