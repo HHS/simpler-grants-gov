@@ -5,12 +5,7 @@ from src.api.schemas.response_schema import (
     FileResponseSchema,
     WarningMixinSchema,
 )
-from src.app_config import AppConfig
 from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
-
-# Get the maximum file size from config
-app_config = AppConfig()
-MAX_FILE_SIZE_BYTES = app_config.max_file_upload_size_bytes
 
 
 class ApplicationStartRequestSchema(Schema):
