@@ -23,7 +23,9 @@ export const fetchCompetitionEndpoint = {
   method: "GET" as ApiMethod,
 };
 
-export const toDynamicApplicationsEndpoint = (type: "POST" | "GET" | "PUT") => {
+export const toDynamicApplicationsEndpoint = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => {
   return {
     allowedErrorStatuses: [422],
     basePath: environment.API_URL,
