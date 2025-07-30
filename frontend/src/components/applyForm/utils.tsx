@@ -1,6 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get } from "lodash";
+import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
@@ -148,11 +148,11 @@ export const getFieldSchema = ({
 }): RJSFSchema => {
   if (definition && schema) {
     return {
-      ...getSchemaObjectFromPointer(formSchema, definition),
+      ...(getByPointer(formSchema, definition) as object),
       ...schema,
     } as RJSFSchema;
   } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
+    return getByPointer(formSchema, definition) as RJSFSchema;
   }
   return schema as RJSFSchema;
 };
@@ -224,6 +224,12 @@ const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
+// this is going to need to get much more complicated to figure out if
+// nested and conditionally required fields are required
+const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
+  return (formSchema.required ?? []).includes(fieldName);
+};
+
 export const buildField = ({
   errors,
   formSchema,
@@ -266,6 +272,7 @@ export const buildField = ({
     value = getByPointer(formData, path) as string | number | undefined;
   }
   if (!name || !fieldSchema) {
+    console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
@@ -316,7 +323,8 @@ export const buildField = ({
   return widgetComponents[type]({
     id: name,
     disabled,
-    required: (formSchema.required ?? []).includes(name),
+    // required: (formSchema.required ?? []).includes(name),
+    required: isFieldRequired(name, formSchema),
     minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
     maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
     schema: fieldSchema,
@@ -400,6 +408,80 @@ const wrapSection = (
   );
 };
 
+const isBasicallyAnObject = (mightBeAnObject: any): boolean => {
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
+  );
+};
+
+const isEmptyObject = (objectThatMaybeEmpty: object): boolean => {
+  return Object.values(objectThatMaybeEmpty).every((value) => {
+    if (isBasicallyAnObject(value)) {
+      return isEmptyObject(value);
+    }
+    return !value;
+  });
+};
+
+// if an object contains only undefined values, remove it
+export const filterUnfilledNestedFields = (
+  structuredFormData: object,
+): object => {
+  return Object.entries(structuredFormData).reduce(
+    (filteredFormData, [key, value]) => {
+      if (isBasicallyAnObject(value)) {
+        if (isEmptyObject(value)) {
+          return filteredFormData;
+        }
+      }
+      // // what about empty arrays?
+      // if (value) {
+      //   filteredFormData[key] = value;
+      //   return filteredFormData;
+      // }
+      filteredFormData[key] = value;
+      return filteredFormData;
+    },
+    {},
+  );
+};
+
+function removeEmptyObjectsAndUndefined(obj: any): any {
+  if (Array.isArray(obj)) {
+    // Recursively clean array elements
+    return obj.map(removeEmptyObjectsAndUndefined);
+  } else if (typeof obj === "object" && obj !== null) {
+    const result: any = {};
+    if (
+      Object.values(obj).some(
+        (nestedValue) => typeof obj === "object" && obj !== null,
+      )
+    ) {
+    }
+    Object.entries(obj).forEach(([key, value]) => {
+      if (value === undefined) {
+        return;
+      }
+      const cleaned = removeEmptyObjectsAndUndefined(value);
+      // Remove empty objects, but keep arrays and all other values
+      if (
+        typeof cleaned === "object" &&
+        cleaned !== null &&
+        !Array.isArray(cleaned) &&
+        Object.keys(cleaned).length === 0
+      ) {
+        return;
+      }
+      result[key] = cleaned;
+    });
+    return result;
+  }
+  return obj;
+}
+
 // filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_REF_1");
@@ -409,9 +491,10 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  return formDataToObject(formData, {
+  const structuredFormData = formDataToObject(formData, {
     delimiter: "--",
-  }) as T;
+  });
+  return filterUnfilledNestedFields(structuredFormData) as T;
 };
 
 // arrays from the html look like field_[row]_item

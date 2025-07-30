@@ -35,7 +35,7 @@ export function formDataToObject(
         !isNaN(Number(value))
       )
         return Number(value);
-      return value;
+      return value || undefined;
     })();
 
     const chunksLen = chunks.length;

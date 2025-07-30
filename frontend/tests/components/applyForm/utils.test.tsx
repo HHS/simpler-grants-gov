@@ -7,6 +7,7 @@ import {
   buildField,
   buildFormTreeRecursive,
   determineFieldType,
+  filterUnfilledNestedFields,
   getApplicationResponse,
   getFieldSchema,
   shapeFormData,
@@ -525,5 +526,17 @@ describe("getFieldSchema", () => {
       // added from the uiFieldObject schema
       minLength: 5,
     });
+  });
+});
+
+describe("filterUnfilledNestedFields", () => {
+  it.only("returns flat object unchanged", () => {
+    const flat = {
+      thing: 1,
+      another: "string",
+      bad: null,
+      stuff: [2, "hi"],
+    };
+    expect(filterUnfilledNestedFields(flat)).toEqual(flat);
   });
 });

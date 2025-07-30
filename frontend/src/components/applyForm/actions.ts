@@ -45,6 +45,7 @@ export async function handleFormAction(
     };
   }
 
+  // this generic typing isn't correct - we'll end up with a nested object
   const applicationFormData =
     shapeFormData<ApplicationResponseDetail>(formData);
 
