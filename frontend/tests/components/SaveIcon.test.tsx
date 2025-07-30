@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "tests/react-utils";
+import { fireEvent, render, screen } from "tests/react-utils";
 
 import SaveIcon from "src/components/SaveIcon";
 
@@ -90,4 +90,4 @@ describe("SaveIcon", () => {
       expect(icon).toBeInTheDocument();
     });
   });
-}); 
+});

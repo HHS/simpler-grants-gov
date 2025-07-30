@@ -13,17 +13,19 @@ jest.mock("next-intl", () => ({
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
   OpportunitySaveUserControl: jest
     .fn()
-    .mockImplementation(({ opportunityId, type }: { opportunityId: string; type?: string }) => {
-      return (
-        <div
-          data-testid={`opportunity-save-control-${opportunityId}`}
-          data-opportunity-id={opportunityId}
-          data-type={type || "button"}
-        >
-          {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
-        </div>
-      );
-    }),
+    .mockImplementation(
+      ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
+        return (
+          <div
+            data-testid={`opportunity-save-control-${opportunityId}`}
+            data-opportunity-id={opportunityId}
+            data-type={type || "button"}
+          >
+            {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
+          </div>
+        );
+      },
+    ),
 }));
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
@@ -91,7 +93,9 @@ describe("SearchResultsTable", () => {
 
     // Check that the wrapper div with new layout classes exists
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrapper = container.querySelector(".margin-right-1.margin-y-auto.flex-1");
+    const wrapper = container.querySelector(
+      ".margin-right-1.margin-y-auto.flex-1",
+    );
     expect(wrapper).toBeInTheDocument();
 
     // Verify the mock was called
@@ -254,7 +258,9 @@ describe("SearchResultsTable", () => {
 
     // Verify correct number of wrapper divs
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrappers = container.querySelectorAll(".margin-right-1.margin-y-auto.flex-1");
+    const wrappers = container.querySelectorAll(
+      ".margin-right-1.margin-y-auto.flex-1",
+    );
     expect(wrappers).toHaveLength(3);
 
     // Verify each opportunity ID was called
@@ -312,4 +318,3 @@ describe("SearchResultsTable", () => {
     );
   });
 });
-

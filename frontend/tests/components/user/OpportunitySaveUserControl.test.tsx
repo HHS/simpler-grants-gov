@@ -17,4 +17,4 @@ describe("OpportunitySaveUserControl", () => {
     const component = OpportunitySaveUserControl;
     expect(component).toBeDefined();
   });
-}); 
+});
