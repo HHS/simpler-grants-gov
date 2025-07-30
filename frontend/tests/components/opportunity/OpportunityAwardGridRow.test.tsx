@@ -39,7 +39,7 @@ describe("OpportunityAwardGridRow", () => {
 
     const titleElement = screen.getByText(mockTranslations.programFunding);
     expect(titleElement).toBeInTheDocument();
-    expect(titleElement).toHaveClass("desktop-lg:font-sans-sm margin-top-0");
+    expect(titleElement).toHaveClass("desktop-lg:font-sans-sm");
   });
 
   it("accepts number value for content", () => {

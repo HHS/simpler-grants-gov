@@ -61,7 +61,7 @@ WORKDIR /frontend
 RUN apt-get update \
   && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --only-upgrade libc-bin libc6 \
-  && apt-get install --no-install-recommends --yes libtasn1-6 libgnutls30 liblzma5 systemd \
+  && apt-get install --no-install-recommends --yes libgnutls30 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +75,8 @@ RUN apt-get update \
   # Install wget, required for health checks
   wget \
   # Reduce the image size by clearing apt cached lists
-  && rm -fr /var/lib/apt/lists/*
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production

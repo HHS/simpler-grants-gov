@@ -492,9 +492,6 @@ FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
-    # TODO - before we can enable prepopulation we need the following rules:
-    #   * assistance listing number
-    #   * assistance listing program title
     "federal_program_name": {"gg_pre_population": {"rule": "assistance_listing_program_title"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
     ##### POST-POPULATION RULES
@@ -505,10 +502,11 @@ FORM_RULE_SCHEMA = {
 }
 
 SFLLL_v2_0 = Form(
-    # legacy form ID - 670
     # https://grants.gov/forms/form-items-description/fid/670
     form_id=uuid.UUID("778a1485-082a-463e-a61b-6615ccebe027"),
+    legacy_form_id=670,
     form_name="Disclosure of Lobbying Activities (SF-LLL)",
+    short_form_name="SFLLL_2_0",
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0013",

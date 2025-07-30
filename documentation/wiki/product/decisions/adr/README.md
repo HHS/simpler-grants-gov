@@ -51,3 +51,4 @@ The following list links to all of the ADRs we've adopted:
 * [Repository organization](2025-01-02-repo-organization.md)
 * [Dedicated Forum for Simpler.Grants.gov Community](2025-02-25-community-forum.md)
 * [Confluence for internal knowledge management](2025-04-18-internal-knowledge-management.md)
+* [Use Condens + Public Wiki for Design Research Repository](use-condens.io-+-public-wiki-for-design-research-repository.md)

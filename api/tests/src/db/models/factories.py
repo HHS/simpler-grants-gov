@@ -1151,6 +1151,10 @@ class FormFactory(BaseFactory):
 
     form_id = Generators.UuidObj
     form_name = "Test form"
+    # short_form_name will look like AB123A_1_2
+    short_form_name = factory.LazyAttribute(
+        lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
+    )
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
@@ -2604,6 +2608,8 @@ class OrganizationUserFactory(BaseFactory):
 class ApplicationUserFactory(BaseFactory):
     class Meta:
         model = user_models.ApplicationUser
+
+    application_user_id = factory.LazyFunction(uuid.uuid4)
 
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)

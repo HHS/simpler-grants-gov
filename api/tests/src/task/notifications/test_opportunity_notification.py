@@ -23,7 +23,7 @@ from src.task.notifications.constants import (
     UserOpportunityUpdateContent,
 )
 from src.task.notifications.email_notification import EmailNotificationTask
-from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.task.notifications.opportunity_notifcation import UTM_TAG, OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 
@@ -306,8 +306,7 @@ class TestOpportunityNotification:
             .all()
         )
         assert len(notification_logs) == 2
-        assert notification_logs[0].user_id == user.user_id
-        assert notification_logs[1].user_id == user_2.user_id
+        assert {n.user_id for n in notification_logs} == {user.user_id, user_2.user_id}
 
         # Verify the log contains the correct metrics
         log_records = [
@@ -618,24 +617,28 @@ class TestOpportunityNotification:
         assert res == expected_html
 
     @pytest.mark.parametrize(
-        "imp_dates_diffs,expected_html",
+        "imp_dates_diffs,opportunity_status,expected_html",
         [
             # close_date
             (
                 {"close_date": {"before": "2035-10-10", "after": "2035-10-30"}},
+                None,
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
             (
                 {"close_date": {"before": "2025-10-10", "after": None}},
+                {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
             ),
             # forecasted_award_date
             (
                 {"forecasted_award_date": {"before": "2030-1-6", "after": "2031-5-3"}},
+                None,
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
             ),
             (
                 {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
+                {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
             ),
             # forecasted_project_start_date
@@ -646,20 +649,47 @@ class TestOpportunityNotification:
                         "after": "2031-5-3",
                     }
                 },
+                None,
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
             ),
             (
                 {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
+                {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
             ),
             # fiscal_year
             (
                 {"fiscal_year": {"before": 2050, "after": 2051}},
+                None,
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
             ),
             (
                 {"fiscal_year": {"before": 2033, "after": None}},
+                None,
                 '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
+            ),
+            (
+                {"fiscal_year": {"before": 2033, "after": None}},
+                {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.POSTED},
+                "",
+            ),
+            (
+                {"forecasted_project_start_date": {"before": "2028-1-7", "after": "2029-1-7"}},
+                {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.CLOSED},
+                "",
+            ),
+            (
+                {"forecasted_award_date": {"before": "2025-10-7", "after": None}},
+                {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.ARCHIVED},
+                "",
+            ),
+            (
+                {
+                    "forecasted_award_date": {"before": "2025-10-7", "after": None},
+                    "close_date": {"before": "2035-10-10", "after": "2035-10-30"},
+                },
+                {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.POSTED},
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
         ],
     )
@@ -667,12 +697,12 @@ class TestOpportunityNotification:
         self,
         db_session,
         imp_dates_diffs,
+        opportunity_status,
         expected_html,
         set_env_var_for_email_notification_config,
         notification_task,
     ):
-        res = notification_task._build_important_dates_content(imp_dates_diffs)
-
+        res = notification_task._build_important_dates_content(imp_dates_diffs, opportunity_status)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -967,14 +997,14 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on Simpler.Grants.gov",
+                    subject="Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}{UTM_TAG}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
-                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
                     updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
@@ -991,12 +1021,12 @@ class TestOpportunityNotification:
                     ),
                 ],
                 UserOpportunityUpdateContent(
-                    subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
+                    subject="Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                         '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
                         "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                        "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                        f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                         "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
                     ),
                     updated_opportunity_ids=[TOPAZ.opportunity_id],
@@ -1022,6 +1052,7 @@ class TestOpportunityNotification:
         notification_task,
     ):
         res = notification_task._build_notification_content(version_changes)
+
         assert res == expected
 
     def test_build_notification_content_all_changes(
@@ -1035,7 +1066,7 @@ class TestOpportunityNotification:
             revision_number=2,
             opportunity_title="Topaz 2025 Climate Research Grant",
             opportunity_status=OpportunityStatus.CLOSED,
-            close_date=date(2025, 12, 31),
+            close_date=None,
             forecasted_award_date=date(2026, 3, 15),
             forecasted_project_start_date=date(2026, 5, 1),
             fiscal_year=2026,
@@ -1060,14 +1091,11 @@ class TestOpportunityNotification:
         )
 
         expected = UserOpportunityUpdateContent(
-            subject="[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on Simpler.Grants.gov",
+            subject="Your saved funding opportunity changed on Simpler.Grants.gov",
             message=(
-                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
+                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
                 '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to December 31, 2025.<br>'
-                '<p style="padding-left: 40px;">•  The estimated award date changed from February 1, 2026 to March 15, 2026.<br>'
-                '<p style="padding-left: 40px;">•  The estimated project start date changed from April 15, 2026 to May 1, 2026.<br>'
-                '<p style="padding-left: 40px;">•  The fiscal year changed from 2025 to 2026.<br><br>'
+                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to not specified.<br><br>'
                 '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                 '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                 '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
@@ -1084,7 +1112,7 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
                 '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-                "<a href='http://testhost:3000' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
+                f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
             ),
             updated_opportunity_ids=[TOPAZ.opportunity_id],

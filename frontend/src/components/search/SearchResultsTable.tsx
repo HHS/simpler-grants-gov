@@ -52,15 +52,22 @@ const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
 const TitleDisplay = ({
   opportunity,
   saved,
+  page,
+  index,
 }: {
   opportunity: BaseOpportunity;
   saved: boolean;
+  page: number;
+  index: number;
 }) => {
   const t = useTranslations("Search.table");
   return (
     <>
       <div className="font-sans-lg text-bold">
-        <a href={getOpportunityUrl(opportunity.opportunity_id)}>
+        <a
+          href={getOpportunityUrl(opportunity.opportunity_id)}
+          id={`search-result-link-${page}-${index + 1}`}
+        >
           {opportunity.opportunity_title}
         </a>
       </div>
@@ -105,6 +112,8 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
 const toSearchResultsTableRow = (
   result: BaseOpportunity,
   saved: boolean,
+  page: number,
+  index: number,
 ): TableCellData[] => {
   return [
     {
@@ -118,7 +127,14 @@ const toSearchResultsTableRow = (
       stackOrder: 1,
     },
     {
-      cellData: <TitleDisplay opportunity={result} saved={saved} />,
+      cellData: (
+        <TitleDisplay
+          opportunity={result}
+          saved={saved}
+          page={page}
+          index={index}
+        />
+      ),
       stackOrder: 0,
     },
     {
@@ -142,8 +158,10 @@ const toSearchResultsTableRow = (
 
 export const SearchResultsTable = async ({
   searchResults,
+  page,
 }: {
   searchResults: SearchResponseData;
+  page: number;
 }) => {
   const t = useTranslations("Search.table");
 
@@ -164,10 +182,12 @@ export const SearchResultsTable = async ({
     { cellData: t("headings.awardMin") },
     { cellData: t("headings.awardMax") },
   ];
-  const tableRowData = searchResults.map((result) =>
+  const tableRowData = searchResults.map((result, index) =>
     toSearchResultsTableRow(
       result,
       savedOpportunityIds.includes(result.opportunity_id),
+      page,
+      index,
     ),
   );
   return (

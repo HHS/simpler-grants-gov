@@ -10,9 +10,12 @@ import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
+from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
+from src.form_schema.forms.project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
@@ -42,6 +45,9 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
         factories.OpportunityFactory.create_batch(
             size=2, is_posted_summary=True, has_long_descriptions=True
+        )
+        factories.OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, has_long_descriptions=True, has_attachments=True
         )
         factories.OpportunityFactory.create_batch(
             size=2, agency_code="CLOSED", is_closed_summary=True
@@ -93,6 +99,21 @@ def _build_pilot_competition(db_session: db.Session) -> None:
     project_abstract_summary = db_session.merge(ProjectAbstractSummary_v2_0, load=True)
     factories.CompetitionFormFactory.create(
         competition=pilot_competition, form=project_abstract_summary, is_required=True
+    )
+
+    project_narrative_attachment = db_session.merge(ProjectNarrativeAttachment_v1_2, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=project_narrative_attachment, is_required=True
+    )
+
+    budget_narrative_attachment = db_session.merge(BudgetNarrativeAttachment_v1_2, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=budget_narrative_attachment, is_required=True
+    )
+
+    sf424b = db_session.merge(SF424b_v1_1, load=True)
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition, form=sf424b, is_required=True
     )
 
     sflll = db_session.merge(SFLLL_v2_0, load=True)
