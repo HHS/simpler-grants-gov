@@ -427,60 +427,26 @@ const isEmptyObject = (objectThatMaybeEmpty: object): boolean => {
 };
 
 // if an object contains only undefined values, remove it
+// does not handle objects nested within arrays
 export const filterUnfilledNestedFields = (
   structuredFormData: object,
-): object => {
-  return Object.entries(structuredFormData).reduce(
+): object | undefined => {
+  const filtered = Object.entries(structuredFormData).reduce(
     (filteredFormData, [key, value]) => {
-      if (isBasicallyAnObject(value)) {
-        if (isEmptyObject(value)) {
-          return filteredFormData;
-        }
+      if (isBasicallyAnObject(value) && isEmptyObject(value)) {
+        return filteredFormData;
       }
-      // // what about empty arrays?
-      // if (value) {
-      //   filteredFormData[key] = value;
-      //   return filteredFormData;
-      // }
+      if (isBasicallyAnObject(value)) {
+        filteredFormData[key] = filterUnfilledNestedFields(value);
+        return filteredFormData;
+      }
       filteredFormData[key] = value;
       return filteredFormData;
     },
     {},
   );
+  return Object.keys(filtered).length ? filtered : undefined;
 };
-
-function removeEmptyObjectsAndUndefined(obj: any): any {
-  if (Array.isArray(obj)) {
-    // Recursively clean array elements
-    return obj.map(removeEmptyObjectsAndUndefined);
-  } else if (typeof obj === "object" && obj !== null) {
-    const result: any = {};
-    if (
-      Object.values(obj).some(
-        (nestedValue) => typeof obj === "object" && obj !== null,
-      )
-    ) {
-    }
-    Object.entries(obj).forEach(([key, value]) => {
-      if (value === undefined) {
-        return;
-      }
-      const cleaned = removeEmptyObjectsAndUndefined(value);
-      // Remove empty objects, but keep arrays and all other values
-      if (
-        typeof cleaned === "object" &&
-        cleaned !== null &&
-        !Array.isArray(cleaned) &&
-        Object.keys(cleaned).length === 0
-      ) {
-        return;
-      }
-      result[key] = cleaned;
-    });
-    return result;
-  }
-  return obj;
-}
 
 // filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(formData: FormData): T => {
@@ -494,7 +460,7 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   const structuredFormData = formDataToObject(formData, {
     delimiter: "--",
   });
-  return filterUnfilledNestedFields(structuredFormData) as T;
+  return (filterUnfilledNestedFields(structuredFormData) as T) || ({} as T);
 };
 
 // arrays from the html look like field_[row]_item

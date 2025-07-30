@@ -530,7 +530,7 @@ describe("getFieldSchema", () => {
 });
 
 describe("filterUnfilledNestedFields", () => {
-  it.only("returns flat object unchanged", () => {
+  it("returns flat object unchanged", () => {
     const flat = {
       thing: 1,
       another: "string",
@@ -538,5 +538,45 @@ describe("filterUnfilledNestedFields", () => {
       stuff: [2, "hi"],
     };
     expect(filterUnfilledNestedFields(flat)).toEqual(flat);
+  });
+  it("returns undefined if passed an empty object or object with only undefined fields", () => {
+    const empty = {};
+    expect(filterUnfilledNestedFields(empty)).toEqual(undefined);
+
+    const undefinedFields = {
+      whatever: {
+        again: { something: undefined },
+        another: undefined,
+        more: { stuff: undefined },
+      },
+    };
+    expect(filterUnfilledNestedFields(undefinedFields)).toEqual(undefined);
+  });
+  it("removes nested objects containing only undefined properties", () => {
+    expect(
+      filterUnfilledNestedFields({
+        thing: "stuff",
+        another: {
+          nested: {
+            bad: undefined,
+          },
+        },
+        keepMe: {
+          here: {
+            ok: "sure",
+          },
+          remove: {
+            me: undefined,
+          },
+        },
+      }),
+    ).toEqual({
+      thing: "stuff",
+      keepMe: {
+        here: {
+          ok: "sure",
+        },
+      },
+    });
   });
 });
