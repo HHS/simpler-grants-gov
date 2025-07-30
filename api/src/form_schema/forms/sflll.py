@@ -166,7 +166,7 @@ FORM_JSON_SCHEMA = {
         },
         "signature_block": {
             "type": "object",
-            "required": ["signature", "name", "signed_date"],
+            "required": ["name"],
             "properties": {
                 "signature": {
                     "type": "string",
