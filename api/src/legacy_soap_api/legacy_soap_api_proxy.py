@@ -47,6 +47,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
         )
+        print(_request.url)
         return _get_soap_response(_request, timeout=timeout)
 
     logger.info("soap_client_certificate: Processing client certificate")
