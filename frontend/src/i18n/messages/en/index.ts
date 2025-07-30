@@ -293,6 +293,31 @@ export const messages = {
       },
       updated: "Last updated",
     },
+    attachments: {
+      attachedDocument: "Attached document",
+      attachments: "Attachments",
+      attachmentsInstructions:
+        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+      action: "Action",
+      cancelUpload: "Cancel upload",
+      delete: "Delete",
+      uploading: "Uploading...",
+      download: "Download",
+      emptyTable: "No attachments uploaded",
+      fileSize: "File Size",
+      uploadBy: "Upload by",
+      uploadDate: "Upload date",
+      deleteModal: {
+        titleText: "Delete",
+        cancelDeleteCta: "Cancel",
+        cautionDeletingAttachment: "Caution, deleting attachment",
+        descriptionText:
+          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+        deleteFileCta: "Delete file",
+        deleteFilesCta: "Delete files",
+        deleting: "Deleting...",
+      },
+    },
     applyForm: {
       errorTitle: "This form could not be saved",
       errorMessage:

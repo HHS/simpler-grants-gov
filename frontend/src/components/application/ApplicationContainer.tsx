@@ -3,6 +3,7 @@
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -12,14 +13,17 @@ import { Alert } from "@trussworks/react-uswds";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
+import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
 const ApplicationContainer = ({
   applicationDetails,
+  attachments,
   opportunity,
 }: {
   applicationDetails: ApplicationDetail;
+  attachments: Attachment[];
   opportunity: OpportunityDetail;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
@@ -108,6 +112,10 @@ const ApplicationContainer = ({
         applicationForms={applicationForms}
         applicationId={applicationId}
         forms={forms}
+      />
+      <AttachmentsCard
+        applicationId={applicationId}
+        attachments={attachments}
       />
     </>
   );

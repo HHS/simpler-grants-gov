@@ -143,6 +143,11 @@ const nextConfig = {
   async headers() {
     return headers;
   },
+  api: {
+    bodyParser: {
+      sizeLimit: "2000mb",
+    },
+  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
@@ -168,6 +173,9 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
+    serverActions: {
+      bodySizeLimit: "2000mb",
+    },
   },
   async redirects() {
     return [
