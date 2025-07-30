@@ -6,6 +6,7 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -38,6 +39,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
   let opportunity = {} as OpportunityDetail;
+  let attachments = [] as Attachment[];
 
   try {
     const response = await getApplicationDetails(
@@ -65,6 +67,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <TopLevelError />;
     }
     opportunity = opportunityResponse.data;
+    attachments = response.data.application_attachments;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -83,6 +86,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
+          attachments={attachments}
         />
       </GridContainer>
     </>
