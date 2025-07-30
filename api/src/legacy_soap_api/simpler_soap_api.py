@@ -1,11 +1,11 @@
 import logging
-import traceback
 
 import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SimplerSoapAPI,
     SOAPInvalidEnvelope,
@@ -43,20 +43,21 @@ def get_simpler_soap_response(
     except (SOAPInvalidEnvelope, SOAPInvalidRequestOperationName, SOAPOperationNotSupported) as e:
         logger.info(
             f"simpler_soap_api: {e}",
+            exc_info=True,
             extra={
-                "simpler_soap_api_error": e,
+                "soap_api_event": LegacySoapApiEvent.INVALID_REQUEST,
                 "used_simpler_response": use_simpler,
             },
         )
         return soap_proxy_response
-    except Exception as e:
+    except Exception:
         err = "Unable to initialize Simpler SOAP client: Unknown error"
         logger.info(
             f"simpler_soap_api: {err}",
+            exc_info=True,
             extra={
-                "simpler_soap_api_error": err,
+                "soap_api_event": LegacySoapApiEvent.UNKNOWN_ERROR,
                 "used_simpler_response": use_simpler,
-                "soap_traceback": "".join(traceback.format_tb(e.__traceback__)),
             },
         )
         return soap_proxy_response
@@ -68,12 +69,18 @@ def get_simpler_soap_response(
     if simpler_soap_response is not None and use_simpler:
         logger.info(
             "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
-            extra={"used_simpler_response": use_simpler},
+            extra={
+                "soap_api_event": LegacySoapApiEvent.RETURNING_SIMPLER_RESPONSE,
+                "used_simpler_response": use_simpler,
+            },
         )
         return simpler_soap_response
 
     logger.info(
         "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
-        extra={"used_simpler_response": use_simpler},
+        extra={
+            "soap_api_event": LegacySoapApiEvent.RETURNING_LEGACY_SOAP_RESPONSE,
+            "used_simpler_response": use_simpler,
+        },
     )
     return soap_proxy_response
