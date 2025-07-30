@@ -102,7 +102,9 @@ export const OpportunitySaveUserControl = ({
       <>
         {user?.token ? (
           <SaveIcon
-            onClick={userSavedOppCallback}
+            onClick={() => {
+              userSavedOppCallback().catch(console.error);
+            }}
             loading={loading}
             saved={saved}
           />

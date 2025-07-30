@@ -13,13 +13,14 @@ jest.mock("next-intl", () => ({
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
   OpportunitySaveUserControl: jest
     .fn()
-    .mockImplementation(({ opportunityId }: { opportunityId: string }) => {
+    .mockImplementation(({ opportunityId, type }: { opportunityId: string; type?: string }) => {
       return (
         <div
           data-testid={`opportunity-save-control-${opportunityId}`}
           data-opportunity-id={opportunityId}
+          data-type={type || "button"}
         >
-          {`Mocked Save Control for ${opportunityId}`}
+          {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
         </div>
       );
     }),
@@ -72,30 +73,30 @@ describe("SearchResultsTable", () => {
     // Verify the mock component was called for each opportunity
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id },
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "second-opportunity-id" },
+      { opportunityId: "second-opportunity-id", type: "icon" },
       undefined,
     );
   });
 
-  it("applies search-table-save-wrapper CSS class to save control containers", () => {
+  it("renders save control in correct layout structure", () => {
     const component = SearchResultsTable({
       searchResults: [mockOpportunity],
       page: 1,
     });
     const { container } = render(component);
 
-    // Check that the wrapper div with search-table-save-wrapper class exists
+    // Check that the wrapper div with new layout classes exists
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrapper = container.querySelector(".search-table-save-wrapper");
+    const wrapper = container.querySelector(".margin-right-1.margin-y-auto.flex-1");
     expect(wrapper).toBeInTheDocument();
 
     // Verify the mock was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id },
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
       undefined,
     );
   });
@@ -160,7 +161,7 @@ describe("SearchResultsTable", () => {
 
     // Verify that the save control component was called for this opportunity
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id },
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
       undefined,
     );
 
@@ -253,20 +254,20 @@ describe("SearchResultsTable", () => {
 
     // Verify correct number of wrapper divs
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const wrappers = container.querySelectorAll(".search-table-save-wrapper");
+    const wrappers = container.querySelectorAll(".margin-right-1.margin-y-auto.flex-1");
     expect(wrappers).toHaveLength(3);
 
     // Verify each opportunity ID was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-1" },
+      { opportunityId: "opp-1", type: "icon" },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-2" },
+      { opportunityId: "opp-2", type: "icon" },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-3" },
+      { opportunityId: "opp-3", type: "icon" },
       undefined,
     );
   });
@@ -288,12 +289,27 @@ describe("SearchResultsTable", () => {
 
     // Check that the mock was called with the correct opportunity IDs
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "unique-id-1" },
+      { opportunityId: "unique-id-1", type: "icon" },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "unique-id-2" },
+      { opportunityId: "unique-id-2", type: "icon" },
+      undefined,
+    );
+  });
+
+  it("passes type='icon' to OpportunitySaveUserControl components", () => {
+    const component = SearchResultsTable({
+      searchResults: [mockOpportunity],
+      page: 1,
+    });
+    render(component);
+
+    // Verify that type="icon" was passed to the component
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
       undefined,
     );
   });
 });
+

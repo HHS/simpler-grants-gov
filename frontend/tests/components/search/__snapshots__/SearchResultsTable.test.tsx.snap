@@ -111,14 +111,21 @@ exports[`SearchResultsTable matches snapshot 1`] = `
               data-testid="responsive-data-0-2"
             >
               <div
-                class="font-sans-lg text-bold"
+                class="display-flex"
               >
-                <a
-                  href="/opportunity/63588df8-f2d1-44ed-a201-5804abba696a"
-                  id="search-result-link-1-1"
+                <div
+                  class="margin-right-1 margin-y-auto flex-1"
+                />
+                <div
+                  class="font-sans-md text-bold flex-11"
                 >
-                  Test Opportunity
-                </a>
+                  <a
+                    href="/opportunity/63588df8-f2d1-44ed-a201-5804abba696a"
+                    id="search-result-link-1-1"
+                  >
+                    Test Opportunity
+                  </a>
+                </div>
               </div>
               <div
                 class="display-none tablet-lg:display-block font-sans-xs"
@@ -132,9 +139,6 @@ exports[`SearchResultsTable matches snapshot 1`] = `
                  
                 OPP-12345
               </div>
-              <div
-                class="margin-top-2 search-table-save-wrapper"
-              />
             </div>
           </div>
         </td>
