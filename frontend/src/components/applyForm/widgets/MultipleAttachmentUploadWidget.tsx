@@ -1,115 +1,142 @@
 "use client";
 
 import { uploadFileToApp } from "src/services/attachments/upload";
+import { useEffect, useRef, useState } from "react";
+import {
+  ErrorMessage,
+  FileInput,
+  FileInputRef,
+  FormGroup,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
+import { UswdsWidgetProps } from "../types";
 
-import React, { useState } from "react";
-import { FileInput } from "@trussworks/react-uswds";
+function getApplicationIdFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  const match = window.location.pathname.match(
+    /\/applications\/application\/([a-f0-9-]+)\/form\//,
+  );
+  return match?.[1] ?? null;
+}
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
+type UploadedFile = {
+  id: string;
+  name: string;
+};
 
-const MultipleAttachmentUpload = ({
+const MultipleAttachmentUploadWidget = ({
   id,
-  value = [],
+  value: initialValue,
   required,
   rawErrors = [],
-  onChange,
-  schema,
   label,
 }: UswdsWidgetProps) => {
-  const [fileNames, setFileNames] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const attachments: string[] = Array.isArray(value) ? value : [];
+  const fileInputRef = useRef<FileInputRef | null>(null);
   const hasError = rawErrors.length > 0;
+  const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
 
-  const handleFilesChange = async (fileList: FileList | null) => {
-    if (!fileList || fileList.length === 0) return;
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  useEffect(() => {
+    if (Array.isArray(initialValue)) {
+      setUploadedFiles(
+        initialValue.map((uuid) => ({ id: uuid, name: "(Previously uploaded file)" })),
+      );
+    }
+  }, [initialValue]);
+
+  const handleFileChange = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
     const applicationId = getApplicationIdFromUrl();
-    if (!applicationId) return;
+    if (!applicationId) {
+      console.error("Could not extract applicationId from URL");
+      return;
+    }
 
-    setUploading(true);
-    const newIds: string[] = [];
-    const newNames: string[] = [];
-
-    for (let i = 0; i < fileList.length; i++) {
-      const file = fileList[i];
+    for (const file of Array.from(files)) {
       try {
         const attachmentId = await uploadFileToApp(applicationId, file);
-        newIds.push(attachmentId as string);
-        newNames.push(file.name);
+        if (attachmentId) {
+          setUploadedFiles((prev) => [
+            ...prev,
+            { id: attachmentId, name: file.name },
+          ]);
+        }
       } catch (err) {
-        console.error("Failed to upload", err);
+        console.error("Upload failed:", err);
       }
     }
 
-    setUploading(false);
-    onChange?.([...attachments, ...newIds]);
-    setFileNames([...fileNames, ...newNames]);
+    fileInputRef.current?.clearFiles();
   };
 
-  const handleRemove = (index: number) => {
-    const updated = attachments.filter((_, i) => i !== index);
-    const updatedNames = fileNames.filter((_, i) => i !== index);
-    onChange?.(updated);
-    setFileNames(updatedNames);
+  const handleRemove = (indexToRemove: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
   };
 
   return (
-    <div
-      key={id}
-      className={`usa-form-group ${hasError ? "usa-form-group--error" : ""}`}
-    >
-      {label && (
-        <label className="usa-label">
-          {label}
-          {required && <span className="text-red-600"> *</span>}
-        </label>
-      )}
-      {schema?.description && (
-        <div className="usa-hint mb-1">{schema.description}</div>
-      )}
+    <FormGroup key={`wrapper-for-${id}`} error={hasError}>
+      <Label htmlFor={id}>
+        {label}
+        {required && <span className="text-red-600"> *</span>}
+      </Label>
+
       {hasError && (
-        <div className="usa-error-message" role="alert">
-          {rawErrors[0]}
-        </div>
+        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
       )}
 
       <FileInput
-        key={`${id}-input`}
-        id={`${id}-file-input`}
-        name={`${id}-file-input`}
+        id={id}
+        name={id}
+        ref={fileInputRef}
+        type="file"
         multiple
-        onChange={(e) => void handleFilesChange(e.currentTarget.files)}
-        disabled={uploading}
+        className="usa-file-input__input"
+        onChange={(e) => {
+          const files = e.currentTarget.files;
+          e.preventDefault();
+          void handleFileChange(files);
+        }}
+        aria-describedby={describedBy}
       />
 
-      {attachments.map((attachmentId, idx) => (
-        <input
-          key={`${id}-hidden-${idx}`}
-          type="hidden"
-          name={id}
-          value={attachmentId}
-        />
-      ))}
+      {/* Display uploaded UUIDs in a hidden input */}
+      <input
+        type="hidden"
+        name={id}
+        value={JSON.stringify(uploadedFiles.map((f) => f.id))}
+      />
 
-      <ul className="usa-list usa-list--unstyled mt-2">
-        {attachments.map((_attachmentId, idx) => (
-          <li key={`${id}-${idx}`} className="mb-1">
-            <span className="font-mono text-sm">
-              {fileNames[idx] || "Unnamed file"}
-            </span>
-            <button
-              type="button"
-              className="usa-button usa-button--unstyled text-secondary ml-2"
-              onClick={() => handleRemove(idx)}
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      {/* Show uploaded files */}
+      {uploadedFiles.length > 0 && (
+        <ul className="usa-list usa-list--unstyled mt-2">
+          {uploadedFiles.map((file, index) => (
+            <li key={file.id} className="mb-1 flex items-center justify-between">
+              <TextInput
+                type="text"
+                id={`${id}-file-${index}`}
+                name={`${id}-file-${index}`}
+                value={file.name}
+                disabled
+                readOnly
+                className="w-full mr-2"
+                aria-describedby={describedBy}
+              />
+              <button
+                type="button"
+                className="usa-button usa-button--unstyled text-secondary ml-2"
+                onClick={() => handleRemove(index)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </FormGroup>
   );
 };
 
-export default MultipleAttachmentUpload;
+export default MultipleAttachmentUploadWidget;
