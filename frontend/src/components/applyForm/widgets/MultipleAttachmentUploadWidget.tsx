@@ -102,18 +102,16 @@ const MultipleAttachmentUploadWidget = ({
         aria-describedby={describedBy}
       />
 
-      {/* Display uploaded UUIDs in a hidden input */}
       <input
         type="hidden"
         name={id}
         value={JSON.stringify(uploadedFiles.map((f) => f.id))}
       />
 
-      {/* Show uploaded files */}
       {uploadedFiles.length > 0 && (
         <ul className="usa-list usa-list--unstyled mt-2">
           {uploadedFiles.map((file, index) => (
-            <li key={file.id} className="mb-1 flex items-center justify-between">
+            <li key={`${file.id}-${index}`} className="mb-1 flex items-center justify-between">
               <TextInput
                 type="text"
                 id={`${id}-file-${index}`}
