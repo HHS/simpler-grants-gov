@@ -114,30 +114,34 @@ exports[`SearchResultsTable matches snapshot 1`] = `
                 class="display-flex"
               >
                 <div
-                  class="margin-right-1 margin-y-auto flex-1"
+                  class="margin-y-auto grid-col-auto minw-4"
                 />
                 <div
-                  class="font-sans-md text-bold flex-11"
+                  class="grid-col-fill"
                 >
-                  <a
-                    href="/opportunity/63588df8-f2d1-44ed-a201-5804abba696a"
-                    id="search-result-link-1-1"
+                  <div
+                    class="font-sans-md text-bold line-height-sans-3"
                   >
-                    Test Opportunity
-                  </a>
+                    <a
+                      href="/opportunity/63588df8-f2d1-44ed-a201-5804abba696a"
+                      id="search-result-link-1-1"
+                    >
+                      Test Opportunity
+                    </a>
+                  </div>
+                  <div
+                    class="display-none tablet-lg:display-block font-sans-xs"
+                  >
+                    <span
+                      class="text-bold"
+                    >
+                      number
+                      :
+                    </span>
+                     
+                    OPP-12345
+                  </div>
                 </div>
-              </div>
-              <div
-                class="display-none tablet-lg:display-block font-sans-xs"
-              >
-                <span
-                  class="text-bold"
-                >
-                  number
-                  :
-                </span>
-                 
-                OPP-12345
               </div>
             </div>
           </div>

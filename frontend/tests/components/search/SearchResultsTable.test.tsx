@@ -94,7 +94,7 @@ describe("SearchResultsTable", () => {
     // Check that the wrapper div with new layout classes exists
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const wrapper = container.querySelector(
-      ".margin-right-1.margin-y-auto.flex-1",
+      ".margin-y-auto.grid-col-auto.minw-4",
     );
     expect(wrapper).toBeInTheDocument();
 
@@ -259,7 +259,7 @@ describe("SearchResultsTable", () => {
     // Verify correct number of wrapper divs
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const wrappers = container.querySelectorAll(
-      ".margin-right-1.margin-y-auto.flex-1",
+      ".margin-y-auto.grid-col-auto.minw-4",
     );
     expect(wrappers).toHaveLength(3);
 

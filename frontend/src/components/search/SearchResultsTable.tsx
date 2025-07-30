@@ -61,26 +61,26 @@ const TitleDisplay = ({
   return (
     <>
       <div className="display-flex">
-        <div className="margin-right-1 margin-y-auto flex-1">
+        <div className="margin-y-auto grid-col-auto minw-4">
           <OpportunitySaveUserControl
             opportunityId={opportunity.opportunity_id}
             type="icon"
           />
         </div>
-
-        <div className="font-sans-md text-bold flex-11">
-          <a
-            href={getOpportunityUrl(opportunity.opportunity_id)}
-            id={`search-result-link-${page}-${index + 1}`}
-          >
-            {opportunity.opportunity_title}
-          </a>
+        <div className="grid-col-fill">
+          <div className="font-sans-md text-bold line-height-sans-3">
+            <a
+              href={getOpportunityUrl(opportunity.opportunity_id)}
+              id={`search-result-link-${page}-${index + 1}`}
+            >
+              {opportunity.opportunity_title}
+            </a>
+          </div>
+          <div className="display-none tablet-lg:display-block font-sans-xs">
+            <span className="text-bold">{t("number")}:</span>{" "}
+            {opportunity.opportunity_number}
+          </div>
         </div>
-      </div>
-
-      <div className="display-none tablet-lg:display-block font-sans-xs">
-        <span className="text-bold">{t("number")}:</span>{" "}
-        {opportunity.opportunity_number}
       </div>
     </>
   );
