@@ -1,10 +1,11 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
+// like, this is basically anything lol - DWS
 type NestedObject = {
   [key: string]:
     | NestedObject
     | NestedObject[]
-    | (object | string | boolean | number | null);
+    | (object | string | boolean | number | null | undefined);
 };
 
 type FormDataToJsonOptions = {

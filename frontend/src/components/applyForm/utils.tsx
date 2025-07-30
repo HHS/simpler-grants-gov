@@ -1,6 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
+import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
@@ -213,13 +213,9 @@ const getByPointer = (target: object, path: string): unknown => {
     return;
   }
   try {
-    // console.log("trying", target, path);
     return getSchemaObjectFromPointer(target, path);
   } catch (e) {
-    if (e.message.includes("Invalid reference token")) {
-      return undefined;
-    }
-    console.error("!!! error referencing schema path", e, target, path);
+    console.error("error referencing schema path", e, target, path);
     throw e;
   }
 };
@@ -408,7 +404,7 @@ const wrapSection = (
   );
 };
 
-const isBasicallyAnObject = (mightBeAnObject: any): boolean => {
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   return (
     !!mightBeAnObject &&
     !isArray(mightBeAnObject) &&
@@ -420,21 +416,24 @@ const isBasicallyAnObject = (mightBeAnObject: any): boolean => {
 // if a nested field contains no defined items, remove it from the data
 // this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
-  return Object.entries(structuredFormData).reduce((acc, [key, value]) => {
-    if (!isBasicallyAnObject(value)) {
-      acc[key] = value;
+  return Object.entries(structuredFormData).reduce(
+    (acc, [key, value]) => {
+      if (!isBasicallyAnObject(value)) {
+        acc[key] = value;
+        return acc;
+      }
+      const isEmptyObject = Object.values(value as object).every(
+        (nestedValue) => !nestedValue,
+      );
+      if (isEmptyObject) {
+        return acc;
+      }
+      const pruned = pruneEmptyNestedFields(value as object);
+      acc[key] = pruned;
       return acc;
-    }
-    const isEmptyObject = Object.values(value).every(
-      (nestedValue) => !nestedValue,
-    );
-    if (isEmptyObject) {
-      return acc;
-    }
-    const pruned = pruneEmptyNestedFields(value);
-    acc[key] = pruned;
-    return acc;
-  }, {});
+    },
+    {} as { [key: string]: unknown },
+  );
 };
 
 // filters, orders, and nests the form data to match the form schema

@@ -7,7 +7,6 @@ import {
   buildField,
   buildFormTreeRecursive,
   determineFieldType,
-  filterUnfilledNestedFields,
   getApplicationResponse,
   getFieldSchema,
   pruneEmptyNestedFields,
@@ -21,16 +20,16 @@ jest.mock("react", () => ({
 
 describe("shapeFormData", () => {
   it("should shape form data to the form schema", () => {
-    const formSchema: RJSFSchema = {
-      title: "test schema",
-      properties: {
-        name: { type: "string", title: "test name", maxLength: 60 },
-        dob: { type: "string", format: "date", title: "Date of birth" },
-        address: { type: "string", title: "test address" },
-        state: { type: "string", title: "test state" },
-      },
-      required: ["name"],
-    };
+    // const formSchema: RJSFSchema = {
+    //   title: "test schema",
+    //   properties: {
+    //     name: { type: "string", title: "test name", maxLength: 60 },
+    //     dob: { type: "string", format: "date", title: "Date of birth" },
+    //     address: { type: "string", title: "test address" },
+    //     state: { type: "string", title: "test state" },
+    //   },
+    //   required: ["name"],
+    // };
 
     const shapedFormData = {
       name: "test",
@@ -45,63 +44,63 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData, formSchema);
+    const data = shapeFormData(formData);
 
     expect(data).toMatchObject(shapedFormData);
   });
   it("should shape nested form data", () => {
-    const formSchema: RJSFSchema = {
-      type: "object",
-      title: "test schema",
-      properties: {
-        name: { type: "string", title: "test name", maxLength: 60 },
-        dob: { type: "string", format: "date", title: "Date of birth" },
-        address: {
-          type: "object",
-          properties: {
-            street: { type: "string", title: "street" },
-            zip: { type: "number", title: "zip code" },
-            state: { type: "string", title: "test state" },
-            question: {
-              type: "object",
-              properties: {
-                own: { type: "string", title: "own" },
-                rent: { type: "string", title: "rent" },
-                other: { type: "string", title: "other" },
-              },
-            },
-          },
-        },
-        tasks: {
-          type: "array",
-          title: "Tasks",
-          items: {
-            type: "object",
-            required: ["title"],
-            properties: {
-              title: {
-                type: "string",
-                title: "Important task",
-              },
-              done: {
-                type: "boolean",
-                title: "Done?",
-                default: false,
-              },
-            },
-          },
-        },
-        todos: {
-          type: "array",
-          title: "Tasks",
-          items: {
-            type: "string",
-            title: "Reminder",
-          },
-        },
-      },
-      required: ["name"],
-    };
+    // const formSchema: RJSFSchema = {
+    //   type: "object",
+    //   title: "test schema",
+    //   properties: {
+    //     name: { type: "string", title: "test name", maxLength: 60 },
+    //     dob: { type: "string", format: "date", title: "Date of birth" },
+    //     address: {
+    //       type: "object",
+    //       properties: {
+    //         street: { type: "string", title: "street" },
+    //         zip: { type: "number", title: "zip code" },
+    //         state: { type: "string", title: "test state" },
+    //         question: {
+    //           type: "object",
+    //           properties: {
+    //             own: { type: "string", title: "own" },
+    //             rent: { type: "string", title: "rent" },
+    //             other: { type: "string", title: "other" },
+    //           },
+    //         },
+    //       },
+    //     },
+    //     tasks: {
+    //       type: "array",
+    //       title: "Tasks",
+    //       items: {
+    //         type: "object",
+    //         required: ["title"],
+    //         properties: {
+    //           title: {
+    //             type: "string",
+    //             title: "Important task",
+    //           },
+    //           done: {
+    //             type: "boolean",
+    //             title: "Done?",
+    //             default: false,
+    //           },
+    //         },
+    //       },
+    //     },
+    //     todos: {
+    //       type: "array",
+    //       title: "Tasks",
+    //       items: {
+    //         type: "string",
+    //         title: "Reminder",
+    //       },
+    //     },
+    //   },
+    //   required: ["name"],
+    // };
 
     const shapedFormData = {
       name: "test",
@@ -147,7 +146,7 @@ describe("shapeFormData", () => {
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData, formSchema);
+    const data = shapeFormData(formData);
     expect(data).toMatchObject(shapedFormData);
   });
 });
@@ -495,12 +494,14 @@ describe("getFieldSchema", () => {
       },
     };
 
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-    };
+    // const uiFieldObject: UiSchemaField = {
+    //   type: "field",
+    //   definition: "/properties/name",
+    // };
 
-    const result = getFieldSchema({ uiFieldObject, formSchema });
+    const definition = "/properties/name";
+
+    const result = getFieldSchema({ schema: {}, definition, formSchema });
     expect(result).toEqual({ type: "string", title: "Name", maxLength: 50 });
   });
 
@@ -512,13 +513,15 @@ describe("getFieldSchema", () => {
       },
     };
 
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-      schema: { title: "Custom Name", minLength: 5 },
-    };
+    // const uiFieldObject: UiSchemaField = {
+    //   type: "field",
+    //   definition: "/properties/name",
+    //   schema: { title: "Custom Name", minLength: 5 },
+    // };
 
-    const result = getFieldSchema({ uiFieldObject, formSchema });
+    const definition = "/properties/name";
+
+    const result = getFieldSchema({ schema: {}, definition, formSchema });
     expect(result).toEqual({
       type: "string",
       // overridden the beh uiFieldObject schema
@@ -553,7 +556,7 @@ describe("pruneEmptyNestedFields", () => {
     };
     expect(pruneEmptyNestedFields(undefinedFields)).toEqual(empty);
   });
-  it.only("removes nested objects containing only undefined properties", () => {
+  it("removes nested objects containing only undefined properties", () => {
     expect(
       pruneEmptyNestedFields({
         thing: "stuff",
