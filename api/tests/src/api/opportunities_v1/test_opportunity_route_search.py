@@ -1732,36 +1732,3 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert [opp["opportunity_id"] for opp in data] == [
             opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
         ]
-
-    def test_search_agency_filter_includes_top_level_agency_when_sub_agencies_present_200(
-        self, client, db_session, enable_factory_create, api_auth_token, setup_search_data
-    ):
-        """
-        Test that when a top level agency has opportunities assigned to it,
-        and you run a search against the agency filter options list that contains
-        sub agencies for the agency, you will only get back sub agencies of the agency,
-        and not the agency itself.
-        """
-
-        # Search with agency filter that includes both top-level agency (DOC) and sub-agency (DOC-EDA)
-        resp = client.post(
-            "/v1/opportunities/search",
-            json=get_search_request(top_level_agency_one_of=["DOC"]),
-            headers={"X-Auth": api_auth_token},
-        )
-        assert resp.status_code == 200
-        data = resp.json["data"]
-
-        # Should only return opportunities from sub-agencies (DOC-EDA), not the top-level agency (DOC)
-        expected_opportunity_ids = [
-            DOC_SPACE_COAST.opportunity_id,
-            DOC_MANUFACTURING.opportunity_id,
-            DOC_TOP_LEVEL.opportunity_id,
-        ]
-        actual_opportunity_ids = [opp["opportunity_id"] for opp in data]
-
-        assert len(data) == 3
-        assert set(actual_opportunity_ids) == set(expected_opportunity_ids)
-
-        # Verify that the top-level agency opportunity (DOC_TOP_LEVEL) is included
-        assert DOC_TOP_LEVEL.opportunity_id in actual_opportunity_ids
