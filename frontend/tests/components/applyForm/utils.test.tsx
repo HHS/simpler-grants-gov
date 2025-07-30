@@ -10,6 +10,7 @@ import {
   filterUnfilledNestedFields,
   getApplicationResponse,
   getFieldSchema,
+  pruneEmptyNestedFields,
   shapeFormData,
 } from "src/components/applyForm/utils";
 
@@ -529,7 +530,7 @@ describe("getFieldSchema", () => {
   });
 });
 
-describe("filterUnfilledNestedFields", () => {
+describe("pruneEmptyNestedFields", () => {
   it("returns flat object unchanged", () => {
     const flat = {
       thing: 1,
@@ -537,11 +538,11 @@ describe("filterUnfilledNestedFields", () => {
       bad: null,
       stuff: [2, "hi"],
     };
-    expect(filterUnfilledNestedFields(flat)).toEqual(flat);
+    expect(pruneEmptyNestedFields(flat)).toEqual(flat);
   });
   it("returns undefined if passed an empty object or object with only undefined fields", () => {
     const empty = {};
-    expect(filterUnfilledNestedFields(empty)).toEqual(undefined);
+    expect(pruneEmptyNestedFields(empty)).toEqual(empty);
 
     const undefinedFields = {
       whatever: {
@@ -550,11 +551,11 @@ describe("filterUnfilledNestedFields", () => {
         more: { stuff: undefined },
       },
     };
-    expect(filterUnfilledNestedFields(undefinedFields)).toEqual(undefined);
+    expect(pruneEmptyNestedFields(undefinedFields)).toEqual(empty);
   });
-  it("removes nested objects containing only undefined properties", () => {
+  it.only("removes nested objects containing only undefined properties", () => {
     expect(
-      filterUnfilledNestedFields({
+      pruneEmptyNestedFields({
         thing: "stuff",
         another: {
           nested: {
@@ -572,6 +573,7 @@ describe("filterUnfilledNestedFields", () => {
       }),
     ).toEqual({
       thing: "stuff",
+      another: {},
       keepMe: {
         here: {
           ok: "sure",

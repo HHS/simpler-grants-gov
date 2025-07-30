@@ -417,35 +417,24 @@ const isBasicallyAnObject = (mightBeAnObject: any): boolean => {
   );
 };
 
-const isEmptyObject = (objectThatMaybeEmpty: object): boolean => {
-  return Object.values(objectThatMaybeEmpty).every((value) => {
-    if (isBasicallyAnObject(value)) {
-      return isEmptyObject(value);
+// if a nested field contains no defined items, remove it from the data
+// this may not be necessary, as JSON.stringify probably does the same thing
+export const pruneEmptyNestedFields = (structuredFormData: object): object => {
+  return Object.entries(structuredFormData).reduce((acc, [key, value]) => {
+    if (!isBasicallyAnObject(value)) {
+      acc[key] = value;
+      return acc;
     }
-    return !value;
-  });
-};
-
-// if an object contains only undefined values, remove it
-// does not handle objects nested within arrays
-export const filterUnfilledNestedFields = (
-  structuredFormData: object,
-): object | undefined => {
-  const filtered = Object.entries(structuredFormData).reduce(
-    (filteredFormData, [key, value]) => {
-      if (isBasicallyAnObject(value) && isEmptyObject(value)) {
-        return filteredFormData;
-      }
-      if (isBasicallyAnObject(value)) {
-        filteredFormData[key] = filterUnfilledNestedFields(value);
-        return filteredFormData;
-      }
-      filteredFormData[key] = value;
-      return filteredFormData;
-    },
-    {},
-  );
-  return Object.keys(filtered).length ? filtered : undefined;
+    const isEmptyObject = Object.values(value).every(
+      (nestedValue) => !nestedValue,
+    );
+    if (isEmptyObject) {
+      return acc;
+    }
+    const pruned = pruneEmptyNestedFields(value);
+    acc[key] = pruned;
+    return acc;
+  }, {});
 };
 
 // filters, orders, and nests the form data to match the form schema
@@ -460,7 +449,7 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   const structuredFormData = formDataToObject(formData, {
     delimiter: "--",
   });
-  return (filterUnfilledNestedFields(structuredFormData) as T) || ({} as T);
+  return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
 // arrays from the html look like field_[row]_item
