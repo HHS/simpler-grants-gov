@@ -60,22 +60,27 @@ const TitleDisplay = ({
   const t = useTranslations("Search.table");
   return (
     <>
-      <div className="font-sans-lg text-bold">
-        <a
-          href={getOpportunityUrl(opportunity.opportunity_id)}
-          id={`search-result-link-${page}-${index + 1}`}
-        >
-          {opportunity.opportunity_title}
-        </a>
+      <div className="display-flex">
+        <div className="margin-right-1 margin-y-auto flex-1">
+          <OpportunitySaveUserControl
+            opportunityId={opportunity.opportunity_id}
+            type="icon"
+          />
+        </div>
+
+        <div className="font-sans-md text-bold flex-11">
+          <a
+            href={getOpportunityUrl(opportunity.opportunity_id)}
+            id={`search-result-link-${page}-${index + 1}`}
+          >
+            {opportunity.opportunity_title}
+          </a>
+        </div>
       </div>
+
       <div className="display-none tablet-lg:display-block font-sans-xs">
         <span className="text-bold">{t("number")}:</span>{" "}
         {opportunity.opportunity_number}
-      </div>
-      <div className="margin-top-2 search-table-save-wrapper">
-        <OpportunitySaveUserControl
-          opportunityId={opportunity.opportunity_id}
-        />
       </div>
     </>
   );

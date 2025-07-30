@@ -139,6 +139,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         <div className="padding-y-3 display-flex">
           <OpportunitySaveUserControl
             opportunityId={opportunityData.opportunity_id}
+            type="button"
           />
           {opportunityData.competitions &&
             opportunityData.opportunity_title && (

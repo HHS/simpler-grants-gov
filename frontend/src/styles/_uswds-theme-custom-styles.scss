@@ -633,29 +633,3 @@ iframe[id^="ethnio-screener-"] {
     transform-origin: left bottom;
   }
 }
-
-// Search Table Save Button Responsive Layout
-.search-table-save-wrapper {
-  .display-flex.flex-align-start {
-    flex-direction: column;
-    align-items: flex-start;
-    .usa-alert {
-      margin-left: 0px !important;
-    }
-    .usa-alert__body {
-      height: auto !important;
-    }
-    button {
-      margin-bottom: 1rem;
-      text-wrap: nowrap;
-    }
-    @include at-media("widescreen") {
-      flex-direction: row;
-      align-items: flex-start;
-
-      button {
-        margin-bottom: 0;
-      }
-    }
-  }
-}
