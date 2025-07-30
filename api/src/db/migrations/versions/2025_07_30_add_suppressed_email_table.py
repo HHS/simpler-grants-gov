@@ -1,8 +1,8 @@
 """add_suppressed_email_table
 
-Revision ID: 6cae8331ab57
-Revises: c59a945c96c5
-Create Date: 2025-07-30 14:46:46.144742
+Revision ID: 6e52e053c111
+Revises: 0f085993b457
+Create Date: 2025-07-30 15:49:15.202051
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "6cae8331ab57"
-down_revision = "c59a945c96c5"
+revision = "6e52e053c111"
+down_revision = "0f085993b457"
 branch_labels = None
 depends_on = None
 
