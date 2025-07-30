@@ -346,6 +346,26 @@ DOC_MANUFACTURING = build_opp(
     estimated_total_program_funding=15_000_000_000,
 )
 
+DOC_TOP_LEVEL = build_opp(
+    opportunity_id="999d99d9-9999-4999-9999-999999999999",
+    opportunity_title="Department of Commerce Top Level Initiative",
+    opportunity_number="DOC-TL-2024",
+    agency="DOC",
+    summary_description="A top-level Department of Commerce initiative for economic development",
+    opportunity_status=OpportunityStatus.POSTED,
+    assistance_listings=[ECONOMIC_AL],
+    applicant_types=[ApplicantType.OTHER],
+    funding_instruments=[FundingInstrument.GRANT],
+    funding_categories=[FundingCategory.OTHER],
+    post_date=date(2024, 1, 1),
+    close_date=date(2025, 12, 31),
+    is_cost_sharing=False,
+    expected_number_of_awards=5,
+    award_floor=100_000,
+    award_ceiling=1_000_000,
+    estimated_total_program_funding=5_000_000,
+)
+
 OPPORTUNITIES = [
     NASA_SPACE_FELLOWSHIP,
     NASA_INNOVATIONS,
@@ -356,6 +376,7 @@ OPPORTUNITIES = [
     DOS_DIGITAL_LITERACY,
     DOC_SPACE_COAST,
     DOC_MANUFACTURING,
+    DOC_TOP_LEVEL,
 ]
 
 
@@ -445,7 +466,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         }
                     ],
                 ),
-                [LOC_TEACHING, LOC_HIGHER_EDUCATION, DOC_MANUFACTURING],
+                [LOC_TEACHING, LOC_HIGHER_EDUCATION, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(
@@ -469,7 +490,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         {"order_by": "opportunity_title", "sort_direction": SortDirection.ASCENDING}
                     ],
                 ),
-                [NASA_SPACE_FELLOWSHIP, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST, NASA_K12_DIVERSITY],
+                [NASA_INNOVATIONS, NASA_SPACE_FELLOWSHIP, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
             ),
             (
                 get_search_request(
@@ -585,7 +606,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         {"order_by": "close_date", "sort_direction": SortDirection.ASCENDING}
                     ],
                 ),
-                [NASA_SUPERSONIC, DOC_MANUFACTURING, NASA_INNOVATIONS, LOC_HIGHER_EDUCATION],
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    DOC_MANUFACTURING,
+                    NASA_INNOVATIONS,
+                    LOC_HIGHER_EDUCATION,
+                ],
             ),
             # Agency
             (
@@ -597,11 +624,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     ],
                 ),
                 [
+                    DOC_TOP_LEVEL,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                     DOS_DIGITAL_LITERACY,
                     LOC_TEACHING,
-                    LOC_HIGHER_EDUCATION,
                 ],
             ),
             (
@@ -623,7 +650,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         {"order_by": "award_floor", "sort_direction": SortDirection.DESCENDING}
                     ],
                 ),
-                [DOC_MANUFACTURING, NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+                [DOC_MANUFACTURING, DOC_TOP_LEVEL, NASA_SPACE_FELLOWSHIP],
             ),
             # Award Ceiling
             (
@@ -682,12 +709,22 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 get_search_request(
                     agency_one_of=["DOC-EDA", "NASA", "LOC", "DOS-ECA", "something else"]
                 ),
-                OPPORTUNITIES,
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                    NASA_K12_DIVERSITY,
+                    LOC_TEACHING,
+                    LOC_HIGHER_EDUCATION,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
             ),
             # Opportunity Status
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.POSTED]),
-                [NASA_SPACE_FELLOWSHIP, LOC_TEACHING, DOC_MANUFACTURING],
+                [NASA_SPACE_FELLOWSHIP, LOC_TEACHING, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.FORECASTED]),
@@ -714,6 +751,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     LOC_TEACHING,
                     LOC_HIGHER_EDUCATION,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -749,6 +787,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     LOC_HIGHER_EDUCATION,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -782,7 +821,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(funding_category_one_of=[FundingCategory.OTHER]),
-                [LOC_HIGHER_EDUCATION, DOS_DIGITAL_LITERACY, DOC_SPACE_COAST],
+                [LOC_HIGHER_EDUCATION, DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(funding_category_one_of=[FundingCategory.REGIONAL_DEVELOPMENT]),
@@ -817,6 +856,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     NASA_K12_DIVERSITY,
                     DOS_DIGITAL_LITERACY,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -873,7 +913,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     opportunity_status_one_of=[OpportunityStatus.POSTED],
                     applicant_type_one_of=[ApplicantType.OTHER],
                 ),
-                [NASA_SPACE_FELLOWSHIP, DOC_MANUFACTURING],
+                [NASA_SPACE_FELLOWSHIP, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
         ],
         ids=search_scenario_id_fnc,
@@ -913,13 +953,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 get_search_request(
                     post_date={"start_date": "2019-06-01", "end_date": "2024-01-01"}
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(
                     post_date={"start_date_relative": -2063, "end_date_relative": -389}
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC, DOC_TOP_LEVEL],
             ),
             (get_search_request(post_date={"end_date": "2016-01-01"}), [DOC_MANUFACTURING]),
             (get_search_request(post_date={"end_date_relative": -3310}), [DOC_MANUFACTURING]),
@@ -936,6 +976,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -950,6 +991,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -960,6 +1002,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -970,6 +1013,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -1027,11 +1071,23 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(is_cost_sharing_one_of=["false"]),
-                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+                [
+                    NASA_INNOVATIONS,
+                    NASA_K12_DIVERSITY,
+                    LOC_HIGHER_EDUCATION,
+                    DOC_SPACE_COAST,
+                    DOC_TOP_LEVEL,
+                ],
             ),
             (
                 get_search_request(is_cost_sharing_one_of=["no"]),
-                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+                [
+                    NASA_INNOVATIONS,
+                    NASA_K12_DIVERSITY,
+                    LOC_HIGHER_EDUCATION,
+                    DOC_SPACE_COAST,
+                    DOC_TOP_LEVEL,
+                ],
             ),
         ],
     )
@@ -1055,11 +1111,12 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
                 get_search_request(expected_number_of_awards={"min": 5, "max": 10}),
-                [NASA_SUPERSONIC],
+                [NASA_SUPERSONIC, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(expected_number_of_awards={"min": 12}),
@@ -1080,6 +1137,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -1109,6 +1167,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -1120,11 +1179,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(award_ceiling={"min": 50_000}),
-                [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
-                    DOC_MANUFACTURING,
-                ],
+                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
             # Estimated Total Program Funding
             (
@@ -1139,6 +1194,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
                 ],
             ),
             (
@@ -1529,7 +1585,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     ],
                     query="DOC*",
                 ),
-                [DOC_SPACE_COAST, DOC_MANUFACTURING],
+                [DOC_SPACE_COAST, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
             (
                 get_search_request(
@@ -1649,9 +1705,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert resp.status_code == 200
         data = resp.json["data"]
 
-        assert len(data) == 3
+        assert len(data) == 4
         assert [opp["opportunity_id"] for opp in data] == [
-            opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
+            opp.opportunity_id
+            for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING, DOC_TOP_LEVEL]
         ]
 
     def test_search_top_level_agency_and_sub_agencies_200(
@@ -1675,3 +1732,36 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert [opp["opportunity_id"] for opp in data] == [
             opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
         ]
+
+    def test_search_agency_filter_includes_top_level_agency_when_sub_agencies_present_200(
+        self, client, db_session, enable_factory_create, api_auth_token, setup_search_data
+    ):
+        """
+        Test that when a top level agency has opportunities assigned to it,
+        and you run a search against the agency filter options list that contains
+        sub agencies for the agency, you will only get back sub agencies of the agency,
+        and not the agency itself.
+        """
+
+        # Search with agency filter that includes both top-level agency (DOC) and sub-agency (DOC-EDA)
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(top_level_agency_one_of=["DOC"]),
+            headers={"X-Auth": api_auth_token},
+        )
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        # Should only return opportunities from sub-agencies (DOC-EDA), not the top-level agency (DOC)
+        expected_opportunity_ids = [
+            DOC_SPACE_COAST.opportunity_id,
+            DOC_MANUFACTURING.opportunity_id,
+            DOC_TOP_LEVEL.opportunity_id,
+        ]
+        actual_opportunity_ids = [opp["opportunity_id"] for opp in data]
+
+        assert len(data) == 3
+        assert set(actual_opportunity_ids) == set(expected_opportunity_ids)
+
+        # Verify that the top-level agency opportunity (DOC_TOP_LEVEL) is included
+        assert DOC_TOP_LEVEL.opportunity_id in actual_opportunity_ids
