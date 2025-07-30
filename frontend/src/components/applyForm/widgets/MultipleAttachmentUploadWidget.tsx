@@ -1,19 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { FileInput } from "@trussworks/react-uswds";
-import { UswdsWidgetProps } from "../types";
 import { uploadFileToApp } from "src/services/attachments/upload";
 
-function getApplicationIdFromUrl(): string {
-  if (typeof window === "undefined") return "";
-  const match = window.location.pathname.match(
-    /\/applications\/application\/([a-f0-9-]+)\/form\//,
-  );
-  return match?.[1] || "";
-}
+import React, { useState } from "react";
+import { FileInput } from "@trussworks/react-uswds";
 
-const AttachmentArrayWidget = ({
+import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
+
+const MultipleAttachmentUpload = ({
   id,
   value = [],
   required,
@@ -84,15 +79,24 @@ const AttachmentArrayWidget = ({
         id={`${id}-file-input`}
         name={`${id}-file-input`}
         multiple
-        onChange={(e) => handleFilesChange(e.currentTarget.files)}
+        onChange={(e) => void handleFilesChange(e.currentTarget.files)}
         disabled={uploading}
       />
 
+      {attachments.map((attachmentId, idx) => (
+        <input
+          key={`${id}-hidden-${idx}`}
+          type="hidden"
+          name={id}
+          value={attachmentId}
+        />
+      ))}
+
       <ul className="usa-list usa-list--unstyled mt-2">
-        {attachments.map((attachmentId, idx) => (
+        {attachments.map((_attachmentId, idx) => (
           <li key={`${id}-${idx}`} className="mb-1">
             <span className="font-mono text-sm">
-              {fileNames[idx] || "Unnamed file"} – <code>{attachmentId}</code>
+              {fileNames[idx] || "Unnamed file"}
             </span>
             <button
               type="button"
@@ -108,4 +112,4 @@ const AttachmentArrayWidget = ({
   );
 };
 
-export default AttachmentArrayWidget;
+export default MultipleAttachmentUpload;

@@ -18,14 +18,14 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+import FileUploadWidget from "./widgets/AttachmentUploadWidget";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
+import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
-import FileUploadWidget from "./widgets/FileUploadWidget";
-import AttachmentArrayWidget from "./widgets/AttachmentArrayWidget";
 
 export function getSchemaObjectFromPointer(
   rootSchema: JSONSchema7,
@@ -204,28 +204,24 @@ export const determineFieldType = ({
   const { widget } = uiFieldObject;
   if (widget) return widget;
 
-  if (fieldSchema.type === "string" && fieldSchema.format === "attachment-id") {
+  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
     return "Attachment";
   }
 
-  if (fieldSchema.type === "array" && fieldSchema.format === "attachment-id") {
-    return "AttachmentArray";
+  if (fieldSchema.type === "array" && fieldSchema.items) {
+    const item = Array.isArray(fieldSchema.items)
+      ? fieldSchema.items[0]
+      : fieldSchema.items;
+
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      item.type === "string" &&
+      item.format === "uuid"
+    ) {
+      return "AttachmentArray";
+    }
   }
-
-if (fieldSchema.type === "array" && fieldSchema.items) {
-  const item = Array.isArray(fieldSchema.items)
-    ? fieldSchema.items[0]
-    : fieldSchema.items;
-
-  if (
-    typeof item === "object" &&
-    "format" in item &&
-    item.format === "attachment-id"
-  ) {
-    return "AttachmentArray";
-  }
-}
-
 
   if (fieldSchema.enum?.length) return "Select";
   if (fieldSchema.type === "boolean") return "Checkbox";
@@ -261,8 +257,8 @@ const widgetComponents: Record<
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
   Attachment: (widgetProps: UswdsWidgetProps) => FileUploadWidget(widgetProps),
-  AttachmentArray: (widgetProps: UswdsWidgetProps) => AttachmentArrayWidget(widgetProps),
-
+  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
+    AttachmentArrayWidget(widgetProps),
 };
 
 export const buildField = ({
@@ -279,12 +275,12 @@ export const buildField = ({
   const { definition, schema } = uiFieldObject;
   const fieldSchema = getFieldSchema(formSchema, uiFieldObject);
 
-const name = definition
-  ? definition
-      .replace(/^\/properties\//, "") // remove leading prefix
-      .replace(/\/properties\//g, ".") // flatten additional nested levels
-      .replace(/\//g, ".") // convert any leftover slashes
-  : (schema?.title || fieldSchema?.title || "untitled").replace(/\s/g, "-");
+  const name = definition
+    ? definition
+        .replace(/^\/properties\//, "") // remove leading prefix
+        .replace(/\/properties\//g, ".") // flatten additional nested levels
+        .replace(/\//g, ".") // convert any leftover slashes
+    : (schema?.title || fieldSchema?.title || "untitled").replace(/\s/g, "-");
 
   const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
   const value = get(formData, name) as string | number | undefined;
@@ -429,4 +425,12 @@ export const getApplicationResponse = (
   } else {
     return {};
   }
+};
+
+export const getApplicationIdFromUrl = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const match = window.location.pathname.match(
+    /\/applications\/application\/([a-f0-9-]+)\/form\//,
+  );
+  return match?.[1] ?? null;
 };

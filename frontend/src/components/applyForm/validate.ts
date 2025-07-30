@@ -6,10 +6,7 @@ export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
   items: {
-    anyOf: [
-      { $ref: "#/$defs/field" },
-      { $ref: "#/$defs/section" },
-    ],
+    anyOf: [{ $ref: "#/$defs/field" }, { $ref: "#/$defs/section" }],
   },
   $defs: {
     field: {
@@ -19,25 +16,34 @@ export const UiJsonSchema: RJSFSchema = {
         schema: { $ref: "#/$defs/schema" },
         definition: {
           type: "string",
-          pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$"
+          pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
         },
         widget: {
           type: "string",
-          enum: ["Checkbox", "Text", "TextArea", "Radio", "Select"],
+          enum: [
+            "Checkbox",
+            "Text",
+            "TextArea",
+            "Radio",
+            "Select",
+            "Attachment",
+            "AttachmentArray",
+          ],
         },
+        attachmentType: { type: "string" },
       },
       required: ["type"],
-      anyOf: [
-        { required: ["schema"] },
-        { required: ["definition"] },
-      ],
+      anyOf: [{ required: ["schema"] }, { required: ["definition"] }],
       additionalProperties: true,
     },
     schema: {
       type: "object",
       properties: {
         title: { type: "string" },
-        type: { type: "string", enum: ["boolean", "string", "number", "integer", "null"] },
+        type: {
+          type: "string",
+          enum: ["boolean", "string", "number", "integer", "null"],
+        },
         enum: { type: "array" },
         pattern: { type: "string", enum: ["date", "email"] },
       },
@@ -53,10 +59,7 @@ export const UiJsonSchema: RJSFSchema = {
         children: {
           type: "array",
           items: {
-            anyOf: [
-              { $ref: "#/$defs/field" },
-              { $ref: "#/$defs/section" },
-            ],
+            anyOf: [{ $ref: "#/$defs/field" }, { $ref: "#/$defs/section" }],
           },
         },
       },

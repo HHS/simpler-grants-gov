@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "src/services/auth/session";
 import { uploadAttachment } from "src/services/fetch/fetchers/applicationFetcher";
 import { createFormData } from "src/utils/fileUtils/createFormData";
 
+import { NextRequest, NextResponse } from "next/server";
+
 export async function POST(
   req: NextRequest,
-  { params }: { params: { applicationId: string } }) {
+  { params }: { params: { applicationId: string } },
+) {
   const session = await getSession();
 
   if (!session || !session.token) {
@@ -17,7 +19,10 @@ export async function POST(
   const file = formData.get("file") as File;
 
   if (!file || !applicationId) {
-    return NextResponse.json({ error: "Missing file or applicationId" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing file or applicationId" },
+      { status: 400 },
+    );
   }
 
   const arrayBuffer = await file.arrayBuffer();
@@ -26,7 +31,11 @@ export async function POST(
   const fileFormData = createFormData(file.name, buffer, file.type);
 
   try {
-    const res = await uploadAttachment(applicationId, session.token, fileFormData);
+    const res = await uploadAttachment(
+      applicationId,
+      session.token,
+      fileFormData,
+    );
     if (res.status_code !== 200) throw new Error("Upload failed");
 
     return NextResponse.json({

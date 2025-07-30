@@ -1,6 +1,6 @@
 export async function uploadFileToApp(
   applicationId: string,
-  file: File
+  file: File,
 ): Promise<string | null> {
   const formData = new FormData();
   formData.append("file", file);

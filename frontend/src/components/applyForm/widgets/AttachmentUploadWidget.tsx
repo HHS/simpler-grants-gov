@@ -1,39 +1,35 @@
 "use client";
 
-import {
-  FormGroup,
-  FileInput,
-  FileInputRef,
-  Label,
-  ErrorMessage,
-  TextInput,
-} from "@trussworks/react-uswds";
-import { useEffect, useRef, useState } from "react";
-import { UswdsWidgetProps } from "../types";
 import { uploadFileToApp } from "src/services/attachments/upload";
 
-function getApplicationIdFromUrl(): string | null {
-  if (typeof window === "undefined") return null;
-  const match = window.location.pathname.match(
-    /\/applications\/application\/([a-f0-9-]+)\/form\//,
-  );
-  return match?.[1] ?? null;
-}
+import { useRef, useState } from "react";
+import {
+  ErrorMessage,
+  FileInput,
+  FileInputRef,
+  FormGroup,
+  Label,
+} from "@trussworks/react-uswds";
 
-const FileUploadWidget = ({
+import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
+
+const AttachmentUpload = ({
   id,
   value: initialValue,
   required,
   rawErrors = [],
   label,
+  onChange,
 }: UswdsWidgetProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
 
-  const [localValue, setLocalValue] = useState<string | null>(
+  const [uuid, setUuid] = useState<string | null>(
     typeof initialValue === "string" ? initialValue : null,
   );
+  const [fileName, setFileName] = useState<string>("");
 
   const handleFileChange = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -47,7 +43,9 @@ const FileUploadWidget = ({
     try {
       const attachmentId = await uploadFileToApp(applicationId, file);
       if (attachmentId) {
-        setLocalValue(attachmentId);
+        setUuid(attachmentId);
+        setFileName(file.name);
+        onChange?.(attachmentId);
         fileInputRef.current?.clearFiles();
       }
     } catch (err) {
@@ -56,7 +54,9 @@ const FileUploadWidget = ({
   };
 
   const handleRemove = () => {
-    setLocalValue(null);
+    setUuid(null);
+    setFileName("");
+    onChange?.("");
   };
 
   return (
@@ -70,37 +70,31 @@ const FileUploadWidget = ({
         <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
       )}
 
-      {localValue ? (
+      {uuid ? (
         <>
-          <TextInput
-            id={id}
-            name={id}
-            value={localValue}
-            disabled
-            readOnly
-            aria-describedby={describedBy}
-            type="text"
-          />
-          <input type="hidden" name={id} value={localValue} />
-          <button
-            type="button"
-            className="usa-button usa-button--unstyled text-secondary mt-2"
-            onClick={handleRemove}
-          >
-            Remove Attachment
-          </button>
+          <div className="usa-file-input__target text-base">
+            {fileName || "File uploaded"}{" "}
+            <button
+              type="button"
+              className="usa-button usa-button--unstyled text-secondary ml-2"
+              onClick={handleRemove}
+            >
+              Remove
+            </button>
+          </div>
+          <input type="hidden" name={id} value={uuid} />
         </>
       ) : (
         <FileInput
           id={id}
-          name={id}
+          name={`${id}-file`}
           ref={fileInputRef}
           type="file"
           className="usa-file-input__input"
           onChange={(e) => {
             const files = e.currentTarget.files;
             e.preventDefault();
-            handleFileChange(files);
+            void handleFileChange(files);
           }}
           aria-describedby={describedBy}
         />
@@ -109,4 +103,4 @@ const FileUploadWidget = ({
   );
 };
 
-export default FileUploadWidget;
+export default AttachmentUpload;

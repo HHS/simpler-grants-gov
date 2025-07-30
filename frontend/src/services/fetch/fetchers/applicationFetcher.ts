@@ -1,3 +1,4 @@
+import { environment } from "src/constants/environments";
 import {
   ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
@@ -7,9 +8,8 @@ import {
   ApplicationSubmitApiResponse,
 } from "src/types/applicationResponseTypes";
 
-import { fetchApplicationWithMethod } from "./fetchers";
-import { createRequestUrl } from "../fetcherHelpers";
-import { environment } from "src/constants/environments";
+import { createRequestUrl } from "src/services/fetch/fetcherHelpers";
+import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
 
 export const handleStartApplication = async (
   applicationName: string,
@@ -112,7 +112,6 @@ export const handleUpdateApplicationForm = async (
 
   return (await response.json()) as ApplicationStartApiResponse;
 };
-
 
 export const uploadAttachment = async (
   applicationId: string,
