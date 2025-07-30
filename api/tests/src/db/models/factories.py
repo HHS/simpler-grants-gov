@@ -10,7 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 import factory
@@ -2610,3 +2610,15 @@ class ApplicationUserFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
+class SuppressedEmailFactory(BaseFactory):
+    class Meta:
+        model = user_models.SuppressedEmail
+
+    suppressed_email_id = Generators.UuidObj
+    email = factory.Faker("email")
+    reason = "BOUNCE"
+    last_update_time = factory.Faker(
+        "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
+    )
