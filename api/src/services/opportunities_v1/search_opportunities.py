@@ -73,6 +73,14 @@ STATIC_PAGINATION = {
     }
 }
 
+STATIC_DATE_RANGES: list = [
+    {"from": "now", "to": "now+7d/d", "key": "7"},
+    {"from": "now", "to": "now+30d/d", "key": "30"},
+    {"from": "now", "to": "now+60d/d", "key": "60"},
+    {"from": "now", "to": "now+90d/d", "key": "90"},
+    {"from": "now", "to": "now+120d/d", "key": "120"},
+]
+
 SCHEMA = OpportunityV1Schema()
 
 
@@ -148,6 +156,11 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         "is_cost_sharing",
         _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
     )
+    builder.aggregation_relative_date_range(
+        "close_date",
+        _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+        STATIC_DATE_RANGES,
+    )
 
 
 def _add_top_level_agency_prefix(
@@ -163,6 +176,11 @@ def _add_top_level_agency_prefix(
 
     if not filters or not (filters.top_level_agency and filters.top_level_agency.one_of):
         return
+
+    # Exact match for the top-level agency itself (e.g., "DOC")
+    builder.filter_should_terms(
+        "agency_code.keyword", [agency for agency in filters.top_level_agency.one_of]
+    )
 
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
     builder.filter_should_prefix(
@@ -217,12 +235,10 @@ def _search_opportunities(
     includes: list | None = None,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
-
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
-
     response = search_client.search(
         index_alias, search_request, includes=includes, excludes=["attachments"]
     )

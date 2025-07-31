@@ -345,3 +345,21 @@ class SearchQueryBuilder:
             request["aggs"] = self.aggregations
 
         return request
+
+    def aggregation_relative_date_range(
+        self, aggregation_name: str, field_name: str, ranges: list[dict]
+    ) -> typing.Self:
+        """
+        Add a relative date range aggregation to the request. Date range aggregations group documents
+        into custom time ranges and return counts for each range.
+
+        See: https://opensearch.org/docs/latest/aggregations/bucket/date-range/
+        """
+        self.aggregations[aggregation_name] = {
+            "date_range": {
+                "field": field_name,
+                "format": "YYYY-MM-dd",
+                "ranges": ranges,
+            }
+        }
+        return self

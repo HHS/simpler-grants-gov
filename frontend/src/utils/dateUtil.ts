@@ -20,6 +20,15 @@ export function formatDate(dateStr: string | null): string {
   return dayjs(dateStr).format("LL");
 }
 
+export function formatDateTime(dateStr: string | null): string {
+  if (!dateStr || !dayjs(dateStr).isValid()) {
+    console.warn("invalid date string provided for parse");
+    return "";
+  }
+
+  return dayjs(dateStr).format("MMMM D, YYYY h:mm a");
+}
+
 // "2025-01-15" -> "Jan 15, 2025"
 export const toShortMonthDate = (unformattedDate: string): string => {
   const dateInstance = dayjs(unformattedDate);

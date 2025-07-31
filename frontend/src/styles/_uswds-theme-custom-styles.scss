@@ -503,6 +503,21 @@ button.usa-pagination__button.usa-button {
   &.overflow-wrap {
     overflow-wrap: break-word;
   }
+  &.application-attachments-table {
+    td {
+      height: 65px;
+    }
+    .grants-spinner {
+      float: left;
+      margin-right: 0.5rem;
+    }
+    .highlight {
+      td {
+        background-color: color(gold-5v);
+        line-height: 1rem;
+      }
+    }
+  }
 }
 
 // Accordions
@@ -589,5 +604,56 @@ dl {
         }
       }
     }
+  }
+}
+
+.simpler-selected-filter {
+  .usa-accordion__button {
+    background-color: color($theme-color-secondary-lightest);
+  }
+}
+
+iframe[id^="ethnio-screener-"] {
+  position: fixed !important;
+}
+
+// roadmap timeline
+.roadmap-row {
+  div:first-child:after {
+    content: "";
+    position: absolute;
+    top: 1.2rem;
+    left: 0;
+    margin-left: calc(-0.5rem - 1px);
+    height: 1rem;
+    width: 1rem;
+    background-color: color("base-darkest");
+    border-radius: 100%;
+    @include at-media("tablet") {
+      left: 100%;
+      margin-left: calc(-0.5rem + 1px);
+    }
+  }
+
+  &:last-child div:last-child:after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    height: 0.75rem;
+    width: 0.75rem;
+    border-left: 2px solid color("base-darkest");
+    border-bottom: 2px solid color("base-darkest");
+    transform: rotate(-45deg);
+    transform-origin: left bottom;
+  }
+}
+
+#opportunity-detail-content {
+  p:first-child {
+    margin-top: 1rem;
+  }
+  p:last-child {
+    margin-bottom: 1rem;
   }
 }

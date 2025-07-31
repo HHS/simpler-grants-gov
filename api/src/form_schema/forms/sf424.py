@@ -8,7 +8,6 @@ FORM_JSON_SCHEMA = {
     "required": [
         "submission_type",
         "application_type",
-        "date_received",
         "organization_name",
         "employer_taxpayer_identification_number",
         "sam_uei",
@@ -38,8 +37,6 @@ FORM_JSON_SCHEMA = {
         "authorized_representative",
         "authorized_representative_phone_number",
         "authorized_representative_email",
-        "aor_signature",
-        "date_signed",
     ],
     # Conditional validation rules for SF424
     "allOf": [
@@ -745,12 +742,6 @@ FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
     # Note - we don't have pre-population enabled yet, so these
     # won't run yet.
-    # TODO - before we can enable prepopulation we need the following rules:
-    #   * uei
-    #   * assistance listing number
-    #   * assistance listing program title
-    #   * public competition ID
-    #   * competition title
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
     "agency_name": {"gg_pre_population": {"rule": "agency_name"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
@@ -774,12 +765,13 @@ FORM_RULE_SCHEMA = {
 
 
 SF424_v4_0 = Form(
-    # legacy form ID - 713
     # https://www.grants.gov/forms/form-items-description/fid/713
     form_id=uuid.UUID("1623b310-85be-496a-b84b-34bdee22a68a"),
+    legacy_form_id=713,
     form_name="Application for Federal Assistance (SF-424)",
+    short_form_name="SF424_4_0",
     form_version="4.0",
-    agency_code="SGG",  # TODO - Do we want to add Simpler Grants.gov as an "Agency"?
+    agency_code="SGG",
     omb_number="4040-0004",
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,

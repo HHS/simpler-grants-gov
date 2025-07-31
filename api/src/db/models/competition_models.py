@@ -192,9 +192,12 @@ class Form(ApiSchemaTable, TimestampMixin):
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_name: Mapped[str]
+    # This is used for making files and should not contain spaces
+    short_form_name: Mapped[str]
     form_version: Mapped[str]
     agency_code: Mapped[str]
     omb_number: Mapped[str | None]
+    legacy_form_id: Mapped[int | None] = mapped_column(index=True, unique=True)
     active_at: Mapped[datetime | None]
     inactive_at: Mapped[datetime | None]
     form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
@@ -253,7 +256,7 @@ class Application(ApiSchemaTable, TimestampMixin):
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(Organization.organization_id)
     )
-    organization: Mapped[Organization] = relationship(
+    organization: Mapped[Organization | None] = relationship(
         Organization, uselist=False, back_populates="applications"
     )
 

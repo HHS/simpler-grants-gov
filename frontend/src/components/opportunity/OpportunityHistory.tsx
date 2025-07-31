@@ -23,7 +23,7 @@ export const OpportunityHistoryItem = ({
         {title}
         {":"}
       </p>
-      <p className={"margin-top-0"}>{content}</p>
+      <p>{content}</p>
     </div>
   );
 };

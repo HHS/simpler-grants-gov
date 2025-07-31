@@ -146,6 +146,28 @@ class CompetitionOpenToApplicant(StrEnum):
     ORGANIZATION = "organization"
 
 
+class SubmissionIssue(StrEnum):
+    """Submission issue types for metrics logging"""
+
+    NOT_A_MEMBER_OF_ORG = "not_a_member_of_org"
+    ORG_NO_SAM_GOV_ENTITY = "org_no_sam_gov_entity"
+    ORG_INACTIVE_IN_SAM_GOV = "org_inactive_in_sam_gov"
+    ORG_SAM_GOV_EXPIRED = "org_sam_gov_expired"
+    COMPETITION_NO_ORG_APPLICATIONS = "competition_no_org_applications"
+    COMPETITION_NO_INDIVIDUAL_APPLICATIONS = "competition_no_individual_applications"
+    COMPETITION_NOT_FOUND = "competition_not_found"
+    ORGANIZATION_NOT_FOUND = "organization_not_found"
+    APPLICATION_NOT_IN_PROGRESS = "application_not_in_progress"
+    COMPETITION_NOT_OPEN = "competition_not_open"
+    FORM_VALIDATION_ERRORS = "form_validation_errors"
+    UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
+    NO_UPDATE_DATA_PROVIDED = "no_update_data_provided"
+    FORM_NOT_FOUND_OR_NOT_ATTACHED = "form_not_found_or_not_attached"
+    APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
+    INVALID_FILE_NAME = "invalid_file_name"
+    ATTACHMENT_NOT_FOUND = "attachment_not_found"
+
+
 class SamGovExtractType(StrEnum):
     MONTHLY = "monthly"
     DAILY = "daily"

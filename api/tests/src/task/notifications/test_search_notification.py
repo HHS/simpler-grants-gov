@@ -13,8 +13,8 @@ from src.db.models.user_models import UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
-from src.task.notifications.generate_notifications import NotificationConstants
 from src.task.notifications.search_notification import (
+    UTM_TAG,
     SearchNotificationTask,
     _strip_pagination_params,
 )
@@ -107,7 +107,7 @@ def test_search_notifications_cli(
 
     notification_logs_count = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationReason.SEARCH_UPDATES)
         .count()
     )
 
@@ -400,7 +400,7 @@ def test_search_notification_email_format_single_opportunity(
         mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
             "SimpleEmail"
         ]["Subject"]["Data"]
-        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+        == f"New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
     email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
@@ -410,7 +410,7 @@ def test_search_notification_email_format_single_opportunity(
     # Test single opportunity format
     expected_single = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
@@ -486,7 +486,7 @@ def test_search_notification_email_format_no_close_date(
     # Test opportunity with no close date format
     expected_content = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>Ongoing Research Grant Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>Ongoing Research Grant Program</a></b>
 Status: Posted
 Submission period: 2/15/2025-(To be determined)
 Award range: $50,000-$500,000
@@ -579,7 +579,7 @@ def test_search_notification_email_format_multiple_opportunities(
         mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
             "SimpleEmail"
         ]["Subject"]["Data"]
-        == f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] 2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
+        == f"2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
     email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
@@ -589,14 +589,14 @@ def test_search_notification_email_format_multiple_opportunities(
     # Test single opportunity format
     expected_single = f"""The following funding opportunities matching your saved search queries were recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
 Expected awards: 40
 Cost sharing: Yes
 
-<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}{UTM_TAG}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
 Status: Forecasted
 Submission period: To be announced.
 Award range: $1-$30,000

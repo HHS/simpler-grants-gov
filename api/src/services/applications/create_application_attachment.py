@@ -8,6 +8,7 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
@@ -48,6 +49,10 @@ def upsert_application_attachment(
     # This should only ever happen if someone had a filename that Werkzeug could
     # not parse or interpreted as a file stream.
     if file_attachment.filename is None:
+        logger.info(
+            "Invalid file name, cannot parse",
+            extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME},
+        )
         raise_flask_error(422, "Invalid file name, cannot parse")
 
     # secure_filename makes the file safe in path operations and removes non-ascii characters

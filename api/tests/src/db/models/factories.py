@@ -10,7 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 import factory
@@ -1151,6 +1151,10 @@ class FormFactory(BaseFactory):
 
     form_id = Generators.UuidObj
     form_name = "Test form"
+    # short_form_name will look like AB123A_1_2
+    short_form_name = factory.LazyAttribute(
+        lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
+    )
     # Form version will be like 1.0, 4.5, etc.
     form_version = factory.Faker("pystr_format", string_format="#.#")
     agency_code = factory.Faker("agency_code")
@@ -2605,8 +2609,22 @@ class ApplicationUserFactory(BaseFactory):
     class Meta:
         model = user_models.ApplicationUser
 
+    application_user_id = factory.LazyFunction(uuid.uuid4)
+
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
+class SuppressedEmailFactory(BaseFactory):
+    class Meta:
+        model = user_models.SuppressedEmail
+
+    suppressed_email_id = Generators.UuidObj
+    email = factory.Faker("email")
+    reason = "BOUNCE"
+    last_update_time = factory.Faker(
+        "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
+    )

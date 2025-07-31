@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { submitApplicationHandler } from "src/app/api/applications/[id]/submit/handler";
+import { submitApplicationHandler } from "src/app/api/applications/[applicationId]/submit/handler";
 import { ApplicationSubmitApiResponse } from "src/types/applicationResponseTypes";
 
 import { NextRequest } from "next/server";
@@ -53,7 +53,7 @@ describe("POST request", () => {
       fakeRequestSubmitApp(true, "POST"),
       {
         params: Promise.resolve({
-          id: "14",
+          applicationId: "14",
         }),
       },
     );
@@ -90,7 +90,7 @@ describe("POST request", () => {
       fakeRequestSubmitApp(false, "POST"),
       {
         params: Promise.resolve({
-          id: "14",
+          applicationId: "14",
         }),
       },
     );
@@ -124,7 +124,7 @@ describe("POST request", () => {
       fakeRequestSubmitApp(false, "POST"),
       {
         params: Promise.resolve({
-          id: "14",
+          applicationId: "14",
         }),
       },
     );

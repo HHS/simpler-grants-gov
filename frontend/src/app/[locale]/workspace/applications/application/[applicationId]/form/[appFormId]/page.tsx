@@ -20,6 +20,7 @@ import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
+import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -120,6 +121,7 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
+      <BookmarkBanner containerClasses="margin-y-3" />
       <GridContainer>
         <Breadcrumbs
           breadcrumbList={[
