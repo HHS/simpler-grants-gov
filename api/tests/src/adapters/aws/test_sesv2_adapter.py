@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.adapters.aws.ses_adapter import MockSESV2Client, SuppressedDestination
+from src.adapters.aws.sesv2_adapter import MockSESV2Client, SuppressedDestination
 
 
 def test_ses_adapter():
