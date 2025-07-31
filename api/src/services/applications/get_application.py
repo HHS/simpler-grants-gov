@@ -80,5 +80,6 @@ def get_application_with_warnings(
     # Set the is_required field on all application forms
     for application_form in application.application_forms:
         application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
+        application_form.is_included_in_submission = not application_form.is_required
 
     return application, form_warnings

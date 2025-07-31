@@ -52,5 +52,6 @@ def get_application_form(
 
     # Set the is_required field on the application form object
     application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
+    application_form.is_included_in_submission = not application_form.is_required
 
     return application_form, warnings
