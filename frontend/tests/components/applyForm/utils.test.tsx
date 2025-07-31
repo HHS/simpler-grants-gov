@@ -8,6 +8,7 @@ import {
   buildFormTreeRecursive,
   determineFieldType,
   getApplicationResponse,
+  getFieldName,
   getFieldSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -485,5 +486,31 @@ describe("pruneEmptyNestedFields", () => {
         },
       },
     });
+  });
+});
+
+describe("getFieldName", () => {
+  it("returns correct field name based on definition, removing properties and adding delimiter", () => {
+    expect(
+      getFieldName({
+        definition: "/properties/something/properties/somethingElse",
+      }),
+    ).toEqual("something--somethingElse");
+  });
+  // this may not actually work
+  it("returns correct field name based on schema", () => {
+    expect(
+      getFieldName({
+        schema: {
+          title: "a bunch of stuff",
+        },
+      }),
+    ).toEqual("a-bunch-of-stuff");
+
+    expect(
+      getFieldName({
+        schema: {},
+      }),
+    ).toEqual("untitled");
   });
 });

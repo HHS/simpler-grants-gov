@@ -175,17 +175,20 @@ export const getNameFromDef = ({
 };
 
 // new, not used in multifield
-export const getFieldName = (
-  definition?: string,
-  schema?: SchemaField,
-): string => {
+export const getFieldName = ({
+  definition,
+  schema,
+}: {
+  definition?: string;
+  schema?: SchemaField;
+}): string => {
   if (definition) {
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
       .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
   }
-  return (schema?.title ?? "untitled").replace(" ", "-");
+  return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
 
 export const getFieldPath = (fieldName: string) =>
@@ -268,7 +271,7 @@ export const buildField = ({
   } else if (typeof definition === "string") {
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
 
-    name = getFieldName(definition, schema);
+    name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
   }
