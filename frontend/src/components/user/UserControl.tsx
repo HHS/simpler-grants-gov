@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -14,7 +15,6 @@ import {
 
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 // used in three different places
 // 1. on desktop - nav item drop down button content

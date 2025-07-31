@@ -18,7 +18,5 @@ export default async function Developer({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Developer" });
 
-  return (
-    <></>
-  );
-} 
+  return <></>;
+}
