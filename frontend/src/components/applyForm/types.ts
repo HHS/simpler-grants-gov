@@ -92,39 +92,6 @@ export type TextTypes =
   | "tel"
   | "url";
 
-// extends the WidgetProps type from rjsf for USWDS and this project implementation
-// export interface UswdsWidgetProps<
-//   T = unknown,
-//   S extends StrictRJSFSchema = RJSFSchema,
-//   F extends FormContextType = never,
-// > extends GenericObjectType,
-//     Pick<
-//       HTMLAttributes<HTMLElement>,
-//       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
-//     > {
-//   id: string;
-//   value?: string | Array<T> | unknown;
-//   type?: string;
-//   minLength?: number;
-//   schema: RJSFSchema;
-//   maxLength?: number;
-//   required?: boolean;
-//   disabled?: boolean;
-//   readonly?: boolean;
-//   hideError?: boolean;
-//   autofocus?: boolean;
-//   placeholder?: string;
-//   options?: NonNullable<UIOptionsType<T, S, F>>;
-//   hideLabel?: boolean;
-//   multiple?: boolean;
-//   rawErrors?: string[] | [Record<string, unknown>] | undefined;
-//   // whether or not to use value + onChange
-//   updateOnInput?: boolean;
-//   onChange?: (value: unknown) => void;
-//   onBlur?: (id: string, value: unknown) => void;
-//   onFocus?: (id: string, value: unknown) => void;
-// }
-
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,

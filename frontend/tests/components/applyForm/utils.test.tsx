@@ -21,17 +21,6 @@ jest.mock("react", () => ({
 
 describe("shapeFormData", () => {
   it("should shape form data to the form schema", () => {
-    // const formSchema: RJSFSchema = {
-    //   title: "test schema",
-    //   properties: {
-    //     name: { type: "string", title: "test name", maxLength: 60 },
-    //     dob: { type: "string", format: "date", title: "Date of birth" },
-    //     address: { type: "string", title: "test address" },
-    //     state: { type: "string", title: "test state" },
-    //   },
-    //   required: ["name"],
-    // };
-
     const shapedFormData = {
       name: "test",
       dob: "01/01/1900",
