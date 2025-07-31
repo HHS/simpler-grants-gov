@@ -233,3 +233,14 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="organizations", uselist=False)
+
+
+class SuppressedEmail(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "suppressed_email"
+
+    suppressed_email_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    email: Mapped[str] = mapped_column(index=True)
+    reason: Mapped[str]
+    last_update_time: Mapped[datetime] = mapped_column(index=True)
