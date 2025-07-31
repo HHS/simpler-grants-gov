@@ -69,7 +69,7 @@ const UserDropdown = ({
 
   const developerNavItem = showDeveloperPortal ? (
     <a
-      href="/dev"
+      href="/developer"
       className="display-flex usa-button usa-button--unstyled text-no-underline"
     >
       <USWDSIcon name="settings" className="usa-icon--size-3 display-block" />
