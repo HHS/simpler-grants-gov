@@ -20,13 +20,13 @@ class SESV2Response(BaseModel):
     )
 
 
-class BasesSESV2Client(ABC, metaclass=ABCMeta):
+class BaseSESV2Client(ABC, metaclass=ABCMeta):
     @abstractmethod
     def list_suppressed_destinations(self) -> SESV2Response:
         pass
 
 
-class SESV2Client(BasesSESV2Client):
+class SESV2Client(BaseSESV2Client):
     def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
         client = boto3.client("sesv2")
         response = (
@@ -37,7 +37,7 @@ class SESV2Client(BasesSESV2Client):
         return SESV2Response(**response)
 
 
-class MockSESV2Client(BasesSESV2Client):
+class MockSESV2Client(BaseSESV2Client):
     def __init__(self) -> None:
         self.mock_responses: list[SuppressedDestination] = []
 
