@@ -23,7 +23,7 @@ def test_ses_adapter():
 
     resp = client.list_suppressed_destinations()
 
-    assert len(resp["SuppressedDestinationSummaries"]) == 2
+    assert len(resp.suppressed_destination_summaries) == 2
 
     assert client.mock_responses[0].email_address == "bounce@simulator.amazonses.com"
     assert client.mock_responses[0].reason == "BOUNCE"
@@ -34,8 +34,8 @@ def test_ses_adapter():
     assert client.mock_responses[1].last_update_time == datetime(2025, 1, 1, 9, 30, 0)
 
     resp = client.list_suppressed_destinations(start_date=datetime(2022, 1, 1))
-    data = resp["SuppressedDestinationSummaries"]
+    data = resp.suppressed_destination_summaries
 
-    assert data[0]["EmailAddress"] == "bounce2@simulator.amazonses.com"
-    assert data[0]["Reason"] == "COMPLAINT"
-    assert data[0]["LastUpdateTime"] == datetime(2025, 1, 1, 9, 30, 0)
+    assert data[0].email_address == "bounce2@simulator.amazonses.com"
+    assert data[0].reason == "COMPLAINT"
+    assert data[0].last_update_time == datetime(2025, 1, 1, 9, 30, 0)
