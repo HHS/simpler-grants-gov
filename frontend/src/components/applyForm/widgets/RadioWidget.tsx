@@ -25,7 +25,7 @@ function RadioWidget<
 >({
   id,
   disabled,
-  options,
+  options = {},
   schema,
   required,
   readonly,
@@ -91,7 +91,15 @@ function RadioWidget<
         required={required}
         description={description}
       />
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : Object.values(rawErrors[0])
+                .map((value) => value)
+                .join(",")}
+        </ErrorMessage>
+      )}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
           const checked = enumOptionsIsSelected<S>(option.value, value);

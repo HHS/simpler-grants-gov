@@ -121,7 +121,7 @@ export const handleUpdateApplicationForm = async (
   };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${applicationFormId}`,
-    body: { application_response: values },
+    body: { application_response: values, is_included_in_submission: true },
     additionalHeaders: ssgToken,
   });
 

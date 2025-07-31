@@ -1,7 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { formDataToObject } from "formdata2json";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get } from "lodash";
+import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
@@ -10,6 +9,7 @@ import {
 
 import { JSX } from "react";
 
+import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
   SchemaField,
@@ -148,11 +148,11 @@ export const getFieldSchema = ({
 }): RJSFSchema => {
   if (definition && schema) {
     return {
-      ...getSchemaObjectFromPointer(formSchema, definition),
+      ...(getByPointer(formSchema, definition) as object),
       ...schema,
     } as RJSFSchema;
   } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
+    return getByPointer(formSchema, definition) as RJSFSchema;
   }
   return schema as RJSFSchema;
 };
@@ -174,6 +174,26 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
+// new, not used in multifield
+export const getFieldName = ({
+  definition,
+  schema,
+}: {
+  definition?: string;
+  schema?: SchemaField;
+}): string => {
+  if (definition) {
+    const definitionParts = definition.split("/");
+    return definitionParts
+      .filter((part) => part && part !== "properties")
+      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+  }
+  return (schema?.title ?? "untitled").replace(/\s/g, "-");
+};
+
+export const getFieldPath = (fieldName: string) =>
+  `/${fieldName.replace(/--/g, "/")}`;
+
 const widgetComponents: Record<
   WidgetTypes,
   (widgetProps: UswdsWidgetProps) => JSX.Element
@@ -189,6 +209,29 @@ const widgetComponents: Record<
     Budget424aSectionB(widgetProps),
   Budget424aTotalBudgetSummary: (widgetProps: UswdsWidgetProps) =>
     Budget424aTotalBudgetSummary(widgetProps),
+};
+
+const getByPointer = (target: object, path: string): unknown => {
+  if (!Object.keys(target).length) {
+    return;
+  }
+  try {
+    return getSchemaObjectFromPointer(target, path);
+  } catch (e) {
+    // this is not ideal, but it seems like the desired behavior is to return undefined if the
+    // path is not found on the target, and the library throws an error instead
+    if ((e as Error).message.includes("Invalid reference token:")) {
+      return undefined;
+    }
+    console.error("error referencing schema path", e, target, path);
+    throw e;
+  }
+};
+
+// this is going to need to get much more complicated to figure out if
+// nested and conditionally required fields are required
+const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
+  return (formSchema.required ?? []).includes(fieldName);
 };
 
 export const buildField = ({
@@ -228,13 +271,16 @@ export const buildField = ({
   } else if (typeof definition === "string") {
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
 
-    name = getNameFromDef({ definition, schema });
-    value = get(formData, name) as string | number | undefined;
+    name = getFieldName({ definition, schema });
+    const path = getFieldPath(name);
+    value = getByPointer(formData, path) as string | number | undefined;
   }
   if (!name || !fieldSchema) {
+    console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
+  // should filter and match warnings to field earlier in the process
   const rawErrors = errors
     ? formatFieldWarnings(
         errors,
@@ -281,7 +327,8 @@ export const buildField = ({
   return widgetComponents[type]({
     id: name,
     disabled,
-    required: (formSchema.required ?? []).includes(name),
+    // required: (formSchema.required ?? []).includes(name),
+    required: isFieldRequired(name, formSchema),
     minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
     maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
     schema: fieldSchema,
@@ -289,6 +336,11 @@ export const buildField = ({
     value,
     options,
   });
+};
+
+const fieldNameToWarningName = (fieldName: string): string => {
+  const warningName = fieldName.replace(/--/g, ".");
+  return `$.${warningName}`;
 };
 
 const formatFieldWarnings = (
@@ -309,7 +361,7 @@ const formatFieldWarnings = (
   }
   const warningsforField = filter(
     warnings,
-    (warning) => `$.${name}` === warning.field,
+    (warning) => fieldNameToWarningName(name) === warning.field,
   );
   return warningsforField.map((warning) => {
     return warning.message;
@@ -360,6 +412,38 @@ const wrapSection = (
   );
 };
 
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
+  );
+};
+
+// if a nested field contains no defined items, remove it from the data
+// this may not be necessary, as JSON.stringify probably does the same thing
+export const pruneEmptyNestedFields = (structuredFormData: object): object => {
+  return Object.entries(structuredFormData).reduce(
+    (acc, [key, value]) => {
+      if (!isBasicallyAnObject(value)) {
+        acc[key] = value;
+        return acc;
+      }
+      const isEmptyObject = Object.values(value as object).every(
+        (nestedValue) => !nestedValue,
+      );
+      if (isEmptyObject) {
+        return acc;
+      }
+      const pruned = pruneEmptyNestedFields(value as object);
+      acc[key] = pruned;
+      return acc;
+    },
+    {} as { [key: string]: unknown },
+  );
+};
+
 // filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_REF_1");
@@ -369,7 +453,10 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  return formDataToObject(formData) as T;
+  const structuredFormData = formDataToObject(formData, {
+    delimiter: "--",
+  });
+  return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
 // arrays from the html look like field_[row]_item

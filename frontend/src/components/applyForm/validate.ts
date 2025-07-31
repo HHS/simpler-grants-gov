@@ -32,13 +32,13 @@ export const UiJsonSchema: RJSFSchema = {
           oneOf: [
             {
               type: "string",
-              pattern: "^/properties/[a-zA-Z0-9_]+$",
+              pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
             },
             {
               type: "array",
               items: {
                 type: "string",
-                pattern: "^/properties/[a-zA-Z0-9_]+$",
+                pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
               },
             },
           ],
