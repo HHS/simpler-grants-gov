@@ -46,7 +46,7 @@ function SelectWidget<
 >({
   id,
   disabled,
-  options,
+  options = {},
   readonly,
   required,
   schema,
@@ -125,7 +125,15 @@ function SelectWidget<
         description={description}
       />
 
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : Object.values(rawErrors[0])
+                .map((value) => value)
+                .join(",")}
+        </ErrorMessage>
+      )}
 
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580

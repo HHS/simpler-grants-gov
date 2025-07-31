@@ -215,6 +215,11 @@ const getByPointer = (target: object, path: string): unknown => {
   try {
     return getSchemaObjectFromPointer(target, path);
   } catch (e) {
+    // this is not ideal, but it seems like the desired behavior is to return undefined if the
+    // path is not found on the target, and the library throws an error instead
+    if ((e as Error).message.includes("Invalid reference token:")) {
+      return undefined;
+    }
     console.error("error referencing schema path", e, target, path);
     throw e;
   }

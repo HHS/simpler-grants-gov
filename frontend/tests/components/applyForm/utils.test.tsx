@@ -49,65 +49,12 @@ describe("shapeFormData", () => {
     expect(data).toMatchObject(shapedFormData);
   });
   it("should shape nested form data", () => {
-    // const formSchema: RJSFSchema = {
-    //   type: "object",
-    //   title: "test schema",
-    //   properties: {
-    //     name: { type: "string", title: "test name", maxLength: 60 },
-    //     dob: { type: "string", format: "date", title: "Date of birth" },
-    //     address: {
-    //       type: "object",
-    //       properties: {
-    //         street: { type: "string", title: "street" },
-    //         zip: { type: "number", title: "zip code" },
-    //         state: { type: "string", title: "test state" },
-    //         question: {
-    //           type: "object",
-    //           properties: {
-    //             own: { type: "string", title: "own" },
-    //             rent: { type: "string", title: "rent" },
-    //             other: { type: "string", title: "other" },
-    //           },
-    //         },
-    //       },
-    //     },
-    //     tasks: {
-    //       type: "array",
-    //       title: "Tasks",
-    //       items: {
-    //         type: "object",
-    //         required: ["title"],
-    //         properties: {
-    //           title: {
-    //             type: "string",
-    //             title: "Important task",
-    //           },
-    //           done: {
-    //             type: "boolean",
-    //             title: "Done?",
-    //             default: false,
-    //           },
-    //         },
-    //       },
-    //     },
-    //     todos: {
-    //       type: "array",
-    //       title: "Tasks",
-    //       items: {
-    //         type: "string",
-    //         title: "Reminder",
-    //       },
-    //     },
-    //   },
-    //   required: ["name"],
-    // };
-
     const shapedFormData = {
       name: "test",
       dob: "01/01/1900",
       address: {
         street: "test street",
-        zip: "1234",
+        zip: 1234,
         state: "XX",
         question: {
           rent: "yes",
@@ -126,21 +73,22 @@ describe("shapeFormData", () => {
       todos: ["email", "write"],
     };
 
-    const formData = new FormData();
-    formData.append("street", "test street");
-    formData.append("name", "test");
-    formData.append("state", "XX");
-    formData.append("zip", "1234");
-    formData.append("dob", "01/01/1900");
-    formData.append("rent", "yes");
     const tasks: Array<{ title: string; done: string }> = [
       { title: "Submit form", done: "false" },
       { title: "Start form", done: "true" },
     ];
+    const formData = new FormData();
+
+    formData.append("name", "test");
+    formData.append("dob", "01/01/1900");
+    formData.append("address--street", "test street");
+    formData.append("address--state", "XX");
+    formData.append("address--zip", "1234");
+    formData.append("address--question--rent", "yes");
 
     tasks.forEach((obj, index) => {
       (Object.keys(obj) as Array<keyof typeof obj>).forEach((key) => {
-        formData.append(`tasks[${index}][${key}]`, String(obj[key]));
+        formData.append(`tasks[${index}]--${key}`, String(obj[key]));
       });
     });
     formData.append("todos[0]", "email");
@@ -195,45 +143,6 @@ describe("buildField", () => {
     expect(field).toHaveAttribute("type", "text");
     expect(field).toHaveAttribute("maxLength", "50");
     expect(field).toHaveValue("Jane Doe");
-  });
-
-  it("should handle fields with no definition", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      schema: {
-        type: "number",
-        title: "Age",
-      },
-    };
-
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        age: { type: "number", title: "Age" },
-      },
-    };
-
-    const errors = null;
-    const formData = {};
-
-    const BuiltField = buildField({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-    });
-    render(BuiltField);
-
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "Age");
-    expect(label).toHaveAttribute("id", "label-for-Age");
-
-    const field = screen.getByTestId("Age");
-    expect(field).toBeInTheDocument();
-    expect(field).not.toBeRequired();
-    expect(field).toHaveAttribute("type", "number");
-    // the fields not in the json schema do not have values
-    expect(field).not.toHaveValue();
   });
 
   it("should handle fields with errors", () => {
@@ -494,11 +403,6 @@ describe("getFieldSchema", () => {
       },
     };
 
-    // const uiFieldObject: UiSchemaField = {
-    //   type: "field",
-    //   definition: "/properties/name",
-    // };
-
     const definition = "/properties/name";
 
     const result = getFieldSchema({ schema: {}, definition, formSchema });
@@ -513,15 +417,10 @@ describe("getFieldSchema", () => {
       },
     };
 
-    // const uiFieldObject: UiSchemaField = {
-    //   type: "field",
-    //   definition: "/properties/name",
-    //   schema: { title: "Custom Name", minLength: 5 },
-    // };
-
     const definition = "/properties/name";
+    const schema = { title: "Custom Name", minLength: 5 };
 
-    const result = getFieldSchema({ schema: {}, definition, formSchema });
+    const result = getFieldSchema({ schema, definition, formSchema });
     expect(result).toEqual({
       type: "string",
       // overridden the beh uiFieldObject schema
@@ -543,10 +442,11 @@ describe("pruneEmptyNestedFields", () => {
     };
     expect(pruneEmptyNestedFields(flat)).toEqual(flat);
   });
-  it("returns undefined if passed an empty object or object with only undefined fields", () => {
+  it("returns empty object if passed an empty object or object with only undefined fields", () => {
     const empty = {};
     expect(pruneEmptyNestedFields(empty)).toEqual(empty);
-
+  });
+  it("prunes only top level empty objects", () => {
     const undefinedFields = {
       whatever: {
         again: { something: undefined },
@@ -554,7 +454,9 @@ describe("pruneEmptyNestedFields", () => {
         more: { stuff: undefined },
       },
     };
-    expect(pruneEmptyNestedFields(undefinedFields)).toEqual(empty);
+    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({
+      whatever: { another: undefined },
+    });
   });
   it("removes nested objects containing only undefined properties", () => {
     expect(

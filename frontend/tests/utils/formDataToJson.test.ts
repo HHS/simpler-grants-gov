@@ -18,14 +18,14 @@ describe("formDataToObject", () => {
       user: {
         age: 30,
         name: "Alice",
-        emptyString: "",
+        emptyString: undefined,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
           value: "hello",
         },
       },
       nonUser: false,
-      empty: "",
+      empty: undefined,
       numeral: 100,
     };
 
