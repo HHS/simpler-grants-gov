@@ -134,18 +134,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 120,
         },
         "award_amount": {
-            # Represents a monetary amount. We use a string instead of number
-            # to avoid any floating point rounding issues.
-            "type": "string",
-            # Pattern here effectively says:
-            # * Any number of digits
-            # * An optional decimal point
-            # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^\d*([.]\d{2})?$",
-            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-            "maxLength": 14,
-            "title": "Award Amount",
-            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
+            "$ref": "#/$defs/budget_monetary_amount",
         },
         "lobbying_registrant": {
             "type": "object",
@@ -321,6 +310,20 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 6,
                 },
             },
+        },
+        "budget_monetary_amount": {
+            # Represents a monetary amount. We use a string instead of number
+            # to avoid any floating point rounding issues.
+            "type": "string",
+            # Pattern here effectively says:
+            # * Any number of digits
+            # * An optional decimal point
+            # * Then exactly 2 digits - if there was a decimal
+            "pattern": r"^\d*([.]\d{2})?$",
+            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
+            "maxLength": 14,
+            "title": "Award Amount",
+            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
         "state_code": {
             "type": "string",
