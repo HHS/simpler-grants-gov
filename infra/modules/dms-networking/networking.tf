@@ -18,9 +18,9 @@ resource "aws_vpc_peering_connection" "dms" {
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route
-resource "aws_route" "dms" {
-  for_each                  = toset(data.aws_route_tables.rts.ids)
-  route_table_id            = each.value
-  destination_cidr_block    = local.their_source_cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
-}
+# resource "aws_route" "dms" {
+#   for_each                  = toset(data.aws_route_tables.rts.ids)
+#   route_table_id            = each.value
+#   destination_cidr_block    = local.their_source_cidr_block
+#   vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
+# }

@@ -30,6 +30,17 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    training = [
+      "poetry",
+      "run",
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     prod = [
       "poetry",
       "run",

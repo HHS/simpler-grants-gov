@@ -32,24 +32,24 @@ resource "aws_kms_key" "opensearch" {
         Action   = "kms:*",
         Resource = "*"
       },
-      {
-        Sid    = "Allow use of the key to the task executor role (eg. the ECS task)",
-        Effect = "Allow",
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}"
-        },
-        Action = [
-          "kms:List*",
-          "kms:Describe*",
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:CreateGrant",
-          "kms:RevokeGrant",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*"
-        ],
-        Resource = "*"
-      },
+#       {
+#         Sid    = "Allow use of the key to the task executor role (eg. the ECS task)",
+#         Effect = "Allow",
+#         Principal = {
+#           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}"
+#         },
+#         Action = [
+#           "kms:List*",
+#           "kms:Describe*",
+#           "kms:Encrypt",
+#           "kms:Decrypt",
+#           "kms:CreateGrant",
+#           "kms:RevokeGrant",
+#           "kms:ReEncrypt*",
+#           "kms:GenerateDataKey*"
+#         ],
+#         Resource = "*"
+#       },
       {
         Sid    = "Allow access to the key for CloudWatch Logs",
         Effect = "Allow",

@@ -81,49 +81,49 @@ resource "aws_lb_listener_rule" "app_http_forward" {
   }
 }
 
-resource "aws_lb_listener" "alb_listener_https" {
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+# resource "aws_lb_listener" "alb_listener_https" {
+#   count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+#
+#   load_balancer_arn = aws_lb.alb[count.index].arn
+#   port              = 443
+#   protocol          = "HTTPS"
+#   certificate_arn   = count.index == 0 ? var.certificate_arn : var.mtls_certificate_arn
+#   mutual_authentication {
+#     mode = count.index == 1 ? "passthrough" : "off"
+#   }
+#
+#   # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
+#   ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+#
+#   default_action {
+#     type = "fixed-response"
+#
+#     fixed_response {
+#       content_type = "text/plain"
+#       message_body = "Not Found"
+#       status_code  = "404"
+#     }
+#   }
+# }
 
-  load_balancer_arn = aws_lb.alb[count.index].arn
-  port              = 443
-  protocol          = "HTTPS"
-  certificate_arn   = count.index == 0 ? var.certificate_arn : var.mtls_certificate_arn
-  mutual_authentication {
-    mode = count.index == 1 ? "passthrough" : "off"
-  }
-
-  # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
-  ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Not Found"
-      status_code  = "404"
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "app_https_forward" {
-  # we need an identical https forward, with mtls enabled
-  # so we piggy back off existing and just spin up two when the api sets this true
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
-
-  listener_arn = aws_lb_listener.alb_listener_https[count.index].arn
-  priority     = 91
-
-  action {
-    type             = "forward"
-    target_group_arn = count.index == 0 ? aws_lb_target_group.app_tg[0].arn : aws_lb_target_group.mtls_tg[0].arn
-  }
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-}
+# resource "aws_lb_listener_rule" "app_https_forward" {
+#   # we need an identical https forward, with mtls enabled
+#   # so we piggy back off existing and just spin up two when the api sets this true
+#   count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+# 
+#   listener_arn = aws_lb_listener.alb_listener_https[count.index].arn
+#   priority     = 91
+# 
+#   action {
+#     type             = "forward"
+#     target_group_arn = count.index == 0 ? aws_lb_target_group.app_tg[0].arn : aws_lb_target_group.mtls_tg[0].arn
+#   }
+#   condition {
+#     path_pattern {
+#       values = ["/*"]
+#     }
+#   }
+# }
 
 # these get referenced from the service/main file so we want two distinct ones for easier referencing by app_tg vs mtls_tg names
 resource "aws_lb_target_group" "app_tg" {

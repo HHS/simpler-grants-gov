@@ -95,7 +95,8 @@ module "database" {
   instance_count                 = local.database_config.instance_count
   max_capacity                   = local.database_config.max_capacity
   min_capacity                   = local.database_config.min_capacity
-  enable_http_endpoint           = local.database_config.enable_http_endpoint
+#   enable_http_endpoint           = local.database_config.enable_http_endpoint
+  enable_http_endpoint           = true
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
