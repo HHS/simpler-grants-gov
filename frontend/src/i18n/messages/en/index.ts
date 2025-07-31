@@ -476,10 +476,16 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
+  Developer: {
+    pageTitle: "Developer Portal | Simpler.Grants.gov",
+    pageDescription: "Tools and resources for developers working on Simpler.Grants.gov",
+    description: "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+  },
   Header: {
     navLinks: {
       about: "About",
       community: "Community",
+      developer: "Developer Portal",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",
