@@ -40,12 +40,10 @@ def minimal_valid_sflll_v2_0() -> dict:
             }
         },
         "signature_block": {
-            "signature": "Bob",
             "name": {
                 "first_name": "Bob",
                 "last_name": "Brown",
             },
-            "signed_date": "2025-01-01",
         },
     }
 
@@ -186,9 +184,7 @@ def test_sflll_2_0_empty_objects(minimal_valid_sflll_v2_0):
         "$.reporting_entity.applicant_reporting_entity",
         "$.lobbying_registrant.individual",
         "$.individual_performing_service.individual",
-        "$.signature_block.signature",
         "$.signature_block.name",
-        "$.signature_block.signed_date",
     ]
     validate_required(data, EXPECTED_REQUIRED_FIELDS)
 

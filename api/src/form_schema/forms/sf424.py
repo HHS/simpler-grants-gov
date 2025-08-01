@@ -8,7 +8,6 @@ FORM_JSON_SCHEMA = {
     "required": [
         "submission_type",
         "application_type",
-        "date_received",
         "organization_name",
         "employer_taxpayer_identification_number",
         "sam_uei",
@@ -38,8 +37,6 @@ FORM_JSON_SCHEMA = {
         "authorized_representative",
         "authorized_representative_phone_number",
         "authorized_representative_email",
-        "aor_signature",
-        "date_signed",
     ],
     # Conditional validation rules for SF424
     "allOf": [
