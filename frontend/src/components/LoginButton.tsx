@@ -6,7 +6,10 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "./USWDSIcon";
 
-export function LoginLink({ children, className }: PropsWithChildren) {
+export function LoginLink({
+  children,
+  className,
+}: { className?: string } & PropsWithChildren) {
   return (
     <a
       href={LOGIN_URL}
@@ -30,19 +33,19 @@ export function LoginButton({
   navLoginLinkText: string;
 }) {
   return (
-    <Button
-      type="button"
-      className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-      data-testid="sign-in-button"
-    >
-      <LoginLink className="padding-0 text-no-underline text-primary-dark display-flex">
+    <LoginLink className="padding-0 text-no-underline text-primary-dark display-flex">
+      <Button
+        type="button"
+        className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
+        data-testid="sign-in-button"
+      >
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
           name="login"
           key="login-link-icon"
         />
         {navLoginLinkText}
-      </LoginLink>
-    </Button>
+      </Button>
+    </LoginLink>
   );
 }
