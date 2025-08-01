@@ -754,6 +754,7 @@ export const messages = {
       closeDate: "Close date",
       costSharing: "Cost sharing",
       topLevelAgency: "Top level agency",
+      andOr: "Query and/or operator",
     },
     editModal: {
       loading: "Updating",
