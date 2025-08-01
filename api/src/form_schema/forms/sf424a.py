@@ -338,15 +338,14 @@ FORM_UI_SCHEMA = [
         "label": "Section A - Budget summary",
         "children": [
             {
-                "type": "field",
+                "type": "multiField",
+                "name": "Budget424aSectionA",
                 "widget": "Budget424aSectionA",
-                "definition": "/properties/activity_line_items",
-            },
-            {
-                "type": "field",
-                "widget": "Budget424aTotalBudgetSummary",
-                "definition": "/properties/total_budget_summary",
-            },
+                "definition": [
+                    "/properties/activity_line_items",
+                    "/properties/total_budget_summary"
+                ]
+            }
         ],
     },
     {

@@ -20,56 +20,63 @@ function Budget424aSectionA<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
->({ id, schema, value = [], rawErrors }: UswdsWidgetProps<T, S, F>) {
-  const { description } = schema as S;
-  const schemaItems = schema.items as {
-    properties: {
-      activity_title: object;
-      assistance_listing_number: object;
-      budget_summary: {
-        allOf: [
-          {
-            properties: {
-              federal_estimated_unobligated_amount: { allOf: [object] };
-              non_federal_estimated_unobligated_amount: { allOf: [object] };
-              federal_new_or_revised_amount: { allOf: [object] };
-              non_federal_new_or_revised_amount: { allOf: [object] };
-              total_amount: { allOf: [object] };
-            };
-          },
-        ];
-      };
-    };
-  };
+>({ id, value = [], rawErrors }: UswdsWidgetProps<T, S, F>) {
   const errors = rawErrors as FormValidationWarning[];
 
-  const fieldSchema = {
-    maxLength: 14,
-    pattern: "^\\d*([.]\\d{2})?$",
-  };
   // TODO: use json pointer / ref for this
-  const activityTitleSchema = schemaItems.properties.activity_title;
-  const assistanceListingNumberSchema =
-    schemaItems.properties.assistance_listing_number;
-  const budgetSummarySchema = schemaItems.properties.budget_summary;
-  const federalEstimatedUnobligatedAmountSchema =
-    budgetSummarySchema.allOf[0].properties.federal_estimated_unobligated_amount
-      .allOf[0];
-  const nonFederalEstimatedUnobligatedAmountSchema =
-    budgetSummarySchema.allOf[0].properties
-      .non_federal_estimated_unobligated_amount.allOf[0];
-  const federalnewOrRevisedAmountSchema =
-    budgetSummarySchema.allOf[0].properties.federal_new_or_revised_amount
-      .allOf[0];
-  const nonFederalNewOrRevisedAmountSchema =
-    budgetSummarySchema.allOf[0].properties.non_federal_new_or_revised_amount
-      .allOf[0];
-  const totalAmountSchema =
-    budgetSummarySchema.allOf[0].properties.total_amount.allOf[0];
+  const activityTitleSchema = {
+    type: "string" as const,
+    minLength: 0,
+    maxLength: 120,
+  };
+  const assistanceListingNumberSchema = {
+    type: "string" as const,
+    minLength: 0,
+    maxLength: 15,
+  };
+  const amountSchema = {
+    type: "string" as const,
+    pattern: "^\\d*([.]\\d{2})?$",
+    maxLength: 14,
+  };
+  const federalEstimatedUnobligatedAmountSchema = amountSchema;
+  const nonFederalEstimatedUnobligatedAmountSchema = amountSchema;
+  const federalnewOrRevisedAmountSchema = amountSchema;
+  const nonFederalNewOrRevisedAmountSchema = amountSchema;
+  const totalAmountSchema = amountSchema;
 
   return (
     <div key={id} id={id}>
-      <p>{description}</p>
+      <h3>Instructions</h3>
+      <div style={{ columnCount: 2 }}>
+        <h4>New applications</h4>
+        <p>
+          Leave Columns C and D blank. For each line entry in Columns A and B,
+          enter in Columns E, F, and G the appropriate amounts of funds needed
+          to support the project for the first funding period (usually a year).
+        </p>
+
+        <h4>Supplemental grants and changes to existing grants</h4>
+        <p>
+          Leave Columns C and D blank. In Column E, enter the amount of the
+          increase or decrease of Federal funds and enter in Column F the amount
+          of the increase or decrease of non-Federal funds. In Column G, enter
+          the new total budgeted amount (Federal and non-Federal) which includes
+          the total previous authorized budgeted amounts plus or minus, as
+          appropriate, the amounts shown in Columns E and F. The amount(s) in
+          Column G should not equal the sum of amounts in Columns E and F.
+        </p>
+        <h4>Continuing grant applications</h4>
+        <p>
+          In Columns C and D, enter the estimated amounts of funds that will
+          remain unobligated at the end of the grant funding period only if the
+          Federal grantor agency instructions provide for this. Otherwise, leave
+          these columns blank. In Columns E and F, enter the amounts of funds
+          needed for the upcoming period. The amount(s) in Column G should be
+          the sum of amounts in Columns E and F. Submit these forms before the
+          end of each funding period as required by the grantor agency.
+        </p>
+      </div>
       <Table
         bordered={false}
         className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light"
@@ -190,16 +197,16 @@ function Budget424aSectionA<
               >
                 <TextWidget
                   schema={federalEstimatedUnobligatedAmountSchema}
-                  id={`activity_line_items[${row}]--federal_estimated_unobligated_amount`}
+                  id={`activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`}
                   rawErrors={getErrors({
                     errors,
-                    id: `activity_line_items[${row}]--federal_estimated_unobligated_amount`,
+                    id: `activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`,
                   })}
                   formClassName="margin-top-3 simpler-currency-input-wrapper"
                   inputClassName="minw-10"
                   value={get(
                     value,
-                    `[${row}]federal_estimated_unobligated_amount`,
+                    `[${row}]budget_summary.federal_estimated_unobligated_amount`,
                   )}
                 />
               </td>
@@ -209,16 +216,16 @@ function Budget424aSectionA<
               >
                 <TextWidget
                   schema={nonFederalEstimatedUnobligatedAmountSchema}
-                  id={`activity_line_items[${row}]--non_federal_estimated_unobligated_amount`}
+                  id={`activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`}
                   rawErrors={getErrors({
                     errors,
-                    id: `activity_line_items[${row}]--non_federal_estimated_unobligated_amount`,
+                    id: `activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`,
                   })}
                   formClassName="margin-top-3 simpler-currency-input-wrapper"
                   inputClassName="minw-10"
                   value={get(
                     value,
-                    `[${row}]non_federal_estimated_unobligated_amount`,
+                    `[${row}]budget_summary.non_federal_estimated_unobligated_amount`,
                   )}
                 />
               </td>
@@ -228,14 +235,17 @@ function Budget424aSectionA<
               >
                 <TextWidget
                   schema={federalnewOrRevisedAmountSchema}
-                  id={`activity_line_items[${row}]--federal_new_or_revised_amount`}
+                  id={`activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`}
                   rawErrors={getErrors({
                     errors,
-                    id: `activity_line_items[${row}]--federal_new_or_revised_amount`,
+                    id: `activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`,
                   })}
                   inputClassName="minw-10"
                   formClassName="margin-top-3 simpler-currency-input-wrapper"
-                  value={get(value, `[${row}]federal_new_or_revised_amount`)}
+                  value={get(
+                    value,
+                    `[${row}]budget_summary.federal_new_or_revised_amount`,
+                  )}
                 />
               </td>
               <td
@@ -244,16 +254,16 @@ function Budget424aSectionA<
               >
                 <TextWidget
                   schema={nonFederalNewOrRevisedAmountSchema}
-                  id={`activity_line_items[${row}]--non_federal_new_or_revised_amount`}
+                  id={`activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`}
                   rawErrors={getErrors({
                     errors,
-                    id: `activity_line_items[${row}]--non_federal_new_or_revised_amount`,
+                    id: `activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`,
                   })}
                   inputClassName="minw-10"
                   formClassName="margin-top-3 simpler-currency-input-wrapper"
                   value={get(
                     value,
-                    `[${row}]non_federal_new_or_revised_amount`,
+                    `[${row}]budget_summary.non_federal_new_or_revised_amount`,
                   )}
                 />
               </td>
@@ -269,14 +279,14 @@ function Budget424aSectionA<
                     </div>
                     <TextWidget
                       schema={totalAmountSchema}
-                      id={`activity_line_items[${row}]--total_amount`}
+                      id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrors({
                         errors,
-                        id: `activity_line_items[${row}]--total_amount`,
+                        id: `activity_line_items[${row}]--budget_summary--total_amount`,
                       })}
                       inputClassName="minw-10 margin-top-0 border-2px"
                       formClassName="margin-top-0 simpler-currency-input-wrapper"
-                      value={get(value, `[${row}]total_amount`)}
+                      value={get(value, `[${row}]budget_summary.total_amount`)}
                     />
                   </div>
                 </div>
@@ -300,7 +310,7 @@ function Budget424aSectionA<
                 Sum of column C
               </div>
               <TextWidget
-                schema={fieldSchema}
+                schema={amountSchema}
                 id={
                   "total_budget_summary--federal_estimated_unobligated_amount"
                 }
@@ -318,7 +328,7 @@ function Budget424aSectionA<
                 Sum of column D
               </div>
               <TextWidget
-                schema={fieldSchema}
+                schema={amountSchema}
                 id={
                   "total_budget_summary.non_federal_estimated_unobligated_amount"
                 }
@@ -336,7 +346,7 @@ function Budget424aSectionA<
                 Sum of column E
               </div>
               <TextWidget
-                schema={fieldSchema}
+                schema={amountSchema}
                 id={"total_budget_summary.federal_new_or_revised_amount"}
                 rawErrors={getErrors({
                   errors,
@@ -352,7 +362,7 @@ function Budget424aSectionA<
                 Sum of column F
               </div>
               <TextWidget
-                schema={fieldSchema}
+                schema={amountSchema}
                 id={"total_budget_summary.non_federal_new_or_revised_amount"}
                 rawErrors={getErrors({
                   errors,
@@ -368,7 +378,7 @@ function Budget424aSectionA<
                 Sum of column G
               </div>
               <TextWidget
-                schema={fieldSchema}
+                schema={amountSchema}
                 formClassName="margin-top-0 simpler-currency-input-wrapper"
                 inputClassName="margin-top-0 border-2px"
                 id={"total_budget_summary.total_amount"}

@@ -109,3 +109,21 @@ Sections wrap fields, or other sections:
 }
 
 ```
+
+## Using multiple definitions in a single field
+
+Some widgets require data from more than one field. To add more than one field, use the `multiField` field type:
+
+```
+{
+    "type": "multiField",
+    "name": "Budget424aSectionA",
+    "widget": "Budget424aSectionA",
+    "definition": [
+        "/properties/activity_line_items",
+        "/properties/total_budget_summary"
+    ]
+}
+```
+
+In the widget, the data is available as a combined `value` object.
