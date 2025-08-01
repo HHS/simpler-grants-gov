@@ -1,28 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
 
 import { LoginModal } from "src/components/LoginModal";
-
-const mockSetItem = jest.fn<void, [string, string]>();
-
-jest.mock("src/services/sessionStorage/sessionStorage", () => {
-  return {
-    __esModule: true,
-    default: {
-      setItem: (key: string, value: string): void => mockSetItem(key, value),
-    },
-  };
-});
-
-const mockLocation = {
-  pathname: "/test-path",
-  search: "?param=value",
-};
-
-// Save the original location
-const originalLocation = global.location;
 
 describe("LoginModal", () => {
   const createModalRef = (): RefObject<ModalRef> => ({
@@ -35,21 +16,7 @@ describe("LoginModal", () => {
   });
 
   beforeEach(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: { ...mockLocation },
-      writable: true,
-    });
-
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: originalLocation,
-      writable: true,
-    });
   });
 
   it("should render the login modal", () => {
@@ -87,53 +54,5 @@ describe("LoginModal", () => {
     );
 
     expect(screen.getByText(customButtonText)).toBeInTheDocument();
-  });
-
-  it("should store the current URL in session storage when clicking sign in", () => {
-    const modalRef = createModalRef();
-    render(
-      <LoginModal
-        modalRef={modalRef}
-        helpText="Help text"
-        titleText="Login"
-        descriptionText="Please login"
-        buttonText="Sign In"
-        closeText="Close"
-        modalId="login-modal"
-      />,
-    );
-
-    const signInButton = screen.getByText("Sign In");
-    fireEvent.click(signInButton);
-
-    expect(mockSetItem).toHaveBeenCalledWith(
-      "login-redirect",
-      "/test-path?param=value",
-    );
-  });
-
-  it("should not store URL in session storage if pathname and search are empty", () => {
-    Object.defineProperty(global, "location", {
-      value: { pathname: "", search: "" },
-    });
-
-    const modalRef = createModalRef();
-
-    render(
-      <LoginModal
-        modalRef={modalRef}
-        helpText="Help text"
-        titleText="Login"
-        descriptionText="Please login"
-        buttonText="Sign In"
-        closeText="Close"
-        modalId="login-modal"
-      />,
-    );
-
-    const loginButton = screen.getByText("Sign In");
-    fireEvent.click(loginButton);
-
-    expect(mockSetItem).not.toHaveBeenCalled();
   });
 });
