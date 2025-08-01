@@ -4,6 +4,8 @@
 
 # ALB for an app running in ECS
 resource "aws_lb" "alb" {
+  # checkov:skip=CKV2_AWS_76:No Java in our stack, with the intro of the mTLS and the SOAP it supports we likely won't put this behind a WAF ever
+
   # we need an identical alb, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
   count      = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
