@@ -657,3 +657,21 @@ iframe[id^="ethnio-screener-"] {
     margin-bottom: 1rem;
   }
 }
+
+.simpler-currency-input-wrapper {
+  position: relative;
+  display: inline-block;
+
+  &:before {
+    content: "$";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  input {
+    padding-left: 25px;
+    margin-top: 0 !important;
+  }
+}

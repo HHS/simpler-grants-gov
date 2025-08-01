@@ -119,9 +119,11 @@ export interface UswdsWidgetProps<
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  formClassName?: string;
+  inputClassName?: string;
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[] | [Record<string, unknown>] | undefined;
+  rawErrors?: string[]| FormValidationWarning[] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;

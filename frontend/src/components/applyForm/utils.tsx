@@ -40,6 +40,11 @@ export function buildFormTreeRecursive({
   uiSchema: UiSchema;
 }) {
   let acc: JSX.Element[] = [];
+  // json schema describes arrays with dots, our html uses --
+  const formattedErrors = errors?.map((error) => {
+    error.field = error.field.replace("$.", "").replace(".", "--");
+    return error;
+  });
 
   const buildFormTree = (
     uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
@@ -65,7 +70,7 @@ export function buildFormTreeRecursive({
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
-            errors,
+            errors: formattedErrors ?? null,
             formData,
           });
           if (field) {
@@ -90,7 +95,7 @@ export function buildFormTreeRecursive({
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
-              errors,
+              errors: formattedErrors ?? null,
               formData,
             });
           }
@@ -250,9 +255,14 @@ export const buildField = ({
   let fieldSchema = {} as RJSFSchema;
   let name = "";
   let value = "" as string | number | object | undefined;
+  let rawErrors: string[] | FormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
     name = uiFieldObject.name ? uiFieldObject.name : "";
+    if (!name) {
+      console.error("name misssing from multiField definition");
+      throw new Error("Could not build field");
+    }
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
       .reduce((acc, schema) => ({ ...acc, ...schema }), {});
@@ -268,30 +278,38 @@ export const buildField = ({
         (acc, value) => ({ ...acc, ...value }),
         {},
       );
-  } else if (typeof definition === "string") {
+    // multifield needs to retain field location for errors.
+    rawErrors = definition
+      .map((def) => {
+        const defName = getNameFromDef({ definition: def, schema });
+        return filter(
+          errors,
+          (warning) => warning.field.indexOf(defName) !== -1,
+        ) as unknown as string[];
+      })
+      .flat();
+    } else if (typeof definition === "string") {
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
-
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
+    rawErrors = formatFieldWarnings(
+      errors,
+      name,
+      typeof fieldSchema.type === "string"
+        ? fieldSchema.type
+        : Array.isArray(fieldSchema.type)
+          ? (fieldSchema.type[0] ?? "")
+          : "",
+    );
   }
-  if (!name || !fieldSchema) {
+  // fields that have no definition won't have a name, but will havea schema
+  if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
   // should filter and match warnings to field earlier in the process
-  const rawErrors = errors
-    ? formatFieldWarnings(
-        errors,
-        name,
-        typeof fieldSchema.type === "string"
-          ? fieldSchema.type
-          : Array.isArray(fieldSchema.type)
-            ? (fieldSchema.type[0] ?? "")
-            : "",
-      )
-    : [];
 
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
@@ -338,16 +356,14 @@ export const buildField = ({
   });
 };
 
-const fieldNameToWarningName = (fieldName: string): string => {
-  const warningName = fieldName.replace(/--/g, ".");
-  return `$.${warningName}`;
-};
-
 const formatFieldWarnings = (
-  warnings: FormValidationWarning[],
+  warnings: FormValidationWarning[] | null,
   name: string,
   type: string,
-) => {
+): string[] => {
+  if (!warnings || warnings.length < 1) {
+    return [];
+  }
   if (type === "array") {
     const data = warnings.reduce(
       (acc, item) => {
@@ -357,11 +373,11 @@ const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
-    return flatFormDataToArray(name, data) as unknown as [""];
+    return flatFormDataToArray(name, data) as unknown as [];
   }
   const warningsforField = filter(
     warnings,
-    (warning) => fieldNameToWarningName(name) === warning.field,
+    (warning) => warning.field.indexOf(name) !== -1,
   );
   return warningsforField.map((warning) => {
     return warning.message;

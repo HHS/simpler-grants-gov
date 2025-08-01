@@ -36,6 +36,8 @@ function TextWidget<
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
+  formClassName,
+  inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
@@ -90,7 +92,11 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup
+      className={formClassName}
+      error={error}
+      key={`wrapper-for-${id}`}
+    >
       <FieldLabel
         idFor={id}
         title={title}
@@ -104,6 +110,7 @@ function TextWidget<
       )}
       <TextInput
         data-testid={id}
+        className={inputClassName}
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
         id={id}

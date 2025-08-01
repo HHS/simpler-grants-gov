@@ -55,6 +55,7 @@ const ApplyForm = ({
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
+
   try {
     fields = buildFormTreeRecursive({
       errors: saved ? validationWarnings : null,
