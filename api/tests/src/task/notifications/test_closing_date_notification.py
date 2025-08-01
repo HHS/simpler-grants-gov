@@ -124,14 +124,15 @@ class TestClosingDateNotification:
         assert notification_logs[0].notification_sent is True
 
         assert len(notification_opportunity_logs) == 2
-        assert notification_opportunity_logs[0].opportunity_id == opportunity.opportunity_id
-        assert notification_opportunity_logs[0].user_id == user_with_email.user_id
 
-        assert (
-            notification_opportunity_logs[1].opportunity_id
-            == opportunity_within_window.opportunity_id
-        )
-        assert notification_opportunity_logs[1].user_id == user_with_email.user_id
+        assert set([log.opportunity_id for log in notification_opportunity_logs]) == {
+            opportunity.opportunity_id,
+            opportunity_within_window.opportunity_id,
+        }
+        assert set([log.user_id for log in notification_opportunity_logs]) == {
+            opportunity.user_id,
+            opportunity_within_window.user_id,
+        }
 
         # Verify email was sent via Pinpoint
         mock_responses = _get_mock_responses()
