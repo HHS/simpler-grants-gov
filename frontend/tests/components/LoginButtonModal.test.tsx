@@ -2,7 +2,6 @@ import userEvent from "@testing-library/user-event";
 import { LOGIN_URL } from "src/constants/auth";
 import { render, screen } from "tests/react-utils";
 
-import Header from "src/components/Header";
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
@@ -39,7 +38,7 @@ describe("LoginButtonModal", () => {
   });
 
   it("displays modal when clicked", async () => {
-    render(<Header />);
+    render(<LoginButtonModal navLoginLinkText="Sign in" />);
 
     const loginButton = screen.getByRole("button", { name: /Sign in/i });
     expect(loginButton).toBeInTheDocument();
