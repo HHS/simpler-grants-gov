@@ -1,4 +1,3 @@
-import { ExternalRoutes } from "src/constants/routes";
 import { render, screen } from "tests/react-utils";
 
 import Footer from "src/components/Footer";
