@@ -4,28 +4,41 @@ import { mockOpportunity } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SearchResultsTable } from "src/components/search/SearchResultsTable";
-
-const mockFetchSavedOpportunities = jest.fn();
+import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  fetchSavedOpportunities: () => mockFetchSavedOpportunities() as unknown,
+jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
+  OpportunitySaveUserControl: jest
+    .fn()
+    .mockImplementation(
+      ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
+        return (
+          <div
+            data-testid={`opportunity-save-control-${opportunityId}`}
+            data-opportunity-id={opportunityId}
+            data-type={type || "button"}
+          >
+            {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
+          </div>
+        );
+      },
+    ),
 }));
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
 describe("SearchResultsTable", () => {
-  beforeEach(() =>
-    mockFetchSavedOpportunities.mockResolvedValue([
-      { opportunity_id: "0bfdd67c-e58a-4005-bfd1-12cfe592b17e" },
-    ]),
+  const mockOpportunitySaveUserControl = jest.mocked(
+    OpportunitySaveUserControl,
   );
+
   afterEach(() => jest.resetAllMocks());
+
   it("passes accessibility test", async () => {
-    const component = await SearchResultsTable({
+    const component = SearchResultsTable({
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -33,34 +46,67 @@ describe("SearchResultsTable", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it("matches snapshot", async () => {
-    const component = await SearchResultsTable({
+
+  it("matches snapshot", () => {
+    const component = SearchResultsTable({
       searchResults: [mockOpportunity],
       page: 1,
     });
     const { container } = render(component);
     expect(container).toMatchSnapshot();
   });
-  it("displays saved search indicator when applicable", async () => {
-    const component = await SearchResultsTable({
-      searchResults: [
-        mockOpportunity,
-        {
-          ...mockOpportunity,
-          opportunity_id: "0bfdd67c-e58a-4005-bfd1-12cfe592b17e",
-        },
-      ],
+
+  it("renders OpportunitySaveUserControl for each opportunity", () => {
+    const opportunities = [
+      mockOpportunity,
+      {
+        ...mockOpportunity,
+        opportunity_id: "second-opportunity-id",
+        opportunity_title: "Second Test Opportunity",
+      },
+    ];
+
+    const component = SearchResultsTable({
+      searchResults: opportunities,
       page: 1,
     });
     render(component);
 
-    const results = screen.getAllByRole("row");
-    expect(results).toHaveLength(3); // first is the header row
-    expect(within(results[1]).queryByText("saved")).not.toBeInTheDocument();
-    expect(within(results[2]).getByText("saved")).toBeInTheDocument();
+    // Verify the mock component was called for each opportunity
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      undefined,
+    );
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "second-opportunity-id", type: "icon" },
+      undefined,
+    );
   });
-  it("displays headings for all columns as expected", async () => {
-    const component = await SearchResultsTable({
+
+  it("renders save control in correct layout structure", () => {
+    const component = SearchResultsTable({
+      searchResults: [mockOpportunity],
+      page: 1,
+    });
+    const { container } = render(component);
+
+    // Check that the wrapper div with new layout classes exists
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const wrapper = container.querySelector(
+      ".margin-y-auto.grid-col-auto.minw-4",
+    );
+    expect(wrapper).toBeInTheDocument();
+
+    // Verify the mock was called
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      undefined,
+    );
+  });
+
+  it("displays headings for all columns as expected", () => {
+    const component = SearchResultsTable({
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -85,10 +131,11 @@ describe("SearchResultsTable", () => {
       screen.getByRole("columnheader", { name: "headings.awardMax" }),
     ).toBeInTheDocument();
   });
+
   // note that values for this test also include the header value - this is a remnant of the responsive experience,
   // Jest doesn't know that these header values should be hidden :shrug:
-  it("displays data for all columns as expected", async () => {
-    const component = await SearchResultsTable({
+  it("displays data for all columns as expected", () => {
+    const component = SearchResultsTable({
       searchResults: [
         {
           ...mockOpportunity,
@@ -110,11 +157,18 @@ describe("SearchResultsTable", () => {
         name: "headings.status statuses.posted",
       }),
     ).toBeInTheDocument();
-    expect(
-      within(results[1]).getByRole("cell", {
-        name: "headings.title Test Opportunity number: OPP-12345",
-      }),
-    ).toBeInTheDocument();
+
+    const titleCell = within(results[1]).getByRole("cell", {
+      name: /headings\.title Test Opportunity number: OPP-12345/,
+    });
+    expect(titleCell).toBeInTheDocument();
+
+    // Verify that the save control component was called for this opportunity
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      undefined,
+    );
+
     expect(
       within(results[1]).getByRole("cell", {
         name: "headings.agency published : Jan 15, 2023 expectedAwards: 1",
@@ -132,8 +186,8 @@ describe("SearchResultsTable", () => {
     ).toBeInTheDocument();
   });
 
-  it("handles display of empty values", async () => {
-    const component = await SearchResultsTable({
+  it("handles display of empty values", () => {
+    const component = SearchResultsTable({
       searchResults: [
         {
           ...mockOpportunity,
@@ -171,8 +225,9 @@ describe("SearchResultsTable", () => {
       }),
     ).toBeInTheDocument();
   });
-  it("displays a proper message when there are no results", async () => {
-    const component = await SearchResultsTable({
+
+  it("displays a proper message when there are no results", () => {
+    const component = SearchResultsTable({
       searchResults: [],
       page: 1,
     });
@@ -183,5 +238,83 @@ describe("SearchResultsTable", () => {
         name: "title",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("renders save controls for multiple opportunities with different IDs", () => {
+    const opportunities = [
+      { ...mockOpportunity, opportunity_id: "opp-1" },
+      { ...mockOpportunity, opportunity_id: "opp-2" },
+      { ...mockOpportunity, opportunity_id: "opp-3" },
+    ];
+
+    const component = SearchResultsTable({
+      searchResults: opportunities,
+      page: 1,
+    });
+    const { container } = render(component);
+
+    // Verify correct number of mock calls
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(3);
+
+    // Verify correct number of wrapper divs
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const wrappers = container.querySelectorAll(
+      ".margin-y-auto.grid-col-auto.minw-4",
+    );
+    expect(wrappers).toHaveLength(3);
+
+    // Verify each opportunity ID was called
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "opp-1", type: "icon" },
+      undefined,
+    );
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "opp-2", type: "icon" },
+      undefined,
+    );
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "opp-3", type: "icon" },
+      undefined,
+    );
+  });
+
+  it("passes correct opportunity ID to each save control component", () => {
+    const opportunities = [
+      { ...mockOpportunity, opportunity_id: "unique-id-1" },
+      { ...mockOpportunity, opportunity_id: "unique-id-2" },
+    ];
+
+    const component = SearchResultsTable({
+      searchResults: opportunities,
+      page: 1,
+    });
+    render(component);
+
+    // Check that the mock was called with the correct parameters
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
+
+    // Check that the mock was called with the correct opportunity IDs
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "unique-id-1", type: "icon" },
+      undefined,
+    );
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: "unique-id-2", type: "icon" },
+      undefined,
+    );
+  });
+
+  it("passes type='icon' to OpportunitySaveUserControl components", () => {
+    const component = SearchResultsTable({
+      searchResults: [mockOpportunity],
+      page: 1,
+    });
+    render(component);
+
+    // Verify that type="icon" was passed to the component
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      undefined,
+    );
   });
 });
