@@ -1,6 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get } from "lodash";
+import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   ApplicationFormDetail,
@@ -9,13 +9,17 @@ import {
 
 import { JSX } from "react";
 
+import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
+  SchemaField,
   UiSchema,
   UiSchemaField,
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
+import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import RadioWidget from "./widgets/RadioWidget";
@@ -35,6 +39,11 @@ export function buildFormTreeRecursive({
   uiSchema: UiSchema;
 }) {
   let acc: JSX.Element[] = [];
+  // json schema describes arrays with dots, our html uses --
+  const formattedErrors = errors?.map((error) => {
+    error.field = error.field.replace("$.", "").replace(".", "--");
+    return error;
+  });
 
   const buildFormTree = (
     uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
@@ -60,7 +69,7 @@ export function buildFormTreeRecursive({
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
-            errors,
+            errors: formattedErrors ?? null,
             formData,
           });
           if (field) {
@@ -85,7 +94,7 @@ export function buildFormTreeRecursive({
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
-              errors,
+              errors: formattedErrors ?? null,
               formData,
             });
           }
@@ -125,29 +134,69 @@ export const determineFieldType = ({
     return "Checkbox";
   } else if (fieldSchema.maxLength && fieldSchema.maxLength > 255) {
     return "TextArea";
+  } else if (fieldSchema.type === "array") {
+    return "Select";
   }
   return "Text";
 };
 
 // either schema or definition is required, and schema fields take precedence
 export const getFieldSchema = ({
-  uiFieldObject,
+  definition,
+  schema,
   formSchema,
 }: {
-  uiFieldObject: UiSchemaField;
+  definition: `/properties/${string}` | undefined;
+  schema: SchemaField | undefined;
   formSchema: RJSFSchema;
 }): RJSFSchema => {
-  const { definition, schema } = uiFieldObject;
   if (definition && schema) {
     return {
-      ...getSchemaObjectFromPointer(formSchema, definition),
+      ...(getByPointer(formSchema, definition) as object),
       ...schema,
     } as RJSFSchema;
   } else if (definition) {
-    return getSchemaObjectFromPointer(formSchema, definition) as RJSFSchema;
+    return getByPointer(formSchema, definition) as RJSFSchema;
   }
   return schema as RJSFSchema;
 };
+
+export const getNameFromDef = ({
+  definition,
+  schema,
+}: {
+  definition: `/properties/${string}` | undefined;
+  schema: SchemaField | undefined;
+}) => {
+  return definition
+    ? definition.split("/")[definition.split("/").length - 1]
+    : typeof schema === "object" &&
+        schema !== null &&
+        "title" in schema &&
+        typeof (schema as { title?: string }).title === "string"
+      ? ((schema as { title?: string }).title as string).replace(/ /g, "-")
+      : "untitled";
+};
+
+// new, not used in multifield
+export const getFieldName = ({
+  definition,
+  schema,
+}: {
+  definition?: string;
+  schema?: SchemaField;
+}): string => {
+  if (definition) {
+    const definitionParts = definition.split("/");
+    return definitionParts
+      .filter((part) => part && part !== "properties")
+      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+  }
+  return (schema?.title ?? "untitled").replace(/\s/g, "-");
+};
+
+export const getFieldPath = (fieldName: string) =>
+  `/${fieldName.replace(/--/g, "/")}`;
 
 const widgetComponents: Record<
   WidgetTypes,
@@ -158,6 +207,33 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionA(widgetProps),
+  Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionB(widgetProps),
+};
+
+const getByPointer = (target: object, path: string): unknown => {
+  if (!Object.keys(target).length) {
+    return;
+  }
+  try {
+    return getSchemaObjectFromPointer(target, path);
+  } catch (e) {
+    // this is not ideal, but it seems like the desired behavior is to return undefined if the
+    // path is not found on the target, and the library throws an error instead
+    if ((e as Error).message.includes("Invalid reference token:")) {
+      return undefined;
+    }
+    console.error("error referencing schema path", e, target, path);
+    throw e;
+  }
+};
+
+// this is going to need to get much more complicated to figure out if
+// nested and conditionally required fields are required
+const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
+  return (formSchema.required ?? []).includes(fieldName);
 };
 
 export const buildField = ({
@@ -171,21 +247,86 @@ export const buildField = ({
   formData: object;
   uiFieldObject: UiSchemaField;
 }) => {
-  const { definition, schema } = uiFieldObject;
-  const fieldSchema = getFieldSchema({ uiFieldObject, formSchema });
-  const name = definition
-    ? definition.split("/")[definition.split("/").length - 1]
-    : (schema?.title ?? "untitled").replace(" ", "-");
+  const { definition, schema, type: fieldType } = uiFieldObject;
 
-  const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
-  const value = get(formData, name) as string | number | undefined;
+  let fieldSchema = {} as RJSFSchema;
+  let name = "";
+  let value = "" as string | number | object | undefined;
+  let rawErrors: string[] | FormValidationWarning[] = [];
+
+  if (fieldType === "multiField" && definition && Array.isArray(definition)) {
+    name = uiFieldObject.name ? uiFieldObject.name : "";
+    if (!name) {
+      console.error("name misssing from multiField definition");
+      throw new Error("Could not build field");
+    }
+    fieldSchema = definition
+      .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
+      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+    value = definition
+      .map((def) => {
+        const defName = getNameFromDef({ definition: def, schema });
+        const result = get(formData, defName) as unknown;
+        return typeof result === "object" && result !== null
+          ? (result as Record<string, unknown>)
+          : {};
+      })
+      .reduce<Record<string, unknown>>(
+        (acc, value) => ({ ...acc, ...value }),
+        {},
+      );
+    // multifield needs to retain field location for errors.
+    rawErrors = definition
+      .map((def) => {
+        const defName = getNameFromDef({ definition: def, schema });
+        return filter(
+          errors,
+          (warning) => warning.field.indexOf(defName) !== -1,
+        ) as unknown as string[];
+      })
+      .flat();
+  } else if (typeof definition === "string") {
+    fieldSchema = getFieldSchema({ definition, schema, formSchema });
+    name = getFieldName({ definition, schema });
+    const path = getFieldPath(name);
+    value = getByPointer(formData, path) as string | number | undefined;
+    rawErrors = formatFieldWarnings(
+      errors,
+      name,
+      typeof fieldSchema.type === "string"
+        ? fieldSchema.type
+        : Array.isArray(fieldSchema.type)
+          ? (fieldSchema.type[0] ?? "")
+          : "",
+    );
+  }
+  // fields that have no definition won't have a name, but will havea schema
+  if ((!name || !fieldSchema) && definition) {
+    console.error("no field name or schema for: ", definition);
+    throw new Error("Could not build field");
+  }
+
+  // should filter and match warnings to field earlier in the process
+
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
   const disabled = fieldSchema.type === "null";
   let options = {};
+  let enums: unknown[] = [];
   if (type === "Select") {
-    const enums = fieldSchema.enum ? fieldSchema.enum : [];
+    if (fieldSchema.type === "array") {
+      if (
+        fieldSchema.items &&
+        typeof fieldSchema.items === "object" &&
+        "enum" in fieldSchema.items &&
+        Array.isArray((fieldSchema.items as { enum?: unknown[] }).enum)
+      ) {
+        enums = (fieldSchema.items as { enum?: unknown[] }).enum ?? [];
+      }
+    } else {
+      enums = fieldSchema.enum ?? [];
+    }
     options = {
       enumOptions: enums.map((label) => ({
         value: String(label),
@@ -201,7 +342,8 @@ export const buildField = ({
   return widgetComponents[type]({
     id: name,
     disabled,
-    required: (formSchema.required ?? []).includes(name),
+    // required: (formSchema.required ?? []).includes(name),
+    required: isFieldRequired(name, formSchema),
     minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
     maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
     schema: fieldSchema,
@@ -212,12 +354,27 @@ export const buildField = ({
 };
 
 const formatFieldWarnings = (
-  warnings: FormValidationWarning[],
+  warnings: FormValidationWarning[] | null,
   name: string,
-) => {
+  type: string,
+): string[] => {
+  if (!warnings || warnings.length < 1) {
+    return [];
+  }
+  if (type === "array") {
+    const data = warnings.reduce(
+      (acc, item) => {
+        const field = item.field.replace(/^\$\./, "");
+        acc[field] = item.message;
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    );
+    return flatFormDataToArray(name, data) as unknown as [];
+  }
   const warningsforField = filter(
     warnings,
-    (warning) => `$.${name}` === warning.field,
+    (warning) => warning.field.indexOf(name) !== -1,
   );
   return warningsforField.map((warning) => {
     return warning.message;
@@ -268,110 +425,75 @@ const wrapSection = (
   );
 };
 
-// filters, orders, and nests the form data to match the form schema
-export const shapeFormData = <T extends object>(
-  formData: FormData,
-  formSchema: RJSFSchema,
-): T => {
-  const filteredData = Object.fromEntries(
-    Array.from(formData.keys())
-      .filter((key) => !key.startsWith("$ACTION_"))
-      .map((key) => [
-        key,
-        formData.getAll(key).length > 1
-          ? formData.getAll(key)
-          : formData.get(key),
-      ]),
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
   );
+};
 
-  // arrays from FormData() look like item[0]:value or item[0][key]: value
-  // this accepts flat objects or strings
-  const formDataArrayToArray = (
-    field: string,
-    data: Record<string, unknown>,
-  ) => {
-    const result: Array<Record<string, unknown>> | string[] = [];
-    Object.entries(data).forEach(([key, value]) => {
-      if (!key.includes(field)) return;
-      const match = key.match(/([a-z]+)\[(\d+)\]?\[?([a-z]+)?]/);
-      if (!match?.length) return;
-      const dataField = match[1];
-      if (dataField !== field) return;
-      const dataIndex = Number(match[2]);
-      if (Number.isNaN(dataIndex)) return;
-      const dataItem = match[3];
-      if (dataItem) {
-        if (result[dataIndex] && typeof result[dataIndex] === "object") {
-          result[dataIndex][dataItem] = value;
-        } else {
-          result[dataIndex] = { [dataItem]: value };
-        }
-      } else {
-        result[dataIndex] = value as string;
+// if a nested field contains no defined items, remove it from the data
+// this may not be necessary, as JSON.stringify probably does the same thing
+export const pruneEmptyNestedFields = (structuredFormData: object): object => {
+  return Object.entries(structuredFormData).reduce(
+    (acc, [key, value]) => {
+      if (!isBasicallyAnObject(value)) {
+        acc[key] = value;
+        return acc;
       }
-    });
-    return result;
-  };
-
-  const shapeData = (
-    schema: RJSFSchema,
-    data: Record<string, unknown>,
-  ): Record<string, unknown> => {
-    const result: Record<string, unknown> = {};
-
-    if (schema.properties) {
-      for (const key of Object.keys(schema.properties)) {
-        if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "object"
-        ) {
-          result[key] = shapeData(
-            schema.properties[key] as RJSFSchema,
-            (data[key] as Record<string, unknown>) || data,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "array" &&
-          typeof data === "object"
-        ) {
-          const arrayData = formDataArrayToArray(key, data);
-          result[key] = (arrayData as unknown[]).map((item) =>
-            typeof item === "object" &&
-            schema.properties &&
-            typeof schema.properties[key] !== "boolean" &&
-            schema.properties[key].items
-              ? shapeData(
-                  schema.properties[key].items as RJSFSchema,
-                  item as Record<string, unknown>,
-                )
-              : item,
-          );
-        } else if (
-          typeof schema.properties[key] !== "boolean" &&
-          schema.properties[key].type === "boolean" &&
-          typeof data === "object"
-        ) {
-          // if the schema is a boolean, we need to check if the data has a value
-          if (data[key] === "true" || data[key] === true) {
-            result[key] = true;
-          } else if (data[key] === "false" || data[key] === false) {
-            result[key] = false;
-          } else {
-            result[key] = undefined; // or some default value
-          }
-          // if the array is flat, just return the values
-        } else {
-          if (data[key]) {
-            result[key] = data[key];
-          }
-        }
+      const isEmptyObject = Object.values(value as object).every(
+        (nestedValue) => !nestedValue,
+      );
+      if (isEmptyObject) {
+        return acc;
       }
-    }
+      const pruned = pruneEmptyNestedFields(value as object);
+      acc[key] = pruned;
+      return acc;
+    },
+    {} as { [key: string]: unknown },
+  );
+};
 
-    return result;
-  };
+// filters, orders, and nests the form data to match the form schema
+export const shapeFormData = <T extends object>(formData: FormData): T => {
+  formData.delete("$ACTION_REF_1");
+  formData.delete("$ACTION_1:0");
+  formData.delete("$ACTION_1:1");
+  formData.delete("$ACTION_REF_1");
+  formData.delete("$ACTION_KEY");
+  formData.delete("apply-form-button");
 
-  return shapeData(formSchema, filteredData) as T;
+  const structuredFormData = formDataToObject(formData, {
+    delimiter: "--",
+  });
+  return pruneEmptyNestedFields(structuredFormData) as T;
+};
+
+// arrays from the html look like field_[row]_item
+const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
+  return Object.entries(data).reduce(
+    (values: Array<Record<string, unknown>>, CV) => {
+      const value = CV[1];
+      const fieldSplit = CV[0].split(/\[\d+\]\./);
+      const fieldName = fieldSplit[0];
+      const itemName = fieldSplit[1];
+
+      if (fieldName === field && value) {
+        const match = CV[0].match(/[0-9]+/);
+        const arrayNumber = match ? Number(match[0]) : -1;
+        if (!values[arrayNumber]) {
+          values[arrayNumber] = {};
+        }
+        values[arrayNumber][itemName] = value;
+      }
+
+      return values;
+    },
+    [] as Array<Record<string, unknown>>,
+  );
 };
 
 // the application detail contains an empty array for the form response if no

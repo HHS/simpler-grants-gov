@@ -19,10 +19,10 @@ type ApplyFormResponse = {
 };
 
 export async function handleFormAction(
-  _prevState: ApplyFormResponse,
+  prevState: ApplyFormResponse,
   formData: FormData,
 ) {
-  const { formId, applicationId } = _prevState;
+  const { formId, applicationId } = prevState;
   const session = await getSession();
   if (!session || !session.token) {
     return {
@@ -44,10 +44,10 @@ export async function handleFormAction(
       saved: true,
     };
   }
-  const applicationFormData = shapeFormData<ApplicationResponseDetail>(
-    formData,
-    formSchema,
-  );
+
+  // this generic typing isn't correct - we'll end up with a nested object
+  const applicationFormData =
+    shapeFormData<ApplicationResponseDetail>(formData);
 
   const saveSuccess = await handleSave(
     applicationFormData,

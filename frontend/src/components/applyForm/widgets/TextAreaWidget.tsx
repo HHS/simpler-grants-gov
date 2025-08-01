@@ -63,7 +63,16 @@ function TextAreaWidget<
     <FormGroup error={error} key={`wrapper-for-${id}`}>
       <FieldLabel idFor={id} title={title} required={required} />
 
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {" "}
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : Object.values(rawErrors[0])
+                .map((value) => value)
+                .join(",")}
+        </ErrorMessage>
+      )}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

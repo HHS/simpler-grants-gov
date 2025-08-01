@@ -20,7 +20,7 @@ describe("validateFormData", () => {
       required: ["name"],
     };
 
-    const data = shapeFormData(formData, schema);
+    const data = shapeFormData(formData);
 
     expect(validateJsonBySchema(data, schema)).toBe(false);
   });
@@ -103,13 +103,12 @@ describe("validateFormData", () => {
         "/0/definition",
       );
       expect(schemaErrors && schemaErrors[0]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z0-9_]+$"',
+        // eslint-disable-next-line
+        `must match pattern \"^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$\"`,
       );
-      expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch(
-        "/1/definition",
-      );
+      expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch("/0/type");
       expect(schemaErrors && schemaErrors[7]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z0-9_]+$"',
+        "must be equal to one of the allowed values",
       );
     });
   });

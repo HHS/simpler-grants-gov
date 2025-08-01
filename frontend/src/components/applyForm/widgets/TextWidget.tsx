@@ -36,6 +36,8 @@ function TextWidget<
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
+  formClassName,
+  inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
@@ -46,6 +48,7 @@ function TextWidget<
     type,
     examples,
     default: defaultValue,
+    pattern,
   } = schema as S;
 
   let inputValue: string | number | undefined;
@@ -89,7 +92,11 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup
+      className={formClassName}
+      error={error}
+      key={`wrapper-for-${id}`}
+    >
       <FieldLabel
         idFor={id}
         title={title}
@@ -97,10 +104,13 @@ function TextWidget<
         description={description}
       />
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+        <ErrorMessage id={`error-for-${id}`}>
+          {String(rawErrors[0])}
+        </ErrorMessage>
       )}
       <TextInput
         data-testid={id}
+        className={inputClassName}
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
         id={id}
@@ -119,6 +129,7 @@ function TextWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         validationStatus={error ? "error" : undefined}
+        pattern={pattern || undefined}
       />
       {Array.isArray(examples) && (
         <datalist

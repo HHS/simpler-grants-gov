@@ -55,6 +55,7 @@ const ApplyForm = ({
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   let fields: JSX.Element[] = [];
+
   try {
     fields = buildFormTreeRecursive({
       errors: saved ? validationWarnings : null,
@@ -63,6 +64,7 @@ const ApplyForm = ({
       uiSchema,
     });
   } catch (e) {
+    console.error(e);
     return (
       <Alert type="error" heading="Error" headingLevel="h4">
         Error rendering form

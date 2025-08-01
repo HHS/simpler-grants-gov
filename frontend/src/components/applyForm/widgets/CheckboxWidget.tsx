@@ -51,7 +51,7 @@ function CheckboxWidget<
     (event: FocusEvent<HTMLInputElement>) => onFocus(id, event.target.checked),
     [onFocus, id],
   );
-  const description = options.description ?? schema.description;
+  const description = options?.description ?? schema.description;
 
   const label = required ? (
     <>
