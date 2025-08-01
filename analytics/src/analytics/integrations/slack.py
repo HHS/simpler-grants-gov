@@ -1,4 +1,3 @@
-# ruff: noqa: T201
 """Integrate with Slack to post messages and get channel information."""
 
 import functools
