@@ -55,8 +55,7 @@ export type WidgetTypes =
   | "Radio"
   | "Select"
   | "Budget424aSectionA"
-  | "Budget424aSectionB"
-  | "Budget424aTotalBudgetSummary";
+  | "Budget424aSectionB";
 
 export type UiSchemaField = {
   type: "field" | "multiField";
@@ -123,7 +122,7 @@ export interface UswdsWidgetProps<
   inputClassName?: string;
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[]| FormValidationWarning[] | undefined;
+  rawErrors?: string[] | FormValidationWarning[] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;

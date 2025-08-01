@@ -6,7 +6,10 @@ import { get } from "lodash";
 
 import { Table } from "@trussworks/react-uswds";
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
+import {
+  FormValidationWarning,
+  UswdsWidgetProps,
+} from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
@@ -20,7 +23,7 @@ function Budget424aSectionB<
 >({ id, schema, value = [], rawErrors }: UswdsWidgetProps<T, S, F>) {
   const { description } = schema as S;
 
-  const errors = rawErrors as [Record<string, unknown>];
+  const errors = rawErrors as FormValidationWarning[];
 
   const fieldSchema = {
     maxLength: 14,
@@ -55,8 +58,7 @@ function Budget424aSectionB<
                   id={`activity_line_items[${row}].budget_categories.personnel_amount`}
                   rawErrors={getErrors({
                     errors,
-                    row,
-                    key: "personnel_amount",
+                    id: `activity_line_items[${row}].budget_categories.personnel_amount`,
                   })}
                   value={get(
                     value,
@@ -73,25 +75,16 @@ function Budget424aSectionB<
 }
 
 export const getErrors = ({
-  key,
-  row,
   errors,
+  id,
 }: {
-  key: string;
-  row: number;
-  errors: [Record<string, unknown>];
+  id: string;
+  errors: FormValidationWarning[];
 }) => {
-  if (
-    errors.length > 0 &&
-    errors.length >= row &&
-    errors[row] &&
-    Object.prototype.hasOwnProperty.call(errors[row], key) &&
-    typeof errors[row][key] === "string"
-  ) {
-    return [errors[row][key]];
-  } else {
-    return [];
-  }
+  if (!errors) return [];
+  return errors
+    .filter((error) => error.field === id)
+    .map((error) => error.message);
 };
 
 export default Budget424aSectionB;

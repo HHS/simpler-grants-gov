@@ -20,7 +20,6 @@ import {
 } from "./types";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
-import Budget424aTotalBudgetSummary from "./widgets/budget/Budget424aTotalBudgetSummary";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import RadioWidget from "./widgets/RadioWidget";
@@ -212,8 +211,6 @@ const widgetComponents: Record<
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionB(widgetProps),
-  Budget424aTotalBudgetSummary: (widgetProps: UswdsWidgetProps) =>
-    Budget424aTotalBudgetSummary(widgetProps),
 };
 
 const getByPointer = (target: object, path: string): unknown => {
@@ -288,7 +285,7 @@ export const buildField = ({
         ) as unknown as string[];
       })
       .flat();
-    } else if (typeof definition === "string") {
+  } else if (typeof definition === "string") {
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);

@@ -41,7 +41,7 @@ function Budget424aSectionA<
       };
     };
   };
-  const errors = rawErrors as FormValidationWarning[]
+  const errors = rawErrors as FormValidationWarning[];
 
   const fieldSchema = {
     maxLength: 14,
