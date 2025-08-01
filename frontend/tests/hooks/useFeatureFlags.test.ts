@@ -59,7 +59,6 @@ describe("useFeatureFlags", () => {
 
   describe("checkFeatureFlag", () => {
     test("allows checking value of individual flag", () => {
-      // mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
       mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
       const { result } = renderHook(() => useFeatureFlags());
 
@@ -70,7 +69,6 @@ describe("useFeatureFlags", () => {
     });
 
     test("returns false if specified flag is not present", () => {
-      // mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);
       mockUseUser.mockReturnValue({ featureFlags: { someFlag: true } });
       const { result } = renderHook(() => useFeatureFlags());
 
