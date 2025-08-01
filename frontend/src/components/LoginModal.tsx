@@ -66,7 +66,7 @@ export const LoginModalBody = ({
       <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
-          <LoginLink>
+          <LoginLink className="usa-button">
             {buttonText}
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"
