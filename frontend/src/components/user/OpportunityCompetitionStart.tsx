@@ -3,7 +3,7 @@
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { Competition } from "src/types/competitionsResponseTypes";
 
-import StartApplicationModal from "src/components/workspace/StartApplicationModal";
+import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
 export const OpportunityCompetitionStart = ({
   competitions,
@@ -20,7 +20,7 @@ export const OpportunityCompetitionStart = ({
   } else {
     return (
       <>
-        <StartApplicationModal
+        <StartApplicationModalControl
           opportunityTitle={opportunityTitle}
           competitionId={openCompetitions[0].competition_id}
         />
