@@ -130,8 +130,7 @@ class TestClosingDateNotification:
             opportunity_within_window.opportunity_id,
         }
         assert set([log.user_id for log in notification_opportunity_logs]) == {
-            opportunity.user_id,
-            opportunity_within_window.user_id,
+            user_with_email.user_id
         }
 
         # Verify email was sent via Pinpoint
