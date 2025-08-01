@@ -94,13 +94,12 @@ describe("FeatureFlagsManager", () => {
         expires: expect.any(Date) as jest.Expect,
         name: FEATURE_FLAGS_KEY,
         value: JSON.stringify({
-          ...DEFAULT_FEATURE_FLAGS,
           ...expectedFeatureFlags,
         }),
       });
     });
 
-    test("sets cookie with correct combination of default, env var and query param based flags", () => {
+    test("sets cookie with correct from query param based flags", () => {
       mockParseFeatureFlagsFromString.mockImplementation(() => ({
         feature2: true,
       }));
@@ -118,36 +117,72 @@ describe("FeatureFlagsManager", () => {
         expires: expect.any(Date) as jest.Expect,
         name: FEATURE_FLAGS_KEY,
         value: JSON.stringify({
-          feature1: true, // from default
           feature2: true, // from query param
-          feature3: false, // from env var
         }),
       });
     });
 
-    test("resets cookie to server side settings on `reset` value", () => {
+    test("clears cookie correctly on `reset` value", () => {
       const request = new NextRequest(
         new Request("fakeUrl://not.real?_ff=reset"),
         {},
       );
       const mockSet = jest.fn();
-      jest
-        .spyOn(NextResponse.prototype, "cookies", "get")
-        .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
+      const mockDelete = jest.fn();
+      jest.spyOn(NextResponse.prototype, "cookies", "get").mockReturnValue({
+        set: mockSet,
+        delete: mockDelete,
+      } as object as NextResponse["cookies"]);
 
       const featureFlagsManager = new FeatureFlagsManager({
         feature3: "false",
       });
       featureFlagsManager.middleware(request, NextResponse.next());
+
+      expect(mockDelete).toHaveBeenCalledWith({ name: FEATURE_FLAGS_KEY });
+      expect(mockSet).not.toHaveBeenCalled();
+    });
+
+    test("clears cookie correctly if no user unique values need to be tracked", () => {
+      const expectedFeatureFlags = {
+        feature1: false,
+      };
+      mockParseFeatureFlagsFromString.mockImplementation(
+        () => expectedFeatureFlags,
+      );
+      const request = new NextRequest(new Request("fakeUrl://not.real"), {});
+
+      const mockSet = jest.fn();
+      const mockDelete = jest.fn();
+      jest.spyOn(NextResponse.prototype, "cookies", "get").mockReturnValue({
+        set: mockSet,
+        delete: mockDelete,
+      } as object as NextResponse["cookies"]);
+
+      const featureFlagsManager = new FeatureFlagsManager({
+        feature1: "true",
+      });
+      featureFlagsManager.middleware(request, NextResponse.next());
+
       expect(mockSet).toHaveBeenCalledWith({
         expires: expect.any(Date) as jest.Expect,
         name: FEATURE_FLAGS_KEY,
         value: JSON.stringify({
-          feature1: true, // from default
-          feature2: false, // from default
-          feature3: false, // from env var
+          ...expectedFeatureFlags,
         }),
       });
+      expect(mockDelete).not.toHaveBeenCalled();
+
+      mockDelete.mockClear();
+      mockSet.mockClear();
+
+      const featureFlagsManager2 = new FeatureFlagsManager({
+        feature1: "false",
+      });
+      featureFlagsManager2.middleware(request, NextResponse.next());
+
+      expect(mockDelete).toHaveBeenCalledWith({ name: FEATURE_FLAGS_KEY });
+      expect(mockSet).not.toHaveBeenCalled();
     });
   });
 

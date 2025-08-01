@@ -101,7 +101,6 @@ export function requesterForEndpoint({
     return response;
   };
 }
-
 export const fetchOpportunity = cache(
   requesterForEndpoint(fetchOpportunityEndpoint),
 );
