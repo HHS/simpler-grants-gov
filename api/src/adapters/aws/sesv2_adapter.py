@@ -31,11 +31,12 @@ class SESV2Client(BaseSESV2Client):
         self.client = boto3.client("sesv2")
 
     def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
-        response = (
-            self.client.list_suppressed_destinations(StartDate=start_date)
-            if start_date
-            else self.client.list_suppressed_destinations()
-        )
+        request_params = {}
+        if start_date:
+            request_params["StartDate"] = start_date
+
+        response = self.client.list_suppressed_destinations(**request_params)
+
         return SESV2Response(**response)
 
 
