@@ -171,9 +171,7 @@ def validate_application_form(
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
-    # Apply post-population changes to the application form during submit
-    if action == ApplicationAction.SUBMIT and context.config.do_post_population:
-        application_form.application_response = context.json_data
+    application_form.application_response = context.json_data
 
     # Check if the form is required
     is_required = is_form_required(application_form)
