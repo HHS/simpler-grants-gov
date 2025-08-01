@@ -9,6 +9,7 @@ import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   PaginationOrderBy,
   PaginationSortDirection,
+  QueryOperator,
   QueryParamData,
   SearchAPIResponse,
   SearchFetcherActionType,
@@ -70,6 +71,7 @@ export const fakeSavedSearch = {
   filters: fakeSearchFilterRequestBody,
   pagination: arbitrarySearchPagination,
   query: "something to search for",
+  query_operator: "OR" as QueryOperator,
 };
 
 export const fakeSearchQueryParamData: ValidSearchQueryParamData = {

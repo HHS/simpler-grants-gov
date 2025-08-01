@@ -61,6 +61,7 @@ export type SavedSearchQuery = {
   filters: SearchFilterRequestBody;
   pagination: PaginationRequestBody;
   query: string;
+  query_operator: QueryOperator;
 };
 
 // relevant portions of the response payload from fetching a user's saved searches

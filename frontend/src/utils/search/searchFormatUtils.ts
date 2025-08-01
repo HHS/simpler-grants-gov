@@ -224,8 +224,14 @@ export const searchToQueryParams = (
       : {};
 
   const sortby = paginationToSortby(searchRecord?.pagination?.sort_order || []);
-
-  return { ...filters, query: searchRecord.query || "", ...sortby };
+  const withQueryAndSort = {
+    ...filters,
+    query: searchRecord.query || "",
+    ...sortby,
+  };
+  return searchRecord.query && searchRecord.query_operator
+    ? { ...withQueryAndSort, andOr: searchRecord.query_operator }
+    : withQueryAndSort;
 };
 
 // sort of the opposite of buildPagination - translates from backend search pagination object to "sortby" query param

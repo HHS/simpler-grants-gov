@@ -56,6 +56,7 @@ const fakeParamDisplayMapping = {
   closeDate: "closeDate",
   costSharing: "costSharing",
   topLevelAgency: "topLevelAgency",
+  andOr: "andOr",
 };
 
 describe("SavedSearchesList", () => {
