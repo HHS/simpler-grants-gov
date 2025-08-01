@@ -1,7 +1,11 @@
 import logging
 from datetime import datetime
 
+import boto3
+import botocore.client
 from pydantic import BaseModel, Field
+
+from src.adapters.aws.aws_session import is_local_aws
 
 logger = logging.getLogger(__name__)
 
@@ -31,3 +35,4 @@ class MockSESV2Client:
             results = [r for r in results if r.last_update_time >= start_date]
 
         return {"SuppressedDestinationSummaries": [r.model_dump(by_alias=True) for r in results]}
+

@@ -7,9 +7,9 @@ from src.task.notifications.closing_date_notification import ClosingDateNotifica
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from src.task.notifications.search_notification import SearchNotificationTask
+from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmails
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-
 
 @task_blueprint.cli.command(
     "email-notifications", help="Send email notifications for opportunity and search changes"
@@ -29,14 +29,21 @@ class EmailNotificationTask(Task):
         db_session: db.Session,
         search_client: search.SearchClient,
         notification_config: EmailNotificationConfig | None = None,
+        sesv2_client: BaseSESV2Client | None = None,
     ) -> None:
         super().__init__(db_session)
         self.search_client = search_client
         if notification_config is None:
             notification_config = EmailNotificationConfig()
         self.notification_config = notification_config
+        if sesv2_client is None:
+            sesv2_client = BaseSESV2Client()
+        self.sesv2_client = sesv2_client
 
     def run_task(self) -> None:
+        # Run the suppressed email job first
+        SyncSuppressedEmails(db_session=self.db_session).run()
+
         if self.notification_config.enable_opportunity_notifications:
             OpportunityNotificationTask(
                 db_session=self.db_session, notification_config=self.notification_config
