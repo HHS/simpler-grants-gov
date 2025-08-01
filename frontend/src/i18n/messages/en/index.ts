@@ -512,13 +512,22 @@ export const messages = {
     agencyContactCenter: "Grants.gov Program Management Office",
     telephone: "1-800-518-4726",
     returnToTop: "Return to top",
-    linkXTwitter: "X (Twitter)",
-    linkYoutube: "YouTube",
-    linkGithub: "Github",
-    linkRss: "RSS",
-    linkNewsletter: "Newsletter",
-    linkBlog: "Blog",
     logoAlt: "Grants.gov logo",
+    explore: "Explore",
+    links: {
+      home: "Home",
+      search: "Search",
+      vision: "Vision",
+      roadmap: "Roadmap",
+      events: "Events",
+      newsletter: "Newsletter",
+    },
+    feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
+    supportCenter: "Grants.gov Support Center",
+    techSupport:
+      "For technical support, contact: <email>support@grants.gov</email>",
+    grantorSupport:
+      "Grantors, contact the PMO through your <poc>Agency Point of Contact</poc>.",
   },
   Identifier: {
     identity:
