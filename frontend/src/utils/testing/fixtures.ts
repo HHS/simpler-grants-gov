@@ -365,3 +365,77 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
     queryParamValue: "again",
   },
 ];
+
+export const fakeOrganization = {
+  is_organization_owner: true,
+  organization_id: "great id",
+  sam_gov_entity: {
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeCompetition = {
+  closing_date: "1-1-30",
+  competition_forms: [
+    {
+      form: {
+        form_id: "123e4567-e89b-12d3-a456-426614174000",
+        form_json_schema: {
+          properties: {
+            ApplicationNumber: {
+              maxLength: 120,
+              minLength: 1,
+              title: "Application number",
+              type: "number",
+            },
+            Date: {
+              format: "date",
+              title: "Date of application ",
+              type: "string",
+            },
+            Description: {
+              maxLength: 15,
+              minLength: 0,
+              title: "Description for application",
+              type: "string",
+            },
+            Title: {
+              maxLength: 60,
+              minLength: 1,
+              title: "Title",
+              type: "string",
+            },
+          },
+          title: "Test form for testing",
+          type: "object",
+        },
+      },
+      is_required: true,
+    },
+  ],
+  competition_id: "1",
+  competition_info: "info",
+  competition_instructions: [
+    {
+      created_at: "2025-06-13T20:17:16.491Z",
+      download_path:
+        "https://cdn.example.com/competition-instructions/file.pdf",
+      file_name: "competition_instructions.pdf",
+      updated_at: "2025-06-13T20:17:16.491Z",
+    },
+  ],
+  competition_title: "cool competition",
+  contact_info: null,
+  is_open: true,
+  open_to_applicants: ["individual", "organization"],
+  opening_date: "1-1-25",
+  opportunity_assistance_listings: [
+    {
+      assistance_listing_number: "43.012",
+      program_title: "Space Technology",
+    },
+  ],
+  opportunity_id: "2",
+};
