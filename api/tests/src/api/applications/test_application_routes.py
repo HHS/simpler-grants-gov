@@ -46,6 +46,21 @@ SIMPLE_ATTACHMENT_JSON_SCHEMA = {
 
 SIMPLE_ATTACHMENT_RULE_SCHEMA = {"attachment_field": {"gg_validation": {"rule": "attachment"}}}
 
+# Test schemas for post-population
+POST_POPULATION_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "signature_field": {"type": "string"},
+        "date_field": {"type": "string"},
+        "existing_field": {"type": "string"},
+    },
+}
+
+POST_POPULATION_RULE_SCHEMA = {
+    "signature_field": {"gg_post_population": {"rule": "signature"}},
+    "date_field": {"gg_post_population": {"rule": "current_date"}},
+}
+
 
 def test_application_start_success(
     client, enable_factory_create, db_session, user, user_auth_token
