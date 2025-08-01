@@ -27,12 +27,14 @@ class BaseSESV2Client(ABC, metaclass=ABCMeta):
 
 
 class SESV2Client(BaseSESV2Client):
+    def __init__(self) -> None:
+        self.client = boto3.client("sesv2")
+
     def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
-        client = boto3.client("sesv2")
         response = (
-            client.list_suppressed_destinations(StartDate=start_date)
+            self.client.list_suppressed_destinations(StartDate=start_date)
             if start_date
-            else client.list_suppressed_destinations()
+            else self.client.list_suppressed_destinations()
         )
         return SESV2Response(**response)
 
