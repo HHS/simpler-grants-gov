@@ -30,4 +30,5 @@ export const ExternalRoutes = {
   PRIVACY_POLICY: "https://www.grants.gov/privacy-policy",
   USA: "https://www.usa.gov",
   WIKI: "https://wiki.simpler.hhs.gov",
+  GRANTOR_SUPPORT: "https://www.grants.gov/grantors/grantor-help",
 };
