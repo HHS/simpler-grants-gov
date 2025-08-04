@@ -3429,7 +3429,7 @@ def test_application_form_update_with_pre_population(
     assert application_form.application_response["opportunity_number_field"] == "UPDATE-OPP-456"
 
 
-def test_application_form_update_preserves_user_changes_with_pre_population(
+def test_application_form_update_overwrites_user_changes_with_pre_population(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test that pre-population overwrites user values for pre-populated fields"""
