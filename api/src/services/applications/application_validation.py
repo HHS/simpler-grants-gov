@@ -22,7 +22,7 @@ class ApplicationAction(StrEnum):
 
 START_JSON_RULE_CONFIG = JsonRuleConfig(
     # When starting an application, we only do pre-population
-    do_pre_population=True,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=False,
 )
