@@ -96,10 +96,10 @@ FORM_JSON_SCHEMA = {
                     "maximum": 99,
                 },
                 "applicant_reporting_entity": {
-                    "allOf": [{"$ref": "#/$defs/reporting_entity_awardee"}],
+                    "$ref": "#/$defs/reporting_entity_awardee",
                 },
                 "prime_reporting_entity": {
-                    "allOf": [{"$ref": "#/$defs/reporting_entity_awardee"}],
+                    "$ref": "#/$defs/reporting_entity_awardee",
                 },
             },
         },
@@ -134,9 +134,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 120,
         },
         "award_amount": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
-            "title": "Award Amount",
-            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
+            "$ref": "#/$defs/budget_monetary_amount",
         },
         "lobbying_registrant": {
             "type": "object",
@@ -144,10 +142,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "$ref": "#/$defs/person_name",
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "$ref": "#/$defs/simple_address",
                 },
             },
         },
@@ -157,10 +155,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "$ref": "#/$defs/person_name",
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "$ref": "#/$defs/simple_address",
                 },
             },
         },
@@ -176,7 +174,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 144,
                 },
                 "name": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "$ref": "#/$defs/person_name",
                 },
                 "title": {
                     "type": "string",
@@ -239,7 +237,7 @@ FORM_JSON_SCHEMA = {
                 },
                 "suffix": {
                     "type": "string",
-                    "title": "suffix",
+                    "title": "Suffix",
                     "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
                     "minLength": 1,
                     "maxLength": 10,
@@ -258,28 +256,28 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "street1": {
                     "type": "string",
-                    "title": "street1",
+                    "title": "Street 1",
                     "description": "Enter the first line of the Street Address.",
                     "minLength": 1,
                     "maxLength": 55,
                 },
                 "street2": {
                     "type": "string",
-                    "title": "street2",
+                    "title": "Street 2",
                     "description": "Enter the second line of the Street Address.",
                     "minLength": 1,
                     "maxLength": 55,
                 },
                 "city": {
                     "type": "string",
-                    "title": "city",
+                    "title": "City",
                     "description": "Enter the city.",
                     "minLength": 1,
                     "maxLength": 35,
                 },
                 "state": {
                     "allOf": [{"$ref": "#/$defs/state_code"}],
-                    "title": "state",
+                    "title": "State",
                     "description": "Enter the state.",
                 },
                 "zip_code": {
@@ -302,7 +300,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 60,
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "$ref": "#/$defs/simple_address",
                 },
                 "congressional_district": {
                     "type": "string",
@@ -324,6 +322,8 @@ FORM_JSON_SCHEMA = {
             "pattern": r"^\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
+            "title": "Award Amount",
+            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
         "state_code": {
             "type": "string",
@@ -343,149 +343,237 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "1. Background",
+        "name": "Background",
         "children": [
             {"type": "field", "definition": "/properties/federal_action_type"},
             {"type": "field", "definition": "/properties/federal_action_status"},
             {"type": "field", "definition": "/properties/report_type"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "2. For Material Change Only",
+        "name": "For Material Change Only",
+        "children": [
             # Material Change
             {"type": "field", "definition": "/properties/material_change_year"},
             {"type": "field", "definition": "/properties/material_change_quarter"},
             {"type": "field", "definition": "/properties/last_report_date"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "3. Name and Address of Reporting Entity",
+        "name": "Name and Address of Reporting Entity",
+        "children": [
             # Reporting Entity
-            {"type": "field", "definition": "/properties/reporting_entity/entity_type"},
-            {"type": "field", "definition": "/properties/reporting_entity/tier"},
+            {"type": "field", "definition": "/properties/reporting_entity/properties/entity_type"},
+            {"type": "field", "definition": "/properties/reporting_entity/properties/tier"},
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/organization_name",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/organization_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/address/street1",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/address/properties/street1",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/address/street2",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/address/properties/street2",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/address/city",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/address/properties/city",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/address/state",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/address/properties/state",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/address/zip_code",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/address/properties/zip_code",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/applicant_reporting_entity/congressional_district",
+                "definition": "/properties/reporting_entity/properties/applicant_reporting_entity/properties/congressional_district",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "4. If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
+        "name": "If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/organization_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/organization_name",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/address/properties/street1",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/address/street1",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/address/properties/street2",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/address/street2",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/address/properties/city",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/address/city",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/address/properties/state",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/address/state",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/address/properties/zip_code",
             },
             {
                 "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/address/zip_code",
+                "definition": "/properties/reporting_entity/properties/prime_reporting_entity/properties/congressional_district",
             },
-            {
-                "type": "field",
-                "definition": "/properties/reporting_entity/prime_reporting_entity/congressional_district",
-            },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "5. Details",
+        "name": "Details",
+        "children": [
             # Various fields in middle
             {"type": "field", "definition": "/properties/federal_agency_department"},
             {"type": "field", "definition": "/properties/federal_program_name"},
             {"type": "field", "definition": "/properties/assistance_listing_number"},
             {"type": "field", "definition": "/properties/federal_action_number"},
             {"type": "field", "definition": "/properties/award_amount"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "6. Name and Address of Lobbying Registrant",
+        "name": "Name and Address of Lobbying Registrant",
+        "children": [
             # Lobbying Registrant
             {
                 "type": "field",
-                "definition": "/properties/lobbying_registrant/individual/first_name",
+                "definition": "/properties/lobbying_registrant/properties/individual/properties/first_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/lobbying_registrant/individual/middle_name",
+                "definition": "/properties/lobbying_registrant/properties/individual/properties/middle_name",
             },
-            {"type": "field", "definition": "/properties/lobbying_registrant/individual/last_name"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/individual/prefix"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/individual/suffix"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/address/street1"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/address/street2"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/address/city"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/address/state"},
-            {"type": "field", "definition": "/properties/lobbying_registrant/address/zip_code"},
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/individual/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/individual/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/individual/properties/suffix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/address/properties/street2",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/address/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/lobbying_registrant/properties/address/properties/zip_code",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "7. Individual Performing Services (including address if different from No. 6)",
+        "name": "Individual Performing Services (including address if different from No. 6)",
+        "children": [
             # Individual performing services
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/individual/first_name",
+                "definition": "/properties/individual_performing_service/properties/individual/properties/first_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/individual/middle_name",
+                "definition": "/properties/individual_performing_service/properties/individual/properties/middle_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/individual/last_name",
+                "definition": "/properties/individual_performing_service/properties/individual/properties/last_name",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/individual/prefix",
+                "definition": "/properties/individual_performing_service/properties/individual/properties/prefix",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/individual/suffix",
+                "definition": "/properties/individual_performing_service/properties/individual/properties/suffix",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/address/street1",
+                "definition": "/properties/individual_performing_service/properties/address/properties/street1",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/address/street2",
+                "definition": "/properties/individual_performing_service/properties/address/properties/street2",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/address/city",
+                "definition": "/properties/individual_performing_service/properties/address/properties/city",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/address/state",
+                "definition": "/properties/individual_performing_service/properties/address/properties/state",
             },
             {
                 "type": "field",
-                "definition": "/properties/individual_performing_service/address/zip_code",
+                "definition": "/properties/individual_performing_service/properties/address/properties/zip_code",
             },
-            # Signature block
-            {"type": "field", "definition": "/properties/signature_block/signature"},
-            {"type": "field", "definition": "/properties/signature_block/name/first_name"},
-            {"type": "field", "definition": "/properties/signature_block/name/middle_name"},
-            {"type": "field", "definition": "/properties/signature_block/name/last_name"},
-            {"type": "field", "definition": "/properties/signature_block/name/prefix"},
-            {"type": "field", "definition": "/properties/signature_block/name/suffix"},
-            {"type": "field", "definition": "/properties/signature_block/signed_date"},
         ],
-    }
+    },
+    {
+        "type": "section",
+        "label": "8. Signature",
+        "name": "Signature",
+        "children": [
+            # Signature block
+            {"type": "field", "definition": "/properties/signature_block/properties/signature"},
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/suffix",
+            },
+            {"type": "field", "definition": "/properties/signature_block/properties/signed_date"},
+        ],
+    },
 ]
 
 FORM_RULE_SCHEMA = {
