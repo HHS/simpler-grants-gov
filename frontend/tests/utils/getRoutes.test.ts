@@ -9,6 +9,7 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/dev/feature-flags",
+      "/developer",
       "/error",
       "/events",
       "/login",

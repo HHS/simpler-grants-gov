@@ -26,7 +26,9 @@ Using contractions (like _we're', it's' or you'll_) helps our writing sound more
 
 ### Capitalization
 
-**Simpler.Grants.gov uses sentence case in most cases.** Sentence case makes content easier to scan and digest, especially in long text. It also aligns with how many people naturally speak and write, making it feel more conversational. In contrast, excessive use of title case can engender formality, making our product look stiff and unwelcoming.\
+**Simpler.Grants.gov uses sentence case in most cases.** Sentence case makes content easier to scan and digest, especially in long text. It also aligns with how many people naturally speak and write, making it feel more conversational. In contrast, excessive use of title case can engender formality, making our product look stiff and unwelcoming.
+
+Read: [_Making the case for sentence case_](https://blog.usa.gov/making-the-case-for-sentence-case) on USA.gov\
 \
 **Sentence case examples**
 
