@@ -2,7 +2,6 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
-import { redirect, RedirectType } from "next/navigation";
 import { useEffect } from "react";
 
 /**
@@ -19,7 +18,8 @@ export default function ClientMaintenanceCheck() {
       !checkFeatureFlag("opportunityOff") &&
       checkFeatureFlag("authOn")
     ) {
-      redirect("/", RedirectType.push);
+      // This piece does not seem reliable, maybe due to re-render or rehyrdrate cylces where we redirect away before the actual client live feature flag is set
+      // redirect("/", RedirectType.push);
     }
   }, [checkFeatureFlag]);
 
