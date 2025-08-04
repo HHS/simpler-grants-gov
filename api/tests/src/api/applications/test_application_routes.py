@@ -3287,29 +3287,202 @@ def test_application_form_inclusion_update_application_form_not_found(
 def test_application_form_inclusion_update_invalid_request_missing_field(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test form inclusion update fails with missing required field"""
-    # Create application with a form
+    """Test application form inclusion update with missing is_included_in_submission field"""
     application = ApplicationFactory.create()
-    form = FormFactory.create()
-    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
-    ApplicationFormFactory.create(
-        application=application,
-        competition_form=competition_form,
-        application_response={"name": "John Doe"},
+    
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+    ApplicationUserFactory.create(user=user, application=application)
+
+    request_data = {}  # Missing is_included_in_submission
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{competition_form.form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 422
+
+
+def test_application_start_with_pre_population(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that starting an application triggers pre-population of form fields"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create an opportunity with specific data for pre-population
+    opportunity = OpportunityFactory.create(
+        opportunity_number="TEST-OPP-123",
+        opportunity_title="Test Opportunity Title",
+    )
+    
+    competition = CompetitionFactory.create(
+        opening_date=today, 
+        closing_date=future_date,
+        opportunity=opportunity
+    )
+
+    # Create a form with pre-population rules
+    form_rule_schema = {
+        "opportunity_number_field": {
+            "gg_pre_population": {"rule": "opportunity_number"}
+        },
+        "opportunity_title_field": {
+            "gg_pre_population": {"rule": "opportunity_title"}
+        }
+    }
+    
+    form = FormFactory.create(form_rule_schema=form_rule_schema)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    application_id = response.json["data"]["application_id"]
+
+    # Verify that the application form was created with pre-populated values
+    application_form = db_session.execute(
+        select(ApplicationForm).where(
+            ApplicationForm.application_id == application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id
+        )
+    ).scalar_one_or_none()
+
+    assert application_form is not None
+    assert application_form.application_response["opportunity_number_field"] == "TEST-OPP-123"
+    assert application_form.application_response["opportunity_title_field"] == "Test Opportunity Title"
+
+
+def test_application_form_update_with_pre_population(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that updating an application form triggers pre-population of new fields"""
+    # Create application
+    opportunity = OpportunityFactory.create(
+        opportunity_number="UPDATE-OPP-456",
+        opportunity_title="Updated Opportunity Title"
+    )
+    
+    application = ApplicationFactory.create()
+    application.competition.opportunity = opportunity
+
+    # Create a form with pre-population rules
+    form_rule_schema = {
+        "opportunity_number_field": {
+            "gg_pre_population": {"rule": "opportunity_number"}
+        },
+        "user_input_field": {
+            # No rule - user can modify this
+        }
+    }
+    
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_JSON_SCHEMA,
+        form_rule_schema=form_rule_schema
+    )
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
     )
 
     # Associate user with application
     ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
-    form_id = str(form.form_id)
-    request_data = {}  # Missing is_included_in_submission
+    form_id = str(competition_form.form_id)
+    
+    # Update with user data - should trigger pre-population
+    request_data = {
+        "application_response": {
+            "user_input_field": "User provided data"
+        }
+    }
 
     response = client.put(
-        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
         headers={"X-SGG-Token": user_auth_token},
     )
 
-    assert response.status_code == 422
-    assert "is_included_in_submission" in str(response.json)
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify application form was updated with both user data and pre-populated values
+    application_form = db_session.execute(
+        select(ApplicationForm).where(
+            ApplicationForm.application_id == application.application_id,
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
+        )
+    ).scalar_one_or_none()
+
+    assert application_form is not None
+    # Should have user data
+    assert application_form.application_response["user_input_field"] == "User provided data"
+    # Should also have pre-populated data
+    assert application_form.application_response["opportunity_number_field"] == "UPDATE-OPP-456"
+
+
+def test_application_form_update_preserves_user_changes_with_pre_population(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that pre-population overwrites user values for pre-populated fields"""
+    # Create application
+    opportunity = OpportunityFactory.create(
+        opportunity_number="PRESERVE-OPP-789"
+    )
+    
+    application = ApplicationFactory.create()
+    application.competition.opportunity = opportunity
+
+    # Create a form with pre-population rules
+    form_rule_schema = {
+        "opportunity_number_field": {
+            "gg_pre_population": {"rule": "opportunity_number"}
+        }
+    }
+    
+    form = FormFactory.create(form_rule_schema=form_rule_schema)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create existing application form with user-modified pre-populated field
+    existing_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={
+            "opportunity_number_field": "User Changed This Value"
+        }
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    request_data = {
+        "application_response": {
+            "opportunity_number_field": "User Tried To Change Again"
+        }
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+
+    # Verify application form was updated with pre-populated value, not user value
+    db_session.refresh(existing_form)
+    
+    # Pre-population should override user input
+    assert existing_form.application_response["opportunity_number_field"] == "PRESERVE-OPP-789"

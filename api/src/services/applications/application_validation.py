@@ -22,7 +22,7 @@ class ApplicationAction(StrEnum):
 
 START_JSON_RULE_CONFIG = JsonRuleConfig(
     # When starting an application, we only do pre-population
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,  # TODO - when we enable pre-population, flip this to True
     do_post_population=False,
     do_field_validation=False,
 )
@@ -39,7 +39,7 @@ UPDATE_JSON_RULE_CONFIG = JsonRuleConfig(
     # When updating, we do pre-population + validate. If a user
     # changed any values, we want to make sure any pre-populated fields
     # stay as the automatically generated ones.
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,  # TODO - when we enable pre-population, flip this to True
     do_post_population=False,
     do_field_validation=True,
 )
@@ -171,7 +171,10 @@ def validate_application_form(
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
-    # TODO pre/post-populate should update the value here
+    # Apply pre/post-populated changes back to the application form
+    # The context.json_data contains the updated values after rule processing
+    if context.json_data != application_form.application_response:
+        application_form.application_response = context.json_data
 
     # Check if the form is required
     is_required = is_form_required(application_form)
