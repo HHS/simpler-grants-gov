@@ -666,7 +666,10 @@ FORM_UI_SCHEMA=[
     "name": "submission_info",
     "label": "Submission Type",
     "children": [
-      { "type": "field", "definition": "/properties/submission_type" }
+      {
+        "type": "field",
+        "definition": "/properties/submission_type",
+      }
     ]
   },
   {
@@ -674,9 +677,18 @@ FORM_UI_SCHEMA=[
     "name": "application_type",
     "label": "Application Type and Revision",
     "children": [
-      { "type": "field", "definition": "/properties/application_type" },
-      { "type": "field", "definition": "/properties/revision_type" },
-      { "type": "field", "definition": "/properties/revision_other_specify" }
+      {
+        "type": "field",
+        "definition": "/properties/application_type"
+      },
+      {
+        "type": "field",
+        "definition": "/properties/revision_type",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/revision_other_specify",
+      }
     ]
   },
   {
@@ -684,8 +696,14 @@ FORM_UI_SCHEMA=[
     "name": "date_and_applicant_id",
     "label": "Date Received & Applicant ID",
     "children": [
-      { "type": "field", "definition": "/properties/date_received" },
-      { "type": "field", "definition": "/properties/applicant_id" }
+      {
+        "type": "field",
+        "definition": "/properties/date_received",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant_id",
+      }
     ]
   },
   {
@@ -693,9 +711,18 @@ FORM_UI_SCHEMA=[
     "name": "organization_info",
     "label": "Organization Information",
     "children": [
-      { "type": "field", "definition": "/properties/organization_name" },
-      { "type": "field", "definition": "/properties/employer_taxpayer_identification_number" },
-      { "type": "field", "definition": "/properties/sam_uei" }
+      {
+        "type": "field",
+        "definition": "/properties/organization_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/employer_taxpayer_identification_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/sam_uei",
+      }
     ]
   },
   {
@@ -703,10 +730,22 @@ FORM_UI_SCHEMA=[
     "name": "federal_state_ids",
     "label": "Federal and State Identifiers",
     "children": [
-      { "type": "field", "definition": "/properties/federal_entity_identifier" },
-      { "type": "field", "definition": "/properties/federal_award_identifier" },
-      { "type": "field", "definition": "/properties/state_receive_date" },
-      { "type": "field", "definition": "/properties/state_application_id" }
+      {
+        "type": "field",
+        "definition": "/properties/federal_entity_identifier",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/federal_award_identifier",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/state_receive_date",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/state_application_id",
+      }
     ]
   },
   {
@@ -714,14 +753,38 @@ FORM_UI_SCHEMA=[
     "name": "applicant_address",
     "label": "Applicant Address",
     "children": [
-      { "type": "field", "definition": "/properties/applicant/street1" },
-      { "type": "field", "definition": "/properties/applicant/street2" },
-      { "type": "field", "definition": "/properties/applicant/city" },
-      { "type": "field", "definition": "/properties/applicant/county" },
-      { "type": "field", "definition": "/properties/applicant/state" },
-      { "type": "field", "definition": "/properties/applicant/province" },
-      { "type": "field", "definition": "/properties/applicant/country" },
-      { "type": "field", "definition": "/properties/applicant/zip_code" }
+      {
+        "type": "field",
+        "definition": "/properties/applicant/street1",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/street2",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/city",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/county",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/state",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/province",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/country",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant/zip_code",
+      }
     ]
   },
   {
@@ -729,8 +792,14 @@ FORM_UI_SCHEMA=[
     "name": "department_info",
     "label": "Department & Division Info",
     "children": [
-      { "type": "field", "definition": "/properties/department_name" },
-      { "type": "field", "definition": "/properties/division_name" }
+      {
+        "type": "field",
+        "definition": "/properties/department_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/division_name",
+      }
     ]
   },
   {
@@ -738,16 +807,46 @@ FORM_UI_SCHEMA=[
     "name": "contact_info",
     "label": "Contact Person Information",
     "children": [
-      { "type": "field", "definition": "/properties/contact_person/prefix" },
-      { "type": "field", "definition": "/properties/contact_person/first_name" },
-      { "type": "field", "definition": "/properties/contact_person/middle_name" },
-      { "type": "field", "definition": "/properties/contact_person/last_name" },
-      { "type": "field", "definition": "/properties/contact_person/suffix" },
-      { "type": "field", "definition": "/properties/contact_person/title" },
-      { "type": "field", "definition": "/properties/organization_affiliation" },
-      { "type": "field", "definition": "/properties/phone_number" },
-      { "type": "field", "definition": "/properties/fax" },
-      { "type": "field", "definition": "/properties/email" }
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/prefix",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/first_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/middle_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/last_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/suffix",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/contact_person/title",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/organization_affiliation",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/phone_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/fax",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/email",
+      }
     ]
   },
   {
@@ -755,8 +854,14 @@ FORM_UI_SCHEMA=[
     "name": "applicant_type",
     "label": "Applicant Type",
     "children": [
-      { "type": "field", "definition": "/properties/applicant_type_code" },
-      { "type": "field", "definition": "/properties/applicant_type_other_specify" }
+      {
+        "type": "field",
+        "definition": "/properties/applicant_type_code",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant_type_other_specify",
+      }
     ]
   },
   {
@@ -764,9 +869,18 @@ FORM_UI_SCHEMA=[
     "name": "agency_info",
     "label": "Agency and Assistance Info",
     "children": [
-      { "type": "field", "definition": "/properties/agency_name" },
-      { "type": "field", "definition": "/properties/assistance_listing_number" },
-      { "type": "field", "definition": "/properties/assistance_listing_program_title" }
+      {
+        "type": "field",
+        "definition": "/properties/agency_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/assistance_listing_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/assistance_listing_program_title",
+      }
     ]
   },
   {
@@ -774,8 +888,14 @@ FORM_UI_SCHEMA=[
     "name": "funding_opportunity",
     "label": "Funding Opportunity Info",
     "children": [
-      { "type": "field", "definition": "/properties/funding_opportunity_number" },
-      { "type": "field", "definition": "/properties/funding_opportunity_title" }
+      {
+        "type": "field",
+        "definition": "/properties/funding_opportunity_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/funding_opportunity_title",
+      }
     ]
   },
   {
@@ -783,8 +903,14 @@ FORM_UI_SCHEMA=[
     "name": "competition_info",
     "label": "Competition Info",
     "children": [
-      { "type": "field", "definition": "/properties/competition_identification_number" },
-      { "type": "field", "definition": "/properties/competition_identification_title" }
+      {
+        "type": "field",
+        "definition": "/properties/competition_identification_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/competition_identification_title",
+      }
     ]
   },
   {
@@ -795,7 +921,7 @@ FORM_UI_SCHEMA=[
       {
         "type": "field",
         "definition": "/properties/areas_affected",
-        "widget": "Attachment" 
+        "widget": "Attachment",
       }
     ]
   },
@@ -804,8 +930,15 @@ FORM_UI_SCHEMA=[
     "name": "project_title",
     "label": "Project Title",
     "children": [
-      { "type": "field", "definition": "/properties/project_title" },
-      { "type": "field", "definition": "/properties/additional_project_title", "widget": "AttachmentArray" }
+      {
+        "type": "field",
+        "definition": "/properties/project_title",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/additional_project_title",
+        "widget": "AttachmentArray",
+      }
     ]
   },
   {
@@ -813,11 +946,27 @@ FORM_UI_SCHEMA=[
     "name": "congressional_districts",
     "label": "Congressional District Info",
     "children": [
-      { "type": "field", "definition": "/properties/congressional_district_applicant" },
-      { "type": "field", "definition": "/properties/congressional_district_program_project" },
-      { "type": "field", "definition": "/properties/additional_congressional_districts", "widget": "Attachment" },
-      { "type": "field", "definition": "/properties/project_start_date" },
-      { "type": "field", "definition": "/properties/project_end_date" }
+      {
+        "type": "field",
+        "definition": "/properties/congressional_district_applicant",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/congressional_district_program_project",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/additional_congressional_districts",
+        "widget": "Attachment",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/project_start_date",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/project_end_date",
+      }
     ]
   },
   {
@@ -825,13 +974,34 @@ FORM_UI_SCHEMA=[
     "name": "estimated_funding",
     "label": "Estimated Funding",
     "children": [
-      { "type": "field", "definition": "/properties/federal_estimated_funding" },
-      { "type": "field", "definition": "/properties/applicant_estimated_funding" },
-      { "type": "field", "definition": "/properties/state_estimated_funding" },
-      { "type": "field", "definition": "/properties/local_estimated_funding" },
-      { "type": "field", "definition": "/properties/other_estimated_funding" },
-      { "type": "field", "definition": "/properties/program_income_estimated_funding" },
-      { "type": "field", "definition": "/properties/total_estimated_funding" }
+      {
+        "type": "field",
+        "definition": "/properties/federal_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/applicant_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/state_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/local_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/other_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/program_income_estimated_funding",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/total_estimated_funding",
+      }
     ]
   },
   {
@@ -839,8 +1009,14 @@ FORM_UI_SCHEMA=[
     "name": "state_review",
     "label": "State Review",
     "children": [
-      { "type": "field", "definition": "/properties/state_review" },
-      { "type": "field", "definition": "/properties/state_review_available_date" }
+      {
+        "type": "field",
+        "definition": "/properties/state_review",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/state_review_available_date",
+      }
     ]
   },
   {
@@ -848,8 +1024,15 @@ FORM_UI_SCHEMA=[
     "name": "federal_debt",
     "label": "Delinquent Federal Debt",
     "children": [
-      { "type": "field", "definition": "/properties/delinquent_federal_debt" },
-      { "type": "field", "definition": "/properties/debt_explanation", "widget": "Attachment" }
+      {
+        "type": "field",
+        "definition": "/properties/delinquent_federal_debt",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/debt_explanation",
+        "widget": "Attachment",
+      }
     ]
   },
   {
@@ -857,7 +1040,10 @@ FORM_UI_SCHEMA=[
     "name": "certification",
     "label": "Certification Agreement",
     "children": [
-      { "type": "field", "definition": "/properties/certification_agree" }
+      {
+        "type": "field",
+        "definition": "/properties/certification_agree",
+      }
     ]
   },
   {
@@ -865,17 +1051,50 @@ FORM_UI_SCHEMA=[
     "name": "authorized_representative",
     "label": "Authorized Representative Info",
     "children": [
-      { "type": "field", "definition": "/properties/authorized_representative/prefix" },
-      { "type": "field", "definition": "/properties/authorized_representative/first_name" },
-      { "type": "field", "definition": "/properties/authorized_representative/middle_name" },
-      { "type": "field", "definition": "/properties/authorized_representative/last_name" },
-      { "type": "field", "definition": "/properties/authorized_representative/suffix" },
-      { "type": "field", "definition": "/properties/authorized_representative/title" },
-      { "type": "field", "definition": "/properties/authorized_representative_phone_number" },
-      { "type": "field", "definition": "/properties/authorized_representative_fax" },
-      { "type": "field", "definition": "/properties/authorized_representative_email" },
-      { "type": "field", "definition": "/properties/aor_signature" },
-      { "type": "field", "definition": "/properties/date_signed" }
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/prefix",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/first_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/middle_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/last_name",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/suffix",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative/title",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative_phone_number",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative_fax",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/authorized_representative_email",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/aor_signature",
+      },
+      {
+        "type": "field",
+        "definition": "/properties/date_signed",
+      }
     ]
   }
 ]

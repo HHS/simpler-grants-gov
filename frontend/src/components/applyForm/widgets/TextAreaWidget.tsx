@@ -6,7 +6,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { getLabelComponent } from "../utils/getLabelComponent";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.
  *
@@ -32,7 +32,7 @@ function TextAreaWidget<
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, maxLength, minLength } = schema;
+  const { description, title, maxLength, minLength } = schema;
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLTextAreaElement>) =>
@@ -61,7 +61,7 @@ function TextAreaWidget<
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
+      {/* <FieldLabel idFor={id} title={title} required={required} /> */}
 
       {error && (
         <ErrorMessage>
@@ -73,6 +73,8 @@ function TextAreaWidget<
                 .join(",")}
         </ErrorMessage>
       )}
+      {getLabelComponent({ id, title, required, description, options })}
+      {/* {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>} */}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

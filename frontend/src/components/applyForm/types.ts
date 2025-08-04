@@ -9,6 +9,7 @@ import {
 import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
+import { Attachment } from "src/types/attachmentTypes";
 
 export type SchemaField = {
   type?: string;
@@ -57,12 +58,16 @@ export type WidgetTypes =
   | "Attachment"
   | "AttachmentArray"
   | "Budget424aSectionA"
-  | "Budget424aSectionB";
+  | "Budget424aSectionB"
+  | "SectionATable";
 
 export type UiSchemaField = {
   type: "field" | "multiField";
   widget?: WidgetTypes;
   name?: string;
+  options?: {
+    [key: string]: string | number | boolean | object | any[] | null | undefined;
+  };
 } & (
   | {
       definition: `/properties/${string}` | [`/properties/${string}`];

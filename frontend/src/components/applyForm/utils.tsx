@@ -11,7 +11,7 @@ import {
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
 
-import { JSX } from "react";
+import React, { JSX } from "react";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -25,11 +25,13 @@ import {
 import FileUploadWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
+import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
+import { SectionATableWidget } from "./widgets/SF424A/SectionA";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
@@ -167,23 +169,27 @@ export function buildFormTreeRecursive({
       if (parent) {
         const childAcc: JSX.Element[] = [];
         const keys: number[] = [];
-        const row = uiSchema.map((node) => {
+        const row = uiSchema.map((node, index) => {
           if ("children" in node) {
-            acc.forEach((item, key) => {
-              if (item) {
-                if (item.key === `${node.name}-wrapper`) {
-                  keys.push(key);
-                }
-              }
-            });
-            return null;
+            return null; // handled recursively
           } else {
-            return buildField({
+            const field = buildField({
               uiFieldObject: node,
               formSchema: schema,
               errors: formattedErrors ?? null,
               formData,
             });
+
+            if (!field) {
+              console.warn("buildField returned nothing for:", node);
+              return null;
+            }
+
+            return (
+              <React.Fragment key={`${parent?.name || "field"}-${index}`}>
+                {field}
+              </React.Fragment>
+            );
           }
         });
         if (keys.length) {
@@ -193,10 +199,25 @@ export function buildFormTreeRecursive({
           });
           acc = [
             ...acc,
-            wrapSection(parent.label, parent.name, <>{childAcc}</>),
+            wrapSection(
+              parent.label,
+              parent.name,
+              <React.Fragment key={`${parent.name}-section`}>
+                {childAcc}
+              </React.Fragment>,
+            ),
           ];
         } else {
-          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+          acc = [
+            ...acc,
+            wrapSection(
+              parent.label,
+              parent.name,
+              <React.Fragment key={`${parent.name}-section`}>
+                {row}
+              </React.Fragment>,
+            ),
+          ];
         }
       }
     }
@@ -282,7 +303,17 @@ export const getFieldSchema = ({
   } else if (definition) {
     return getByPointer(formSchema, definition) as RJSFSchema;
   }
-  return schema as RJSFSchema;
+  // return schema as RJSFSchema;
+  if (!base || Object.keys(base).length === 0) {
+    console.warn("⚠️ Schema not found for field definition:", field.definition);
+  }
+
+  const result = {
+    ...base,
+    ...(field.schema ?? {}),
+  } as RJSFSchema;
+
+  return result;
 };
 
 export const getNameFromDef = ({
@@ -331,13 +362,15 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => FileUploadWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
     AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionB(widgetProps),
+  SectionATable: (widgetProps: UswdsWidgetProps) =>
+    SectionATableWidget(widgetProps),
 };
 
 const getByPointer = (target: object, path: string): unknown => {
@@ -444,6 +477,15 @@ export const buildField = ({
 
   // should filter and match warnings to field earlier in the process
 
+  // const name = definition
+  //   ? definition
+  //       .replace(/^\/properties\//, "")
+  //       .replace(/\/properties\//g, ".")
+  //       .replace(/\//g, ".")
+  //   : (schema?.title || fieldSchema?.title || "untitled").replace(/\s/g, "-");
+
+  // const rawErrors = errors ? formatFieldWarnings(errors, name) : [];
+  // const value = get(formData, name);
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   const disabled = fieldSchema.type === "null";
@@ -452,8 +494,10 @@ export const buildField = ({
     : [];
   const isRequired = requiredList.includes(name.split(".").slice(-1)[0]);
 
-  let options = {};
+  // let options = {};
   let enums: unknown[] = [];
+  let options: Record<string, any> = {};
+
   if (type === "Select") {
     if (fieldSchema.type === "array") {
       if (
@@ -493,6 +537,45 @@ export const buildField = ({
     value,
     options,
   });
+  // if (uiFieldObject.options) {
+  //   options = {
+  //     ...options,
+  //     ...uiFieldObject.options,
+  //   };
+  // }
+
+  // // DEBUGGING: field rendering details
+  // // console.warn("BUILD FIELD:", {
+  // //   name,
+  // //   definition,
+  // //   type,
+  // //   value,
+  // //   fieldSchema,
+  // //   uiFieldObject,
+  // // });
+
+  // if (!widgetComponents[type]) {
+  //   console.warn("Unknown widget type:", type, "for field", name);
+  //   return <div style={{ color: "red" }}>Unknown widget: {type}</div>;
+  // }
+
+  // try {
+  //   return widgetComponents[type]({
+  //     id: name,
+  //     disabled,
+  //     required: isRequired,
+  //     minLength: fieldSchema?.minLength,
+  //     maxLength: fieldSchema?.maxLength,
+  //     label: fieldSchema?.title ?? name.replace(/_/g, " "),
+  //     schema: fieldSchema,
+  //     rawErrors,
+  //     value,
+  //     options,
+  //   });
+  // } catch (err) {
+  //   console.error("Widget rendering failed:", type, name, err);
+  //   return <div style={{ color: "red" }}>Widget failed: {name}</div>;
+  // }
 };
 
 const formatFieldWarnings = (
@@ -556,6 +639,8 @@ const wrapSection = (
   fieldName: string,
   tree: JSX.Element | undefined,
 ) => {
+  // DEBUGGING: field prop details
+  // console.warn("wrapSection:", { label, fieldName, tree });
   return (
     <FieldsetWidget
       key={`${fieldName}-wrapper`}
@@ -571,6 +656,16 @@ const wrapSection = (
 // export const shapeFormData = <T extends object>(
 //   formData: FormData,
 //   formSchema: RJSFSchema,
+// ): T => {
+//   const filteredData = Object.fromEntries(
+//     Array.from(formData.keys())
+//       .filter((key) => !key.startsWith("$ACTION_"))
+//       .map((key) => {
+//         const allValues = formData.getAll(key);
+//         const value = allValues.length > 1 ? allValues : formData.get(key);
+// export const shapeFormData = <T extends object>(
+//   formData: FormData,
+//   _formSchema: RJSFSchema,
 // ): T => {
 //   const filteredData = Object.fromEntries(
 //     Array.from(formData.keys())

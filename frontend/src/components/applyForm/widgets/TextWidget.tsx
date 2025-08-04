@@ -11,7 +11,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { getLabelComponent } from "../utils/getLabelComponent";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -92,17 +92,19 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup
-      className={formClassName}
-      error={error}
-      key={`wrapper-for-${id}`}
-    >
-      <FieldLabel
-        idFor={id}
-        title={title}
-        required={required}
-        description={description}
-      />
+    // <FormGroup
+    //   className={formClassName}
+    //   error={error}
+    //   key={`wrapper-for-${id}`}
+    // >
+    //   <FieldLabel
+    //     idFor={id}
+    //     title={title}
+    //     required={required}
+    //     description={description}
+    //   />
+    <FormGroup error={error} key={`wrapper-for-${id}`}>
+      {getLabelComponent({ id, title, required, description, options })}
       {error && (
         <ErrorMessage id={`error-for-${id}`}>
           {String(rawErrors[0])}

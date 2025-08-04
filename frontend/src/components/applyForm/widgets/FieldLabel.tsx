@@ -12,16 +12,20 @@ export const FieldLabel = ({
   required: boolean | undefined;
 }) => {
   return (
-    <Label id={`label-for-${idFor}`} key={`label-for-${idFor}`} htmlFor={idFor}>
-      {title}
-      {required && (
-        <span className="usa-hint usa-hint--required text-no-underline">*</span>
-      )}
-      {description && (
-        <span>
-          <br /> {description}
-        </span>
-      )}
-    </Label>
+    <>
+      <Label
+        id={`label-for-${idFor}`}
+        key={`label-for-${idFor}`}
+        htmlFor={idFor}
+      >
+        {title}
+        {required && (
+          <span className="usa-hint usa-hint--required text-no-underline">
+            *
+          </span>
+        )}
+      </Label>
+      {description && <p className="text-base-dark margin-top-0">{description}</p>}
+    </>
   );
 };

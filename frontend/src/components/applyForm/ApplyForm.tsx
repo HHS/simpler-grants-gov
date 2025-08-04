@@ -13,9 +13,11 @@ import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
+import { Attachment } from "src/types/attachmentTypes";
 
 const ApplyForm = ({
   applicationId,
+  attachments,
   formId,
   formSchema,
   savedFormData,
@@ -23,6 +25,7 @@ const ApplyForm = ({
   uiSchema,
 }: {
   applicationId: string;
+  attachments: Attachment[];
   formId: string;
   formSchema: RJSFSchema;
   savedFormData: object;
@@ -72,6 +75,7 @@ const ApplyForm = ({
     );
   }
 
+  console.log('FROM APPLY FORM', attachments)
   return (
     <>
       <form

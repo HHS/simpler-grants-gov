@@ -22,7 +22,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { getLabelComponent } from "src/components/applyForm/utils/getLabelComponent";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -118,12 +118,12 @@ function SelectWidget<
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
+      {/* <FieldLabel
         idFor={id}
         title={title}
         required={required}
         description={description}
-      />
+      /> */}
 
       {error && (
         <ErrorMessage>
@@ -134,6 +134,8 @@ function SelectWidget<
                 .join(",")}
         </ErrorMessage>
       )}
+      {getLabelComponent({ id, title, required, description, options })}
+      {/* {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>} */}
 
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580

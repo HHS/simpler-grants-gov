@@ -11,7 +11,7 @@ import { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { getLabelComponent } from "../utils/getLabelComponent";
 
 /** The `RadioWidget` is a widget for rendering a radio group.
  *  It is typically used with a string property constrained with enum options.
@@ -85,12 +85,12 @@ function RadioWidget<
 
   return (
     <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
+      {/* <FieldLabel
         idFor={id}
         title={title}
         required={required}
         description={description}
-      />
+      /> */}
       {error && (
         <ErrorMessage>
           {typeof rawErrors[0] === "string"
@@ -100,6 +100,8 @@ function RadioWidget<
                 .join(",")}
         </ErrorMessage>
       )}
+      {getLabelComponent({ id, title, required, description, options })}
+      {/* {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>} */}
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
           const checked = enumOptionsIsSelected<S>(option.value, value);

@@ -49,6 +49,7 @@ export const UiJsonSchema: RJSFSchema = {
             "Budget424aSectionB",
             "Budget424aSectionA",
             "Budget424aTotalBudgetSummary",
+            "SectionATable"
           ],
         },
         attachmentType: { type: "string" },
