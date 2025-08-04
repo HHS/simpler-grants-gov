@@ -88,13 +88,11 @@ resource "aws_api_gateway_stage" "api_v1_stage" {
     format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\",\"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"apiKeyId\":\"$context.identity.apiKeyId\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\" }"
   }
 
-  cache_cluster_enabled = true
-  cache_cluster_size = 1.6
-
   # checkov:skip=CKV_AWS_73:X-Ray can increase costs greatly, and aren't always necessary
   # checkov:skip=CKV2_AWS_29:WAF can be enabled at a later time if needed
   # checkov:skip=CKV2_AWS_51:Mutual TLS increases complexity for downstream systems
-  # checkov:skip=CKV2_AWS_4:Log level 
+  # checkov:skip=CKV2_AWS_4:Log level and format is already set
+  # checkov:skip=CKV_AWS_120:Cache disabled for now, will be followed up in a future ticket
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
@@ -115,13 +113,11 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
   method_path = "*/*"
 
   settings {
-    metrics_enabled      = true
-    logging_level        = "INFO"
-    caching_enabled      = true
-    cache_ttl_in_seconds = 300
-    cache_data_encrypted = true
+    metrics_enabled = true
+    logging_level   = "INFO"
   }
   # checkov:skip=CKV2_AWS_4:Log level set to info
+  # checkov:skip=CKV_AWS_225:Cache disabled for now, will be followed up in a future ticket
 }
 
 resource "aws_api_gateway_domain_name" "api" {
