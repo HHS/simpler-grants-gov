@@ -302,6 +302,7 @@ class ProcessSamExtractsTask(Task):
         sam_extract_file: SamExtractFile,
         extract_log_extra: dict,
     ) -> None:
+        """Load sam.gov entities to the DB"""
         total_to_process = len(sam_gov_entity_container.processed_entities)
         total_processed = 0
         for batch in itertools.batched(
