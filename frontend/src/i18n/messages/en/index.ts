@@ -113,20 +113,50 @@ export const messages = {
       help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don't have an account? You can create one.",
       title: "Sign in to save this opportunity",
     },
-    startApplicationButtonText: "Start new application",
     startApplicationModal: {
+      startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      description:
-        "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
-      name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",
-      title: "New application",
-      validationError: "Please enter a name for your application.",
+      title: "Start a new application",
+      ineligibleTitle:
+        "It looks like you're not eligible to start a new application through this site",
+      applyingFor: "Applying for: ",
+      fields: {
+        name: {
+          label: "Name of this application",
+          description:
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+          validationError: "Enter a filing name. You can change this later.",
+        },
+        organizationSelect: {
+          label: "Who's applying?",
+          default: "-Select-",
+          notListed: "My organization isn't listed",
+          validationError:
+            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
+        },
+      },
+      description: {
+        organizationIntro:
+          "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
+        applyingForOrg:
+          "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
+        poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
+        uei: "Have a valid UEI (a Unique Entity ID <link>registered through SAM.gov</link>)",
+        ineligibleGoToGrants:
+          "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        goToGrants:
+          "If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        pilotGoToGrants:
+          "This opportunity is part of a pilot program. If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        organizationIndividualIntro:
+          "You can apply as an individual or organization. To apply as part of an organization you must:",
+      },
     },
     intro: {
       agency: "Agency: ",
@@ -476,10 +506,18 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
+  Developer: {
+    pageTitle: "Developer Portal | Simpler.Grants.gov",
+    pageDescription:
+      "Tools and resources for developers working on Simpler.Grants.gov",
+    description:
+      "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+  },
   Header: {
     navLinks: {
       about: "About",
       community: "Community",
+      developer: "Developer Portal",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",

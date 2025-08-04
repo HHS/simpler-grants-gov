@@ -55,19 +55,22 @@ export type WidgetTypes =
   | "Radio"
   | "Select"
   | "Attachment"
-  | "AttachmentArray";
+  | "AttachmentArray"
+  | "Budget424aSectionA"
+  | "Budget424aSectionB";
 
 export type UiSchemaField = {
-  type: "field";
+  type: "field" | "multiField";
   widget?: WidgetTypes;
+  name?: string;
 } & (
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema: SchemaField;
     }
 );
@@ -90,7 +93,6 @@ export type TextTypes =
   | "tel"
   | "url";
 
-// extends the WidgetProps type from rjsf for USWDS and this project implementation
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -101,7 +103,7 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | unknown;
+  value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
   schema: RJSFSchema;
@@ -112,15 +114,17 @@ export interface UswdsWidgetProps<
   hideError?: boolean;
   autofocus?: boolean;
   placeholder?: string;
-  options: NonNullable<UIOptionsType<T, S, F>> & {
+  options?: NonNullable<UIOptionsType<T, S, F>> & {
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  formClassName?: string;
+  inputClassName?: string;
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[] | undefined;
+  rawErrors?: string[] | FormValidationWarning[] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;

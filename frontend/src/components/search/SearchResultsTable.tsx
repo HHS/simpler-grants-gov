@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { isNil } from "lodash";
-import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import {
   BaseOpportunity,
   OpportunityStatus,
@@ -16,7 +15,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
 
 const statusColorClasses = {
@@ -51,41 +50,38 @@ const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
 
 const TitleDisplay = ({
   opportunity,
-  saved,
   page,
   index,
 }: {
   opportunity: BaseOpportunity;
-  saved: boolean;
   page: number;
   index: number;
 }) => {
   const t = useTranslations("Search.table");
   return (
     <>
-      <div className="font-sans-lg text-bold">
-        <a
-          href={getOpportunityUrl(opportunity.opportunity_id)}
-          id={`search-result-link-${page}-${index + 1}`}
-        >
-          {opportunity.opportunity_title}
-        </a>
-      </div>
-      <div className="display-none tablet-lg:display-block font-sans-xs">
-        <span className="text-bold">{t("number")}:</span>{" "}
-        {opportunity.opportunity_number}
-      </div>
-      {saved && (
-        <div className="margin-top-2 display-inline-block">
-          <span className="display-flex flex-align-center font-sans-2xs">
-            <USWDSIcon
-              name="star"
-              className="text-accent-warm-dark button-icon-md padding-right-05"
-            />
-            {t("saved")}
-          </span>
+      <div className="display-flex">
+        <div className="margin-y-auto grid-col-auto minw-4">
+          <OpportunitySaveUserControl
+            opportunityId={opportunity.opportunity_id}
+            type="icon"
+          />
         </div>
-      )}
+        <div className="grid-col-fill">
+          <div className="font-sans-md text-bold line-height-sans-3">
+            <a
+              href={getOpportunityUrl(opportunity.opportunity_id)}
+              id={`search-result-link-${page}-${index + 1}`}
+            >
+              {opportunity.opportunity_title}
+            </a>
+          </div>
+          <div className="display-none tablet-lg:display-block font-sans-xs">
+            <span className="text-bold">{t("number")}:</span>{" "}
+            {opportunity.opportunity_number}
+          </div>
+        </div>
+      </div>
     </>
   );
 };
@@ -111,7 +107,6 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
 
 const toSearchResultsTableRow = (
   result: BaseOpportunity,
-  saved: boolean,
   page: number,
   index: number,
 ): TableCellData[] => {
@@ -127,14 +122,7 @@ const toSearchResultsTableRow = (
       stackOrder: 1,
     },
     {
-      cellData: (
-        <TitleDisplay
-          opportunity={result}
-          saved={saved}
-          page={page}
-          index={index}
-        />
-      ),
+      cellData: <TitleDisplay opportunity={result} page={page} index={index} />,
       stackOrder: 0,
     },
     {
@@ -156,7 +144,7 @@ const toSearchResultsTableRow = (
   ];
 };
 
-export const SearchResultsTable = async ({
+export const SearchResultsTable = ({
   searchResults,
   page,
 }: {
@@ -169,11 +157,6 @@ export const SearchResultsTable = async ({
     return <FilterSearchNoResults useHeading={true} />;
   }
 
-  const savedOpportunities = await fetchSavedOpportunities();
-  const savedOpportunityIds = savedOpportunities.map(
-    (opportunity) => opportunity.opportunity_id,
-  );
-
   const headerContent: TableCellData[] = [
     { cellData: t("headings.closeDate") },
     { cellData: t("headings.status") },
@@ -183,12 +166,7 @@ export const SearchResultsTable = async ({
     { cellData: t("headings.awardMax") },
   ];
   const tableRowData = searchResults.map((result, index) =>
-    toSearchResultsTableRow(
-      result,
-      savedOpportunityIds.includes(result.opportunity_id),
-      page,
-      index,
-    ),
+    toSearchResultsTableRow(result, page, index),
   );
   return (
     <TableWithResponsiveHeader

@@ -101,7 +101,6 @@ export function requesterForEndpoint({
     return response;
   };
 }
-
 export const fetchOpportunity = cache(
   requesterForEndpoint(fetchOpportunityEndpoint),
 );
@@ -122,9 +121,8 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const fetchUserWithMethod = (
-  type: "POST" | "DELETE" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicUsersEndpoint(type));
+export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
+  requesterForEndpoint(toDynamicUsersEndpoint(type));
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
 

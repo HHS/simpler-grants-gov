@@ -177,6 +177,11 @@ def _add_top_level_agency_prefix(
     if not filters or not (filters.top_level_agency and filters.top_level_agency.one_of):
         return
 
+    # Exact match for the top-level agency itself (e.g., "DOC")
+    builder.filter_should_terms(
+        "agency_code.keyword", [agency for agency in filters.top_level_agency.one_of]
+    )
+
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
     builder.filter_should_prefix(
         "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]

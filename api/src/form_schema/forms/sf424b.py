@@ -4,7 +4,7 @@ from src.db.models.competition_models import Form
 
 FORM_JSON_SCHEMA = {
     "type": "object",
-    "required": ["signature", "title", "applicant_organization", "date_signed"],
+    "required": ["signature", "title", "applicant_organization"],
     "properties": {
         "signature": {
             "type": "string",

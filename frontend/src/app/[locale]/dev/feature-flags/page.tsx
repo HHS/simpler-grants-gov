@@ -28,8 +28,14 @@ export default function FeatureFlags() {
 
         <FeatureFlagsTable />
 
+        <a href="/">
+          <Button type="button" data-testid="apply-changes">
+            Apply changes and return to the App
+          </Button>
+        </a>
+
         <a href="?_ff=reset">
-          <Button type="button" data-testid="reset-defaults">
+          <Button type="button" data-testid="reset-defaults" secondary>
             Reset all flags to defaults
           </Button>
         </a>

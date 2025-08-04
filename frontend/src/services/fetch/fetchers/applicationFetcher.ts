@@ -18,6 +18,7 @@ export const handleStartApplication = async (
   applicationName: string,
   competitionID: string,
   token: string,
+  organization?: string,
 ): Promise<ApplicationStartApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
@@ -26,7 +27,11 @@ export const handleStartApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
     additionalHeaders: ssgToken,
-    body: { competition_id: competitionID, application_name: applicationName },
+    body: {
+      competition_id: competitionID,
+      application_name: applicationName,
+      organization_id: organization,
+    },
   });
 
   return (await response.json()) as ApplicationStartApiResponse;
@@ -121,7 +126,7 @@ export const handleUpdateApplicationForm = async (
   };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${applicationFormId}`,
-    body: { application_response: values },
+    body: { application_response: values, is_included_in_submission: true },
     additionalHeaders: ssgToken,
   });
 

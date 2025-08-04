@@ -693,3 +693,146 @@ def test_validate_is_included_in_submission_behavior(
     else:
         for validation_error in validation_errors:
             assert validation_error.type != ValidationErrorType.APPLICATION_FORM_VALIDATION
+
+
+@freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_validate_application_form_submit_post_population(enable_factory_create):
+    """Test that post-population occurs and updates application_response during submit action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+        is_required=True,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with SUBMIT action (should trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.SUBMIT)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population occurred and updated the application_response
+    assert "signature_field" in application_form.application_response
+    assert "date_field" in application_form.application_response
+    assert application_form.application_response["existing_field"] == "existing_value"
+
+    # Verify the signature is populated (defaults to "unknown" since no user in this context)
+    assert application_form.application_response["signature_field"] == "unknown"
+
+    # Verify the date is populated with the current date
+    assert application_form.application_response["date_field"] == "2023-02-20"
+
+
+def test_validate_application_form_get_no_post_population(enable_factory_create):
+    """Test that post-population does NOT occur during GET action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with GET action (should NOT trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population did NOT occur - application_response should remain unchanged
+    assert application_form.application_response == original_response
+    assert "signature_field" not in application_form.application_response
+    assert "date_field" not in application_form.application_response
+
+
+def test_validate_application_form_modify_no_post_population(enable_factory_create):
+    """Test that post-population does NOT occur during MODIFY action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with MODIFY action (should NOT trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population did NOT occur - application_response should remain unchanged
+    assert application_form.application_response == original_response
+    assert "signature_field" not in application_form.application_response
+    assert "date_field" not in application_form.application_response
