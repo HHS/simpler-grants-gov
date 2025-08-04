@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -62,6 +63,21 @@ const UserDropdown = ({
   logout: () => Promise<void>;
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+  const t = useTranslations("Header.navLinks");
+  const { checkFeatureFlag } = useFeatureFlags();
+  const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
+
+  const developerNavItem = showDeveloperPortal ? (
+    <a
+      href="/developer"
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+    >
+      <USWDSIcon name="settings" className="usa-icon--size-3 display-block" />
+      <IconListContent className="font-sans-sm">
+        {t("developer")}
+      </IconListContent>
+    </a>
+  ) : null;
 
   const logoutNavItem = (
     <a
@@ -110,8 +126,9 @@ const UserDropdown = ({
         id="user-control"
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
+          ...(showDeveloperPortal ? [developerNavItem] : []),
           logoutNavItem,
-        ]}
+        ].filter(Boolean)}
         type="subnav"
         isOpen={userProfileMenuOpen}
       />
