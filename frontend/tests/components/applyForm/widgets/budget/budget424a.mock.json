@@ -1,0 +1,71 @@
+{
+  "activity_line_items": [
+    {
+      "activity_title": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC",
+      "assistance_listing_number": "ABCDFC",
+      "budget_summary": {
+        "federal_estimated_unobligated_amount": "12.30",
+        "non_federal_estimated_unobligated_amount": "4.53",
+        "federal_new_or_revised_amount": "24.23",
+        "non_federal_new_or_revised_amount": "32.43"
+      },
+      "budget_categories": {
+        "personnel_amount": "4234.23",
+        "fringe_benefits_amount": "3422.34",
+        "travel_amount": "547.45",
+        "equipment_amount": "423.59",
+        "supplies_amount": "32.42",
+        "contractual_amount": "235.51",
+        "construction_amount": "3242.31",
+        "other_amount": "3423.26",
+        "total_direct_charge_amount": "976.86",
+        "total_indirect_charge_amount": "45.46",
+        "total_amount": "345.25",
+        "program_income_amount": "453.46"
+      },
+      "non_federal_resources": {
+        "applicant_amount": "4234.23",
+        "state_amount": "3422.34",
+        "other_amount": "547.45",
+        "total_amount": "423.59"
+      },
+      "federal_fund_estimates": {
+        "first_year_amount": "4234.23",
+        "second_year_amount  ": "4234.23",
+        "third_year_amount": "4234.23",
+        "fourth_year_amount": "4234.23"
+      }
+    }
+  ],
+  "total_budget_summary": {
+    "federal_estimated_unobligated_amount": 0,
+    "non_federal_estimated_unobligated_amount": true,
+    "federal_new_or_revised_amount": 0,
+    "non_federal_new_or_revised_amount": true
+  },
+  "total_budget_categories": {
+    "personnel_amount": "4234.23",
+    "fringe_benefits_amount": "3422.34",
+    "travel_amount": "547.45",
+    "equipment_amount": "423.59",
+    "supplies_amount": "32.42",
+    "contractual_amount": "235.51",
+    "construction_amount": "3242.31",
+    "other_amount": "3423.26",
+    "total_direct_charge_amount": "976.86",
+    "total_indirect_charge_amount": "45.46",
+    "total_amount": "345.25",
+    "program_income_amount": "453.46"
+  },
+  "total_non_federal_resources": true,
+  "forecasted_cash_needs": {
+    "federal_forecasted_cash_needs": 0.0,
+    "non_federal_forecasted_cash_needs": [],
+    "total_forecasted_cash_needs": 0
+  },
+  "total_federal_fund_estimates": 0,
+  "confirmation": true,
+  "direct_charges_explanation": "ABCDEFGHIJKLM",
+  "indirect_charges_explanation": "ABCDEFGHIJK",
+  "remarks": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+}
