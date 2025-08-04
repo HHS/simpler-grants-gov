@@ -48,7 +48,7 @@ SUBMISSION_JSON_RULE_CONFIG = JsonRuleConfig(
     # During submission, we do post-population (the only place we ever do)
     # and field validation
     do_pre_population=False,
-    do_post_population=False,  # TODO - when we enable post-population, flip this to True
+    do_post_population=True,  # Post-population enabled for submit flow
     do_field_validation=True,
 )
 
@@ -171,7 +171,7 @@ def validate_application_form(
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
-    # TODO pre/post-populate should update the value here
+    application_form.application_response = context.json_data
 
     # Check if the form is required
     is_required = is_form_required(application_form)
