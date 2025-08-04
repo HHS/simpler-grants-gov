@@ -97,23 +97,23 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
-data "aws_acm_certificate" "cert" {
-  count       = local.service_config.enable_https ? 1 : 0
-  domain      = local.service_config.domain_name
-  most_recent = true
-}
+# data "aws_acm_certificate" "cert" {
+#   count       = local.service_config.enable_https ? 1 : 0
+#   domain      = local.service_config.domain_name
+#   most_recent = true
+# }
 
-data "aws_acm_certificate" "s3_cdn_cert" {
-  count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
-  domain      = local.service_config.s3_cdn_domain_name
-  most_recent = true
-}
+# data "aws_acm_certificate" "s3_cdn_cert" {
+#   count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
+#   domain      = local.service_config.s3_cdn_domain_name
+#   most_recent = true
+# }
 
-data "aws_acm_certificate" "mtls_cert" {
-  count       = local.service_config.mtls_domain_name != null ? 1 : 0
-  domain      = local.service_config.mtls_domain_name
-  most_recent = true
-}
+# data "aws_acm_certificate" "mtls_cert" {
+#   count       = local.service_config.mtls_domain_name != null ? 1 : 0
+#   domain      = local.service_config.mtls_domain_name
+#   most_recent = true
+# }
 
 data "aws_iam_policy" "app_db_access_policy" {
   count = module.app_config.has_database ? 1 : 0
@@ -158,18 +158,19 @@ module "service" {
   public_subnet_ids  = data.aws_subnets.public.ids
   private_subnet_ids = data.aws_subnets.private.ids
 
-  certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
-  domain_name            = local.service_config.domain_name
+#   certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
+  certificate_arn = null
+domain_name            = local.service_config.domain_name
   s3_cdn_domain_name     = local.service_config.s3_cdn_domain_name
-  s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
-
+#   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
+  s3_cdn_certificate_arn = null
   hosted_zone_id = null
 
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = true
   mtls_domain_name          = local.service_config.mtls_domain_name
-  mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
-
+#   mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
+  mtls_certificate_arn = null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

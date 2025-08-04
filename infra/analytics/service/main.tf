@@ -119,10 +119,10 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
-data "aws_acm_certificate" "certificate" {
-  count  = local.service_config.enable_https ? 1 : 0
-  domain = local.service_config.domain_name
-}
+# data "aws_acm_certificate" "certificate" {
+#   count  = local.service_config.enable_https ? 1 : 0
+#   domain = local.service_config.domain_name
+# }
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
   count = module.app_config.has_incident_management_service ? 1 : 0
@@ -194,15 +194,15 @@ module "service" {
     }] : []
   )
 
-  extra_policies = merge(
-    {
-      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
-      # storage_access              = module.storage.access_policy_arn
-    },
-    module.app_config.enable_identity_provider ? {
-      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
-  )
+#   extra_policies = merge(
+#     {
+#       api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
+#       # storage_access              = module.storage.access_policy_arn
+#     },
+#     module.app_config.enable_identity_provider ? {
+#       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+#     } : {}
+#   )
 
   is_temporary = local.is_temporary
 }
