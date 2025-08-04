@@ -343,8 +343,8 @@ FORM_UI_SCHEMA = [
                 "widget": "Budget424aSectionA",
                 "definition": [
                     "/properties/activity_line_items",
-                    "/properties/total_budget_summary"
-                ]
+                    "/properties/total_budget_summary",
+                ],
             }
         ],
     },
