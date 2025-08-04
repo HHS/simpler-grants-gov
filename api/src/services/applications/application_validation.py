@@ -172,9 +172,7 @@ def validate_application_form(
     form_validation_errors.extend(context.validation_issues)
 
     # Apply pre/post-populated changes back to the application form
-    # The context.json_data contains the updated values after rule processing
-    if context.json_data != application_form.application_response:
-        application_form.application_response = context.json_data
+    application_form.application_response = context.json_data
 
     # Check if the form is required
     is_required = is_form_required(application_form)
