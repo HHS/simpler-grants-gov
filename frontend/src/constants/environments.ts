@@ -26,7 +26,7 @@ const {
   CI,
 } = process.env;
 
-export const featureFlags = {
+export const envFeatureFlags = {
   opportunityOff: FEATURE_OPPORTUNITY_OFF,
   searchOff: FEATURE_SEARCH_OFF,
   developerPageOff: FEATURE_DEVELOPER_PAGE_OFF,
