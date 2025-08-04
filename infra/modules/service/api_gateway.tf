@@ -56,6 +56,10 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
 resource "aws_api_gateway_deployment" "api_deployment" {
   count = var.enable_api_gateway ? 1 : 0
 
+  depends_on = [
+    aws_api_gateway_method.api_proxy_method
+  ]
+
   rest_api_id = aws_api_gateway_rest_api.api[0].id
 
   triggers = {
@@ -85,6 +89,7 @@ resource "aws_api_gateway_stage" "api_v1_stage" {
   }
 
   cache_cluster_enabled = true
+  cache_cluster_size = 1.6
 
   # checkov:skip=CKV_AWS_73:X-Ray can increase costs greatly, and aren't always necessary
   # checkov:skip=CKV2_AWS_29:WAF can be enabled at a later time if needed
