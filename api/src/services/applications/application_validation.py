@@ -39,7 +39,7 @@ UPDATE_JSON_RULE_CONFIG = JsonRuleConfig(
     # When updating, we do pre-population + validate. If a user
     # changed any values, we want to make sure any pre-populated fields
     # stay as the automatically generated ones.
-    do_pre_population=True,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=True,
 )
