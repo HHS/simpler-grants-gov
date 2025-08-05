@@ -360,9 +360,7 @@ FORM_JSON_SCHEMA = {
             "title": "Additional Project Title",
             "description": "Attach file(s) using the appropriate buttons.",
             "maxItems": 100,
-            "items": {
-                "allOf": [{"$ref": "#/$defs/attachment_field"}]
-            },
+            "items": {"allOf": [{"$ref": "#/$defs/attachment_field"}]},
         },
         "congressional_district_applicant": {
             "type": "string",
@@ -640,11 +638,7 @@ FORM_JSON_SCHEMA = {
             "minLength": 1,
             "maxLength": 25,
         },
-        "attachment_field": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Attachment"
-        },
+        "attachment_field": {"type": "string", "format": "uuid", "title": "Attachment"},
         "state_code": {
             "type": "string",
             "title": "State",
@@ -660,403 +654,379 @@ FORM_JSON_SCHEMA = {
     },
 }
 
-FORM_UI_SCHEMA=[
-  {
-    "type": "section",
-    "name": "submission_info",
-    "label": "Submission Type",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/submission_type",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "application_type",
-    "label": "Application Type and Revision",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/application_type"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/revision_type",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/revision_other_specify",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "date_and_applicant_id",
-    "label": "Date Received & Applicant ID",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/date_received",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/applicant_id",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "organization_info",
-    "label": "Organization Information",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/organization_name",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/employer_taxpayer_identification_number",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/sam_uei",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "federal_state_ids",
-    "label": "Federal and State Identifiers",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/federal_entity_identifier",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/federal_award_identifier",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/state_receive_date",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/state_application_id",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "applicant_address",
-    "label": "Applicant Address",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/street1",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/street2",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/city",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/county",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/state",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/province",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/country",
-      },
-      {
-        "type": "field",
-        "definition": "/$defs/address/properties/zip_code",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "department_info",
-    "label": "Department & Division Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/department_name",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/division_name",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "contact_info",
-    "label": "Contact Person Information",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/contact_person"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/organization_affiliation",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/phone_number",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/fax",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/email",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "applicant_type",
-    "label": "Applicant Type",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/applicant_type_code",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/applicant_type_other_specify",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "agency_info",
-    "label": "Agency and Assistance Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/agency_name",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/assistance_listing_number",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/assistance_listing_program_title",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "funding_opportunity",
-    "label": "Funding Opportunity Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/funding_opportunity_number",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/funding_opportunity_title",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "competition_info",
-    "label": "Competition Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/competition_identification_number",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/competition_identification_title",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "areas_affected",
-    "label": "Areas Affected by Project",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/areas_affected",
-        "widget": "Attachment",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "project_title",
-    "label": "Project Title",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/project_title",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/additional_project_title",
-        "widget": "AttachmentArray",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "congressional_districts",
-    "label": "Congressional District Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/congressional_district_applicant",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/congressional_district_program_project",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/additional_congressional_districts",
-        "widget": "Attachment",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/project_start_date",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/project_end_date",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "estimated_funding",
-    "label": "Estimated Funding",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/federal_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/applicant_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/state_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/local_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/other_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/program_income_estimated_funding",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/total_estimated_funding",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "state_review",
-    "label": "State Review",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/state_review",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/state_review_available_date",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "federal_debt",
-    "label": "Delinquent Federal Debt",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/delinquent_federal_debt",
-      },
-      {
-        "type": "field",
-        "definition": "/properties/debt_explanation",
-        "widget": "Attachment",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "certification",
-    "label": "Certification Agreement",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/certification_agree",
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "name": "authorized_representative",
-    "label": "Authorized Representative Info",
-    "children": [
-      {
-        "type": "field",
-        "definition": "/properties/authorized_representative"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/authorized_representative_phone_number"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/authorized_representative_fax"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/authorized_representative_email"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/aor_signature"
-      },
-      {
-        "type": "field",
-        "definition": "/properties/date_signed"
-      }
-    ]
-  }
+FORM_UI_SCHEMA = [
+    {
+        "type": "section",
+        "name": "submission_info",
+        "label": "Submission Type",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/submission_type",
+            }
+        ],
+    },
+    {
+        "type": "section",
+        "name": "application_type",
+        "label": "Application Type and Revision",
+        "children": [
+            {"type": "field", "definition": "/properties/application_type"},
+            {
+                "type": "field",
+                "definition": "/properties/revision_type",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/revision_other_specify",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "date_and_applicant_id",
+        "label": "Date Received & Applicant ID",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/date_received",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/applicant_id",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "organization_info",
+        "label": "Organization Information",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/organization_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/employer_taxpayer_identification_number",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/sam_uei",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "federal_state_ids",
+        "label": "Federal and State Identifiers",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/federal_entity_identifier",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/federal_award_identifier",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/state_receive_date",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/state_application_id",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "applicant_address",
+        "label": "Applicant Address",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/street2",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/county",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/province",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/country",
+            },
+            {
+                "type": "field",
+                "definition": "/$defs/address/properties/zip_code",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "department_info",
+        "label": "Department & Division Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/department_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/division_name",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "contact_info",
+        "label": "Contact Person Information",
+        "children": [
+            {"type": "field", "definition": "/properties/contact_person"},
+            {
+                "type": "field",
+                "definition": "/properties/organization_affiliation",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/phone_number",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/fax",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/email",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "applicant_type",
+        "label": "Applicant Type",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/applicant_type_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/applicant_type_other_specify",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "agency_info",
+        "label": "Agency and Assistance Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/agency_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/assistance_listing_number",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/assistance_listing_program_title",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "funding_opportunity",
+        "label": "Funding Opportunity Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/funding_opportunity_number",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/funding_opportunity_title",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "competition_info",
+        "label": "Competition Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/competition_identification_number",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/competition_identification_title",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "areas_affected",
+        "label": "Areas Affected by Project",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/areas_affected",
+                "widget": "Attachment",
+            }
+        ],
+    },
+    {
+        "type": "section",
+        "name": "project_title",
+        "label": "Project Title",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/project_title",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/additional_project_title",
+                "widget": "AttachmentArray",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "congressional_districts",
+        "label": "Congressional District Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/congressional_district_applicant",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/congressional_district_program_project",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/additional_congressional_districts",
+                "widget": "Attachment",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_start_date",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_end_date",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "estimated_funding",
+        "label": "Estimated Funding",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/federal_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/applicant_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/state_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/local_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/other_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/program_income_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/total_estimated_funding",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "state_review",
+        "label": "State Review",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/state_review",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/state_review_available_date",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "federal_debt",
+        "label": "Delinquent Federal Debt",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/delinquent_federal_debt",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/debt_explanation",
+                "widget": "Attachment",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "certification",
+        "label": "Certification Agreement",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/certification_agree",
+            }
+        ],
+    },
+    {
+        "type": "section",
+        "name": "authorized_representative",
+        "label": "Authorized Representative Info",
+        "children": [
+            {"type": "field", "definition": "/properties/authorized_representative"},
+            {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
+            {"type": "field", "definition": "/properties/authorized_representative_fax"},
+            {"type": "field", "definition": "/properties/authorized_representative_email"},
+            {"type": "field", "definition": "/properties/aor_signature"},
+            {"type": "field", "definition": "/properties/date_signed"},
+        ],
+    },
 ]
 
 FORM_RULE_SCHEMA = {
