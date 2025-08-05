@@ -18,7 +18,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { FormValidationWarning, UiSchema } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
@@ -33,21 +33,6 @@ export function generateMetadata() {
   };
   return meta;
 }
-
-interface UiSchemaField {
-  type: "field";
-  definition: string;
-  widget?: string;
-}
-
-interface UiSchemaSection {
-  type: "section";
-  name: string;
-  label?: string;
-  children: (UiSchemaField | UiSchemaSection)[];
-}
-
-type UiSchema = (UiSchemaField | UiSchemaSection)[];
 
 export function formHasAttachmentFields(uiSchema: UiSchema): boolean {
   for (const item of uiSchema) {
@@ -137,9 +122,7 @@ async function FormPage({ params }: formPageProps) {
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
   const schemaErrors = validateUiSchema(form_ui_schema);
 
-  const includeAttachments = formHasAttachmentFields(
-    form_ui_schema as UiSchema,
-  );
+  const includeAttachments = formHasAttachmentFields(form_ui_schema);
   const attachments = includeAttachments ? applicationAttachments : [];
 
   if (schemaErrors) {
