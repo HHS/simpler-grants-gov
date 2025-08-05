@@ -3289,7 +3289,7 @@ def test_application_form_inclusion_update_invalid_request_missing_field(
 ):
     """Test application form inclusion update with missing is_included_in_submission field"""
     application = ApplicationFactory.create()
-    
+
     competition_form = CompetitionFormFactory.create(competition=application.competition)
     ApplicationUserFactory.create(user=user, application=application)
 
@@ -3316,23 +3316,17 @@ def test_application_start_with_pre_population(
         opportunity_number="TEST-OPP-123",
         opportunity_title="Test Opportunity Title",
     )
-    
+
     competition = CompetitionFactory.create(
-        opening_date=today, 
-        closing_date=future_date,
-        opportunity=opportunity
+        opening_date=today, closing_date=future_date, opportunity=opportunity
     )
 
     # Create a form with pre-population rules
     form_rule_schema = {
-        "opportunity_number_field": {
-            "gg_pre_population": {"rule": "opportunity_number"}
-        },
-        "opportunity_title_field": {
-            "gg_pre_population": {"rule": "opportunity_title"}
-        }
+        "opportunity_number_field": {"gg_pre_population": {"rule": "opportunity_number"}},
+        "opportunity_title_field": {"gg_pre_population": {"rule": "opportunity_title"}},
     }
-    
+
     form = FormFactory.create(form_rule_schema=form_rule_schema)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
@@ -3350,13 +3344,15 @@ def test_application_start_with_pre_population(
     application_form = db_session.execute(
         select(ApplicationForm).where(
             ApplicationForm.application_id == application_id,
-            ApplicationForm.competition_form_id == competition_form.competition_form_id
+            ApplicationForm.competition_form_id == competition_form.competition_form_id,
         )
     ).scalar_one_or_none()
 
     assert application_form is not None
     assert application_form.application_response["opportunity_number_field"] == "TEST-OPP-123"
-    assert application_form.application_response["opportunity_title_field"] == "Test Opportunity Title"
+    assert (
+        application_form.application_response["opportunity_title_field"] == "Test Opportunity Title"
+    )
 
 
 def test_application_form_update_with_pre_population(
@@ -3365,26 +3361,22 @@ def test_application_form_update_with_pre_population(
     """Test that updating an application form triggers pre-population of new fields"""
     # Create application
     opportunity = OpportunityFactory.create(
-        opportunity_number="UPDATE-OPP-456",
-        opportunity_title="Updated Opportunity Title"
+        opportunity_number="UPDATE-OPP-456", opportunity_title="Updated Opportunity Title"
     )
-    
+
     application = ApplicationFactory.create()
     application.competition.opportunity = opportunity
 
     # Create a form with pre-population rules
     form_rule_schema = {
-        "opportunity_number_field": {
-            "gg_pre_population": {"rule": "opportunity_number"}
-        },
+        "opportunity_number_field": {"gg_pre_population": {"rule": "opportunity_number"}},
         "user_input_field": {
             # No rule - user can modify this
-        }
+        },
     }
-    
+
     form = FormFactory.create(
-        form_json_schema=SIMPLE_JSON_SCHEMA,
-        form_rule_schema=form_rule_schema
+        form_json_schema=SIMPLE_JSON_SCHEMA, form_rule_schema=form_rule_schema
     )
 
     competition_form = CompetitionFormFactory.create(
@@ -3397,13 +3389,9 @@ def test_application_form_update_with_pre_population(
 
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
-    
+
     # Update with user data - should trigger pre-population
-    request_data = {
-        "application_response": {
-            "user_input_field": "User provided data"
-        }
-    }
+    request_data = {"application_response": {"user_input_field": "User provided data"}}
 
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
@@ -3434,20 +3422,16 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
 ):
     """Test that pre-population overwrites user values for pre-populated fields"""
     # Create application
-    opportunity = OpportunityFactory.create(
-        opportunity_number="PRESERVE-OPP-789"
-    )
-    
+    opportunity = OpportunityFactory.create(opportunity_number="PRESERVE-OPP-789")
+
     application = ApplicationFactory.create()
     application.competition.opportunity = opportunity
 
     # Create a form with pre-population rules
     form_rule_schema = {
-        "opportunity_number_field": {
-            "gg_pre_population": {"rule": "opportunity_number"}
-        }
+        "opportunity_number_field": {"gg_pre_population": {"rule": "opportunity_number"}}
     }
-    
+
     form = FormFactory.create(form_rule_schema=form_rule_schema)
 
     competition_form = CompetitionFormFactory.create(
@@ -3459,18 +3443,14 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
     existing_form = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
-        application_response={
-            "opportunity_number_field": "User Changed This Value"
-        }
+        application_response={"opportunity_number_field": "User Changed This Value"},
     )
 
     # Associate user with application
     ApplicationUserFactory.create(user=user, application=application)
 
     request_data = {
-        "application_response": {
-            "opportunity_number_field": "User Tried To Change Again"
-        }
+        "application_response": {"opportunity_number_field": "User Tried To Change Again"}
     }
 
     response = client.put(
@@ -3483,6 +3463,6 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
 
     # Verify application form was updated with pre-populated value, not user value
     db_session.refresh(existing_form)
-    
+
     # Pre-population should override user input
     assert existing_form.application_response["opportunity_number_field"] == "PRESERVE-OPP-789"
