@@ -322,6 +322,7 @@ export const messages = {
         complete: "Complete",
       },
       updated: "Last updated",
+      submitWithApplication: "Submit with application?",
     },
     attachments: {
       attachedDocument: "Attached document",
