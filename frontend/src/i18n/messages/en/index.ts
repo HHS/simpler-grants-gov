@@ -512,6 +512,35 @@ export const messages = {
       "Tools and resources for developers working on Simpler.Grants.gov",
     description:
       "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+    pageHeaderTitle: "Developer Portal",
+    pageHeaderParagraph:
+      "Access developer tools, resources, and documentation to contribute to Simpler.Grants.gov. Build with us to create a better grants experience.",
+    infoTitle: "API tools & management",
+    canDoHeader: "What's available for developers",
+    canDoSubHeader: "What you can do now",
+    canDoParagraph:
+      "With an API key, you can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials—create, view, rotate, and revoke API keys—via the API dashboard.",
+    cantDoHeader: "What you can’t do quite yet",
+    cantDoParagraph:
+      "Before you get started there are a few limitations to be aware of. Inactive API keys are automatically disabled after 30 days without use. Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API. Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options. Additional management features (such as organization-level projects and roles) are on the roadmap but aren’t available yet. ",
+    featureFlagsLink: "Manage API Keys",
+    iconSections: [
+      {
+        description:
+          "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
+        http: "https://github.com/HHS/simpler-grants-gov/tree/main/documentation",
+        iconName: "code",
+        link: "Get started",
+        title: "Developer quickstart",
+      },
+      {
+        description: "Learn more about integrating our API into your project.",
+        http: "/dev/feature-flags",
+        iconName: "local_library",
+        link: "Read the docs",
+        title: "API reference",
+      },
+    ],
   },
   Header: {
     navLinks: {
