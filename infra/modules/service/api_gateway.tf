@@ -152,8 +152,13 @@ resource "aws_api_gateway_usage_plan" "api_public_usage_plan" {
 
   # Global level throttling for this usage plan
   throttle_settings {
-    burst_limit = 5
     rate_limit  = 10
+  }
+
+  # Limits the public usage plan to 250k a month
+  quota_settings {
+    limit  = 250000
+    period = "MONTH"
   }
 }
 
