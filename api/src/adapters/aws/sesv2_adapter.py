@@ -31,7 +31,7 @@ class BaseSESV2Client(ABC, metaclass=ABCMeta):
 
 class SESV2Client(BaseSESV2Client):
     def __init__(self) -> None:
-        self.client = get_ses_client()
+        self.client = get_sesv2_client()
 
     def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
         request_params = {}
@@ -65,7 +65,7 @@ class MockSESV2Client(BaseSESV2Client):
         )
 
 
-def get_ses_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
+def get_sesv2_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
     if session is None:
         session = get_boto_session()
 
