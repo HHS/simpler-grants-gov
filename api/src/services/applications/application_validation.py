@@ -48,7 +48,7 @@ SUBMISSION_JSON_RULE_CONFIG = JsonRuleConfig(
     # During submission, we do post-population (the only place we ever do)
     # and field validation
     do_pre_population=False,
-    do_post_population=False,  # TODO - when we enable post-population, flip this to True
+    do_post_population=True,  # Post-population enabled for submit flow
     do_field_validation=True,
 )
 
