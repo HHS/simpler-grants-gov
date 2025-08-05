@@ -1,7 +1,8 @@
-"use client"
+"use client";
+
+import { Attachment } from "src/types/attachmentTypes";
 
 import { createContext, useContext } from "react";
-import { Attachment } from "src/types/attachmentTypes";
 
 export const AttachmentContext = createContext<Attachment[] | null>(null);
 

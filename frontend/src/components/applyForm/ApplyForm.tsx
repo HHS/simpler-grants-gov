@@ -13,7 +13,6 @@ import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
-import { Attachment } from "src/types/attachmentTypes";
 
 const ApplyForm = ({
   applicationId,
@@ -55,8 +54,16 @@ const ApplyForm = ({
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
-  let fields: JSX.Element[] = [];
 
+  if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
+    return (
+      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
+        Error rendering form
+      </Alert>
+    );
+  }
+
+  let fields: JSX.Element[] = [];
   try {
     fields = buildFormTreeRecursive({
       errors: saved ? validationWarnings : null,
@@ -67,7 +74,7 @@ const ApplyForm = ({
   } catch (e) {
     console.error(e);
     return (
-      <Alert type="error" heading="Error" headingLevel="h4">
+      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form
       </Alert>
     );

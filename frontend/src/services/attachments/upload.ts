@@ -1,3 +1,5 @@
+import { AttachmentUploadResponse } from "src/types/attachmentTypes";
+
 export const uploadFileToApp = async (
   applicationId: string,
   file: File,
@@ -13,10 +15,13 @@ export const uploadFileToApp = async (
 
     if (!res.ok) throw new Error("Upload failed");
 
-    const data = await res.json();
-    return data.application_attachment_id ?? null;
+    const data = (await res.json()) as AttachmentUploadResponse;
+
+    return typeof data.application_attachment_id === "string"
+      ? data.application_attachment_id
+      : null;
   } catch (err) {
     console.error("Upload error:", err);
     return null;
   }
-}
+};

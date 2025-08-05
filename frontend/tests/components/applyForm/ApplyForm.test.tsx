@@ -179,7 +179,6 @@ describe("ApplyForm", () => {
       />,
     );
     const alert = screen.getByTestId("alert");
-    expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent("Error rendering form");
   });
   it("errors when form data does not conform to JSON schema", () => {
@@ -189,7 +188,7 @@ describe("ApplyForm", () => {
       <ApplyForm
         applicationId="test"
         savedFormData={{}}
-        formSchema={{ arbitrayField: "arbirtrary value" }}
+        formSchema={{ title: "Invalid", type: "object", properties: {} }}
         uiSchema={uiSchema}
         formId="test"
         validationWarnings={[]}

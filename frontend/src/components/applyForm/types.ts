@@ -106,7 +106,10 @@ export interface UswdsWidgetProps<
   value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
-  schema: RJSFSchema;
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
   maxLength?: number;
   required?: boolean;
   disabled?: boolean;

@@ -109,22 +109,12 @@ export function buildFormTreeRecursive({
           });
           acc = [
             ...acc,
-            wrapSection(
-              parent.label,
-              parent.name,
-              <>{childAcc}</>,
-              `${parent.name}--`,
-            ),
+            wrapSection(parent.label, parent.name, <>{childAcc}</>),
           ];
         } else {
           acc = [
             ...acc,
-            wrapSection(
-              parent.label,
-              parent.name,
-              <>{row}</>,
-              `${parent.name}--`,
-            ),
+            wrapSection(parent.label, parent.name, <>{row}</>),
           ];
         }
       }
@@ -166,6 +156,7 @@ export const determineFieldType = ({
     }
   }
 
+  // eslint-disable-next-line no-console
   console.debug(
     "Resolved widget type",
     fieldSchema.type,
@@ -201,34 +192,43 @@ export const getFieldSchema = ({
   }
 
   // If schema is provided, merge it on top of resolved pointer
-  let resolved = schema ?? {};
+  let resolved: Partial<RJSFSchema> = {};
 
   if (definition) {
     const pathParts = definition.split("/").filter(Boolean);
 
-    let current: any = formSchema;
+    let current: unknown = formSchema;
 
-    for (let i = 0; i < pathParts.length; i++) {
-      const part = pathParts[i];
-
-      if (!current[part]) {
+    for (const part of pathParts) {
+      if (
+        typeof current !== "object" ||
+        current === null ||
+        !(part in current)
+      ) {
         console.warn(`Schema path part "${part}" not found in`, current);
         return resolved as RJSFSchema;
       }
 
-      current = current[part];
+      current = (current as Record<string, unknown>)[part];
 
-      // Resolve $ref if found
-      while (current?.["$ref"]) {
-        const refPath = current["$ref"].replace(/^#\//, "");
+      // resolve $ref if present
+      while (
+        typeof current === "object" &&
+        current !== null &&
+        "$ref" in current
+      ) {
+        const refPath = (current as { $ref: string }).$ref.replace(/^#\//, "");
         current = getSchemaObjectFromPointer(formSchema, `/${refPath}`);
       }
     }
 
-    resolved = { ...current, ...resolved };
+    resolved = current as Partial<RJSFSchema>;
   }
 
-  return resolved as RJSFSchema;
+  return {
+    ...resolved,
+    ...(schema ?? {}),
+  } as RJSFSchema;
 };
 
 export const getNameFromDef = ({
@@ -500,9 +500,8 @@ const wrapSection = (
   label: string,
   fieldName: string,
   tree: JSX.Element | undefined,
-  pathPrefix = "",
-) => {
-  const key = `${pathPrefix}${fieldName}-wrapper`;
+): JSX.Element => {
+  const key = `${fieldName}-wrapper`;
 
   return (
     <FieldsetWidget key={key} fieldName={fieldName} label={label}>
@@ -610,16 +609,20 @@ export function getLabelComponent<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
->({
-  id,
-  title,
-  required,
-  description,
-  options,
-}: Pick<
-  UswdsWidgetProps<T, S, F>,
-  "id" | "title" | "required" | "description" | "options"
->) {
+>(
+  // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  {
+    id,
+    title,
+    required,
+    description,
+    options,
+  }: Pick<
+    UswdsWidgetProps<T, S, F>,
+    "id" | "title" | "required" | "description" | "options"
+  >,
+) {
   const labelType = options?.["widget-label"] || "default";
 
   switch (labelType) {
@@ -641,7 +644,7 @@ export function getLabelComponent<
         <FieldLabel
           idFor={id}
           title={title}
-          description={description}
+          description={description as string}
           required={required}
         />
       );

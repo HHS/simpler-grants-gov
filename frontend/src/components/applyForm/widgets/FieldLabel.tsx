@@ -25,7 +25,9 @@ export const FieldLabel = ({
           </span>
         )}
       </Label>
-      {description && <p className="text-base-dark margin-top-0">{description}</p>}
+      {description && (
+        <p className="text-base-dark margin-top-0">{description}</p>
+      )}
     </>
   );
 };

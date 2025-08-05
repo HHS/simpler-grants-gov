@@ -1,5 +1,8 @@
 "use client";
 
+import { uploadFileToApp } from "src/services/attachments/upload";
+import { Attachment } from "src/types/attachmentTypes";
+
 import { useEffect, useRef, useState } from "react";
 import {
   ErrorMessage,
@@ -9,12 +12,12 @@ import {
   Icon,
 } from "@trussworks/react-uswds";
 
-
-import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { Attachment } from "src/types/attachmentTypes";
-import { uploadFileToApp } from "src/services/attachments/upload";
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
-import { getApplicationIdFromUrl, getLabelComponent } from "src/components/applyForm/utils";
+import { UswdsWidgetProps } from "src/components/applyForm/types";
+import {
+  getApplicationIdFromUrl,
+  getLabelComponent,
+} from "src/components/applyForm/utils";
 
 const AttachmentUpload = ({
   id,
@@ -24,7 +27,10 @@ const AttachmentUpload = ({
   schema,
   onChange,
 }: UswdsWidgetProps) => {
-  const { description, options, title } = schema;
+  const { description, options, title } = schema as typeof schema & {
+    description?: string;
+    title?: string;
+  };
   const fileInputRef = useRef<FileInputRef | null>(null);
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
@@ -75,58 +81,66 @@ const AttachmentUpload = ({
   };
 
   return (
-    <FormGroup  key={`form-group__file-upload--${id}`} error={hasError}>
+    <FormGroup key={`form-group__file-upload--${id}`} error={hasError}>
+      {/* casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath. */}
+      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
       {getLabelComponent({ id, title, required, description, options })}
       {hasError && (
         <ErrorMessage id={`error-for-${id}`}>
-        {(() => {
+          {(() => {
             const error = rawErrors[0];
             if (!error) return null;
             if (typeof error === "string") return error;
             if (typeof error === "object" && "message" in error) {
-            return error.message;
+              return error.message;
             }
             return "Invalid input";
-        })()}
+          })()}
         </ErrorMessage>
       )}
 
       {uuid ? (
-  <>
-    <div className="margin-top-2 display-flex flex-align-center">
-      {(() => {
-        const attachment = attachments.find(
-          (a) => a.application_attachment_id === uuid,
-        );
+        <>
+          <div className="margin-top-2 display-flex flex-align-center">
+            {(() => {
+              const attachment = attachments.find(
+                (a) => a.application_attachment_id === uuid,
+              );
 
-        return attachment?.download_path ? (
-          <a
-            href={attachment.download_path}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary display-inline-flex align-items-center"
-          >
-            <Icon.Visibility className="margin-right-02 text-middle" role="presentation" />
-            {fileName || "View uploaded file"}
-          </a>
-        ) : (
-          <span>{fileName || "File uploaded"}</span>
-        );
-      })()}
+              return attachment?.download_path ? (
+                <a
+                  href={attachment.download_path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary display-inline-flex align-items-center"
+                >
+                  <Icon.Visibility
+                    className="margin-right-02 text-middle"
+                    role="presentation"
+                  />
+                  {fileName || "View uploaded file"}
+                </a>
+              ) : (
+                <span>{fileName || "File uploaded"}</span>
+              );
+            })()}
 
-      <button
-        type="button"
-        className="usa-button usa-button--unstyled text-primary margin-left-5 display-inline-flex align-items-center"
-        onClick={handleRemove}
-      >
-        <Icon.Delete className="margin-right-02 text-middle" role="presentation" />
-        Delete
-      </button>
-    </div>
+            <button
+              type="button"
+              className="usa-button usa-button--unstyled text-primary margin-left-5 display-inline-flex align-items-center"
+              onClick={handleRemove}
+            >
+              <Icon.Delete
+                className="margin-right-02 text-middle"
+                role="presentation"
+              />
+              Delete
+            </button>
+          </div>
 
-    <input type="hidden" name={id} value={uuid} />
-  </>
-) : (
+          <input type="hidden" name={id} value={uuid} />
+        </>
+      ) : (
         <FileInput
           id={id}
           name={`${id}-file`}
@@ -136,7 +150,9 @@ const AttachmentUpload = ({
           onChange={(e) => {
             const files = e.currentTarget.files;
             e.preventDefault();
-            void handleFileChange(files);
+            handleFileChange(files).catch((error) => {
+              console.error("File handling failed:", error);
+            });
           }}
           aria-describedby={describedBy}
         />

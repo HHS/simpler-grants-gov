@@ -1,10 +1,11 @@
 "use client";
 
-import { Attachment } from "src/types/attachmentTypes";
-import { AttachmentContext } from "./AttachmentContext";
-import ApplyForm from "./ApplyForm";
-import { FormValidationWarning, UiSchema } from "./types";
 import { RJSFSchema } from "@rjsf/utils";
+import { Attachment } from "src/types/attachmentTypes";
+
+import ApplyForm from "./ApplyForm";
+import { AttachmentContext } from "./AttachmentContext";
+import { FormValidationWarning, UiSchema } from "./types";
 
 export const ClientApplyForm = ({
   applicationId,
@@ -23,7 +24,6 @@ export const ClientApplyForm = ({
   uiSchema: UiSchema;
   validationWarnings: FormValidationWarning[] | null;
 }) => {
-
   return (
     <AttachmentContext.Provider value={attachments}>
       <ApplyForm
@@ -36,4 +36,4 @@ export const ClientApplyForm = ({
       />
     </AttachmentContext.Provider>
   );
-}
+};

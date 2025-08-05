@@ -11,18 +11,18 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { Attachment } from "src/types/attachmentTypes";
-import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
 
 export const dynamic = "force-dynamic";
 
@@ -117,7 +117,9 @@ async function FormPage({ params }: formPageProps) {
     }
 
     formValidationWarnings =
-      (applicationData.form_validation_warnings?.[appFormId] as unknown as FormValidationWarning[]) || null;
+      (applicationData.form_validation_warnings?.[
+        appFormId
+      ] as unknown as FormValidationWarning[]) || null;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -135,7 +137,9 @@ async function FormPage({ params }: formPageProps) {
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
   const schemaErrors = validateUiSchema(form_ui_schema);
 
-  const includeAttachments = formHasAttachmentFields(form_ui_schema as UiSchema);
+  const includeAttachments = formHasAttachmentFields(
+    form_ui_schema as UiSchema,
+  );
   const attachments = includeAttachments ? applicationAttachments : [];
 
   if (schemaErrors) {
