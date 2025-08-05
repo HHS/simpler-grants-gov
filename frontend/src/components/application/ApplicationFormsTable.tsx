@@ -3,9 +3,12 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useState } from "react";
 import { Table } from "@trussworks/react-uswds";
 
+import RadioWidget from "src/components/applyForm/widgets/RadioWidget";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { useClientFetch } from "../../hooks/useClientFetch";
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,
@@ -76,6 +79,7 @@ export const ApplicationFormsTable = ({
             forms={forms}
             applicationForms={conditionalRequiredForms}
             applicationId={applicationId}
+            formsAreOptional={true}
           />
         </>
       )}
@@ -97,10 +101,12 @@ const ApplicationTable = ({
   applicationForms,
   applicationId,
   forms,
+  formsAreOptional = false,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
+  formsAreOptional: boolean;
 }) => {
   const t = useTranslations("Application.competitionFormTable");
 
@@ -111,6 +117,11 @@ const ApplicationTable = ({
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("status")}
           </th>
+          {formsAreOptional && (
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("includeFormInApplicationSubmission")}
+            </th>
+          )}
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("form")}
           </th>
@@ -131,6 +142,17 @@ const ApplicationTable = ({
                 formId={form.form_id}
               />
             </td>
+            {formsAreOptional && (
+              <td data-label={t("includeFormInApplicationSubmission")}>
+                <IncludeFormInSubmissionRadio
+                  applicationId={applicationId}
+                  formId={form.form_id}
+                  includeFormInApplicationSubmission={
+                    form.is_included_in_submission
+                  }
+                />
+              </td>
+            )}
             <td data-label={t("form")}>
               <FormLink
                 formId={form.form_id}
@@ -248,5 +270,58 @@ const FormLink = ({
         </Link>
       )}
     </>
+  );
+};
+
+const IncludeFormInSubmissionRadio = ({
+  applicationId,
+  formId,
+  includeFormInApplicationSubmission,
+}: {
+  applicationId: string;
+  formId: string;
+  includeFormInApplicationSubmission?: boolean | null;
+}) => {
+  const { clientFetch } = useClientFetch<{
+    applicationId: string;
+    formId: string;
+  }>("Error submitting update include form in application submission");
+  const [include, setInclude] = useState<boolean | null>(
+    includeFormInApplicationSubmission ?? null,
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleChange = (value: string) => {
+    const newInclude = value === "Yes";
+    setLoading(true);
+    clientFetch(`/api/applications/${applicationId}/forms/${formId}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        is_included_in_submission: newInclude,
+      }),
+    })
+      .then((data) => {
+        console.log(data);
+        setInclude(newInclude);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  return (
+    <RadioWidget
+      id={"yesNoWidget"}
+      schema={{ enum: ["Yes", "No"] }}
+      value={include === true ? "Yes" : include === false ? "No" : null}
+      options={{
+        disabled: loading,
+      }}
+      updateOnInput={true}
+      onChange={handleChange}
+    />
   );
 };
