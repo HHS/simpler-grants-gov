@@ -148,15 +148,6 @@ resource "aws_api_gateway_usage_plan" "api_public_usage_plan" {
   api_stages {
     api_id = aws_api_gateway_rest_api.api[0].id
     stage  = aws_api_gateway_stage.api_v1_stage[0].stage_name
-
-    # Will test once the gateway is deployed. This might be a way to restrict what paths a public user 
-    # has access to. We'd have to test to see if we can do wildcard or greedy syntax so we don't
-    # need to define each path they DON'T have access to
-    # throttle {
-    #   path        = "/some/path/to/block/GET"
-    #   burst_limit = 0
-    #   rate_limit  = 0
-    # }
   }
 
   # Global level throttling for this usage plan
