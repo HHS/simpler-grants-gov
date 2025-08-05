@@ -5,8 +5,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ClientMaintenanceCheck from "src/components/ClientMaintenanceCheck";
-
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -28,7 +26,8 @@ export default function Maintenance({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <ClientMaintenanceCheck />
+      {/* This piece does not seem reliable, maybe due to re-render or rehyrdrate cylces where we redirect away before the actual client live feature flag is set */}
+      {/* <ClientMaintenanceCheck /> */}
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 padding-x-5 tablet:padding-x-7 desktop-lg:padding-x-10 text-center">
         <h2 className="margin-bottom-0">{t("heading")}</h2>
         <p className="margin-x-auto">{body}</p>
