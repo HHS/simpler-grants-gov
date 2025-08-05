@@ -13,15 +13,13 @@ import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFe
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
+import { formHasAttachmentFields } from "src/utils/formHasAttachment";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
-import {
-  FormValidationWarning,
-  UiSchema,
-} from "src/components/applyForm/types";
+import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
@@ -35,21 +33,6 @@ export function generateMetadata() {
     description: "this is the form",
   };
   return meta;
-}
-
-export function formHasAttachmentFields(uiSchema: UiSchema): boolean {
-  for (const item of uiSchema) {
-    if (item.type === "field" && item.widget?.startsWith("Attachment")) {
-      return true;
-    }
-
-    if (item.type === "section" && Array.isArray(item.children)) {
-      if (formHasAttachmentFields(item.children)) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 interface formPageProps {
