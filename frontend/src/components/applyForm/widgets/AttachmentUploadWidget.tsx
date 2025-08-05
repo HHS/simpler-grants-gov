@@ -1,164 +1,203 @@
 "use client";
 
-import { uploadFileToApp } from "src/services/attachments/upload";
-import { Attachment } from "src/types/attachmentTypes";
+import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
+import { AttachmentUploadResponse } from "src/types/attachmentTypes";
 
-import { useEffect, useRef, useState } from "react";
 import {
-  ErrorMessage,
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  Button,
   FileInput,
   FileInputRef,
-  FormGroup,
-  Icon,
+  ModalRef,
 } from "@trussworks/react-uswds";
 
-import { useAttachments } from "src/components/applyForm/AttachmentContext";
-import { UswdsWidgetProps } from "src/components/applyForm/types";
 import {
-  getApplicationIdFromUrl,
-  getLabelComponent,
-} from "src/components/applyForm/utils";
+  deleteAttachmentAction,
+  DeleteAttachmentActionState,
+} from "src/components/application/attachments/actions";
+import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { useAttachments } from "src/components/applyForm/AttachmentContext";
+import {
+  FormValidationWarning,
+  UswdsWidgetProps,
+} from "src/components/applyForm/types";
+import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
 
-const AttachmentUpload = ({
-  id,
-  value: initialValue,
-  required,
-  rawErrors = [],
-  schema,
-  onChange,
-}: UswdsWidgetProps) => {
-  const { description, options, title } = schema as typeof schema & {
-    description?: string;
-    title?: string;
-  };
+export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
+  const {
+    id,
+    value,
+    onChange,
+    required,
+    schema,
+    rawErrors = [],
+    disabled,
+  } = props;
+
   const fileInputRef = useRef<FileInputRef | null>(null);
-  const hasError = rawErrors.length > 0;
-  const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
-
-  const [uuid, setUuid] = useState<string | null>(
-    typeof initialValue === "string" ? initialValue : null,
-  );
-  const [fileName, setFileName] = useState<string>("");
+  const deleteModalRef = useRef<ModalRef | null>(null);
+  const applicationId = getApplicationIdFromUrl();
   const attachments = useAttachments();
 
-  useEffect(() => {
-    if (uuid && !fileName) {
-      const existing = attachments.find(
-        (a: Attachment) => a.application_attachment_id === uuid,
-      );
-      if (existing) {
-        setFileName(existing.file_name);
-      }
-    }
-  }, [uuid, fileName, attachments]);
+  const [attachmentId, setAttachmentId] = useState<string | null>(
+    typeof value === "string" ? value : null,
+  );
 
-  const handleFileChange = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    const applicationId = getApplicationIdFromUrl();
-    if (!applicationId) {
-      console.error("Could not extract applicationId from URL");
-      return;
-    }
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [showFile, setShowFile] = useState<boolean>(false);
+  const [deletePendingName, setDeletePendingName] = useState<string | null>(
+    null,
+  );
 
-    try {
-      const attachmentId = await uploadFileToApp(applicationId, file);
-      if (attachmentId) {
-        setUuid(attachmentId);
-        setFileName(file.name);
-        onChange?.(attachmentId);
-        fileInputRef.current?.clearFiles();
-      }
-    } catch (err) {
-      console.error("Upload failed:", err);
+  const [deleteState, deleteActionFormAction, deletePending] = useActionState(
+    deleteAttachmentAction,
+    deleteUploadActionsInitialState satisfies DeleteAttachmentActionState,
+  );
+
+  const handleDeleteClick = () => {
+    if (isPreviouslyUploaded) {
+      setShowFile(false);
+      setFileName(null);
+      setAttachmentId(null);
+      onChange?.(undefined);
+    } else {
+      setDeletePendingName(fileName ?? "this file");
+      deleteModalRef.current?.toggleModal();
     }
   };
 
-  const handleRemove = () => {
-    setUuid(null);
-    setFileName("");
-    onChange?.("");
+  const handleDeleteConfirmed = () => {
+    if (!applicationId || !attachmentId) return;
+
+    startTransition(() => {
+      deleteActionFormAction({
+        applicationId,
+        applicationAttachmentId: attachmentId,
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (deleteState?.success) {
+      setShowFile(false);
+      setFileName(null);
+      setAttachmentId(null);
+      onChange?.(undefined);
+    }
+  }, [deleteState, onChange]);
+
+  useEffect(() => {
+    const newAttachmentId = typeof value === "string" ? value : null;
+    setAttachmentId(newAttachmentId);
+
+    const uploadedAttachment = attachments.find(
+      (a) => a.application_attachment_id === newAttachmentId,
+    );
+
+    setFileName(
+      uploadedAttachment?.file_name ??
+        (newAttachmentId ? "(Previously uploaded file)" : null),
+    );
+
+    setShowFile(!!newAttachmentId);
+  }, [value, attachments]);
+
+  const handleChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
+    const file = event.target.files?.[0];
+    if (!file || !applicationId) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/applications/${applicationId}/attachments`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as AttachmentUploadResponse;
+      const uploadedId = data.application_attachment_id;
+      if (typeof uploadedId === "string") {
+        setAttachmentId(uploadedId);
+        setFileName(file.name);
+        setShowFile(true);
+        onChange?.(uploadedId);
+      } else {
+        console.error("Upload response missing a valid attachment ID");
+      }
+    } else {
+      console.error("Upload failed");
+    }
+
+    fileInputRef.current?.clearFiles();
+  };
+
+  const hasError = rawErrors.length > 0;
+  const describedBy = hasError ? `${id}-error` : undefined;
+  const isPreviouslyUploaded = fileName === "(Previously uploaded file)";
+
+  const isValidationWarning = (e: unknown): e is FormValidationWarning => {
+    return typeof e === "object" && e !== null && "message" in e;
   };
 
   return (
-    <FormGroup key={`form-group__file-upload--${id}`} error={hasError}>
-      {/* casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath. */}
-      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-      {getLabelComponent({ id, title, required, description, options })}
-      {hasError && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {(() => {
-            const error = rawErrors[0];
-            if (!error) return null;
-            if (typeof error === "string") return error;
-            if (typeof error === "object" && "message" in error) {
-              return error.message;
-            }
-            return "Invalid input";
-          })()}
-        </ErrorMessage>
-      )}
-
-      {uuid ? (
-        <>
-          <div className="margin-top-2 display-flex flex-align-center">
-            {(() => {
-              const attachment = attachments.find(
-                (a) => a.application_attachment_id === uuid,
-              );
-
-              return attachment?.download_path ? (
-                <a
-                  href={attachment.download_path}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary display-inline-flex align-items-center"
-                >
-                  <Icon.Visibility
-                    className="margin-right-02 text-middle"
-                    role="presentation"
-                  />
-                  {fileName || "View uploaded file"}
-                </a>
-              ) : (
-                <span>{fileName || "File uploaded"}</span>
-              );
-            })()}
-
-            <button
-              type="button"
-              className="usa-button usa-button--unstyled text-primary margin-left-5 display-inline-flex align-items-center"
-              onClick={handleRemove}
-            >
-              <Icon.Delete
-                className="margin-right-02 text-middle"
-                role="presentation"
-              />
-              Delete
-            </button>
-          </div>
-
-          <input type="hidden" name={id} value={uuid} />
-        </>
-      ) : (
+    <>
+      <input type="hidden" name={id} value={attachmentId ?? ""} />
+      {!showFile && (
         <FileInput
           id={id}
-          name={`${id}-file`}
+          name={id}
+          required={required}
+          disabled={disabled}
           ref={fileInputRef}
-          type="file"
-          className="usa-file-input__input"
           onChange={(e) => {
-            const files = e.currentTarget.files;
-            e.preventDefault();
-            handleFileChange(files).catch((error) => {
-              console.error("File handling failed:", error);
-            });
+            handleChange(e).catch((error) => console.error(error));
           }}
+          accept={schema.contentMediaType}
           aria-describedby={describedBy}
+          aria-invalid={hasError}
         />
       )}
-    </FormGroup>
-  );
-};
 
-export default AttachmentUpload;
+      {showFile && (
+        <div className="margin-top-1 display-flex flex-align-center">
+          <span>{fileName}</span>
+          <Button
+            type="button"
+            unstyled
+            onClick={handleDeleteClick}
+            className="margin-left-1"
+          >
+            {isPreviouslyUploaded ? "Remove" : "Delete"}
+          </Button>
+        </div>
+      )}
+
+      {hasError && (
+        <span id={`${id}-error`} className="usa-error-message">
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : isValidationWarning(rawErrors[0])
+              ? rawErrors[0].message
+              : "Invalid input"}
+        </span>
+      )}
+
+      <DeleteAttachmentModal
+        deletePending={deletePending}
+        handleDeleteAttachment={handleDeleteConfirmed}
+        modalId="delete-attachment-modal"
+        modalRef={deleteModalRef}
+        pendingDeleteName={deletePendingName ?? ""}
+      />
+    </>
+  );
+}

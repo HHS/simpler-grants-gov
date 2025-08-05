@@ -1,16 +1,29 @@
 "use client";
 
+import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
 import { uploadFileToApp } from "src/services/attachments/upload";
 
-import { useEffect, useRef, useState } from "react";
+import React, {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ErrorMessage,
   FileInput,
   FileInputRef,
   FormGroup,
   Icon,
+  ModalRef,
 } from "@trussworks/react-uswds";
 
+import {
+  deleteAttachmentAction,
+  DeleteAttachmentActionState,
+} from "src/components/application/attachments/actions";
+import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import {
@@ -32,6 +45,8 @@ const MultipleAttachmentUploadWidget = ({
   onChange,
 }: UswdsWidgetProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
+  const deleteModalRef = useRef<ModalRef | null>(null);
+  const attachments = useAttachments();
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
   const { description, options, title } = schema as typeof schema & {
@@ -39,31 +54,47 @@ const MultipleAttachmentUploadWidget = ({
     title?: string;
   };
 
-  const attachments = useAttachments();
+  const applicationId = getApplicationIdFromUrl();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-
   const uploadedFilesRef = useRef<UploadedFile[]>([]);
+  const [fileToDeleteIndex, setFileToDeleteIndex] = useState<number | null>(
+    null,
+  );
+  const [deletePendingName, setDeletePendingName] = useState<string | null>(
+    null,
+  );
+
+  const [deleteState, deleteActionFormAction, deletePending] = useActionState(
+    deleteAttachmentAction,
+    deleteUploadActionsInitialState satisfies DeleteAttachmentActionState,
+  );
+
+  const hasHydratedRef = useRef(false);
 
   useEffect(() => {
+    if (hasHydratedRef.current) return;
+
     let parsedValue: string[] = [];
 
     if (Array.isArray(initialValue)) {
       parsedValue = initialValue as string[];
     } else if (typeof initialValue === "string") {
       try {
-        const parsed: unknown = JSON.parse(initialValue);
+        // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const parsed = JSON.parse(initialValue);
         if (
           Array.isArray(parsed) &&
-          (parsed as unknown[]).every((item) => typeof item === "string")
+          parsed.every((item) => typeof item === "string")
         ) {
-          parsedValue = parsed as string[];
+          parsedValue = parsed;
         }
       } catch {
         console.warn("Invalid JSON string for initialValue:", initialValue);
       }
     }
 
-    if (parsedValue.length > 0 && uploadedFiles.length === 0) {
+    if (parsedValue.length > 0) {
       const hydrated = parsedValue.map((uuid) => {
         const match = attachments.find(
           (a) => a.application_attachment_id === uuid,
@@ -73,19 +104,26 @@ const MultipleAttachmentUploadWidget = ({
           name: match?.file_name || "(Previously uploaded file)",
         };
       });
+
       setUploadedFiles(hydrated);
       uploadedFilesRef.current = hydrated;
+      hasHydratedRef.current = true;
     }
-  }, [initialValue, attachments, uploadedFiles.length]);
+  }, [initialValue, attachments]);
 
-  const handleFileChange = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    const applicationId = getApplicationIdFromUrl();
-    if (!applicationId) {
-      console.error("Could not extract applicationId from URL");
-      return;
+  useEffect(() => {
+    if (deleteState?.success && fileToDeleteIndex !== null) {
+      const updated = uploadedFiles.filter((_, i) => i !== fileToDeleteIndex);
+      setUploadedFiles(updated);
+      uploadedFilesRef.current = updated;
+      onChange?.(updated.map((f) => f.id));
+      setFileToDeleteIndex(null);
+      setDeletePendingName(null);
     }
+  }, [deleteState, fileToDeleteIndex, uploadedFiles, onChange]);
+
+  const handleFileChange = async (files: FileList | null): Promise<void> => {
+    if (!files || !applicationId) return;
 
     const newFiles: UploadedFile[] = [];
 
@@ -101,7 +139,6 @@ const MultipleAttachmentUploadWidget = ({
     }
 
     const combined = [...uploadedFilesRef.current, ...newFiles];
-
     setUploadedFiles(combined);
     uploadedFilesRef.current = combined;
     onChange?.(combined.map((f) => f.id));
@@ -109,29 +146,47 @@ const MultipleAttachmentUploadWidget = ({
     fileInputRef.current?.clearFiles();
   };
 
-  const handleRemove = (indexToRemove: number) => {
-    const updated = uploadedFiles.filter((_, i) => i !== indexToRemove);
-    setUploadedFiles(updated);
-    onChange?.(updated.map((f) => f.id));
+  const handleRemove = (index: number): void => {
+    const file = uploadedFiles[index];
+    const isPreviouslyUploaded = file.name === "(Previously uploaded file)";
+    if (isPreviouslyUploaded || !applicationId) {
+      const updated = uploadedFiles.filter((_, i) => i !== index);
+      setUploadedFiles(updated);
+      uploadedFilesRef.current = updated;
+      onChange?.(updated.map((f) => f.id));
+    } else {
+      setFileToDeleteIndex(index);
+      setDeletePendingName(file.name);
+      deleteModalRef.current?.toggleModal();
+    }
+  };
+
+  const confirmDelete = (): void => {
+    if (fileToDeleteIndex === null || !applicationId) return;
+    const file = uploadedFiles[fileToDeleteIndex];
+    startTransition(() => {
+      deleteActionFormAction({
+        applicationId,
+        applicationAttachmentId: file.id,
+      });
+    });
   };
 
   return (
     <FormGroup key={`form-group__multi-file-upload--${id}`} error={hasError}>
-      {/* casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath. */}
-      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-      {getLabelComponent({ id, title, required, description, options })}
+      {
+        // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        getLabelComponent({ id, title, required, description, options })
+      }
 
       {hasError && (
         <ErrorMessage id={`error-for-${id}`}>
-          {(() => {
-            const error = rawErrors[0];
-            if (!error) return null;
-            if (typeof error === "string") return error;
-            if (typeof error === "object" && "message" in error) {
-              return error.message;
-            }
-            return "Invalid input";
-          })()}
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : "message" in rawErrors[0]
+              ? rawErrors[0].message
+              : "Invalid input"}
         </ErrorMessage>
       )}
 
@@ -143,11 +198,9 @@ const MultipleAttachmentUploadWidget = ({
         multiple
         className="usa-file-input__input"
         onChange={(e) => {
-          const files = e.currentTarget.files;
-          e.preventDefault();
-          handleFileChange(files).catch((error) => {
-            console.error("File handling failed:", error);
-          });
+          handleFileChange(e.currentTarget.files).catch((error) =>
+            console.error(error),
+          );
         }}
         aria-describedby={describedBy}
       />
@@ -164,6 +217,8 @@ const MultipleAttachmentUploadWidget = ({
             const attachment = attachments.find(
               (a) => a.application_attachment_id === file.id,
             );
+            const isPreviouslyUploaded =
+              file.name === "(Previously uploaded file)";
 
             return (
               <li
@@ -186,7 +241,6 @@ const MultipleAttachmentUploadWidget = ({
                 ) : (
                   <span>{file.name}</span>
                 )}
-
                 <button
                   type="button"
                   className="usa-button usa-button--unstyled text-primary margin-left-2 display-inline-flex align-items-center"
@@ -195,15 +249,22 @@ const MultipleAttachmentUploadWidget = ({
                   <Icon.Delete
                     className="margin-right-02 text-middle"
                     role="presentation"
-                    aria-label=""
                   />
-                  Delete
+                  {isPreviouslyUploaded ? "Remove" : "Delete"}
                 </button>
               </li>
             );
           })}
         </ul>
       )}
+
+      <DeleteAttachmentModal
+        deletePending={deletePending}
+        handleDeleteAttachment={confirmDelete}
+        modalId="multi-attachment-delete-modal"
+        modalRef={deleteModalRef}
+        pendingDeleteName={deletePendingName ?? ""}
+      />
     </FormGroup>
   );
 };

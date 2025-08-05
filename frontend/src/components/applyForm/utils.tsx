@@ -7,7 +7,7 @@ import {
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
 
-import { JSX } from "react";
+import React, { JSX } from "react";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -76,7 +76,10 @@ export function buildFormTreeRecursive({
             formData,
           });
           if (field) {
-            acc = [...acc, field];
+            acc = [
+              ...acc,
+              <React.Fragment key={node.name}>{field}</React.Fragment>,
+            ];
           }
         }
       });
@@ -112,10 +115,7 @@ export function buildFormTreeRecursive({
             wrapSection(parent.label, parent.name, <>{childAcc}</>),
           ];
         } else {
-          acc = [
-            ...acc,
-            wrapSection(parent.label, parent.name, <>{row}</>),
-          ];
+          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
         }
       }
     }
@@ -426,18 +426,21 @@ export const buildField = ({
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return Widget({
-    id: name,
-    disabled,
-    // required: (formSchema.required ?? []).includes(name),
-    required: isFieldRequired(name, formSchema),
-    minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
-    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
-    schema: fieldSchema,
-    rawErrors,
-    value,
-    options,
-  });
+  return (
+    <React.Fragment key={name}>
+      {Widget({
+        id: name,
+        disabled,
+        required: isFieldRequired(name, formSchema),
+        minLength: fieldSchema?.minLength,
+        maxLength: fieldSchema?.maxLength,
+        schema: fieldSchema,
+        rawErrors,
+        value,
+        options,
+      })}
+    </React.Fragment>
+  );
 };
 
 const formatFieldWarnings = (
@@ -500,11 +503,12 @@ const wrapSection = (
   label: string,
   fieldName: string,
   tree: JSX.Element | undefined,
-): JSX.Element => {
-  const key = `${fieldName}-wrapper`;
+  pathPrefix = "",
+) => {
+  const uniqueKey = `${pathPrefix}${fieldName}-fieldset`;
 
   return (
-    <FieldsetWidget key={key} fieldName={fieldName} label={label}>
+    <FieldsetWidget key={uniqueKey} fieldName={fieldName} label={label}>
       {tree}
     </FieldsetWidget>
   );
