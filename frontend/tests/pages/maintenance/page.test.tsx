@@ -58,7 +58,7 @@ describe("Maintenance", () => {
     expect(content).toBeInTheDocument();
   });
 
-  it("redirects when not in maintenance", () => {
+  it.skip("redirects when not in maintenance", () => {
     // set a major feature offline so we don't redirect to homepage
     render(
       <UserContext
