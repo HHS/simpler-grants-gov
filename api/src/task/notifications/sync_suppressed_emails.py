@@ -1,31 +1,28 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from src.adapters import db
+from src.adapters.aws.sesv2_adapter import BaseSESV2Client, SESV2Client
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.task import Task
 
 
-class SyncSuppressedEmails(Task):
-    def __init__(self, db_session: db.Session, client: BaseSESV2Client | None = None) -> None:
+class SyncSuppressedEmailsTask(Task):
+    def __init__(self, db_session: db.Session, sesv2_client: BaseSESV2Client | None = None) -> None:
         super().__init__(db_session)
 
-        if client is None:
-            client = SESV2Client()
+        self.sesv2_client = sesv2_client or SESV2Client()
 
-        self.client = client
-
-    def fetch_suppressed_emails(self) -> None:
+    def run_task(self) -> None:
         # Get the most recent suppression timestamp from DB
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
         last_record = self.db_session.execute(stmt).scalars().first()
         start_date: datetime | None = None
-
         if last_record:
-            start_date = last_record.last_update_time + timedelta(seconds=1)
+            start_date = last_record.last_update_time + timedelta(microseconds=1)
 
-        resp = self.client.list_suppressed_destinations(start_date=start_date)
+        resp = self.sesv2_client.list_suppressed_destinations(start_date=start_date)
         emails = [d.email_address for d in resp.suppressed_destination_summaries]
         if not emails:
             return

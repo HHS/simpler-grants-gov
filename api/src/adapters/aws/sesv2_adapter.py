@@ -3,7 +3,10 @@ from abc import ABC, ABCMeta, abstractmethod
 from datetime import datetime
 
 import boto3
+import botocore.client
 from pydantic import BaseModel, Field
+
+from src.adapters.aws import get_boto_session
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +25,13 @@ class SESV2Response(BaseModel):
 
 class BaseSESV2Client(ABC, metaclass=ABCMeta):
     @abstractmethod
-    def list_suppressed_destinations(self) -> SESV2Response:
+    def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
         pass
 
 
 class SESV2Client(BaseSESV2Client):
     def __init__(self) -> None:
-        self.client = boto3.client("sesv2")
+        self.client = get_ses_client()
 
     def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
         request_params = {}
@@ -60,3 +63,10 @@ class MockSESV2Client(BaseSESV2Client):
         return SESV2Response(
             SuppressedDestinationSummaries=[r.model_dump(by_alias=True) for r in results]
         )
+
+
+def get_ses_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
+    if session is None:
+        session = get_boto_session()
+
+    return session.client("sesv2")
