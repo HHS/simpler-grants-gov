@@ -49,6 +49,8 @@ export type FormValidationWarning = {
 };
 
 export type WidgetTypes =
+  | "Attachment"
+  | "AttachmentArray"
   | "Checkbox"
   | "Text"
   | "TextArea"

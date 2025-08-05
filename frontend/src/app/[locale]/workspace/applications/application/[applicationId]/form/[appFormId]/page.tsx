@@ -16,12 +16,13 @@ import { FormDetail } from "src/types/formResponseTypes";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { Attachment } from "src/types/attachmentTypes";
+import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
 
 export const dynamic = "force-dynamic";
 
@@ -33,17 +34,49 @@ export function generateMetadata() {
   return meta;
 }
 
+interface UiSchemaField {
+  type: "field";
+  definition: string;
+  widget?: string;
+}
+
+interface UiSchemaSection {
+  type: "section";
+  name: string;
+  label?: string;
+  children: (UiSchemaField | UiSchemaSection)[];
+}
+
+type UiSchema = (UiSchemaField | UiSchemaSection)[];
+
+export function formHasAttachmentFields(uiSchema: UiSchema): boolean {
+  for (const item of uiSchema) {
+    if (item.type === "field" && item.widget?.startsWith("Attachment")) {
+      return true;
+    }
+
+    if (item.type === "section" && Array.isArray(item.children)) {
+      if (formHasAttachmentFields(item.children)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 interface formPageProps {
   params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
 }
 
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
+  let applicationAttachments: Attachment[] = [];
   let applicationData = {} as ApplicationDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formId = "";
   let formData: FormDetail | null;
   const session = await getSession();
+
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session to access form");
   }
@@ -58,7 +91,10 @@ async function FormPage({ params }: formPageProps) {
       );
       return <TopLevelError />;
     }
+
     applicationData = response.data;
+    applicationAttachments = applicationData.application_attachments ?? [];
+
     formId =
       applicationData.application_forms?.find(
         (form) => form.application_form_id === appFormId,
@@ -79,10 +115,9 @@ async function FormPage({ params }: formPageProps) {
       );
       return <TopLevelError />;
     }
+
     formValidationWarnings =
-      (applicationData.form_validation_warnings?.[
-        appFormId
-      ] as unknown as FormValidationWarning[]) || null;
+      (applicationData.form_validation_warnings?.[appFormId] as unknown as FormValidationWarning[]) || null;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -93,14 +128,16 @@ async function FormPage({ params }: formPageProps) {
     }
     return <TopLevelError />;
   }
-
   const application_response = getApplicationResponse(
     applicationData.application_forms,
     formId,
   );
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
-
   const schemaErrors = validateUiSchema(form_ui_schema);
+
+  const includeAttachments = formHasAttachmentFields(form_ui_schema as UiSchema);
+  const attachments = includeAttachments ? applicationAttachments : [];
+
   if (schemaErrors) {
     console.error(
       "Error validating form ui schema",
@@ -137,13 +174,14 @@ async function FormPage({ params }: formPageProps) {
           ]}
         />
         <h1>{form_name}</h1>
-        <ApplyForm
+        <ClientApplyForm
           validationWarnings={formValidationWarnings}
           savedFormData={application_response}
           formSchema={formSchema}
           uiSchema={form_ui_schema}
           formId={form_id}
           applicationId={applicationId}
+          attachments={attachments}
         />
       </GridContainer>
     </>

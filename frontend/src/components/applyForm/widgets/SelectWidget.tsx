@@ -117,7 +117,7 @@ function SelectWidget<
   const Widget = useCombo ? ComboBox : Select;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`form-group__select-input--${id}`}>
       <FieldLabel
         idFor={id}
         title={title}

@@ -94,8 +94,8 @@ function TextWidget<
   return (
     <FormGroup
       className={formClassName}
+      key={`form-group__text-input--${id}`}
       error={error}
-      key={`wrapper-for-${id}`}
     >
       <FieldLabel
         idFor={id}

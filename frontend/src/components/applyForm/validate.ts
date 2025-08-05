@@ -46,6 +46,8 @@ export const UiJsonSchema: RJSFSchema = {
         widget: {
           type: "string",
           enum: [
+            "Attachment",
+            "AttachmentArray",
             "Checkbox",
             "Text",
             "TextArea",
@@ -57,6 +59,7 @@ export const UiJsonSchema: RJSFSchema = {
             "Budget424aTotalBudgetSummary",
           ],
         },
+        attachmentType: { type: "string" },
       },
       required: ["type"],
       anyOf: [

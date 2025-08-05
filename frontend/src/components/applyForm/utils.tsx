@@ -1,4 +1,4 @@
-import { RJSFSchema } from "@rjsf/utils";
+import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
@@ -18,10 +18,13 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import CheckboxWidget from "./widgets/CheckboxWidget";
+import { FieldLabel } from "./widgets/FieldLabel";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
+import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
@@ -106,15 +109,30 @@ export function buildFormTreeRecursive({
           });
           acc = [
             ...acc,
-            wrapSection(parent.label, parent.name, <>{childAcc}</>),
+            wrapSection(
+              parent.label,
+              parent.name,
+              <>{childAcc}</>,
+              `${parent.name}--`,
+            ),
           ];
         } else {
-          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+          acc = [
+            ...acc,
+            wrapSection(
+              parent.label,
+              parent.name,
+              <>{row}</>,
+              `${parent.name}--`,
+            ),
+          ];
         }
       }
     }
   };
+
   buildFormTree(uiSchema, null);
+
   return acc;
 }
 
@@ -128,6 +146,34 @@ export const determineFieldType = ({
 }): WidgetTypes => {
   const { widget } = uiFieldObject;
   if (widget) return widget;
+
+  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
+    return "Attachment";
+  }
+
+  if (fieldSchema.type === "array" && fieldSchema.items) {
+    const item = Array.isArray(fieldSchema.items)
+      ? fieldSchema.items[0]
+      : fieldSchema.items;
+
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      item.type === "string" &&
+      item.format === "uuid"
+    ) {
+      return "AttachmentArray";
+    }
+  }
+
+  console.debug(
+    "Resolved widget type",
+    fieldSchema.type,
+    "for definition",
+    fieldSchema.definition,
+    fieldSchema,
+  );
+
   if (fieldSchema.enum?.length) {
     return "Select";
   } else if (fieldSchema.type === "boolean") {
@@ -146,19 +192,43 @@ export const getFieldSchema = ({
   schema,
   formSchema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
   formSchema: RJSFSchema;
 }): RJSFSchema => {
-  if (definition && schema) {
-    return {
-      ...(getByPointer(formSchema, definition) as object),
-      ...schema,
-    } as RJSFSchema;
-  } else if (definition) {
-    return getByPointer(formSchema, definition) as RJSFSchema;
+  if (!definition && !schema) {
+    throw new Error("Missing schema definition");
   }
-  return schema as RJSFSchema;
+
+  // If schema is provided, merge it on top of resolved pointer
+  let resolved = schema ?? {};
+
+  if (definition) {
+    const pathParts = definition.split("/").filter(Boolean);
+
+    let current: any = formSchema;
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+
+      if (!current[part]) {
+        console.warn(`Schema path part "${part}" not found in`, current);
+        return resolved as RJSFSchema;
+      }
+
+      current = current[part];
+
+      // Resolve $ref if found
+      while (current?.["$ref"]) {
+        const refPath = current["$ref"].replace(/^#\//, "");
+        current = getSchemaObjectFromPointer(formSchema, `/${refPath}`);
+      }
+    }
+
+    resolved = { ...current, ...resolved };
+  }
+
+  return resolved as RJSFSchema;
 };
 
 export const getNameFromDef = ({
@@ -207,6 +277,9 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
+  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
+    AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
@@ -293,13 +366,19 @@ export const buildField = ({
     rawErrors = formatFieldWarnings(
       errors,
       name,
-      typeof fieldSchema.type === "string"
+      typeof fieldSchema?.type === "string"
         ? fieldSchema.type
-        : Array.isArray(fieldSchema.type)
+        : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "",
     );
   }
+
+  if (!fieldSchema || typeof fieldSchema !== "object") {
+    console.error("Invalid field schema for:", definition);
+    throw new Error("Invalid or missing field schema");
+  }
+
   // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
@@ -339,7 +418,15 @@ export const buildField = ({
     };
   }
 
-  return widgetComponents[type]({
+  const Widget = widgetComponents[type];
+
+  // light debugging for unknown widgets
+  if (typeof Widget !== "function") {
+    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
+    throw new Error(`Unknown widget type: ${type}`);
+  }
+
+  return Widget({
     id: name,
     disabled,
     // required: (formSchema.required ?? []).includes(name),
@@ -413,13 +500,12 @@ const wrapSection = (
   label: string,
   fieldName: string,
   tree: JSX.Element | undefined,
+  pathPrefix = "",
 ) => {
+  const key = `${pathPrefix}${fieldName}-wrapper`;
+
   return (
-    <FieldsetWidget
-      key={`${fieldName}-wrapper`}
-      fieldName={fieldName}
-      label={label}
-    >
+    <FieldsetWidget key={key} fieldName={fieldName} label={label}>
       {tree}
     </FieldsetWidget>
   );
@@ -509,3 +595,55 @@ export const getApplicationResponse = (
     return {};
   }
 };
+
+// getApplicationIdFromUrl
+export const getApplicationIdFromUrl = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const match = window.location.pathname.match(
+    /\/applications\/application\/([a-f0-9-]+)\/form\//,
+  );
+  return match?.[1] ?? null;
+};
+
+// getLabelComponent
+export function getLabelComponent<
+  T = unknown,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = never,
+>({
+  id,
+  title,
+  required,
+  description,
+  options,
+}: Pick<
+  UswdsWidgetProps<T, S, F>,
+  "id" | "title" | "required" | "description" | "options"
+>) {
+  const labelType = options?.["widget-label"] || "default";
+
+  switch (labelType) {
+    case "hide-helper-text":
+      return (
+        <label className="usa-label" htmlFor={id}>
+          {title}
+          {required && (
+            <abbr title="required" className="usa-hint usa-hint--required">
+              *
+            </abbr>
+          )}
+        </label>
+      );
+
+    case "default":
+    default:
+      return (
+        <FieldLabel
+          idFor={id}
+          title={title}
+          description={description}
+          required={required}
+        />
+      );
+  }
+}

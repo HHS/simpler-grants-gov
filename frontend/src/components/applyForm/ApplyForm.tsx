@@ -13,6 +13,7 @@ import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
+import { Attachment } from "src/types/attachmentTypes";
 
 const ApplyForm = ({
   applicationId,
