@@ -44,11 +44,11 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
 
   integration_http_method = aws_api_gateway_method.api_proxy_method[0].http_method
   type                    = "HTTP_PROXY"
-  # Commenting out to see if I can't use the ALB public AWS DNS
-  # connection_type      = "VPC_LINK"
-  # connection_id        = aws_api_gateway_vpc_link.api_vpc_link.id
 
-  uri = "https://${aws_lb.alb.dns_name}/{proxy}"
+  connection_type = "VPC_LINK"
+  connection_id   = aws_api_gateway_vpc_link.api_vpc_link[0].id
+
+  uri = "https://${aws_lb.api_vpc_link_nlb[0].dns_name}/{proxy}"
 
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
@@ -222,11 +222,105 @@ resource "aws_api_gateway_rest_api_policy" "api_access_restriction" {
 }
 
 # Lets the API gateway forward traffic to the LB
-# Commenting out to see if I can't use the ALB public AWS DNS
-# resource "aws_api_gateway_vpc_link" "api_vpc_link" {
-#   count = var.enable_api_gateway ? 1 : 0
+resource "aws_api_gateway_vpc_link" "api_vpc_link" {
+  count = var.enable_api_gateway ? 1 : 0
 
-#   name        = var.service_name
-#   description = "Forwards traffic from the gateway to the ${var.service_name} via the LB"
-#   target_arns = [aws_lb.alb.arn]
-# }
+  name        = var.service_name
+  description = "Forwards traffic from the gateway to the ${var.service_name} via the LB"
+  target_arns = [aws_lb.api_vpc_link_nlb[0].arn]
+}
+
+resource "aws_lb" "api_vpc_link_nlb" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  name               = "${var.service_name}-api-gateway-nlb"
+  internal           = true
+  load_balancer_type = "network"
+  subnets            = var.private_subnet_ids
+
+  enable_deletion_protection       = true
+  enable_cross_zone_load_balancing = true
+
+  security_groups = [
+    aws_security_group.api_vpc_link_nlb_sg[0].id
+  ]
+
+  # checkov:skip=CKV_AWS_91: API gateway and downstream ALB has logging, enabling logging here won't give a huge benefit
+}
+
+resource "aws_security_group" "api_vpc_link_nlb_sg" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  name        = "${var.service_name}-api-gateway-nlb"
+  description = "NLB security group to allow access to ALB for API Gateway"
+  vpc_id      = var.vpc_id
+
+  # checkov:skip=CKV2_AWS_5: Security group is attached to the NLB above
+}
+
+resource "aws_vpc_security_group_egress_rule" "api_vpc_link_nlb_to_alb" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  security_group_id = aws_security_group.api_vpc_link_nlb_sg[0].id
+
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.alb.id
+  description                  = "Allows outbound access to only the ALB"
+}
+
+# The inbound traffic allowed, the API gateway traffic technically comes via
+# an Amazon owned AWS account, so we have to have the CIDR open
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr: VPC service for API GW -> NLB comes via Amazon AWS account
+resource "aws_security_group_rule" "api_vpc_link_allow_inbound_to_nlb" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  security_group_id = aws_security_group.api_vpc_link_nlb_sg[0].id
+
+  description = "Allows access to the NLB port from public since API Gateway VPC link traffic comes from Amazon accounts"
+
+  type        = "ingress"
+  cidr_blocks = ["0.0.0.0/0"]
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+}
+
+resource "aws_lb_target_group" "api_nlb_tg" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  name     = "${var.service_name}-api-gateway-nlb-alb"
+  port     = 443
+  protocol = "TLS"
+  vpc_id   = var.vpc_id
+
+  target_type       = "alb"
+  proxy_protocol_v2 = true
+
+  health_check {
+    path     = "/health"
+    protocol = "HTTPS"
+  }
+}
+
+resource "aws_lb_target_group_attachment" "api_vpc_link_nlb_to_alb_target" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  target_group_arn = aws_lb_target_group.api_nlb_tg[0].arn
+  target_id        = aws_lb.alb[0].arn
+  port             = 443
+}
+
+resource "aws_lb_listener" "api_vpc_link_nlb_listener" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  load_balancer_arn = aws_lb.api_vpc_link_nlb[0].arn
+  port              = 443
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.api_nlb_tg[0].arn
+  }
+}
