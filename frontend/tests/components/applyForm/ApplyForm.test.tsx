@@ -188,7 +188,7 @@ describe("ApplyForm", () => {
       <ApplyForm
         applicationId="test"
         savedFormData={{}}
-        formSchema={{ title: "Invalid", type: "object", properties: {} }}
+        formSchema={{ arbitrayField: "arbirtrary value" }}
         uiSchema={uiSchema}
         formId="test"
         validationWarnings={[]}

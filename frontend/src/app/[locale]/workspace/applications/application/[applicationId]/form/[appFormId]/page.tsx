@@ -18,7 +18,10 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
-import { FormValidationWarning, UiSchema } from "src/components/applyForm/types";
+import {
+  FormValidationWarning,
+  UiSchema,
+} from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
