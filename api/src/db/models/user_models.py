@@ -50,6 +50,10 @@ class User(ApiSchemaTable, TimestampMixin):
         "OrganizationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
+    api_keys: Mapped[list["UserApiKey"]] = relationship(
+        "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
+    )
+
     @property
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
@@ -244,3 +248,18 @@ class SuppressedEmail(ApiSchemaTable, TimestampMixin):
     email: Mapped[str] = mapped_column(index=True)
     reason: Mapped[str]
     last_update_time: Mapped[datetime] = mapped_column(index=True)
+
+
+class UserApiKey(ApiSchemaTable, TimestampMixin):
+    """API Key table for user authentication to the API"""
+
+    __tablename__ = "user_api_key"
+
+    token_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    key_name: Mapped[str] = mapped_column(nullable=False)
+    key_id: Mapped[str] = mapped_column(nullable=False, comment="AWS API Gateway key identifier")
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
+    last_used: Mapped[datetime | None] = mapped_column(nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
