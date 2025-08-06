@@ -135,16 +135,16 @@ export const handleUpdateApplicationForm = async (
 
 export const handleUpdateApplicationFormIncludeInSubmission = async (
   applicationId: string,
-  applicationFormId: string,
-  token: string,
+  formId: string,
   is_included_in_submission: boolean,
+  token: string,
 ): Promise<ApplicationFormDetailApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
 
   const response = await fetchApplicationWithMethod("PUT")({
-    subPath: `${applicationId}/forms/${applicationFormId}/inclusion`,
+    subPath: `${applicationId}/forms/${formId}/inclusion`,
     body: { is_included_in_submission },
     additionalHeaders: ssgToken,
   });

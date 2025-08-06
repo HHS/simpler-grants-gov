@@ -38,7 +38,7 @@ export const updateApplicationIncludeFormInSubmissionHandler = async (
         status === 200
           ? "Application form inclusions update submit success"
           : "Validation errors for updating  application",
-      data: response,
+      is_included_in_submission: response?.data?.is_included_in_submission,
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
