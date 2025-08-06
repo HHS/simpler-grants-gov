@@ -258,7 +258,7 @@ class UserApiKey(ApiSchemaTable, TimestampMixin):
     token_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     key_name: Mapped[str] = mapped_column(nullable=False)
     key_id: Mapped[str] = mapped_column(nullable=False, comment="AWS API Gateway key identifier")
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     last_used: Mapped[datetime | None] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
