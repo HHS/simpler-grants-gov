@@ -740,8 +740,6 @@ FORM_UI_SCHEMA = [
 
 FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
-    # Note - we don't have pre-population enabled yet, so these
-    # won't run yet.
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
     "agency_name": {"gg_pre_population": {"rule": "agency_name"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},

@@ -53,10 +53,8 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    ##### PRE-POPULATION RULES
-    # Note - we don't have pre-population enabled yet, so these
-    # won't run yet.
-    "signature": {"gg_pre_population": {"rule": "signature"}},
+    ##### POST-POPULATION RULES
+    "signature": {"gg_post_population": {"rule": "signature"}},
     "date_signed": {"gg_post_population": {"rule": "current_date"}},
 }
 
