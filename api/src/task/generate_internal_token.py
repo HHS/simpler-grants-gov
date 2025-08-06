@@ -32,53 +32,47 @@ DEFAULT_EXPIRATION_MINUTES = 30
 
 
 @task_blueprint.cli.command(
-    "generate-internal-token",
-    help="Generate an internal JWT token for testing purposes"
+    "generate-internal-token", help="Generate an internal JWT token for testing purposes"
 )
 @click.option(
     "--expiration-minutes",
     type=int,
     default=DEFAULT_EXPIRATION_MINUTES,
-    help=f"Number of minutes until the token expires (default: {DEFAULT_EXPIRATION_MINUTES})"
+    help=f"Number of minutes until the token expires (default: {DEFAULT_EXPIRATION_MINUTES})",
 )
-@click.option(
-    "--quiet",
-    is_flag=True,
-    help="Only output the token, no additional messages"
-)
+@click.option("--quiet", is_flag=True, help="Only output the token, no additional messages")
 @flask_db.with_db_session()
 def generate_internal_token_cli(
-    db_session: db.Session, 
-    expiration_minutes: int, 
-    quiet: bool
+    db_session: db.Session, expiration_minutes: int, quiet: bool
 ) -> None:
     """Generate an internal JWT token for testing purposes."""
     # Ensure we're running in a local environment
     error_if_not_local()
-    
+
     # Initialize JWT auth configuration (should already be done by Flask app)
     initialize_jwt_auth()
-    
+
     # Calculate expiration time
     current_time = datetime_util.utcnow()
     expires_at = current_time + timedelta(minutes=expiration_minutes)
-    
+
     # Generate the token
     with db_session.begin():
         jwt_token, short_lived_token = create_jwt_for_internal_token(
-            expires_at=expires_at,
-            db_session=db_session
+            expires_at=expires_at, db_session=db_session
         )
-        
+
         logger.info(
             "Generated internal JWT token",
             extra={
-                "short_lived_internal_token_id": str(short_lived_token.short_lived_internal_token_id),
+                "short_lived_internal_token_id": str(
+                    short_lived_token.short_lived_internal_token_id
+                ),
                 "expires_at": expires_at.isoformat(),
                 "expiration_minutes": expiration_minutes,
-            }
+            },
         )
-    
+
     if quiet:
         # Only print the token for easy copy/paste
         click.echo(jwt_token)
@@ -88,11 +82,13 @@ def generate_internal_token_cli(
         click.echo("INTERNAL JWT TOKEN GENERATED")
         click.echo("=" * 80)
         click.echo(f"Expiration: {expiration_minutes} minutes")
-        click.echo(f"Header: X-SGG-Internal-Token")
+        click.echo("Header: X-SGG-Internal-Token")
         click.echo("-" * 80)
         click.echo("Token:")
         click.echo(jwt_token)
         click.echo("-" * 80)
         click.echo("Example usage:")
-        click.echo(f'curl -H "X-SGG-Internal-Token: {jwt_token}" http://localhost:5000/alpha/applications/<application_id>/application_form/<form_id>')
-        click.echo("=" * 80) 
+        click.echo(
+            f'curl -H "X-SGG-Internal-Token: {jwt_token}" http://localhost:5000/alpha/applications/<application_id>/application_form/<form_id>'
+        )
+        click.echo("=" * 80)
