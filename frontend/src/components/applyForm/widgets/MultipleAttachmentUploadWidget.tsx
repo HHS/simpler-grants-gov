@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
-import { uploadFileToApp } from "src/services/attachments/upload";
+import { useClientFetch } from "src/hooks/useClientFetch";
 
 import React, {
   startTransition,
@@ -30,6 +30,7 @@ import {
   getApplicationIdFromUrl,
   getLabelComponent,
 } from "src/components/applyForm/utils";
+import { AttachmentUploadResponse } from "src/types/attachmentTypes";
 
 type UploadedFile = {
   id: string;
@@ -53,6 +54,7 @@ const MultipleAttachmentUploadWidget = ({
     description?: string;
     title?: string;
   };
+  const { clientFetch } = useClientFetch<AttachmentUploadResponse>("Upload failed");
 
   const applicationId = getApplicationIdFromUrl();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -119,6 +121,7 @@ const MultipleAttachmentUploadWidget = ({
       onChange?.(updated.map((f) => f.id));
       setFileToDeleteIndex(null);
       setDeletePendingName(null);
+      deleteModalRef.current?.toggleModal();
     }
   }, [deleteState, fileToDeleteIndex, uploadedFiles, onChange]);
 
@@ -129,7 +132,18 @@ const MultipleAttachmentUploadWidget = ({
 
     for (const file of Array.from(files)) {
       try {
-        const attachmentId = await uploadFileToApp(applicationId, file);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const data = await clientFetch(
+          `/api/applications/${applicationId}/attachments`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const attachmentId = data?.application_attachment_id;
         if (attachmentId) {
           newFiles.push({ id: attachmentId, name: file.name });
         }

@@ -3,7 +3,7 @@
 import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
 import { AttachmentUploadResponse } from "src/types/attachmentTypes";
 
-import {
+import React, {
   startTransition,
   useActionState,
   useEffect,
@@ -16,7 +16,6 @@ import {
   FileInputRef,
   ModalRef,
 } from "@trussworks/react-uswds";
-
 import {
   deleteAttachmentAction,
   DeleteAttachmentActionState,
@@ -28,6 +27,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
+import { useClientFetch } from "src/hooks/useClientFetch";
 
 export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
   const {
@@ -44,6 +44,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = getApplicationIdFromUrl();
   const attachments = useAttachments();
+  const { clientFetch } = useClientFetch<AttachmentUploadResponse>("Upload failed");
 
   const [attachmentId, setAttachmentId] = useState<string | null>(
     typeof value === "string" ? value : null,
@@ -89,6 +90,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
       setFileName(null);
       setAttachmentId(null);
       onChange?.(undefined);
+      deleteModalRef.current?.toggleModal()
     }
   }, [deleteState, onChange]);
 
@@ -108,37 +110,39 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
     setShowFile(!!newAttachmentId);
   }, [value, attachments]);
 
-  const handleChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ): Promise<void> => {
-    const file = event.target.files?.[0];
-    if (!file || !applicationId) return;
+const handleChange = async (
+  event: React.ChangeEvent<HTMLInputElement>,
+): Promise<void> => {
+  const file = event.target.files?.[0];
+  if (!file || !applicationId) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const res = await fetch(`/api/applications/${applicationId}/attachments`, {
-      method: "POST",
-      body: formData,
-    });
+  try {
+    const data = await clientFetch(
+      `/api/applications/${applicationId}/attachments`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
-    if (res.ok) {
-      const data = (await res.json()) as AttachmentUploadResponse;
-      const uploadedId = data.application_attachment_id;
-      if (typeof uploadedId === "string") {
-        setAttachmentId(uploadedId);
-        setFileName(file.name);
-        setShowFile(true);
-        onChange?.(uploadedId);
-      } else {
-        console.error("Upload response missing a valid attachment ID");
-      }
+    const uploadedId = data.application_attachment_id;
+    if (typeof uploadedId === "string") {
+      setAttachmentId(uploadedId);
+      setFileName(file.name);
+      setShowFile(true);
+      onChange?.(uploadedId);
     } else {
-      console.error("Upload failed");
+      console.error("Upload response missing a valid attachment ID");
     }
+  } catch (err) {
+    console.error(err);
+  }
 
-    fileInputRef.current?.clearFiles();
-  };
+  fileInputRef.current?.clearFiles();
+};
 
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `${id}-error` : undefined;
@@ -149,7 +153,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
   };
 
   return (
-    <>
+    <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
       {!showFile && (
         <FileInput
@@ -198,6 +202,6 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
         modalRef={deleteModalRef}
         pendingDeleteName={deletePendingName ?? ""}
       />
-    </>
+    </ React.Fragment>
   );
 }
