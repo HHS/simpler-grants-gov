@@ -816,6 +816,7 @@ export const messages = {
     },
   },
   SavedOpportunities: {
+    metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
     noSavedCTA:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
