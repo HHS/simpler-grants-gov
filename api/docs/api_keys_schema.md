@@ -89,18 +89,3 @@ db_session.commit()
 api_key.is_active = False
 db_session.commit()
 ```
-
-## Security Considerations
-
-1. **Key Storage**: The actual API key value is not stored in this table - only the AWS API Gateway identifier
-2. **Soft Delete**: Use `is_active` flag instead of hard deletion to maintain audit trail
-3. **Usage Tracking**: The `last_used` field helps track which keys are actively being used
-4. **Cascade Delete**: API keys are automatically cleaned up when users are deleted
-
-## Future Enhancements
-
-Potential future additions to this schema:
-- `expires_at`: Optional expiration date for API keys
-- `scope`: Permissions/scope limitations for the API key
-- `created_by`: Who created the API key (if different from the owner)
-- `ip_restrictions`: IP address restrictions for key usage 
