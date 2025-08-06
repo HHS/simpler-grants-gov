@@ -975,7 +975,7 @@ class UserApiKeyFactory(BaseFactory):
     class Meta:
         model = user_models.UserApiKey
 
-    token_id = Generators.UuidObj
+    api_key_id = Generators.UuidObj
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda k: k.user.user_id)

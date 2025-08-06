@@ -8,7 +8,7 @@ The `user_api_key` table stores API keys that allow users to authenticate with t
 
 | Column     | Type      | Constraints              | Description |
 | ---------- | --------- | ------------------------ | ----------- |
-| token_id   | UUID      | PRIMARY KEY              | Unique identifier for the API key record |
+| api_key_id | UUID      | PRIMARY KEY              | Unique identifier for the API key record |
 | key_name   | TEXT      | NOT NULL                 | Human-readable name for the API key (e.g., "Production Key", "Development Key") |
 | key_id     | TEXT      | NOT NULL                 | AWS API Gateway key identifier |
 | user_id    | UUID      | NOT NULL, FK → user.user_id | Reference to the user who owns this API key |
@@ -38,12 +38,12 @@ class UserApiKey(ApiSchemaTable, TimestampMixin):
 
     __tablename__ = "user_api_key"
 
-    token_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    key_name: Mapped[str] = mapped_column(nullable=False)
-    key_id: Mapped[str] = mapped_column(nullable=False, comment="AWS API Gateway key identifier")
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
-    last_used: Mapped[datetime | None] = mapped_column(nullable=True)
-    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    key_name: Mapped[str]
+    key_id: Mapped[str] = mapped_column(comment="AWS API Gateway key identifier")
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("api.user.user_id"), index=True)
+    last_used: Mapped[datetime | None]
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
 ```
