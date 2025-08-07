@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta, timezone
-
-import pytest
+from datetime import datetime, timedelta
 
 from src.adapters import db
-from src.services.users.get_user_api_keys import get_active_user_api_keys, get_user_api_keys
+from src.services.users.get_user_api_keys import get_user_api_keys
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
