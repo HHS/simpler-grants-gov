@@ -675,3 +675,9 @@ iframe[id^="ethnio-screener-"] {
     margin-top: 0 !important;
   }
 }
+
+.simpler-page-anchor-offset {
+  @include at-media("desktop") {
+    scroll-margin-top: 6rem;
+  }
+}
