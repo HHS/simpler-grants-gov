@@ -3,7 +3,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
     SavedOpportunityResponseV1Schema,
 )
-from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
 from src.pagination.pagination_schema import generate_pagination_schema
@@ -261,4 +261,62 @@ class UserApplicationListResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(UserApplicationListItemSchema),
         metadata={"description": "List of applications for the user"},
+    )
+
+
+class UserApiKeyCreateRequestSchema(Schema):
+    key_name = fields.String(
+        required=True,
+        validate=validators.Length(min=1, max=255),
+        metadata={
+            "description": "Human-readable name for the API key",
+            "example": "Production API Key"
+        }
+    )
+
+
+class UserApiKeySchema(Schema):
+    api_key_id = fields.UUID(
+        metadata={
+            "description": "Unique identifier for the API key record",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+        }
+    )
+    key_name = fields.String(
+        metadata={
+            "description": "Human-readable name for the API key",
+            "example": "Production API Key"
+        }
+    )
+    key_id = fields.String(
+        metadata={
+            "description": "The actual API key identifier to use for authentication",
+            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI"
+        }
+    )
+    is_active = fields.Boolean(
+        metadata={
+            "description": "Whether the API key is currently active",
+            "example": True
+        }
+    )
+    last_used = fields.DateTime(
+        allow_none=True,
+        metadata={
+            "description": "Timestamp when this API key was last used for authentication",
+            "example": "2024-01-15T10:30:00Z"
+        }
+    )
+    created_at = fields.DateTime(
+        metadata={
+            "description": "When this API key was created",
+            "example": "2024-01-01T12:00:00Z"
+        }
+    )
+
+
+class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(
+        UserApiKeySchema,
+        metadata={"description": "The newly created API key"}
     )

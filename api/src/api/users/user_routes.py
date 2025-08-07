@@ -11,6 +11,8 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
+    UserApiKeyCreateRequestSchema,
+    UserApiKeyCreateResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
@@ -36,6 +38,7 @@ from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_re
 from src.db.models.user_models import UserTokenSession
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
+from src.services.users.create_api_key import create_api_key
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
@@ -452,3 +455,52 @@ def user_update_saved_search(
     )
 
     return response.ApiResponse(message="Success")
+
+
+@user_blueprint.post("/<uuid:user_id>/api-keys")
+@user_blueprint.input(UserApiKeyCreateRequestSchema, location="json")
+@user_blueprint.output(UserApiKeyCreateResponseSchema)
+@user_blueprint.doc(responses=[200, 400, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_create_api_key(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Create a new API key for the authenticated user"""
+    logger.info("POST /v1/users/:user_id/api-keys")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    try:
+        with db_session.begin():
+            api_key = create_api_key(db_session, user_id, json_data)
+
+        logger.info(
+            "Created API key for user",
+            extra={
+                "user_id": user_id,
+                "api_key_id": api_key.api_key_id,
+                "key_name": api_key.key_name,
+            },
+        )
+
+        return response.ApiResponse(message="Success", data=api_key)
+    
+    except ValueError as e:
+        # Handle validation errors from the service
+        logger.warning(
+            "Invalid parameters for API key creation",
+            extra={"user_id": user_id, "error": str(e)},
+        )
+        raise_flask_error(400, str(e))
+    
+    except Exception as e:
+        logger.error(
+            "Unexpected error creating API key",
+            extra={"user_id": user_id, "error": str(e)},
+        )
+        raise_flask_error(500, "Internal server error")

@@ -3,11 +3,11 @@ import uuid
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 
 from src.adapters import db
 from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import generate_api_key_id
+from src.api.schemas.extension import validators
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +20,32 @@ class KeyGenerationError(Exception):
 
     pass
 
+class CreateApiKeyParams:
+    """Simple parameter validation for API key creation"""
+    def __init__(self, json_data: dict):
+        self.key_name = json_data.get("key_name", "").strip()
+        
+        # Validate key_name
+        if not self.key_name:
+            raise ValueError("key_name is required")
+        
+        # Use the same validator as the schema
+        length_validator = validators.Length(min=1, max=255)
+        try:
+            length_validator(self.key_name)
+        except Exception as e:
+            raise ValueError(f"key_name validation failed: {str(e)}")
+
 
 def create_api_key(
     db_session: db.Session,
     user_id: UUID,
-    key_name: str,
-    is_active: bool = True,
+    json_data: dict
 ) -> UserApiKey:
+    params = CreateApiKeyParams(json_data)
+
+    key_name = params.key_name
+    is_active = True
 
     # Generate a unique key_id with collision detection
     key_id = _generate_unique_key_id(db_session)
