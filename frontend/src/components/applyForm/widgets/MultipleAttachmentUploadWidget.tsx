@@ -1,11 +1,9 @@
 "use client";
 
-import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
-import { useClientFetch } from "src/hooks/useClientFetch";
+import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
+import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
 import React, {
-  startTransition,
-  useActionState,
   useEffect,
   useRef,
   useState,
@@ -19,10 +17,6 @@ import {
   ModalRef,
 } from "@trussworks/react-uswds";
 
-import {
-  deleteAttachmentAction,
-  DeleteAttachmentActionState,
-} from "src/components/application/attachments/actions";
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
@@ -30,7 +24,6 @@ import {
   getApplicationIdFromUrl,
   getLabelComponent,
 } from "src/components/applyForm/utils";
-import { AttachmentUploadResponse } from "src/types/attachmentTypes";
 
 type UploadedFile = {
   id: string;
@@ -54,7 +47,9 @@ const MultipleAttachmentUploadWidget = ({
     description?: string;
     title?: string;
   };
-  const { clientFetch } = useClientFetch<AttachmentUploadResponse>("Upload failed");
+  const { uploadAttachment } = useAttachmentUpload();
+  const { deleteState, deletePending, deleteAttachment } =
+    useAttachmentDelete();
 
   const applicationId = getApplicationIdFromUrl();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -64,11 +59,6 @@ const MultipleAttachmentUploadWidget = ({
   );
   const [deletePendingName, setDeletePendingName] = useState<string | null>(
     null,
-  );
-
-  const [deleteState, deleteActionFormAction, deletePending] = useActionState(
-    deleteAttachmentAction,
-    deleteUploadActionsInitialState satisfies DeleteAttachmentActionState,
   );
 
   const hasHydratedRef = useRef(false);
@@ -131,24 +121,9 @@ const MultipleAttachmentUploadWidget = ({
     const newFiles: UploadedFile[] = [];
 
     for (const file of Array.from(files)) {
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const data = await clientFetch(
-          `/api/applications/${applicationId}/attachments`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        const attachmentId = data?.application_attachment_id;
-        if (attachmentId) {
-          newFiles.push({ id: attachmentId, name: file.name });
-        }
-      } catch (err) {
-        console.error("Upload failed:", err);
+      const attachmentId = await uploadAttachment(applicationId, file);
+      if (attachmentId) {
+        newFiles.push({ id: attachmentId, name: file.name });
       }
     }
 
@@ -178,12 +153,7 @@ const MultipleAttachmentUploadWidget = ({
   const confirmDelete = (): void => {
     if (fileToDeleteIndex === null || !applicationId) return;
     const file = uploadedFiles[fileToDeleteIndex];
-    startTransition(() => {
-      deleteActionFormAction({
-        applicationId,
-        applicationAttachmentId: file.id,
-      });
-    });
+    deleteAttachment(applicationId, file.id);
   };
 
   return (

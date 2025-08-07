@@ -1,11 +1,9 @@
 "use client";
 
-import { deleteUploadActionsInitialState } from "src/constants/attachment/deleteUploadActionsInitialState";
-import { AttachmentUploadResponse } from "src/types/attachmentTypes";
+import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
+import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
 import React, {
-  startTransition,
-  useActionState,
   useEffect,
   useRef,
   useState,
@@ -16,10 +14,7 @@ import {
   FileInputRef,
   ModalRef,
 } from "@trussworks/react-uswds";
-import {
-  deleteAttachmentAction,
-  DeleteAttachmentActionState,
-} from "src/components/application/attachments/actions";
+
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import {
@@ -27,9 +22,8 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
-import { useClientFetch } from "src/hooks/useClientFetch";
 
-export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
+const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
     id,
     value,
@@ -44,7 +38,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = getApplicationIdFromUrl();
   const attachments = useAttachments();
-  const { clientFetch } = useClientFetch<AttachmentUploadResponse>("Upload failed");
+  const { uploadAttachment } = useAttachmentUpload();
 
   const [attachmentId, setAttachmentId] = useState<string | null>(
     typeof value === "string" ? value : null,
@@ -56,10 +50,8 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
     null,
   );
 
-  const [deleteState, deleteActionFormAction, deletePending] = useActionState(
-    deleteAttachmentAction,
-    deleteUploadActionsInitialState satisfies DeleteAttachmentActionState,
-  );
+  const { deleteState, deletePending, deleteAttachment } =
+    useAttachmentDelete();
 
   const handleDeleteClick = () => {
     if (isPreviouslyUploaded) {
@@ -76,12 +68,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
   const handleDeleteConfirmed = () => {
     if (!applicationId || !attachmentId) return;
 
-    startTransition(() => {
-      deleteActionFormAction({
-        applicationId,
-        applicationAttachmentId: attachmentId,
-      });
-    });
+    deleteAttachment(applicationId, attachmentId);
   };
 
   useEffect(() => {
@@ -90,7 +77,7 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
       setFileName(null);
       setAttachmentId(null);
       onChange?.(undefined);
-      deleteModalRef.current?.toggleModal()
+      deleteModalRef.current?.toggleModal();
     }
   }, [deleteState, onChange]);
 
@@ -110,39 +97,22 @@ export default function AttachmentUploadWidget(props: UswdsWidgetProps) {
     setShowFile(!!newAttachmentId);
   }, [value, attachments]);
 
-const handleChange = async (
-  event: React.ChangeEvent<HTMLInputElement>,
-): Promise<void> => {
-  const file = event.target.files?.[0];
-  if (!file || !applicationId) return;
+  const handleChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
+    const file = event.target.files?.[0];
+    if (!file || !applicationId) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const data = await clientFetch(
-      `/api/applications/${applicationId}/attachments`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-
-    const uploadedId = data.application_attachment_id;
-    if (typeof uploadedId === "string") {
+    const uploadedId = await uploadAttachment(applicationId, file);
+    if (uploadedId) {
       setAttachmentId(uploadedId);
       setFileName(file.name);
       setShowFile(true);
       onChange?.(uploadedId);
-    } else {
-      console.error("Upload response missing a valid attachment ID");
     }
-  } catch (err) {
-    console.error(err);
-  }
 
-  fileInputRef.current?.clearFiles();
-};
+    fileInputRef.current?.clearFiles();
+  };
 
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `${id}-error` : undefined;
@@ -202,6 +172,8 @@ const handleChange = async (
         modalRef={deleteModalRef}
         pendingDeleteName={deletePendingName ?? ""}
       />
-    </ React.Fragment>
+    </React.Fragment>
   );
-}
+};
+
+export default AttachmentUploadWidget;
