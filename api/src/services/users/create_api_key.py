@@ -36,7 +36,7 @@ class CreateApiKeyParams:
         try:
             length_validator(self.key_name)
         except Exception as e:
-            raise ValueError(f"key_name validation failed: {str(e)}")
+            raise ValueError(f"key_name validation failed: {str(e)}") from e
 
 
 def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> UserApiKey:
@@ -72,7 +72,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
 
 
 def _generate_unique_key_id(db_session: db.Session) -> str:
-    for attempt in range(MAX_KEY_GENERATION_RETRIES):
+    for _attempt in range(MAX_KEY_GENERATION_RETRIES):
         key_id = generate_api_key_id()
 
         # Check if this key_id already exists
