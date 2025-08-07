@@ -1163,18 +1163,38 @@ def test_application_get_success(client, enable_factory_create, db_session, user
     for application_form, application_form_response in zip(
         application_forms, response_application_forms, strict=True
     ):
-        assert application_form_response == {
-            "application_form_id": str(application_form.application_form_id),
-            "application_id": str(application.application_id),
-            "form_id": str(application_form.form_id),
-            "application_response": application_form.application_response,
-            "application_form_status": ApplicationFormStatus.IN_PROGRESS,
-            "created_at": application_form.created_at.isoformat(),
-            "updated_at": application_form.updated_at.isoformat(),
-            "is_required": True,
-            "is_included_in_submission": None,
-            "application_attachments": [],
-        }
+        assert application_form_response["application_form_id"] == str(
+            application_form.application_form_id
+        )
+        assert application_form_response["application_id"] == str(application.application_id)
+        assert application_form_response["form_id"] == str(application_form.form_id)
+        assert (
+            application_form_response["application_response"]
+            == application_form.application_response
+        )
+        assert (
+            application_form_response["application_form_status"]
+            == ApplicationFormStatus.IN_PROGRESS
+        )
+        assert application_form_response["created_at"] == application_form.created_at.isoformat()
+        assert application_form_response["updated_at"] == application_form.updated_at.isoformat()
+        assert application_form_response["is_required"] is True
+        assert application_form_response["is_included_in_submission"] is None
+        assert application_form_response["application_attachments"] == []
+        # Check the form
+        assert application_form_response["form"]["form_name"] == application_form.form.form_name
+        assert (
+            application_form_response["form"]["form_json_schema"]
+            == application_form.form.form_json_schema
+        )
+        assert (
+            application_form_response["form"]["form_ui_schema"]
+            == application_form.form.form_ui_schema
+        )
+        assert (
+            application_form_response["form"]["form_rule_schema"]
+            == application_form.form.form_rule_schema
+        )
 
 
 def test_application_get_with_attachments(
