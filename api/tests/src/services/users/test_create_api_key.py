@@ -85,10 +85,8 @@ def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_sessi
         )
         api_keys.append(api_key)
 
-
     key_ids = [key.key_id for key in api_keys]
     assert len(set(key_ids)) == len(key_ids), "All key_ids should be unique"
-
 
     assert all(len(key_id) == 25 for key_id in key_ids)
 
@@ -97,15 +95,13 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     """Test that create_api_key handles key_id collisions by retrying."""
     user = UserFactory.create()
 
-
     existing_key_id = "COLLISION_TEST_KEY_12345"
     UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
 
-
     with patch("src.services.users.create_api_key.generate_api_key_id") as mock_generate:
         mock_generate.side_effect = [
-            existing_key_id,  
-            "UNIQUE_TEST_KEY_123456789",  
+            existing_key_id,
+            "UNIQUE_TEST_KEY_123456789",
         ]
 
         api_key = create_api_key(
@@ -115,7 +111,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
         )
 
         assert api_key.key_id == "UNIQUE_TEST_KEY_123456789"
-        assert mock_generate.call_count == 2  
+        assert mock_generate.call_count == 2
 
 
 def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: db.Session):
@@ -174,7 +170,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
 
     with patch("src.services.users.create_api_key.generate_api_key_id") as mock_generate:
-        mock_generate.return_value = existing_key_id 
+        mock_generate.return_value = existing_key_id
 
         with caplog.at_level("ERROR"):
             with pytest.raises(KeyGenerationError):
@@ -216,6 +212,7 @@ def test_create_api_key_uses_key_generator(
 
     assert api_key.key_id == "TestGeneratedKey123456789"
 
+
 def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):
     """Test that the same user can have multiple API keys with different names."""
     user = UserFactory.create()
@@ -235,4 +232,4 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.user_id == api_key2.user_id
     assert api_key1.key_name != api_key2.key_name
     assert api_key1.api_key_id != api_key2.api_key_id
-    assert api_key1.key_id != api_key2.key_id  
+    assert api_key1.key_id != api_key2.key_id
