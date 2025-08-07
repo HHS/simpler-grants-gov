@@ -1,8 +1,6 @@
 import string
 from unittest.mock import patch
 
-import pytest
-
 from src.util.api_key_gen import generate_api_key_id
 
 
