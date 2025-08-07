@@ -589,16 +589,6 @@ export const getApplicationResponse = (
   }
 };
 
-// getApplicationIdFromUrl
-export const getApplicationIdFromUrl = (): string | null => {
-  if (typeof window === "undefined") return null;
-  const match = window.location.pathname.match(
-    /\/applications\/application\/([a-f0-9-]+)\/form\//,
-  );
-  return match?.[1] ?? null;
-};
-
-// getLabelComponent
 export function getLabelComponent<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,

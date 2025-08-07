@@ -21,7 +21,6 @@ import { DeleteAttachmentModal } from "src/components/application/attachments/De
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import {
-  getApplicationIdFromUrl,
   getLabelComponent,
 } from "src/components/applyForm/utils";
 import { useApplicationId } from "src/hooks/useApplicationId";
