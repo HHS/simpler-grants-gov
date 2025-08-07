@@ -18,7 +18,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 
 import Layout from "src/components/Layout";
-import { ClientScriptInjector } from "src/components/ScriptInjector";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
@@ -55,6 +54,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       })
     : "";
 
+  // note that if we need to conditionally include third party scripts on the page, a component was implemented
+  // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -81,7 +82,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
               dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
             />
-            <ClientScriptInjector />
           </>
         )}
       </body>
