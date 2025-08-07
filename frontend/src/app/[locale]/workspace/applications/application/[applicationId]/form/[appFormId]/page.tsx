@@ -9,8 +9,8 @@ import {
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import { redirect } from "next/navigation";
@@ -39,7 +39,7 @@ interface formPageProps {
 
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
-  let applicationData = {} as ApplicationDetail;
+  let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formId = "";
   let formData: FormDetail | null;
@@ -50,7 +50,7 @@ async function FormPage({ params }: formPageProps) {
   }
 
   try {
-    const response = await getApplicationDetails(applicationId, session.token);
+    const response = await getApplicationFormDetails(applicationId, appFormId);
 
     if (response.status_code !== 200) {
       console.error(
@@ -60,22 +60,8 @@ async function FormPage({ params }: formPageProps) {
       return <TopLevelError />;
     }
 
-    applicationData = response.data;
-
-    formId =
-      applicationData.application_forms?.find(
-        (form) => form.application_form_id === appFormId,
-      )?.form_id || "";
-    if (!formId) {
-      console.error(
-        `No form found for applicationID (${applicationId}), appFormId (${appFormId})`,
-      );
-      return <TopLevelError />;
-    }
-    formData =
-      applicationData.competition.competition_forms.find(
-        (form) => form.form.form_id === formId,
-      )?.form || null;
+    applicationFormData = response.data;
+    formData = applicationFormData.form;
     if (!formData) {
       console.error(
         `No form data found for applicationID (${applicationId}), appFormId (${appFormId}), formId (${formId})`,
@@ -83,10 +69,14 @@ async function FormPage({ params }: formPageProps) {
       return <TopLevelError />;
     }
 
+    formId = applicationFormData.form.form_id;
+    if (applicationFormData.application_form_id !== appFormId) {
+      console.error(`Application form ids to do not match`);
+      return <TopLevelError />;
+    }
     formValidationWarnings =
-      (applicationData.form_validation_warnings?.[
-        appFormId
-      ] as unknown as FormValidationWarning[]) || null;
+      (applicationFormData.warnings as unknown as FormValidationWarning[]) ||
+      null;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -97,10 +87,9 @@ async function FormPage({ params }: formPageProps) {
     }
     return <TopLevelError />;
   }
-  const application_response = getApplicationResponse(
-    applicationData.application_forms,
-    formId,
-  );
+
+  const application_response = applicationFormData.application_response || {};
+
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
   const schemaErrors = validateUiSchema(form_ui_schema);
 
@@ -130,12 +119,12 @@ async function FormPage({ params }: formPageProps) {
           breadcrumbList={[
             { title: "home", path: "/" },
             {
-              title: applicationData.application_name,
-              path: `/workspace/applications/application/${applicationData.application_id}`,
+              title: applicationFormData.application_name, // this may still be missing?
+              path: `/workspace/applications/application/${applicationFormData.application_id}`,
             },
             {
               title: "Form",
-              path: `/workspace/applications/application/${applicationData.application_id}/form/${applicationId}`,
+              path: `/workspace/applications/application/${applicationFormData.application_id}/form/${applicationId}`,
             },
           ]}
         />

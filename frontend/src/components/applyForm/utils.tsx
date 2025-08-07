@@ -539,6 +539,8 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
+// This is only needed when extracting an application response from the application endpoint's
+// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
 // the application detail contains an empty array for the form response if no
 // forms have been saved or an application_response with a form_id
 export const getApplicationResponse = (

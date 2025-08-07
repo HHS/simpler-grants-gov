@@ -3,6 +3,7 @@ import { APIResponse } from "src/types/apiResponseTypes";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
+import { FormDetail } from "./formResponseTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -25,20 +26,22 @@ export interface Oranization {
   sam_gov_entity: SamGovEntity;
 }
 
-export interface ApplicationFormDetail {
-  application_form_id: string;
-  application_form_status: "not_started" | "in_progress" | "complete";
-  application_id: string;
-  application_response: ApplicationResponseDetail;
-  form_id: string;
-}
-
 export interface FormValidationWarnings {
   [applicationId: string]: FormValidationWarning;
 }
 
 export interface FormValidationErrors {
   form_validation_errors: FormValidationWarnings;
+}
+
+export interface ApplicationFormDetail {
+  application_form_id: string;
+  application_form_status: "not_started" | "in_progress" | "complete";
+  application_id: string;
+  application_response: ApplicationResponseDetail;
+  form_id: string;
+  form: FormDetail;
+  warnings: FormValidationWarnings;
 }
 
 export interface ApplicationDetail {
