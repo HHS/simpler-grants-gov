@@ -1,6 +1,5 @@
 import string
-from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from unittest.mock import patch
 
 import pytest
 
