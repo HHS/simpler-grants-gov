@@ -21,7 +21,7 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { getApplicationIdFromUrl } from "src/components/applyForm/utils";
+import { useApplicationId } from "src/hooks/useApplicationId";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
@@ -36,14 +36,13 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  const applicationId = getApplicationIdFromUrl();
   const attachments = useAttachments();
-  const { uploadAttachment } = useAttachmentUpload();
+  const applicationId = useApplicationId();
 
+  const { uploadAttachment } = useAttachmentUpload();
   const [attachmentId, setAttachmentId] = useState<string | null>(
     typeof value === "string" ? value : null,
   );
-
   const [fileName, setFileName] = useState<string | null>(null);
   const [showFile, setShowFile] = useState<boolean>(false);
   const [deletePendingName, setDeletePendingName] = useState<string | null>(

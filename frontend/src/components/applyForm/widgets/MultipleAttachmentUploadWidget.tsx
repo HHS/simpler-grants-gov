@@ -24,6 +24,7 @@ import {
   getApplicationIdFromUrl,
   getLabelComponent,
 } from "src/components/applyForm/utils";
+import { useApplicationId } from "src/hooks/useApplicationId";
 
 type UploadedFile = {
   id: string;
@@ -41,6 +42,7 @@ const MultipleAttachmentUploadWidget = ({
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const attachments = useAttachments();
+  const applicationId = useApplicationId();
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
   const { description, options, title } = schema as typeof schema & {
@@ -51,7 +53,6 @@ const MultipleAttachmentUploadWidget = ({
   const { deleteState, deletePending, deleteAttachment } =
     useAttachmentDelete();
 
-  const applicationId = getApplicationIdFromUrl();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const uploadedFilesRef = useRef<UploadedFile[]>([]);
   const [fileToDeleteIndex, setFileToDeleteIndex] = useState<number | null>(
