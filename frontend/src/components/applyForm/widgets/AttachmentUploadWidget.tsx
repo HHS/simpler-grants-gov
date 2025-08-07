@@ -16,7 +16,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import {
   FormValidationWarning,
   UswdsWidgetProps,
@@ -32,11 +31,11 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     schema,
     rawErrors = [],
     disabled,
+    attachments,
   } = props;
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  const attachments = useAttachments();
   const applicationId = useApplicationId();
 
   const { uploadAttachment } = useAttachmentUpload();
@@ -84,7 +83,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     const newAttachmentId = typeof value === "string" ? value : null;
     setAttachmentId(newAttachmentId);
 
-    const uploadedAttachment = attachments.find(
+    const uploadedAttachment = attachments?.find(
       (a) => a.application_attachment_id === newAttachmentId,
     );
 

@@ -11,19 +11,17 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
-import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
-import { formHasAttachmentFields } from "src/utils/formHasAttachment";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import { ClientApplyForm } from "src/components/applyForm/ClientApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import ApplyForm from "src/components/applyForm/ApplyForm";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +39,6 @@ interface formPageProps {
 
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
-  let applicationAttachments: Attachment[] = [];
   let applicationData = {} as ApplicationDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formId = "";
@@ -64,7 +61,6 @@ async function FormPage({ params }: formPageProps) {
     }
 
     applicationData = response.data;
-    applicationAttachments = applicationData.application_attachments ?? [];
 
     formId =
       applicationData.application_forms?.find(
@@ -108,9 +104,6 @@ async function FormPage({ params }: formPageProps) {
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
   const schemaErrors = validateUiSchema(form_ui_schema);
 
-  const includeAttachments = formHasAttachmentFields(form_ui_schema);
-  const attachments = includeAttachments ? applicationAttachments : [];
-
   if (schemaErrors) {
     console.error(
       "Error validating form ui schema",
@@ -147,14 +140,13 @@ async function FormPage({ params }: formPageProps) {
           ]}
         />
         <h1>{form_name}</h1>
-        <ClientApplyForm
+        <ApplyForm
+          applicationId={applicationId}
           validationWarnings={formValidationWarnings}
           savedFormData={application_response}
           formSchema={formSchema}
           uiSchema={form_ui_schema}
           formId={form_id}
-          applicationId={applicationId}
-          attachments={attachments}
         />
       </GridContainer>
     </>

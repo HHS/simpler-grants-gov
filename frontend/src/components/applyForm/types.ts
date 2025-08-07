@@ -9,6 +9,7 @@ import {
 import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
+import { Attachment } from "src/types/attachmentTypes";
 
 export type SchemaField = {
   type?: string;
@@ -102,6 +103,7 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
+  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;

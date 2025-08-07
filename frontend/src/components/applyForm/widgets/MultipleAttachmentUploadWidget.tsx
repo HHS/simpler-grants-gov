@@ -18,7 +18,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import { useAttachments } from "src/components/applyForm/AttachmentContext";
 import { SchemaWithLabelOption, UswdsWidgetProps } from "src/components/applyForm/types";
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
@@ -36,10 +35,10 @@ const MultipleAttachmentUploadWidget = ({
   rawErrors = [],
   schema,
   onChange,
+  attachments,
 }: UswdsWidgetProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  const attachments = useAttachments();
   const applicationId = useApplicationId();
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
@@ -84,7 +83,7 @@ const MultipleAttachmentUploadWidget = ({
 
     if (parsedValue.length > 0) {
       const hydrated = parsedValue.map((uuid) => {
-        const match = attachments.find(
+        const match = attachments?.find(
           (a) => a.application_attachment_id === uuid,
         );
         return {
@@ -196,7 +195,7 @@ const MultipleAttachmentUploadWidget = ({
       {uploadedFiles.length > 0 && (
         <ul className="usa-list usa-list--unstyled margin-top-2">
           {uploadedFiles.map((file, index) => {
-            const attachment = attachments.find(
+            const attachment = attachments?.find(
               (a) => a.application_attachment_id === file.id,
             );
             const isPreviouslyUploaded =
