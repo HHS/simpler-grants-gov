@@ -4,6 +4,7 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Table } from "@trussworks/react-uswds";
 
@@ -283,13 +284,10 @@ export const IncludeFormInSubmissionRadio = ({
   formId: string;
   includeFormInApplicationSubmission?: boolean | null;
 }) => {
+  const router = useRouter();
   const { clientFetch } = useClientFetch<{
     is_included_in_submission: boolean;
   }>("Error submitting update include form in application submission");
-
-  const [includeFormInSubmission, setIncludeFormInSubmission] = useState<
-    boolean | null
-  >(includeFormInApplicationSubmission ?? null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (value: string | unknown) => {
@@ -306,22 +304,22 @@ export const IncludeFormInSubmissionRadio = ({
             "Error updating form to be included in submission. Value undefined",
           );
         }
-        setIncludeFormInSubmission(is_included_in_submission);
       })
       .catch((err) => {
         // We will fall back to false on any errors to prevent blocking user workflows.
-        setIncludeFormInSubmission(false);
+        includeFormInApplicationSubmission = false;
         console.error(err);
       })
       .finally(() => {
         setLoading(false);
+        router.refresh();
       });
   };
 
   let radioValue = null;
-  if (includeFormInSubmission) {
+  if (includeFormInApplicationSubmission) {
     radioValue = "Yes";
-  } else if (includeFormInSubmission === false) {
+  } else if (includeFormInApplicationSubmission === false) {
     radioValue = "No";
   }
 
