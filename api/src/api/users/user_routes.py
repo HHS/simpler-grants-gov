@@ -36,9 +36,9 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
+from src.services.users.create_api_key import create_api_key
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
-from src.services.users.create_api_key import create_api_key
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
@@ -489,7 +489,7 @@ def user_create_api_key(
         )
 
         return response.ApiResponse(message="Success", data=api_key)
-    
+
     except ValueError as e:
         # Handle validation errors from the service
         logger.warning(
@@ -497,7 +497,7 @@ def user_create_api_key(
             extra={"user_id": user_id, "error": str(e)},
         )
         raise_flask_error(400, str(e))
-    
+
     except Exception as e:
         logger.error(
             "Unexpected error creating API key",

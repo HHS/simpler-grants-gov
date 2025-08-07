@@ -270,8 +270,8 @@ class UserApiKeyCreateRequestSchema(Schema):
         validate=validators.Length(min=1, max=255),
         metadata={
             "description": "Human-readable name for the API key",
-            "example": "Production API Key"
-        }
+            "example": "Production API Key",
+        },
     )
 
 
@@ -279,44 +279,35 @@ class UserApiKeySchema(Schema):
     api_key_id = fields.UUID(
         metadata={
             "description": "Unique identifier for the API key record",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
+            "example": "123e4567-e89b-12d3-a456-426614174000",
         }
     )
     key_name = fields.String(
         metadata={
             "description": "Human-readable name for the API key",
-            "example": "Production API Key"
+            "example": "Production API Key",
         }
     )
     key_id = fields.String(
         metadata={
             "description": "The actual API key identifier to use for authentication",
-            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI"
+            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI",
         }
     )
     is_active = fields.Boolean(
-        metadata={
-            "description": "Whether the API key is currently active",
-            "example": True
-        }
+        metadata={"description": "Whether the API key is currently active", "example": True}
     )
     last_used = fields.DateTime(
         allow_none=True,
         metadata={
             "description": "Timestamp when this API key was last used for authentication",
-            "example": "2024-01-15T10:30:00Z"
-        }
+            "example": "2024-01-15T10:30:00Z",
+        },
     )
     created_at = fields.DateTime(
-        metadata={
-            "description": "When this API key was created",
-            "example": "2024-01-01T12:00:00Z"
-        }
+        metadata={"description": "When this API key was created", "example": "2024-01-01T12:00:00Z"}
     )
 
 
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(
-        UserApiKeySchema,
-        metadata={"description": "The newly created API key"}
-    )
+    data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
