@@ -156,15 +156,6 @@ export const determineFieldType = ({
     }
   }
 
-  // eslint-disable-next-line no-console
-  console.debug(
-    "Resolved widget type",
-    fieldSchema.type,
-    "for definition",
-    fieldSchema.definition,
-    fieldSchema,
-  );
-
   if (fieldSchema.enum?.length) {
     return "Select";
   } else if (fieldSchema.type === "boolean") {
@@ -427,9 +418,9 @@ export const buildField = ({
   }
 
   return (
-    <React.Fragment key={name}>
-      {Widget({
+      Widget({
         id: name,
+        key: name,
         disabled,
         required: isFieldRequired(name, formSchema),
         minLength: fieldSchema?.minLength,
@@ -438,8 +429,7 @@ export const buildField = ({
         rawErrors,
         value,
         options,
-      })}
-    </React.Fragment>
+      })
   );
 };
 
