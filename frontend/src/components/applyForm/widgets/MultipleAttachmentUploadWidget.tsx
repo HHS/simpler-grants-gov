@@ -19,11 +19,10 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { useAttachments } from "src/components/applyForm/AttachmentContext";
-import { UswdsWidgetProps } from "src/components/applyForm/types";
-import {
-  getLabelComponent,
-} from "src/components/applyForm/utils";
+import { SchemaWithLabelOption, UswdsWidgetProps } from "src/components/applyForm/types";
 import { useApplicationId } from "src/hooks/useApplicationId";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 type UploadedFile = {
   id: string;
@@ -44,10 +43,7 @@ const MultipleAttachmentUploadWidget = ({
   const applicationId = useApplicationId();
   const hasError = rawErrors.length > 0;
   const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
-  const { description, options, title } = schema as typeof schema & {
-    description?: string;
-    title?: string;
-  };
+  const { description, title, options } = schema as SchemaWithLabelOption;
   const { uploadAttachment } = useAttachmentUpload();
   const { deleteState, deletePending, deleteAttachment } =
     useAttachmentDelete();
@@ -60,7 +56,7 @@ const MultipleAttachmentUploadWidget = ({
   const [deletePendingName, setDeletePendingName] = useState<string | null>(
     null,
   );
-
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const hasHydratedRef = useRef(false);
 
   useEffect(() => {
@@ -158,11 +154,13 @@ const MultipleAttachmentUploadWidget = ({
 
   return (
     <FormGroup key={`form-group__multi-file-upload--${id}`} error={hasError}>
-      {
-        // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        getLabelComponent({ id, title, required, description, options })
-      }
+      <DynamicFieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description as string}
+        labelType={labelType}
+      />
 
       {hasError && (
         <ErrorMessage id={`error-for-${id}`}>

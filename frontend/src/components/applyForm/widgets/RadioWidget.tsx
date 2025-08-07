@@ -11,7 +11,8 @@ import { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `RadioWidget` is a widget for rendering a radio group.
  *  It is typically used with a string property constrained with enum options.
@@ -41,6 +42,7 @@ function RadioWidget<
   const { title, enum: enumFromSchema, description } = schema;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumDisabled, emptyValue } = options;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const enumOptions = useMemo(
     () =>
@@ -85,12 +87,14 @@ function RadioWidget<
 
   return (
     <FormGroup error={error} key={`form-group__radio--${id}`}>
-      <FieldLabel
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
+
       {error && (
         <ErrorMessage>
           {typeof rawErrors[0] === "string"

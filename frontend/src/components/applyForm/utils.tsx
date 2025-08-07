@@ -1,4 +1,4 @@
-import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
+import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
@@ -22,7 +22,6 @@ import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import CheckboxWidget from "./widgets/CheckboxWidget";
-import { FieldLabel } from "./widgets/FieldLabel";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
@@ -588,49 +587,3 @@ export const getApplicationResponse = (
     return {};
   }
 };
-
-export function getLabelComponent<
-  T = unknown,
-  S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
->(
-  // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  {
-    id,
-    title,
-    required,
-    description,
-    options,
-  }: Pick<
-    UswdsWidgetProps<T, S, F>,
-    "id" | "title" | "required" | "description" | "options"
-  >,
-) {
-  const labelType = options?.["widget-label"] || "default";
-
-  switch (labelType) {
-    case "hide-helper-text":
-      return (
-        <label className="usa-label" htmlFor={id}>
-          {title}
-          {required && (
-            <abbr title="required" className="usa-hint usa-hint--required">
-              *
-            </abbr>
-          )}
-        </label>
-      );
-
-    case "default":
-    default:
-      return (
-        <FieldLabel
-          idFor={id}
-          title={title}
-          description={description as string}
-          required={required}
-        />
-      );
-  }
-}

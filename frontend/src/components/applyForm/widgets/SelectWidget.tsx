@@ -22,7 +22,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -61,6 +62,7 @@ function SelectWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, description } = schema;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
   const enums = useMemo(() => (opts && opts.length > 0 ? opts : []), [opts]);
@@ -118,11 +120,12 @@ function SelectWidget<
 
   return (
     <FormGroup error={error} key={`form-group__select-input--${id}`}>
-      <FieldLabel
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
 
       {error && (

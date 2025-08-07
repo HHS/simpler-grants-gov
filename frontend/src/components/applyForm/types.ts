@@ -134,3 +134,12 @@ export interface UswdsWidgetProps<
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
 }
+
+export interface SchemaWithLabelOption {
+  title?: string;
+  description?: string;
+  options?: {
+    "widget-label"?: string;
+    [key: string]: unknown;
+  };
+}
