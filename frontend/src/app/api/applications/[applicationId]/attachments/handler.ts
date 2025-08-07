@@ -3,6 +3,7 @@ import { uploadAttachment } from "src/services/fetch/fetchers/applicationFetcher
 import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { NextResponse } from "next/server";
+import { readError } from "src/errors";
 
 export const postAttachmentHandler = async (
   req: Request,
@@ -42,8 +43,14 @@ export const postAttachmentHandler = async (
     return NextResponse.json({
       application_attachment_id: res.data?.application_attachment_id,
     });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+
+    return Response.json(
+      {
+        message: `Error fauled to upload attachment: ${message}`,
+      },
+      { status },
+    );
   }
 };
