@@ -467,6 +467,7 @@ def user_create_api_key(
     db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Create a new API key for the authenticated user"""
+    add_extra_data_to_current_request_logs({"user_id": user_id})
     logger.info("POST /v1/users/:user_id/api-keys")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
