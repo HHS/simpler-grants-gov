@@ -22,7 +22,7 @@ locals {
     LOGIN_GOV_REDIRECT_SCHEME        = var.enable_https ? "https" : "http"
     API_JWT_ISSUER                   = "simpler-grants-api-${var.environment}"
     API_JWT_AUDIENCE                 = "simpler-grants-api-${var.environment}"
-    API_JWT_TOKEN_EXPIRATION_MINUTES = 15
+    API_JWT_TOKEN_EXPIRATION_MINUTES = 1
 
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
 

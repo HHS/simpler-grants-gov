@@ -52,6 +52,7 @@ export default function UserProvider({
         if (localUser?.token && !fetchedUser.token) {
           setHasBeenLoggedOut(true);
         }
+        console.log("~~~ session refreshed", fetchedUser);
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
         setIsLoading(false);
@@ -85,7 +86,11 @@ export default function UserProvider({
   const refreshIfExpired = useCallback(async (): Promise<
     boolean | undefined
   > => {
+    if (!localUser?.token) {
+      return;
+    }
     if (isExpired(localUser?.expiresAt)) {
+      console.log("~~~ logging out");
       await getUserSession().then(noop).catch(noop);
       return true;
     }
@@ -94,6 +99,7 @@ export default function UserProvider({
   // if token is less than 10 mins from its expiration, refresh the user to get a token refresh
   const refreshIfExpiring = useCallback(async () => {
     if (isExpiring(localUser?.expiresAt)) {
+      console.log("~~~ refreshing expiring");
       await getUserSession().then(noop).catch(noop);
       return true;
     }
