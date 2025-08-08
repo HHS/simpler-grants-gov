@@ -73,7 +73,7 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   };
 
   return (
-    <div className="margin-top-2">
+    <div className="margin-top-4">
       <h2>Award</h2>
       <Grid row className="margin-top-2 grid-gap-2">
         {Object.entries(awardGridInfo).map(([title, content], index) => (
