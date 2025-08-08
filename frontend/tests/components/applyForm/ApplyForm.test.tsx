@@ -15,6 +15,17 @@ jest.mock("src/components/applyForm/actions", () => ({
     mockHandleFormAction(...args),
 }));
 
+const mockRevalidateTag = jest.fn();
+const getSessionMock = jest.fn();
+
+jest.mock("next/cache", () => ({
+  revalidateTag: () => mockRevalidateTag(),
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 const formSchema: RJSFSchema = {
   title: "test schema",
   properties: {

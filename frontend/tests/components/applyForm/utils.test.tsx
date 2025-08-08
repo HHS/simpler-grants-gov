@@ -19,6 +19,17 @@ jest.mock("react", () => ({
   useCallback: (fn: unknown) => fn,
 }));
 
+const mockRevalidateTag = jest.fn();
+const getSessionMock = jest.fn();
+
+jest.mock("next/cache", () => ({
+  revalidateTag: () => mockRevalidateTag(),
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 describe("shapeFormData", () => {
   it("should shape form data to the form schema", () => {
     const shapedFormData = {
