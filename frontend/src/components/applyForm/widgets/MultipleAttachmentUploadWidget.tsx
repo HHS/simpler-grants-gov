@@ -19,12 +19,12 @@ import {
   UploadedFile,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { isValidationWarning } from "src/components/applyForm/utils";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
 
 const MultipleAttachmentUploadWidget = ({
+  error,
   id,
   value: initialValue,
   required,
@@ -157,13 +157,9 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {hasError && (
+      {error && (
         <ErrorMessage id={`error-for-${id}`}>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : isValidationWarning(rawErrors[0])
-              ? rawErrors[0].message
-              : "Invalid input"}
+          {String(rawErrors[0])}
         </ErrorMessage>
       )}
 

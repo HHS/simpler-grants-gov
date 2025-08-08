@@ -21,10 +21,10 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { useApplicationId } from "src/hooks/useApplicationId";
-import { isValidationWarning } from "src/components/applyForm/utils";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
+    error,
     id,
     value,
     onChange,
@@ -121,13 +121,9 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
 
-      {hasError && (
+      {error && (
         <ErrorMessage id={`error-for-${id}`}>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : isValidationWarning(rawErrors[0])
-              ? rawErrors[0].message
-              : "Invalid input"}
+          {String(rawErrors[0])}
         </ErrorMessage>
       )}
 
