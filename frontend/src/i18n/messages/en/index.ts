@@ -245,6 +245,8 @@ export const messages = {
         "All required fields or attachments in required forms must be completed or uploaded.",
       incompleteForm: "is incomplete. Answer all required questions to submit.",
       notStartedForm: "has not been started. Complete the form to submit.",
+      missingIncludeInSubmission:
+        'Select Yes or No for "Submit with application?" column in Conditionally-Required Forms section.',
     },
     submissionError: {
       title: "Your application could not be submitted",
@@ -323,6 +325,7 @@ export const messages = {
       },
       updated: "Last updated",
       includeFormInApplicationSubmission: "Submit with application?",
+      includeFormInApplicationSubmissionIncompleteMessage: "Some issues found.",
     },
     attachments: {
       attachedDocument: "Attached document",

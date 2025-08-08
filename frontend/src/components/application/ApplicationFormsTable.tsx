@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Table } from "@trussworks/react-uswds";
 
+import { FormValidationWarning } from "src/components/applyForm/types";
 import RadioWidget from "src/components/applyForm/widgets/RadioWidget";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -47,10 +48,12 @@ export const ApplicationFormsTable = ({
   applicationForms,
   applicationId,
   forms,
+  errors = null,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
+  errors?: FormValidationWarning[] | null;
 }) => {
   const requiredForms = selectApplicationFormsByRequired({
     applicationForms,
@@ -82,6 +85,7 @@ export const ApplicationFormsTable = ({
             applicationForms={conditionalRequiredForms}
             applicationId={applicationId}
             formsAreOptional={true}
+            errors={errors}
           />
         </>
       )}
@@ -104,13 +108,35 @@ const ApplicationTable = ({
   applicationId,
   forms,
   formsAreOptional = false,
+  errors = null,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
   formsAreOptional: boolean;
+  errors?: FormValidationWarning[] | null;
 }) => {
   const t = useTranslations("Application.competitionFormTable");
+  const formIdsWithErrors = errors ? errors.map((item) => item.value) : [];
+
+  /**
+   * This function returns errors under the form link column only in the conditional forms table
+   * and when there are relevant validation errors after submission.
+   */
+  const getFormLinkErrors = (form: ApplicationFormDetail) =>
+    formsAreOptional &&
+    errors &&
+    formIdsWithErrors.includes(form.application_form_id) && (
+      <div className="display-flex flex-align-center text-bold text-error margin-top-1">
+        <USWDSIcon
+          name="error_outline"
+          className="text-error usa-icon--size-1 margin-right-05"
+        />
+        <p className={"font-sans-3xs margin-top-0"}>
+          {t("includeFormInApplicationSubmissionIncompleteMessage")}
+        </p>
+      </div>
+    );
 
   return (
     <Table className="width-full overflow-wrap">
@@ -162,6 +188,7 @@ const ApplicationTable = ({
                 applicationId={applicationId}
                 appFormId={form.application_form_id}
               />
+              {getFormLinkErrors(form)}
             </td>
             <td data-label={t("instructions")}>
               <InstructionsLink
@@ -288,14 +315,19 @@ export const IncludeFormInSubmissionRadio = ({
   const { clientFetch } = useClientFetch<{
     is_included_in_submission: boolean;
   }>("Error submitting update include form in application submission");
+  const [includeFormInSubmission, setIncludeFormInSubmission] = useState<
+    boolean | null
+  >(includeFormInApplicationSubmission ?? null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (value: string | unknown) => {
+    const newValue = value === "Yes";
+    setIncludeFormInSubmission(newValue); // eagerly set state.
     setLoading(true);
     clientFetch(`/api/applications/${applicationId}/forms/${formId}`, {
       method: "PUT",
       body: JSON.stringify({
-        is_included_in_submission: value === "Yes",
+        is_included_in_submission: newValue,
       }),
     })
       .then(({ is_included_in_submission }) => {
@@ -307,7 +339,7 @@ export const IncludeFormInSubmissionRadio = ({
       })
       .catch((err) => {
         // We will fall back to false on any errors to prevent blocking user workflows.
-        includeFormInApplicationSubmission = false;
+        setIncludeFormInSubmission(false);
         console.error(err);
       })
       .finally(() => {
@@ -317,9 +349,9 @@ export const IncludeFormInSubmissionRadio = ({
   };
 
   let radioValue = null;
-  if (includeFormInApplicationSubmission) {
+  if (includeFormInSubmission) {
     radioValue = "Yes";
-  } else if (includeFormInApplicationSubmission === false) {
+  } else if (includeFormInSubmission === false) {
     radioValue = "No";
   }
 
