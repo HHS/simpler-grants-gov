@@ -475,32 +475,16 @@ def user_create_api_key(
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
-    try:
-        with db_session.begin():
-            api_key = create_api_key(db_session, user_id, json_data)
+    with db_session.begin():
+        api_key = create_api_key(db_session, user_id, json_data)
 
-        logger.info(
-            "Created API key for user",
-            extra={
-                "user_id": user_id,
-                "api_key_id": api_key.api_key_id,
-                "key_name": api_key.key_name,
-            },
-        )
+    logger.info(
+        "Created API key for user",
+        extra={
+            "user_id": user_id,
+            "api_key_id": api_key.api_key_id,
+            "key_name": api_key.key_name,
+        },
+    )
 
-        return response.ApiResponse(message="Success", data=api_key)
-
-    except ValueError as e:
-        # Handle validation errors from the service
-        logger.warning(
-            "Invalid parameters for API key creation",
-            extra={"user_id": user_id, "error": str(e)},
-        )
-        raise_flask_error(400, str(e))
-
-    except Exception as e:
-        logger.error(
-            "Unexpected error creating API key",
-            extra={"user_id": user_id, "error": str(e)},
-        )
-        raise_flask_error(500, "Internal server error")
+    return response.ApiResponse(message="Success", data=api_key)

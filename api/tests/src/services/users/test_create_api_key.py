@@ -244,40 +244,5 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.key_id != api_key2.key_id
 
 
-def test_create_api_key_missing_key_name(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key raises ValueError when key_name is missing."""
-    user = UserFactory.create()
-    json_data = {}
-
-    with pytest.raises(ValueError, match="key_name is required"):
-        create_api_key(
-            db_session=db_session,
-            user_id=user.user_id,
-            json_data=json_data,
-        )
-
-
-def test_create_api_key_empty_key_name(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key raises ValueError when key_name is empty."""
-    user = UserFactory.create()
-    json_data = {"key_name": ""}
-
-    with pytest.raises(ValueError, match="key_name is required"):
-        create_api_key(
-            db_session=db_session,
-            user_id=user.user_id,
-            json_data=json_data,
-        )
-
-
-def test_create_api_key_long_key_name(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key raises ValueError when key_name is too long."""
-    user = UserFactory.create()
-    json_data = {"key_name": "x" * 256}  # Exceeds 255 char limit
-
-    with pytest.raises(ValueError, match="key_name validation failed"):
-        create_api_key(
-            db_session=db_session,
-            user_id=user.user_id,
-            json_data=json_data,
-        )
+# Validation tests removed - validation is now handled by Marshmallow schema
+# at the API endpoint level, so the service assumes valid input

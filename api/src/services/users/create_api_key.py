@@ -5,7 +5,6 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.adapters import db
-from src.api.schemas.extension import validators
 from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import generate_api_key_id
 
@@ -22,21 +21,10 @@ class KeyGenerationError(Exception):
 
 
 class CreateApiKeyParams:
-    """Simple parameter validation for API key creation"""
+    """Simple parameter extraction for API key creation"""
 
     def __init__(self, json_data: dict):
-        self.key_name = json_data.get("key_name", "").strip()
-
-        # Validate key_name
-        if not self.key_name:
-            raise ValueError("key_name is required")
-
-        # Use the same validator as the schema
-        length_validator = validators.Length(min=1, max=255)
-        try:
-            length_validator(self.key_name)
-        except Exception as e:
-            raise ValueError(f"key_name validation failed: {str(e)}") from e
+        self.key_name = json_data["key_name"]
 
 
 def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> UserApiKey:
