@@ -5,21 +5,41 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
 
+type FormActionArgs = [
+  {
+    applicationId: string;
+    formId: string;
+    formData: FormData;
+    saved: boolean;
+    error: boolean;
+  },
+  FormData,
+];
+
+type FormActionResult = Promise<{
+  applicationId: string;
+  formId: string;
+  saved: boolean;
+  error: boolean;
+  formData: FormData;
+}>;
+
+const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
-const mockHandleFormAction = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
-  handleFormAction: (...args: unknown[]): unknown =>
+  handleFormAction: (...args: [...FormActionArgs]) =>
     mockHandleFormAction(...args),
 }));
 
-const mockRevalidateTag = jest.fn();
+const mockRevalidateTag = jest.fn<void, [string]>();
 const getSessionMock = jest.fn();
 
 jest.mock("next/cache", () => ({
-  revalidateTag: () => mockRevalidateTag(),
+  revalidateTag: (tag: string) => mockRevalidateTag(tag),
 }));
 
 jest.mock("src/services/auth/session", () => ({
@@ -148,7 +168,15 @@ describe("ApplyForm", () => {
   });
 
   it("calls handleFormAction action on save", () => {
-    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(
+      mockHandleFormAction.mockResolvedValue({
+        applicationId: "test",
+        formId: "test",
+        saved: false,
+        error: false,
+        formData: new FormData(),
+      }),
+    );
 
     render(
       <ApplyForm
@@ -177,7 +205,15 @@ describe("ApplyForm", () => {
     );
   });
   it("errors when form data is empty", () => {
-    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(
+      mockHandleFormAction.mockResolvedValue({
+        applicationId: "test",
+        formId: "test",
+        saved: false,
+        error: false,
+        formData: new FormData(),
+      }),
+    );
 
     render(
       <ApplyForm
@@ -193,7 +229,15 @@ describe("ApplyForm", () => {
     expect(alert).toHaveTextContent("Error rendering form");
   });
   it("errors when form data does not conform to JSON schema", () => {
-    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(
+      mockHandleFormAction.mockResolvedValue({
+        applicationId: "test",
+        formId: "test",
+        saved: false,
+        error: false,
+        formData: new FormData(),
+      }),
+    );
 
     render(
       <ApplyForm
@@ -210,7 +254,15 @@ describe("ApplyForm", () => {
     expect(errorMessage).toBeInTheDocument();
   });
   it("does not error when saved form data does not conform to form schema", () => {
-    mockHandleFormAction.mockImplementation(() => Promise.resolve());
+    mockHandleFormAction.mockImplementation(
+      mockHandleFormAction.mockResolvedValue({
+        applicationId: "test",
+        formId: "test",
+        saved: false,
+        error: false,
+        formData: new FormData(),
+      }),
+    );
 
     render(
       <ApplyForm

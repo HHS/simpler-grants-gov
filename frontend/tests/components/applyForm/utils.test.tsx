@@ -14,16 +14,42 @@ import {
   shapeFormData,
 } from "src/components/applyForm/utils";
 
-jest.mock("react", () => ({
-  ...jest.requireActual<typeof import("react")>("react"),
-  useCallback: (fn: unknown) => fn,
+type FormActionArgs = [
+  {
+    applicationId: string;
+    formId: string;
+    formData: FormData;
+    saved: boolean;
+    error: boolean;
+  },
+  FormData,
+];
+
+type FormActionResult = Promise<{
+  applicationId: string;
+  formId: string;
+  saved: boolean;
+  error: boolean;
+  formData: FormData;
+}>;
+
+const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+
+jest.mock("src/components/applyForm/actions", () => ({
+  handleFormAction: (...args: [...FormActionArgs]) =>
+    mockHandleFormAction(...args),
 }));
 
-const mockRevalidateTag = jest.fn();
+const mockRevalidateTag = jest.fn<void, [string]>();
 const getSessionMock = jest.fn();
 
 jest.mock("next/cache", () => ({
-  revalidateTag: () => mockRevalidateTag(),
+  revalidateTag: (tag: string) => mockRevalidateTag(tag),
+}));
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  useCallback: (fn: unknown) => fn,
 }));
 
 jest.mock("src/services/auth/session", () => ({

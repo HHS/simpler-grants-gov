@@ -2,7 +2,7 @@ import { Attachment } from "src/types/attachmentTypes";
 
 import { Icon } from "@trussworks/react-uswds";
 
-import { UploadedFile } from "../types";
+import { UploadedFile } from "src/components/applyForm/types";
 
 interface Props {
   handleRemove: (index: number) => void;
