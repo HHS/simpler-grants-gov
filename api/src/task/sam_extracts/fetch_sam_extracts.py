@@ -63,7 +63,7 @@ class FetchSamExtractsTask(Task):
         stmt = select(SamExtractFile).where(
             SamExtractFile.extract_type == SamGovExtractType.MONTHLY,
             SamExtractFile.extract_date == target_date,
-            SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
+            SamExtractFile.processing_status != SamGovProcessingStatus.FAILED,
         )
         existing = self.db_session.execute(stmt).scalar_one_or_none()
 
@@ -125,7 +125,7 @@ class FetchSamExtractsTask(Task):
             stmt = select(SamExtractFile).where(
                 SamExtractFile.extract_type == SamGovExtractType.DAILY,
                 SamExtractFile.extract_date == date_to_process,
-                SamExtractFile.processing_status == SamGovProcessingStatus.COMPLETED,
+                SamExtractFile.processing_status != SamGovProcessingStatus.FAILED,
             )
             existing = self.db_session.execute(stmt).scalar_one_or_none()
 

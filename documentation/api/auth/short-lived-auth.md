@@ -108,6 +108,40 @@ def generate_pdf_token(db_session: db.Session) -> str:
     return jwt_token
 ```
 
+### Generate Tokens for Testing (CLI Command)
+
+For local development and testing, you can use the provided Flask CLI command to generate internal tokens:
+
+```bash
+# Generate a token with default 30-minute expiration
+make generate-internal-token
+
+# Generate a token with custom expiration (60 minutes)
+make generate-internal-token args="--expiration-minutes 60"
+
+# Generate a token quietly (just output the token for copy/paste)
+make generate-internal-token args="--quiet"
+
+# Alternative: Use the Flask CLI directly
+make cmd args="task generate-internal-token --help"
+make cmd args="task generate-internal-token --expiration-minutes 120"
+```
+
+**Implementation Location**: `api/src/task/generate_internal_token.py`
+
+**Usage in API calls**:
+```bash
+# Example: Get application form using the generated token
+curl -H "X-SGG-Internal-Token: <generated-token>" \
+     http://localhost:5000/alpha/applications/<application_id>/application_form/<form_id>
+```
+
+This CLI command is particularly useful for:
+- Frontend developers testing PDF generation endpoints
+- Internal service integration testing
+- Local development workflow automation
+- Testing endpoints that require internal authentication
+
 ### Revoking Tokens
 
 ```python
