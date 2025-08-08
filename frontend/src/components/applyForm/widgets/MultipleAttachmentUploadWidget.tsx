@@ -22,6 +22,7 @@ import { SchemaWithLabelOption, UswdsWidgetProps } from "src/components/applyFor
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
+import { isValidationWarning } from "../utils";
 
 type UploadedFile = {
   id: string;
@@ -165,7 +166,7 @@ const MultipleAttachmentUploadWidget = ({
         <ErrorMessage id={`error-for-${id}`}>
           {typeof rawErrors[0] === "string"
             ? rawErrors[0]
-            : "message" in rawErrors[0]
+            : isValidationWarning(rawErrors[0])
               ? rawErrors[0].message
               : "Invalid input"}
         </ErrorMessage>

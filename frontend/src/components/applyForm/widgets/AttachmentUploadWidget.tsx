@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import {
   Button,
+  ErrorMessage,
   FileInput,
   FileInputRef,
   ModalRef,
@@ -17,10 +18,10 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import {
-  FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { useApplicationId } from "src/hooks/useApplicationId";
+import { isValidationWarning } from "../utils";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
@@ -116,13 +117,20 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const describedBy = hasError ? `${id}-error` : undefined;
   const isPreviouslyUploaded = fileName === "(Previously uploaded file)";
 
-  const isValidationWarning = (e: unknown): e is FormValidationWarning => {
-    return typeof e === "object" && e !== null && "message" in e;
-  };
-
   return (
     <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
+
+      {hasError && (
+        <ErrorMessage id={`error-for-${id}`}>
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : isValidationWarning(rawErrors[0])
+              ? rawErrors[0].message
+              : "Invalid input"}
+        </ErrorMessage>
+      )}
+
       {!showFile && (
         <FileInput
           id={id}
@@ -151,16 +159,6 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
             {isPreviouslyUploaded ? "Remove" : "Delete"}
           </Button>
         </div>
-      )}
-
-      {hasError && (
-        <span id={`${id}-error`} className="usa-error-message">
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : isValidationWarning(rawErrors[0])
-              ? rawErrors[0].message
-              : "Invalid input"}
-        </span>
       )}
 
       <DeleteAttachmentModal

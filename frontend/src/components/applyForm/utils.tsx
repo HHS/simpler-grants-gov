@@ -587,3 +587,7 @@ export const getApplicationResponse = (
     return {};
   }
 };
+
+export const isValidationWarning = (e: unknown): e is FormValidationWarning => {
+  return typeof e === "object" && e !== null && "message" in e;
+};
