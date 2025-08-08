@@ -203,9 +203,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 12,
         },
         "applicant": {
-            "allOf": [{"$ref": "#/$defs/address"}],
-            "title": "Applicant",
-            "description": "Enter information about the applicant.",
+            "$ref": "#/$defs/address"
         },
         "department_name": {
             "type": "string",
@@ -222,9 +220,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 100,
         },
         "contact_person": {
-            "allOf": [{"$ref": "#/$defs/person_name"}],
-            "title": "Contact Person",
-            "description": "Enter information about the contact person.",
+            "$ref": "#/$defs/person_name"
         },
         "organization_affiliation": {
             "type": "string",
@@ -460,9 +456,7 @@ FORM_JSON_SCHEMA = {
             "description": "Check to select.",
         },
         "authorized_representative": {
-            "allOf": [{"$ref": "#/$defs/person_name"}],
-            "title": "Authorized Representative Header",
-            "description": "",
+            "$ref": "#/$defs/person_name"
         },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": "#/$defs/phone_number_field"}],
@@ -744,38 +738,7 @@ FORM_UI_SCHEMA = [
         "name": "applicant_address",
         "label": "Applicant Address",
         "children": [
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/street1",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/street2",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/city",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/county",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/state",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/province",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/country",
-            },
-            {
-                "type": "field",
-                "definition": "/$defs/address/properties/zip_code",
-            },
+{ "type": "field", "definition": "/properties/applicant" },
         ],
     },
     {

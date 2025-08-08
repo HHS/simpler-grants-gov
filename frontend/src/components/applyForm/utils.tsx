@@ -173,52 +173,19 @@ export const getFieldSchema = ({
   schema,
   formSchema,
 }: {
-  definition: string | undefined;
+  definition: `/properties/${string}` | undefined;
   schema: SchemaField | undefined;
   formSchema: RJSFSchema;
 }): RJSFSchema => {
-  if (!definition && !schema) {
-    throw new Error("Missing schema definition");
+  if (definition && schema) {
+    return {
+      ...(getByPointer(formSchema, definition) as object),
+      ...schema,
+    } as RJSFSchema;
+  } else if (definition) {
+    return getByPointer(formSchema, definition) as RJSFSchema;
   }
-
-  // If schema is provided, merge it on top of resolved pointer
-  let resolved: Partial<RJSFSchema> = {};
-
-  if (definition) {
-    const pathParts = definition.split("/").filter(Boolean);
-
-    let current: unknown = formSchema;
-
-    for (const part of pathParts) {
-      if (
-        typeof current !== "object" ||
-        current === null ||
-        !(part in current)
-      ) {
-        console.warn(`Schema path part "${part}" not found in`, current);
-        return resolved as RJSFSchema;
-      }
-
-      current = (current as Record<string, unknown>)[part];
-
-      // resolve $ref if present
-      while (
-        typeof current === "object" &&
-        current !== null &&
-        "$ref" in current
-      ) {
-        const refPath = (current as { $ref: string }).$ref.replace(/^#\//, "");
-        current = getSchemaObjectFromPointer(formSchema, `/${refPath}`);
-      }
-    }
-
-    resolved = current as Partial<RJSFSchema>;
-  }
-
-  return {
-    ...resolved,
-    ...(schema ?? {}),
-  } as RJSFSchema;
+  return schema as RJSFSchema;
 };
 
 export const getNameFromDef = ({
