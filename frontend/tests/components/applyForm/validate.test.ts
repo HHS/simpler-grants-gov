@@ -1,7 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 
 import { UiSchema } from "src/components/applyForm/types";
-import { shapeFormData } from "src/components/applyForm/utils";
 import {
   validateJsonBySchema,
   validateUiSchema,
@@ -9,9 +8,6 @@ import {
 
 describe("validateFormData", () => {
   it("should return false for valid form data", () => {
-    const formData = new FormData();
-    formData.append("name", "John Doe");
-
     const schema: RJSFSchema = {
       type: "object",
       properties: {
@@ -20,9 +16,7 @@ describe("validateFormData", () => {
       required: ["name"],
     };
 
-    const data = shapeFormData(formData);
-
-    expect(validateJsonBySchema(data, schema)).toBe(false);
+    expect(validateJsonBySchema({ name: "John Doe" }, schema)).toBe(false);
   });
 
   it("should return validation errors for invalid form data", () => {

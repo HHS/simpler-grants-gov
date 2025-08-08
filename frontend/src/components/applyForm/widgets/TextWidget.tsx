@@ -11,7 +11,8 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -50,6 +51,7 @@ function TextWidget<
     default: defaultValue,
     pattern,
   } = schema as S;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   let inputValue: string | number | undefined;
   if (type === "number" || type === "integer") {
@@ -94,14 +96,15 @@ function TextWidget<
   return (
     <FormGroup
       className={formClassName}
+      key={`form-group__text-input--${id}`}
       error={error}
-      key={`wrapper-for-${id}`}
     >
-      <FieldLabel
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
       {error && (
         <ErrorMessage id={`error-for-${id}`}>
