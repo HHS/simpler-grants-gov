@@ -3,7 +3,7 @@
 import React from "react";
 import { Label } from "@trussworks/react-uswds";
 
-type DynamicLabelType = "default" | "hide-helper-text"
+type DynamicLabelType = "default" | "hide-helper-text";
 
 type DynamicFieldLabelProps = {
   idFor: string;
@@ -26,9 +26,7 @@ export const DynamicFieldLabel = ({
     <>
       {title}
       {required && (
-        <span className="usa-hint usa-hint--required text-no-underline">
-          *
-        </span>
+        <span className="usa-hint usa-hint--required text-no-underline">*</span>
       )}
     </>
   );

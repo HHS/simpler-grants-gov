@@ -16,12 +16,12 @@ import { FormDetail } from "src/types/formResponseTypes";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import ApplyForm from "src/components/applyForm/ApplyForm";
 
 export const dynamic = "force-dynamic";
 

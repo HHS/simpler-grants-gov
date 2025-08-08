@@ -1,13 +1,10 @@
 "use client";
 
+import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   ErrorMessage,
@@ -17,10 +14,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import {
-  UswdsWidgetProps,
-} from "src/components/applyForm/types";
-import { useApplicationId } from "src/hooks/useApplicationId";
+import { UswdsWidgetProps } from "src/components/applyForm/types";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {

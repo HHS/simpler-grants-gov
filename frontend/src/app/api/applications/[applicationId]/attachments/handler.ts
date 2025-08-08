@@ -1,9 +1,9 @@
+import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { uploadAttachment } from "src/services/fetch/fetchers/applicationFetcher";
 import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { NextResponse } from "next/server";
-import { readError } from "src/errors";
 
 export const postAttachmentHandler = async (
   req: Request,

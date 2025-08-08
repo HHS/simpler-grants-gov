@@ -416,20 +416,18 @@ export const buildField = ({
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return (
-      Widget({
-        id: name,
-        key: name,
-        disabled,
-        required: isFieldRequired(name, formSchema),
-        minLength: fieldSchema?.minLength,
-        maxLength: fieldSchema?.maxLength,
-        schema: fieldSchema,
-        rawErrors,
-        value,
-        options,
-      })
-  );
+  return Widget({
+    id: name,
+    key: name,
+    disabled,
+    required: isFieldRequired(name, formSchema),
+    minLength: fieldSchema?.minLength,
+    maxLength: fieldSchema?.maxLength,
+    schema: fieldSchema,
+    rawErrors,
+    value,
+    options,
+  });
 };
 
 const formatFieldWarnings = (
