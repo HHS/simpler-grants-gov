@@ -21,7 +21,7 @@ const OpportunityDownload = ({ attachments }: OpportunityDownloadProps) => {
       className="margin-top-2 tablet:margin-top-0 flex-align-self-center"
     >
       <USWDSIcon name="arrow_downward" />
-      <Link className="flex-align-self-center" href={"#opportunity_documents"}>
+      <Link className="flex-align-self-center" href={"#opportunity-documents"}>
         {t("jumpToDocuments")}
       </Link>
     </Button>
