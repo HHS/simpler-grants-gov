@@ -333,6 +333,7 @@ describe("getApplicationResponse", () => {
         application_form_status: "complete",
         application_response: { test: "test" },
         form_id: "test",
+        is_required: false,
       },
     ] as ApplicationFormDetail[];
 

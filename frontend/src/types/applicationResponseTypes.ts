@@ -31,6 +31,8 @@ export interface ApplicationFormDetail {
   application_id: string;
   application_response: ApplicationResponseDetail;
   form_id: string;
+  is_required: boolean;
+  is_included_in_submission?: boolean | null;
 }
 
 export interface FormValidationWarnings {
