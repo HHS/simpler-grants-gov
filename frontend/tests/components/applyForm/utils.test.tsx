@@ -207,9 +207,17 @@ describe("buildFormTreeRecursive", () => {
       uiSchema,
     });
 
-    expect(result).toHaveLength(2);
-    expect(result[0].key).toBe("form-group__text-input--name");
-    expect(result[1].key).toBe("form-group__text-input--age");
+    // render the result
+    render(<>{result}</>);
+
+    // assert field inputs
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toBeInTheDocument();
+    expect(nameField).toHaveValue("John");
+
+    const ageField = screen.getByTestId("age");
+    expect(ageField).toBeInTheDocument();
+    expect(ageField).toHaveValue(30);
   });
 
   it("should build a tree for a nested schema", () => {
@@ -252,7 +260,7 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("address-wrapper");
+    expect(result[0].key).toBe("address-fieldset");
   });
 
   it("should handle empty uiSchema gracefully", () => {
@@ -320,7 +328,7 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("section-wrapper");
+    expect(result[0].key).toBe("section-fieldset");
   });
 });
 

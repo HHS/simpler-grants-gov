@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 
 describe("DynamicFieldLabel", () => {
@@ -60,10 +61,7 @@ describe("DynamicFieldLabel", () => {
 
   it("returns null if title is not provided", () => {
     const { container } = render(
-      <DynamicFieldLabel
-        idFor="test"
-        title={undefined}
-      />,
+      <DynamicFieldLabel idFor="test" title={undefined} />,
     );
 
     expect(container).toBeEmptyDOMElement();
