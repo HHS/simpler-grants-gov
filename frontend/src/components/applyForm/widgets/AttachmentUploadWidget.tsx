@@ -21,7 +21,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { useApplicationId } from "src/hooks/useApplicationId";
-import { isValidationWarning } from "../utils";
+import { isValidationWarning } from "src/components/applyForm/utils";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
