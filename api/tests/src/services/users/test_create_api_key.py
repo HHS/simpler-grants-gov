@@ -68,8 +68,6 @@ def test_create_api_key_inactive(enable_factory_create, db_session: db.Session):
         json_data=json_data,
     )
 
-    # Note: The current implementation always creates active keys
-    # This test verifies the behavior is consistent
     assert api_key.is_active is True
 
 
@@ -242,7 +240,3 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.key_name != api_key2.key_name
     assert api_key1.api_key_id != api_key2.api_key_id
     assert api_key1.key_id != api_key2.key_id
-
-
-# Validation tests removed - validation is now handled by Marshmallow schema
-# at the API endpoint level, so the service assumes valid input
