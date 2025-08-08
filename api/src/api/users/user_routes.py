@@ -8,6 +8,7 @@ from src.adapters import db, search
 from src.adapters.db import flask_db
 from src.api import response
 from src.api.route_utils import raise_flask_error
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
