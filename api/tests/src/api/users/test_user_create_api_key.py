@@ -3,7 +3,6 @@ import uuid
 from sqlalchemy import select
 
 from src.db.models.user_models import UserApiKey
-from tests.src.db.models.factories import UserApiKeyFactory
 
 
 def test_create_api_key_success(enable_factory_create, db_session, client, user, user_auth_token):
