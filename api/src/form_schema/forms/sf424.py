@@ -202,9 +202,7 @@ FORM_JSON_SCHEMA = {
             "minLength": 12,
             "maxLength": 12,
         },
-        "applicant": {
-            "$ref": "#/$defs/address"
-        },
+        "applicant": {"$ref": "#/$defs/address"},
         "department_name": {
             "type": "string",
             "title": "Department Name",
@@ -219,9 +217,7 @@ FORM_JSON_SCHEMA = {
             "minLength": 1,
             "maxLength": 100,
         },
-        "contact_person": {
-            "$ref": "#/$defs/person_name"
-        },
+        "contact_person": {"$ref": "#/$defs/person_name"},
         "organization_affiliation": {
             "type": "string",
             "title": "Organizational Affiliation",
@@ -455,9 +451,7 @@ FORM_JSON_SCHEMA = {
             "title": "Certification Agree",
             "description": "Check to select.",
         },
-        "authorized_representative": {
-            "$ref": "#/$defs/person_name"
-        },
+        "authorized_representative": {"$ref": "#/$defs/person_name"},
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": "#/$defs/phone_number_field"}],
             "title": "AOR Telephone Number",
@@ -738,7 +732,7 @@ FORM_UI_SCHEMA = [
         "name": "applicant_address",
         "label": "Applicant Address",
         "children": [
-{ "type": "field", "definition": "/properties/applicant" },
+            {"type": "field", "definition": "/properties/applicant"},
         ],
     },
     {
