@@ -160,7 +160,7 @@ export const messages = {
     },
     intro: {
       agency: "Agency: ",
-      assistanceListings: "Assistance Listings: ",
+      assistanceListings: "Assistance Listings:",
       lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
