@@ -681,3 +681,19 @@ iframe[id^="ethnio-screener-"] {
     scroll-margin-top: 6rem;
   }
 }
+
+.simpler-apply-form {
+  .usa-input, .usa-select, fieldset[id^=form-section] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
+  }
+}
+
+.simpler-application-forms-table {
+  tr[id^=form] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
+  }
+}

@@ -27,7 +27,7 @@ export default function Layout({ children, locale }: Props) {
         envFeatureFlags,
       )}
     >
-      <div className="display-flex flex-column minh-viewport simpler-page-anchor-offset">
+      <div className="display-flex flex-column minh-viewport">
         <a className="usa-skipnav" href="#main-content">
           {t("Layout.skipToMain")}
         </a>
