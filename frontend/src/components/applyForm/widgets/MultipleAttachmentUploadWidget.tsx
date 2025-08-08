@@ -1,33 +1,28 @@
 "use client";
 
+import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ErrorMessage,
   FileInput,
   FileInputRef,
   FormGroup,
-  Icon,
   ModalRef,
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import { SchemaWithLabelOption, UswdsWidgetProps } from "src/components/applyForm/types";
-import { useApplicationId } from "src/hooks/useApplicationId";
+import {
+  SchemaWithLabelOption,
+  UploadedFile,
+  UswdsWidgetProps,
+} from "src/components/applyForm/types";
+import { isValidationWarning } from "src/components/applyForm/utils";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
-import { isValidationWarning } from "src/components/applyForm/utils";
-
-type UploadedFile = {
-  id: string;
-  name: string;
-};
+import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
 
 const MultipleAttachmentUploadWidget = ({
   id,
@@ -194,50 +189,11 @@ const MultipleAttachmentUploadWidget = ({
       />
 
       {uploadedFiles.length > 0 && (
-        <ul className="usa-list usa-list--unstyled margin-top-2">
-          {uploadedFiles.map((file, index) => {
-            const attachment = attachments?.find(
-              (a) => a.application_attachment_id === file.id,
-            );
-            const isPreviouslyUploaded =
-              file.name === "(Previously uploaded file)";
-
-            return (
-              <li
-                key={`${file.id}-${index}`}
-                className="margin-bottom-1 display-flex flex-align-center"
-              >
-                {attachment?.download_path ? (
-                  <a
-                    href={attachment.download_path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary display-inline-flex align-items-center"
-                  >
-                    <Icon.Visibility
-                      className="margin-right-02 text-middle"
-                      role="presentation"
-                    />
-                    {file.name}
-                  </a>
-                ) : (
-                  <span>{file.name}</span>
-                )}
-                <button
-                  type="button"
-                  className="usa-button usa-button--unstyled text-primary margin-left-2 display-inline-flex align-items-center"
-                  onClick={() => handleRemove(index)}
-                >
-                  <Icon.Delete
-                    className="margin-right-02 text-middle"
-                    role="presentation"
-                  />
-                  {isPreviouslyUploaded ? "Remove" : "Delete"}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <MultipleAttachmentUploadList
+          attachments={attachments}
+          uploadedFiles={uploadedFiles}
+          handleRemove={(index) => handleRemove(index)}
+        />
       )}
 
       <DeleteAttachmentModal

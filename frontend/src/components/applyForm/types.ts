@@ -145,3 +145,8 @@ export interface SchemaWithLabelOption {
     [key: string]: unknown;
   };
 }
+
+export type UploadedFile = {
+  id: string;
+  name: string;
+};
