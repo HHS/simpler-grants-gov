@@ -99,7 +99,7 @@ class CreateAnalyticsDbCsvsTask(Task):
 
         # Use explicit column ordering for user table to ensure column safety
         if table.name == "user":
-            copy_query = f"COPY (SELECT user_id, created_at, updated_at FROM {schema}.{table.name} ORDER BY created_at) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
+            copy_query = f"COPY (SELECT user_id, created_at, updated_at FROM {schema}.{table.name} ORDER BY created_at) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"  # nosec B608
         else:
             copy_query = f"COPY {schema}.{table.name} TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
 
