@@ -22,6 +22,7 @@ export async function handleFormAction(
   prevState: ApplyFormResponse,
   formData: FormData,
 ) {
+  console.log("~~~ running server action");
   const { formId, applicationId } = prevState;
   const session = await getSession();
   if (!session || !session.token) {
@@ -55,6 +56,7 @@ export async function handleFormAction(
     formId,
     session.token,
   );
+  console.log("~~~ save handled", saveSuccess);
   if (saveSuccess) {
     return {
       applicationId,
