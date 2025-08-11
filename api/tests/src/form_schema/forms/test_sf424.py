@@ -205,7 +205,7 @@ def test_sf424_v4_0_empty_nested(sf424_v4_0, valid_json_v4_0):
     "value",
     [
         ["X: Other (specify)"],
-        ["X: Other (specify)", "A: state Government"],
+        ["X: Other (specify)", "A: State Government"],
         ["E: Regional Organization", "X: Other (specify)", "G: Independent School District"],
     ],
 )
