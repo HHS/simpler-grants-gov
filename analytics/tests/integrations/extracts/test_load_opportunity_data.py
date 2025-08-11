@@ -58,47 +58,65 @@ def test_extract_copy_opportunity_data(
 
     # Verify that the data was inserted into the database
     with conn.begin():
-        lk_opp_sts_result = conn.execute(
-            text("SELECT COUNT(*) FROM lk_opportunity_status ;"),
-        )
-        lk_opp_ctgry_result = conn.execute(
-            text("SELECT COUNT(*) FROM lk_opportunity_category ;"),
-        )
-        opp_result = conn.execute(
-            text("SELECT COUNT(*) FROM opportunity ;"),
-        )
-        opp_smry_result = conn.execute(
-            text("SELECT COUNT(*) FROM opportunity_summary ;"),
-        )
-
-        curr_opp_smry_result = conn.execute(
-            text("SELECT COUNT(*) FROM current_opportunity_summary ;"),
-        )
-
-        user_save_opp_result = conn.execute(
-            text("SELECT COUNT(*) FROM user_saved_opportunity ;"),
-        )
-
-        user_save_search_result = conn.execute(
-            text("SELECT COUNT(*) FROM user_saved_search ;"),
-        )
-
-        user_search_result = conn.execute(
-            text('SELECT COUNT(*) FROM "user" ;'),
-        )
-
         # test all test_files were upload to mocks3 bucket
         assert upload_opportunity_tables_s3 == 8
 
         # test table records were inserted for each table
-        assert lk_opp_sts_result.fetchone()[0] == 4
-        assert lk_opp_ctgry_result.fetchone()[0] == 5
-        assert opp_result.fetchone()[0] == 144
-        assert opp_smry_result.fetchone()[0] == 139
-        assert curr_opp_smry_result.fetchone()[0] == 139
-        assert user_save_opp_result.fetchone()[0] == 25
-        assert user_save_search_result.fetchone()[0] == 25
-        assert user_search_result.fetchone()[0] == 7
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM lk_opportunity_status ;"),
+            ).fetchone()[0]
+            == 4
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM lk_opportunity_category ;"),
+            ).fetchone()[0]
+            == 5
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM opportunity ;"),
+            ).fetchone()[0]
+            == 144
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM opportunity_summary ;"),
+            ).fetchone()[0]
+            == 139
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM current_opportunity_summary ;"),
+            ).fetchone()[0]
+            == 139
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM user_saved_opportunity ;"),
+            ).fetchone()[0]
+            == 25
+        )
+
+        assert (
+            conn.execute(
+                text("SELECT COUNT(*) FROM user_saved_search ;"),
+            ).fetchone()[0]
+            == 25
+        )
+
+        assert (
+            conn.execute(
+                text('SELECT COUNT(*) FROM "user" ;'),
+            ).fetchone()[0]
+            == 7
+        )
 
     # running again to verify that it does not break on the next call
     extract_copy_opportunity_data()
