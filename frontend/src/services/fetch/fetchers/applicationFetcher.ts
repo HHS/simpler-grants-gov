@@ -105,11 +105,16 @@ export const updateApplicationFilingName = async (
  */
 
 export const getApplicationFormDetails = async (
+  token: string,
   applicationId: string,
   applicationFormId: string,
 ): Promise<ApplicationFormDetailApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
   const response = await fetchApplicationWithMethod("GET")({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
+    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationFormDetailApiResponse;

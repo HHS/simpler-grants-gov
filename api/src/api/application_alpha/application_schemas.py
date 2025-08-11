@@ -114,6 +114,7 @@ class ApplicationFormGetResponseDataSchema(Schema):
     )
 
     application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+    application_name = fields.String()
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):

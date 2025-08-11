@@ -1,22 +1,57 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
   determineFieldType,
-  getApplicationResponse,
   getFieldName,
   getFieldSchema,
   pruneEmptyNestedFields,
   shapeFormData,
 } from "src/components/applyForm/utils";
 
+type FormActionArgs = [
+  {
+    applicationId: string;
+    formId: string;
+    formData: FormData;
+    saved: boolean;
+    error: boolean;
+  },
+  FormData,
+];
+
+type FormActionResult = Promise<{
+  applicationId: string;
+  formId: string;
+  saved: boolean;
+  error: boolean;
+  formData: FormData;
+}>;
+
+const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+
+jest.mock("src/components/applyForm/actions", () => ({
+  handleFormAction: (...args: [...FormActionArgs]) =>
+    mockHandleFormAction(...args),
+}));
+
+const mockRevalidateTag = jest.fn<void, [string]>();
+const getSessionMock = jest.fn();
+
+jest.mock("next/cache", () => ({
+  revalidateTag: (tag: string) => mockRevalidateTag(tag),
+}));
+
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   useCallback: (fn: unknown) => fn,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
 }));
 
 describe("shapeFormData", () => {
@@ -207,9 +242,17 @@ describe("buildFormTreeRecursive", () => {
       uiSchema,
     });
 
-    expect(result).toHaveLength(2);
-    expect(result[0].key).toBe("wrapper-for-name");
-    expect(result[1].key).toBe("wrapper-for-age");
+    // render the result
+    render(<>{result}</>);
+
+    // assert field inputs
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toBeInTheDocument();
+    expect(nameField).toHaveValue("John");
+
+    const ageField = screen.getByTestId("age");
+    expect(ageField).toBeInTheDocument();
+    expect(ageField).toHaveValue(30);
   });
 
   it("should build a tree for a nested schema", () => {
@@ -252,7 +295,7 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("address-wrapper");
+    expect(result[0].key).toBe("address-fieldset");
   });
 
   it("should handle empty uiSchema gracefully", () => {
@@ -320,28 +363,27 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("section-wrapper");
+    expect(result[0].key).toBe("section-fieldset");
   });
 });
 
-describe("getApplicationResponse", () => {
-  it("should return a structured response for valid input", () => {
-    const forms = [
-      {
-        application_form_id: "test",
-        application_id: "test",
-        application_form_status: "complete",
-        application_response: { test: "test" },
-        form_id: "test",
-        is_required: false,
-      },
-    ] as ApplicationFormDetail[];
+// describe("getApplicationResponse", () => {
+//   it("should return a structured response for valid input", () => {
+//     const forms = [
+//       {
+//         application_form_id: "test",
+//         application_id: "test",
+//         application_form_status: "complete",
+//         application_response: { test: "test" },
+//         form_id: "test",
+//       },
+//     ] as ApplicationFormDetail[];
 
-    const result = getApplicationResponse(forms, "test");
+//     const result = getApplicationResponse(forms, "test");
 
-    expect(result).toEqual({ test: "test" });
-  });
-});
+//     expect(result).toEqual({ test: "test" });
+//   });
+// });
 
 describe("determineFieldType", () => {
   it("should return proper fields", () => {

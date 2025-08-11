@@ -79,7 +79,7 @@ const ApplicationValidationAlert = ({
           <ul>
             {formattedValidationErrors.map(
               ({ appFormId, formName, message }) => (
-                <li key={appFormId}>
+                <li key={`${appFormId ?? ""}-${formName ?? ""}`}>
                   <a href={`#form-${String(appFormId)}`}>{formName}</a>{" "}
                   {message}
                 </li>

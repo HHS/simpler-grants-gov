@@ -5,10 +5,12 @@ export const FieldsetWidget = ({
   label,
   fieldName,
   children,
+  description,
 }: {
   label: string;
   fieldName: string;
   children: JSX.Element | undefined;
+  description?: string;
 }) => {
   return (
     <Fieldset key={`${fieldName}-row`} id={fieldName}>
@@ -19,6 +21,7 @@ export const FieldsetWidget = ({
         >
           {label}
         </h4>
+        {description && <p>{description}</p>}
         {children}
       </FormGroup>
     </Fieldset>
