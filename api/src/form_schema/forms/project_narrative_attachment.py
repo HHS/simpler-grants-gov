@@ -12,20 +12,20 @@ FORM_JSON_SCHEMA = {
             "description": "At least one file must be attached",
             "minItems": 1,
             "maxItems": 100,
-            "items": {"allOf": [{"$ref": "#/$defs/attachment_field"}]},
+            "items": {"$ref": "#/$defs/attachment_field"},
         }
     },
     "$defs": {
         # Just defining this separately so it's easier to refactor when we have a shared schema
-        "attachment_field": {"type": "string", "format": "uuid"},
+        "attachment_field": {"type": "string", "format": "uuid", "title": "Attachment"},
     },
 }
 
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "1. Project Narrative File(s)",
+        "name": "projectNarrativeFiles",
         "children": [
             {"type": "field", "definition": "/properties/attachments"},
         ],
