@@ -22,6 +22,7 @@ export async function handleFormAction(
   prevState: ApplyFormResponse,
   formData: FormData,
 ) {
+  // eslint-disable-next-line
   console.log("~~~ running server action");
   const { formId, applicationId } = prevState;
   const session = await getSession();
@@ -56,6 +57,7 @@ export async function handleFormAction(
     formId,
     session.token,
   );
+  // eslint-disable-next-line
   console.log("~~~ save handled", saveSuccess);
   if (saveSuccess) {
     return {

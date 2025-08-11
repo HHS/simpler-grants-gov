@@ -14,23 +14,23 @@ import { logRequest } from "./services/logger/simplerLogger";
 
 export const config = {
   matcher: [
-    /*
-     * Run Middleware on all request paths except these:
-     * - Api routes
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - images (static files in public/images/ directory)
-     */
-    {
-      regexp:
-        "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.ico).*)",
-    },
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:
      */
-    { source: "/" },
-    { missing: [{ type: "header", key: "next-action" }] },
+    {
+      /*
+       * Run Middleware on all request paths except these:
+       * - Api routes
+       * - _next/static (static files)
+       * - _next/image (image optimization files)
+       * - images (static files in public/images/ directory)
+       */
+      source:
+        "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.ico).*)",
+
+      missing: [{ type: "header", key: "next-action" }],
+    },
   ],
 };
 
