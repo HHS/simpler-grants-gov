@@ -5,9 +5,6 @@ are parsed correctly, addressing issue #5744.
 
 from datetime import date
 
-import pytest
-from pydantic import ValidationError
-
 from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
@@ -32,9 +29,9 @@ class TestProxyResponseParsing:
         proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
-                <app:GetOpportunityListResponse 
-                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" 
-                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" 
+                <app:GetOpportunityListResponse
+                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0"
+                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0"
                     xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
                     <app1:OpportunityDetails>
                         <gran:FundingOpportunityNumber>O-BJA-2025-202930-STG</gran:FundingOpportunityNumber>
@@ -83,9 +80,9 @@ class TestProxyResponseParsing:
         proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
-                <app:GetOpportunityListResponse 
-                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" 
-                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" 
+                <app:GetOpportunityListResponse
+                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0"
+                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0"
                     xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
                     <app1:OpportunityDetails>
                         <gran:FundingOpportunityNumber>TEST-2025-001</gran:FundingOpportunityNumber>
@@ -117,9 +114,9 @@ class TestProxyResponseParsing:
         proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
-                <app:GetOpportunityListResponse 
-                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" 
-                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" 
+                <app:GetOpportunityListResponse
+                    xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0"
+                    xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0"
                     xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
                     <app1:OpportunityDetails>
                         <gran:FundingOpportunityNumber>TEST-2025-001</gran:FundingOpportunityNumber>
