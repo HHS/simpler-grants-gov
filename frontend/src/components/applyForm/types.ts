@@ -81,6 +81,7 @@ export interface UiSchemaSection {
   label: string;
   name: string;
   children: Array<UiSchemaField | UiSchemaSection>;
+  description?: string;
 }
 
 export type UiSchema = Array<UiSchemaSection | UiSchemaField>;

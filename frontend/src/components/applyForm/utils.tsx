@@ -44,8 +44,15 @@ export function buildFormTreeRecursive({
   });
 
   const buildFormTree = (
-    uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
-    parent: { label: string; name: string } | null,
+    uiSchema:
+      | UiSchema
+      | {
+          children: UiSchema;
+          label: string;
+          name: string;
+          description?: string;
+        },
+    parent: { label: string; name: string; description?: string } | null,
   ) => {
     if (
       !Array.isArray(uiSchema) &&
@@ -55,6 +62,7 @@ export function buildFormTreeRecursive({
       buildFormTree(uiSchema.children, {
         label: uiSchema.label,
         name: uiSchema.name,
+        description: uiSchema.description,
       });
     } else if (Array.isArray(uiSchema)) {
       uiSchema.forEach((node) => {
@@ -62,6 +70,7 @@ export function buildFormTreeRecursive({
           buildFormTree(node.children as unknown as UiSchema, {
             label: node.label,
             name: node.name,
+            description: node.description,
           });
         } else if (!parent && ("definition" in node || "schema" in node)) {
           const field = buildField({
@@ -107,10 +116,23 @@ export function buildFormTreeRecursive({
           });
           acc = [
             ...acc,
-            wrapSection(parent.label, parent.name, <>{childAcc}</>),
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              description: parent.description,
+              tree: <>{childAcc}</>,
+            }),
           ];
         } else {
-          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+          acc = [
+            ...acc,
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              tree: <>{row}</>,
+              description: parent.description,
+            }),
+          ];
         }
       }
     }
@@ -449,16 +471,25 @@ export function getFieldsForNav(
   return results;
 }
 
-const wrapSection = (
-  label: string,
-  fieldName: string,
-  tree: JSX.Element | undefined,
-  pathPrefix = "",
-) => {
-  const uniqueKey = `${pathPrefix}${fieldName}-fieldset`;
-
+const wrapSection = ({
+  label,
+  fieldName,
+  tree,
+  description,
+}: {
+  label: string;
+  fieldName: string;
+  tree: JSX.Element | undefined;
+  description?: string;
+}) => {
+  const uniqueKey = `${fieldName}-fieldset`;
   return (
-    <FieldsetWidget key={uniqueKey} fieldName={fieldName} label={label}>
+    <FieldsetWidget
+      key={uniqueKey}
+      fieldName={fieldName}
+      label={label}
+      description={description}
+    >
       {tree}
     </FieldsetWidget>
   );
