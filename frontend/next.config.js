@@ -175,6 +175,7 @@ const nextConfig = {
     testProxy: true,
     serverActions: {
       bodySizeLimit: "2000mb",
+      allowedOrigins: ["*.simpler.grants.gov", "frontend-*.elb.amazonaws.com"],
     },
   },
   async redirects() {
