@@ -225,9 +225,9 @@ def test_sf424_v4_0_applicant_type_other(sf424_v4_0, valid_json_v4_0, value):
         ([], "[] should be non-empty"),
         (
             [
-                "A: state Government",
-                "B: county Government",
-                "C: city or Township Government",
+                "A: State Government",
+                "B: County Government",
+                "C: City or Township Government",
                 "D: Special District Government",
             ],
             "The array is too long, expected a maximum length of 3",
