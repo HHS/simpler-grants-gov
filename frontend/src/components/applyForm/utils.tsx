@@ -2,10 +2,6 @@ import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
-import {
-  ApplicationFormDetail,
-  ApplicationResponseDetail,
-} from "src/types/applicationResponseTypes";
 
 import React, { JSX } from "react";
 
@@ -539,16 +535,18 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
+// This is only needed when extracting an application response from the application endpoint's
+// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
 // the application detail contains an empty array for the form response if no
 // forms have been saved or an application_response with a form_id
-export const getApplicationResponse = (
-  forms: [] | ApplicationFormDetail[],
-  formId: string,
-): ApplicationResponseDetail | object => {
-  if (forms.length > 0) {
-    const form = forms.find((form) => form?.form_id === formId);
-    return form?.application_response || {};
-  } else {
-    return {};
-  }
-};
+// export const getApplicationResponse = (
+//   forms: [] | ApplicationFormDetail[],
+//   formId: string,
+// ): ApplicationResponseDetail | object => {
+//   if (forms.length > 0) {
+//     const form = forms.find((form) => form?.form_id === formId);
+//     return form?.application_response || {};
+//   } else {
+//     return {};
+//   }
+// };
