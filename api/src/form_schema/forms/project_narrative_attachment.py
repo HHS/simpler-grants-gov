@@ -12,7 +12,7 @@ FORM_JSON_SCHEMA = {
             "description": "At least one file must be attached",
             "minItems": 1,
             "maxItems": 100,
-            "items": {"$ref": "#/$defs/attachment_field"},
+            "items": {"allOf": [{"$ref": "#/$defs/attachment_field"}]},
         }
     },
     "$defs": {
@@ -27,7 +27,7 @@ FORM_UI_SCHEMA = [
         "label": "1. Project Narrative File(s)",
         "name": "projectNarrativeFiles",
         "children": [
-            {"type": "field", "definition": "/properties/attachments"},
+            {"type": "field", "definition": "/properties/attachments", "widget": "AttachmentArray"},
         ],
     }
 ]
