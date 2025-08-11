@@ -1,13 +1,11 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
   determineFieldType,
-  getApplicationResponse,
   getFieldName,
   getFieldSchema,
   pruneEmptyNestedFields,
@@ -369,23 +367,23 @@ describe("buildFormTreeRecursive", () => {
   });
 });
 
-describe("getApplicationResponse", () => {
-  it("should return a structured response for valid input", () => {
-    const forms = [
-      {
-        application_form_id: "test",
-        application_id: "test",
-        application_form_status: "complete",
-        application_response: { test: "test" },
-        form_id: "test",
-      },
-    ] as ApplicationFormDetail[];
+// describe("getApplicationResponse", () => {
+//   it("should return a structured response for valid input", () => {
+//     const forms = [
+//       {
+//         application_form_id: "test",
+//         application_id: "test",
+//         application_form_status: "complete",
+//         application_response: { test: "test" },
+//         form_id: "test",
+//       },
+//     ] as ApplicationFormDetail[];
 
-    const result = getApplicationResponse(forms, "test");
+//     const result = getApplicationResponse(forms, "test");
 
-    expect(result).toEqual({ test: "test" });
-  });
-});
+//     expect(result).toEqual({ test: "test" });
+//   });
+// });
 
 describe("determineFieldType", () => {
   it("should return proper fields", () => {

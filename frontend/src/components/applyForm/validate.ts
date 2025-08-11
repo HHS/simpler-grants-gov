@@ -111,6 +111,9 @@ export const UiJsonSchema: RJSFSchema = {
         name: {
           type: "string",
         },
+        description: {
+          type: "string",
+        },
         children: {
           type: "array",
           items: {

@@ -1019,6 +1019,9 @@ def test_application_form_get_success(
     assert response.json["data"]["application_response"] == {"name": "John Doe"}
     # Verify application_attachments field exists (empty list in this case)
     assert response.json["data"]["application_attachments"] == []
+    assert (
+        response.json["data"]["application_name"] == application_form.application.application_name
+    )
 
 
 def test_application_form_get_application_not_found(
@@ -1181,6 +1184,7 @@ def test_application_get_success(client, enable_factory_create, db_session, user
         assert application_form_response["is_required"] is True
         assert application_form_response["is_included_in_submission"] is None
         assert application_form_response["application_attachments"] == []
+        assert application_form_response["application_name"] == application.application_name
         # Check the form
         assert application_form_response["form"]["form_name"] == application_form.form.form_name
         assert (
