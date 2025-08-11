@@ -7,7 +7,7 @@ import {
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
 
-import { JSX } from "react";
+import React, { JSX } from "react";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -18,10 +18,12 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
+import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
@@ -73,7 +75,10 @@ export function buildFormTreeRecursive({
             formData,
           });
           if (field) {
-            acc = [...acc, field];
+            acc = [
+              ...acc,
+              <React.Fragment key={node.name}>{field}</React.Fragment>,
+            ];
           }
         }
       });
@@ -114,7 +119,9 @@ export function buildFormTreeRecursive({
       }
     }
   };
+
   buildFormTree(uiSchema, null);
+
   return acc;
 }
 
@@ -128,6 +135,26 @@ export const determineFieldType = ({
 }): WidgetTypes => {
   const { widget } = uiFieldObject;
   if (widget) return widget;
+
+  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
+    return "Attachment";
+  }
+
+  if (fieldSchema.type === "array" && fieldSchema.items) {
+    const item = Array.isArray(fieldSchema.items)
+      ? fieldSchema.items[0]
+      : fieldSchema.items;
+
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      item.type === "string" &&
+      item.format === "uuid"
+    ) {
+      return "AttachmentArray";
+    }
+  }
+
   if (fieldSchema.enum?.length) {
     return "Select";
   } else if (fieldSchema.type === "boolean") {
@@ -207,6 +234,9 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
+  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
+    AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
@@ -293,13 +323,19 @@ export const buildField = ({
     rawErrors = formatFieldWarnings(
       errors,
       name,
-      typeof fieldSchema.type === "string"
+      typeof fieldSchema?.type === "string"
         ? fieldSchema.type
-        : Array.isArray(fieldSchema.type)
+        : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "",
     );
   }
+
+  if (!fieldSchema || typeof fieldSchema !== "object") {
+    console.error("Invalid field schema for:", definition);
+    throw new Error("Invalid or missing field schema");
+  }
+
   // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
@@ -339,13 +375,21 @@ export const buildField = ({
     };
   }
 
-  return widgetComponents[type]({
+  const Widget = widgetComponents[type];
+
+  // light debugging for unknown widgets
+  if (typeof Widget !== "function") {
+    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
+    throw new Error(`Unknown widget type: ${type}`);
+  }
+
+  return Widget({
     id: name,
+    key: name,
     disabled,
-    // required: (formSchema.required ?? []).includes(name),
     required: isFieldRequired(name, formSchema),
-    minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
-    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
+    minLength: fieldSchema?.minLength,
+    maxLength: fieldSchema?.maxLength,
     schema: fieldSchema,
     rawErrors,
     value,
@@ -413,13 +457,12 @@ const wrapSection = (
   label: string,
   fieldName: string,
   tree: JSX.Element | undefined,
+  pathPrefix = "",
 ) => {
+  const uniqueKey = `${pathPrefix}${fieldName}-fieldset`;
+
   return (
-    <FieldsetWidget
-      key={`${fieldName}-wrapper`}
-      fieldName={fieldName}
-      label={label}
-    >
+    <FieldsetWidget key={uniqueKey} fieldName={fieldName} label={label}>
       {tree}
     </FieldsetWidget>
   );

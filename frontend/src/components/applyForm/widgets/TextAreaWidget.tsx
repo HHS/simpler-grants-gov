@@ -6,7 +6,8 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.
  *
@@ -32,7 +33,8 @@ function TextAreaWidget<
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, maxLength, minLength } = schema;
+  const { description, title, maxLength, minLength } = schema;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLTextAreaElement>) =>
@@ -60,8 +62,14 @@ function TextAreaWidget<
   const inputValue = value !== undefined ? String(value) : "";
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
+    <FormGroup error={error} key={`form-group__text-area--${id}`}>
+      <DynamicFieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description as string}
+        labelType={labelType}
+      />
 
       {error && (
         <ErrorMessage>

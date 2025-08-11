@@ -44,6 +44,7 @@ async function FormPage({ params }: formPageProps) {
   let formId = "";
   let formData: FormDetail | null;
   const session = await getSession();
+
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session to access form");
   }
@@ -58,7 +59,9 @@ async function FormPage({ params }: formPageProps) {
       );
       return <TopLevelError />;
     }
+
     applicationData = response.data;
+
     formId =
       applicationData.application_forms?.find(
         (form) => form.application_form_id === appFormId,
@@ -79,6 +82,7 @@ async function FormPage({ params }: formPageProps) {
       );
       return <TopLevelError />;
     }
+
     formValidationWarnings =
       (applicationData.form_validation_warnings?.[
         appFormId
@@ -93,14 +97,13 @@ async function FormPage({ params }: formPageProps) {
     }
     return <TopLevelError />;
   }
-
   const application_response = getApplicationResponse(
     applicationData.application_forms,
     formId,
   );
   const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
-
   const schemaErrors = validateUiSchema(form_ui_schema);
+
   if (schemaErrors) {
     console.error(
       "Error validating form ui schema",
@@ -138,12 +141,12 @@ async function FormPage({ params }: formPageProps) {
         />
         <h1>{form_name}</h1>
         <ApplyForm
+          applicationId={applicationId}
           validationWarnings={formValidationWarnings}
           savedFormData={application_response}
           formSchema={formSchema}
           uiSchema={form_ui_schema}
           formId={form_id}
-          applicationId={applicationId}
         />
       </GridContainer>
     </>
