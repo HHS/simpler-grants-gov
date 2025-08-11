@@ -6,6 +6,7 @@ from pydantic import Field, field_validator, model_validator
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.util.datetime_util import parse_grants_gov_date
 
 GET_OPPORTUNITY_LIST_REQUEST_ERR = "No package_id or opportunity_filter provided."
 OPPORTUNITY_LIST_NO_DATA_PROVIDED_ERR = (
@@ -69,6 +70,30 @@ class OpportunityDetails(BaseSOAPSchema):
     opening_date: date | None = Field(default=None, alias="OpeningDate")
     package_id: str | None = Field(default=None, alias="PackageID")
     schema_url: str | None = Field(default=None, alias="SchemaURL")
+
+    @field_validator("closing_date", mode="before")
+    @classmethod
+    def parse_closing_date(cls, value: str | date | None) -> date | None:
+        """
+        Parse closing date from grants.gov format which may include timezone suffix.
+        
+        Grants.gov returns dates like "2025-09-16-04:00" but we need just the date part.
+        """
+        if isinstance(value, date):
+            return value
+        return parse_grants_gov_date(value)
+
+    @field_validator("opening_date", mode="before")
+    @classmethod
+    def parse_opening_date(cls, value: str | date | None) -> date | None:
+        """
+        Parse opening date from grants.gov format which may include timezone suffix.
+        
+        Grants.gov returns dates like "2025-09-16-04:00" but we need just the date part.
+        """
+        if isinstance(value, date):
+            return value
+        return parse_grants_gov_date(value)
 
 
 class GetOpportunityListResponse(BaseSOAPSchema):
