@@ -49,6 +49,8 @@ const ApplyForm = ({
     formData: new FormData(),
     saved: false,
   });
+  // eslint-disable-next-line
+  console.log("~~~ response from server action", formState);
 
   const { formData, error, saved } = formState;
 
