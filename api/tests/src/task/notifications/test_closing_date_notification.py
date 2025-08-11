@@ -60,7 +60,8 @@ class TestClosingDateNotification:
         # Create an opportunity closing in three weeks (shouldn't trigger notification)
         opportunity_later = factories.OpportunityFactory.create(no_current_summary=True)
         summary = factories.OpportunitySummaryFactory.create(
-            opportunity=opportunity_later, close_date=datetime_util.get_now_us_eastern_date() + timedelta(days=21)
+            opportunity=opportunity_later,
+            close_date=datetime_util.get_now_us_eastern_date() + timedelta(days=21),
         )
         factories.CurrentOpportunitySummaryFactory.create(
             opportunity=opportunity_later, opportunity_summary=summary
@@ -73,7 +74,8 @@ class TestClosingDateNotification:
         # Create an opportunity closing in the past (shouldn't trigger notification)
         opportunity_past = factories.OpportunityFactory.create(no_current_summary=True)
         summary = factories.OpportunitySummaryFactory.create(
-            opportunity=opportunity_past, close_date=datetime_util.get_now_us_eastern_date() - timedelta(days=21)
+            opportunity=opportunity_past,
+            close_date=datetime_util.get_now_us_eastern_date() - timedelta(days=21),
         )
         factories.CurrentOpportunitySummaryFactory.create(
             opportunity=opportunity_past, opportunity_summary=summary
