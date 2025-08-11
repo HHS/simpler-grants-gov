@@ -25,6 +25,7 @@ TABLES_TO_EXTRACT = [
     "lk_opportunity_status",
     "user_saved_search",
     "user_saved_opportunity",
+    "user",
 ]
 
 
@@ -96,9 +97,13 @@ class CreateAnalyticsDbCsvsTask(Task):
         cursor = self.db_session.connection().connection.cursor()
         schema = table.schema if self.config.db_schema is None else self.config.db_schema
 
-        with cursor.copy(
-            f"COPY {schema}.{table.name} TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
-        ) as cursor_copy:
+        # Use explicit column ordering for user table to ensure column safety
+        if table.name == "user":
+            copy_query = f"COPY (SELECT user_id, created_at, updated_at FROM {schema}.{table.name} ORDER BY created_at) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
+        else:
+            copy_query = f"COPY {schema}.{table.name} TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
+
+        with cursor.copy(copy_query) as cursor_copy:
             with file_util.open_stream(output_path, "wb") as outfile:
                 for data in cursor_copy:
                     outfile.write(data)
