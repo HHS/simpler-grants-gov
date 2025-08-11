@@ -41,7 +41,7 @@ export interface ApplicationFormDetail {
   application_response: ApplicationResponseDetail;
   form_id: string;
   form: FormDetail;
-  warnings: FormValidationWarnings;
+  application_name: string;
 }
 
 export interface ApplicationDetail {
@@ -82,8 +82,10 @@ export interface ApplicationSubmitApiResponse
   data: ApplicationSubmitResponse;
 }
 
-export interface ApplicationFormDetailApiResponse extends APIResponse {
+export interface ApplicationFormDetailApiResponse
+  extends Omit<APIResponse, "warnings"> {
   data: ApplicationFormDetail;
+  warnings: FormValidationWarnings;
 }
 
 export interface ApplicationDetailApiResponse extends APIResponse {

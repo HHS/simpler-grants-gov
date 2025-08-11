@@ -18,7 +18,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
-import { getApplicationResponse } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -50,7 +49,11 @@ async function FormPage({ params }: formPageProps) {
   }
 
   try {
-    const response = await getApplicationFormDetails(applicationId, appFormId);
+    const response = await getApplicationFormDetails(
+      session.token,
+      applicationId,
+      appFormId,
+    );
 
     if (response.status_code !== 200) {
       console.error(
@@ -61,7 +64,7 @@ async function FormPage({ params }: formPageProps) {
     }
 
     applicationFormData = response.data;
-    formData = applicationFormData.form;
+    formData = response.data.form;
     if (!formData) {
       console.error(
         `No form data found for applicationID (${applicationId}), appFormId (${appFormId}), formId (${formId})`,
@@ -75,8 +78,7 @@ async function FormPage({ params }: formPageProps) {
       return <TopLevelError />;
     }
     formValidationWarnings =
-      (applicationFormData.warnings as unknown as FormValidationWarning[]) ||
-      null;
+      (response.warnings as unknown as FormValidationWarning[]) || null;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -119,7 +121,7 @@ async function FormPage({ params }: formPageProps) {
           breadcrumbList={[
             { title: "home", path: "/" },
             {
-              title: applicationFormData.application_name, // this may still be missing?
+              title: applicationFormData.application_name,
               path: `/workspace/applications/application/${applicationFormData.application_id}`,
             },
             {
