@@ -55,46 +55,37 @@ class TestOpportunityDetailsDateParsing:
         """Test that closing_date field correctly parses grants.gov format"""
         data = {"ClosingDate": "2025-09-16-04:00"}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.closing_date == date(2025, 9, 16)
 
     def test_opening_date_with_timezone_suffix(self):
         """Test that opening_date field correctly parses grants.gov format"""
         data = {"OpeningDate": "2025-09-16-04:00"}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.opening_date == date(2025, 9, 16)
 
     def test_both_dates_with_timezone_suffix(self):
         """Test parsing both opening and closing dates with timezone suffixes"""
-        data = {
-            "OpeningDate": "2025-08-15+05:00",
-            "ClosingDate": "2025-09-16-04:00"
-        }
+        data = {"OpeningDate": "2025-08-15+05:00", "ClosingDate": "2025-09-16-04:00"}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.opening_date == date(2025, 8, 15)
         assert opportunity.closing_date == date(2025, 9, 16)
 
     def test_dates_with_standard_iso_format(self):
         """Test that standard ISO dates still work correctly"""
-        data = {
-            "OpeningDate": "2025-08-15",
-            "ClosingDate": "2025-09-16"
-        }
+        data = {"OpeningDate": "2025-08-15", "ClosingDate": "2025-09-16"}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.opening_date == date(2025, 8, 15)
         assert opportunity.closing_date == date(2025, 9, 16)
 
     def test_none_dates_remain_none(self):
         """Test that None dates remain None"""
-        data = {
-            "OpeningDate": None,
-            "ClosingDate": None
-        }
+        data = {"OpeningDate": None, "ClosingDate": None}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.opening_date is None
         assert opportunity.closing_date is None
 
@@ -102,13 +93,10 @@ class TestOpportunityDetailsDateParsing:
         """Test that date objects are passed through unchanged"""
         opening_date = date(2025, 8, 15)
         closing_date = date(2025, 9, 16)
-        
-        data = {
-            "OpeningDate": opening_date,
-            "ClosingDate": closing_date
-        }
+
+        data = {"OpeningDate": opening_date, "ClosingDate": closing_date}
         opportunity = OpportunityDetails(**data)
-        
+
         assert opportunity.opening_date == opening_date
         assert opportunity.closing_date == closing_date
 
@@ -123,17 +111,17 @@ class TestOpportunityDetailsDateParsing:
             "ClosingDate": "2025-09-16-04:00",
             "OfferingAgency": "Bureau of Justice Assistance",
             "AgencyContactInfo": "Contact info here",
-            "IsMultiProject": "false"
+            "IsMultiProject": "false",
         }
-        
+
         opportunity = OpportunityDetails(**data)
-        
+
         # Verify the dates were parsed correctly
         assert opportunity.opening_date == date(2025, 8, 15)
         assert opportunity.closing_date == date(2025, 9, 16)
-        
+
         # Verify other fields are still correct
         assert opportunity.funding_opportunity_number == "O-BJA-2025-202930-STG"
         assert opportunity.funding_opportunity_title == "Test Opportunity"
         assert opportunity.competition_id == "12345"
-        assert opportunity.offering_agency == "Bureau of Justice Assistance" 
+        assert opportunity.offering_agency == "Bureau of Justice Assistance"

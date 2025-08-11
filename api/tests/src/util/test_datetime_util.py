@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 
 import pytest
 import pytz
@@ -101,9 +101,9 @@ class TestParseGrantsGovDate:
             "2025-09-16-11:00",  # UTC-11
             "2025-09-16+14:00",  # UTC+14 (Line Islands)
         ]
-        
+
         expected = date(2025, 9, 16)
-        
+
         for test_case in test_cases:
             result = parse_grants_gov_date(test_case)
             assert result == expected, f"Failed for input: {test_case}"
@@ -121,7 +121,7 @@ class TestParseGrantsGovDate:
             ("2024-12-31-12:00", date(2024, 12, 31)),
             ("2000-02-29+06:00", date(2000, 2, 29)),  # Leap year
         ]
-        
+
         for date_str, expected in test_cases:
             result = parse_grants_gov_date(date_str)
             assert result == expected, f"Failed for input: {date_str}"

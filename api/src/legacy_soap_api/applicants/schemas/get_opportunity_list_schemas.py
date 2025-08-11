@@ -76,7 +76,7 @@ class OpportunityDetails(BaseSOAPSchema):
     def parse_closing_date(cls, value: str | date | None) -> date | None:
         """
         Parse closing date from grants.gov format which may include timezone suffix.
-        
+
         Grants.gov returns dates like "2025-09-16-04:00" but we need just the date part.
         """
         if isinstance(value, date):
@@ -88,7 +88,7 @@ class OpportunityDetails(BaseSOAPSchema):
     def parse_opening_date(cls, value: str | date | None) -> date | None:
         """
         Parse opening date from grants.gov format which may include timezone suffix.
-        
+
         Grants.gov returns dates like "2025-09-16-04:00" but we need just the date part.
         """
         if isinstance(value, date):
