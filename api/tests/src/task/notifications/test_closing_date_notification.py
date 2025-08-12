@@ -41,7 +41,13 @@ class TestClosingDateNotification:
         cascade_delete_from_db_table(db_session, UserSavedSearch)
 
     def test_closing_date_notifications(
-        self, db_session, enable_factory_create, user_with_email, search_client, configuration
+        self,
+        mock_sesv2_client,
+        db_session,
+        enable_factory_create,
+        user_with_email,
+        search_client,
+        configuration,
     ):
         """Test that notifications are sent for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -140,7 +146,13 @@ class TestClosingDateNotification:
         assert len(mock_responses) == 1
 
     def test_closing_date_notification_not_sent_twice(
-        self, db_session, enable_factory_create, user_with_email, search_client, configuration
+        self,
+        mock_sesv2_client,
+        db_session,
+        enable_factory_create,
+        user_with_email,
+        search_client,
+        configuration,
     ):
         """Test that closing date notifications aren't sent multiple times for the same opportunity"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -200,7 +212,7 @@ class TestClosingDateNotification:
 
     def test_post_notification_log_creation(
         self,
-        cli_runner,
+        mock_sesv2_client,
         db_session,
         search_client,
         enable_factory_create,

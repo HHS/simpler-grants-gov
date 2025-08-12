@@ -59,6 +59,7 @@ def clear_data(db_session):
 def notification_task(db_session, search_client):
     notification_config = EmailNotificationConfig()
     notification_config.reset_emails_without_sending = False
+    notification_config.sync_suppressed_emails = False
 
     return SearchNotificationTask(
         db_session=db_session, search_client=search_client, notification_config=notification_config
@@ -114,9 +115,9 @@ def test_search_notifications_cli(
     _clear_mock_responses()
 
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
-
     assert result.exit_code == 0
 
     # Verify expected log messages
@@ -224,7 +225,8 @@ def test_grouped_search_queries_cli(
     )
 
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
 
     assert result.exit_code == 0
@@ -251,7 +253,7 @@ def test_grouped_search_queries_cli(
 
 
 def test_search_notifications_on_index_change(
-    cli_runner,
+    mock_sesv2_client,
     db_session,
     enable_factory_create,
     user,
@@ -388,7 +390,8 @@ def test_search_notification_email_format_single_opportunity(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
@@ -471,7 +474,8 @@ def test_search_notification_email_format_no_close_date(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
@@ -567,7 +571,8 @@ def test_search_notification_email_format_multiple_opportunities(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
