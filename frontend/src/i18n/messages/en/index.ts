@@ -514,6 +514,7 @@ export const messages = {
     returnToTop: "Return to top",
     logoAlt: "Grants.gov logo",
     explore: "Explore",
+    simpler: "Simpler.Grants.gov",
     links: {
       home: "Home",
       search: "Search",

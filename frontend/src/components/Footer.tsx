@@ -65,7 +65,7 @@ const Footer = () => {
               className="margin-top-3 tablet:margin-top-0"
               tablet={{ col: 3 }}
             >
-              <h3>{t("explore")}</h3>
+              <h3>{t("simpler")}</h3>
               <div>
                 {t.rich("feedback", {
                   email: (chunk) => (
