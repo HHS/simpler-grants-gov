@@ -457,7 +457,7 @@ export function getFieldsForNav(
       item.children.length > 0
     ) {
       if (item.name && item.label) {
-        results.push({ href: item.name, text: item.label });
+        results.push({ href: `form-section-${item.name}`, text: item.label });
       }
       if (
         Array.isArray(item.children) &&
