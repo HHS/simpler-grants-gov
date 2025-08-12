@@ -44,11 +44,9 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
 
   integration_http_method = aws_api_gateway_method.api_proxy_method[0].http_method
   type                    = "HTTP_PROXY"
-  # Commenting out to see if I can't use the ALB public AWS DNS
-  # connection_type      = "VPC_LINK"
-  # connection_id        = aws_api_gateway_vpc_link.api_vpc_link.id
-
-  uri = "https://${aws_lb.alb.dns_name}/{proxy}"
+  # This might need a aws_api_gateway_vpc_link, but since the ALB is public, we
+  # might be able to avoid that
+  uri = "https://${var.domain_name}/{proxy}"
 
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
@@ -220,13 +218,3 @@ resource "aws_api_gateway_rest_api_policy" "api_access_restriction" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   policy      = data.aws_iam_policy_document.api_access_restriction[0].json
 }
-
-# Lets the API gateway forward traffic to the LB
-# Commenting out to see if I can't use the ALB public AWS DNS
-# resource "aws_api_gateway_vpc_link" "api_vpc_link" {
-#   count = var.enable_api_gateway ? 1 : 0
-
-#   name        = var.service_name
-#   description = "Forwards traffic from the gateway to the ${var.service_name} via the LB"
-#   target_arns = [aws_lb.alb.arn]
-# }
