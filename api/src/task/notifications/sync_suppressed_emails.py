@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 
 from src.adapters import db
-from src.adapters.aws.sesv2_adapter import BaseSESV2Client, SESV2Client
+from src.adapters.aws.sesv2_adapter import BaseSESV2Client, SESV2Client, get_sesv2_client
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.task import Task
 
@@ -12,7 +12,7 @@ class SyncSuppressedEmailsTask(Task):
     def __init__(self, db_session: db.Session, sesv2_client: BaseSESV2Client | None = None) -> None:
         super().__init__(db_session)
 
-        self.sesv2_client = sesv2_client or SESV2Client()
+        self.sesv2_client = sesv2_client or get_sesv2_client()
 
     def run_task(self) -> None:
         # Get the most recent suppression timestamp from DB
