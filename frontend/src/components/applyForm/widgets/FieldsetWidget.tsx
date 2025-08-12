@@ -13,7 +13,7 @@ export const FieldsetWidget = ({
   description?: string;
 }) => {
   return (
-    <Fieldset key={`${fieldName}-row`} id={fieldName}>
+    <Fieldset key={`${fieldName}-row`} id={`form-section-${fieldName}`}>
       <FormGroup key={`${fieldName}-group`} className="simpler-formgroup">
         <h4
           key={`${fieldName}-legend`}
