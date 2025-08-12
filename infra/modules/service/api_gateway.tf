@@ -44,8 +44,7 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
 
   integration_http_method = aws_api_gateway_method.api_proxy_method[0].http_method
   type                    = "HTTP_PROXY"
-  # This might need a aws_api_gateway_vpc_link, but since the ALB is public, we
-  # might be able to avoid that
+  # This will be changed to use a new ALB DNS and cert
   uri = "https://${var.domain_name}/{proxy}"
 
   request_parameters = {
@@ -122,7 +121,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
 
 resource "aws_api_gateway_domain_name" "api" {
   count = var.enable_api_gateway ? 1 : 0
-  # This might cause issues with the ALB, since they have the same domain_name
+  # This will become a different variable since it will be the current API domain and cert
   domain_name              = var.domain_name
   regional_certificate_arn = var.certificate_arn
 
