@@ -52,7 +52,7 @@ const ApplyForm = ({
   // eslint-disable-next-line
   console.log("~~~ response from server action", formState);
 
-  const { formData, error, saved } = formState;
+  const { formData, error, saved } = formState || {};
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
