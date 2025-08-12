@@ -44,7 +44,7 @@ export const ApplyFormMessage = ({
         <ul>
           {validationWarnings.map((warning, index) => (
             <li key={index}>
-              <a href={warning.field.replace("$.", "#")}>{warning.message}</a>
+              <a href={`#${warning.field}`}>{warning.message}</a>
             </li>
           ))}
         </ul>

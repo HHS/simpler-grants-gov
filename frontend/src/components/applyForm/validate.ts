@@ -22,7 +22,7 @@ export const UiJsonSchema: RJSFSchema = {
       properties: {
         type: {
           type: "string",
-          enum: ["field", "multiField"],
+          enum: ["field", "multiField", "null"],
         },
         name: { type: "string" },
         schema: {

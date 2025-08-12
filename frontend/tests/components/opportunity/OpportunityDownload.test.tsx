@@ -13,7 +13,7 @@ describe("OpportunityDownload Component", () => {
     render(<OpportunityDownload attachments={[fakeOpportunityDocument]} />);
     const link = screen.getByRole("link");
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "#opportunity_documents");
+    expect(link).toHaveAttribute("href", "#opportunity-documents");
   });
 
   it("does not render link if no attachments are present", () => {
