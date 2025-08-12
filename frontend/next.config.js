@@ -143,6 +143,8 @@ const nextConfig = {
   async headers() {
     return headers;
   },
+  // see https://nextjs.org/docs/messages/api-routes-response-size-limit
+  // warning about unrecognized key can be ignored
   api: {
     bodyParser: {
       sizeLimit: "2000mb",
