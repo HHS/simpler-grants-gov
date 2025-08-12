@@ -7,6 +7,7 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
+import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 
@@ -49,6 +50,8 @@ export type FormValidationWarning = {
 };
 
 export type WidgetTypes =
+  | "Attachment"
+  | "AttachmentArray"
   | "Checkbox"
   | "Text"
   | "TextArea"
@@ -78,6 +81,7 @@ export interface UiSchemaSection {
   label: string;
   name: string;
   children: Array<UiSchemaField | UiSchemaSection>;
+  description?: string;
 }
 
 export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
@@ -100,11 +104,15 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
+  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
-  schema: RJSFSchema;
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
   maxLength?: number;
   required?: boolean;
   disabled?: boolean;
@@ -129,3 +137,17 @@ export interface UswdsWidgetProps<
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
 }
+
+export interface SchemaWithLabelOption {
+  title?: string;
+  description?: string;
+  options?: {
+    "widget-label"?: string;
+    [key: string]: unknown;
+  };
+}
+
+export type UploadedFile = {
+  id: string;
+  name: string;
+};
