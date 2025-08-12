@@ -147,10 +147,7 @@ def _normalize_soap_dict_for_comparison(soap_dict: dict, is_root_level: bool = T
         Normalized dictionary for comparison
     """
     # Filter out namespace attributes and copy other keys
-    normalized = {
-        k: v for k, v in soap_dict.items()
-        if not k.startswith("@xmlns:")
-    }
+    normalized = {k: v for k, v in soap_dict.items() if not k.startswith("@xmlns:")}
 
     # Handle OpportunityDetails normalization for empty responses - ONLY at root level
     # This prevents adding OpportunityDetails to nested dictionaries
@@ -167,7 +164,11 @@ def _normalize_soap_dict_for_comparison(soap_dict: dict, is_root_level: bool = T
         elif isinstance(value, list) and value and isinstance(value[0], dict):
             # Normalize list of dictionaries
             normalized[key] = [
-                _normalize_soap_dict_for_comparison(item, is_root_level=False) if isinstance(item, dict) else item
+                (
+                    _normalize_soap_dict_for_comparison(item, is_root_level=False)
+                    if isinstance(item, dict)
+                    else item
+                )
                 for item in value
             ]
 

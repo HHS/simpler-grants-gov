@@ -6,7 +6,6 @@ normalized and compared to avoid false differences when both represent
 the same "no results" state.
 """
 
-
 from src.legacy_soap_api.legacy_soap_api_utils import (
     _normalize_soap_dict_for_comparison,
     diff_soap_dicts,
@@ -23,7 +22,7 @@ class TestNormalizeSoapDictForComparison:
             "@xmlns:app1": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
             "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
             "OpportunityDetails": [],
-            "SomeOtherField": "value"
+            "SomeOtherField": "value",
         }
 
         normalized = _normalize_soap_dict_for_comparison(soap_dict)
@@ -48,10 +47,7 @@ class TestNormalizeSoapDictForComparison:
 
     def test_normalizes_none_opportunity_details(self):
         """Test that None OpportunityDetails becomes empty list"""
-        soap_dict = {
-            "OpportunityDetails": None,
-            "SomeOtherField": "value"
-        }
+        soap_dict = {"OpportunityDetails": None, "SomeOtherField": "value"}
 
         normalized = _normalize_soap_dict_for_comparison(soap_dict)
 
@@ -60,10 +56,7 @@ class TestNormalizeSoapDictForComparison:
 
     def test_preserves_empty_list_opportunity_details(self):
         """Test that empty list OpportunityDetails remains empty list"""
-        soap_dict = {
-            "OpportunityDetails": [],
-            "SomeOtherField": "value"
-        }
+        soap_dict = {"OpportunityDetails": [], "SomeOtherField": "value"}
 
         normalized = _normalize_soap_dict_for_comparison(soap_dict)
 
@@ -73,10 +66,7 @@ class TestNormalizeSoapDictForComparison:
     def test_preserves_populated_opportunity_details(self):
         """Test that populated OpportunityDetails remains unchanged"""
         opportunity_data = {"FundingOpportunityNumber": "TEST-001"}
-        soap_dict = {
-            "OpportunityDetails": [opportunity_data],
-            "SomeOtherField": "value"
-        }
+        soap_dict = {"OpportunityDetails": [opportunity_data], "SomeOtherField": "value"}
 
         normalized = _normalize_soap_dict_for_comparison(soap_dict)
 
@@ -90,10 +80,7 @@ class TestNormalizeSoapDictForComparison:
                 {
                     "@xmlns:nested": "http://example.com",
                     "FundingOpportunityNumber": "TEST-001",
-                    "NestedDict": {
-                        "@xmlns:deep": "http://deep.example.com",
-                        "SomeField": "value"
-                    }
+                    "NestedDict": {"@xmlns:deep": "http://deep.example.com", "SomeField": "value"},
                 }
             ]
         }
@@ -122,7 +109,7 @@ class TestEmptyResponseComparison:
         grants_gov_response = {
             "@xmlns:app": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
             "@xmlns:app1": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
-            "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+            "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
         }
 
         # Should have no differences after normalization
@@ -138,7 +125,7 @@ class TestEmptyResponseComparison:
         grants_gov_response = {
             "@xmlns:app": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
             "@xmlns:app1": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
-            "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+            "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
         }
 
         # Should have no differences after normalization
@@ -156,11 +143,7 @@ class TestEmptyResponseComparison:
 
     def test_populated_responses_still_diff_correctly(self):
         """Test that responses with actual differences still show diffs"""
-        response_with_data = {
-            "OpportunityDetails": [
-                {"FundingOpportunityNumber": "TEST-001"}
-            ]
-        }
+        response_with_data = {"OpportunityDetails": [{"FundingOpportunityNumber": "TEST-001"}]}
 
         empty_response = {"OpportunityDetails": []}
 
@@ -173,16 +156,12 @@ class TestEmptyResponseComparison:
         """Test that namespace differences are ignored but actual data differences are caught"""
         response1 = {
             "@xmlns:app": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
-            "OpportunityDetails": [
-                {"FundingOpportunityNumber": "TEST-001"}
-            ]
+            "OpportunityDetails": [{"FundingOpportunityNumber": "TEST-001"}],
         }
 
         response2 = {
             "@xmlns:different": "http://different.example.com",
-            "OpportunityDetails": [
-                {"FundingOpportunityNumber": "TEST-002"}  # Different data
-            ]
+            "OpportunityDetails": [{"FundingOpportunityNumber": "TEST-002"}],  # Different data
         }
 
         # Should show differences in the opportunity number but ignore namespace differences
@@ -190,24 +169,23 @@ class TestEmptyResponseComparison:
         assert diff_result != {}
         assert "OpportunityDetails" in diff_result
         # Namespace differences should not appear in the diff
-        assert "keys_only_in_sgg" not in diff_result or "@xmlns:app" not in diff_result.get("keys_only_in_sgg", {})
-        assert "keys_only_in_gg" not in diff_result or "@xmlns:different" not in diff_result.get("keys_only_in_gg", {})
+        assert "keys_only_in_sgg" not in diff_result or "@xmlns:app" not in diff_result.get(
+            "keys_only_in_sgg", {}
+        )
+        assert "keys_only_in_gg" not in diff_result or "@xmlns:different" not in diff_result.get(
+            "keys_only_in_gg", {}
+        )
 
     def test_complex_nested_empty_responses(self):
         """Test normalization works with complex nested structures"""
         complex_response1 = {
             "@xmlns:app": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
             "OpportunityDetails": [],
-            "NestedData": {
-                "@xmlns:nested": "http://nested.example.com",
-                "SomeField": "value"
-            }
+            "NestedData": {"@xmlns:nested": "http://nested.example.com", "SomeField": "value"},
         }
 
         complex_response2 = {
-            "NestedData": {
-                "SomeField": "value"
-            }
+            "NestedData": {"SomeField": "value"}
             # OpportunityDetails missing entirely
         }
 
