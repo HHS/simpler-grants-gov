@@ -1,4 +1,5 @@
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
+from src.api.form_alpha.form_schema import FormAlphaSchema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
@@ -90,6 +91,7 @@ class ApplicationFormGetResponseDataSchema(Schema):
     application_form_id = fields.UUID()
     application_id = fields.UUID()
     form_id = fields.UUID()
+    form = fields.Nested(FormAlphaSchema())
     application_response = fields.Dict()
 
     application_form_status = fields.Enum(
@@ -112,6 +114,7 @@ class ApplicationFormGetResponseDataSchema(Schema):
     )
 
     application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+    application_name = fields.String()
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):

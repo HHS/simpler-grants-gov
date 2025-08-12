@@ -3,7 +3,6 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 
-// Mock `useTranslations`
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
@@ -34,16 +33,16 @@ const mockOpportunityData: OpportunityDetail = {
 } as OpportunityDetail;
 
 describe("OpportunityIntro", () => {
-  it("renders the opportunity title and agency name", () => {
+  it("renders the agency name", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
-    expect(screen.getByText("Agency: Test Agency")).toBeInTheDocument();
+    expect(screen.getByText("Test Agency")).toBeInTheDocument();
   });
   it("renders assistance listings correctly", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
     expect(
-      screen.getByText(/Assistance Listings:\s*12345\s*--\s*Test Program 1/),
+      screen.getByText(/\s*12345\s*--\s*Test Program 1/),
     ).toBeInTheDocument();
     expect(screen.getByText("67890 -- Test Program 2")).toBeInTheDocument();
   });
@@ -51,9 +50,7 @@ describe("OpportunityIntro", () => {
   it("renders the formatted last updated date", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
-    expect(
-      screen.getByText("Last updated: August 10, 2024"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("August 10, 2024")).toBeInTheDocument();
   });
 
   it("handles null agency name and null assistance listings", () => {
@@ -65,8 +62,14 @@ describe("OpportunityIntro", () => {
 
     render(<OpportunityIntro opportunityData={opportunityDataWithNulls} />);
 
-    expect(screen.getByText("Agency: --")).toBeInTheDocument();
-    expect(screen.getByText("Assistance Listings: —")).toBeInTheDocument(); // No assistance listings
+    expect(
+      screen.getByText((_, element) => element?.textContent === "Agency: --"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) => element?.textContent === "Assistance Listings: —",
+      ),
+    ).toBeInTheDocument(); // No assistance listings
   });
 
   it("handles null updated date", () => {
@@ -76,8 +79,11 @@ describe("OpportunityIntro", () => {
     };
 
     render(<OpportunityIntro opportunityData={opportunityDataWithoutDate} />);
-
-    expect(screen.getByText("Last updated: --")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) => element?.textContent === "Last updated: --",
+      ),
+    ).toBeInTheDocument();
   });
   it("includes `Version History` link to legacy opportunity page", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);

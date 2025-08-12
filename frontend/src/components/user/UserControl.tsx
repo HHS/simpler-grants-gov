@@ -13,7 +13,7 @@ import {
   NavDropDownButton,
 } from "@trussworks/react-uswds";
 
-import { LoginButtonModal } from "src/components/LoginButtonModal";
+import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 // used in three different places
@@ -154,9 +154,7 @@ export const UserControl = () => {
 
   return (
     <>
-      {!user?.token && (
-        <LoginButtonModal navLoginLinkText={t("navLinks.login")} />
-      )}
+      {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
       {!!user?.token && (
         <UserDropdown
           user={user}
