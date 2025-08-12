@@ -72,18 +72,23 @@ class OpportunityDetails(BaseSOAPSchema):
 
 
 class GetOpportunityListResponse(BaseSOAPSchema):
-    opportunity_details: list[OpportunityDetails] | None = Field(
-        default=None, alias="OpportunityDetails"
+    opportunity_details: list[OpportunityDetails] = Field(
+        default_factory=list, alias="OpportunityDetails"
     )
 
     @field_validator("opportunity_details", mode="before")
     @classmethod
-    def force_list(cls, value: dict | list | None) -> list | None:
+    def force_list(cls, value: dict | list | None) -> list:
         """
         Parsing the xml into a dict may result in this property being a dict instead of
         a list so this method forces opportunity_details into list when there is only 1 opportunity
         returned.
+
+        Always returns a list to ensure consistent behavior - empty list for no opportunities,
+        populated list for one or more opportunities.
         """
         if isinstance(value, dict):
             return [value]
+        elif value is None:
+            return []
         return value
