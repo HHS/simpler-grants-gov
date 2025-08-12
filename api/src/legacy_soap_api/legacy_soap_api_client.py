@@ -149,7 +149,23 @@ class BaseSOAPClient:
         simpler_response_soap_dict = self.get_soap_response_dict()
 
         # We will only run diffs for responses that do not match.
-        if proxy_response_soap_dict == simpler_response_soap_dict:
+        # Use normalized comparison to handle namespace attributes and empty response differences
+        proxy_body = get_envelope_dict(
+            proxy_response_soap_dict, self.operation_config.response_operation_name
+        )
+        simpler_body = get_envelope_dict(
+            simpler_response_soap_dict, self.operation_config.response_operation_name
+        )
+
+        # Use our normalization logic for the main comparison
+        diff_results = diff_soap_dicts(
+            sgg_dict=simpler_body,
+            gg_dict=proxy_body,
+            key_indexes=self.operation_config.key_indexes,
+            keys_only=True,
+        )
+
+        if diff_results == {}:
             logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
         else:
             self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
