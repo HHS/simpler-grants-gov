@@ -50,6 +50,8 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
+
+  timeout_milliseconds = 180000
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
@@ -135,8 +137,8 @@ resource "aws_api_gateway_domain_name" "api" {
 # Leave disabled until the domain name is figured for ALB vs API gateway above
 # resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping" {
 #   count                    = var.enable_api_gateway ? 1 : 0
-#   api_id      = aws_api_gateway_rest_api.api.id
-#   domain_name = aws_api_gateway_domain_name.api.domain_name
+#   api_id      = aws_api_gateway_rest_api.api[0].id
+#   domain_name = aws_api_gateway_domain_name.api[0].domain_name
 # }
 
 resource "aws_api_gateway_usage_plan" "api_public_usage_plan" {
