@@ -47,7 +47,11 @@ const i18nMiddleware = createIntlMiddleware({
 
 export default function middleware(request: NextRequest): NextResponse {
   // eslint-disable-next-line
-  console.log("~~~ running middleware");
+  console.log("~~~ running middleware", request.url, request.headers.entries());
+  request.headers.entries().forEach(([key, value]) => {
+    // eslint-disable-next-line
+    console.log("~~~ middleware header", key, value);
+  });
   const response = request.url.match(/api\//)
     ? featureFlagsManager.middleware(request, NextResponse.next())
     : featureFlagsManager.middleware(request, i18nMiddleware(request));
