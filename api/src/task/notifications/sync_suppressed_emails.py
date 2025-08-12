@@ -17,52 +17,48 @@ class SyncSuppressedEmailsTask(Task):
     def run_task(self) -> None:
         # Get the most recent suppression timestamp from DB
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
-        last_record = self.db_session.execute(stmt).scalars().first()
-        start_date: datetime | None = None
-        if last_record:
-            start_date = last_record.last_update_time + timedelta(microseconds=1)
+        with self.db_session.begin():
+            last_record = self.db_session.execute(stmt).scalars().first()
 
-        resp = self.sesv2_client.list_suppressed_destinations(start_date=start_date)
-        emails = [d.email_address for d in resp.suppressed_destination_summaries]
-        if not emails:
-            return
+            start_date: datetime | None = None
+            if last_record:
+                start_date = last_record.last_update_time + timedelta(microseconds=1)
 
-        # Fetch relevant users
-        existing_users = (
-            self.db_session.execute(
-                select(LinkExternalUser.email).where(LinkExternalUser.email.in_(emails))
-            )
-            .scalars()
-            .all()
-        )
-        user_email_set = set(existing_users)
+            resp = self.sesv2_client.list_suppressed_destinations(start_date=start_date)
+            emails = [d.email_address for d in resp.suppressed_destination_summaries]
+            if not emails:
+                return
 
-        # Fetch existing suppressed records to update
-        existing_suppressions = (
-            self.db_session.execute(
-                select(SuppressedEmail).where(SuppressedEmail.email.in_(user_email_set))
-            )
-            .scalars()
-            .all()
-        )
-        suppression_map = {s.email: s for s in existing_suppressions}
-
-        for destination in resp.suppressed_destination_summaries:
-            email = destination.email_address
-            if email not in user_email_set:
-                continue
-
-            existing = suppression_map.get(email)
-            if existing:
-                existing.reason = destination.reason
-                existing.last_update_time = destination.last_update_time
-            else:
-                self.db_session.add(
-                    SuppressedEmail(
-                        email=email,
-                        reason=destination.reason,
-                        last_update_time=destination.last_update_time,
-                    )
+            # Fetch relevant users
+            existing_users = (
+                self.db_session.execute(
+                    select(LinkExternalUser.email).where(LinkExternalUser.email.in_(emails))
                 )
+                .scalars()
+                .all()
+            )
+            user_email_set = set(existing_users)
 
-        self.db_session.commit()
+            # Fetch existing suppressed records to update
+            existing_suppressions = (
+                self.db_session.execute(
+                    select(SuppressedEmail).where(SuppressedEmail.email.in_(user_email_set))
+                )
+                .scalars()
+                .all()
+            )
+
+            suppression_map = {s.email: s for s in existing_suppressions}
+
+            for destination in resp.suppressed_destination_summaries:
+                email = destination.email_address
+                if email not in user_email_set:
+                    continue
+
+                suppressed_email_record = suppression_map.get(email)
+                if not suppressed_email_record:
+                    suppressed_email_record = SuppressedEmail(email=email)
+
+                suppressed_email_record.reason = destination.reason
+                suppressed_email_record.last_update_time = destination.last_update_time
+                self.db_session.add(suppressed_email_record)
