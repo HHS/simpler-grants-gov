@@ -39,8 +39,9 @@ class SESV2Client(BaseSESV2Client):
             request_params["StartDate"] = start_date
 
         response = self.client.list_suppressed_destinations(**request_params)
+        response_object = SESV2Response.model_validate(response["SuppressedDestinationSummaries"])
 
-        return SESV2Response(**response)
+        return response_object
 
 
 class MockSESV2Client(BaseSESV2Client):

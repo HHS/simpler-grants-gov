@@ -2,7 +2,7 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import db
-from src.adapters.aws.sesv2_adapter import BaseSESV2Client, SESV2Client
+from src.adapters.aws.sesv2_adapter import BaseSESV2Client
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
@@ -38,14 +38,14 @@ class EmailNotificationTask(Task):
         if notification_config is None:
             notification_config = EmailNotificationConfig()
         self.notification_config = notification_config
-        if sesv2_client is None:
-            sesv2_client = SESV2Client()
         self.sesv2_client = sesv2_client
 
     def run_task(self) -> None:
         # Run the suppressed email job first
-        SyncSuppressedEmailsTask(db_session=self.db_session, sesv2_client=self.sesv2_client).run()
-
+        if self.notification_config.sync_suppressed_emails:
+            SyncSuppressedEmailsTask(
+                db_session=self.db_session, sesv2_client=self.sesv2_client
+            ).run()
         if self.notification_config.enable_opportunity_notifications:
             OpportunityNotificationTask(
                 db_session=self.db_session, notification_config=self.notification_config
