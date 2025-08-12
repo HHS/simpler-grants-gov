@@ -365,7 +365,7 @@ export const buildField = ({
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
-  const disabled = fieldSchema.type === "null";
+  const disabled = fieldType === "null";
   let options = {};
   let enums: unknown[] = [];
   if (type === "Select") {
@@ -450,12 +450,7 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if (
-      "children" in item &&
-      item.children &&
-      Array.isArray(item.children) &&
-      item.children.length > 0
-    ) {
+    if ("children" in item && Array.isArray(item.children)) {
       if (item.name && item.label) {
         results.push({ href: item.name, text: item.label });
       }

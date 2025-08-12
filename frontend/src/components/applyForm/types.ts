@@ -61,7 +61,7 @@ export type WidgetTypes =
   | "Budget424aSectionB";
 
 export type UiSchemaField = {
-  type: "field" | "multiField";
+  type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
