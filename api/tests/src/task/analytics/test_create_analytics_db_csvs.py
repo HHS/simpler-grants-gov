@@ -2,6 +2,7 @@ import csv
 
 import pytest
 
+from src.db.models.lookup_models import LkOpportunityCategory, LkOpportunityStatus
 import src.util.file_util as file_util
 from src.db.models.user_models import User
 from src.task.analytics.create_analytics_db_csvs import (
@@ -193,3 +194,22 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         user_ids = set([str(u.user_id) for u in users])
         csv_user_ids = set([record["user_id"] for record in csv_users])
         assert user_ids == csv_user_ids
+
+    def test_lookup_tables_columns(self, db_session, task, enable_factory_create):
+        task.run()
+
+        # We don't validate record count since lookup table values are managed elsewhere
+        count_lk_opportunity_category = db_session.query(LkOpportunityCategory).count()
+        count_lk_opportunity_status = db_session.query(LkOpportunityStatus).count()
+
+        validate_file(
+            task.config.file_path + "/lk_opportunity_category.csv",
+            count_lk_opportunity_category,
+            TABLES_TO_EXTRACT["lk_opportunity_category"],
+        )
+
+        validate_file(
+            task.config.file_path + "/lk_opportunity_status.csv",
+            count_lk_opportunity_status,
+            TABLES_TO_EXTRACT["lk_opportunity_status"],
+        )
