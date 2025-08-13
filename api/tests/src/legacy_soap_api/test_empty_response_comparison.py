@@ -3,7 +3,7 @@ Test cases for empty response comparison fix for issue #5858.
 
 This module contains legacy tests that are kept for backwards compatibility.
 The main tests are now in test_empty_response_pipeline_normalization.py which
-implements freddieyebra's feedback about pipeline normalization.
+implements the pipeline normalization approach.
 """
 
 from src.legacy_soap_api.legacy_soap_api_utils import diff_soap_dicts

@@ -10,9 +10,11 @@ the same Pydantic schema (GetOpportunityListResponse), so they should produce
 identical results for equivalent empty responses.
 """
 
-from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import GetOpportunityListResponse
-from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_envelope_dict
+from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import (
+    GetOpportunityListResponse,
+)
 from src.legacy_soap_api.legacy_soap_api_utils import diff_soap_dicts
+from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_envelope_dict
 
 
 class TestPipelineNormalization:
@@ -32,7 +34,7 @@ class TestPipelineNormalization:
         payload = SOAPPayload(
             grants_gov_xml,
             operation_name="GetOpportunityListResponse",
-            force_list_attributes=["OpportunityDetails"]
+            force_list_attributes=["OpportunityDetails"],
         )
         xml_dict = payload.to_dict()
 
@@ -47,11 +49,7 @@ class TestPipelineNormalization:
 
         # Should produce clean empty list response
         expected = {
-            'Envelope': {
-                'Body': {
-                    'GetOpportunityListResponse': {'OpportunityDetails': []}
-                }
-            }
+            "Envelope": {"Body": {"GetOpportunityListResponse": {"OpportunityDetails": []}}}
         }
         assert final_envelope == expected
 
@@ -63,11 +61,7 @@ class TestPipelineNormalization:
 
         # Should produce the same structure
         expected = {
-            'Envelope': {
-                'Body': {
-                    'GetOpportunityListResponse': {'OpportunityDetails': []}
-                }
-            }
+            "Envelope": {"Body": {"GetOpportunityListResponse": {"OpportunityDetails": []}}}
         }
         assert envelope == expected
 
@@ -81,7 +75,11 @@ class TestPipelineNormalization:
     </soap:Body>
 </soap:Envelope>"""
 
-        payload = SOAPPayload(grants_gov_xml, operation_name="GetOpportunityListResponse", force_list_attributes=["OpportunityDetails"])
+        payload = SOAPPayload(
+            grants_gov_xml,
+            operation_name="GetOpportunityListResponse",
+            force_list_attributes=["OpportunityDetails"],
+        )
         body_dict = get_envelope_dict(payload.to_dict(), "GetOpportunityListResponse")
         proxy_response = GetOpportunityListResponse(**body_dict)
         proxy_envelope = proxy_response.to_soap_envelope_dict("GetOpportunityListResponse")
@@ -115,7 +113,11 @@ class TestPipelineNormalization:
         # Both should produce identical results after pipeline
         results = []
         for xml in [xml1, xml2]:
-            payload = SOAPPayload(xml, operation_name="GetOpportunityListResponse", force_list_attributes=["OpportunityDetails"])
+            payload = SOAPPayload(
+                xml,
+                operation_name="GetOpportunityListResponse",
+                force_list_attributes=["OpportunityDetails"],
+            )
             body_dict = get_envelope_dict(payload.to_dict(), "GetOpportunityListResponse")
             response = GetOpportunityListResponse(**body_dict)
             envelope = response.to_soap_envelope_dict("GetOpportunityListResponse")
@@ -126,11 +128,7 @@ class TestPipelineNormalization:
 
         # And both should match expected structure
         expected = {
-            'Envelope': {
-                'Body': {
-                    'GetOpportunityListResponse': {'OpportunityDetails': []}
-                }
-            }
+            "Envelope": {"Body": {"GetOpportunityListResponse": {"OpportunityDetails": []}}}
         }
         assert results[0] == expected
 
@@ -155,7 +153,11 @@ class TestIssue5858AcceptanceCriteria:
 </soap:Envelope>"""
 
         # Simulate get_proxy_soap_response_dict
-        payload = SOAPPayload(s2s_xml, operation_name="GetOpportunityListResponse", force_list_attributes=["OpportunityDetails"])
+        payload = SOAPPayload(
+            s2s_xml,
+            operation_name="GetOpportunityListResponse",
+            force_list_attributes=["OpportunityDetails"],
+        )
         body_dict = get_envelope_dict(payload.to_dict(), "GetOpportunityListResponse")
         s2s_response = GetOpportunityListResponse(**body_dict)
         s2s_envelope = s2s_response.to_soap_envelope_dict("GetOpportunityListResponse")
@@ -183,7 +185,7 @@ class TestIssue5858AcceptanceCriteria:
             opportunity_details=[
                 {
                     "funding_opportunity_number": "TEST-001",
-                    "funding_opportunity_title": "Test Opportunity"
+                    "funding_opportunity_title": "Test Opportunity",
                 }
             ]
         )
