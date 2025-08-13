@@ -13,6 +13,23 @@ type FormDataToJsonOptions = {
   delimiter?: string;
 };
 
+const parseValue = (value: unknown): unknown => {
+  if (value === "false") return false;
+  if (value === "true") return true;
+  if (
+    value !== "" &&
+    value !== null &&
+    value !== undefined &&
+    !isNaN(Number(value))
+  )
+    return Number(value);
+  try {
+    return JSON.parse(value as string);
+  } catch (e) {
+    return value || undefined;
+  }
+};
+
 export function formDataToObject(
   formData = new FormData(),
   options?: FormDataToJsonOptions,
@@ -26,18 +43,7 @@ export function formDataToObject(
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
     let current = result;
-    const parsedValue = (() => {
-      if (value === "false") return false;
-      if (value === "true") return true;
-      if (
-        value !== "" &&
-        value !== null &&
-        value !== undefined &&
-        !isNaN(Number(value))
-      )
-        return Number(value);
-      return value || undefined;
-    })();
+    const parsedValue = parseValue(value);
 
     const chunksLen = chunks.length;
     for (let chunkIdx = 0; chunkIdx < chunksLen; chunkIdx++) {
@@ -75,7 +81,7 @@ export function formDataToObject(
         }
       } else {
         if (chunkIdx === chunks.length - 1) {
-          current[chunkName] = parsedValue;
+          current[chunkName] = parsedValue as NestedObject;
         } else {
           current[chunkName] = current[chunkName] ?? {};
           current = current[chunkName] as NestedObject;
