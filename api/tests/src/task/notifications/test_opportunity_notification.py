@@ -217,7 +217,6 @@ class TestOpportunityNotification:
 
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
-
         user_2 = factories.LinkExternalUserFactory.create().user
 
         # Create a saved opportunity that needs notification
@@ -1138,8 +1137,7 @@ class TestOpportunityNotification:
     ):
         """Test that the user notification does not pick up user on suppression_list"""
         # create a suppressed email
-        user_1 = factories.LinkExternalUserFactory.create().user
-        factories.SuppressedEmailFactory(email=user_1.email)
+        factories.SuppressedEmailFactory(email=user.email)
 
         # create opportunity
         opp = factories.OpportunityFactory.create(is_posted_summary=True)
