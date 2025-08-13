@@ -15,11 +15,11 @@ class SyncSuppressedEmailsTask(Task):
         self.sesv2_client = sesv2_client or get_sesv2_client()
 
     def run_task(self) -> None:
-        # Get the most recent suppression timestamp from DB
         with self.db_session.begin():
             self.process_suppressed_emails()
 
     def process_suppressed_emails(self) -> None:
+        # Get the most recent suppression timestamp from DB
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
 
         last_record = self.db_session.execute(stmt).scalars().first()
