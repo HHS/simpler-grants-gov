@@ -23,6 +23,7 @@ class SESV2Response(BaseModel):
     suppressed_destination_summaries: list[SuppressedDestination] = Field(
         alias="SuppressedDestinationSummaries", default_factory=list
     )
+    next_token: str | None = Field(alias="NextToken", default=None)
 
 
 class BaseSESV2Client(ABC, metaclass=ABCMeta):
@@ -39,19 +40,34 @@ class SESV2Client(BaseSESV2Client):
         request_params = {}
         if start_time:
             request_params["StartDate"] = start_time
+
+        all_summaries = []
+        next_token = None
+
         try:
-            response = self.client.list_suppressed_destinations(**request_params)
-            response_object = SESV2Response.model_validate(response)
+            while True:
+                if next_token:
+                    request_params["NextToken"] = next_token
+
+                response = self.client.list_suppressed_destinations(**request_params)
+                response_object = SESV2Response.model_validate(response)
+                all_summaries.extend(response_object.suppressed_destination_summaries)
+
+                next_token = response.get("NextToken")
+                if not next_token:
+                    break
+
         except ClientError:
             logger.exception("Error calling list_suppressed_destinations")
             raise
 
-        return response_object
+        return SESV2Response(suppressed_destination_summaries=all_summaries)
 
 
 class MockSESV2Client(BaseSESV2Client):
-    def __init__(self) -> None:
+    def __init__(self, page_size: int = 1) -> None:
         self.mock_responses: list[SuppressedDestination] = []
+        self.page_size = page_size  # Number of suppressed destinations per page
 
     def add_mock_responses(self, response: SuppressedDestination) -> None:
         """Seed mock responses list with test data."""
@@ -60,14 +76,23 @@ class MockSESV2Client(BaseSESV2Client):
     def list_suppressed_destinations(
         self,
         start_time: datetime | None = None,
+        next_token: str | None = None,
     ) -> SESV2Response:
-        """Return suppressed destination filtered by date range."""
+        """Return suppressed destination with optional time filter and pagination"""
         results = self.mock_responses
         if start_time:
             results = [r for r in results if r.last_update_time >= start_time]
+        # Where the page begins in the list
+        start_index = int(next_token) if next_token else 0
+        # Where the page ends in the list
+        end_index = start_index + self.page_size
+        # Subset of suppressed destinations
+        page = results[start_index:end_index]
+        # Offset for the next page
+        next_token = str(end_index) if end_index < len(results) else None
 
         return SESV2Response(
-            SuppressedDestinationSummaries=[r.model_dump(by_alias=True) for r in results]
+            SuppressedDestinationSummaries=page, **({"NextToken": next_token} if next_token else {})
         )
 
 
