@@ -171,14 +171,20 @@ const CompetitionStatus = ({
   if (applicationForm?.application_form_status === "in_progress") {
     return (
       <div className="display-flex flex-align-center text-bold icon-active">
-        <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3" />
+        <USWDSIcon
+          name="error_outline"
+          className="margin-right-2px usa-icon--size-3"
+        />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
       <div className="display-flex flex-align-center text-bold">
-        <USWDSIcon name="check_circle_outline" className="text-primary margin-right-2px usa-icon--size-3" />
+        <USWDSIcon
+          name="check_circle_outline"
+          className="text-primary margin-right-2px usa-icon--size-3"
+        />
         {t("complete")}
       </div>
     );

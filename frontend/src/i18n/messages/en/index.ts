@@ -320,7 +320,7 @@ export const messages = {
         not_started: "Not started",
         in_progress: "Some required fields are incomplete",
         complete: "All required fields are complete",
-        attachmentDeleted: "An attachment was deleted"
+        attachmentDeleted: "An attachment was deleted",
       },
       updated: "Last updated",
       updatedBy: "Last updated by",
