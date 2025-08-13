@@ -99,6 +99,7 @@ function TextAreaWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         rows={options.rows}
+        error={error}
       />
     </FormGroup>
   );

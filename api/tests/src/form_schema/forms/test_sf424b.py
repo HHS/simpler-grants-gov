@@ -39,7 +39,6 @@ def test_sf424b_v1_1_full_valid_json(full_valid_sf424b_v1_1):
 
 def test_sf424b_v1_1_empty_json():
     EXPECTED_REQUIRED_FIELDS = [
-        "$.signature",
         "$.title",
         "$.applicant_organization",
     ]

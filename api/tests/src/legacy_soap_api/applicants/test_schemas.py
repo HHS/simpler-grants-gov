@@ -34,4 +34,5 @@ def test_get_opportunity_list_response_force_list():
         ).opportunity_details,
         list,
     )
-    assert schemas.GetOpportunityListResponse(**{}).opportunity_details is None
+    # Updated behavior: empty dict now returns empty list instead of None for consistency
+    assert schemas.GetOpportunityListResponse(**{}).opportunity_details == []

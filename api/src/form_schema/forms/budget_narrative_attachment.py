@@ -24,10 +24,10 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "1. Budget Narrative File(s)",
+        "name": "budgetNarrativeFiles",
         "children": [
-            {"type": "field", "definition": "/properties/attachments"},
+            {"type": "field", "definition": "/properties/attachments", "widget": "AttachmentArray"},
         ],
     }
 ]

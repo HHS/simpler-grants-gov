@@ -53,8 +53,9 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "1. Project Abstract Summary",
+        "name": "projectAbstractSummary",
+        "description": "This Project Abstract Summary form must be submitted or the application will be considered incomplete. Ensure the Project Abstract field succinctly describes the project in plain language that the public can understand and use without the full proposal. Use 4,000 characters or less. Do not include personally identifiable, sensitive or proprietary information. Refer to Agency instructions for any additional Project Abstract field requirements. If the application is funded, your project abstract information (as submitted) will be made available to public websites and/or databases including USAspending.gov.",
         "children": [
             {"type": "field", "definition": "/properties/funding_opportunity_number"},
             {"type": "field", "definition": "/properties/assistance_listing_number"},

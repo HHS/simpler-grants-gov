@@ -83,7 +83,7 @@ const ApplyForm = ({
   return (
     <>
       <form
-        className="flex-1 margin-top-2"
+        className="flex-1 margin-top-2 simpler-apply-form"
         action={formAction}
         // turns off html5 validation so all error displays are consistent
         noValidate

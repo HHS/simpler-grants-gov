@@ -73,7 +73,11 @@ def get_saved_opportunities(
             CurrentOpportunitySummary.opportunity_summary_id
             == OpportunitySummary.opportunity_summary_id,
         )
-        .options(selectinload("*"))
+        .options(
+            selectinload(Opportunity.current_opportunity_summary).selectinload(
+                CurrentOpportunitySummary.opportunity_summary
+            )
+        )
     )
 
     stmt = add_sort_order(stmt, opportunity_params.pagination.sort_order)

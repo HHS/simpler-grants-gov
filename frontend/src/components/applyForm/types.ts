@@ -61,7 +61,7 @@ export type WidgetTypes =
   | "Budget424aSectionB";
 
 export type UiSchemaField = {
-  type: "field" | "multiField";
+  type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
@@ -81,6 +81,7 @@ export interface UiSchemaSection {
   label: string;
   name: string;
   children: Array<UiSchemaField | UiSchemaSection>;
+  description?: string;
 }
 
 export type UiSchema = Array<UiSchemaSection | UiSchemaField>;

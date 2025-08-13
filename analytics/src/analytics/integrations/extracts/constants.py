@@ -13,6 +13,7 @@ class OpportunityTables(StrEnum):
     CURRENT_OPPORTUNITY_SUMMARY = "current_opportunity_summary"
     USER_SAVED_OPPORTUNITY = "user_saved_opportunity"
     USER_SAVED_SEARCH = "user_saved_search"
+    USER = "user"
 
 
 LK_OPPORTUNITY_STATUS_COLS = (
@@ -114,6 +115,12 @@ USER_SAVED_SEARCH_COLS = (
     "UPDATED_AT",
 )
 
+USER_COLS = (
+    "USER_ID",
+    "CREATED_AT",
+    "UPDATED_AT",
+)
+
 MAP_TABLES_TO_COLS: dict[OpportunityTables, tuple[str, ...]] = {
     OpportunityTables.LK_OPPORTUNITY_STATUS: LK_OPPORTUNITY_STATUS_COLS,
     OpportunityTables.LK_OPPORTUNITY_CATEGORY: LK_OPPORTUNITY_CATEGORY_COLS,
@@ -122,4 +129,5 @@ MAP_TABLES_TO_COLS: dict[OpportunityTables, tuple[str, ...]] = {
     OpportunityTables.CURRENT_OPPORTUNITY_SUMMARY: CURRENT_OPPORTUNITY_SUMMARY_COLS,
     OpportunityTables.USER_SAVED_OPPORTUNITY: USER_SAVED_OPPORTUNITY_COLS,
     OpportunityTables.USER_SAVED_SEARCH: USER_SAVED_SEARCH_COLS,
+    OpportunityTables.USER: USER_COLS,
 }
