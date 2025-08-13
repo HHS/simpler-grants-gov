@@ -253,7 +253,6 @@ def test_grouped_search_queries_cli(
 
 
 def test_search_notifications_on_index_change(
-    mock_sesv2_client,
     db_session,
     enable_factory_create,
     user,

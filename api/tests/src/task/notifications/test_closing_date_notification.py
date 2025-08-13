@@ -42,7 +42,6 @@ class TestClosingDateNotification:
 
     def test_closing_date_notifications(
         self,
-        mock_sesv2_client,
         db_session,
         enable_factory_create,
         user_with_email,
@@ -147,7 +146,6 @@ class TestClosingDateNotification:
 
     def test_closing_date_notification_not_sent_twice(
         self,
-        mock_sesv2_client,
         db_session,
         enable_factory_create,
         user_with_email,
@@ -212,7 +210,6 @@ class TestClosingDateNotification:
 
     def test_post_notification_log_creation(
         self,
-        mock_sesv2_client,
         db_session,
         search_client,
         enable_factory_create,

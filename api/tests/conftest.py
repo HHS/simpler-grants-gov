@@ -1,7 +1,6 @@
 import logging
 import uuid
 from os import path
-from unittest.mock import MagicMock, patch
 
 import _pytest.monkeypatch
 import boto3
@@ -395,14 +394,6 @@ def all_api_auth_tokens(monkeypatch):
 def api_auth_token(monkeypatch, all_api_auth_tokens):
     auth_token = all_api_auth_tokens[0]
     return auth_token
-
-
-@pytest.fixture
-def mock_sesv2_client():
-    with patch("src.task.notifications.sync_suppressed_emails.SESV2Client") as MockSESV2Client:
-        mock_instance = MagicMock()
-        MockSESV2Client.return_value = mock_instance
-        yield mock_instance
 
 
 ####################
