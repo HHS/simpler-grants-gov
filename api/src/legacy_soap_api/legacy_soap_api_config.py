@@ -1,6 +1,6 @@
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cache, lru_cache
 from typing import Any
@@ -78,14 +78,14 @@ class SOAPOperationConfig:
 
     # This value holds all namespace mappings per soap api. Grantors and Applicants APIs
     # will have different namespace configurations.
-    namespaces: dict[str, str] | None = None
+    namespaces: dict[None | str, str] = field(default_factory=dict)
 
     # Configuration for XML namespace mapping to generate XML from SOAP XML dicts.
     # This will only be needed for the simpler SOAP data processing. The values for this property
     # are derived from the namespaces attribute in this class. The data in this
     # config should align with what the existing GG SOAP response namespaces. Not all tags have
     # namespaces or namespace prefixes.
-    namespace_keymap: dict | None = None
+    namespace_keymap: dict[str, str] = field(default_factory=dict)
 
 
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
@@ -114,7 +114,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
 SOAP_NS = "http://schemas.xmlsoap.org/soap/envelope/"
 
 # Namespaces for SOAP API XML data.
-SOAP_API_NAMESPACES = {
+SOAP_API_NAMESPACES: dict[SimplerSoapAPI, dict[str | None, str]] = {
     SimplerSoapAPI.APPLICANTS: {
         "soap": SOAP_NS,
         "ns2": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
@@ -136,5 +136,7 @@ def get_soap_operation_config(
     operation_config = SIMPLER_SOAP_OPERATION_CONFIGS.get(simpler_api, {}).get(
         request_operation_name
     )
+    if operation_config is None:
+        return None
     operation_config.namespaces = SOAP_API_NAMESPACES.get(simpler_api, {})
     return operation_config

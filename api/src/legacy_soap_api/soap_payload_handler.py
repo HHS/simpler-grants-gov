@@ -5,6 +5,8 @@ from typing import Any, Callable, Iterable
 
 import xmltodict
 from defusedxml import ElementTree as DET
+from lxml import etree
+from lxml.etree import Element, QName, SubElement
 
 ENVELOPE_REGEX = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
 XML_DICT_KEY_NAMESPACE_DELIMITER = ":"
@@ -225,3 +227,48 @@ def get_soap_operation_dict(soap_xml: str, operation_name: str) -> dict:
 
 def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
     return soap_xml_dict.get("Envelope", {}).get("Body", {}).get(operation_name, {})
+
+
+def build_xml_from_dict(
+    operation_name: str,
+    xml_dict: dict[str, Any],
+    key_namespace_config: dict[str, str],
+    namespaces: dict[str | None, str],
+) -> bytes:
+    soap_ns = namespaces.get("soap")
+    envelope = Element(QName(soap_ns, "Envelope"), nsmap={"soap": soap_ns})
+    body = SubElement(envelope, QName(soap_ns, "Body"))
+    element_tag_prefix = key_namespace_config.get(operation_name)
+    element_tag_ns_uri = namespaces.get(element_tag_prefix)
+    element = QName(element_tag_ns_uri, operation_name)
+    root_element = SubElement(body, element, nsmap=namespaces)
+    _build_xml_elements(root_element, xml_dict, key_namespace_config, namespaces)
+    return etree.tostring(envelope, encoding="utf-8")
+
+
+def _build_xml_elements(
+    parent: etree._Element,
+    xml_dict: dict[str, Any],
+    key_namespace_config: dict[str, str],
+    namespaces: dict[str | None, str],
+) -> None:
+    for key, value in xml_dict.items():
+        ns_uri = namespaces.get(key_namespace_config.get(key))
+
+        # Add the namespace uri if it exists in the namespaces.
+        tag = QName(ns_uri, key) if ns_uri else key
+
+        if isinstance(value, dict):
+            child = SubElement(parent, tag)
+            _build_xml_elements(child, value, key_namespace_config, namespaces)
+        elif isinstance(value, list):
+            for item in value:
+                item_tag = QName(ns_uri, key) if ns_uri else key
+                item_el = SubElement(parent, item_tag)
+                if isinstance(item, dict):
+                    _build_xml_elements(item_el, item, key_namespace_config, namespaces)
+                else:
+                    item_el.text = str(item)
+        else:
+            el = SubElement(parent, tag)
+            el.text = str(value)
