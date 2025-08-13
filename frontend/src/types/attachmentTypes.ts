@@ -37,3 +37,8 @@ export interface AttachmentResponse extends APIResponse {
     | "download_path"
   >[];
 }
+
+export interface FormsWithMissingAttachments {
+  formId: string;
+  missingAttachmentFields: string[];
+}

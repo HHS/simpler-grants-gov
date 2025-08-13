@@ -3,7 +3,7 @@
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
-import { Attachment } from "src/types/attachmentTypes";
+import { Attachment, FormsWithMissingAttachments } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -20,10 +20,12 @@ import { OpportunityCard } from "./OpportunityCard";
 const ApplicationContainer = ({
   applicationDetails,
   attachments,
+  formsWithMissingAttachments,
   opportunity,
 }: {
   applicationDetails: ApplicationDetail;
   attachments: Attachment[];
+  formsWithMissingAttachments: FormsWithMissingAttachments[]
   opportunity: OpportunityDetail;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
@@ -112,6 +114,7 @@ const ApplicationContainer = ({
         applicationForms={applicationForms}
         applicationId={applicationId}
         forms={forms}
+        formsWithDeletedAttachments={formsWithMissingAttachments}
       />
       <AttachmentsCard
         applicationId={applicationId}

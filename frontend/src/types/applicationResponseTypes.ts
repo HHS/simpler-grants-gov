@@ -91,3 +91,9 @@ export interface ApplicationFormDetailApiResponse
 export interface ApplicationDetailApiResponse extends APIResponse {
   data: ApplicationDetail;
 }
+
+export interface FormWithDeletedAttachments {
+  formId: string;
+  hasDeletedAttachments: boolean;
+  deletedAttachments: Attachment[];
+}

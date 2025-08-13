@@ -15,6 +15,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
+import { getFormsWithMissingAttachments } from "src/utils/attachment/getFormsWithMissingAttachments";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let details = {} as ApplicationDetailsCardProps;
   let opportunity = {} as OpportunityDetail;
   let attachments = [] as Attachment[];
+  let formsWithMissingAttachments = [];
 
   try {
     const response = await getApplicationDetails(
@@ -68,6 +70,12 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     opportunity = opportunityResponse.data;
     attachments = response.data.application_attachments;
+    formsWithMissingAttachments = await getFormsWithMissingAttachments(
+      userSession.token,
+      details.application_forms,
+      applicationId,
+      attachments
+    );
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -85,8 +93,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <h1>{t("title")}</h1>
         <ApplicationContainer
           applicationDetails={details}
-          opportunity={opportunity}
           attachments={attachments}
+          formsWithMissingAttachments={formsWithMissingAttachments}
+          opportunity={opportunity}
         />
       </GridContainer>
     </>

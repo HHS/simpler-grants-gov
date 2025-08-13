@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { FormsWithMissingAttachments } from "src/types/attachmentTypes";
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,
@@ -43,10 +44,12 @@ export const ApplicationFormsTable = ({
   applicationForms,
   applicationId,
   forms,
+  formsWithDeletedAttachments
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
+  formsWithDeletedAttachments: FormsWithMissingAttachments[];
 }) => {
   const requiredForms = selectApplicationFormsByRequired({
     applicationForms,
@@ -58,6 +61,7 @@ export const ApplicationFormsTable = ({
     forms,
     required: false,
   });
+
   const t = useTranslations("Application.competitionFormTable");
 
   return (
@@ -67,6 +71,7 @@ export const ApplicationFormsTable = ({
         forms={forms}
         applicationForms={requiredForms}
         applicationId={applicationId}
+        formsWithDeletedAttachments={formsWithDeletedAttachments}
       />
       {conditionalRequiredForms.length > 0 && (
         <>
@@ -76,12 +81,14 @@ export const ApplicationFormsTable = ({
             forms={forms}
             applicationForms={conditionalRequiredForms}
             applicationId={applicationId}
+            formsWithDeletedAttachments={formsWithDeletedAttachments}
           />
         </>
       )}
     </>
   );
 };
+
 
 const selectApplicationFormById = ({
   forms,
@@ -97,10 +104,12 @@ const ApplicationTable = ({
   applicationForms,
   applicationId,
   forms,
+  formsWithDeletedAttachments
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
+  formsWithDeletedAttachments: FormsWithMissingAttachments[];
 }) => {
   const t = useTranslations("Application.competitionFormTable");
 
@@ -123,40 +132,50 @@ const ApplicationTable = ({
         </tr>
       </thead>
       <tbody>
-        {applicationForms.map((form, index) => (
-          <tr key={index} id={`form-${form.application_form_id}`}>
-            <td data-label={t("form")}>
-              <FormLink
-                formId={form.form_id}
-                forms={forms}
-                applicationId={applicationId}
-                appFormId={form.application_form_id}
-              />
-              <CompetitionStatus
-                applicationForms={applicationForms}
-                formId={form.form_id}
-              />
-            </td>
-            <td data-label={t("instructions")}>
-              <InstructionsLink
-                forms={forms}
-                formId={form.form_id}
-                text={t("downloadInstructions")}
-                unavailableText={t("attachmentUnavailable")}
-              />
-            </td>
-            <td data-label={t("updated")}>
-              <div> -- </div>
-            </td>
-            <td data-label={t("updatedBy")}>
-              <div> -- </div>
-            </td>
-          </tr>
-        ))}
+        {applicationForms.map((form, index) => {
+          const missingAttachmentsInfo = formsWithDeletedAttachments.find(
+            (item) => item.formId === form.application_form_id
+          );
+
+          return (
+            <tr key={index} id={`form-${form.application_form_id}`}>
+              <td data-label={t("form")}>
+                <FormLink
+                  formId={form.form_id}
+                  forms={forms}
+                  applicationId={applicationId}
+                  appFormId={form.application_form_id}
+                />
+                <CompetitionStatus
+                  applicationForms={applicationForms}
+                  formId={form.form_id}
+                />
+                <MissingAttachments
+                  formsWithDeletedAttachments={missingAttachmentsInfo}
+                />
+              </td>
+              <td data-label={t("instructions")}>
+                <InstructionsLink
+                  forms={forms}
+                  formId={form.form_id}
+                  text={t("downloadInstructions")}
+                  unavailableText={t("attachmentUnavailable")}
+                />
+              </td>
+              <td data-label={t("updated")}>
+                <div> -- </div>
+              </td>
+              <td data-label={t("updatedBy")}>
+                <div> -- </div>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </Table>
   );
 };
+
 
 const CompetitionStatus = ({
   formId,
@@ -170,15 +189,15 @@ const CompetitionStatus = ({
 
   if (applicationForm?.application_form_status === "in_progress") {
     return (
-      <div className="display-flex flex-align-center text-bold icon-active">
-        <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3" />
+      <div className="display-flex flex-align-center">
+        <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
-      <div className="display-flex flex-align-center text-bold">
-        <USWDSIcon name="check_circle_outline" className="text-primary margin-right-2px usa-icon--size-3" />
+      <div className="display-flex flex-align-center">
+        <USWDSIcon name="check_circle_outline" className="text-primary margin-right-2px usa-icon--size-3 icon-active" />
         {t("complete")}
       </div>
     );
@@ -186,6 +205,40 @@ const CompetitionStatus = ({
     return <>-</>;
   }
 };
+
+interface MissingAttachments {
+  formsWithDeletedAttachments: FormsWithMissingAttachments | undefined
+  showMissingFields?: boolean;
+}
+
+const MissingAttachments = ({ formsWithDeletedAttachments, showMissingFields = false }: MissingAttachments) => {
+  const t = useTranslations("Application.competitionFormTable");
+
+  if(formsWithDeletedAttachments && formsWithDeletedAttachments.missingAttachmentFields.length > 0) {
+    if(showMissingFields){
+      return (<>
+        <p className="display-flex flex-align-top">
+          <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />{t("deletedOrMissingAttachments")}
+        </p>
+        {
+          <ul>
+            {formsWithDeletedAttachments.missingAttachmentFields.map((fieldName, index) => (<li className="display-flex" key={`missing-attachment--${fieldName}-${index}`}>{fieldName}</li>))}
+          </ul>
+        }
+      </>)
+    } else {
+      return (
+        <p className="display-flex flex-align-top">
+          <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />
+          {t("deletedOrMissingAttachmentsGeneric")}
+        </p>
+      )
+    }
+  }
+
+  return null
+}
+
 
 const InstructionsLink = ({
   formId,

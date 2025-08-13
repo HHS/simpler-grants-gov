@@ -17,7 +17,7 @@ export type FormInstruction = {
 
 export interface FormDetail {
   form_id: string;
-  form_instruction: FormInstruction;
+  form_instruction: FormInstruction | null;
   form_name: string;
   form_json_schema: RJSFSchema;
   form_ui_schema: UiSchema;
