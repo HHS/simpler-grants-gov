@@ -3,6 +3,7 @@ import csv
 import pytest
 
 import src.util.file_util as file_util
+from src.db.models.user_models import User
 from src.task.analytics.create_analytics_db_csvs import (
     CreateAnalyticsDbCsvsConfig,
     CreateAnalyticsDbCsvsTask,
@@ -10,6 +11,7 @@ from src.task.analytics.create_analytics_db_csvs import (
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     OpportunityFactory,
+    UserFactory,
     UserSavedOpportunityFactory,
     UserSavedSearchFactory,
 )
@@ -154,3 +156,16 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
             for record in csv_saved_searches
         }
         assert saved_search_ids == csv_saved_search_ids
+
+    def test_users(self, db_session, task, enable_factory_create):
+        users = []
+        current_users = db_session.query(User)
+        users.extend(current_users)
+        users.extend(UserFactory.create_batch(size=5))
+
+        task.run()
+
+        csv_users = validate_file(task.config.file_path + "/user.csv", len(users))
+        user_ids = set([str(u.user_id) for u in users])
+        csv_user_ids = set([record["user_id"] for record in csv_users])
+        assert user_ids == csv_user_ids
