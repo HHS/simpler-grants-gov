@@ -1,9 +1,15 @@
+import json
+import logging
 import uuid
-from typing import Any
+import xml.dom.minidom
+from typing import Any, Callable
 
 import requests
 
+from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+
+logger = logging.getLogger(__name__)
 
 BASE_SOAP_API_RESPONSE_HEADERS = {
     "Content-Type": 'multipart/related; type="application/xop+xml"',
@@ -219,6 +225,39 @@ def diff_list_of_dicts(
             if sgg_dict[k] != gg_dict[k]
         },
     }
+
+
+def xml_formatter(xml_data: str) -> str:
+    """Format XML string. If it is invalid XML just return XML as is.
+
+    This should only be used for logging purposes.
+    """
+    try:
+        return xml.dom.minidom.parseString(xml_data).toprettyxml()
+    except Exception:
+        return xml_data
+
+
+def json_formatter(data: dict) -> str | dict:
+    """Format dict as JSON string. If it is invalid JSON just return dict as is.
+
+    This should only be used for logging purposes.
+    """
+    try:
+        return json.dumps(data, indent=2)
+    except Exception:
+        return data
+
+
+def log_local(msg: str, data: Any | None = None, formatter: Callable | None = None) -> None:
+    """Log local data
+
+    This is a utility for logging in local dev. This will not have associated
+    environment variable in AWS so will never be enabled in other envs.
+    """
+    if get_soap_config().enable_verbose_logging:
+        data = formatter(data) if formatter else data
+        logger.info(msg=f"\n{msg}:\n{data}")
 
 
 def _hide_value(value: Any, hide: bool) -> Any:

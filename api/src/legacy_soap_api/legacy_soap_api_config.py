@@ -21,6 +21,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     gg_s2s_proxy_header_key: str = Field(default="", alias="GG_S2S_PROXY_HEADER_KEY")
     soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
     soap_auth_map: dict = Field(default_factory=dict)
+    enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
 
     @property
     def gg_url(self) -> str:
@@ -75,6 +76,17 @@ class SOAPOperationConfig:
     # This config is used for insights when diffing proxy and simpler soap responses.
     key_indexes: dict[str, str] | None = None
 
+    # This value holds all namespace mappings per soap api. Grantors and Applicants APIs
+    # will have different namespace configurations.
+    namespaces: dict[str, str] | None = None
+
+    # Configuration for XML namespace mapping to generate XML from SOAP XML dicts.
+    # This will only be needed for the simpler SOAP data processing. The values for this property
+    # are derived from the namespaces attribute in this class. The data in this
+    # config should align with what the existing GG SOAP response namespaces. Not all tags have
+    # namespaces or namespace prefixes.
+    namespace_keymap: dict | None = None
+
 
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
     SimplerSoapAPI.APPLICANTS: {
@@ -83,9 +95,37 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
+            namespace_keymap={
+                "GetOpportunityListResponse": "ns2",
+                "OpportunityDetails": "ns5",
+                "CFDADetails": "ns5",
+                "Number": "ns5",
+                "Title": "ns5",
+                "OpeningDate": "ns5",
+                "ClosingDate": "ns5",
+                "OfferingAgency": "ns4",
+            },
         )
     },
     SimplerSoapAPI.GRANTORS: {},
+}
+
+# This is a standard global namespace for SOAP XML.
+SOAP_NS = "http://schemas.xmlsoap.org/soap/envelope/"
+
+# Namespaces for SOAP API XML data.
+SOAP_API_NAMESPACES = {
+    SimplerSoapAPI.APPLICANTS: {
+        "soap": SOAP_NS,
+        "ns2": "http://apply.grants.gov/services/ApplicantWebServices-V2.0",
+        "ns3": "http://schemas.xmlsoap.org/wsdl/",
+        "ns4": "http://schemas.xmlsoap.org/wsdl/soap/",
+        "ns5": "http://apply.grants.gov/system/ApplicantCommonElements-V1.0",
+        None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
+    },
+    SimplerSoapAPI.GRANTORS: {
+        "soap": SOAP_NS,
+    },
 }
 
 
@@ -93,4 +133,8 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
 def get_soap_operation_config(
     simpler_api: SimplerSoapAPI, request_operation_name: str
 ) -> SOAPOperationConfig | None:
-    return SIMPLER_SOAP_OPERATION_CONFIGS.get(simpler_api, {}).get(request_operation_name)
+    operation_config = SIMPLER_SOAP_OPERATION_CONFIGS.get(simpler_api, {}).get(
+        request_operation_name
+    )
+    operation_config.namespaces = SOAP_API_NAMESPACES.get(simpler_api, {})
+    return operation_config
