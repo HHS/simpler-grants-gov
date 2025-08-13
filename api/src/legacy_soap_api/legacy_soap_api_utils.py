@@ -130,51 +130,6 @@ def is_list_of_dicts(data: list) -> bool:
     return isinstance(data, list) and all(isinstance(item, dict) for item in data)
 
 
-def _normalize_soap_dict_for_comparison(soap_dict: dict, is_root_level: bool = True) -> dict:
-    """
-    Normalize a SOAP dictionary for comparison.
-
-    This function handles differences in empty response formatting between
-    Simpler and Grants.gov SOAP responses by:
-    1. Filtering out XML namespace attributes (@xmlns:*)
-    2. Normalizing OpportunityDetails field (missing/None -> empty list) only at root level
-
-    Args:
-        soap_dict: Dictionary representation of SOAP response
-        is_root_level: Whether this is the root level response dict
-
-    Returns:
-        Normalized dictionary for comparison
-    """
-    # Filter out namespace attributes and copy other keys
-    normalized = {k: v for k, v in soap_dict.items() if not k.startswith("@xmlns:")}
-
-    # Handle OpportunityDetails normalization for empty responses - ONLY at root level
-    # This prevents adding OpportunityDetails to nested dictionaries
-    if is_root_level:
-        if "OpportunityDetails" not in normalized:
-            normalized["OpportunityDetails"] = []
-        elif normalized["OpportunityDetails"] is None:
-            normalized["OpportunityDetails"] = []
-
-    # Recursively normalize nested dictionaries (not at root level)
-    for key, value in normalized.items():
-        if isinstance(value, dict):
-            normalized[key] = _normalize_soap_dict_for_comparison(value, is_root_level=False)
-        elif isinstance(value, list) and value and isinstance(value[0], dict):
-            # Normalize list of dictionaries
-            normalized[key] = [
-                (
-                    _normalize_soap_dict_for_comparison(item, is_root_level=False)
-                    if isinstance(item, dict)
-                    else item
-                )
-                for item in value
-            ]
-
-    return normalized
-
-
 def diff_soap_dicts(
     sgg_dict: dict, gg_dict: dict, key_indexes: dict | None = None, keys_only: bool = False
 ) -> dict:
@@ -183,26 +138,22 @@ def diff_soap_dicts(
     # the dicts with the specified matching key name.
     key_indexes = key_indexes if key_indexes else {}
 
-    # Normalize dicts before comparison to handle empty responses and namespace attributes
-    normalized_sgg_dict = _normalize_soap_dict_for_comparison(sgg_dict)
-    normalized_gg_dict = _normalize_soap_dict_for_comparison(gg_dict)
-
-    sgg_keys = set(normalized_sgg_dict.keys())
-    gg_keys = set(normalized_gg_dict.keys())
+    sgg_keys = set(sgg_dict.keys())
+    gg_keys = set(gg_dict.keys())
 
     key_diffs = {}
     if keys_only_in_sgg := sgg_keys - gg_keys:
         key_diffs["keys_only_in_sgg"] = {
-            k: _hide_value(normalized_sgg_dict[k], keys_only) for k in keys_only_in_sgg
+            k: _hide_value(sgg_dict[k], keys_only) for k in keys_only_in_sgg
         }
     if keys_only_in_gg := gg_keys - sgg_keys:
         key_diffs["keys_only_in_gg"] = {
-            k: _hide_value(normalized_gg_dict[k], keys_only) for k in keys_only_in_gg
+            k: _hide_value(gg_dict[k], keys_only) for k in keys_only_in_gg
         }
 
     differing = {}
     for k in sgg_keys & gg_keys:
-        sgg_value, gg_value = normalized_sgg_dict[k], normalized_gg_dict[k]
+        sgg_value, gg_value = sgg_dict[k], gg_dict[k]
         if isinstance(sgg_value, dict) and isinstance(gg_value, dict):
             nested_diff = diff_soap_dicts(sgg_value, gg_value, key_indexes, keys_only)
             if nested_diff:
