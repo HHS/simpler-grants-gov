@@ -2,13 +2,13 @@ import csv
 
 import pytest
 
-from src.db.models.lookup_models import LkOpportunityCategory, LkOpportunityStatus
 import src.util.file_util as file_util
+from src.db.models.lookup_models import LkOpportunityCategory, LkOpportunityStatus
 from src.db.models.user_models import User
 from src.task.analytics.create_analytics_db_csvs import (
+    TABLES_TO_EXTRACT,
     CreateAnalyticsDbCsvsConfig,
     CreateAnalyticsDbCsvsTask,
-    TABLES_TO_EXTRACT,
 )
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
