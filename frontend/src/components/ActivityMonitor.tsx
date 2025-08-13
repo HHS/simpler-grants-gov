@@ -12,12 +12,9 @@ export function ActivityMonitor() {
   const handlerRef = useRef<EventListener>(null);
 
   const refreshTokenIfExpiringOrLogout = useCallback(() => {
-    console.log("~~~ doing it");
     refreshIfExpired()
       .then((expired) => {
-        console.log("~~~ maybe logged out", expired);
         if (expired) {
-          console.log("~~~ logging out local user");
           logoutLocalUser();
           return;
         }
@@ -29,40 +26,40 @@ export function ActivityMonitor() {
   }, [refreshIfExpired, refreshIfExpiring, logoutLocalUser]);
 
   const addHandlers = useCallback(() => {
-    console.log("~~~ maybe add handlers");
     if (!listening) {
       document.addEventListener("click", refreshTokenIfExpiringOrLogout);
       document.addEventListener("keydown", refreshTokenIfExpiringOrLogout);
-      // setHandler(refreshTokenIfExpiringOrLogout);
-      console.log("~~~ YES add handlers", !!refreshTokenIfExpiringOrLogout);
       setListening(true);
     }
   }, [refreshTokenIfExpiringOrLogout, listening]);
 
   const removeHandlers = useCallback(() => {
-    console.log("~~~ REMOVING it???", listening, handlerRef.current);
     if (!listening) {
-      console.log("~~~ not REMOVING it");
       return;
     }
-    document.removeEventListener("click", handlerRef.current);
-    document.removeEventListener("keydown", handlerRef.current);
+    document.removeEventListener("click", handlerRef.current as EventListener);
+    document.removeEventListener(
+      "keydown",
+      handlerRef.current as EventListener,
+    );
     setListening(false);
     handlerRef.current = null;
   }, [listening]);
 
+  // when logged in status changes, remove or add handlers
   useEffect(() => {
     if (!user || !user.token) {
-      console.log("~~~ try REMOVING it");
       removeHandlers();
       return;
     }
     addHandlers();
   }, [user, addHandlers, removeHandlers]);
 
+  // whenever we are not listening for activity, and the handler function has been updated
+  // update the ref, so that we have the right reference ready when we want to remove the handlers later
+  // note that if we try to do this in addHandlers it somehow doesn't work right, given all of the dependencies involved
   useEffect(() => {
     if (refreshTokenIfExpiringOrLogout && !listening) {
-      console.log("~~~ refreshing refresh function", listening);
       handlerRef.current = refreshTokenIfExpiringOrLogout;
     }
   }, [refreshTokenIfExpiringOrLogout, listening]);
