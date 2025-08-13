@@ -80,21 +80,21 @@ def test_extract_copy_opportunity_data(
             conn.execute(
                 text("SELECT COUNT(*) FROM opportunity ;"),
             ).fetchone()[0]
-            == 144
+            == 146
         )
 
         assert (
             conn.execute(
                 text("SELECT COUNT(*) FROM opportunity_summary ;"),
             ).fetchone()[0]
-            == 139
+            == 141
         )
 
         assert (
             conn.execute(
                 text("SELECT COUNT(*) FROM current_opportunity_summary ;"),
             ).fetchone()[0]
-            == 139
+            == 141
         )
 
         assert (

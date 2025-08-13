@@ -17,16 +17,16 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
-TABLES_TO_EXTRACT = [
-    "opportunity",
-    "opportunity_summary",
-    "current_opportunity_summary",
-    "lk_opportunity_category",
-    "lk_opportunity_status",
-    "user_saved_search",
-    "user_saved_opportunity",
-    "user",
-]
+TABLES_TO_EXTRACT = {
+    "opportunity": ["*"],
+    "opportunity_summary": ["*"],
+    "current_opportunity_summary": ["*"],
+    "lk_opportunity_category": ["*"],
+    "lk_opportunity_status": ["*"],
+    "user_saved_search": ["*"],
+    "user_saved_opportunity": ["*"],
+    "user": ["user_id", "created_at", "updated_at"],
+}
 
 
 @task_blueprint.cli.command(
@@ -68,7 +68,7 @@ class CreateAnalyticsDbCsvsTask(Task):
         super().__init__(db_session)
 
         if tables_to_extract is None or len(tables_to_extract) == 0:
-            tables_to_extract = TABLES_TO_EXTRACT
+            tables_to_extract = list(TABLES_TO_EXTRACT.keys())
 
         # We only want to process tables that were configured
         self.tables: list[sqlalchemy.Table] = [
@@ -97,11 +97,12 @@ class CreateAnalyticsDbCsvsTask(Task):
         cursor = self.db_session.connection().connection.cursor()
         schema = table.schema if self.config.db_schema is None else self.config.db_schema
 
-        # Use explicit column ordering for user table to ensure column safety
-        if table.name == "user":
-            copy_query = f"COPY (SELECT user_id, created_at, updated_at FROM {schema}.{table.name} ORDER BY created_at) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"  # nosec B608
-        else:
-            copy_query = f"COPY {schema}.{table.name} TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
+        # Get column configuration for this table
+        columns = TABLES_TO_EXTRACT.get(table.name, ["*"])
+        columns_str = ", ".join(columns)
+
+        # Build the appropriate COPY query based on column configuration
+        copy_query = f"COPY (SELECT {columns_str} FROM {schema}.{table.name}) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"  # nosec B608
 
         with cursor.copy(copy_query) as cursor_copy:
             with file_util.open_stream(output_path, "wb") as outfile:
