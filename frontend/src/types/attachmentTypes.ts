@@ -42,3 +42,8 @@ export interface FormsWithMissingAttachments {
   formId: string;
   missingAttachmentFields: string[];
 }
+
+export interface MissingAttachmentsProps {
+  formsWithDeletedAttachments: FormsWithMissingAttachments | undefined;
+  showMissingFields?: boolean;
+}

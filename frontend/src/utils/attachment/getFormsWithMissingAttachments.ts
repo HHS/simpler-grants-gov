@@ -1,11 +1,20 @@
+import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
-import { Attachment, FormsWithMissingAttachments } from "src/types/attachmentTypes";
-import { JSONSchema7, JSONSchema7Definition } from "json-schema";
+import {
+  Attachment,
+  FormsWithMissingAttachments,
+} from "src/types/attachmentTypes";
 
 // type guard to check if a JSONSchema7Definition is an object schema (not boolean)
-const isSchemaObject = (definition: JSONSchema7Definition): definition is JSONSchema7 => {
-  return typeof definition === "object" && definition !== null && !Array.isArray(definition);
+const isSchemaObject = (
+  definition: JSONSchema7Definition,
+): definition is JSONSchema7 => {
+  return (
+    typeof definition === "object" &&
+    definition !== null &&
+    !Array.isArray(definition)
+  );
 };
 
 const ATTACHMENT_REF = "#/$defs/attachment_field";
@@ -21,7 +30,11 @@ const checkForAttachment = (property: JSONSchema7Definition): boolean => {
 
   // Check allOf array
   if (Array.isArray(property.allOf)) {
-    if (property.allOf.some((item) => isSchemaObject(item) && item.$ref === ATTACHMENT_REF)) {
+    if (
+      property.allOf.some(
+        (item) => isSchemaObject(item) && item.$ref === ATTACHMENT_REF,
+      )
+    ) {
       return true;
     }
     // Recursively check nested allOf items
@@ -69,7 +82,7 @@ export const getFormsWithMissingAttachments = async (
     });
 
     // skip forms with no attachment fields
-    if (fieldsRequiringAttachment.length === 0) continue; 
+    if (fieldsRequiringAttachment.length === 0) continue;
 
     try {
       const response = await getApplicationFormDetails(
@@ -91,10 +104,12 @@ export const getFormsWithMissingAttachments = async (
 
         const valuesArray = Array.isArray(value) ? value : [value];
 
-        const hasMissing = valuesArray.some((attachmentId) =>
-          !applicationAttachments.some(
-            (attachment) => attachment.application_attachment_id === attachmentId,
-          ),
+        const hasMissing = valuesArray.some(
+          (attachmentId) =>
+            !applicationAttachments.some(
+              (attachment) =>
+                attachment.application_attachment_id === attachmentId,
+            ),
         );
 
         if (hasMissing) {
@@ -109,7 +124,10 @@ export const getFormsWithMissingAttachments = async (
         });
       }
     } catch (error) {
-      console.error(`Failed to fetch form details for formId: ${form.application_form_id}`, error);
+      console.error(
+        `Failed to fetch form details for formId: ${form.application_form_id}`,
+        error,
+      );
     }
   }
 

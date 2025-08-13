@@ -308,7 +308,8 @@ export const messages = {
       attachment: "Attachment",
       attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
-      deletedOrMissingAttachments: "The attachment(s) for these fields were deleted:",
+      deletedOrMissingAttachments:
+        "The attachment(s) for these fields were deleted:",
       deletedOrMissingAttachmentsGeneric: "An attachment was deleted.",
       conditionalFormsDescription:
         "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
@@ -322,7 +323,7 @@ export const messages = {
         not_started: "Not started",
         in_progress: "Some issues found. Check your entries.",
         complete: "No issues detected.",
-        attachmentDeleted: "An attachment was deleted"
+        attachmentDeleted: "An attachment was deleted",
       },
       updated: "Last updated",
       updatedBy: "Last updated by",

@@ -1,7 +1,11 @@
-import { useState, useEffect } from "react";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
-import { Attachment, FormsWithMissingAttachments } from "src/types/attachmentTypes";
+import {
+  Attachment,
+  FormsWithMissingAttachments,
+} from "src/types/attachmentTypes";
 import { getFormsWithMissingAttachments } from "src/utils/attachment/getFormsWithMissingAttachments";
+
+import { useEffect, useState } from "react";
 
 export function useMissingAttachments(
   token: string | null,
@@ -9,7 +13,9 @@ export function useMissingAttachments(
   applicationId: string,
   applicationAttachments: Attachment[],
 ) {
-  const [missingAttachments, setMissingAttachments] = useState<FormsWithMissingAttachments[]>([]);
+  const [missingAttachments, setMissingAttachments] = useState<
+    FormsWithMissingAttachments[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -22,7 +28,12 @@ export function useMissingAttachments(
     setLoading(true);
     setError(null);
 
-    getFormsWithMissingAttachments(token, applicationForms, applicationId, applicationAttachments)
+    getFormsWithMissingAttachments(
+      token,
+      applicationForms,
+      applicationId,
+      applicationAttachments,
+    )
       .then(setMissingAttachments)
       .catch(setError)
       .finally(() => setLoading(false));

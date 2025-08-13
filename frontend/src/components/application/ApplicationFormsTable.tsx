@@ -1,4 +1,8 @@
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
+import {
+  FormsWithMissingAttachments,
+  MissingAttachmentsProps,
+} from "src/types/attachmentTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -6,7 +10,6 @@ import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { FormsWithMissingAttachments } from "src/types/attachmentTypes";
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,
@@ -44,7 +47,7 @@ export const ApplicationFormsTable = ({
   applicationForms,
   applicationId,
   forms,
-  formsWithDeletedAttachments
+  formsWithDeletedAttachments,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
@@ -89,7 +92,6 @@ export const ApplicationFormsTable = ({
   );
 };
 
-
 const selectApplicationFormById = ({
   forms,
   formId,
@@ -104,7 +106,7 @@ const ApplicationTable = ({
   applicationForms,
   applicationId,
   forms,
-  formsWithDeletedAttachments
+  formsWithDeletedAttachments,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
@@ -134,7 +136,7 @@ const ApplicationTable = ({
       <tbody>
         {applicationForms.map((form, index) => {
           const missingAttachmentsInfo = formsWithDeletedAttachments.find(
-            (item) => item.formId === form.application_form_id
+            (item) => item.formId === form.application_form_id,
           );
 
           return (
@@ -176,7 +178,6 @@ const ApplicationTable = ({
   );
 };
 
-
 const CompetitionStatus = ({
   formId,
   applicationForms,
@@ -190,14 +191,20 @@ const CompetitionStatus = ({
   if (applicationForm?.application_form_status === "in_progress") {
     return (
       <div className="display-flex flex-align-center">
-        <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />
+        <USWDSIcon
+          name="error_outline"
+          className="margin-right-2px usa-icon--size-3 icon-active"
+        />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
       <div className="display-flex flex-align-center">
-        <USWDSIcon name="check_circle_outline" className="text-primary margin-right-2px usa-icon--size-3 icon-active" />
+        <USWDSIcon
+          name="check_circle_outline"
+          className="text-primary margin-right-2px usa-icon--size-3 icon-active"
+        />
         {t("complete")}
       </div>
     );
@@ -206,39 +213,57 @@ const CompetitionStatus = ({
   }
 };
 
-interface MissingAttachments {
-  formsWithDeletedAttachments: FormsWithMissingAttachments | undefined
-  showMissingFields?: boolean;
-}
-
-const MissingAttachments = ({ formsWithDeletedAttachments, showMissingFields = false }: MissingAttachments) => {
+const MissingAttachments = ({
+  formsWithDeletedAttachments,
+  showMissingFields = false,
+}: MissingAttachmentsProps) => {
   const t = useTranslations("Application.competitionFormTable");
 
-  if(formsWithDeletedAttachments && formsWithDeletedAttachments.missingAttachmentFields.length > 0) {
-    if(showMissingFields){
-      return (<>
-        <p className="display-flex flex-align-top">
-          <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />{t("deletedOrMissingAttachments")}
-        </p>
-        {
-          <ul>
-            {formsWithDeletedAttachments.missingAttachmentFields.map((fieldName, index) => (<li className="display-flex" key={`missing-attachment--${fieldName}-${index}`}>{fieldName}</li>))}
-          </ul>
-        }
-      </>)
+  if (
+    formsWithDeletedAttachments &&
+    formsWithDeletedAttachments.missingAttachmentFields.length > 0
+  ) {
+    if (showMissingFields) {
+      return (
+        <>
+          <p className="display-flex flex-align-top">
+            <USWDSIcon
+              name="error_outline"
+              className="margin-right-2px usa-icon--size-3 icon-active"
+            />
+            {t("deletedOrMissingAttachments")}
+          </p>
+          {
+            <ul>
+              {formsWithDeletedAttachments.missingAttachmentFields.map(
+                (fieldName, index) => (
+                  <li
+                    className="display-flex"
+                    key={`missing-attachment--${fieldName}-${index}`}
+                  >
+                    {fieldName}
+                  </li>
+                ),
+              )}
+            </ul>
+          }
+        </>
+      );
     } else {
       return (
         <p className="display-flex flex-align-top">
-          <USWDSIcon name="error_outline" className="margin-right-2px usa-icon--size-3 icon-active" />
+          <USWDSIcon
+            name="error_outline"
+            className="margin-right-2px usa-icon--size-3 icon-active"
+          />
           {t("deletedOrMissingAttachmentsGeneric")}
         </p>
-      )
+      );
     }
   }
 
-  return null
-}
-
+  return null;
+};
 
 const InstructionsLink = ({
   formId,

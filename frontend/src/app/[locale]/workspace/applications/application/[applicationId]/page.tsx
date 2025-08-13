@@ -8,6 +8,7 @@ import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFe
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { getFormsWithMissingAttachments } from "src/utils/attachment/getFormsWithMissingAttachments";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -15,7 +16,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
-import { getFormsWithMissingAttachments } from "src/utils/attachment/getFormsWithMissingAttachments";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +74,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       userSession.token,
       details.application_forms,
       applicationId,
-      attachments
+      attachments,
     );
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
