@@ -37,7 +37,7 @@ class SESV2Client(BaseSESV2Client):
         self.client = get_boto_sesv2_client()
 
     def list_suppressed_destinations(self, start_time: datetime | None = None) -> SESV2Response:
-        request_params = {}
+        request_params: dict[str, datetime | str] = {}
         if start_time:
             request_params["StartDate"] = start_time
 
@@ -53,7 +53,7 @@ class SESV2Client(BaseSESV2Client):
                 response_object = SESV2Response.model_validate(response)
                 all_summaries.extend(response_object.suppressed_destination_summaries)
 
-                next_token = response.get("NextToken")
+                next_token = response_object.next_token
                 if not next_token:
                     break
 
