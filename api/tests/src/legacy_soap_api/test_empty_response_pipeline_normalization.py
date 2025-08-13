@@ -1,7 +1,7 @@
 """
 Test cases for empty response pipeline normalization for issue #5858.
 
-This module tests freddieyebra's assertion that both S2S and Simpler responses
+This module tests the assertion that both S2S and Simpler responses
 are properly normalized through the existing pipeline (Pydantic validation) and
 do not require additional comparison-level normalization.
 
@@ -71,8 +71,8 @@ class TestPipelineNormalization:
         }
         assert envelope == expected
 
-    def test_freddieyebra_assertion_both_pipelines_identical(self):
-        """Test freddieyebra's assertion that both pipelines produce identical results"""
+    def test_both_pipelines_produce_identical_results(self):
+        """Test that both pipelines produce identical results for empty responses"""
         # Grants.gov pipeline
         grants_gov_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -90,12 +90,12 @@ class TestPipelineNormalization:
         simpler_response = GetOpportunityListResponse()
         simpler_envelope = simpler_response.to_soap_envelope_dict("GetOpportunityListResponse")
 
-        # freddieyebra's assertion: they should be identical
+        # Both pipelines should produce identical results
         assert proxy_envelope == simpler_envelope
 
     def test_different_xml_formats_same_pipeline_result(self):
         """Test that different XML formats for empty responses produce same result"""
-        # Self-closing tag format (as mentioned by freddieyebra)
+        # Self-closing tag format
         xml1 = """<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
