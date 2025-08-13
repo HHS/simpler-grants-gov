@@ -577,6 +577,61 @@ paths:
               $ref: '#/components/schemas/FormUpdateRequest'
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/api-keys:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiKeyCreateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Create a new API key for the authenticated user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserApiKeyCreateRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -3343,6 +3398,65 @@ components:
           type:
           - object
           $ref: '#/components/schemas/FormAlpha'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserApiKeyCreateRequest:
+      type: object
+      properties:
+        key_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Human-readable name for the API key
+          example: Production API Key
+      required:
+      - key_name
+    UserApiKey:
+      type: object
+      properties:
+        api_key_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the API key record
+          example: 123e4567-e89b-12d3-a456-426614174000
+        key_name:
+          type: string
+          description: Human-readable name for the API key
+          example: Production API Key
+        key_id:
+          type: string
+          description: The actual API key identifier to use for authentication
+          example: k8w2Xd9Zq1mN3pR7sT5vY4uI
+        is_active:
+          type: boolean
+          description: Whether the API key is currently active
+          example: true
+        last_used:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when this API key was last used for authentication
+          example: '2024-01-15T10:30:00Z'
+        created_at:
+          type: string
+          format: date-time
+          description: When this API key was created
+          example: '2024-01-01T12:00:00Z'
+    UserApiKeyCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The newly created API key
+          type:
+          - object
+          $ref: '#/components/schemas/UserApiKey'
         status_code:
           type: integer
           description: The HTTP status code
