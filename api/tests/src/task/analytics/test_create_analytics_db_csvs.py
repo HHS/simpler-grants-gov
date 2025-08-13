@@ -198,7 +198,7 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
     def test_lookup_tables_columns(self, db_session, task, enable_factory_create):
         task.run()
 
-        # We don't validate record count since lookup table values are managed elsewhere
+        # We just use the existing record count since lookup table values are managed elsewhere
         count_lk_opportunity_category = db_session.query(LkOpportunityCategory).count()
         count_lk_opportunity_status = db_session.query(LkOpportunityStatus).count()
 
