@@ -12,6 +12,12 @@ export const FieldsetWidget = ({
   children: JSX.Element | undefined;
   description?: string;
 }) => {
+  const descriptionGraphs = description
+    ?.split("\n")
+    .filter(Boolean)
+    .map((paragraph, i) => (
+      <p key={`${label}-section-description-paragraph-${i}`}>{paragraph}</p>
+    ));
   return (
     <Fieldset key={`${fieldName}-row`} id={`form-section-${fieldName}`}>
       <FormGroup key={`${fieldName}-group`} className="simpler-formgroup">
@@ -21,7 +27,7 @@ export const FieldsetWidget = ({
         >
           {label}
         </h4>
-        {description && <p>{description}</p>}
+        {descriptionGraphs}
         {children}
       </FormGroup>
     </Fieldset>
