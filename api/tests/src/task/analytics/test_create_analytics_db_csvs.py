@@ -7,6 +7,7 @@ from src.db.models.user_models import User
 from src.task.analytics.create_analytics_db_csvs import (
     CreateAnalyticsDbCsvsConfig,
     CreateAnalyticsDbCsvsTask,
+    TABLES_TO_EXTRACT,
 )
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
@@ -17,11 +18,21 @@ from tests.src.db.models.factories import (
 )
 
 
-def validate_file(file_path: str, expected_record_count: int) -> dict:
+def validate_file(
+    file_path: str, expected_record_count: int, expected_columns: list[str] = None
+) -> dict:
     with file_util.open_stream(file_path) as csvfile:
-        records = [record for record in csv.DictReader(csvfile)]
+        reader = csv.DictReader(csvfile)
+        records = [record for record in reader]
 
         assert len(records) == expected_record_count
+
+        # Validate columns if expected_columns is provided
+        if expected_columns:
+            actual_columns = list(reader.fieldnames)
+            assert (
+                actual_columns == expected_columns
+            ), f"Expected columns {expected_columns}, but got {actual_columns}"
 
     return records
 
@@ -53,7 +64,11 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         task.run()
 
         # Validate the opportunity file
-        csv_opps = validate_file(task.config.file_path + "/opportunity.csv", len(opportunities))
+        csv_opps = validate_file(
+            task.config.file_path + "/opportunity.csv",
+            len(opportunities),
+            TABLES_TO_EXTRACT["opportunity"],
+        )
         opportunity_ids = set([str(o.opportunity_id) for o in opportunities])
         csv_opportunity_ids = set([record["opportunity_id"] for record in csv_opps])
         assert opportunity_ids == csv_opportunity_ids
@@ -67,6 +82,7 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         csv_current_summaries = validate_file(
             task.config.file_path + "/current_opportunity_summary.csv",
             len(current_opportunity_summaries),
+            TABLES_TO_EXTRACT["current_opportunity_summary"],
         )
         current_summary_ids = set(
             [
@@ -85,7 +101,9 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         # Validate the opportunity summary file
         opportunity_summaries = [o.opportunity_summary for o in current_opportunity_summaries]
         csv_summaries = validate_file(
-            task.config.file_path + "/opportunity_summary.csv", len(opportunity_summaries)
+            task.config.file_path + "/opportunity_summary.csv",
+            len(opportunity_summaries),
+            TABLES_TO_EXTRACT["opportunity_summary"],
         )
         opportunity_summary_ids = set(
             [str(o.opportunity_summary_id) for o in opportunity_summaries]
@@ -108,7 +126,9 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
             )
         task.run()
         csv_saved_opps = validate_file(
-            task.config.file_path + "/user_saved_opportunity.csv", len(user_saved_opps)
+            task.config.file_path + "/user_saved_opportunity.csv",
+            len(user_saved_opps),
+            TABLES_TO_EXTRACT["user_saved_opportunity"],
         )
         saved_opps_ids = set([(str(o.opportunity_id), str(o.user_id)) for o in user_saved_opps])
         csv_saved_opps_ids = set(
@@ -136,7 +156,9 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         task.run()
 
         csv_saved_searches = validate_file(
-            task.config.file_path + "/user_saved_search.csv", len(user_saved_searches)
+            task.config.file_path + "/user_saved_search.csv",
+            len(user_saved_searches),
+            TABLES_TO_EXTRACT["user_saved_search"],
         )
         saved_search_ids = {
             (",".join(map(str, sorted(o.searched_opportunity_ids))), str(o.user_id))
@@ -165,7 +187,9 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
 
         task.run()
 
-        csv_users = validate_file(task.config.file_path + "/user.csv", len(users))
+        csv_users = validate_file(
+            task.config.file_path + "/user.csv", len(users), TABLES_TO_EXTRACT["user"]
+        )
         user_ids = set([str(u.user_id) for u in users])
         csv_user_ids = set([record["user_id"] for record in csv_users])
         assert user_ids == csv_user_ids
