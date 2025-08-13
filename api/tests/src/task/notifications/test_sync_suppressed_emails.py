@@ -16,15 +16,17 @@ def clear_data(db_session):
 
 
 @pytest.fixture
-def sync_suppressed_emails(db_session):
-    client = MockSESV2Client()
+def client():
+    return MockSESV2Client()
+
+
+@pytest.fixture
+def task(db_session, client):
     task = SyncSuppressedEmailsTask(db_session, client)
-    return task, client
+    return task
 
 
-def test_sync_suppressed_emails_update(sync_suppressed_emails, db_session, enable_factory_create):
-    task, client = sync_suppressed_emails
-
+def test_sync_suppressed_emails_update(task, client, db_session, enable_factory_create):
     supp_1 = factories.SuppressedEmailFactory.create()
     factories.LinkExternalUserFactory.create(email=supp_1.email)
 
@@ -44,8 +46,7 @@ def test_sync_suppressed_emails_update(sync_suppressed_emails, db_session, enabl
     assert result[0].last_update_time == supp_1.last_update_time
 
 
-def test_sync_suppressed_emails_create(sync_suppressed_emails, db_session, enable_factory_create):
-    task, client = sync_suppressed_emails
+def test_sync_suppressed_emails_create(task, client, db_session, enable_factory_create):
     user = factories.LinkExternalUserFactory.create()
 
     client.add_mock_responses(
@@ -63,17 +64,14 @@ def test_sync_suppressed_emails_create(sync_suppressed_emails, db_session, enabl
     assert result[0].email == user.email
 
 
-def test_sync_suppressed_no_suppressed_email(sync_suppressed_emails, db_session):
-    task, _ = sync_suppressed_emails
-
+def test_sync_suppressed_no_suppressed_email(task, db_session):
     task.run()
 
     result = db_session.query(SuppressedEmail).all()
     assert len(result) == 0
 
 
-def test_sync_suppressed_emails_none_existent_user(sync_suppressed_emails, db_session):
-    task, client = sync_suppressed_emails
+def test_sync_suppressed_emails_none_existent_user(task, client, db_session):
 
     client.add_mock_responses(
         SuppressedDestination(

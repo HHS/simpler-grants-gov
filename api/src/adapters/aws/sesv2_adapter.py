@@ -4,6 +4,7 @@ from datetime import datetime
 
 import boto3
 import botocore.client
+from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
 
 from src.adapters.aws import get_boto_session
@@ -26,7 +27,7 @@ class SESV2Response(BaseModel):
 
 class BaseSESV2Client(ABC, metaclass=ABCMeta):
     @abstractmethod
-    def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
+    def list_suppressed_destinations(self, start_time: datetime | None = None) -> SESV2Response:
         pass
 
 
@@ -34,13 +35,16 @@ class SESV2Client(BaseSESV2Client):
     def __init__(self) -> None:
         self.client = get_boto_sesv2_client()
 
-    def list_suppressed_destinations(self, start_date: datetime | None = None) -> SESV2Response:
+    def list_suppressed_destinations(self, start_time: datetime | None = None) -> SESV2Response:
         request_params = {}
-        if start_date:
-            request_params["StartDate"] = start_date
-
-        response = self.client.list_suppressed_destinations(**request_params)
-        response_object = SESV2Response.model_validate(response["SuppressedDestinationSummaries"])
+        if start_time:
+            request_params["StartDate"] = start_time
+        try:
+            response = self.client.list_suppressed_destinations(**request_params)
+            response_object = SESV2Response.model_validate(response)
+        except ClientError:
+            logger.exception("Error calling list_suppressed_destinations")
+            raise
 
         return response_object
 
@@ -55,12 +59,12 @@ class MockSESV2Client(BaseSESV2Client):
 
     def list_suppressed_destinations(
         self,
-        start_date: datetime | None = None,
+        start_time: datetime | None = None,
     ) -> SESV2Response:
         """Return suppressed destination filtered by date range."""
         results = self.mock_responses
-        if start_date:
-            results = [r for r in results if r.last_update_time >= start_date]
+        if start_time:
+            results = [r for r in results if r.last_update_time >= start_time]
 
         return SESV2Response(
             SuppressedDestinationSummaries=[r.model_dump(by_alias=True) for r in results]
@@ -69,6 +73,7 @@ class MockSESV2Client(BaseSESV2Client):
 
 class SesConfig(PydanticBaseEnvConfig):
     use_mock_ses_client: bool = False
+
 
 def get_sesv2_client() -> BaseSESV2Client:
     config = SesConfig()
