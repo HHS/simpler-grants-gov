@@ -5,10 +5,14 @@ from sqlalchemy import select
 from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client, get_sesv2_client
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
+from src.task.notifications import constants
+from src.task.notifications.constants import Metrics
 from src.task.task import Task
 
 
 class SyncSuppressedEmailsTask(Task):
+    Metrics = constants.Metrics  # type: ignore[assignment]
+
     def __init__(self, db_session: db.Session, sesv2_client: BaseSESV2Client | None = None) -> None:
         super().__init__(db_session)
 
@@ -61,6 +65,7 @@ class SyncSuppressedEmailsTask(Task):
 
             suppressed_email_record = suppression_map.get(email)
             if not suppressed_email_record:
+                self.increment(Metrics.SUPPRESSED_DESTINATION_COUNT)
                 suppressed_email_record = SuppressedEmail(email=email)
 
             suppressed_email_record.reason = destination.reason

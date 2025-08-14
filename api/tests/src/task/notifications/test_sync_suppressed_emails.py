@@ -4,6 +4,7 @@ import pytest
 
 from src.adapters.aws.sesv2_adapter import MockSESV2Client, SuppressedDestination
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
+from src.task.notifications.constants import Metrics
 from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmailsTask
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models import factories
@@ -62,6 +63,9 @@ def test_sync_suppressed_emails_create(task, client, db_session, enable_factory_
     result = db_session.query(SuppressedEmail).all()
     assert len(result) == 1
     assert result[0].email == user.email
+
+    metrics = task.metrics
+    assert metrics[Metrics.SUPPRESSED_DESTINATION_COUNT] == 1
 
 
 def test_sync_suppressed_no_suppressed_email(task, db_session):
