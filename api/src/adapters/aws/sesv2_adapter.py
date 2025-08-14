@@ -45,7 +45,10 @@ class SESV2Client(BaseSESV2Client):
         next_token = None
 
         try:
+            iterations = 0
             while True:
+                iterations += 1
+
                 if next_token:
                     request_params["NextToken"] = next_token
 
@@ -55,6 +58,11 @@ class SESV2Client(BaseSESV2Client):
 
                 next_token = response_object.next_token
                 if not next_token:
+                    break
+                if iterations > 100:
+                    logger.error(
+                        "Stopping iteration of response from list suppression API after 100 iterations"
+                    )
                     break
 
         except ClientError:
@@ -67,7 +75,6 @@ class SESV2Client(BaseSESV2Client):
 class MockSESV2Client(BaseSESV2Client):
     def __init__(self, page_size: int = 1) -> None:
         self.mock_responses: list[SuppressedDestination] = []
-        self.page_size = page_size  # Number of suppressed destinations per page
 
     def add_mock_responses(self, response: SuppressedDestination) -> None:
         """Seed mock responses list with test data."""
@@ -78,21 +85,13 @@ class MockSESV2Client(BaseSESV2Client):
         start_time: datetime | None = None,
         next_token: str | None = None,
     ) -> SESV2Response:
-        """Return suppressed destination with optional time filter and pagination"""
+        """Return suppressed destination with optional time filter."""
         results = self.mock_responses
         if start_time:
             results = [r for r in results if r.last_update_time >= start_time]
-        # Where the page begins in the list
-        start_index = int(next_token) if next_token else 0
-        # Where the page ends in the list
-        end_index = start_index + self.page_size
-        # Subset of suppressed destinations
-        page = results[start_index:end_index]
-        # Offset for the next page
-        next_token = str(end_index) if end_index < len(results) else None
 
         return SESV2Response(
-            SuppressedDestinationSummaries=page, **({"NextToken": next_token} if next_token else {})
+            SuppressedDestinationSummaries=[r.model_dump(by_alias=True) for r in results]
         )
 
 
