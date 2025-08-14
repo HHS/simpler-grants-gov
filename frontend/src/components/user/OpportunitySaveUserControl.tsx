@@ -111,6 +111,7 @@ export const OpportunitySaveUserControl = ({
         ) : (
           <>
             <ModalToggleButton
+              id={`save-search-result-${opportunityId}`}
               modalRef={modalRef}
               opener
               className="usa-button--unstyled"
@@ -124,7 +125,7 @@ export const OpportunitySaveUserControl = ({
               closeText={t("saveloginModal.close")}
               descriptionText={t("saveloginModal.description")}
               titleText={t("saveloginModal.title")}
-              modalId="opp-save-login-modal"
+              modalId={`opp-save-login-modal-${opportunityId}`}
             />
           </>
         )}
@@ -165,7 +166,7 @@ export const OpportunitySaveUserControl = ({
             closeText={t("saveloginModal.close")}
             descriptionText={t("saveloginModal.description")}
             titleText={t("saveloginModal.title")}
-            modalId="opp-save-login-modal"
+            modalId={`opp-save-login-modal-${opportunityId}`}
           />
         </>
       )}

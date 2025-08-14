@@ -33,19 +33,39 @@ export function LoginButton({
   navLoginLinkText: string;
 }) {
   return (
-    <LoginLink className="padding-0 text-no-underline text-primary-dark display-flex">
-      <Button
-        type="button"
-        className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-        data-testid="sign-in-button"
-      >
-        <USWDSIcon
-          className="usa-icon margin-right-05 margin-left-neg-05"
-          name="login"
-          key="login-link-icon"
-        />
-        {navLoginLinkText}
-      </Button>
+    <LoginLink
+      className="padding-0 text-no-underline text-primary-dark display-flex usa-nav__link font-sans-2xs display-flex text-normal border-0 desktop:line-height-1 desktop:padding-2 text-align-left margin-0 position-relative width-full"
+      data-testid="sign-in-button"
+    >
+      <USWDSIcon
+        className="usa-icon margin-right-05 margin-left-neg-05"
+        name="login"
+        key="login-link-icon"
+      />
+      {navLoginLinkText}
     </LoginLink>
   );
 }
+
+// export function LoginButton({
+//   navLoginLinkText,
+// }: {
+//   navLoginLinkText: string;
+// }) {
+//   return (
+//     <LoginLink className="padding-0 text-no-underline text-primary-dark display-flex">
+//       <Button
+//         type="button"
+//         className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
+//         data-testid="sign-in-button"
+//       >
+//         <USWDSIcon
+//           className="usa-icon margin-right-05 margin-left-neg-05"
+//           name="login"
+//           key="login-link-icon"
+//         />
+//         {navLoginLinkText}
+//       </Button>
+//     </LoginLink>
+//   );
+// }

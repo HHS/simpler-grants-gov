@@ -10,9 +10,14 @@ import { Select } from "@trussworks/react-uswds";
 interface SearchSortByProps {
   queryTerm: string | null | undefined;
   sortby: string | null;
+  drawer?: boolean;
 }
 
-export default function SearchSortBy({ queryTerm, sortby }: SearchSortByProps) {
+export default function SearchSortBy({
+  queryTerm,
+  sortby,
+  drawer,
+}: SearchSortByProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
 
@@ -54,16 +59,16 @@ export default function SearchSortBy({ queryTerm, sortby }: SearchSortByProps) {
   );
 
   return (
-    <div id="search-sort-by">
+    <div id={`search-sort-by-${drawer ? "drawer" : ""}`}>
       <label
-        htmlFor="search-sort-by-select"
+        htmlFor={`search-sort-by-select-${drawer ? "drawer" : ""}`}
         className="usa-label tablet:display-inline-block tablet:margin-right-2"
       >
         {t("sortBy.label")}
       </label>
 
       <Select
-        id="search-sort-by-select"
+        id={`search-sort-by-select-${drawer ? "drawer" : ""}`}
         name="search-sort-by"
         onChange={handleChange}
         value={sortby || ""}
