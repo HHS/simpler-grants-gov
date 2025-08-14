@@ -2,7 +2,7 @@ import logging
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import exists, select, update
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -12,7 +12,7 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import UserSavedSearch
+from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
@@ -48,7 +48,10 @@ class SearchNotificationTask(BaseNotificationTask):
             select(UserSavedSearch)
             .options(selectinload(UserSavedSearch.user))
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
-            .where(UserSavedSearch.is_deleted.isnot(True))
+            .where(
+                UserSavedSearch.is_deleted.isnot(True),
+                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+            )
         )
 
         saved_searches = self.db_session.execute(stmt).scalars().all()

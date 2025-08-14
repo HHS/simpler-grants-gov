@@ -139,7 +139,7 @@ const ApplicationTable = ({
     );
 
   return (
-    <Table className="width-full overflow-wrap">
+    <Table className="width-full overflow-wrap simpler-application-forms-table">
       <thead>
         <tr>
           <th scope="col" className="bg-base-lightest padding-y-205">

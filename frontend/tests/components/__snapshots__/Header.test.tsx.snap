@@ -443,7 +443,7 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div
@@ -959,7 +959,7 @@ exports[`Header About renders Community submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div
@@ -1476,7 +1476,7 @@ exports[`Header renders Header navbar menu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div
