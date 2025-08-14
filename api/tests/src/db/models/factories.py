@@ -2658,3 +2658,12 @@ class SuppressedEmailFactory(BaseFactory):
     last_update_time = factory.Faker(
         "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
     )
+
+
+class ExcludedOpportunityReview(BaseFactory):
+    class Meta:
+        model = opportunity_models.ExcludedOpportunityReview
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+    omb_review_status_display = factory.Faker("random_element", elemnts=["RETURNED", "REVIEWABLE"])
