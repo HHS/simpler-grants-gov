@@ -7,10 +7,12 @@ import tests.src.db.models.factories as factories
 from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
+    SuppressedEmail,
     UserNotificationLog,
     UserOpportunityNotificationLog,
     UserSavedSearch,
 )
+from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
@@ -39,6 +41,7 @@ class TestClosingDateNotification:
         cascade_delete_from_db_table(db_session, UserOpportunityNotificationLog)
         cascade_delete_from_db_table(db_session, Opportunity)
         cascade_delete_from_db_table(db_session, UserSavedSearch)
+        cascade_delete_from_db_table(db_session, SuppressedEmail)
 
     def test_closing_date_notifications(
         self, db_session, enable_factory_create, user_with_email, search_client, configuration
@@ -244,3 +247,28 @@ class TestClosingDateNotification:
         assert len(opp_notification_logs) == 1
         assert opp_notification_logs[0].user_id == user.user_id
         assert opp_notification_logs[0].opportunity_id == opportunity.opportunity_id
+
+    def test_excludes_emails_in_suppression_list(
+        self, db_session, search_client, enable_factory_create, user_with_email, configuration
+    ):
+        """Test that the user notification does not pick up users on suppression_list"""
+        # create a suppressed email
+        factories.SuppressedEmailFactory(email=user_with_email.email)
+
+        two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
+
+        # Create an opportunity closing in two weeks
+        opportunity = factories.OpportunityFactory.create(no_current_summary=True)
+        summary = factories.OpportunitySummaryFactory.create(
+            opportunity=opportunity, close_date=two_weeks_from_now
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=opportunity, opportunity_summary=summary
+        )
+        factories.UserSavedOpportunityFactory.create(user=user_with_email, opportunity=opportunity)
+
+        task = ClosingDateNotificationTask(db_session, self.notification_config)
+        results = task.collect_email_notifications()
+
+        # Verify opportunity is not picked up
+        assert len(results) == 0
