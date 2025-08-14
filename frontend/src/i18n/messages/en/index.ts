@@ -318,7 +318,7 @@ export const messages = {
       status: "Status",
       statuses: {
         not_started: "Not started.",
-        in_progress: "Some required fields are incomplete.",
+        in_progress: "Some issues found. Check your entries.",
         complete: "No issues detected.",
         attachmentDeleted: "An attachment was deleted.",
       },
