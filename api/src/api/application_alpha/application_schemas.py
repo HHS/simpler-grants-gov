@@ -10,13 +10,38 @@ from src.constants.lookup_constants import ApplicationFormStatus, ApplicationSta
 
 
 class ApplicationStartRequestSchema(Schema):
-    competition_id = fields.UUID(required=True)
-    application_name = fields.String(required=False, allow_none=True)
-    organization_id = fields.UUID(required=False, allow_none=True)
+    competition_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "The unique identifier of the competition to create an application for",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+        }
+    )
+    application_name = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Optional name for the application",
+            "example": "My Research Grant Application"
+        }
+    )
+    organization_id = fields.UUID(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Optional organization ID to associate with the application",
+            "example": "456e7890-e12c-34f5-b678-901234567890"
+        }
+    )
 
 
 class ApplicationStartResponseDataSchema(Schema):
-    application_id = fields.UUID()
+    application_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the newly created application",
+            "example": "789f0123-f45g-67h8-i901-234567890123"
+        }
+    )
 
 
 class ApplicationStartResponseSchema(AbstractResponseSchema):
@@ -24,11 +49,23 @@ class ApplicationStartResponseSchema(AbstractResponseSchema):
 
 
 class ApplicationUpdateRequestSchema(Schema):
-    application_name = fields.String(required=True, allow_none=False)
+    application_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The new name for the application",
+            "example": "Updated Research Grant Application"
+        }
+    )
 
 
 class ApplicationUpdateResponseDataSchema(Schema):
-    application_id = fields.UUID()
+    application_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the updated application",
+            "example": "789f0123-f45g-67h8-i901-234567890123"
+        }
+    )
 
 
 class ApplicationUpdateResponseSchema(AbstractResponseSchema):
@@ -88,11 +125,38 @@ class ApplicationAttachmentNoLinkSchema(Schema):
 
 
 class ApplicationFormGetResponseDataSchema(Schema):
-    application_form_id = fields.UUID()
-    application_id = fields.UUID()
-    form_id = fields.UUID()
-    form = fields.Nested(FormAlphaSchema())
-    application_response = fields.Dict()
+    application_form_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the application form",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+        }
+    )
+    application_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the application this form belongs to",
+            "example": "789f0123-f45g-67h8-i901-234567890123"
+        }
+    )
+    form_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the form template",
+            "example": "456e7890-e12c-34f5-b678-901234567890"
+        }
+    )
+    form = fields.Nested(
+        FormAlphaSchema(),
+        metadata={"description": "The form template information"}
+    )
+    application_response = fields.Dict(
+        metadata={
+            "description": "The user's responses to the form fields",
+            "example": {
+                "project_title": "Advanced AI Research",
+                "budget_amount": 150000,
+                "project_duration": "24 months"
+            }
+        }
+    )
 
     application_form_status = fields.Enum(
         ApplicationFormStatus,
@@ -113,8 +177,18 @@ class ApplicationFormGetResponseDataSchema(Schema):
         metadata={"description": "Whether this form is included in the application submission"},
     )
 
-    application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
-    application_name = fields.String()
+    application_attachments = fields.List(
+        fields.Nested(ApplicationAttachmentNoLinkSchema()),
+        metadata={
+            "description": "List of attachments associated with this application form"
+        }
+    )
+    application_name = fields.String(
+        metadata={
+            "description": "The name of the application",
+            "example": "My Research Grant Application"
+        }
+    )
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -124,24 +198,62 @@ class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSc
 class ApplicationUserSchema(Schema):
     """Schema for users associated with an application"""
 
-    user_id = fields.UUID()
-    email = fields.String()
-    is_application_owner = fields.Boolean()
+    user_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the user",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+        }
+    )
+    email = fields.String(
+        metadata={
+            "description": "The email address of the user",
+            "example": "user@example.com"
+        }
+    )
+    is_application_owner = fields.Boolean(
+        metadata={
+            "description": "Whether this user is the owner/creator of the application"
+        }
+    )
 
 
 class SamGovEntitySchema(Schema):
     """Schema for SAM.gov entity information"""
 
-    uei = fields.String()
-    legal_business_name = fields.String()
-    expiration_date = fields.Date()
+    uei = fields.String(
+        metadata={
+            "description": "Unique Entity Identifier from SAM.gov",
+            "example": "ABCDEFGHIJK1"
+        }
+    )
+    legal_business_name = fields.String(
+        metadata={
+            "description": "Legal business name as registered in SAM.gov",
+            "example": "Example Research Corporation"
+        }
+    )
+    expiration_date = fields.Date(
+        metadata={
+            "description": "The expiration date of the SAM.gov registration",
+            "example": "2025-12-31"
+        }
+    )
 
 
 class OrganizationSchema(Schema):
     """Schema for organization information"""
 
-    organization_id = fields.UUID()
-    sam_gov_entity = fields.Nested(SamGovEntitySchema(), allow_none=True)
+    organization_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the organization",
+            "example": "456e7890-e12c-34f5-b678-901234567890"
+        }
+    )
+    sam_gov_entity = fields.Nested(
+        SamGovEntitySchema(),
+        allow_none=True,
+        metadata={"description": "SAM.gov entity information if organization is registered"}
+    )
 
 
 class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
@@ -149,13 +261,42 @@ class ApplicationFormGetResponseSchema(AbstractResponseSchema, WarningMixinSchem
 
 
 class ApplicationGetResponseDataSchema(Schema):
-    application_id = fields.UUID()
-    competition = fields.Nested(CompetitionAlphaSchema())
-    application_forms = fields.List(fields.Nested(ApplicationFormGetResponseDataSchema()))
-    application_status = fields.Enum(ApplicationStatus)
-    application_name = fields.String()
-    users = fields.List(fields.Nested(ApplicationUserSchema()))
-    organization = fields.Nested(OrganizationSchema(), allow_none=True)
+    application_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the application",
+            "example": "789f0123-f45g-67h8-i901-234567890123"
+        }
+    )
+    competition = fields.Nested(
+        CompetitionAlphaSchema(),
+        metadata={"description": "The competition this application is for"}
+    )
+    application_forms = fields.List(
+        fields.Nested(ApplicationFormGetResponseDataSchema()),
+        metadata={"description": "List of forms that are part of this application"}
+    )
+    application_status = fields.Enum(
+        ApplicationStatus,
+        metadata={
+            "description": "Current status of the application",
+            "example": "draft"
+        }
+    )
+    application_name = fields.String(
+        metadata={
+            "description": "The name of the application",
+            "example": "My Research Grant Application"
+        }
+    )
+    users = fields.List(
+        fields.Nested(ApplicationUserSchema()),
+        metadata={"description": "List of users who have access to this application"}
+    )
+    organization = fields.Nested(
+        OrganizationSchema(),
+        allow_none=True,
+        metadata={"description": "Organization associated with this application, if any"}
+    )
 
     form_validation_warnings = fields.Dict(
         metadata={
@@ -173,7 +314,10 @@ class ApplicationGetResponseDataSchema(Schema):
         }
     )
 
-    application_attachments = fields.List(fields.Nested(ApplicationAttachmentNoLinkSchema()))
+    application_attachments = fields.List(
+        fields.Nested(ApplicationAttachmentNoLinkSchema()),
+        metadata={"description": "List of attachments associated with this application"}
+    )
 
 
 class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
