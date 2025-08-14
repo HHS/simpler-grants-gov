@@ -62,7 +62,7 @@ export async function SearchDrawerFilters({
   return (
     <>
       <div className="display-block tablet:display-none">
-        <SearchSortBy sortby={sortby} queryTerm={query} />
+        <SearchSortBy sortby={sortby} queryTerm={query} drawer={true} />
       </div>
       <CheckboxFilter
         filterOptions={statusOptions}

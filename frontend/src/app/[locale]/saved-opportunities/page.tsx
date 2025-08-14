@@ -36,13 +36,8 @@ const SavedOpportunitiesList = ({
   return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
 };
 
-const NoSavedOpportunities = ({
-  noSavedCTA,
-  searchButtonText,
-}: {
-  noSavedCTA: React.ReactNode;
-  searchButtonText: string;
-}) => {
+const NoSavedOpportunities = async ({ locale }: { locale: string }) => {
+  const t = await getTranslations({ locale });
   return (
     <>
       <USWDSIcon
@@ -50,10 +45,13 @@ const NoSavedOpportunities = ({
         className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
-        <p className="usa-intro ">{noSavedCTA}</p>{" "}
-        <Link href="/search">
-          <Button type="button">{searchButtonText}</Button>
-        </Link>
+        <p>{t("SavedOpportunities.noSavedCTAParagraphOne")}</p>
+        <p>{t("SavedOpportunities.noSavedCTAParagraphTwo")}</p>
+        <p>
+          <Link href="/search" className="usa-button">
+            {t("SavedOpportunities.searchButton")}
+          </Link>
+        </p>
       </div>
     </>
   );
@@ -83,28 +81,12 @@ export default async function SavedOpportunities({
           {t("SavedOpportunities.heading")}
         </h1>
       </GridContainer>
-      <div
-        className={clsx({
-          "bg-base-lightest": resolvedOpportunities.length === 0,
-        })}
-      >
-        <div className="grid-container padding-y-5 display-flex">
-          {resolvedOpportunities.length > 0 ? (
-            <SavedOpportunitiesList opportunities={resolvedOpportunities} />
-          ) : (
-            <NoSavedOpportunities
-              noSavedCTA={t.rich("SavedOpportunities.noSavedCTA", {
-                br: () => (
-                  <>
-                    <br />
-                    <br />
-                  </>
-                ),
-              })}
-              searchButtonText={t("SavedOpportunities.searchButton")}
-            />
-          )}
-        </div>
+      <div className="grid-container padding-y-5 display-flex">
+        {resolvedOpportunities.length > 0 ? (
+          <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+        ) : (
+          <NoSavedOpportunities locale={locale} />
+        )}
       </div>
     </>
   );
