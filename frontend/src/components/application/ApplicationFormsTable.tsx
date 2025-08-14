@@ -170,20 +170,20 @@ const CompetitionStatus = ({
 
   if (applicationForm?.application_form_status === "in_progress") {
     return (
-      <div className="display-flex flex-align-center text-bold icon-active">
+      <div className="display-flex flex-align-center text-italic">
         <USWDSIcon
           name="error_outline"
-          className="margin-right-2px usa-icon--size-3"
+          className="margin-right-1 usa-icon--size-3 icon-active"
         />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
-      <div className="display-flex flex-align-center text-bold">
+      <div className="display-flex flex-align-center text-italic">
         <USWDSIcon
           name="check_circle_outline"
-          className="text-primary margin-right-2px usa-icon--size-3"
+          className="text-primary margin-right-1 usa-icon--size-3 icon-active"
         />
         {t("complete")}
       </div>
