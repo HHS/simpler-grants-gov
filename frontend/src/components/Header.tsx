@@ -69,7 +69,7 @@ const NavLink = ({
 };
 
 const wikiLink = "https://wiki.simpler.grants.gov/";
-const forumLink = "https://simplergrants.discourse.group/";
+const forumLink = "https://forum.simpler.grants.gov/";
 
 const NavLinks = ({
   mobileExpanded,
