@@ -168,6 +168,8 @@ class ProcessSamExtractsTask(Task):
             )
 
             # Mark extract as processed
+            # Have to add to the session as it was fetched in a different transaction
+            self.db_session.add(sam_extract_file)
             sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
 
     def parse_extract_file(
