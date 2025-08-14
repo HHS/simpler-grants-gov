@@ -9,7 +9,7 @@ from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_r
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedSearch
+from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
@@ -53,6 +53,7 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedSearch)
+    cascade_delete_from_db_table(db_session, SuppressedEmail)
 
 
 @pytest.fixture()
@@ -650,4 +651,46 @@ def test_search_notification_deleted_search(
     results = notification_task.collect_email_notifications()
 
     # assert deleted saved search is not picked up
+    assert len(results) == 0
+
+
+def test_search_notification_suppressed_email(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+    search_client,
+    notification_task,
+):
+    """Test that the user notification does not pick up users on suppression_list"""
+    # create a suppressed email
+    factories.SuppressedEmailFactory(email=user_with_email.email)
+
+    opp = factories.OpportunityFactory.create(
+        opportunity_id=OPPORTUNITIES[0].opportunity_id,
+        no_current_summary=True,
+        legacy_opportunity_id=4,
+        opportunity_title="Scholarship Program",
+    )
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opp, post_date=date.fromisoformat("2020-01-01")
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opp,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        search_query={"keywords": "test"},
+        user=user_with_email,
+        searched_opportunity_ids=[OPPORTUNITIES[1].opportunity_id],
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+    )
+
+    results = notification_task.collect_email_notifications()
+
+    # assert saved search is not picked up
     assert len(results) == 0
