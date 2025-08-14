@@ -3121,17 +3121,22 @@ components:
         competition_id:
           type: string
           format: uuid
+          description: The unique identifier of the competition to create an application
+            for
           example: 123e4567-e89b-12d3-a456-426614174000
         application_name:
           type:
           - string
           - 'null'
+          description: Optional name for the application
+          example: My Research Grant Application
         organization_id:
           type:
           - string
           - 'null'
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: Optional organization ID to associate with the application
+          example: 456e7890-e12c-34f5-b678-901234567890
       required:
       - competition_id
     ApplicationStartResponseData:
@@ -3140,7 +3145,8 @@ components:
         application_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the newly created application
+          example: 789f0123-f45g-67h8-i901-234567890123
     ApplicationStartResponse:
       type: object
       properties:
@@ -3469,11 +3475,17 @@ components:
       properties:
         uei:
           type: string
+          description: Unique Entity Identifier from SAM.gov
+          example: ABCDEFGHIJK1
         legal_business_name:
           type: string
+          description: Legal business name as registered in SAM.gov
+          example: Example Research Corporation
         expiration_date:
           type: string
           format: date
+          description: The expiration date of the SAM.gov registration
+          example: '2025-12-31'
     UserOrganization:
       type: object
       properties:
@@ -3630,6 +3642,7 @@ components:
           type: boolean
           description: Whether the form is required for all applications to the competition
         form:
+          description: The form template information for this competition
           type:
           - object
           $ref: '#/components/schemas/FormAlpha'
@@ -3667,6 +3680,8 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
         competition_forms:
           type: array
+          description: List of forms required for this competition
+          example: []
           items:
             type:
             - object
@@ -3699,11 +3714,16 @@ components:
 
             FakeMail@fake.com'
         opportunity_assistance_listing:
+          description: Assistance listing information for this competition
           type:
           - object
           $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         open_to_applicants:
           type: array
+          description: List of applicant types who are eligible for this competition
+          example:
+          - for_profit
+          - nonprofit
           items:
             enum:
             - individual
@@ -3911,21 +3931,31 @@ components:
         application_form_id:
           type: string
           format: uuid
+          description: The unique identifier of the application form
           example: 123e4567-e89b-12d3-a456-426614174000
         application_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the application this form belongs
+            to
+          example: 789f0123-f45g-67h8-i901-234567890123
         form_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the form template
+          example: 456e7890-e12c-34f5-b678-901234567890
         form:
+          description: The form template information
           type:
           - object
           $ref: '#/components/schemas/FormAlpha'
         application_response:
           type: object
+          description: The user's responses to the form fields
+          example:
+            project_title: Advanced AI Research
+            budget_amount: 150000
+            project_duration: 24 months
           additionalProperties: {}
         application_form_status:
           description: Status indicating how much of a form has been filled out
@@ -3953,31 +3983,40 @@ components:
           description: Whether this form is included in the application submission
         application_attachments:
           type: array
+          description: List of attachments associated with this application form
           items:
             type:
             - object
             $ref: '#/components/schemas/ApplicationAttachmentNoLink'
         application_name:
           type: string
+          description: The name of the application
+          example: My Research Grant Application
     ApplicationUser:
       type: object
       properties:
         user_id:
           type: string
           format: uuid
+          description: The unique identifier of the user
           example: 123e4567-e89b-12d3-a456-426614174000
         email:
           type: string
+          description: The email address of the user
+          example: user@example.com
         is_application_owner:
           type: boolean
+          description: Whether this user is the owner/creator of the application
     Organization:
       type: object
       properties:
         organization_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the organization
+          example: 456e7890-e12c-34f5-b678-901234567890
         sam_gov_entity:
+          description: SAM.gov entity information if organization is registered
           type:
           - object
           - 'null'
@@ -3990,18 +4029,23 @@ components:
         application_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the application
+          example: 789f0123-f45g-67h8-i901-234567890123
         competition:
+          description: The competition this application is for
           type:
           - object
           $ref: '#/components/schemas/CompetitionAlpha'
         application_forms:
           type: array
+          description: List of forms that are part of this application
           items:
             type:
             - object
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
         application_status:
+          description: Current status of the application
+          example: draft
           enum:
           - in_progress
           - submitted
@@ -4010,13 +4054,17 @@ components:
           - string
         application_name:
           type: string
+          description: The name of the application
+          example: My Research Grant Application
         users:
           type: array
+          description: List of users who have access to this application
           items:
             type:
             - object
             $ref: '#/components/schemas/ApplicationUser'
         organization:
+          description: Organization associated with this application, if any
           type:
           - object
           - 'null'
@@ -4035,6 +4083,7 @@ components:
           additionalProperties: {}
         application_attachments:
           type: array
+          description: List of attachments associated with this application
           items:
             type:
             - object
@@ -4066,6 +4115,8 @@ components:
       properties:
         application_name:
           type: string
+          description: The new name for the application
+          example: Updated Research Grant Application
       required:
       - application_name
     ApplicationUpdateResponseData:
@@ -4074,7 +4125,8 @@ components:
         application_id:
           type: string
           format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
+          description: The unique identifier of the updated application
+          example: 789f0123-f45g-67h8-i901-234567890123
     ApplicationUpdateResponse:
       type: object
       properties:
