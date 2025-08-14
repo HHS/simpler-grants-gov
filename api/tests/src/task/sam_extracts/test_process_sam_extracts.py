@@ -167,7 +167,9 @@ class TestProcessSamExtracts:
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1234.zip"
         make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
 
-        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 1, 1))
+        sam_extract_file = SamExtractFileFactory.create(
+            s3_path=s3_path, extract_date=date(2025, 1, 1)
+        )
         # Other extract files aren't picked up as they're not pending
         SamExtractFileFactory.create_batch(
             size=3, processing_status=SamGovProcessingStatus.COMPLETED
@@ -187,6 +189,13 @@ class TestProcessSamExtracts:
 
         task = ProcessSamExtractsTask(db_session)
         task.run()
+
+        db_extract_file = db_session.execute(
+            select(SamExtractFile).where(
+                SamExtractFile.sam_extract_file_id == sam_extract_file.sam_extract_file_id
+            )
+        ).scalar_one_or_none()
+        assert db_extract_file.processing_status == SamGovProcessingStatus.COMPLETED
 
         sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
         assert len(sam_gov_entities) == 6
@@ -314,11 +323,13 @@ class TestProcessSamExtracts:
 
         s3_path_day1 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1.zip"
         make_zip_on_s3(s3_path_day1, build_sam_extract_contents([row1_day1, row3_day1]))
-        SamExtractFileFactory.create(s3_path=s3_path_day1, extract_date=date(2025, 1, 1))
+        day1_extract_file = SamExtractFileFactory.create(
+            s3_path=s3_path_day1, extract_date=date(2025, 1, 1)
+        )
 
         s3_path_day2 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_2.zip"
         make_zip_on_s3(s3_path_day2, build_sam_extract_contents([row2_day2, row3_day2]))
-        SamExtractFileFactory.create(
+        day2_extract_file = SamExtractFileFactory.create(
             s3_path=s3_path_day2,
             extract_date=date(2025, 1, 2),
             extract_type=SamGovExtractType.DAILY,
@@ -326,7 +337,7 @@ class TestProcessSamExtracts:
 
         s3_path_day3 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_3.zip"
         make_zip_on_s3(s3_path_day3, build_sam_extract_contents([row1_day3, row2_day3, row3_day3]))
-        SamExtractFileFactory.create(
+        day3_extract_file = SamExtractFileFactory.create(
             s3_path=s3_path_day3,
             extract_date=date(2025, 1, 3),
             extract_type=SamGovExtractType.DAILY,
@@ -335,7 +346,26 @@ class TestProcessSamExtracts:
         task = ProcessSamExtractsTask(db_session)
         task.run()
 
-        db_session.expire_all()  # Expire so this query actually goes to the DB
+        db_session.expire_all()  # Expire so the queries actually go to the DB
+
+        db_extract_files = (
+            db_session.execute(
+                select(SamExtractFile).where(
+                    SamExtractFile.sam_extract_file_id.in_(
+                        [
+                            day1_extract_file.sam_extract_file_id,
+                            day2_extract_file.sam_extract_file_id,
+                            day3_extract_file.sam_extract_file_id,
+                        ]
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for db_extract_file in db_extract_files:
+            assert db_extract_file.processing_status == SamGovProcessingStatus.COMPLETED
+
         sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
         assert len(sam_gov_entities) == 3
         sam_gov_entities.sort(key=lambda e: e.uei)
