@@ -243,7 +243,7 @@ def build_xml_from_dict(
     element = QName(element_tag_ns_uri, operation_name)
     root_element = SubElement(body, element, nsmap=namespaces)
     _build_xml_elements(root_element, xml_dict, key_namespace_config, namespaces)
-    return etree.tostring(envelope, encoding="utf-8")
+    return etree.tostring(envelope, encoding="utf-8", xml_declaration=False)
 
 
 def _build_xml_elements(
