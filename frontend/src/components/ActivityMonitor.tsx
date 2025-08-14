@@ -53,6 +53,16 @@ export function ActivityMonitor() {
       return;
     }
     addHandlers();
+    return () => {
+      document.removeEventListener(
+        "click",
+        handlerRef.current as EventListener,
+      );
+      document.removeEventListener(
+        "keydown",
+        handlerRef.current as EventListener,
+      );
+    };
   }, [user, addHandlers, removeHandlers]);
 
   // whenever we are not listening for activity, and the handler function has been updated
