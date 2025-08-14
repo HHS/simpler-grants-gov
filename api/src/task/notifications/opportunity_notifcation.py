@@ -3,14 +3,14 @@ from datetime import datetime
 from typing import Sequence, cast
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, select, tuple_, update
+from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
 from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
-from src.db.models.user_models import UserSavedOpportunity
+from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
@@ -232,7 +232,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     latest_versions_subq.c.rn == 1,
                 ),
             )
-            .where(UserSavedOpportunity.is_deleted.isnot(True))
+            .where(
+                UserSavedOpportunity.is_deleted.isnot(True),
+                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+            )
         )
 
         results = self.db_session.execute(stmt).all()
