@@ -1,10 +1,10 @@
 import json
 import logging
 import uuid
-import xml.dom.minidom
 from typing import Any, Callable
 
 import requests
+from defusedxml import minidom
 
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
@@ -233,7 +233,7 @@ def xml_formatter(xml_data: str) -> str:
     This should only be used for logging purposes.
     """
     try:
-        return xml.dom.minidom.parseString(xml_data).toprettyxml()
+        return minidom.parseString(xml_data).toprettyxml()
     except Exception:
         return xml_data
 

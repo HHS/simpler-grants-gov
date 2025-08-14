@@ -253,8 +253,6 @@ def _build_xml_elements(
     namespaces: dict[str | None, str],
 ) -> None:
     for key, value in xml_dict.items():
-        print(key)
-        print(value)
         ns_uri = namespaces.get(key_namespace_config.get(key))
 
         # Add the namespace uri if it exists in the namespaces.
