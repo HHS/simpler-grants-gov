@@ -689,7 +689,7 @@ dl {
 }
 
 .simpler-application-forms-table {
-  table-layout:auto;
+  table-layout: auto;
 
   tr[id^="form"] {
     @include at-media("desktop") {
