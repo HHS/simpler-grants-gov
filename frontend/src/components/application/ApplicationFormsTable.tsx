@@ -103,6 +103,22 @@ const selectApplicationFormById = ({
   return forms.find((form) => form.form.form_id === formId);
 };
 
+const ApplicationTableColumnError = ({
+  errorMessage,
+}: {
+  errorMessage: string;
+}) => {
+  return (
+    <div className="display-flex flex-align-center margin-top-1">
+      <USWDSIcon
+        name="error_outline"
+        className="text-error usa-icon--size-3 margin-right-05"
+      />
+      <p className={"font-sans-3xs margin-top-0"}>{errorMessage}</p>
+    </div>
+  );
+};
+
 const ApplicationTable = ({
   applicationForms,
   applicationId,
@@ -127,15 +143,9 @@ const ApplicationTable = ({
     formsAreOptional &&
     errors &&
     formIdsWithErrors.includes(form.application_form_id) && (
-      <div className="display-flex flex-align-center text-bold text-error margin-top-1">
-        <USWDSIcon
-          name="error_outline"
-          className="text-error usa-icon--size-1 margin-right-05"
-        />
-        <p className={"font-sans-3xs margin-top-0"}>
-          {t("includeFormInApplicationSubmissionIncompleteMessage")}
-        </p>
-      </div>
+      <ApplicationTableColumnError
+        errorMessage={t("includeFormInApplicationSubmissionIncompleteMessage")}
+      />
     );
 
   return (
@@ -147,7 +157,9 @@ const ApplicationTable = ({
           </th>
           {formsAreOptional && (
             <th scope="col" className="bg-base-lightest padding-y-205">
-              {t("includeFormInApplicationSubmission")}
+              {t.rich("includeFormInApplicationSubmission", {
+                br: () => <br />,
+              })}
             </th>
           )}
           <th scope="col" className="bg-base-lightest padding-y-205">
@@ -171,7 +183,7 @@ const ApplicationTable = ({
               />
             </td>
             {formsAreOptional && (
-              <td data-label={t("includeFormInApplicationSubmission")}>
+              <td data-label={t("includeFormInApplicationSubmissionDataLabel")}>
                 <IncludeFormInSubmissionRadio
                   applicationId={applicationId}
                   formId={form.form_id}

@@ -324,8 +324,10 @@ export const messages = {
         complete: "Complete",
       },
       updated: "Last updated",
-      includeFormInApplicationSubmission: "Submit with application?",
-      includeFormInApplicationSubmissionIncompleteMessage: "Some issues found.",
+      includeFormInApplicationSubmission: "Submit with<br></br> application?",
+      includeFormInApplicationSubmissionDataLabel: "Submit with application",
+      includeFormInApplicationSubmissionIncompleteMessage:
+        "Some issues found. Check your entries.",
     },
     attachments: {
       attachedDocument: "Attached document",
