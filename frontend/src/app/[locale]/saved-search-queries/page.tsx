@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { SAVED_SEARCHES_CRUMBS } from "src/constants/breadcrumbs";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -8,9 +7,10 @@ import {
 } from "src/types/search/searchQueryTypes";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Button, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
@@ -20,8 +20,8 @@ import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const NoSavedSearches = async ({ locale }: { locale: string }) => {
-  const t = await getTranslations({ locale });
+const NoSavedSearches = () => {
+  const t = useTranslations("SavedSearches");
   return (
     <div className="grid-container display-flex">
       <USWDSIcon
@@ -29,11 +29,11 @@ const NoSavedSearches = async ({ locale }: { locale: string }) => {
         className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
-        <p>{t("SavedOpportunities.noSavedCTAParagraphOne")}</p>
-        <p>{t("SavedOpportunities.noSavedCTAParagraphTwo")}</p>
+        <p>{t("noSavedCTAParagraphOne")}</p>
+        <p>{t("noSavedCTAParagraphTwo")}</p>
         <p>
           <Link href="/search" className="usa-button">
-            {t("SavedOpportunities.searchButton")}
+            {t("searchButton")}
           </Link>
         </p>
       </div>
@@ -94,7 +94,7 @@ export default async function SavedSearchQueries({
             deleteText={t("delete")}
           />
         ) : (
-          <NoSavedSearches locale={locale} />
+          <NoSavedSearches />
         )}
       </div>
     </>

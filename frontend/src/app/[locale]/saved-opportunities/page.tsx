@@ -1,13 +1,13 @@
-import clsx from "clsx";
 import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Button, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
@@ -15,6 +15,27 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+const NoSavedOpportunities = () => {
+  const t = useTranslations("SavedOpportunities");
+  return (
+    <>
+      <USWDSIcon
+        name="star_outline"
+        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+      />
+      <div className="margin-top-2 grid-col-11">
+        <p>{t("noSavedCTAParagraphOne")}</p>
+        <p>{t("noSavedCTAParagraphTwo")}</p>
+        <p>
+          <Link href="/search" className="usa-button">
+            {t("searchButton")}
+          </Link>
+        </p>
+      </div>
+    </>
+  );
+};
 
 const SavedOpportunitiesList = ({
   opportunities,
@@ -34,27 +55,6 @@ const SavedOpportunitiesList = ({
       ),
   );
   return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
-};
-
-const NoSavedOpportunities = async ({ locale }: { locale: string }) => {
-  const t = await getTranslations({ locale });
-  return (
-    <>
-      <USWDSIcon
-        name="star_outline"
-        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
-      />
-      <div className="margin-top-2 grid-col-11">
-        <p>{t("SavedOpportunities.noSavedCTAParagraphOne")}</p>
-        <p>{t("SavedOpportunities.noSavedCTAParagraphTwo")}</p>
-        <p>
-          <Link href="/search" className="usa-button">
-            {t("SavedOpportunities.searchButton")}
-          </Link>
-        </p>
-      </div>
-    </>
-  );
 };
 
 export default async function SavedOpportunities({
@@ -85,7 +85,7 @@ export default async function SavedOpportunities({
         {resolvedOpportunities.length > 0 ? (
           <SavedOpportunitiesList opportunities={resolvedOpportunities} />
         ) : (
-          <NoSavedOpportunities locale={locale} />
+          <NoSavedOpportunities />
         )}
       </div>
     </>
