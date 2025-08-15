@@ -266,7 +266,10 @@ class ApplicationGetResponseDataSchema(Schema):
     )
     application_status = fields.Enum(
         ApplicationStatus,
-        metadata={"description": "Current status of the application", "example": ApplicationStatus.IN_PROGRESS},
+        metadata={
+            "description": "Current status of the application",
+            "example": ApplicationStatus.IN_PROGRESS,
+        },
     )
     application_name = fields.String(
         metadata={
