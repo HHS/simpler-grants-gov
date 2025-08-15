@@ -1,4 +1,7 @@
 import logging
+import traceback
+from email.parser import BytesParser
+from email.policy import default
 
 from flask import request
 
@@ -41,7 +44,34 @@ def simpler_soap_api_route(
         )
         return get_invalid_path_response().to_flask_response()
 
-    operation_name = get_soap_operation_name(request.data)
+    content_type = request.headers.get("Content-Type", "")
+
+    # Determine if we can expect attachments through content_type
+    # NOTE: May be a better way for this like through config?
+    if "multipart/related" in content_type:
+        try:
+            parsed = BytesParser(policy=default).parsebytes(request.get_data())
+            soap_part = None
+            attachments = []
+            for part in parsed.iter_parts():
+                content_id = part.get("Content-ID")
+                content_type = part.get_content_type()
+                payload = part.get_payload(decode=True)
+                if content_type == "application/soap+xml" or soap_part is None:
+                    soap_part = payload
+                else:
+                    attachments.append(
+                        {"content_id": content_id, "content_type": content_type, "payload": payload}
+                    )
+            soap_data = soap_part
+        except Exception as e:
+            logger.error("Failed to parse MTOM request", exc_info=True)
+            return get_soap_error_response().to_flask_response()
+    else:
+        soap_data = request.data
+        attachments = []
+
+    operation_name = get_soap_operation_name(soap_data)
     add_extra_data_to_current_request_logs(
         {
             "soap_api": api_name,
@@ -51,14 +81,16 @@ def simpler_soap_api_route(
     logger.info("SOAP request received")
 
     try:
+        print(f"{len(attachments)}")
         soap_request = SOAPRequest(
             api_name=api_name,
             method="POST",
             full_path=request.full_path,
             headers=dict(request.headers),
-            data=request.data,
+            data=request.get_data(),
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
             operation_name=operation_name,
+            attachments=attachments,
         )
         soap_proxy_response = get_proxy_response(soap_request)
     except Exception:
