@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
@@ -493,3 +493,15 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
+
+
+class ExcludedOpportunityReview(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "excluded_opportunity_review"
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    omb_review_status_display: Mapped[str]
+    omb_review_status_date: Mapped[date | None]
+    last_update_date: Mapped[datetime | None]
