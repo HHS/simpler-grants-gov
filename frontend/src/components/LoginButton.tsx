@@ -2,7 +2,6 @@ import { LOGIN_URL } from "src/constants/auth";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { PropsWithChildren } from "react";
-import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "./USWDSIcon";
 
@@ -34,7 +33,7 @@ export function LoginButton({
 }) {
   return (
     <div className="usa-nav__primary-item border-top-0 height-full">
-      <LoginLink 
+      <LoginLink
         className="usa-nav__link text-normal font-sans-2xs display-flex flex-align-center height-full"
         data-testid="sign-in-button"
       >
