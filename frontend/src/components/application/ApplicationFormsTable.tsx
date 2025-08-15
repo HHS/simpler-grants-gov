@@ -195,6 +195,10 @@ const ApplicationTable = ({
                 appFormId={form.application_form_id}
               />
               {getFormLinkErrors(form)}
+              <CompetitionStatus
+                applicationForms={applicationForms}
+                formId={form.form_id}
+              />
             </td>
             <td data-label={t("instructions")}>
               <InstructionsLink
