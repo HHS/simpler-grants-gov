@@ -58,17 +58,19 @@ export default function SearchSortBy({
     [queryTerm, updateQueryParams],
   );
 
+  const selectId = `search-sort-by-select${drawer ? "-drawer" : ""}`;
+
   return (
-    <div id={`search-sort-by-${drawer ? "drawer" : ""}`}>
+    <div id={`search-sort-by${drawer ? "-drawer" : ""}`}>
       <label
-        htmlFor={`search-sort-by-select-${drawer ? "drawer" : ""}`}
+        htmlFor={selectId}
         className="usa-label tablet:display-inline-block tablet:margin-right-2"
       >
         {t("sortBy.label")}
       </label>
 
       <Select
-        id={`search-sort-by-select-${drawer ? "drawer" : ""}`}
+        id={selectId}
         name="search-sort-by"
         onChange={handleChange}
         value={sortby || ""}
