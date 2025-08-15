@@ -23,43 +23,16 @@ jest.mock("src/services/auth/useUser", () => ({
 }));
 
 describe("ActivityMonitor", () => {
-  // let originalAddEventListener: typeof global.document.addEventListener;
-  // let originalRemoveEventListener: typeof global.document.removeEventListener;
-
   beforeEach(() => {
     mockAddEventListener = jest.spyOn(document, "addEventListener");
     mockRemoveEventListener = jest.spyOn(document, "removeEventListener");
-    // originalAddEventListener = global.document.addEventListener;
-    // originalRemoveEventListener = global.document.removeEventListener;
-    // Object.defineProperty(
-    //   global.document,
-    //   "addEventListener",
-    //   mockAddEventListener,
-    // );
-    // Object.defineProperty(
-    //   global.document,
-    //   "removeEventListener",
-    //   mockRemoveEventListener,
-    // );
+    // not sure why we have to clear mocks before the test, but without this the even listener mocks are not properly cleared
+    // likely because of the reassignment of the mock listener variables, rather than creating new ones
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    // Object.defineProperty(
-    //   global.document,
-    //   "addEventListener",
-    //   originalAddEventListener,
-    // );
-    // Object.defineProperty(
-    //   global.document,
-    //   "removeEventListener",
-    //   originalRemoveEventListener,
-    // );
     jest.clearAllMocks();
-    // jest.resetAllMocks();
-    // mockRefreshIfExpired.mockClear();
-    // mockRefreshIfExpiring.mockClear();
-    // mockRefreshIfExpired.mockReset();
-    // mockRefreshIfExpiring.mockReset();
   });
 
   it("adds handlers when logging in", () => {
@@ -96,7 +69,7 @@ describe("ActivityMonitor", () => {
       expect.any(Function),
     );
   });
-  it.only("calls refreshIfExpiring, refreshIfExpired, when clicking after handlers are added and token is not expired", async () => {
+  it("calls refreshIfExpiring, refreshIfExpired, when clicking after handlers are added and token is not expired", async () => {
     mockRefreshIfExpired.mockResolvedValue(false);
     fakeUser = { token: "" };
     const { rerender } = render(
@@ -123,22 +96,10 @@ describe("ActivityMonitor", () => {
     await waitFor(() => expect(mockRefreshIfExpired).toHaveBeenCalled());
     await waitFor(() => expect(mockRefreshIfExpiring).toHaveBeenCalled());
   });
-  it("calls refreshIfExpiring, logoutLocalUser when clicking after handlers are added and token is expired", async () => {
+  it("calls refreshIfExpired, logoutLocalUser when clicking after handlers are added and token is expired", async () => {
     mockRefreshIfExpired.mockResolvedValue(true);
-    fakeUser = { token: "" };
-    const { rerender } = render(
-      <>
-        <ActivityMonitor />
-        <div data-testid="div"></div>
-      </>,
-    );
-    await userEvent.click(screen.getByTestId("div"));
-
-    expect(mockRefreshIfExpired).not.toHaveBeenCalled();
-    expect(mockLogoutLocalUser).not.toHaveBeenCalled();
-
     fakeUser = { token: "logged in" };
-    rerender(
+    render(
       <>
         <ActivityMonitor />
         <div data-testid="div"></div>
@@ -150,6 +111,43 @@ describe("ActivityMonitor", () => {
     await waitFor(() => expect(mockRefreshIfExpired).toHaveBeenCalled());
     await waitFor(() => expect(mockLogoutLocalUser).toHaveBeenCalled());
   });
-  it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking before handlers are added", () => {});
-  it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking after handlers are removed", () => {});
+  it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking before handlers are added", async () => {
+    fakeUser = { token: "" };
+    render(
+      <>
+        <ActivityMonitor />
+        <div data-testid="div"></div>
+      </>,
+    );
+    await userEvent.click(screen.getByTestId("div"));
+
+    expect(mockRefreshIfExpired).not.toHaveBeenCalled();
+    expect(mockLogoutLocalUser).not.toHaveBeenCalled();
+  });
+  it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking after handlers are removed", async () => {
+    fakeUser = { token: "logged in" };
+    const { rerender } = render(
+      <>
+        <ActivityMonitor />
+        <div data-testid="div"></div>
+      </>,
+    );
+    await userEvent.click(screen.getByTestId("div"));
+
+    expect(mockRefreshIfExpired).toHaveBeenCalledTimes(1);
+    expect(mockLogoutLocalUser).toHaveBeenCalledTimes(1);
+
+    fakeUser = { token: "" };
+    rerender(
+      <>
+        <ActivityMonitor />
+        <div data-testid="div"></div>
+      </>,
+    );
+
+    await userEvent.click(screen.getByTestId("div"));
+
+    expect(mockRefreshIfExpired).toHaveBeenCalledTimes(1);
+    expect(mockLogoutLocalUser).toHaveBeenCalledTimes(1);
+  });
 });

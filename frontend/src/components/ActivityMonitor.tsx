@@ -54,14 +54,7 @@ export function ActivityMonitor() {
     }
     addHandlers();
     return () => {
-      document.removeEventListener(
-        "click",
-        handlerRef.current as EventListener,
-      );
-      document.removeEventListener(
-        "keydown",
-        handlerRef.current as EventListener,
-      );
+      removeHandlers();
     };
   }, [user, addHandlers, removeHandlers]);
 
