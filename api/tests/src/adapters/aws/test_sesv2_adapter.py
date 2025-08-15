@@ -4,7 +4,7 @@ from src.adapters.aws.sesv2_adapter import MockSESV2Client, SuppressedDestinatio
 
 
 def test_ses_adapter():
-    client = MockSESV2Client()
+    client = MockSESV2Client(page_size=2)
 
     client.add_mock_responses(
         SuppressedDestination(
@@ -33,7 +33,7 @@ def test_ses_adapter():
     assert client.mock_responses[1].reason == "COMPLAINT"
     assert client.mock_responses[1].last_update_time == datetime(2025, 1, 1, 9, 30, 0)
 
-    resp = client.list_suppressed_destinations(start_date=datetime(2022, 1, 1))
+    resp = client.list_suppressed_destinations(start_time=datetime(2022, 1, 1))
     data = resp.suppressed_destination_summaries
 
     assert data[0].email_address == "bounce2@simulator.amazonses.com"
