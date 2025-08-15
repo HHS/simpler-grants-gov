@@ -1,4 +1,4 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
+import { dereference } from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
@@ -573,9 +573,7 @@ export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
   try {
-    const dereferenced = (await $RefParser.dereference(
-      formSchema,
-    )) as RJSFSchema;
+    const dereferenced = (await dereference(formSchema)) as RJSFSchema;
     const condensedProperties = mergeAllOf({
       properties: dereferenced.properties,
     } as JSONSchema7);
