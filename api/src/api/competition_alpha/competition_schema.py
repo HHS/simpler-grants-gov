@@ -32,7 +32,10 @@ class CompetitionFormAlphaSchema(Schema):
             "description": "Whether the form is required for all applications to the competition"
         }
     )
-    form = fields.Nested(FormAlphaSchema())
+    form = fields.Nested(
+        FormAlphaSchema(),
+        metadata={"description": "The form template information for this competition"},
+    )
 
 
 class CompetitionAlphaSchema(Schema):
@@ -42,7 +45,10 @@ class CompetitionAlphaSchema(Schema):
         metadata={"description": "The opportunity ID that the competition is associated with"}
     )
 
-    competition_forms = fields.List(fields.Nested(CompetitionFormAlphaSchema()))
+    competition_forms = fields.List(
+        fields.Nested(CompetitionFormAlphaSchema()),
+        metadata={"description": "List of forms required for this competition"},
+    )
 
     competition_instructions = fields.List(
         fields.Nested(CompetitionInstructionAlphaSchema()),
@@ -72,9 +78,21 @@ class CompetitionAlphaSchema(Schema):
         }
     )
 
-    opportunity_assistance_listing = fields.Nested(OpportunityAssistanceListingV1Schema())
+    opportunity_assistance_listing = fields.Nested(
+        OpportunityAssistanceListingV1Schema(),
+        metadata={"description": "Assistance listing information for this competition"},
+    )
 
-    open_to_applicants = fields.List(fields.Enum(CompetitionOpenToApplicant))
+    open_to_applicants = fields.List(
+        fields.Enum(CompetitionOpenToApplicant),
+        metadata={
+            "description": "List of applicant types who are eligible for this competition",
+            "example": [
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        },
+    )
 
     is_open = fields.Boolean(
         metadata={"description": "Whether the competition is open and accepting applications"}
