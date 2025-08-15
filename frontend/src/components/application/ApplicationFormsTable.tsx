@@ -152,9 +152,6 @@ const ApplicationTable = ({
     <Table className="width-full overflow-wrap simpler-application-forms-table">
       <thead>
         <tr>
-          <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("status")}
-          </th>
           {formsAreOptional && (
             <th scope="col" className="bg-base-lightest padding-y-205">
               {t.rich("includeFormInApplicationSubmission", {
@@ -171,17 +168,14 @@ const ApplicationTable = ({
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("updated")}
           </th>
+          <th scope="col" className="bg-base-lightest padding-y-205">
+            {t("updatedBy")}
+          </th>
         </tr>
       </thead>
       <tbody>
         {applicationForms.map((form, index) => (
           <tr key={index} id={`form-${form.application_form_id}`}>
-            <td data-label={t("status")}>
-              <CompetitionStatus
-                applicationForms={applicationForms}
-                formId={form.form_id}
-              />
-            </td>
             {formsAreOptional && (
               <td data-label={t("includeFormInApplicationSubmissionDataLabel")}>
                 <IncludeFormInSubmissionRadio
@@ -213,6 +207,9 @@ const ApplicationTable = ({
             <td data-label={t("updated")}>
               <div> -- </div>
             </td>
+            <td data-label={t("updatedBy")}>
+              <div> -- </div>
+            </td>
           </tr>
         ))}
       </tbody>
@@ -232,15 +229,21 @@ const CompetitionStatus = ({
 
   if (applicationForm?.application_form_status === "in_progress") {
     return (
-      <div className="display-flex flex-align-center text-bold icon-active">
-        <USWDSIcon name="loop" className="margin-right-2px" />
+      <div className="display-flex flex-align-center text-italic">
+        <USWDSIcon
+          name="error_outline"
+          className="margin-right-1 usa-icon--size-3 icon-active"
+        />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
-      <div className="display-flex flex-align-center text-bold">
-        <USWDSIcon name="check" className="text-primary margin-right-2px" />
+      <div className="display-flex flex-align-center text-italic">
+        <USWDSIcon
+          name="check_circle_outline"
+          className="text-primary margin-right-1 usa-icon--size-3 icon-active"
+        />
         {t("complete")}
       </div>
     );
