@@ -87,7 +87,7 @@ class CompetitionAlphaSchema(Schema):
         fields.Enum(CompetitionOpenToApplicant),
         metadata={
             "description": "List of applicant types who are eligible for this competition",
-            "example": ["for_profit", "nonprofit"],
+            "example": [CompetitionOpenToApplicant.INDIVIDUAL, CompetitionOpenToApplicant.ORGANIZATION],
         },
     )
 
