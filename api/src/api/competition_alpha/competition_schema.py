@@ -47,7 +47,7 @@ class CompetitionAlphaSchema(Schema):
 
     competition_forms = fields.List(
         fields.Nested(CompetitionFormAlphaSchema()),
-        metadata={"description": "List of forms required for this competition", "example": []},
+        metadata={"description": "List of forms required for this competition"},
     )
 
     competition_instructions = fields.List(
