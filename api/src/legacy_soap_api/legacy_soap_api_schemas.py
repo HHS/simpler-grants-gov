@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_config import (
@@ -40,6 +40,7 @@ class SOAPRequest(BaseModel):
     api_name: SimplerSoapAPI
     auth: SOAPAuth | None = None
     operation_name: str = ""
+    attachments: list | None = Field(default_factory=list)
 
     def get_soap_request_operation_config(self) -> SOAPOperationConfig:
         """Get operation config
