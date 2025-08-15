@@ -564,6 +564,11 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
+// resolve and "allOf" references within "properties" or "$defs" fields
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -571,14 +576,18 @@ export const processFormSchema = async (
     const dereferenced = (await $RefParser.dereference(
       formSchema,
     )) as RJSFSchema;
-    const condensedProperties = mergeAllOf(
-      dereferenced.properties as JSONSchema7,
-    );
-    const condensedDefs = mergeAllOf(dereferenced.$defs as JSONSchema7);
+    const condensedProperties = mergeAllOf({
+      properties: dereferenced.properties,
+    } as JSONSchema7);
+    const condensedDefs = dereferenced.$defs
+      ? mergeAllOf({
+          $defs: dereferenced.$defs,
+        } as JSONSchema7)
+      : {};
     const condensed = {
       ...dereferenced,
-      properties: condensedProperties,
-      $defs: condensedDefs,
+      ...condensedProperties,
+      ...condensedDefs,
     };
     return condensed as RJSFSchema;
   } catch (e) {
