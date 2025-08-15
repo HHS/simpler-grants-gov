@@ -5,8 +5,8 @@ import { useUser } from "src/services/auth/useUser";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // when a user is logged in, this will track all clicks and key presses and,
-// on each action, if the token is expiring or expired, will refresh the user's
-// token or log them out accordingly
+// on each action, if the user's auth token is expiring or expired, will refresh the
+// token or log the user out accordingly
 export function ActivityMonitor() {
   const { user, refreshIfExpiring, refreshIfExpired, logoutLocalUser } =
     useUser();
