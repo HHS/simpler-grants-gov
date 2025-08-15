@@ -4,6 +4,9 @@ import { useUser } from "src/services/auth/useUser";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// when a user is logged in, this will track all clicks and key presses and,
+// on each action, if the token is expiring or expired, will refresh the user's
+// token or log them out accordingly
 export function ActivityMonitor() {
   const { user, refreshIfExpiring, refreshIfExpired, logoutLocalUser } =
     useUser();
@@ -59,8 +62,10 @@ export function ActivityMonitor() {
   }, [user, addHandlers, removeHandlers]);
 
   // whenever we are not listening for activity, and the handler function has been updated
-  // update the ref, so that we have the right reference ready when we want to remove the handlers later
-  // note that if we try to do this in addHandlers it somehow doesn't work right, given all of the dependencies involved
+  // update the ref, so that we have the right reference ready when we want to remove the handlers later.
+  // we do not want to pick up any changes made while listening, as those changes will not corerspond to the
+  // handler that is actually attached to the document.
+  // note that if we try to do this in addHandlers it somehow doesn't work right, given all of the dependencies involved.
   useEffect(() => {
     if (refreshTokenIfExpiringOrLogout && !listening) {
       handlerRef.current = refreshTokenIfExpiringOrLogout;
