@@ -85,11 +85,14 @@ export default function UserProvider({
   const refreshIfExpired = useCallback(async (): Promise<
     boolean | undefined
   > => {
+    if (!localUser?.token) {
+      return;
+    }
     if (isExpired(localUser?.expiresAt)) {
       await getUserSession().then(noop).catch(noop);
       return true;
     }
-  }, [localUser?.expiresAt, getUserSession]);
+  }, [localUser?.expiresAt, localUser?.token, getUserSession]);
 
   // if token is less than 10 mins from its expiration, refresh the user to get a token refresh
   const refreshIfExpiring = useCallback(async () => {
