@@ -1,4 +1,3 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
@@ -18,6 +17,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { FormValidationWarning } from "src/components/applyForm/types";
+import { processFormSchema } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -107,7 +107,7 @@ async function FormPage({ params }: formPageProps) {
   let formSchema = {};
   try {
     // creates single object for json schema from references
-    formSchema = await $RefParser.dereference(form_json_schema);
+    formSchema = await processFormSchema(form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
     return <TopLevelError />;
