@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
@@ -503,3 +503,5 @@ class ExcludedOpportunityReview(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     omb_review_status_display: Mapped[str]
+    omb_review_status_date: Mapped[date | None]
+    last_update_date: Mapped[datetime | None]
