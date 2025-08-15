@@ -35,7 +35,7 @@ class ApiJwtConfig(PydanticBaseEnvConfig):
 
     algorithm: str = Field("RS256", alias="API_JWT_ALGORITHM")
 
-    token_expiration_minutes: int = Field(30, alias="API_JWT_TOKEN_EXPIRATION_MINUTES")
+    token_expiration_minutes: int = Field(1, alias="API_JWT_TOKEN_EXPIRATION_MINUTES")
 
 
 # Initialize a config at startup that we'll use below

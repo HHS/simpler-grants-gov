@@ -15,9 +15,11 @@ export function ActivityMonitor() {
   const handlerRef = useRef<EventListener>(null);
 
   const refreshTokenIfExpiringOrLogout = useCallback(() => {
+    console.log("~~~ checking token");
     refreshIfExpired()
       .then((expired) => {
         if (expired) {
+          console.log("~~~ token expired, logging out");
           logoutLocalUser();
           return;
         }
