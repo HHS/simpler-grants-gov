@@ -42,6 +42,8 @@ export interface ApplicationFormDetail {
   form_id: string;
   form: FormDetail;
   application_name: string;
+  is_required: boolean;
+  is_included_in_submission?: boolean | null;
 }
 
 export interface ApplicationDetail {

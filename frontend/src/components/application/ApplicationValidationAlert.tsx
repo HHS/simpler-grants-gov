@@ -23,6 +23,8 @@ const ApplicationValidationAlert = ({
         return t("submissionValidationError.notStartedForm");
       case "application_form_validation":
         return t("submissionValidationError.incompleteForm");
+      case "missing_included_in_submission":
+        return t("submissionValidationError.missingIncludeInSubmission");
     }
   };
 
@@ -42,7 +44,10 @@ const ApplicationValidationAlert = ({
               appFormId: appForm?.application_form_id,
               formName: form?.form.form_name,
             };
-          } else if (error.field === "application_form_id") {
+          } else if (
+            error.field === "application_form_id" ||
+            error.field === "is_included_in_submission"
+          ) {
             const appForm = applicationForms.find(
               (appForm) => appForm.application_form_id === error.value,
             );
