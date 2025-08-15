@@ -689,6 +689,8 @@ dl {
 }
 
 .simpler-application-forms-table {
+  table-layout: auto;
+
   tr[id^="form"] {
     @include at-media("desktop") {
       scroll-margin-top: 6rem;
