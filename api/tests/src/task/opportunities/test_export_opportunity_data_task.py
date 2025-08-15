@@ -12,7 +12,7 @@ from src.task.opportunities.export_opportunity_data_task import (
     ExportOpportunityDataTask,
 )
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory
+from tests.src.db.models.factories import OpportunityFactory, ExcludedOpportunityReview
 
 
 class TestExportOpportunityDataTask(BaseTestClass):
@@ -48,6 +48,7 @@ class TestExportOpportunityDataTask(BaseTestClass):
         # Create some opportunities that won't get fetched / exported
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
+        ExcludedOpportunityReview.create_batch(size=2, no_current_summary=True)
 
         export_opportunity_data_task.run()
 
