@@ -109,9 +109,6 @@ const ApplicationTable = ({
       <thead>
         <tr>
           <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("status")}
-          </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
             {t("form")}
           </th>
           <th scope="col" className="bg-base-lightest padding-y-205">
@@ -120,23 +117,24 @@ const ApplicationTable = ({
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("updated")}
           </th>
+          <th scope="col" className="bg-base-lightest padding-y-205">
+            {t("updatedBy")}
+          </th>
         </tr>
       </thead>
       <tbody>
         {applicationForms.map((form, index) => (
           <tr key={index} id={`form-${form.application_form_id}`}>
-            <td data-label={t("status")}>
-              <CompetitionStatus
-                applicationForms={applicationForms}
-                formId={form.form_id}
-              />
-            </td>
             <td data-label={t("form")}>
               <FormLink
                 formId={form.form_id}
                 forms={forms}
                 applicationId={applicationId}
                 appFormId={form.application_form_id}
+              />
+              <CompetitionStatus
+                applicationForms={applicationForms}
+                formId={form.form_id}
               />
             </td>
             <td data-label={t("instructions")}>
@@ -148,6 +146,9 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("updated")}>
+              <div> -- </div>
+            </td>
+            <td data-label={t("updatedBy")}>
               <div> -- </div>
             </td>
           </tr>
@@ -169,15 +170,21 @@ const CompetitionStatus = ({
 
   if (applicationForm?.application_form_status === "in_progress") {
     return (
-      <div className="display-flex flex-align-center text-bold icon-active">
-        <USWDSIcon name="loop" className="margin-right-2px" />
+      <div className="display-flex flex-align-center text-italic">
+        <USWDSIcon
+          name="error_outline"
+          className="margin-right-1 usa-icon--size-3 icon-active"
+        />
         {t("in_progress")}
       </div>
     );
   } else if (applicationForm?.application_form_status === "complete") {
     return (
-      <div className="display-flex flex-align-center text-bold">
-        <USWDSIcon name="check" className="text-primary margin-right-2px" />
+      <div className="display-flex flex-align-center text-italic">
+        <USWDSIcon
+          name="check_circle_outline"
+          className="text-primary margin-right-1 usa-icon--size-3 icon-active"
+        />
         {t("complete")}
       </div>
     );
