@@ -201,6 +201,7 @@ class TestOpportunityNotification:
     def notification_task(self, db_session):
         self.notification_config = EmailNotificationConfig()
         self.notification_config.reset_emails_without_sending = False
+        self.notification_config.sync_suppressed_emails = False
 
         return OpportunityNotificationTask(db_session, self.notification_config)
 
