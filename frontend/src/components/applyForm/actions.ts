@@ -8,7 +8,7 @@ import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import { shapeFormData } from "./utils";
+import { processFormSchema, shapeFormData } from "./utils";
 
 type ApplyFormResponse = {
   applicationId: string;
@@ -116,7 +116,8 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   }
   let formSchema = {};
   try {
-    formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+    // formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+    formSchema = await processFormSchema(formDetail.form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
   }

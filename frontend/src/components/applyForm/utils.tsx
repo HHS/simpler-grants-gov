@@ -1,6 +1,9 @@
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { filter, get, isArray, isNumber, isString } from "lodash";
+import { JSONSchema7 } from "json-schema";
+import mergeAllOf from "json-schema-merge-allof";
+import { cond, filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import React, { JSX } from "react";
@@ -559,6 +562,29 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
     },
     [] as Array<Record<string, unknown>>,
   );
+};
+
+export const processFormSchema = async (
+  formSchema: RJSFSchema,
+): Promise<RJSFSchema> => {
+  try {
+    const dereferenced = (await $RefParser.dereference(
+      formSchema,
+    )) as RJSFSchema;
+    const condensedProperties = mergeAllOf(
+      dereferenced.properties as JSONSchema7,
+    );
+    const condensedDefs = mergeAllOf(dereferenced.$defs as JSONSchema7);
+    const condensed = {
+      ...dereferenced,
+      properties: condensedProperties,
+      $defs: condensedDefs,
+    };
+    return condensed as RJSFSchema;
+  } catch (e) {
+    console.error("Error processing schema");
+    throw e;
+  }
 };
 
 // This is only needed when extracting an application response from the application endpoint's
