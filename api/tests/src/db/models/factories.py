@@ -2660,7 +2660,7 @@ class SuppressedEmailFactory(BaseFactory):
     )
 
 
-class ExcludedOpportunityReview(BaseFactory):
+class ExcludedOpportunityReviewFactory(BaseFactory):
     class Meta:
         model = opportunity_models.ExcludedOpportunityReview
 
