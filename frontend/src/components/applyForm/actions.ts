@@ -1,6 +1,5 @@
 "use server";
 
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
@@ -116,7 +115,6 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   }
   let formSchema = {};
   try {
-    // formSchema = await $RefParser.dereference(formDetail.form_json_schema);
     formSchema = await processFormSchema(formDetail.form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
