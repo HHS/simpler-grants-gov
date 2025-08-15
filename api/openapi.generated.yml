@@ -3681,7 +3681,6 @@ components:
         competition_forms:
           type: array
           description: List of forms required for this competition
-          example: []
           items:
             type:
             - object
@@ -3722,8 +3721,10 @@ components:
           type: array
           description: List of applicant types who are eligible for this competition
           example:
-          - for_profit
-          - nonprofit
+          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
+            - individual
+          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
+            - organization
           items:
             enum:
             - individual
@@ -4045,7 +4046,8 @@ components:
             $ref: '#/components/schemas/ApplicationFormGetResponseData'
         application_status:
           description: Current status of the application
-          example: draft
+          example: !!python/object/apply:src.constants.lookup_constants.ApplicationStatus
+          - in_progress
           enum:
           - in_progress
           - submitted
