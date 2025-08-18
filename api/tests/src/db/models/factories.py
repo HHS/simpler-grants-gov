@@ -2664,8 +2664,7 @@ class ExcludedOpportunityReviewFactory(BaseFactory):
     class Meta:
         model = opportunity_models.ExcludedOpportunityReview
 
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+    opportunity_id = factory.Sequence(lambda n: n)
     omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
     omb_review_status_date = factory.Faker("date_between", start_date="-5y", end_date="-3y")
     last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
