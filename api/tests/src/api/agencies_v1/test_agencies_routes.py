@@ -10,7 +10,6 @@ from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 class TestAgenciesRoutes(BaseTestClass):
     @pytest.fixture(autouse=True)
     def cleanup_agencies(self, db_session):
-        yield
         cascade_delete_from_db_table(db_session, Agency)
         cascade_delete_from_db_table(db_session, Opportunity)
 

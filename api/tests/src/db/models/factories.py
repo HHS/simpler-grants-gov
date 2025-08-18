@@ -2576,7 +2576,7 @@ class SamGovEntityFactory(BaseFactory):
     ebiz_poc_last_name = factory.Faker("last_name")
     has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
-    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+    eft_indicator = None
 
     class Params:
         has_organization = factory.Trait(
