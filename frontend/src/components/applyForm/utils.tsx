@@ -579,15 +579,9 @@ export const processFormSchema = async (
     const condensedProperties = mergeAllOf({
       properties: dereferenced.properties,
     } as JSONSchema7);
-    const condensedDefs = dereferenced.$defs
-      ? mergeAllOf({
-          $defs: dereferenced.$defs,
-        } as JSONSchema7)
-      : {};
     const condensed = {
       ...dereferenced,
       ...condensedProperties,
-      ...condensedDefs,
     };
     return condensed as RJSFSchema;
   } catch (e) {

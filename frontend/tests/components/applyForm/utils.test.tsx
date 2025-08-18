@@ -568,21 +568,11 @@ describe("processFormSchema", () => {
         dereferenced: "stuff",
         allOf: "things",
       },
-      $defs: {
-        dereferenced: "stuff",
-        allOf: "things",
-      },
     });
     mockMergeAllOf.mockImplementation(
-      (processMe: {
-        properties?: { allOf: unknown };
-        $defs?: { allOf: unknown };
-      }): unknown => {
+      (processMe: { properties?: { allOf: unknown } }): unknown => {
         if (processMe.properties) {
           delete processMe.properties.allOf;
-        }
-        if (processMe.$defs) {
-          delete processMe.$defs.allOf;
         }
         return processMe;
       },
@@ -596,8 +586,8 @@ describe("processFormSchema", () => {
     expect(mockDereference).toHaveBeenCalled();
   });
   it("calls allOf merge function", async () => {
-    await processFormSchema({ $defs: {}, properties: {} });
-    expect(mockMergeAllOf).toHaveBeenCalledTimes(2);
+    await processFormSchema({ properties: {} });
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
   });
   it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
     const processed = await processFormSchema({});
@@ -606,9 +596,6 @@ describe("processFormSchema", () => {
         just: "for fun",
       },
       properties: {
-        dereferenced: "stuff",
-      },
-      $defs: {
         dereferenced: "stuff",
       },
     });
