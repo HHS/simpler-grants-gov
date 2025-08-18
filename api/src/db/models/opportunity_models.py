@@ -498,7 +498,7 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
 class ExcludedOpportunityReview(ApiSchemaTable, TimestampMixin):
     __tablename__ = "excluded_opportunity_review"
 
-    opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     omb_review_status_display: Mapped[str]
     omb_review_status_date: Mapped[date | None]
     last_update_date: Mapped[datetime | None]
