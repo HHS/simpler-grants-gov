@@ -7,13 +7,11 @@ import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
-from src.db.models.opportunity_models import ExcludedOpportunityReview
 from src.task.opportunities.export_opportunity_data_task import (
     ExportOpportunityDataConfig,
     ExportOpportunityDataTask,
 )
 from tests.conftest import BaseTestClass
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import ExcludedOpportunityReviewFactory, OpportunityFactory
 
 
@@ -25,16 +23,10 @@ class TestExportOpportunityDataTask(BaseTestClass):
         )
         return ExportOpportunityDataTask(db_session, config)
 
-    @pytest.fixture
-    def cleanup_excluded_opportunities(self, db_session):
-        yield
-        cascade_delete_from_db_table(db_session, ExcludedOpportunityReview)
-
     def test_export_opportunity_data_task(
         self,
         db_session,
         truncate_opportunities,
-        cleanup_excluded_opportunities,
         enable_factory_create,
         export_opportunity_data_task,
     ):
@@ -56,7 +48,8 @@ class TestExportOpportunityDataTask(BaseTestClass):
         # Create some opportunities that won't get fetched / exported
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
-        ExcludedOpportunityReviewFactory.create_batch(size=2)
+        opp = OpportunityFactory.create(is_posted_summary=True)
+        ExcludedOpportunityReviewFactory.create(opportunity_id=opp.legacy_opportunity_id)
 
         export_opportunity_data_task.run()
 

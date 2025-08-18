@@ -130,7 +130,8 @@ class ExportOpportunityDataTask(Task):
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                     ~exists(
                         select(ExcludedOpportunityReview.opportunity_id).where(
-                            ExcludedOpportunityReview.opportunity_id == Opportunity.opportunity_id
+                            ExcludedOpportunityReview.opportunity_id
+                            == Opportunity.legacy_opportunity_id
                         )
                     ),
                 )
