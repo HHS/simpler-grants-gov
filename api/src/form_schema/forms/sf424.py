@@ -202,7 +202,11 @@ FORM_JSON_SCHEMA = {
             "minLength": 12,
             "maxLength": 12,
         },
-        "applicant": {"$ref": "#/$defs/address"},
+        "applicant": {
+            "allOf": [{"$ref": "#/$defs/address"}],
+            "title": "applicant",
+            "description": "Enter information about the applicant.",
+        },
         "department_name": {
             "type": "string",
             "title": "Department Name",
@@ -217,7 +221,11 @@ FORM_JSON_SCHEMA = {
             "minLength": 1,
             "maxLength": 100,
         },
-        "contact_person": {"$ref": "#/$defs/person_name"},
+        "contact_person": {
+            "allOf": [{"$ref": "#/$defs/person_name"}],
+            "title": "Contact Person",
+            "description": "Enter information about the contact person.",
+        },
         "organization_affiliation": {
             "type": "string",
             "title": "Organizational Affiliation",
@@ -451,7 +459,11 @@ FORM_JSON_SCHEMA = {
             "title": "Certification Agree",
             "description": "Check to select.",
         },
-        "authorized_representative": {"$ref": "#/$defs/person_name"},
+        "authorized_representative": {
+            "allOf": [{"$ref": "#/$defs/person_name"}],
+            "title": "Authorized Representative Header",
+            "description": "",
+        },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": "#/$defs/phone_number_field"}],
             "title": "AOR Telephone Number",
