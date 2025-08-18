@@ -325,7 +325,6 @@ export const messages = {
         attachmentDeleted: "An attachment was deleted.",
       },
       updated: "Last updated",
-      includeFormInApplicationSubmission: "Submit with<br></br> application?",
       includeFormInApplicationSubmissionDataLabel: "Submit with application",
       includeFormInApplicationSubmissionIncompleteMessage:
         "Some issues found. Check your entries.",

@@ -86,11 +86,7 @@ function RadioWidget<
       : undefined;
 
   return (
-    <FormGroup
-      error={error}
-      key={`form-group__radio--${id}`}
-      className="margin-top-0"
-    >
+    <FormGroup error={error} key={`form-group__radio--${id}`}>
       <DynamicFieldLabel
         idFor={id}
         title={title}

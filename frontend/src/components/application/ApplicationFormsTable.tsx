@@ -1,16 +1,13 @@
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
-import RadioWidget from "src/components/applyForm/widgets/RadioWidget";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,
@@ -153,10 +150,8 @@ const ApplicationTable = ({
       <thead>
         <tr>
           {formsAreOptional && (
-            <th scope="col" className="bg-base-lightest padding-y-205">
-              {t.rich("includeFormInApplicationSubmission", {
-                br: () => <br />,
-              })}
+            <th scope="col" className="bg-base-lightest padding-y-205 maxw-15">
+              {t("includeFormInApplicationSubmissionDataLabel")}
             </th>
           )}
           <th scope="col" className="bg-base-lightest padding-y-205">
@@ -318,72 +313,5 @@ const FormLink = ({
         </Link>
       )}
     </>
-  );
-};
-
-export const IncludeFormInSubmissionRadio = ({
-  applicationId,
-  formId,
-  includeFormInApplicationSubmission,
-}: {
-  applicationId: string;
-  formId: string;
-  includeFormInApplicationSubmission?: boolean | null;
-}) => {
-  const router = useRouter();
-  const { clientFetch } = useClientFetch<{
-    is_included_in_submission: boolean;
-  }>("Error submitting update include form in application submission");
-  const [includeFormInSubmission, setIncludeFormInSubmission] = useState<
-    boolean | null
-  >(includeFormInApplicationSubmission ?? null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const handleChange = (value: string | unknown) => {
-    const newValue = value === "Yes";
-    setIncludeFormInSubmission(newValue); // eagerly set state.
-    setLoading(true);
-    clientFetch(`/api/applications/${applicationId}/forms/${formId}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        is_included_in_submission: newValue,
-      }),
-    })
-      .then(({ is_included_in_submission }) => {
-        if (is_included_in_submission === undefined) {
-          throw new Error(
-            "Error updating form to be included in submission. Value undefined",
-          );
-        }
-      })
-      .catch((err) => {
-        // We will fall back to false on any errors to prevent blocking user workflows.
-        setIncludeFormInSubmission(false);
-        console.error(err);
-      })
-      .finally(() => {
-        setLoading(false);
-        router.refresh();
-      });
-  };
-
-  let radioValue = null;
-  if (includeFormInSubmission) {
-    radioValue = "Yes";
-  } else if (includeFormInSubmission === false) {
-    radioValue = "No";
-  }
-
-  return (
-    <RadioWidget
-      id={"include-form-in-application-submission-radio"}
-      schema={{ enum: ["Yes", "No"] }}
-      value={radioValue}
-      options={{
-        disabled: loading,
-      }}
-      updateOnInput={true}
-      onChange={handleChange}
-    />
   );
 };
