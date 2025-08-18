@@ -5,10 +5,7 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
-import {
-  ApplicationFormsTable,
-  IncludeFormInSubmissionRadio,
-} from "src/components/application/ApplicationFormsTable";
+import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 
 const clientFetchMock = jest.fn();
 
@@ -65,51 +62,15 @@ describe("CompetitionFormsTable", () => {
     expect(tables[1]).toHaveTextContent("complete");
     expect(tables[1]).toHaveTextContent("downloadInstructions");
   });
-});
-
-describe("IncludeFormInSubmissionRadio", () => {
-  const applicationId = "app-123";
-  const formId = "form-456";
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("renders with value 'Yes' when includeFormInApplicationSubmission is true", () => {
-    render(
-      <IncludeFormInSubmissionRadio
+  it("matches snapshot", () => {
+    const { container } = render(
+      <ApplicationFormsTable
+        forms={competitionForms}
+        applicationForms={applicationForms}
         applicationId={applicationId}
-        formId={formId}
-        includeFormInApplicationSubmission={true}
       />,
     );
-    const yesRadio = screen.getByDisplayValue("Yes");
-    expect(yesRadio).toBeChecked();
-  });
 
-  it("renders with value 'No' when includeFormInApplicationSubmission is false", () => {
-    render(
-      <IncludeFormInSubmissionRadio
-        applicationId={applicationId}
-        formId={formId}
-        includeFormInApplicationSubmission={false}
-      />,
-    );
-    const noRadio = screen.getByDisplayValue("No");
-    expect(noRadio).toBeChecked();
-  });
-
-  it("renders with no selection when includeFormInApplicationSubmission is null", () => {
-    render(
-      <IncludeFormInSubmissionRadio
-        applicationId={applicationId}
-        formId={formId}
-        includeFormInApplicationSubmission={null}
-      />,
-    );
-    const yesRadio = screen.getByDisplayValue("Yes");
-    const noRadio = screen.getByDisplayValue("No");
-    expect(yesRadio).not.toBeChecked();
-    expect(noRadio).not.toBeChecked();
+    expect(container).toMatchSnapshot();
   });
 });
