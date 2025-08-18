@@ -243,6 +243,7 @@ export const getFieldName = ({
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
 
+// transform a form data field name / id into a json pointer that can be used to reference the form schema
 export const getFieldPath = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
@@ -264,7 +265,7 @@ const widgetComponents: Record<
     Budget424aSectionB(widgetProps),
 };
 
-const getByPointer = (target: object, path: string): unknown => {
+export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
     return;
   }
@@ -526,7 +527,10 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
 };
 
 // filters, orders, and nests the form data to match the form schema
-export const shapeFormData = <T extends object>(formData: FormData): T => {
+export const shapeFormData = <T extends object>(
+  formData: FormData,
+  formSchema: RJSFSchema,
+): T => {
   formData.delete("$ACTION_REF_1");
   formData.delete("$ACTION_1:0");
   formData.delete("$ACTION_1:1");
@@ -534,7 +538,7 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  const structuredFormData = formDataToObject(formData, {
+  const structuredFormData = formDataToObject(formData, formSchema, {
     delimiter: "--",
   });
   return pruneEmptyNestedFields(structuredFormData) as T;

@@ -1,5 +1,10 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
+import { RJSFSchema } from "@rjsf/utils";
+import { get as getSchemaObjectFromPointer } from "json-pointer";
+
+import { getByPointer, getFieldPath } from "./utils";
+
 // like, this is basically anything lol - DWS
 type NestedObject = {
   [key: string]:
@@ -13,16 +18,10 @@ type FormDataToJsonOptions = {
   delimiter?: string;
 };
 
-const parseValue = (value: unknown): unknown => {
+const parseValue = (value: unknown, type: string) => {
   if (value === "false") return false;
   if (value === "true") return true;
-  if (
-    value !== "" &&
-    value !== null &&
-    value !== undefined &&
-    !isNaN(Number(value))
-  )
-    return Number(value);
+  if (type === "integer" || type === "number") return Number(value);
   try {
     return JSON.parse(value as string);
   } catch (e) {
@@ -32,6 +31,7 @@ const parseValue = (value: unknown): unknown => {
 
 export function formDataToObject(
   formData = new FormData(),
+  formSchema: RJSFSchema,
   options?: FormDataToJsonOptions,
 ): NestedObject {
   const delimiter = options?.delimiter || ".";
@@ -42,8 +42,15 @@ export function formDataToObject(
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
+    const path = getFieldPath(currentKey);
+    const fullPath = parentKey ? `${parentKey}/${path}` : path;
+    const formFieldDefinition = getByPointer(formSchema, fullPath) as {
+      type?: string;
+    };
+    const fieldType = formFieldDefinition?.type || "";
+    const parsedValue = parseValue(value, fieldType);
+
     let current = result;
-    const parsedValue = parseValue(value);
 
     const chunksLen = chunks.length;
     for (let chunkIdx = 0; chunkIdx < chunksLen; chunkIdx++) {

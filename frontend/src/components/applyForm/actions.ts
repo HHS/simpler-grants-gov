@@ -45,8 +45,10 @@ export async function handleFormAction(
   }
 
   // this generic typing isn't correct - we'll end up with a nested object
-  const applicationFormData =
-    shapeFormData<ApplicationResponseDetail>(formData);
+  const applicationFormData = shapeFormData<ApplicationResponseDetail>(
+    formData,
+    formSchema,
+  );
 
   const saveSuccess = await handleSave(
     applicationFormData,
