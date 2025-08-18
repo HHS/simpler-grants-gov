@@ -8,6 +8,7 @@ import {
   determineFieldType,
   getFieldName,
   getFieldSchema,
+  processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
 } from "src/components/applyForm/utils";
@@ -32,14 +33,15 @@ type FormActionResult = Promise<{
 }>;
 
 const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+const mockRevalidateTag = jest.fn<void, [string]>();
+const getSessionMock = jest.fn();
+const mockDereference = jest.fn();
+const mockMergeAllOf = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
   handleFormAction: (...args: [...FormActionArgs]) =>
     mockHandleFormAction(...args),
 }));
-
-const mockRevalidateTag = jest.fn<void, [string]>();
-const getSessionMock = jest.fn();
 
 jest.mock("next/cache", () => ({
   revalidateTag: (tag: string) => mockRevalidateTag(tag),
@@ -52,6 +54,15 @@ jest.mock("react", () => ({
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("@apidevtools/json-schema-ref-parser", () => ({
+  dereference: () => mockDereference() as unknown,
+}));
+
+jest.mock("json-schema-merge-allof", () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,
 }));
 
 describe("shapeFormData", () => {
@@ -544,5 +555,49 @@ describe("getFieldName", () => {
         schema: {},
       }),
     ).toEqual("untitled");
+  });
+});
+
+describe("processFormSchema", () => {
+  beforeEach(() => {
+    mockDereference.mockResolvedValue({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+        allOf: "things",
+      },
+    });
+    mockMergeAllOf.mockImplementation(
+      (processMe: { properties?: { allOf: unknown } }): unknown => {
+        if (processMe.properties) {
+          delete processMe.properties.allOf;
+        }
+        return processMe;
+      },
+    );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it("calls the dereference function", async () => {
+    await processFormSchema({});
+    expect(mockDereference).toHaveBeenCalled();
+  });
+  it("calls allOf merge function", async () => {
+    await processFormSchema({ properties: {} });
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
+  });
+  it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
+    const processed = await processFormSchema({});
+    expect(processed).toEqual({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+      },
+    });
   });
 });
