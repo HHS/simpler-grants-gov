@@ -5,8 +5,8 @@ module "training_config" {
   default_region = module.project_config.default_region
   environment    = "training"
   network_name   = "training"
-  domain_name    = null
-  enable_https   = false
+  domain_name    = "nofos.training.simpler.grants.gov"
+  enable_https   = true
 
   instance_desired_instance_count = 1
   instance_scaling_min_capacity   = 1

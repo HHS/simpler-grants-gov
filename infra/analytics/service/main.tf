@@ -119,10 +119,10 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
-# data "aws_acm_certificate" "certificate" {
-#   count  = local.service_config.enable_https ? 1 : 0
-#   domain = local.service_config.domain_name
-# }
+data "aws_acm_certificate" "certificate" {
+  count  = local.service_config.enable_https ? 1 : 0
+  domain = local.service_config.domain_name
+}
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
   count = module.app_config.has_incident_management_service ? 1 : 0
