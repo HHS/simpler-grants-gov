@@ -552,13 +552,23 @@ export const messages = {
     agencyContactCenter: "Grants.gov Program Management Office",
     telephone: "1-800-518-4726",
     returnToTop: "Return to top",
-    linkXTwitter: "X (Twitter)",
-    linkYoutube: "YouTube",
-    linkGithub: "Github",
-    linkRss: "RSS",
-    linkNewsletter: "Newsletter",
-    linkBlog: "Blog",
     logoAlt: "Grants.gov logo",
+    explore: "Explore",
+    simpler: "Simpler.Grants.gov",
+    links: {
+      home: "Home",
+      search: "Search",
+      vision: "Vision",
+      roadmap: "Roadmap",
+      events: "Events",
+      newsletter: "Newsletter",
+    },
+    feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
+    supportCenter: "Grants.gov Support Center",
+    techSupport:
+      "For technical support, contact: <email>support@grants.gov</email>",
+    grantorSupport:
+      "Grantors, contact the PMO through your <poc>Agency Point of Contact</poc>.",
   },
   Identifier: {
     identity:
@@ -773,8 +783,9 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
-    noSavedCTA:
-      "You don't have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+    noSavedCTAParagraphOne: "You don't have any saved queries yet.",
+    noSavedCTAParagraphTwo:
+      "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
     title: "Saved Search Queries | Simpler.Grants.gov",
     error:
@@ -820,8 +831,10 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
-    noSavedCTA:
-      "To add an opportunity to your list, use the Save button next to its title on the listing's page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noSavedCTAParagraphOne:
+      "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
+    noSavedCTAParagraphTwo:
+      "Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
