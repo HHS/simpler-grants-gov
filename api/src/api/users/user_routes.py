@@ -13,10 +13,10 @@ from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
-    UserApiKeyRenameRequestSchema,
-    UserApiKeyRenameResponseSchema,
     UserApiKeyListRequestSchema,
     UserApiKeyListResponseSchema,
+    UserApiKeyRenameRequestSchema,
+    UserApiKeyRenameResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
@@ -529,8 +529,9 @@ def user_rename_api_key(
     )
 
     return response.ApiResponse(message="Success", data=api_key)
-  
-  @user_blueprint.post("/<uuid:user_id>/api-keys/list")
+
+
+@user_blueprint.post("/<uuid:user_id>/api-keys/list")
 @user_blueprint.input(UserApiKeyListRequestSchema, location="json")
 @user_blueprint.output(UserApiKeyListResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403])

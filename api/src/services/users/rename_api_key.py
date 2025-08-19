@@ -33,7 +33,6 @@ def rename_api_key(
     if api_key is None:
         raise_flask_error(404, "API key not found")
 
-    old_key_name = api_key.key_name
     api_key.key_name = params.key_name
 
     logger.info(

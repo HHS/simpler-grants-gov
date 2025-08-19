@@ -313,7 +313,6 @@ class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
 
 
-
 class UserApiKeyRenameRequestSchema(Schema):
     key_name = fields.String(
         required=True,
@@ -328,6 +327,7 @@ class UserApiKeyRenameRequestSchema(Schema):
 class UserApiKeyRenameResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserApiKeySchema, metadata={"description": "The renamed API key"})
 
+
 class UserApiKeyListRequestSchema(Schema):
     # Future filtering fields can be added here
     pass
@@ -338,4 +338,3 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
         fields.Nested(UserApiKeySchema),
         metadata={"description": "List of API keys for the user"},
     )
-
