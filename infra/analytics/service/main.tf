@@ -194,15 +194,15 @@ module "service" {
     }] : []
   )
 
-#   extra_policies = merge(
-#     {
-#       api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
-#       # storage_access              = module.storage.access_policy_arn
-#     },
-#     module.app_config.enable_identity_provider ? {
-#       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-#     } : {}
-#   )
+  #   extra_policies = merge(
+  #     {
+  #       api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn,
+  #       # storage_access              = module.storage.access_policy_arn
+  #     },
+  #     module.app_config.enable_identity_provider ? {
+  #       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+  #     } : {}
+  #   )
 
   is_temporary = local.is_temporary
 }

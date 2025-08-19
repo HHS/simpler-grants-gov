@@ -115,8 +115,8 @@ module "service" {
   healthcheck_path         = "/"
 
   certificate_arn = local.service_config.enable_https == true ? data.aws_acm_certificate.certificate[0].arn : null
-#   certificate_arn = null
-  domain_name     = local.service_config.domain_name
+  #   certificate_arn = null
+  domain_name = local.service_config.domain_name
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 

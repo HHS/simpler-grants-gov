@@ -44,9 +44,9 @@ locals {
   enable_notifications = true
 
   environment_configs = {
-    dev     = module.dev_config
-    staging = module.staging_config
-    prod    = module.prod_config
+    dev      = module.dev_config
+    staging  = module.staging_config
+    prod     = module.prod_config
     training = module.training_config
   }
 

@@ -44,9 +44,9 @@ locals {
   enable_notifications = false
 
   environment_configs = {
-    dev     = module.dev_config
-    staging = module.staging_config
-    prod    = module.prod_config
+    dev      = module.dev_config
+    staging  = module.staging_config
+    prod     = module.prod_config
     training = module.training_config
   }
 
@@ -80,11 +80,11 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared  = "simpler-grants-gov"
-    dev     = "simpler-grants-gov"
-    staging = "simpler-grants-gov"
-    prod    = "simpler-grants-gov"
-    training  = "simpler-grants-gov"
+    shared   = "simpler-grants-gov"
+    dev      = "simpler-grants-gov"
+    staging  = "simpler-grants-gov"
+    prod     = "simpler-grants-gov"
+    training = "simpler-grants-gov"
   }
 
   # The name of the network that contains the resources shared across all

@@ -46,9 +46,9 @@ locals {
   enable_notifications = false
 
   environment_configs = {
-    dev     = module.dev_config
-    staging = module.staging_config
-    prod    = module.prod_config
+    dev      = module.dev_config
+    staging  = module.staging_config
+    prod     = module.prod_config
     training = module.training_config
   }
   # Map from environment name to the account name for the AWS account that
