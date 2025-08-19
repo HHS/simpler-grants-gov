@@ -1,10 +1,9 @@
-import { delimiter } from "path";
 import { RJSFSchema } from "@rjsf/utils";
 
 import { formDataToObject } from "src/components/applyForm/formDataToJson";
 
-const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
-const mockRevalidateTag = jest.fn<void, [string]>();
+const mockHandleFormAction = jest.fn();
+const mockRevalidateTag = jest.fn();
 const getSessionMock = jest.fn();
 const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
@@ -18,7 +17,7 @@ jest.mock("src/components/applyForm/actions", () => ({
 }));
 
 jest.mock("next/cache", () => ({
-  revalidateTag: (tag: string) => mockRevalidateTag(tag),
+  revalidateTag: (tag: string) => mockRevalidateTag(tag) as unknown,
 }));
 
 jest.mock("react", () => ({

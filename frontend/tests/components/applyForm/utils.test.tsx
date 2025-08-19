@@ -80,7 +80,7 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
 
     expect(data).toMatchObject(shapedFormData);
   });
@@ -130,7 +130,7 @@ describe("shapeFormData", () => {
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
   });
 });
