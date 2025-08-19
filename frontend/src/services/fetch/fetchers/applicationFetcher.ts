@@ -143,6 +143,25 @@ export const handleUpdateApplicationForm = async (
   return (await response.json()) as ApplicationStartApiResponse;
 };
 
+export const handleUpdateApplicationFormIncludeInSubmission = async (
+  applicationId: string,
+  formId: string,
+  is_included_in_submission: boolean,
+  token: string,
+): Promise<ApplicationFormDetailApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const response = await fetchApplicationWithMethod("PUT")({
+    subPath: `${applicationId}/forms/${formId}/inclusion`,
+    body: { is_included_in_submission },
+    additionalHeaders: ssgToken,
+  });
+
+  return (await response.json()) as ApplicationFormDetailApiResponse;
+};
+
 /**
  * Attachments
  */
