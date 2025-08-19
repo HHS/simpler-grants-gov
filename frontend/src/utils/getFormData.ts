@@ -21,6 +21,7 @@ import { validateUiSchema } from "src/components/applyForm/validate";
 
 export const dynamic = "force-dynamic";
 
+// either return error or data, not both
 type formDataResult =
   | { error: "TopLevelError" | "NotFound"; data?: never }
   | {
@@ -48,15 +49,21 @@ export default async function getFormData({
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
-  const session = await getSession();
+  let sessionToken = "";
 
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session to access form");
+  // API can take either internal token or session token to auth
+  if (!internalToken) {
+    const session = await getSession();
+
+    if (!session || !session.token) {
+      throw new UnauthorizedError("No active session to access form");
+    }
+    sessionToken = session.token;
   }
 
   try {
     const response = await getApplicationFormDetails(
-      session.token,
+      sessionToken,
       applicationId,
       appFormId,
       internalToken,

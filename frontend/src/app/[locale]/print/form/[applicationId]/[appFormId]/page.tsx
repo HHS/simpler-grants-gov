@@ -2,10 +2,9 @@ import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
 import { environment } from "src/constants/environments";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
 
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import PrintForm from "src/components/applyForm/PrintForm";
 
@@ -37,7 +36,7 @@ interface formPageProps {
   params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
 }
 
-async function FormPage({ params }: formPageProps) {
+export default async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
 
   const { data, error } = await getFormData({
@@ -64,9 +63,3 @@ async function FormPage({ params }: formPageProps) {
     </>
   );
 }
-
-export default withFeatureFlag<formPageProps, never>(
-  FormPage,
-  "applyFormPrototypeOff",
-  () => redirect("/maintenance"),
-);
