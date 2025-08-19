@@ -24,7 +24,6 @@ const SAVED_SEARCHES: Breadcrumb = {
   path: "/saved-search-queries/",
 };
 
-export const SUBSCRIBE_CRUMBS: Breadcrumb[] = [HOME, SUBSCRIBE];
 export const SUBSCRIBE_CONFIRMATION_CRUMBS: Breadcrumb[] = [
   HOME,
   SUBSCRIBE,
