@@ -51,7 +51,7 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
 
-  timeout_milliseconds = 180000
+  timeout_milliseconds = 29000
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
@@ -84,16 +84,18 @@ resource "aws_api_gateway_stage" "api_v1_stage" {
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
   stage_name    = "v1"
 
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway_logs[0].arn
-    format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\",\"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"apiKeyId\":\"$context.identity.apiKeyId\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\" }"
-  }
+  # access_log_settings {
+  #   destination_arn = aws_cloudwatch_log_group.api_gateway_logs[0].arn
+  #   format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\",\"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"apiKeyId\":\"$context.identity.apiKeyId\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\" }"
+  # }
 
   # checkov:skip=CKV_AWS_73:X-Ray can increase costs greatly, and aren't always necessary
   # checkov:skip=CKV2_AWS_29:WAF can be enabled at a later time if needed
   # checkov:skip=CKV2_AWS_51:Mutual TLS increases complexity for downstream systems
   # checkov:skip=CKV2_AWS_4:Log level and format is already set
   # checkov:skip=CKV_AWS_120:Cache disabled for now, will be followed up in a future ticket
+  # TEMP
+  # checkov:skip=CKV_AWS_76:Logging is dependent on a role being created in the infra/accounts playbook, but that isn't running first
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
@@ -115,7 +117,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
 
   settings {
     metrics_enabled = true
-    logging_level   = "INFO"
+    # logging_level   = "INFO"
   }
   # checkov:skip=CKV2_AWS_4:Log level set to info
   # checkov:skip=CKV_AWS_225:Cache disabled for now, will be followed up in a future ticket
