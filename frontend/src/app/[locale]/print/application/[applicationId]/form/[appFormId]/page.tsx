@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import { environment } from "src/constants/environments";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
@@ -17,11 +16,13 @@ export async function generateMetadata({
 }) {
   const { applicationId, appFormId } = await params;
   let title = "";
+  const headersList = await headers();
+  const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
   const { data } = await getFormData({
     applicationId,
     appFormId,
-    internalToken: environment.INTERNAL_API_JWT_TOKEN,
+    internalToken,
   });
 
   if (data) {
