@@ -27,6 +27,7 @@ class TestFrontendClient:
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=15,
+            pdf_generation_use_mocks=False,
         )
         client = FrontendClient(config)
         assert client.config.frontend_sidecar_url == "http://test:8080"
@@ -39,6 +40,7 @@ class TestFrontendClient:
             "DOCRAPTOR_TEST_MODE": "true",
             "DOCRAPTOR_API_URL": "https://docraptor.com/docs",
             "SHORT_LIVED_TOKEN_EXPIRATION_MINUTES": "15",
+            "PDF_GENERATION_USE_MOCKS": "false",
         }
 
         for key, value in env_vars.items():
@@ -58,6 +60,7 @@ class TestFrontendClient:
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=15,
+            pdf_generation_use_mocks=False,
         )
         client = FrontendClient(config)
 
@@ -131,6 +134,7 @@ class TestDocRaptorClient:
             docraptor_test_mode=False,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=15,
+            pdf_generation_use_mocks=False,
         )
         client = DocRaptorClient(config)
         assert client.config.docraptor_api_key == "test-key"
@@ -145,6 +149,7 @@ class TestDocRaptorClient:
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=15,
+            pdf_generation_use_mocks=False,
         )
         client = DocRaptorClient(config)
 

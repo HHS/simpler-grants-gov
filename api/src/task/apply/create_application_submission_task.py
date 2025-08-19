@@ -13,6 +13,7 @@ from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
+from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
@@ -70,6 +71,7 @@ class CreateApplicationSubmissionTask(Task):
         self.s3_config = s3_config
 
         self.app_submission_config = ApplicationSubmissionConfig()
+        self.pdf_generation_config = PdfGenerationConfig()
         self.has_more_to_process = True
 
     class Metrics(StrEnum):
@@ -193,7 +195,7 @@ class CreateApplicationSubmissionTask(Task):
                 db_session=self.db_session,
                 application_id=submission.application.application_id,
                 application_form_id=application_form.application_form_id,
-                use_mocks=False,  # TODO: Should this be driven via config?
+                use_mocks=self.pdf_generation_config.pdf_generation_use_mocks,
             )
 
             app_form_file_name = f"{application_form.form.short_form_name}.pdf"

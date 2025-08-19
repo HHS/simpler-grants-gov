@@ -15,6 +15,9 @@ class PdfGenerationConfig(PydanticBaseEnvConfig):
     # Token expiration in minutes
     short_lived_token_expiration_minutes: int
 
+    # Whether to use mock clients (for testing/development)
+    pdf_generation_use_mocks: bool
+
 
 def get_config() -> PdfGenerationConfig:
     """Get the PDF generation configuration."""

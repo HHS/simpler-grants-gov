@@ -27,6 +27,7 @@ class TestPdfGenerationService:
             "DOCRAPTOR_TEST_MODE": "true",
             "DOCRAPTOR_API_URL": "https://docraptor.com/docs",
             "SHORT_LIVED_TOKEN_EXPIRATION_MINUTES": "15",
+            "PDF_GENERATION_USE_MOCKS": "false",
         }
 
         for key, value in env_vars.items():
@@ -45,6 +46,7 @@ class TestPdfGenerationService:
             docraptor_test_mode=False,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=30,
+            pdf_generation_use_mocks=True,
         )
         service = PdfGenerationService(config)
         assert service.config.frontend_sidecar_url == "http://test:8080"
@@ -229,6 +231,7 @@ class TestFactoryFunctions:
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
             short_lived_token_expiration_minutes=15,
+            pdf_generation_use_mocks=False,
         )
         service = create_pdf_generation_service(config=config)
         assert service.config.frontend_sidecar_url == "http://custom:8080"
