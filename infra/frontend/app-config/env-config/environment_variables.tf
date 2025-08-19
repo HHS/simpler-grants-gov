@@ -58,6 +58,11 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
     },
+    # Short-lived token to authenticate when making Grants API fetch requests.
+    INTERNAL_API_JWT_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/internal-api-jwt-token"
+    },
     # URL for the API login route.
     AUTH_LOGIN_URL = {
       manage_method     = "manual"
