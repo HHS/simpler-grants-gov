@@ -170,3 +170,41 @@ class TestTransformOpportunity(BaseTransformTestClass):
         for attachment in attachments:
             assert attachment.file_location.startswith(s3_config.public_files_bucket_path) is True
             assert file_util.file_exists(attachment.file_location) is True
+
+    def test_process_opportunity_update_to_draft_with_attachments(
+        self, db_session, transform_opportunity, s3_config
+    ):
+
+        source_opportunity = setup_opportunity(
+            create_existing=False, source_values={"is_draft": "Y"}
+        )
+
+        target_opportunity = OpportunityFactory.create(
+            legacy_opportunity_id=source_opportunity.opportunity_id,
+            is_draft=False,
+            opportunity_attachments=[],
+        )
+
+        attachments = []
+        for i in range(10):
+            s3_path = attachment_util.get_s3_attachment_path(
+                f"my_file{i}.txt", i, target_opportunity, s3_config
+            )
+            assert s3_path.startswith(s3_config.public_files_bucket_path) is True
+
+            with file_util.open_stream(s3_path, "w") as outfile:
+                outfile.write(f"This is the {i}th file")
+
+            attachment = OpportunityAttachmentFactory.create(
+                opportunity=target_opportunity, file_location=s3_path
+            )
+            attachments.append(attachment)
+
+        transform_opportunity.process_opportunity(source_opportunity, target_opportunity)
+
+        validate_opportunity(db_session, source_opportunity)
+
+        # Verify all of the files were moved to the draft bucket
+        for attachment in attachments:
+            assert attachment.file_location.startswith(s3_config.draft_files_bucket_path) is True
+            assert file_util.file_exists(attachment.file_location) is True
