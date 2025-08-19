@@ -578,43 +578,6 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/api-keys:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserApiKeyListResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Forbidden
-      tags:
-      - User v1 - Internal Only
-      summary: List all API keys for the authenticated user
-      security:
-      - ApiJwtAuth: []
     post:
       parameters:
       - in: path
@@ -754,6 +717,55 @@ paths:
       tags:
       - User v1 - Internal Only
       summary: User Get Organizations
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/api-keys/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiKeyListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: List all API keys for the authenticated user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserApiKeyListRequest'
       security:
       - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}:
@@ -3439,6 +3451,17 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserApiKeyCreateRequest:
+      type: object
+      properties:
+        key_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Human-readable name for the API key
+          example: Production API Key
+      required:
+      - key_name
     UserApiKey:
       type: object
       properties:
@@ -3471,35 +3494,6 @@ components:
           format: date-time
           description: When this API key was created
           example: '2024-01-01T12:00:00Z'
-    UserApiKeyListResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: List of API keys for the user
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/UserApiKey'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    UserApiKeyCreateRequest:
-      type: object
-      properties:
-        key_name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          description: Human-readable name for the API key
-          example: Production API Key
-      required:
-      - key_name
     UserApiKeyCreateResponse:
       type: object
       properties:
@@ -3644,6 +3638,27 @@ components:
             type:
             - object
             $ref: '#/components/schemas/UserOrganization'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserApiKeyListRequest:
+      type: object
+      properties: {}
+    UserApiKeyListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of API keys for the user
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserApiKey'
         status_code:
           type: integer
           description: The HTTP status code
