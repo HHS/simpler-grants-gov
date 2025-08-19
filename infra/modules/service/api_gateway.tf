@@ -51,7 +51,7 @@ resource "aws_api_gateway_integration" "api_proxy_integration" {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
 
-  timeout_milliseconds = 180000
+  timeout_milliseconds = 29000
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
