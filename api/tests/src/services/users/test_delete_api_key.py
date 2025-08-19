@@ -99,5 +99,5 @@ def test_delete_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     db_api_key2 = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key2.api_key_id)
     ).scalar_one_or_none()
-    assert db_api_key1 is None  
-    assert db_api_key2 is not None 
+    assert db_api_key1 is None
+    assert db_api_key2 is not None
