@@ -4414,8 +4414,8 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          description: New human-readable name for the API key
-          example: Updated Production API Key
+          description: New name for the API key
+          example: Production API Key
       required:
       - key_name
     UserApiKeyRenameResponse:
