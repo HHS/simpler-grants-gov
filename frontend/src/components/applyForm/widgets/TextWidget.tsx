@@ -11,7 +11,8 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -36,6 +37,8 @@ function TextWidget<
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
+  formClassName,
+  inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
@@ -46,7 +49,9 @@ function TextWidget<
     type,
     examples,
     default: defaultValue,
+    pattern,
   } = schema as S;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   let inputValue: string | number | undefined;
   if (type === "number" || type === "integer") {
@@ -89,18 +94,26 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
+    <FormGroup
+      className={formClassName}
+      key={`form-group__text-input--${id}`}
+      error={error}
+    >
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+        <ErrorMessage id={`error-for-${id}`}>
+          {String(rawErrors[0])}
+        </ErrorMessage>
       )}
       <TextInput
         data-testid={id}
+        className={inputClassName}
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
         id={id}
@@ -119,6 +132,7 @@ function TextWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         validationStatus={error ? "error" : undefined}
+        pattern={pattern || undefined}
       />
       {Array.isArray(examples) && (
         <datalist

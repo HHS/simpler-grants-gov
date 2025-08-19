@@ -90,5 +90,11 @@ locals {
       schedule_expression = "cron(40 16 * * ? *)"
       state               = "ENABLED"
     }
+    sam-extracts = {
+      task_command = ["poetry", "run", "flask", "task", "sam-extracts"]
+      # Every day at 8am Eastern Time during DST. 9am during non-DST.
+      schedule_expression = "cron(0 13 * * ? *)"
+      state               = "DISABLED"
+    }
   }
 }

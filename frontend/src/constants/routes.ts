@@ -1,6 +1,7 @@
 export const ExternalRoutes = {
   ABOUT_HHS: "https://www.hhs.gov/about/index.html",
   ACCESSIBILITY_COMPLIANCE: "https://www.grants.gov/accessibility-compliance",
+  ASSISTANCE_LISTINGS: "https://sam.gov/assistance-listings",
   EMAIL_SIMPLERGRANTSGOV: "simpler@grants.gov",
   EMAIL_SUPPORT: "support@grants.gov",
   FOIA: "https://www.hhs.gov/foia/index.html",
@@ -30,4 +31,5 @@ export const ExternalRoutes = {
   PRIVACY_POLICY: "https://www.grants.gov/privacy-policy",
   USA: "https://www.usa.gov",
   WIKI: "https://wiki.simpler.hhs.gov",
+  GRANTOR_SUPPORT: "https://www.grants.gov/grantors/grantor-help",
 };

@@ -19,8 +19,12 @@ def minimal_valid_sf424b_v1_1() -> dict:
         "signature": "Bob Smith",
         "title": "Mr.",
         "applicant_organization": "Business Inc.",
-        "date_signed": "2025-01-01",
     }
+
+
+@pytest.fixture
+def full_valid_sf424b_v1_1(minimal_valid_sf424b_v1_1) -> dict:
+    return minimal_valid_sf424b_v1_1 | {"date_signed": "2025-01-01"}
 
 
 def test_sf424b_v1_1_minimal_valid_json(minimal_valid_sf424b_v1_1):
@@ -28,12 +32,15 @@ def test_sf424b_v1_1_minimal_valid_json(minimal_valid_sf424b_v1_1):
     assert len(validation_issues) == 0
 
 
+def test_sf424b_v1_1_full_valid_json(full_valid_sf424b_v1_1):
+    validation_issues = validate_json_schema_for_form(full_valid_sf424b_v1_1, SF424b_v1_1)
+    assert len(validation_issues) == 0
+
+
 def test_sf424b_v1_1_empty_json():
     EXPECTED_REQUIRED_FIELDS = [
-        "$.signature",
         "$.title",
         "$.applicant_organization",
-        "$.date_signed",
     ]
 
     validate_required({}, EXPECTED_REQUIRED_FIELDS)

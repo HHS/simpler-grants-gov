@@ -183,6 +183,7 @@ domain_name            = local.service_config.domain_name
 
   file_upload_jobs     = local.service_config.file_upload_jobs
   enable_s3_cdn        = true
+  enable_api_gateway   = true
   s3_cdn_bucket_name   = "public-files"
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets

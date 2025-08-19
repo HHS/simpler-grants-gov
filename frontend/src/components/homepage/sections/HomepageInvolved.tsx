@@ -5,7 +5,7 @@ import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 
 const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code";
-const discourseLink = "https://simplergrants.discourse.group/";
+const discourseLink = "https://forum.simpler.grants.gov/";
 const participateLink = "https://ethn.io/91822";
 
 const InvolvedContent = () => {

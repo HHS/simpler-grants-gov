@@ -14,7 +14,6 @@ def valid_json_v4_0():
     return {
         "submission_type": "Application",
         "application_type": "New",
-        "date_received": "2025-01-01",
         "organization_name": "Example Org",
         "employer_taxpayer_identification_number": "123-456-7890",
         "sam_uei": "UEI123123123",
@@ -56,8 +55,6 @@ def valid_json_v4_0():
         },
         "authorized_representative_phone_number": "123-456-7890",
         "authorized_representative_email": "example@mail.com",
-        "aor_signature": "Bob Smith",
-        "date_signed": "2025-06-01",
     }
 
 
@@ -70,6 +67,7 @@ def full_valid_json_v4_0(valid_json_v4_0):
         "application_type": "Revision",
         "revision_type": "E: Other (specify)",
         "revision_other_specify": "I am redoing it",
+        "date_received": "2025-01-01",
         "applicant_id": "ABC123",
         "federal_entity_identifier": "XYZ456",
         "federal_award_identifier": "1234567890",
@@ -121,6 +119,8 @@ def full_valid_json_v4_0(valid_json_v4_0):
             "title": "Agent",
         },
         "authorized_representative_fax": "333-333-3333",
+        "aor_signature": "Bob Smith",
+        "date_signed": "2025-06-01",
     }
 
 
@@ -140,7 +140,6 @@ def test_sf424_v4_0_empty_json(sf424_v4_0):
     EXPECTED_REQUIRED_FIELDS = {
         "$.submission_type",
         "$.application_type",
-        "$.date_received",
         "$.organization_name",
         "$.employer_taxpayer_identification_number",
         "$.sam_uei",
@@ -170,8 +169,6 @@ def test_sf424_v4_0_empty_json(sf424_v4_0):
         "$.authorized_representative",
         "$.authorized_representative_phone_number",
         "$.authorized_representative_email",
-        "$.aor_signature",
-        "$.date_signed",
     }
 
     assert len(validation_issues) == len(EXPECTED_REQUIRED_FIELDS)
@@ -208,7 +205,7 @@ def test_sf424_v4_0_empty_nested(sf424_v4_0, valid_json_v4_0):
     "value",
     [
         ["X: Other (specify)"],
-        ["X: Other (specify)", "A: state Government"],
+        ["X: Other (specify)", "A: State Government"],
         ["E: Regional Organization", "X: Other (specify)", "G: Independent School District"],
     ],
 )
@@ -228,9 +225,9 @@ def test_sf424_v4_0_applicant_type_other(sf424_v4_0, valid_json_v4_0, value):
         ([], "[] should be non-empty"),
         (
             [
-                "A: state Government",
-                "B: county Government",
-                "C: city or Township Government",
+                "A: State Government",
+                "B: County Government",
+                "C: City or Township Government",
                 "D: Special District Government",
             ],
             "The array is too long, expected a maximum length of 3",

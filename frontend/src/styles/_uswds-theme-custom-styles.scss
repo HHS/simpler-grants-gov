@@ -335,7 +335,8 @@ h6 {
 }
 
 .usa-footer__secondary-section {
-  background-color: color("mint-5");
+  height: 0;
+  padding: 0;
 }
 
 .footer-logo-container {
@@ -503,6 +504,21 @@ button.usa-pagination__button.usa-button {
   &.overflow-wrap {
     overflow-wrap: break-word;
   }
+  &.application-attachments-table {
+    td {
+      height: 65px;
+    }
+    .grants-spinner {
+      float: left;
+      margin-right: 0.5rem;
+    }
+    .highlight {
+      td {
+        background-color: color(gold-5v);
+        line-height: 1rem;
+      }
+    }
+  }
 }
 
 // Accordions
@@ -598,10 +614,6 @@ dl {
   }
 }
 
-iframe[id^="ethnio-screener-"] {
-  position: fixed !important;
-}
-
 // roadmap timeline
 .roadmap-row {
   div:first-child:after {
@@ -631,5 +643,58 @@ iframe[id^="ethnio-screener-"] {
     border-bottom: 2px solid color("base-darkest");
     transform: rotate(-45deg);
     transform-origin: left bottom;
+  }
+}
+
+#opportunity-detail-content {
+  p:first-child {
+    margin-top: 1rem;
+  }
+  p:last-child {
+    margin-bottom: 1rem;
+  }
+}
+
+.simpler-currency-input-wrapper {
+  position: relative;
+  display: inline-block;
+
+  &:before {
+    content: "$";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  input {
+    padding-left: 25px;
+    margin-top: 0 !important;
+  }
+}
+
+.simpler-page-anchor-offset {
+  @include at-media("desktop") {
+    scroll-margin-top: 6rem;
+  }
+}
+
+.simpler-apply-form {
+  .usa-input,
+  .usa-select,
+  fieldset[id^="form-section"] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
+  }
+}
+
+.simpler-application-forms-table {
+  table-layout: auto;
+
+  tr[id^="form"] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
   }
 }

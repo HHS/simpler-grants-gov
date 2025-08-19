@@ -331,21 +331,39 @@ FORM_JSON_SCHEMA = {
     },
 }
 
-# I have no idea what the frontend needs for the UI schema as it's
-# likely quite different from anything prior, so just going to leave
-# this blank for now.
 FORM_UI_SCHEMA = [
     {
+        "name": "SectionA",
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "label": "Section A - Budget summary",
         "children": [
-            {"type": "field", "definition": "/properties/direct_charges_explanation"},
-            {"type": "field", "definition": "/properties/indirect_charges_explanation"},
-            {"type": "field", "definition": "/properties/remarks"},
-            {"type": "field", "definition": "/properties/confirmation"},
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionA",
+                "widget": "Budget424aSectionA",
+                "definition": [
+                    "/properties/activity_line_items",
+                    "/properties/total_budget_summary",
+                ],
+            }
         ],
-    }
+    },
+    {
+        "name": "SectionB",
+        "type": "section",
+        "label": "Section B - Budget categories",
+        "children": [
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionB",
+                "widget": "Budget424aSectionB",
+                "definition": [
+                    "/properties/activity_line_items",
+                    "/properties/total_budget_categories",
+                ],
+            }
+        ],
+    },
 ]
 
 

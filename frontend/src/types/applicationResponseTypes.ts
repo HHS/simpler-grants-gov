@@ -1,7 +1,9 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
+import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
+import { FormDetail } from "./formResponseTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -24,14 +26,6 @@ export interface Oranization {
   sam_gov_entity: SamGovEntity;
 }
 
-export interface ApplicationFormDetail {
-  application_form_id: string;
-  application_form_status: "not_started" | "in_progress" | "complete";
-  application_id: string;
-  application_response: ApplicationResponseDetail;
-  form_id: string;
-}
-
 export interface FormValidationWarnings {
   [applicationId: string]: FormValidationWarning;
 }
@@ -40,7 +34,18 @@ export interface FormValidationErrors {
   form_validation_errors: FormValidationWarnings;
 }
 
+export interface ApplicationFormDetail {
+  application_form_id: string;
+  application_form_status: "not_started" | "in_progress" | "complete";
+  application_id: string;
+  application_response: ApplicationResponseDetail;
+  form_id: string;
+  form: FormDetail;
+  application_name: string;
+}
+
 export interface ApplicationDetail {
+  application_attachments: Array<Attachment>;
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
@@ -51,6 +56,12 @@ export interface ApplicationDetail {
   users: {
     email: string;
     user_id: string;
+  };
+}
+
+export interface ApplicationAttachmentUploadResponse extends APIResponse {
+  data: {
+    application_attachment_id: string;
   };
 }
 
@@ -71,8 +82,10 @@ export interface ApplicationSubmitApiResponse
   data: ApplicationSubmitResponse;
 }
 
-export interface ApplicationFormDetailApiResponse extends APIResponse {
+export interface ApplicationFormDetailApiResponse
+  extends Omit<APIResponse, "warnings"> {
   data: ApplicationFormDetail;
+  warnings: FormValidationWarnings;
 }
 
 export interface ApplicationDetailApiResponse extends APIResponse {

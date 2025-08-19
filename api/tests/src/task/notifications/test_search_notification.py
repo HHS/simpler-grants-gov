@@ -9,12 +9,12 @@ from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_r
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import UserNotificationLog, UserSavedSearch
+from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
-from src.task.notifications.generate_notifications import NotificationConstants
 from src.task.notifications.search_notification import (
+    UTM_TAG,
     SearchNotificationTask,
     _strip_pagination_params,
 )
@@ -53,12 +53,14 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedSearch)
+    cascade_delete_from_db_table(db_session, SuppressedEmail)
 
 
 @pytest.fixture()
 def notification_task(db_session, search_client):
     notification_config = EmailNotificationConfig()
     notification_config.reset_emails_without_sending = False
+    notification_config.sync_suppressed_emails = False
 
     return SearchNotificationTask(
         db_session=db_session, search_client=search_client, notification_config=notification_config
@@ -107,16 +109,16 @@ def test_search_notifications_cli(
 
     notification_logs_count = (
         db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .filter(UserNotificationLog.notification_reason == NotificationReason.SEARCH_UPDATES)
         .count()
     )
 
     _clear_mock_responses()
 
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
-
     assert result.exit_code == 0
 
     # Verify expected log messages
@@ -224,7 +226,8 @@ def test_grouped_search_queries_cli(
     )
 
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
 
     assert result.exit_code == 0
@@ -251,7 +254,6 @@ def test_grouped_search_queries_cli(
 
 
 def test_search_notifications_on_index_change(
-    cli_runner,
     db_session,
     enable_factory_create,
     user,
@@ -388,7 +390,8 @@ def test_search_notification_email_format_single_opportunity(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
@@ -410,7 +413,7 @@ def test_search_notification_email_format_single_opportunity(
     # Test single opportunity format
     expected_single = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
@@ -471,7 +474,8 @@ def test_search_notification_email_format_no_close_date(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
@@ -486,7 +490,7 @@ def test_search_notification_email_format_no_close_date(
     # Test opportunity with no close date format
     expected_content = f"""A funding opportunity matching your saved search query was recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>Ongoing Research Grant Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>Ongoing Research Grant Program</a></b>
 Status: Posted
 Submission period: 2/15/2025-(To be determined)
 Award range: $50,000-$500,000
@@ -567,7 +571,8 @@ def test_search_notification_email_format_multiple_opportunities(
 
     # Run notification task
     result = cli_runner.invoke(
-        args=["task", "email-notifications"], env={"RESET_EMAILS_WITHOUT_SENDING": "false"}
+        args=["task", "email-notifications"],
+        env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
     )
     assert result.exit_code == 0
 
@@ -589,14 +594,14 @@ def test_search_notification_email_format_multiple_opportunities(
     # Test single opportunity format
     expected_single = f"""The following funding opportunities matching your saved search queries were recently published.
 
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
 Status: Posted
 Submission period: 1/31/2025–4/30/2025
 Award range: $1,000,000-$112,500,000
 Expected awards: 40
 Cost sharing: Yes
 
-<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
+<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}{UTM_TAG}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
 Status: Forecasted
 Submission period: To be announced.
 Award range: $1-$30,000
@@ -646,4 +651,46 @@ def test_search_notification_deleted_search(
     results = notification_task.collect_email_notifications()
 
     # assert deleted saved search is not picked up
+    assert len(results) == 0
+
+
+def test_search_notification_suppressed_email(
+    cli_runner,
+    db_session,
+    setup_opensearch_data,
+    enable_factory_create,
+    user_with_email,
+    search_client,
+    notification_task,
+):
+    """Test that the user notification does not pick up users on suppression_list"""
+    # create a suppressed email
+    factories.SuppressedEmailFactory(email=user_with_email.email)
+
+    opp = factories.OpportunityFactory.create(
+        opportunity_id=OPPORTUNITIES[0].opportunity_id,
+        no_current_summary=True,
+        legacy_opportunity_id=4,
+        opportunity_title="Scholarship Program",
+    )
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity=opp, post_date=date.fromisoformat("2020-01-01")
+    )
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opp,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    # Create saved searches
+    factories.UserSavedSearchFactory.create(
+        search_query={"keywords": "test"},
+        user=user_with_email,
+        searched_opportunity_ids=[OPPORTUNITIES[1].opportunity_id],
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+    )
+
+    results = notification_task.collect_email_notifications()
+
+    # assert saved search is not picked up
     assert len(results) == 0

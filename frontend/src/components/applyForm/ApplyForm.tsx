@@ -54,6 +54,15 @@ const ApplyForm = ({
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+
+  if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
+    return (
+      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
+        Error rendering form
+      </Alert>
+    );
+  }
+
   let fields: JSX.Element[] = [];
   try {
     fields = buildFormTreeRecursive({
@@ -63,8 +72,9 @@ const ApplyForm = ({
       uiSchema,
     });
   } catch (e) {
+    console.error(e);
     return (
-      <Alert type="error" heading="Error" headingLevel="h4">
+      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form
       </Alert>
     );
@@ -73,7 +83,7 @@ const ApplyForm = ({
   return (
     <>
       <form
-        className="flex-1 margin-top-2"
+        className="flex-1 margin-top-2 simpler-apply-form"
         action={formAction}
         // turns off html5 validation so all error displays are consistent
         noValidate

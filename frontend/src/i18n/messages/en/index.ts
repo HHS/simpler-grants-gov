@@ -113,24 +113,54 @@ export const messages = {
       help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don't have an account? You can create one.",
       title: "Sign in to save this opportunity",
     },
-    startApplicationButtonText: "Start new application",
     startApplicationModal: {
+      startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      description:
-        "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
-      name: "Name of this application",
       requiredText: "All fields are required.",
       saveButtonText: "Save",
-      title: "New application",
-      validationError: "Please enter a name for your application.",
+      title: "Start a new application",
+      ineligibleTitle:
+        "It looks like you're not eligible to start a new application through this site",
+      applyingFor: "Applying for: ",
+      fields: {
+        name: {
+          label: "Name of this application",
+          description:
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+          validationError: "Enter a filing name. You can change this later.",
+        },
+        organizationSelect: {
+          label: "Who's applying?",
+          default: "-Select-",
+          notListed: "My organization isn't listed",
+          validationError:
+            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
+        },
+      },
+      description: {
+        organizationIntro:
+          "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
+        applyingForOrg:
+          "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
+        poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
+        uei: "Have a valid UEI (a Unique Entity ID <link>registered through SAM.gov</link>)",
+        ineligibleGoToGrants:
+          "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        goToGrants:
+          "If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        pilotGoToGrants:
+          "This opportunity is part of a pilot program. If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        organizationIndividualIntro:
+          "You can apply as an individual or organization. To apply as part of an organization you must:",
+      },
     },
     intro: {
       agency: "Agency: ",
-      assistanceListings: "Assistance Listings: ",
+      assistanceListings: "Assistance Listings:",
       lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
@@ -224,7 +254,7 @@ export const messages = {
     submissionSuccess: {
       title: "Your application has been submitted",
       description:
-        "The awarding agency will review and process it independently of Grants.gov. Once they receive your application, they will manage all further updates. Grants.gov won’t have access to the status of your award.",
+        "The awarding agency will review and process it independently of Grants.gov. Once they receive your application, they will manage all further updates. Grants.gov won't have access to the status of your award.",
     },
     information: {
       applicant: "Applicant",
@@ -279,7 +309,7 @@ export const messages = {
       attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
-        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you’ll need to complete it and upload any required documents.",
+        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
       downloadInstructions: "Download instructions",
       form: "Form",
       instructions: "Instructions",
@@ -287,11 +317,38 @@ export const messages = {
       requiredForms: " Required Forms",
       status: "Status",
       statuses: {
-        not_started: "Not started",
-        in_progress: "In progress",
-        complete: "Complete",
+        not_started: "Not started.",
+        in_progress: "Some issues found. Check your entries.",
+        complete: "No issues detected.",
+        attachmentDeleted: "An attachment was deleted.",
       },
       updated: "Last updated",
+      updatedBy: "Last updated by",
+    },
+    attachments: {
+      attachedDocument: "Attached document",
+      attachments: "Attachments",
+      attachmentsInstructions:
+        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+      action: "Action",
+      cancelUpload: "Cancel upload",
+      delete: "Delete",
+      uploading: "Uploading...",
+      download: "Download",
+      emptyTable: "No attachments uploaded",
+      fileSize: "File Size",
+      uploadBy: "Upload by",
+      uploadDate: "Upload date",
+      deleteModal: {
+        titleText: "Delete",
+        cancelDeleteCta: "Cancel",
+        cautionDeletingAttachment: "Caution, deleting attachment",
+        descriptionText:
+          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+        deleteFileCta: "Delete file",
+        deleteFilesCta: "Delete files",
+        deleting: "Deleting...",
+      },
     },
     applyForm: {
       errorTitle: "This form could not be saved",
@@ -451,10 +508,18 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
+  Developer: {
+    pageTitle: "Developer Portal | Simpler.Grants.gov",
+    pageDescription:
+      "Tools and resources for developers working on Simpler.Grants.gov",
+    description:
+      "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+  },
   Header: {
     navLinks: {
       about: "About",
       community: "Community",
+      developer: "Developer Portal",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",
@@ -487,13 +552,23 @@ export const messages = {
     agencyContactCenter: "Grants.gov Program Management Office",
     telephone: "1-800-518-4726",
     returnToTop: "Return to top",
-    linkXTwitter: "X (Twitter)",
-    linkYoutube: "YouTube",
-    linkGithub: "Github",
-    linkRss: "RSS",
-    linkNewsletter: "Newsletter",
-    linkBlog: "Blog",
     logoAlt: "Grants.gov logo",
+    explore: "Explore",
+    simpler: "Simpler.Grants.gov",
+    links: {
+      home: "Home",
+      search: "Search",
+      vision: "Vision",
+      roadmap: "Roadmap",
+      events: "Events",
+      newsletter: "Newsletter",
+    },
+    feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
+    supportCenter: "Grants.gov Support Center",
+    techSupport:
+      "For technical support, contact: <email>support@grants.gov</email>",
+    grantorSupport:
+      "Grantors, contact the PMO through your <poc>Agency Point of Contact</poc>.",
   },
   Identifier: {
     identity:
@@ -708,8 +783,9 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
-    noSavedCTA:
-      "You don't have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+    noSavedCTAParagraphOne: "You don't have any saved queries yet.",
+    noSavedCTAParagraphTwo:
+      "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
     title: "Saved Search Queries | Simpler.Grants.gov",
     error:
@@ -729,6 +805,7 @@ export const messages = {
       closeDate: "Close date",
       costSharing: "Cost sharing",
       topLevelAgency: "Top level agency",
+      andOr: "Query and/or operator",
     },
     editModal: {
       loading: "Updating",
@@ -752,9 +829,12 @@ export const messages = {
     },
   },
   SavedOpportunities: {
+    metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
-    noSavedCTA:
-      "To add an opportunity to your list, use the Save button next to its title on the listing's page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noSavedCTAParagraphOne:
+      "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
+    noSavedCTAParagraphTwo:
+      "Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
     searchButton: "Start a new search",
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
@@ -895,19 +975,19 @@ export const messages = {
             date: "Summer 2025",
             title: "Simpler search, by default",
             content:
-              "<p>Our easier-to-use search experience will become the default way to discover funding opportunities on Grants.gov. It’s built to deliver stronger results with less fuss.</p><p><link-search>Try the new search now</link-search>.</p>",
+              "<p>Our easier-to-use search experience will become the default way to discover funding opportunities on Grants.gov. It's built to deliver stronger results with less fuss.</p><p><link-search>Try the new search now</link-search>.</p>",
           },
           {
             date: "Fall 2025",
             title: "Piloting a new way to apply",
             content:
-              "<p>We'll test a simpler, more intuitive application workflow with a small group of partner agencies and funding opportunities.</p><p>Is your agency interested in participating? <link-form>Complete our interest form</link-form>, and we’ll be in touch.</p>",
+              "<p>We'll test a simpler, more intuitive application workflow with a small group of partner agencies and funding opportunities.</p><p>Is your agency interested in participating? <link-form>Complete our interest form</link-form>, and we'll be in touch.</p>",
           },
           {
             date: "Next year",
             title: "A better application experience for everyone",
             content:
-              "<p>All applicants will have the option to use our simpler workflow when applying through Grants.gov. We’ll continue scaling up to support the needs of all agencies.</p>",
+              "<p>All applicants will have the option to use our simpler workflow when applying through Grants.gov. We'll continue scaling up to support the needs of all agencies.</p>",
           },
         ],
       },

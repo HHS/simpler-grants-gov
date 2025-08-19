@@ -22,7 +22,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -46,7 +47,7 @@ function SelectWidget<
 >({
   id,
   disabled,
-  options,
+  options = {},
   readonly,
   required,
   schema,
@@ -61,6 +62,7 @@ function SelectWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, description } = schema;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
   const enums = useMemo(() => (opts && opts.length > 0 ? opts : []), [opts]);
@@ -117,15 +119,24 @@ function SelectWidget<
   const Widget = useCombo ? ComboBox : Select;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
+    <FormGroup error={error} key={`form-group__select-input--${id}`}>
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
 
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {typeof rawErrors[0] === "string"
+            ? rawErrors[0]
+            : Object.values(rawErrors[0])
+                .map((value) => value)
+                .join(",")}
+        </ErrorMessage>
+      )}
 
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580

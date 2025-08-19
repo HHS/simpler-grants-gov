@@ -1,8 +1,12 @@
+import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
+import { envFeatureFlags } from "src/constants/environments";
 import UserProvider from "src/services/auth/UserProvider";
+import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 
+import { ActivityMonitor } from "./ActivityMonitor";
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
@@ -18,7 +22,13 @@ export default function Layout({ children, locale }: Props) {
   const t = useTranslations();
 
   return (
-    <UserProvider>
+    <UserProvider
+      featureFlagDefaults={assignBaseFlags(
+        defaultFeatureFlags,
+        envFeatureFlags,
+      )}
+    >
+      <ActivityMonitor />
       <div className="display-flex flex-column minh-viewport">
         <a className="usa-skipnav" href="#main-content">
           {t("Layout.skipToMain")}

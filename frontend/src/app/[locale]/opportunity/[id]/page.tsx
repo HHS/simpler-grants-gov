@@ -136,9 +136,10 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
-        <div className="padding-y-3 display-flex">
+        <div className="display-flex desktop:padding-y-1 padding-y-3">
           <OpportunitySaveUserControl
             opportunityId={opportunityData.opportunity_id}
+            type="button"
           />
           {opportunityData.competitions &&
             opportunityData.opportunity_title && (
@@ -148,8 +149,8 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
               />
             )}
         </div>
-        <div className="grid-row grid-gap margin-top-2">
-          <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+        <div className="grid-row grid-gap" id="opportunity-detail-content">
+          <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
@@ -162,7 +163,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityLink opportunityData={opportunityData} />
           </div>
 
-          <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
+          <div className="desktop:grid-col-4 grid-col-12 order-0">
             <OpportunityStatusWidget opportunityData={opportunityData} />
             <OpportunityCTA legacyId={opportunityData.legacy_opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />

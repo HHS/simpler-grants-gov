@@ -1,35 +1,72 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
   determineFieldType,
-  getApplicationResponse,
+  getFieldName,
   getFieldSchema,
+  processFormSchema,
+  pruneEmptyNestedFields,
   shapeFormData,
 } from "src/components/applyForm/utils";
+
+type FormActionArgs = [
+  {
+    applicationId: string;
+    formId: string;
+    formData: FormData;
+    saved: boolean;
+    error: boolean;
+  },
+  FormData,
+];
+
+type FormActionResult = Promise<{
+  applicationId: string;
+  formId: string;
+  saved: boolean;
+  error: boolean;
+  formData: FormData;
+}>;
+
+const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+const mockRevalidateTag = jest.fn<void, [string]>();
+const getSessionMock = jest.fn();
+const mockDereference = jest.fn();
+const mockMergeAllOf = jest.fn();
+
+jest.mock("src/components/applyForm/actions", () => ({
+  handleFormAction: (...args: [...FormActionArgs]) =>
+    mockHandleFormAction(...args),
+}));
+
+jest.mock("next/cache", () => ({
+  revalidateTag: (tag: string) => mockRevalidateTag(tag),
+}));
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   useCallback: (fn: unknown) => fn,
 }));
 
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("@apidevtools/json-schema-ref-parser", () => ({
+  dereference: () => mockDereference() as unknown,
+}));
+
+jest.mock("json-schema-merge-allof", () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,
+}));
+
 describe("shapeFormData", () => {
   it("should shape form data to the form schema", () => {
-    const formSchema: RJSFSchema = {
-      title: "test schema",
-      properties: {
-        name: { type: "string", title: "test name", maxLength: 60 },
-        dob: { type: "string", format: "date", title: "Date of birth" },
-        address: { type: "string", title: "test address" },
-        state: { type: "string", title: "test state" },
-      },
-      required: ["name"],
-    };
-
     const shapedFormData = {
       name: "test",
       dob: "01/01/1900",
@@ -43,70 +80,17 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData, formSchema);
+    const data = shapeFormData(formData);
 
     expect(data).toMatchObject(shapedFormData);
   });
   it("should shape nested form data", () => {
-    const formSchema: RJSFSchema = {
-      type: "object",
-      title: "test schema",
-      properties: {
-        name: { type: "string", title: "test name", maxLength: 60 },
-        dob: { type: "string", format: "date", title: "Date of birth" },
-        address: {
-          type: "object",
-          properties: {
-            street: { type: "string", title: "street" },
-            zip: { type: "number", title: "zip code" },
-            state: { type: "string", title: "test state" },
-            question: {
-              type: "object",
-              properties: {
-                own: { type: "string", title: "own" },
-                rent: { type: "string", title: "rent" },
-                other: { type: "string", title: "other" },
-              },
-            },
-          },
-        },
-        tasks: {
-          type: "array",
-          title: "Tasks",
-          items: {
-            type: "object",
-            required: ["title"],
-            properties: {
-              title: {
-                type: "string",
-                title: "Important task",
-              },
-              done: {
-                type: "boolean",
-                title: "Done?",
-                default: false,
-              },
-            },
-          },
-        },
-        todos: {
-          type: "array",
-          title: "Tasks",
-          items: {
-            type: "string",
-            title: "Reminder",
-          },
-        },
-      },
-      required: ["name"],
-    };
-
     const shapedFormData = {
       name: "test",
       dob: "01/01/1900",
       address: {
         street: "test street",
-        zip: "1234",
+        zip: 1234,
         state: "XX",
         question: {
           rent: "yes",
@@ -125,27 +109,28 @@ describe("shapeFormData", () => {
       todos: ["email", "write"],
     };
 
-    const formData = new FormData();
-    formData.append("street", "test street");
-    formData.append("name", "test");
-    formData.append("state", "XX");
-    formData.append("zip", "1234");
-    formData.append("dob", "01/01/1900");
-    formData.append("rent", "yes");
     const tasks: Array<{ title: string; done: string }> = [
       { title: "Submit form", done: "false" },
       { title: "Start form", done: "true" },
     ];
+    const formData = new FormData();
+
+    formData.append("name", "test");
+    formData.append("dob", "01/01/1900");
+    formData.append("address--street", "test street");
+    formData.append("address--state", "XX");
+    formData.append("address--zip", "1234");
+    formData.append("address--question--rent", "yes");
 
     tasks.forEach((obj, index) => {
       (Object.keys(obj) as Array<keyof typeof obj>).forEach((key) => {
-        formData.append(`tasks[${index}][${key}]`, String(obj[key]));
+        formData.append(`tasks[${index}]--${key}`, String(obj[key]));
       });
     });
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData, formSchema);
+    const data = shapeFormData(formData);
     expect(data).toMatchObject(shapedFormData);
   });
 });
@@ -194,45 +179,6 @@ describe("buildField", () => {
     expect(field).toHaveAttribute("type", "text");
     expect(field).toHaveAttribute("maxLength", "50");
     expect(field).toHaveValue("Jane Doe");
-  });
-
-  it("should handle fields with no definition", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      schema: {
-        type: "number",
-        title: "Age",
-      },
-    };
-
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        age: { type: "number", title: "Age" },
-      },
-    };
-
-    const errors = null;
-    const formData = {};
-
-    const BuiltField = buildField({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-    });
-    render(BuiltField);
-
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "Age");
-    expect(label).toHaveAttribute("id", "label-for-Age");
-
-    const field = screen.getByTestId("Age");
-    expect(field).toBeInTheDocument();
-    expect(field).not.toBeRequired();
-    expect(field).toHaveAttribute("type", "number");
-    // the fields not in the json schema do not have values
-    expect(field).not.toHaveValue();
   });
 
   it("should handle fields with errors", () => {
@@ -307,9 +253,17 @@ describe("buildFormTreeRecursive", () => {
       uiSchema,
     });
 
-    expect(result).toHaveLength(2);
-    expect(result[0].key).toBe("wrapper-for-name");
-    expect(result[1].key).toBe("wrapper-for-age");
+    // render the result
+    render(<>{result}</>);
+
+    // assert field inputs
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toBeInTheDocument();
+    expect(nameField).toHaveValue("John");
+
+    const ageField = screen.getByTestId("age");
+    expect(ageField).toBeInTheDocument();
+    expect(ageField).toHaveValue(30);
   });
 
   it("should build a tree for a nested schema", () => {
@@ -352,7 +306,7 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("address-wrapper");
+    expect(result[0].key).toBe("address-fieldset");
   });
 
   it("should handle empty uiSchema gracefully", () => {
@@ -420,27 +374,27 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("section-wrapper");
+    expect(result[0].key).toBe("section-fieldset");
   });
 });
 
-describe("getApplicationResponse", () => {
-  it("should return a structured response for valid input", () => {
-    const forms = [
-      {
-        application_form_id: "test",
-        application_id: "test",
-        application_form_status: "complete",
-        application_response: { test: "test" },
-        form_id: "test",
-      },
-    ] as ApplicationFormDetail[];
+// describe("getApplicationResponse", () => {
+//   it("should return a structured response for valid input", () => {
+//     const forms = [
+//       {
+//         application_form_id: "test",
+//         application_id: "test",
+//         application_form_status: "complete",
+//         application_response: { test: "test" },
+//         form_id: "test",
+//       },
+//     ] as ApplicationFormDetail[];
 
-    const result = getApplicationResponse(forms, "test");
+//     const result = getApplicationResponse(forms, "test");
 
-    expect(result).toEqual({ test: "test" });
-  });
-});
+//     expect(result).toEqual({ test: "test" });
+//   });
+// });
 
 describe("determineFieldType", () => {
   it("should return proper fields", () => {
@@ -493,12 +447,9 @@ describe("getFieldSchema", () => {
       },
     };
 
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-    };
+    const definition = "/properties/name";
 
-    const result = getFieldSchema({ uiFieldObject, formSchema });
+    const result = getFieldSchema({ schema: {}, definition, formSchema });
     expect(result).toEqual({ type: "string", title: "Name", maxLength: 50 });
   });
 
@@ -510,13 +461,10 @@ describe("getFieldSchema", () => {
       },
     };
 
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-      schema: { title: "Custom Name", minLength: 5 },
-    };
+    const definition = "/properties/name";
+    const schema = { title: "Custom Name", minLength: 5 };
 
-    const result = getFieldSchema({ uiFieldObject, formSchema });
+    const result = getFieldSchema({ schema, definition, formSchema });
     expect(result).toEqual({
       type: "string",
       // overridden the beh uiFieldObject schema
@@ -524,6 +472,132 @@ describe("getFieldSchema", () => {
       maxLength: 50,
       // added from the uiFieldObject schema
       minLength: 5,
+    });
+  });
+});
+
+describe("pruneEmptyNestedFields", () => {
+  it("returns flat object unchanged", () => {
+    const flat = {
+      thing: 1,
+      another: "string",
+      bad: null,
+      stuff: [2, "hi"],
+    };
+    expect(pruneEmptyNestedFields(flat)).toEqual(flat);
+  });
+  it("returns empty object if passed an empty object or object with only undefined fields", () => {
+    const empty = {};
+    expect(pruneEmptyNestedFields(empty)).toEqual(empty);
+  });
+  it("prunes only top level empty objects", () => {
+    const undefinedFields = {
+      whatever: {
+        again: { something: undefined },
+        another: undefined,
+        more: { stuff: undefined },
+      },
+    };
+    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({
+      whatever: { another: undefined },
+    });
+  });
+  it("removes nested objects containing only undefined properties", () => {
+    expect(
+      pruneEmptyNestedFields({
+        thing: "stuff",
+        another: {
+          nested: {
+            bad: undefined,
+          },
+        },
+        keepMe: {
+          here: {
+            ok: "sure",
+          },
+          remove: {
+            me: undefined,
+          },
+        },
+      }),
+    ).toEqual({
+      thing: "stuff",
+      another: {},
+      keepMe: {
+        here: {
+          ok: "sure",
+        },
+      },
+    });
+  });
+});
+
+describe("getFieldName", () => {
+  it("returns correct field name based on definition, removing properties and adding delimiter", () => {
+    expect(
+      getFieldName({
+        definition: "/properties/something/properties/somethingElse",
+      }),
+    ).toEqual("something--somethingElse");
+  });
+  // this may not actually work
+  it("returns correct field name based on schema", () => {
+    expect(
+      getFieldName({
+        schema: {
+          title: "a bunch of stuff",
+        },
+      }),
+    ).toEqual("a-bunch-of-stuff");
+
+    expect(
+      getFieldName({
+        schema: {},
+      }),
+    ).toEqual("untitled");
+  });
+});
+
+describe("processFormSchema", () => {
+  beforeEach(() => {
+    mockDereference.mockResolvedValue({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+        allOf: "things",
+      },
+    });
+    mockMergeAllOf.mockImplementation(
+      (processMe: { properties?: { allOf: unknown } }): unknown => {
+        if (processMe.properties) {
+          delete processMe.properties.allOf;
+        }
+        return processMe;
+      },
+    );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it("calls the dereference function", async () => {
+    await processFormSchema({});
+    expect(mockDereference).toHaveBeenCalled();
+  });
+  it("calls allOf merge function", async () => {
+    await processFormSchema({ properties: {} });
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
+  });
+  it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
+    const processed = await processFormSchema({});
+    expect(processed).toEqual({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+      },
     });
   });
 });

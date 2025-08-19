@@ -1,5 +1,5 @@
+import dataclasses
 import logging
-import random
 
 import click
 from sqlalchemy import select
@@ -9,6 +9,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.db.models.competition_models import Form
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -19,9 +20,20 @@ from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
-from tests.lib.seed_form import FORM_NAME, JSON_SCHEMA_FORM, UI_SCHEMA
+from tests.lib.seed_orgs_and_users import _build_organizations_and_users
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class SeedConfig:
+    iterations: int
+    cover_all_agencies: bool
+
+    seed_agencies: bool
+    seed_opportunities: bool
+    seed_forms: bool
+    seed_users: bool
 
 
 def _build_opportunities(
@@ -47,6 +59,9 @@ def _build_opportunities(
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
         factories.OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, has_long_descriptions=True, has_attachments=True
+        )
+        factories.OpportunityFactory.create_batch(
             size=2, agency_code="CLOSED", is_closed_summary=True
         )
         factories.OpportunityFactory.create_batch(
@@ -69,12 +84,40 @@ def _build_opportunities(
                 opportunity=all_null_opportunity, opportunity_summary=summary
             )
     if cover_all_agencies:
-        for agency in factories.CustomProvider.AGENCIES:
-            factories.OpportunityFactory.create(agency_code=agency)
+        agencies = factories.CustomProvider.AGENCIES
+        agencies_with_opp = (
+            db_session.execute(
+                select(Opportunity.agency_code).where(Opportunity.agency_code.in_(agencies))
+            )
+            .scalars()
+            .all()
+        )
+
+        for agency in agencies:
+            if agency not in agencies_with_opp:
+                factories.OpportunityFactory.create(agency_code=agency)
+
     logger.info("Finished creating opportunities")
 
 
-def _build_pilot_competition(db_session: db.Session) -> None:
+def _build_forms(db_session: db.Session) -> dict[str, Form]:
+    """Load all of our forms into the DB"""
+    logger.info("Rebuilding forms")
+
+    forms = dict(
+        sf424=db_session.merge(SF424_v4_0, load=True),
+        sf424a=db_session.merge(SF424a_v1_0, load=True),
+        project_abstract_summary=db_session.merge(ProjectAbstractSummary_v2_0, load=True),
+        project_narrative_attachment=db_session.merge(ProjectNarrativeAttachment_v1_2, load=True),
+        budget_narrative_attachment=db_session.merge(BudgetNarrativeAttachment_v1_2, load=True),
+        sf424b=db_session.merge(SF424b_v1_1, load=True),
+        sflll=db_session.merge(SFLLL_v2_0, load=True),
+    )
+
+    return forms
+
+
+def _build_pilot_competition(forms: dict[str, Form]) -> None:
     logger.info("Creating an opportunity setup like our pilot")
     pilot_competition = factories.CompetitionFactory.create(
         opportunity__opportunity_title="Local Pilot-equivalent Opportunity",
@@ -82,40 +125,32 @@ def _build_pilot_competition(db_session: db.Session) -> None:
         with_instruction=True,
     )
 
-    # Create/update the forms if they don't already exist
-    sf424 = db_session.merge(SF424_v4_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=sf424, is_required=True
+        competition=pilot_competition, form=forms["sf424"], is_required=True
     )
 
-    sf424a = db_session.merge(SF424a_v1_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=sf424a, is_required=True
+        competition=pilot_competition, form=forms["sf424a"], is_required=True
     )
 
-    project_abstract_summary = db_session.merge(ProjectAbstractSummary_v2_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=project_abstract_summary, is_required=True
+        competition=pilot_competition, form=forms["project_abstract_summary"], is_required=True
     )
 
-    project_narrative_attachment = db_session.merge(ProjectNarrativeAttachment_v1_2, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=project_narrative_attachment, is_required=True
+        competition=pilot_competition, form=forms["project_narrative_attachment"], is_required=True
     )
 
-    budget_narrative_attachment = db_session.merge(BudgetNarrativeAttachment_v1_2, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=budget_narrative_attachment, is_required=True
+        competition=pilot_competition, form=forms["budget_narrative_attachment"], is_required=True
     )
 
-    sf424b = db_session.merge(SF424b_v1_1, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=sf424b, is_required=True
+        competition=pilot_competition, form=forms["sf424b"], is_required=True
     )
 
-    sflll = db_session.merge(SFLLL_v2_0, load=True)
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=sflll, is_required=False
+        competition=pilot_competition, form=forms["sflll"], is_required=False
     )
 
     logger.info(
@@ -123,38 +158,7 @@ def _build_pilot_competition(db_session: db.Session) -> None:
     )
 
 
-def _build_user_saved_opportunities_and_searches(db_session: db.Session) -> None:
-    logger.info("Creating users with saved opportunities and searches")
-    saved_opportunities_count = 5
-    saved_searched_count = 5
-
-    # Retrieve list of possible opportunities
-    opportunity_ids: list = db_session.execute(select(Opportunity.opportunity_id)).scalars().all()
-
-    # Create users
-    users = factories.UserFactory.create_batch(size=5)
-
-    for user in users:
-        # Create saved opportunities from randomly selected opportunities
-        selected_opportunities = random.sample(opportunity_ids, saved_opportunities_count)
-        for opportunity_id in selected_opportunities:
-            factories.UserSavedOpportunityFactory.create(user=user, opportunity_id=opportunity_id)
-
-        # Create saved searches from randomly selected opportunities
-        for i in range(saved_searched_count):
-            saved_search_opportunities_count = random.randint(1, 10)
-            selected_opportunities = random.sample(
-                opportunity_ids, saved_search_opportunities_count
-            )
-            factories.UserSavedSearchFactory.create(
-                user=user,
-                name=f"Save Search {i + 1}",
-                search_query={"keywords": f"keyword {i + 1}"},
-                searched_opportunity_ids=selected_opportunities,
-            )
-
-
-def _build_simple_competition():
+def _build_simple_competition(forms: dict[str, Form]) -> None:
     logger.info("Creating a very simple competition for local development")
 
     simple_competition = factories.CompetitionFactory.create(
@@ -162,16 +166,8 @@ def _build_simple_competition():
         competition_forms=[],
         with_instruction=True,
     )
-
     factories.CompetitionFormFactory.create(
-        competition=simple_competition, is_required=True, form__with_instruction=True
-    )
-    factories.CompetitionFormFactory.create(
-        competition=simple_competition,
-        is_required=False,
-        form__form_name=FORM_NAME,
-        form__form_json_schema=JSON_SCHEMA_FORM,
-        form__form_ui_schema=UI_SCHEMA,
+        competition=simple_competition, form=forms["project_abstract_summary"], is_required=True
     )
 
     logger.info(
@@ -179,10 +175,23 @@ def _build_simple_competition():
     )
 
 
-def _build_competitions(db_session: db.Session) -> None:
+def _build_competitions(forms_map: dict[str, Form]) -> None:
     logger.info("Creating competitions")
-    _build_simple_competition()
-    _build_pilot_competition(db_session)
+    _build_simple_competition(forms_map)
+    _build_pilot_competition(forms_map)
+
+
+def _build_user_organizations(db_session: db.Session) -> None:
+    logger.info("Creating user organizations")
+
+    batch_size = 2
+
+    users = factories.UserFactory.create_batch(size=batch_size)
+    organizations = factories.OrganizationFactory.create_batch(size=batch_size)
+    for index in range(batch_size):
+        user = users[index - 1]
+        organization = organizations[index - 1]
+        factories.OrganizationUserFactory.create(user=user, organization=organization)
 
 
 @click.command()
@@ -193,10 +202,29 @@ def _build_competitions(db_session: db.Session) -> None:
 )
 @click.option(
     "--cover_all_agencies",
-    default="false",
+    default=True,
     help="Should the seed include an opportunity assigned to each agency?",
 )
-def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
+@click.option(
+    "--steps",
+    "-s",
+    default=["ALL"],
+    type=click.Choice(
+        ["ALL", "agencies", "opps", "forms", "users"],
+    ),
+    multiple=True,
+    help="Which steps of the process should be run",
+)
+def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -> None:
+    seed_config = SeedConfig(
+        iterations=iterations,
+        cover_all_agencies=cover_all_agencies,
+        seed_agencies="ALL" in steps or "agencies" in steps,
+        seed_opportunities="ALL" in steps or "opps" in steps,
+        seed_forms="ALL" in steps or "forms" in steps,
+        seed_users="ALL" in steps or "users" in steps,
+    )
+
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
@@ -205,13 +233,22 @@ def seed_local_db(iterations: int, cover_all_agencies: bool) -> None:
 
         with db_client.get_session() as db_session:
             factories._db_session = db_session
+            run_seed_logic(db_session, seed_config)
 
-            _build_opportunities(db_session, iterations, cover_all_agencies)
-            # Need to commit to force any updates made
-            # after factories created objects
-            db_session.commit()
 
-            _build_agencies(db_session)
-            _build_competitions(db_session)
-            _build_user_saved_opportunities_and_searches(db_session)
-            db_session.commit()
+def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
+
+    if seed_config.seed_opportunities:
+        _build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
+        # Need to commit to force any updates made
+        # after factories created objects
+        db_session.commit()
+
+    if seed_config.seed_agencies:
+        _build_agencies(db_session)
+    if seed_config.seed_forms:
+        forms_map = _build_forms(db_session)
+        _build_competitions(forms_map)
+    if seed_config.seed_users:
+        _build_organizations_and_users(db_session)
+    db_session.commit()

@@ -203,7 +203,8 @@ class OpportunitySummaryV1Schema(Schema):
     )
 
     version_number = fields.Integer(
-        metadata={"description": "The version number of the opportunity summary", "example": 1}
+        allow_none=True,
+        metadata={"description": "The version number of the opportunity summary", "example": 1},
     )
 
     funding_instruments = fields.List(fields.Enum(FundingInstrument))

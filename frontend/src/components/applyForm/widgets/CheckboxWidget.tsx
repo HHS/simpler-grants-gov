@@ -51,7 +51,7 @@ function CheckboxWidget<
     (event: FocusEvent<HTMLInputElement>) => onFocus(id, event.target.checked),
     [onFocus, id],
   );
-  const description = options.description ?? schema.description;
+  const description = options?.description ?? schema.description;
 
   const label = required ? (
     <>
@@ -63,7 +63,7 @@ function CheckboxWidget<
   );
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`form-group__checkbox--${id}`}>
       <Checkbox
         id={id}
         label={label}

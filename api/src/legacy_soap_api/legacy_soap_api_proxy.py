@@ -11,12 +11,14 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateNotConfigured,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     filter_headers,
     get_soap_error_response,
     get_streamed_soap_response,
 )
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ PROXY_TIMEOUT = 3600
 def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
     config = get_soap_config()
 
-    # Use X-Gg-S2S-Uri header locally if passed, otherwise defualt to GRANTS_GOV_URI:GRANTS_GOV_PORT.
+    # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
     proxy_url = join(
         soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
         soap_request.full_path.lstrip("/"),
@@ -41,29 +43,48 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     if not soap_request.auth or config.soap_auth_map == {}:
-        logger.info("soap_client_certificate: Sending soap request without client certificate")
+        logger.info(
+            "soap_client_certificate: Sending soap request without client certificate",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
+        )
         return _get_soap_response(_request, timeout=timeout)
 
-    logger.info("soap_client_certificate: Sending soap request with client certificate")
+    logger.info("soap_client_certificate: Processing client certificate")
     # Handle cert based proxy request.
     with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
         temp_file_path = temp_cert_file.name
         try:
-            cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
-        except SOAPClientCertificateLookupError as e:
+            cert, cert_id = soap_request.auth.certificate.get_pem(config.soap_auth_map)
+        except SOAPClientCertificateLookupError:
             # This exception handles invalid client certs. We will continue to return the response
             # from GG.
             cert = ""
-            logger.info(f"soap_client_certificate: Unknown or invalid client certificate: {e}")
-        except SOAPClientCertificateNotConfigured as e:
+            cert_id = "unknown"
+            logger.info(
+                "soap_client_certificate: Unknown or invalid client certificate",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_INVALID_CLIENT_CERT},
+            )
+        except SOAPClientCertificateNotConfigured:
             # This exception handles the case of a valid cert being passed, but not configured
             # to use Simpler SOAP API.
-            logger.info(f"soap_client_certicate: Certificate validated but not configured: {e}")
+            logger.info(
+                "soap_client_certificate: Certificate validated but not configured",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
+            )
             return get_soap_error_response(
                 faultstring="Client certificate not configured for Simpler SOAP."
             )
+
         temp_cert_file.write(cert)
         temp_cert_file.flush()
+
+        add_extra_data_to_current_request_logs({"cert_id": cert_id})
+        logger.info(
+            "soap_client_certificate: Sending soap request with client certificate",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
+        )
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
 
 

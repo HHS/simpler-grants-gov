@@ -196,7 +196,7 @@ exports[`Header About renders About submenu 1`] = `
         </button>
       </div>
       <div
-        class="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
+        class="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
       >
         <div
           class="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative"
@@ -443,7 +443,7 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div
@@ -712,7 +712,7 @@ exports[`Header About renders Community submenu 1`] = `
         </button>
       </div>
       <div
-        class="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
+        class="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
       >
         <div
           class="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative"
@@ -959,7 +959,7 @@ exports[`Header About renders Community submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div
@@ -1228,7 +1228,7 @@ exports[`Header renders Header navbar menu 1`] = `
         </button>
       </div>
       <div
-        class="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
+        class="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6"
       >
         <div
           class="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative"
@@ -1476,7 +1476,7 @@ exports[`Header renders Header navbar menu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="https://simplergrants.discourse.group/"
+                  href="https://forum.simpler.grants.gov/"
                   target="_blank"
                 >
                   <div

@@ -22,7 +22,7 @@ class ApplicationAction(StrEnum):
 
 START_JSON_RULE_CONFIG = JsonRuleConfig(
     # When starting an application, we only do pre-population
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=False,
 )
@@ -39,7 +39,7 @@ UPDATE_JSON_RULE_CONFIG = JsonRuleConfig(
     # When updating, we do pre-population + validate. If a user
     # changed any values, we want to make sure any pre-populated fields
     # stay as the automatically generated ones.
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=True,
 )
@@ -48,7 +48,7 @@ SUBMISSION_JSON_RULE_CONFIG = JsonRuleConfig(
     # During submission, we do post-population (the only place we ever do)
     # and field validation
     do_pre_population=False,
-    do_post_population=False,  # TODO - when we enable post-population, flip this to True
+    do_post_population=True,  # Post-population enabled for submit flow
     do_field_validation=True,
 )
 
@@ -171,7 +171,8 @@ def validate_application_form(
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
-    # TODO pre/post-populate should update the value here
+    # Apply pre/post-populated changes back to the application form
+    application_form.application_response = context.json_data
 
     # Check if the form is required
     is_required = is_form_required(application_form)
@@ -179,8 +180,14 @@ def validate_application_form(
     # Handle validation based on form requirement and is_included_in_submission flag
     should_run_json_schema_validation = True
 
-    if not is_required:
-        # For non-required forms, check is_included_in_submission
+    # If the form isn't required and we're in the submit endpoint we do two checks:
+    # 1. If the form doesn't have is_included_in_submission set, add an error, skip validation
+    # 2. If the form has is_included_in_submission=True, skip validation
+    #
+    # If this is not the submit endpoint, we'll always do validation for the form, although
+    # it won't block whatever operation is occurring.
+    if not is_required and action == ApplicationAction.SUBMIT:
+        # For non-required forms, is_included_in_submission must be set
         if application_form.is_included_in_submission is None:
             # If form hasn't set is_included_in_submission, it's always an error regardless of content
             form_validation_errors.append(
@@ -191,11 +198,12 @@ def validate_application_form(
                     value=None,
                 )
             )
+
             should_run_json_schema_validation = False
         elif application_form.is_included_in_submission is False:
             # Don't run JSON schema validation if form is not included in submission
             should_run_json_schema_validation = False
-        # If is_included_in_submission is True, run validation (default behavior)
+        # If form is_required or is_included_in_submission is True, run validation (default behavior)
 
     # Run JSON schema validation only if required
     if should_run_json_schema_validation:

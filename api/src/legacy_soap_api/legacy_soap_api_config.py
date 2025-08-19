@@ -1,12 +1,13 @@
 import json
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from functools import cache, lru_cache
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import Field
 
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,10 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
                 self.soap_auth_map = json.loads(self.soap_auth_content.replace("\n", "\\n"))
             except Exception:
                 # This except is to make sure the API still starts up, even if the value is malformed
-                logger.exception("Could not load soap auth content")
+                logger.exception(
+                    "Could not load soap auth content",
+                    extra={"soap_api_event": LegacySoapApiEvent.INVALID_SOAP_AUTH_CONTENT_CONFIG},
+                )
 
 
 @cache
@@ -42,12 +46,12 @@ def get_soap_config() -> LegacySoapAPIConfig:
     return LegacySoapAPIConfig()
 
 
-class SimplerSoapAPI(Enum):
+class SimplerSoapAPI(StrEnum):
     GRANTORS = "grantors"
     APPLICANTS = "applicants"
 
     @staticmethod
-    def get_soap_api(service_name: str, service_port_name: str) -> Optional["SimplerSoapAPI"]:
+    def get_soap_api(service_name: str, service_port_name: str) -> "SimplerSoapAPI | None":
         if service_name == "grantsws-agency" and service_port_name == "AgencyWebServicesSoapPort":
             return SimplerSoapAPI.GRANTORS
         elif (
@@ -62,7 +66,14 @@ class SimplerSoapAPI(Enum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+
+    # Some SOAP XML payloads will not force a list of objects when converting to
+    # dicts if there is only one child element entry in the sequence. This config
+    # forces elements specified here to be a list when converting XML to a dict.
     force_list_attributes: tuple | None = tuple()
+
+    # This config is used for insights when diffing proxy and simpler soap responses.
+    key_indexes: dict[str, str] | None = None
 
 
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
@@ -71,6 +82,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetOpportunityListRequest",
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
+            key_indexes={"OpportunityDetails": "CompetitionID"},
         )
     },
     SimplerSoapAPI.GRANTORS: {},

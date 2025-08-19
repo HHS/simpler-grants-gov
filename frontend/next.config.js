@@ -15,7 +15,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 const appSassOptions = sassOptions(basePath);
 
 const cspHeader = `
-    default-src 'self' https://ethn.io;
+    default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
@@ -25,7 +25,7 @@ const cspHeader = `
     base-uri 'self';
     media-src 'self';
     style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com/;
-    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/ https://ethn.io;
+    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
@@ -143,6 +143,13 @@ const nextConfig = {
   async headers() {
     return headers;
   },
+  // see https://nextjs.org/docs/messages/api-routes-response-size-limit
+  // warning about unrecognized key can be ignored
+  api: {
+    bodyParser: {
+      sizeLimit: "2000mb",
+    },
+  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
@@ -168,6 +175,9 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
+    serverActions: {
+      bodySizeLimit: "2000mb",
+    },
   },
   async redirects() {
     return [

@@ -137,7 +137,7 @@ def test_validate_form_all_valid(
     assert len(error_detail) == 0
 
 
-def test_validate_form_all_valid_not_started_optional_form(
+def test_validate_form_all_valid_not_started_optional_form_in_submit(
     competition, competition_form_a, competition_form_b, competition_form_c
 ):
     application = ApplicationFactory.build(competition=competition, application_forms=[])
@@ -160,38 +160,9 @@ def test_validate_form_all_valid_not_started_optional_form(
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
     validation_errors, error_detail = get_application_form_errors(
-        application, ApplicationAction.GET
+        application, ApplicationAction.SUBMIT
     )
     assert len(validation_errors) == 0
-    assert len(error_detail) == 0
-
-
-def test_validate_forms_non_required_form_with_null_is_included_in_submission(
-    competition, competition_form_c
-):
-    """Test that non-required forms with null is_included_in_submission get validation error but no JSON schema validation"""
-    application = ApplicationFactory.build(competition=competition, application_forms=[])
-
-    # Form C (non-required) - has invalid response but null is_included_in_submission
-    application_form_c = ApplicationFormFactory.build(
-        application=application,
-        competition_form=competition_form_c,
-        application_response={"str_c": 123},  # Invalid type - should be string, not number
-        is_included_in_submission=None,
-    )
-    application.application_forms = [application_form_c]
-
-    validation_errors, error_detail = get_application_form_errors(
-        application, ApplicationAction.GET
-    )
-
-    # Should have 1 validation error for missing is_included_in_submission (not wrapped in APPLICATION_FORM_VALIDATION)
-    assert len(validation_errors) == 1
-    assert validation_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
-    assert validation_errors[0].field == "is_included_in_submission"
-    assert validation_errors[0].value is None
-
-    # Should have no error details since MISSING_INCLUDED_IN_SUBMISSION errors are not wrapped
     assert len(error_detail) == 0
 
 
@@ -246,7 +217,7 @@ def test_validate_forms_not_started_all_forms(
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
     validation_errors, error_detail = get_application_form_errors(
-        application, ApplicationAction.GET
+        application, ApplicationAction.SUBMIT
     )
 
     # With the new validation logic:
@@ -298,7 +269,7 @@ def test_validate_forms_optional_form_with_content_missing_inclusion_flag(
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
     validation_errors, error_detail = get_application_form_errors(
-        application, ApplicationAction.GET
+        application, ApplicationAction.SUBMIT
     )
 
     # Should have 1 MISSING_INCLUDED_IN_SUBMISSION error for the optional form with content
@@ -505,7 +476,7 @@ def test_validate_application_form_non_required_form_null_is_included_in_submiss
         is_included_in_submission=None,
     )
 
-    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+    validation_errors = validate_application_form(application_form, ApplicationAction.SUBMIT)
 
     # Should have exactly one validation error for missing is_included_in_submission
     assert len(validation_errors) == 1
@@ -534,7 +505,7 @@ def test_validate_application_form_non_required_form_false_is_included_in_submis
         is_included_in_submission=False,
     )
 
-    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+    validation_errors = validate_application_form(application_form, ApplicationAction.SUBMIT)
 
     # Should have no validation errors because JSON schema validation is skipped
     assert len(validation_errors) == 0
@@ -621,7 +592,7 @@ def test_get_application_form_errors_with_is_included_in_submission_validation(
     application.application_forms = [application_form_a, application_form_b, application_form_c]
 
     validation_errors, error_detail = get_application_form_errors(
-        application, ApplicationAction.GET
+        application, ApplicationAction.SUBMIT
     )
 
     # Should have 2 validation errors:
@@ -643,3 +614,225 @@ def test_get_application_form_errors_with_is_included_in_submission_validation(
     assert form_b_errors[0].type == "type"
 
     # Form C's MISSING_INCLUDED_IN_SUBMISSION error is returned directly, not in error_detail
+
+
+@pytest.mark.parametrize(
+    "is_included_in_submission,application_action,has_valid_json,expect_included_in_submission_error,expect_validation_issue",
+    [
+        ### Submit cases
+        # Included in submission, Submit, valid JSON - no issues
+        (True, ApplicationAction.SUBMIT, True, False, False),
+        # Included in submission, Submit, bad JSON - JSON error
+        (True, ApplicationAction.SUBMIT, False, False, True),
+        # Not included in submission, Submit, valid JSON - no issues
+        (False, ApplicationAction.SUBMIT, True, False, False),
+        # Not included in submission, Submit, bad JSON - no issues
+        (False, ApplicationAction.SUBMIT, False, False, False),
+        # None included in submission, Submit, valid JSON - missing included in submission error
+        (None, ApplicationAction.SUBMIT, True, True, False),
+        # None included in submission, Submit, bad JSON - missing included in submission error
+        (None, ApplicationAction.SUBMIT, False, True, False),
+        ### Non-submit cases (these all just run validation as normal)
+        # Included in submission, not submit, valid JSON - no issues
+        (True, ApplicationAction.GET, True, False, False),
+        # Included in submission, not submit, bad JSON - JSON error
+        (True, ApplicationAction.MODIFY, False, False, True),
+        # Not included in submission, not submit, valid JSON - no issues
+        (False, ApplicationAction.MODIFY, True, False, False),
+        # Not included in submission, not submit, bad JSON - JSON error
+        (False, ApplicationAction.GET, False, False, True),
+        # None included in submission, not submit, valid JSON - no issues
+        (None, ApplicationAction.GET, True, False, False),
+        # None included in submission, not submit, bad JSON - JSON error
+        (None, ApplicationAction.MODIFY, False, False, True),
+    ],
+)
+def test_validate_is_included_in_submission_behavior(
+    competition,
+    competition_form_c,
+    is_included_in_submission,
+    application_action,
+    has_valid_json,
+    expect_included_in_submission_error,
+    expect_validation_issue,
+):
+    application = ApplicationFactory.build(competition=competition, application_forms=[])
+
+    application_response = VALID_FORM_C_RESPONSE if has_valid_json else {"str_c": 123}
+
+    # Form C (non-required) - has invalid response but null is_included_in_submission
+    application_form_c = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_c,
+        application_response=application_response,
+        is_included_in_submission=is_included_in_submission,
+    )
+    application.application_forms = [application_form_c]
+
+    validation_errors, error_detail = get_application_form_errors(application, application_action)
+
+    if expect_included_in_submission_error:
+        validation_error = next(
+            v
+            for v in validation_errors
+            if v.type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+        )
+        assert validation_error.field == "is_included_in_submission"
+    else:
+        for validation_error in validation_errors:
+            assert validation_error.type != ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+
+    if expect_validation_issue:
+        validation_error = next(
+            v
+            for v in validation_errors
+            if v.type == ValidationErrorType.APPLICATION_FORM_VALIDATION
+        )
+        assert validation_error.field == "application_form_id"
+        assert validation_error.value == application_form_c.application_form_id
+    else:
+        for validation_error in validation_errors:
+            assert validation_error.type != ValidationErrorType.APPLICATION_FORM_VALIDATION
+
+
+@freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_validate_application_form_submit_post_population(enable_factory_create):
+    """Test that post-population occurs and updates application_response during submit action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+        is_required=True,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with SUBMIT action (should trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.SUBMIT)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population occurred and updated the application_response
+    assert "signature_field" in application_form.application_response
+    assert "date_field" in application_form.application_response
+    assert application_form.application_response["existing_field"] == "existing_value"
+
+    # Verify the signature is populated (defaults to "unknown" since no user in this context)
+    assert application_form.application_response["signature_field"] == "unknown"
+
+    # Verify the date is populated with the current date
+    assert application_form.application_response["date_field"] == "2023-02-20"
+
+
+def test_validate_application_form_get_no_post_population(enable_factory_create):
+    """Test that post-population does NOT occur during GET action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with GET action (should NOT trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.GET)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population did NOT occur - application_response should remain unchanged
+    assert application_form.application_response == original_response
+    assert "signature_field" not in application_form.application_response
+    assert "date_field" not in application_form.application_response
+
+
+def test_validate_application_form_modify_no_post_population(enable_factory_create):
+    """Test that post-population does NOT occur during MODIFY action"""
+    # Create a form with post-population rules
+    form = FormFactory.create(
+        form_json_schema={
+            "type": "object",
+            "properties": {
+                "signature_field": {"type": "string"},
+                "date_field": {"type": "string"},
+                "existing_field": {"type": "string"},
+            },
+        },
+        form_rule_schema={
+            "signature_field": {"gg_post_population": {"rule": "signature"}},
+            "date_field": {"gg_post_population": {"rule": "current_date"}},
+        },
+    )
+
+    # Create application and form
+    application = ApplicationFactory.create()
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    # Create application form with initial data (no signature or date fields)
+    original_response = {"existing_field": "existing_value"}
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response=original_response.copy(),
+    )
+
+    # Validate with MODIFY action (should NOT trigger post-population)
+    validation_errors = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    # Verify no validation errors
+    assert len(validation_errors) == 0
+
+    # Verify post-population did NOT occur - application_response should remain unchanged
+    assert application_form.application_response == original_response
+    assert "signature_field" not in application_form.application_response
+    assert "date_field" not in application_form.application_response

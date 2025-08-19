@@ -1,5 +1,4 @@
 import logging
-import traceback
 from typing import Any
 
 from pydantic import ValidationError
@@ -8,6 +7,7 @@ import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAPFaultException,
@@ -72,7 +72,11 @@ class BaseSOAPClient:
         simpler_response_schema = self._get_simpler_soap_response_schema()
         if simpler_response_schema is None:
             logger.info(
-                "Unable to validate SOAP proxy response. No Simpler SOAP pydantic schema found."
+                "Unable to validate SOAP proxy response. No Simpler SOAP pydantic schema found.",
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.NO_SIMPLER_SCHEMA_DEFINED,
+                    "response_operation_name": self.operation_config.response_operation_name,
+                },
             )
             return proxy_response_schema_data
 
@@ -95,14 +99,43 @@ class BaseSOAPClient:
             error_fields = {(err["type"], err["loc"]) for err in e.errors()}
             logger.info(
                 msg=f"{msg} {error_fields}",
-                extra={"simpler_soap_api_error": "proxy_response_validation"},
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.PROXY_RESPONSE_VALIDATION_PROBLEM,
+                },
             )
-        except Exception as e:
+        except Exception:
             logger.info(
                 msg="Could not parse proxy response",
-                extra={"soap_traceback": "".join(traceback.format_tb(e.__traceback__))},
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
             )
         return proxy_response_schema_data
+
+    def log_diffs(self, proxy_response_soap_dict: dict, simpler_response_soap_dict: dict) -> None:
+        try:
+            diff_results = diff_soap_dicts(
+                sgg_dict=get_envelope_dict(
+                    simpler_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                gg_dict=get_envelope_dict(
+                    proxy_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                key_indexes=self.operation_config.key_indexes,
+                keys_only=True,
+            )
+            logger.info(
+                "soap_api_diff complete",
+                extra={"soap_api_diff": diff_results, "soap_responses_match": diff_results == {}},
+            )
+        except Exception:
+            logger.info(
+                "soap_api_diff incomplete",
+                exc_info=True,
+                extra={
+                    "soap_responses_match": False,
+                    "soap_api_event": LegacySoapApiEvent.SOAP_DIFF_FAILED,
+                },
+            )
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
         """
@@ -114,7 +147,12 @@ class BaseSOAPClient:
         """
         proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
         simpler_response_soap_dict = self.get_soap_response_dict()
-        diff_soap_dicts(simpler_response_soap_dict, proxy_response_soap_dict)
+
+        # We will only run diffs for responses that do not match.
+        if proxy_response_soap_dict == simpler_response_soap_dict:
+            logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
+        else:
+            self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
         try:
             simpler_soap_response_payload = SOAPPayload(
@@ -127,7 +165,12 @@ class BaseSOAPClient:
             # parameters or data types. We can still compare the error data responses to the proxy
             # response.
             logger.info(
-                "simpler_soap_api: Fault", extra={"err": e.message, "fault": e.fault.model_dump()}
+                "simpler_soap_api: Fault",
+                exc_info=True,
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.INVALID_REQUEST_RESPONSE_DATA,
+                    "fault": e.fault.model_dump(),
+                },
             )
             simpler_soap_response_payload = SOAPPayload(e.fault.to_xml().decode())
 

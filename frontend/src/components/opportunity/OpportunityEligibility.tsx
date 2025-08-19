@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { upperFirst } from "lodash";
 import { eligbilityValueToGroup } from "src/constants/opportunity";
 import { eligibilityOptions } from "src/constants/searchFilterOptions";
@@ -41,8 +42,15 @@ export const OpportunityEligibility = ({
             <div key={`eligibility-group${groupName}`}>
               <h4>{upperFirst(groupName)}</h4>
               <ul>
-                {applicantTypes.map((display) => (
-                  <li key={display}>{display}</li>
+                {applicantTypes.map((display, i) => (
+                  <li
+                    key={display}
+                    className={clsx({
+                      "margin-bottom-2": i === applicantTypes.length - 1,
+                    })}
+                  >
+                    {display}
+                  </li>
                 ))}
               </ul>
             </div>

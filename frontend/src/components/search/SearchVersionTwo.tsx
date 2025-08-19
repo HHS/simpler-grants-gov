@@ -44,9 +44,18 @@ export function SearchVersionTwo({
   }
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
-  const agencyListPromise = performAgencySearch({
+
+  // this represents the list of agencies as filtered based on the user's selected opportunity status
+  // to be used to form the list of agencies available from the agency filter
+  const filteredAgencyListPromise = performAgencySearch({
     selectedStatuses: Array.from(convertedSearchParams.status),
   });
+
+  // this represents the list of ALL agencies regardless of the user's selected opportunity status
+  // since a user may have agencies selected in a filter that only have archived / close opportunities
+  // and may then alter the list of agency options by deselecting archived / closed status
+  // this full list ensures that filter pills will always have labels regardless of opportunity status selection
+  const agencyListPromise = performAgencySearch();
 
   return (
     <QueryProvider>
@@ -96,7 +105,7 @@ export function SearchVersionTwo({
                   <SearchDrawerFilters
                     searchParams={convertedSearchParams}
                     searchResultsPromise={searchResultsPromise}
-                    agencyListPromise={agencyListPromise}
+                    agencyListPromise={filteredAgencyListPromise}
                   />
                 </DrawerUnit>
               </div>

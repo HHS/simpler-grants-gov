@@ -23,20 +23,20 @@ const UseUserConsumer = () => {
 
 const renderWrappedConsumer = () => {
   const { rerender } = render(
-    <UserProvider>
+    <UserProvider featureFlagDefaults={{}}>
       <UseUserConsumer />
     </UserProvider>,
   );
   return () =>
     rerender(
-      <UserProvider>
+      <UserProvider featureFlagDefaults={{}}>
         <UseUserConsumer />
       </UserProvider>,
     );
 };
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <UserProvider>{children}</UserProvider>
+  <UserProvider featureFlagDefaults={{}}>{children}</UserProvider>
 );
 
 describe("useUser", () => {
@@ -74,7 +74,7 @@ describe("useUser", () => {
   it("sets user as logged out if second fetch for user comes back without a token", async () => {
     debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
     const wrapper = ({ children }: PropsWithChildren) => (
-      <UserProvider>{children}</UserProvider>
+      <UserProvider featureFlagDefaults={{}}>{children}</UserProvider>
     );
     const { result } = renderHook(() => useUser(), { wrapper });
 
@@ -145,6 +145,7 @@ describe("useUser", () => {
     it("does not make a fetch call if there is no token (user is not logged in)", async () => {
       debouncedUserFetcherMock.mockReturnValue({
         token: "",
+        expiresAt: Date.parse("1-1-2099"),
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 

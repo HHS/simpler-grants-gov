@@ -12,14 +12,17 @@ import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
+import SaveIcon from "src/components/SaveIcon";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 
 export const OpportunitySaveUserControl = ({
   opportunityId,
+  type = "button",
 }: {
   opportunityId: string;
+  type?: "button" | "icon";
 }) => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
@@ -93,6 +96,43 @@ export const OpportunitySaveUserControl = ({
 
   const { checkFeatureFlag } = useFeatureFlags();
   if (!checkFeatureFlag("savedOpportunitiesOn")) return null;
+
+  if (type === "icon") {
+    return (
+      <>
+        {user?.token ? (
+          <SaveIcon
+            onClick={() => {
+              userSavedOppCallback().catch(console.error);
+            }}
+            loading={loading}
+            saved={saved}
+          />
+        ) : (
+          <>
+            <ModalToggleButton
+              id={`save-search-result-${opportunityId}`}
+              modalRef={modalRef}
+              opener
+              className="usa-button--unstyled"
+            >
+              <SaveIcon saved={false} />
+            </ModalToggleButton>
+            <LoginModal
+              modalRef={modalRef as React.RefObject<ModalRef>}
+              helpText={t("saveloginModal.help")}
+              buttonText={t("saveloginModal.button")}
+              closeText={t("saveloginModal.close")}
+              descriptionText={t("saveloginModal.description")}
+              titleText={t("saveloginModal.title")}
+              modalId={`opp-save-login-modal-${opportunityId}`}
+            />
+          </>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       {user?.token ? (
@@ -126,7 +166,7 @@ export const OpportunitySaveUserControl = ({
             closeText={t("saveloginModal.close")}
             descriptionText={t("saveloginModal.description")}
             titleText={t("saveloginModal.title")}
-            modalId="opp-save-login-modal"
+            modalId={`opp-save-login-modal-${opportunityId}`}
           />
         </>
       )}

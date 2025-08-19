@@ -7,6 +7,7 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
+import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 
@@ -48,19 +49,29 @@ export type FormValidationWarning = {
   value: string;
 };
 
-export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+export type WidgetTypes =
+  | "Attachment"
+  | "AttachmentArray"
+  | "Checkbox"
+  | "Text"
+  | "TextArea"
+  | "Radio"
+  | "Select"
+  | "Budget424aSectionA"
+  | "Budget424aSectionB";
 
 export type UiSchemaField = {
-  type: "field";
+  type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
+  name?: string;
 } & (
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}`;
+      definition: `/properties/${string}` | [`/properties/${string}`];
       schema: SchemaField;
     }
 );
@@ -70,6 +81,7 @@ export interface UiSchemaSection {
   label: string;
   name: string;
   children: Array<UiSchemaField | UiSchemaSection>;
+  description?: string;
 }
 
 export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
@@ -83,7 +95,6 @@ export type TextTypes =
   | "tel"
   | "url";
 
-// extends the WidgetProps type from rjsf for USWDS and this project implementation
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -93,11 +104,15 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
+  attachments?: Attachment[];
   id: string;
-  value?: string | unknown;
+  value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
-  schema: RJSFSchema;
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
   maxLength?: number;
   required?: boolean;
   disabled?: boolean;
@@ -105,18 +120,34 @@ export interface UswdsWidgetProps<
   hideError?: boolean;
   autofocus?: boolean;
   placeholder?: string;
-  options: NonNullable<UIOptionsType<T, S, F>> & {
+  options?: NonNullable<UIOptionsType<T, S, F>> & {
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  formClassName?: string;
+  inputClassName?: string;
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[] | undefined;
+  rawErrors?: string[] | FormValidationWarning[] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
 }
+
+export interface SchemaWithLabelOption {
+  title?: string;
+  description?: string;
+  options?: {
+    "widget-label"?: string;
+    [key: string]: unknown;
+  };
+}
+
+export type UploadedFile = {
+  id: string;
+  name: string;
+};

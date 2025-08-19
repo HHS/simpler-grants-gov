@@ -1,6 +1,5 @@
 "use server";
 
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
@@ -8,7 +7,7 @@ import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import { shapeFormData } from "./utils";
+import { processFormSchema, shapeFormData } from "./utils";
 
 type ApplyFormResponse = {
   applicationId: string;
@@ -19,10 +18,10 @@ type ApplyFormResponse = {
 };
 
 export async function handleFormAction(
-  _prevState: ApplyFormResponse,
+  prevState: ApplyFormResponse,
   formData: FormData,
 ) {
-  const { formId, applicationId } = _prevState;
+  const { formId, applicationId } = prevState;
   const session = await getSession();
   if (!session || !session.token) {
     return {
@@ -44,10 +43,10 @@ export async function handleFormAction(
       saved: true,
     };
   }
-  const applicationFormData = shapeFormData<ApplicationResponseDetail>(
-    formData,
-    formSchema,
-  );
+
+  // this generic typing isn't correct - we'll end up with a nested object
+  const applicationFormData =
+    shapeFormData<ApplicationResponseDetail>(formData);
 
   const saveSuccess = await handleSave(
     applicationFormData,
@@ -116,7 +115,7 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   }
   let formSchema = {};
   try {
-    formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+    formSchema = await processFormSchema(formDetail.form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
   }

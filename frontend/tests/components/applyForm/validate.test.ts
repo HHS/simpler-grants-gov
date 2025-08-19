@@ -1,7 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 
 import { UiSchema } from "src/components/applyForm/types";
-import { shapeFormData } from "src/components/applyForm/utils";
 import {
   validateJsonBySchema,
   validateUiSchema,
@@ -9,9 +8,6 @@ import {
 
 describe("validateFormData", () => {
   it("should return false for valid form data", () => {
-    const formData = new FormData();
-    formData.append("name", "John Doe");
-
     const schema: RJSFSchema = {
       type: "object",
       properties: {
@@ -20,9 +16,7 @@ describe("validateFormData", () => {
       required: ["name"],
     };
 
-    const data = shapeFormData(formData, schema);
-
-    expect(validateJsonBySchema(data, schema)).toBe(false);
+    expect(validateJsonBySchema({ name: "John Doe" }, schema)).toBe(false);
   });
 
   it("should return validation errors for invalid form data", () => {
@@ -103,13 +97,12 @@ describe("validateFormData", () => {
         "/0/definition",
       );
       expect(schemaErrors && schemaErrors[0]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z0-9_]+$"',
+        // eslint-disable-next-line
+        `must match pattern \"^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$\"`,
       );
-      expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch(
-        "/1/definition",
-      );
+      expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch("/0/type");
       expect(schemaErrors && schemaErrors[7]?.message).toMatch(
-        'must match pattern "^/properties/[a-zA-Z0-9_]+$"',
+        "must be equal to one of the allowed values",
       );
     });
   });
