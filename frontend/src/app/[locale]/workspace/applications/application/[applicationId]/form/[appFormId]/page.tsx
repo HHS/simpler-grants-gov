@@ -4,7 +4,7 @@ import NotFound from "src/app/[locale]/not-found";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
 
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
@@ -20,15 +20,12 @@ export async function generateMetadata({
 }) {
   const { applicationId, appFormId } = await params;
   let title = "";
-  const { data, error } = await getFormData({ applicationId, appFormId });
+  const { data } = await getFormData({ applicationId, appFormId });
 
-  if (error || !data) {
-    if (error === "NotFound") return notFound();
-    return <TopLevelError />;
+  if (data) {
+    const { formName } = data;
+    title = formName;
   }
-
-  const { formName } = data;
-  title = formName;
   const meta: Metadata = {
     title,
     description: "Follow instructions to complete this form.",
@@ -45,6 +42,7 @@ async function FormPage({ params }: formPageProps) {
   const { data, error } = await getFormData({ applicationId, appFormId });
 
   if (error || !data) {
+    if (error === "UnauthorizedError") return redirect("/unauthenticated");
     if (error === "NotFound") return <NotFound />;
     return <TopLevelError />;
   }

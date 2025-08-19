@@ -1,9 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
-import {
-  ApiRequestError,
-  parseErrorStatus,
-  UnauthorizedError,
-} from "src/errors";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import {
@@ -23,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 // either return error or data, not both
 type formDataResult =
-  | { error: "TopLevelError" | "NotFound"; data?: never }
+  | { error: "TopLevelError" | "NotFound" | "UnauthorizedError"; data?: never }
   | {
       error?: never;
       data: {
@@ -56,7 +52,8 @@ export default async function getFormData({
     const session = await getSession();
 
     if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to access form");
+      console.error("No active session to access form");
+      return { error: "UnauthorizedError" };
     }
     sessionToken = session.token;
   }

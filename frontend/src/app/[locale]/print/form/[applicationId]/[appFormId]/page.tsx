@@ -4,8 +4,6 @@ import NotFound from "src/app/[locale]/not-found";
 import { environment } from "src/constants/environments";
 import getFormData from "src/utils/getFormData";
 
-import { notFound } from "next/navigation";
-
 import PrintForm from "src/components/applyForm/PrintForm";
 
 export const dynamic = "force-dynamic";
@@ -17,15 +15,18 @@ export async function generateMetadata({
 }) {
   const { applicationId, appFormId } = await params;
   let title = "";
-  const { data, error } = await getFormData({ applicationId, appFormId });
 
-  if (error || !data) {
-    if (error === "NotFound") return notFound();
-    return <TopLevelError />;
+  const { data } = await getFormData({
+    applicationId,
+    appFormId,
+    internalToken: environment.INTERNAL_API_JWT_TOKEN,
+  });
+
+  if (data) {
+    const { formName } = data;
+    title = formName;
   }
 
-  const { formName } = data;
-  title = formName;
   const meta: Metadata = {
     title,
   };
