@@ -108,13 +108,18 @@ export const getApplicationFormDetails = async (
   token: string,
   applicationId: string,
   applicationFormId: string,
+  internalToken = false,
 ): Promise<ApplicationFormDetailApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
+  const tokenHeaderName = internalToken
+    ? "X-SGG-Internal-Token"
+    : "X-SGG-Token";
+  const additionalHeaders: Record<string, string> = {
+    [tokenHeaderName]: token,
   };
+
   const response = await fetchApplicationWithMethod("GET")({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
-    additionalHeaders: ssgToken,
+    additionalHeaders,
   });
 
   return (await response.json()) as ApplicationFormDetailApiResponse;
