@@ -4,6 +4,8 @@ import NotFound from "src/app/[locale]/not-found";
 import { environment } from "src/constants/environments";
 import getFormData from "src/utils/getFormData";
 
+import { headers } from "next/headers";
+
 import PrintForm from "src/components/applyForm/PrintForm";
 
 export const dynamic = "force-dynamic";
@@ -39,11 +41,13 @@ interface FormPageProps {
 
 export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId } = await params;
+  const headersList = await headers();
+  const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
   const { data, error } = await getFormData({
     applicationId,
     appFormId,
-    internalToken: environment.INTERNAL_API_JWT_TOKEN,
+    internalToken,
   });
 
   if (error || !data) {

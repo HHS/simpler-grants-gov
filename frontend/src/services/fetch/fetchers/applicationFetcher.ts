@@ -108,16 +108,14 @@ export const getApplicationFormDetails = async (
   token: string,
   applicationId: string,
   applicationFormId: string,
-  internalToken?: string,
+  internalToken = false,
 ): Promise<ApplicationFormDetailApiResponse> => {
-  let additionalHeaders: Record<string, string> = {
-    "X-SGG-Token": token,
+  const tokenHeaderName = internalToken
+    ? "X-SGG-Internal-Token"
+    : "X-SGG-Token";
+  const additionalHeaders: Record<string, string> = {
+    [tokenHeaderName]: token,
   };
-  if (internalToken) {
-    additionalHeaders = {
-      "X-SGG-Internal-Token": internalToken,
-    };
-  }
 
   const response = await fetchApplicationWithMethod("GET")({
     subPath: `${applicationId}/application_form/${applicationFormId}`,

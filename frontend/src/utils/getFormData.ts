@@ -43,10 +43,12 @@ export default async function getFormData({
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
+  const useInternalToken = !!internalToken;
   let sessionToken = "";
 
   // API can take either internal token or session token to auth
-  if (!internalToken) {
+  if (internalToken) sessionToken = internalToken;
+  else {
     const session = await getSession();
 
     if (!session || !session.token) {
@@ -61,7 +63,7 @@ export default async function getFormData({
       sessionToken,
       applicationId,
       appFormId,
-      internalToken,
+      useInternalToken,
     );
 
     if (response.status_code !== 200) {
