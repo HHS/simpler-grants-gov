@@ -6,7 +6,7 @@ from tests.src.db.models.factories import UserApiKeyFactory
 
 def test_rename_api_key_success(enable_factory_create, db_session, client, user, user_auth_token):
     """Test successful API key renaming"""
-    api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
+    api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name", last_used=None)
     json_data = {"key_name": "Updated API Key Name"}
 
     response = client.patch(

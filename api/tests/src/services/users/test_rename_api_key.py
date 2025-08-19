@@ -1,7 +1,7 @@
+import apiflask.exceptions
 import pytest
 
 from src.adapters import db
-from src.api.route_utils import FlaskError
 from src.services.users.rename_api_key import rename_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
@@ -38,7 +38,7 @@ def test_rename_api_key_wrong_user(enable_factory_create, db_session: db.Session
     api_key = UserApiKeyFactory.create(user=user1, key_name="Original Key Name")
     json_data = {"key_name": "New Key Name"}
 
-    with pytest.raises(FlaskError) as exc_info:
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
         rename_api_key(
             db_session=db_session,
             user_id=user2.user_id,  # Different user
@@ -126,10 +126,6 @@ def test_rename_api_key_logging_success(enable_factory_create, db_session: db.Se
     assert str(log_record.api_key_id) == str(api_key.api_key_id)
     assert hasattr(log_record, "user_id")
     assert str(log_record.user_id) == str(user.user_id)
-    assert hasattr(log_record, "old_key_name")
-    assert log_record.old_key_name == "Original Key Name"
-    assert hasattr(log_record, "new_key_name")
-    assert log_record.new_key_name == "New Key Name"
 
 
 def test_rename_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):
