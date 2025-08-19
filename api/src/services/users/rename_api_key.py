@@ -41,8 +41,6 @@ def rename_api_key(
         extra={
             "api_key_id": api_key.api_key_id,
             "user_id": user_id,
-            "old_key_name": old_key_name,
-            "new_key_name": params.key_name,
         },
     )
 
