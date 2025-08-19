@@ -311,3 +311,10 @@ class UserApiKeySchema(Schema):
 
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
+
+
+class UserApiKeyListResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserApiKeySchema),
+        metadata={"description": "List of API keys for the user"},
+    )
