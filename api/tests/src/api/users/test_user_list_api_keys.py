@@ -7,9 +7,10 @@ def test_list_api_keys_empty_result(
     enable_factory_create, db_session, client, user, user_auth_token
 ):
     """Test listing API keys when user has no keys"""
-    response = client.get(
-        f"/v1/users/{user.user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 200
@@ -22,9 +23,10 @@ def test_list_api_keys_single_key(enable_factory_create, db_session, client, use
     api_key = UserApiKeyFactory.create(user=user, key_name="Test API Key")
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{user.user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 200
@@ -51,9 +53,10 @@ def test_list_api_keys_multiple_keys_ordered_by_created_at(
     api_key3 = UserApiKeyFactory.create(user=user, key_name="Third Key")
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{user.user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 200
@@ -85,9 +88,10 @@ def test_list_api_keys_only_users_keys(
     user_key = UserApiKeyFactory.create(user=user, key_name="User Key")
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{user.user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 200
@@ -111,9 +115,10 @@ def test_list_api_keys_includes_inactive_keys(
     inactive_key = UserApiKeyFactory.create(user=user, key_name="Inactive Key", is_active=False)
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{user.user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 200
@@ -143,9 +148,10 @@ def test_list_api_keys_unauthorized_different_user(
     """Test that users cannot list API keys for other users"""
     different_user_id = uuid.uuid4()
 
-    response = client.get(
-        f"/v1/users/{different_user_id}/api-keys",
+    response = client.post(
+        f"/v1/users/{different_user_id}/api-keys/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={},
     )
 
     assert response.status_code == 403
@@ -154,7 +160,7 @@ def test_list_api_keys_unauthorized_different_user(
 
 def test_list_api_keys_no_authentication(enable_factory_create, db_session, client, user):
     """Test that the endpoint requires authentication"""
-    response = client.get(f"/v1/users/{user.user_id}/api-keys")
+    response = client.post(f"/v1/users/{user.user_id}/api-keys/list", json={})
 
     assert response.status_code == 401
     assert response.json["message"] == "Unable to process token"
