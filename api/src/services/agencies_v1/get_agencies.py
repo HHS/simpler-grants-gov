@@ -3,13 +3,17 @@ import uuid
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import Select, select
+from sqlalchemy import Select, exists, select
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    ExcludedOpportunityReview,
+    Opportunity,
+)
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.services.service_utils import apply_sorting
@@ -42,6 +46,9 @@ def _construct_active_inner_query(
                 opportunity_status,
             )
         )
+        .where(
+            ~exists(ExcludedOpportunityReview.opportunity_id == Opportunity.legacy_opportunity_id)
+        )  # Exclude opportunities in review status
     )
 
 
