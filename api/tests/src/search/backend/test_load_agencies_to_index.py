@@ -6,11 +6,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    ExcludedOpportunityReviewFactory,
-    OpportunityFactory,
-)
+from tests.src.db.models.factories import AgencyFactory, OpportunityFactory, ExcludedOpportunityReviewFactory
 
 
 class TestLoadAgenciesToIndex(BaseTestClass):
@@ -120,25 +116,24 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         ]
         assert archived_agency_resp["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]
 
-    def test_load_agencies_to_index_review_status(
-        self,
+    def test_load_agencies_to_index_review_status(self,
         db_session,
         search_client,
         load_agencies_to_index,
         agency_index_alias,
-        enable_factory_create,
-    ):
+        enable_factory_create):
+
         # Setup data
         posted_agency = AgencyFactory.create(agency_name="ABC")
         opp = OpportunityFactory.create(agency_code=posted_agency.agency_code)  # POSTED
         ExcludedOpportunityReviewFactory.create(opportunity_id=opp.legacy_opportunity_id)
 
         load_agencies_to_index.index_name = (
-            load_agencies_to_index.index_name + "-review-status-data"
-        )
+                    load_agencies_to_index.index_name + "-review-status-data"
+                )
         load_agencies_to_index.run()
 
         resp = search_client.search(agency_index_alias, {"size": 50})
 
         assert resp.total_records == 1
-        assert resp.records["ABC"]["opportunity_statuses"] == []
+        assert not resp.records[0]["opportunity_statuses"]
