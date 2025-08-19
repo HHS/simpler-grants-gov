@@ -17,7 +17,6 @@ def test_delete_api_key_success(enable_factory_create, db_session: db.Session):
 
     delete_api_key(db_session, user.user_id, api_key.api_key_id)
 
-    # Verify the API key was deleted from the database
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
@@ -33,11 +32,9 @@ def test_delete_api_key_not_found_wrong_user(enable_factory_create, db_session: 
     with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
         delete_api_key(db_session, user2.user_id, api_key.api_key_id)
 
-    # Verify it raises a 404 error
     assert exc_info.value.status_code == 404
     assert "API key not found" in exc_info.value.message
 
-    # Verify the API key still exists and wasn't deleted
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
@@ -52,7 +49,6 @@ def test_delete_api_key_not_found_nonexistent(enable_factory_create, db_session:
     with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
         delete_api_key(db_session, user.user_id, nonexistent_api_key_id)
 
-    # Verify it raises a 404 error
     assert exc_info.value.status_code == 404
     assert "API key not found" in exc_info.value.message
 
@@ -62,10 +58,8 @@ def test_delete_api_key_already_inactive(enable_factory_create, db_session: db.S
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(user=user, is_active=False)
 
-    # This should not raise an error
     delete_api_key(db_session, user.user_id, api_key.api_key_id)
 
-    # Verify the API key was deleted from the database
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
@@ -97,15 +91,13 @@ def test_delete_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     api_key1 = UserApiKeyFactory.create(user=user, is_active=True, key_name="Key 1")
     api_key2 = UserApiKeyFactory.create(user=user, is_active=True, key_name="Key 2")
 
-    # Delete only the first API key
     delete_api_key(db_session, user.user_id, api_key1.api_key_id)
 
-    # Verify only the first key was deleted
     db_api_key1 = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key1.api_key_id)
     ).scalar_one_or_none()
     db_api_key2 = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key2.api_key_id)
     ).scalar_one_or_none()
-    assert db_api_key1 is None  # First key was deleted
-    assert db_api_key2 is not None  # Second key still exists
+    assert db_api_key1 is None  
+    assert db_api_key2 is not None 

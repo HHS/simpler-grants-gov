@@ -508,7 +508,6 @@ def user_delete_api_key(
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
-    # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
