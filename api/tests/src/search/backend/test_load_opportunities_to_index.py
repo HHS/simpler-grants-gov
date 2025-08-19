@@ -22,6 +22,7 @@ from tests.src.db.models.factories import (
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
+from tests.src.db.models.factories import ExcludedOpportunityReviewFactory
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
@@ -225,6 +226,61 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         assert attachments[0]["filename"] == filename_1
         # assert data was b64encoded
         assert attachments[0]["attachment"]["content"] == content  # decoded b64encoded attachment
+
+    def test_excluded_opportunities_not_indexed(
+        self,
+        db_session,
+        truncate_opportunities,
+        enable_factory_create,
+        search_client,
+        opportunity_index_alias,
+        load_opportunities_to_index,
+    ):
+        # Why is truncate_opportunities not working as expected?
+        cascade_delete_from_db_table(db_session, Opportunity)
+
+        # Create opportunities that should be indexed
+        included_opportunities = OpportunityFactory.create_batch(
+            size=3, is_posted_summary=True, opportunity_attachments=[]
+        )
+
+        # Create opportunities that should be excluded
+        excluded_opportunities = OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, opportunity_attachments=[]
+        )
+
+        # Add the excluded opportunities to the ExcludedOpportunityReview table
+        for opportunity in excluded_opportunities:
+            ExcludedOpportunityReviewFactory.create(
+                opportunity_id=opportunity.legacy_opportunity_id
+            )
+
+        # Ensure we have a unique index name for this test to avoid conflicts
+        load_opportunities_to_index.index_name = (
+            load_opportunities_to_index.index_name + "-excluded-test"
+        )
+
+        # Run the indexing process
+        load_opportunities_to_index.run()
+
+        # Verify only the included opportunities are in the search index
+        resp = search_client.search(opportunity_index_alias, {"size": 100})
+
+        # Should only have the included opportunities, not the excluded ones
+        # assert resp.total_records == len(included_opportunities)
+
+        # Verify the correct opportunities are indexed
+        indexed_opportunity_ids = set([record["opportunity_id"] for record in resp.records])
+        expected_opportunity_ids = set([str(opp.opportunity_id) for opp in included_opportunities])
+        excluded_opportunity_ids = set([str(opp.opportunity_id) for opp in excluded_opportunities])
+
+        assert indexed_opportunity_ids == expected_opportunity_ids
+        assert indexed_opportunity_ids.isdisjoint(excluded_opportunity_ids)
+
+        # Verify metrics show only the included opportunities were loaded
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.RECORDS_LOADED
+        ] == len(included_opportunities)
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
