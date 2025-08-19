@@ -1,14 +1,12 @@
 import { Metadata } from "next";
-import { SUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import BetaAlert from "src/components/BetaAlert";
-import Breadcrumbs from "src/components/Breadcrumbs";
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -22,6 +20,12 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
+/* TODO
+  - change url
+  - redirect all pages
+  - styling tweaks
+  - update all incoming links (see emails as well)
+*/
 export default function Subscribe({ params }: LocalizedPageProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
@@ -29,28 +33,42 @@ export default function Subscribe({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <BetaAlert containerClasses="margin-top-5" />
-
-      <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
-        <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
-        <h1 className="margin-top-0">{t("title")}</h1>
-        <p className="usa-intro">{t("intro")}</p>
-        <Grid row gap className="flex-align-start">
-          <Grid tabletLg={{ col: 6 }}>
-            <p>{t("paragraph1")}</p>
-            {t.rich("list", {
-              ul: (chunks) => <ul className="usa-list">{chunks}</ul>,
-              li: (chunks) => <li>{chunks}</li>,
-            })}
+      <div className="text-white bg-primary-darkest padding-top-2 tablet:padding-y-6">
+        <GridContainer>
+          <Grid row gap>
+            <Grid tablet={{ col: "fill" }}>
+              <h1>{t("title")}</h1>
+              <p>{t("paragraph1")}</p>
+              <p>{t("paragraph2")}</p>
+            </Grid>
+            <Grid tablet={{ col: "auto" }}>
+              <Grid className="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0">
+                <Image
+                  src="/img/statue-of-liberty-blue.png"
+                  alt="Statue-of-liberty"
+                  priority={false}
+                  width={493}
+                  height={329}
+                  style={{ objectFit: "cover" }}
+                  className="minh-full width-full"
+                />
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid tabletLg={{ col: 6 }}>
-            <SubscriptionForm />
+        </GridContainer>
+      </div>
+      <div>
+        <GridContainer className="padding-y-4 tablet-lg:padding-y-6">
+          <Grid row gap className="flex-align-start">
+            <Grid tabletLg={{ col: 3 }}>
+              <h2>{t("formLabel")}</h2>
+            </Grid>
+            <Grid tabletLg={{ col: 9 }}>
+              <SubscriptionForm />
+            </Grid>
           </Grid>
-        </Grid>
-      </GridContainer>
-      <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
-        <p className="font-sans-3xs text-base-dark">{t("disclaimer")}</p>
-      </GridContainer>
+        </GridContainer>
+      </div>
     </>
   );
 }

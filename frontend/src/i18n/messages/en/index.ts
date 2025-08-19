@@ -448,16 +448,15 @@ export const messages = {
     },
   },
   Subscribe: {
-    pageTitle: "Subscribe | Simpler.Grants.gov",
+    pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Subscribe to project updates",
-    intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
+    title: "Simpler Grants Newsletter",
     paragraph1:
-      "If you sign up for the Simpler.Grants.gov product updates, we'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Sign up to get project updates delivered to your inbox every few weeks.",
+    paragraph2:
+      "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
+    formLabel: "Subscribe to our newsletter",
     form: {
       name: "First Name",
       lastName: "Last Name",
