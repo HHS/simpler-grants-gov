@@ -103,7 +103,7 @@ class UpdateFormTask(Task):
             return
 
         logger.info(f"Calling {url}")
-        resp = requests.put(url, headers=headers, json=request)
+        resp = requests.put(url, headers=headers, json=request, timeout=5)
 
         if resp.status_code != 200:
             logger.error(f"Failed to update form: {resp.text}")
