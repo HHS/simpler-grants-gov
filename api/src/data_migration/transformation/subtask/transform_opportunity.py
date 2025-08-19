@@ -7,7 +7,7 @@ from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.opportunity import Topportunity
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
@@ -96,23 +96,29 @@ class TransformOpportunity(AbstractTransformSubTask):
                 )
                 self.db_session.merge(transformed_opportunity)
 
-                # If an opportunity went from being a draft to not a draft (published)
-                # then we need to move all of its attachments to the public bucket
-                # from the draft s3 bucket.
-                if was_draft and transformed_opportunity.is_draft is False:
-                    for attachment in cast(Opportunity, target_opportunity).opportunity_attachments:
-                        # Determine the new path
-                        file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
-                        s3_path = attachment_util.get_s3_attachment_path(
-                            file_name,
-                            attachment.attachment_id,
-                            transformed_opportunity,
-                            self.s3_config,
-                        )
-
-                        # Move the file
-                        file_util.move_file(attachment.file_location, s3_path)
-                        attachment.file_location = s3_path
+                # If the opportunity's draft status has changed (draft ↔ published),
+                # move all attachments to the correct S3 bucket (public or draft)
+                if was_draft != transformed_opportunity.is_draft:
+                    self._move_attachments_to_correct_bucket(
+                        cast(Opportunity, target_opportunity).opportunity_attachments,
+                        transformed_opportunity,
+                    )
 
         logger.info("Processed opportunity", extra=extra)
         source_opportunity.transformed_at = self.transform_time
+
+    def _move_attachments_to_correct_bucket(
+        self,
+        opportunity_attachments: list[OpportunityAttachment],
+        transformed_opportunity: Opportunity,
+    ) -> None:
+        for attachment in opportunity_attachments:
+            file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
+            s3_path = attachment_util.get_s3_attachment_path(
+                file_name,
+                attachment.attachment_id,
+                transformed_opportunity,
+                self.s3_config,
+            )
+            file_util.move_file(attachment.file_location, s3_path)
+            attachment.file_location = s3_path
