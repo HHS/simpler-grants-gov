@@ -1,7 +1,6 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
 import { RJSFSchema } from "@rjsf/utils";
-import { get as getSchemaObjectFromPointer } from "json-pointer";
 
 import { getByPointer, getFieldPath } from "./utils";
 
@@ -23,7 +22,7 @@ const parseValue = (value: unknown, type: string) => {
   if (value === "true") return true;
   if (type === "integer" || type === "number") return Number(value);
   try {
-    return JSON.parse(value as string);
+    return JSON.parse(value as string) as unknown;
   } catch (e) {
     return value || undefined;
   }
