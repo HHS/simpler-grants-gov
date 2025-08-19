@@ -94,6 +94,8 @@ resource "aws_api_gateway_stage" "api_v1_stage" {
   # checkov:skip=CKV2_AWS_51:Mutual TLS increases complexity for downstream systems
   # checkov:skip=CKV2_AWS_4:Log level and format is already set
   # checkov:skip=CKV_AWS_120:Cache disabled for now, will be followed up in a future ticket
+  # TEMP
+  # checkov:skip=CKV_AWS_76:Logging is dependent on a role being created in the infra/accounts playbook, but that isn't running first
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
