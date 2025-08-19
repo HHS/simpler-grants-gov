@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from src.adapters import db
 from src.services.users.get_user_api_keys import get_user_api_keys
