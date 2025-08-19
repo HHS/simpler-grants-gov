@@ -122,6 +122,13 @@ const SearchResultsTableView = ({
         totalPages={totalPages}
       />
       <SearchResultsTable searchResults={searchResults.data} page={page} />
+      <SearchPagination
+        totalPages={totalPages}
+        page={page}
+        query={query}
+        totalResults={totalResults}
+        paginationClassName="flex-justify-start tablet:flex-justify-end border-top-0"
+      />
     </>
   );
 };

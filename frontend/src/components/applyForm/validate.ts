@@ -22,7 +22,7 @@ export const UiJsonSchema: RJSFSchema = {
       properties: {
         type: {
           type: "string",
-          enum: ["field", "multiField"],
+          enum: ["field", "multiField", "null"],
         },
         name: { type: "string" },
         schema: {
@@ -46,6 +46,8 @@ export const UiJsonSchema: RJSFSchema = {
         widget: {
           type: "string",
           enum: [
+            "Attachment",
+            "AttachmentArray",
             "Checkbox",
             "Text",
             "TextArea",
@@ -57,6 +59,7 @@ export const UiJsonSchema: RJSFSchema = {
             "Budget424aTotalBudgetSummary",
           ],
         },
+        attachmentType: { type: "string" },
       },
       required: ["type"],
       anyOf: [
@@ -106,6 +109,9 @@ export const UiJsonSchema: RJSFSchema = {
           type: "string",
         },
         name: {
+          type: "string",
+        },
+        description: {
           type: "string",
         },
         children: {

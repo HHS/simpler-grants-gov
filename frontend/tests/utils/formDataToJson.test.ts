@@ -33,6 +33,20 @@ describe("formDataToObject", () => {
 
     expect(result).toEqual(expected);
   });
+  it("handles json string values", () => {
+    const formData = new FormData();
+    formData.append("arrayLike", '["i am", "an array", 100]');
+    formData.append("complicated", '{"key": "value"}');
+
+    const expected = {
+      arrayLike: ["i am", "an array", 100],
+      complicated: { key: "value" },
+    };
+
+    const result = formDataToObject(formData);
+
+    expect(result).toEqual(expected);
+  });
   it("handles falsey values", () => {
     const formData = new FormData();
 

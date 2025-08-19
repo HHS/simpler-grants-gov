@@ -1,13 +1,12 @@
+import $Refparser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
+import { JSONSchema7 } from "json-schema";
+import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
-import {
-  ApplicationFormDetail,
-  ApplicationResponseDetail,
-} from "src/types/applicationResponseTypes";
 
-import { JSX } from "react";
+import React, { JSX } from "react";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -18,10 +17,12 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
+import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
@@ -46,8 +47,15 @@ export function buildFormTreeRecursive({
   });
 
   const buildFormTree = (
-    uiSchema: UiSchema | { children: UiSchema; label: string; name: string },
-    parent: { label: string; name: string } | null,
+    uiSchema:
+      | UiSchema
+      | {
+          children: UiSchema;
+          label: string;
+          name: string;
+          description?: string;
+        },
+    parent: { label: string; name: string; description?: string } | null,
   ) => {
     if (
       !Array.isArray(uiSchema) &&
@@ -57,6 +65,7 @@ export function buildFormTreeRecursive({
       buildFormTree(uiSchema.children, {
         label: uiSchema.label,
         name: uiSchema.name,
+        description: uiSchema.description,
       });
     } else if (Array.isArray(uiSchema)) {
       uiSchema.forEach((node) => {
@@ -64,6 +73,7 @@ export function buildFormTreeRecursive({
           buildFormTree(node.children as unknown as UiSchema, {
             label: node.label,
             name: node.name,
+            description: node.description,
           });
         } else if (!parent && ("definition" in node || "schema" in node)) {
           const field = buildField({
@@ -73,7 +83,10 @@ export function buildFormTreeRecursive({
             formData,
           });
           if (field) {
-            acc = [...acc, field];
+            acc = [
+              ...acc,
+              <React.Fragment key={node.name}>{field}</React.Fragment>,
+            ];
           }
         }
       });
@@ -106,15 +119,30 @@ export function buildFormTreeRecursive({
           });
           acc = [
             ...acc,
-            wrapSection(parent.label, parent.name, <>{childAcc}</>),
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              description: parent.description,
+              tree: <>{childAcc}</>,
+            }),
           ];
         } else {
-          acc = [...acc, wrapSection(parent.label, parent.name, <>{row}</>)];
+          acc = [
+            ...acc,
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              tree: <>{row}</>,
+              description: parent.description,
+            }),
+          ];
         }
       }
     }
   };
+
   buildFormTree(uiSchema, null);
+
   return acc;
 }
 
@@ -128,6 +156,26 @@ export const determineFieldType = ({
 }): WidgetTypes => {
   const { widget } = uiFieldObject;
   if (widget) return widget;
+
+  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
+    return "Attachment";
+  }
+
+  if (fieldSchema.type === "array" && fieldSchema.items) {
+    const item = Array.isArray(fieldSchema.items)
+      ? fieldSchema.items[0]
+      : fieldSchema.items;
+
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      item.type === "string" &&
+      item.format === "uuid"
+    ) {
+      return "AttachmentArray";
+    }
+  }
+
   if (fieldSchema.enum?.length) {
     return "Select";
   } else if (fieldSchema.type === "boolean") {
@@ -207,6 +255,9 @@ const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
+  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
+    AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
@@ -293,13 +344,19 @@ export const buildField = ({
     rawErrors = formatFieldWarnings(
       errors,
       name,
-      typeof fieldSchema.type === "string"
+      typeof fieldSchema?.type === "string"
         ? fieldSchema.type
-        : Array.isArray(fieldSchema.type)
+        : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "",
     );
   }
+
+  if (!fieldSchema || typeof fieldSchema !== "object") {
+    console.error("Invalid field schema for:", definition);
+    throw new Error("Invalid or missing field schema");
+  }
+
   // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
@@ -311,7 +368,7 @@ export const buildField = ({
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
-  const disabled = fieldSchema.type === "null";
+  const disabled = fieldType === "null";
   let options = {};
   let enums: unknown[] = [];
   if (type === "Select") {
@@ -339,13 +396,21 @@ export const buildField = ({
     };
   }
 
-  return widgetComponents[type]({
+  const Widget = widgetComponents[type];
+
+  // light debugging for unknown widgets
+  if (typeof Widget !== "function") {
+    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
+    throw new Error(`Unknown widget type: ${type}`);
+  }
+
+  return Widget({
     id: name,
+    key: name,
     disabled,
-    // required: (formSchema.required ?? []).includes(name),
     required: isFieldRequired(name, formSchema),
-    minLength: fieldSchema?.minLength ? fieldSchema.minLength : undefined,
-    maxLength: fieldSchema?.maxLength ? fieldSchema.maxLength : undefined,
+    minLength: fieldSchema?.minLength,
+    maxLength: fieldSchema?.maxLength,
     schema: fieldSchema,
     rawErrors,
     value,
@@ -388,14 +453,9 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if (
-      "children" in item &&
-      item.children &&
-      Array.isArray(item.children) &&
-      item.children.length > 0
-    ) {
+    if ("children" in item && Array.isArray(item.children)) {
       if (item.name && item.label) {
-        results.push({ href: item.name, text: item.label });
+        results.push({ href: `form-section-${item.name}`, text: item.label });
       }
       if (
         Array.isArray(item.children) &&
@@ -409,16 +469,24 @@ export function getFieldsForNav(
   return results;
 }
 
-const wrapSection = (
-  label: string,
-  fieldName: string,
-  tree: JSX.Element | undefined,
-) => {
+const wrapSection = ({
+  label,
+  fieldName,
+  tree,
+  description,
+}: {
+  label: string;
+  fieldName: string;
+  tree: JSX.Element | undefined;
+  description?: string;
+}) => {
+  const uniqueKey = `${fieldName}-fieldset`;
   return (
     <FieldsetWidget
-      key={`${fieldName}-wrapper`}
+      key={uniqueKey}
       fieldName={fieldName}
       label={label}
+      description={description}
     >
       {tree}
     </FieldsetWidget>
@@ -496,16 +564,44 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
-// the application detail contains an empty array for the form response if no
-// forms have been saved or an application_response with a form_id
-export const getApplicationResponse = (
-  forms: [] | ApplicationFormDetail[],
-  formId: string,
-): ApplicationResponseDetail | object => {
-  if (forms.length > 0) {
-    const form = forms.find((form) => form?.form_id === formId);
-    return form?.application_response || {};
-  } else {
-    return {};
+// resolve and "allOf" references within "properties" or "$defs" fields
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
+export const processFormSchema = async (
+  formSchema: RJSFSchema,
+): Promise<RJSFSchema> => {
+  try {
+    const dereferenced = (await $Refparser.dereference(
+      formSchema,
+    )) as RJSFSchema;
+    const condensedProperties = mergeAllOf({
+      properties: dereferenced.properties,
+    } as JSONSchema7);
+    const condensed = {
+      ...dereferenced,
+      ...condensedProperties,
+    };
+    return condensed as RJSFSchema;
+  } catch (e) {
+    console.error("Error processing schema");
+    throw e;
   }
 };
+
+// This is only needed when extracting an application response from the application endpoint's
+// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
+// the application detail contains an empty array for the form response if no
+// forms have been saved or an application_response with a form_id
+// export const getApplicationResponse = (
+//   forms: [] | ApplicationFormDetail[],
+//   formId: string,
+// ): ApplicationResponseDetail | object => {
+//   if (forms.length > 0) {
+//     const form = forms.find((form) => form?.form_id === formId);
+//     return form?.application_response || {};
+//   } else {
+//     return {};
+//   }
+// };
