@@ -1,0 +1,21 @@
+from src.util.env_config import PydanticBaseEnvConfig
+
+
+class PdfGenerationConfig(PydanticBaseEnvConfig):
+    """Configuration for PDF generation service."""
+
+    # Frontend sidecar URL for calling application pages
+    frontend_sidecar_url: str
+
+    # Docraptor configuration
+    docraptor_api_key: str
+    docraptor_test_mode: bool
+    docraptor_api_url: str
+
+    # Token expiration in minutes
+    short_lived_token_expiration_minutes: int
+
+
+def get_config() -> PdfGenerationConfig:
+    """Get the PDF generation configuration."""
+    return PdfGenerationConfig()

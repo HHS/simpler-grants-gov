@@ -13,6 +13,7 @@ from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
+from src.services.pdf_generation.service import generate_application_form_pdf
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -186,12 +187,41 @@ class CreateApplicationSubmissionTask(Task):
                 extra=log_extra | {"application_form_id": application_form.application_form_id},
             )
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
-            # TODO - when we add the logic to fetch a form as a PDF
-            #        call it here and pass the contents below.
+
+            # Generate PDF from the application form
+            pdf_response = generate_application_form_pdf(
+                db_session=self.db_session,
+                application_id=submission.application.application_id,
+                application_form_id=application_form.application_form_id,
+                use_mocks=False,  # Use real clients for production
+            )
+
             app_form_file_name = f"{application_form.form.short_form_name}.pdf"
             file_name_in_zip = submission.get_file_name_in_zip(app_form_file_name)
-            with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
-                file_in_zip.write(b"TODO")
+
+            if pdf_response.success:
+                logger.info(
+                    "Successfully generated PDF for application form",
+                    extra=log_extra
+                    | {
+                        "application_form_id": application_form.application_form_id,
+                        "pdf_size_bytes": len(pdf_response.pdf_data),
+                    },
+                )
+                with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+                    file_in_zip.write(pdf_response.pdf_data)
+            else:
+                logger.error(
+                    "Failed to generate PDF for application form, using placeholder",
+                    extra=log_extra
+                    | {
+                        "application_form_id": application_form.application_form_id,
+                        "error": pdf_response.error_message,
+                    },
+                )
+                # Fall back to placeholder content if PDF generation fails
+                with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+                    file_in_zip.write(b"PDF generation failed - placeholder content")
 
             file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
             submission.form_pdf_metadata.append(FileMetadata(file_name_in_zip, file_size))
