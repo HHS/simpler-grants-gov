@@ -65,7 +65,6 @@ class FrontendClient(BaseFrontendClient):
         headers = {
             "X-SGG-Internal-Token": token,
             "Accept": "text/html",
-            "User-Agent": "simpler-grants-gov-pdf-generator/1.0",
         }
 
         try:
