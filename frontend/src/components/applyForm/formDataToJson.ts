@@ -21,6 +21,7 @@ const parseValue = (value: unknown, type: string) => {
   if (value === "false") return false;
   if (value === "true") return true;
   if (type === "integer" || type === "number") return Number(value);
+  if (type === "string" && !isNaN(Number(value))) return value || undefined;
   try {
     return JSON.parse(value as string) as unknown;
   } catch (e) {
