@@ -311,3 +311,7 @@ class UserApiKeySchema(Schema):
 
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
+
+
+class UserApiKeyDeleteResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

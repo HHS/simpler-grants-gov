@@ -13,6 +13,7 @@ from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
+    UserApiKeyDeleteResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
@@ -40,6 +41,7 @@ from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
+from src.services.users.delete_api_key import delete_api_key
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
@@ -490,3 +492,35 @@ def user_create_api_key(
     )
 
     return response.ApiResponse(message="Success", data=api_key)
+
+
+@user_blueprint.delete("/<uuid:user_id>/api-keys/<uuid:api_key_id>")
+@user_blueprint.output(UserApiKeyDeleteResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_delete_api_key(
+    db_session: db.Session, user_id: UUID, api_key_id: UUID
+) -> response.ApiResponse:
+    """Delete (deactivate) an API key for the authenticated user"""
+    add_extra_data_to_current_request_logs({"user_id": user_id, "api_key_id": api_key_id})
+    logger.info("DELETE /v1/users/:user_id/api-keys/:api_key_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        delete_api_key(db_session, user_id, api_key_id)
+
+    logger.info(
+        "Deleted API key for user",
+        extra={
+            "user_id": user_id,
+            "api_key_id": api_key_id,
+        },
+    )
+
+    return response.ApiResponse(message="Success")
