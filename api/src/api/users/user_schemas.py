@@ -311,3 +311,18 @@ class UserApiKeySchema(Schema):
 
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
+
+
+class UserApiKeyRenameRequestSchema(Schema):
+    key_name = fields.String(
+        required=True,
+        validate=validators.Length(min=1, max=255),
+        metadata={
+            "description": "New name for the API key",
+            "example": "Production API Key",
+        },
+    )
+
+
+class UserApiKeyRenameResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(UserApiKeySchema, metadata={"description": "The renamed API key"})
