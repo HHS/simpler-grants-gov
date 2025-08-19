@@ -15,10 +15,8 @@ import {
 import { processFormSchema } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 
-export const dynamic = "force-dynamic";
-
 // either return error or data, not both
-type formDataResult =
+type FormDataResult =
   | { error: "TopLevelError" | "NotFound" | "UnauthorizedError"; data?: never }
   | {
       error?: never;
@@ -41,7 +39,7 @@ export default async function getFormData({
   applicationId: string;
   appFormId: string;
   internalToken?: string;
-}): Promise<formDataResult> {
+}): Promise<FormDataResult> {
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
@@ -84,7 +82,7 @@ export default async function getFormData({
     }
 
     if (applicationFormData.application_form_id !== appFormId) {
-      console.error(`Application form ids to do not match`);
+      console.error(`Application form ids do not match`);
       return { error: "TopLevelError" };
     }
     formValidationWarnings =

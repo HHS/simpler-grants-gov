@@ -33,11 +33,11 @@ export async function generateMetadata({
   return meta;
 }
 
-interface formPageProps {
+interface FormPageProps {
   params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
 }
 
-export default async function FormPage({ params }: formPageProps) {
+export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId } = await params;
 
   const { data, error } = await getFormData({
