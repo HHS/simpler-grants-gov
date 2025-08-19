@@ -13,6 +13,8 @@ from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
+    UserApiKeyListRequestSchema,
+    UserApiKeyListResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
@@ -45,6 +47,7 @@ from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
+from src.services.users.get_user_api_keys import get_user_api_keys
 from src.services.users.get_user_applications import get_user_applications
 from src.services.users.get_user_organizations import get_user_organizations
 from src.services.users.login_gov_callback_handler import (
@@ -490,3 +493,27 @@ def user_create_api_key(
     )
 
     return response.ApiResponse(message="Success", data=api_key)
+
+
+@user_blueprint.post("/<uuid:user_id>/api-keys/list")
+@user_blueprint.input(UserApiKeyListRequestSchema, location="json")
+@user_blueprint.output(UserApiKeyListResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_list_api_keys(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """List all API keys for the authenticated user"""
+    add_extra_data_to_current_request_logs({"user_id": user_id})
+    logger.info("POST /v1/users/:user_id/api-keys/list")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        api_keys = get_user_api_keys(db_session, user_id)
+
+    return response.ApiResponse(message="Success", data=api_keys)

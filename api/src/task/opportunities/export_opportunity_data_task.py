@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Iterator, Sequence
 
 from pydantic import Field
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
@@ -14,7 +14,11 @@ import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    ExcludedOpportunityReview,
+    Opportunity,
+)
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
@@ -124,6 +128,12 @@ class ExportOpportunityDataTask(Task):
                 .where(
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
+                    ~exists(
+                        select(ExcludedOpportunityReview.opportunity_id).where(
+                            ExcludedOpportunityReview.opportunity_id
+                            == Opportunity.legacy_opportunity_id
+                        )
+                    ),
                 )
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
                 .execution_options(yield_per=5000)
