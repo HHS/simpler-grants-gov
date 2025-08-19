@@ -1,5 +1,8 @@
+import $Refparser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
+import { JSONSchema7 } from "json-schema";
+import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
@@ -559,6 +562,32 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
     },
     [] as Array<Record<string, unknown>>,
   );
+};
+
+// resolve and "allOf" references within "properties" or "$defs" fields
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
+export const processFormSchema = async (
+  formSchema: RJSFSchema,
+): Promise<RJSFSchema> => {
+  try {
+    const dereferenced = (await $Refparser.dereference(
+      formSchema,
+    )) as RJSFSchema;
+    const condensedProperties = mergeAllOf({
+      properties: dereferenced.properties,
+    } as JSONSchema7);
+    const condensed = {
+      ...dereferenced,
+      ...condensedProperties,
+    };
+    return condensed as RJSFSchema;
+  } catch (e) {
+    console.error("Error processing schema");
+    throw e;
+  }
 };
 
 // This is only needed when extracting an application response from the application endpoint's

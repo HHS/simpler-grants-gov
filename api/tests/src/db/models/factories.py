@@ -2576,7 +2576,7 @@ class SamGovEntityFactory(BaseFactory):
     ebiz_poc_last_name = factory.Faker("last_name")
     has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
-    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+    eft_indicator = None
 
     class Params:
         has_organization = factory.Trait(
@@ -2658,3 +2658,13 @@ class SuppressedEmailFactory(BaseFactory):
     last_update_time = factory.Faker(
         "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
     )
+
+
+class ExcludedOpportunityReviewFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ExcludedOpportunityReview
+
+    opportunity_id = factory.Sequence(lambda n: n)
+    omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
+    omb_review_status_date = factory.Faker("date_between", start_date="-5y", end_date="-3y")
+    last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")

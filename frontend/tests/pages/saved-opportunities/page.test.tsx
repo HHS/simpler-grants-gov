@@ -5,15 +5,26 @@ import {
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
+import {
+  localeParams,
+  mockUseTranslations,
+  useTranslationsMock,
+} from "src/utils/testing/intlMocks";
 import { render, screen, waitFor } from "tests/react-utils";
 
+import { ReactNode } from "react";
+
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => Promise.resolve(mockUseTranslations),
+  getTranslations: () => mockUseTranslations,
 }));
 
-const savedOpportunities = jest.fn().mockReturnValue([]);
-const opportunity = jest.fn().mockReturnValue({ data: [] });
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+  NextIntlClientProvider: ({ children }: { children: ReactNode }) => children, // this is a dumb workaround for a global wrapper we're using
+}));
+
+const savedOpportunities = jest.fn().mockResolvedValue([]);
+const opportunity = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
 
 jest.mock("next/navigation", () => ({
@@ -41,14 +52,14 @@ describe("Saved Opportunities page", () => {
     const component = await SavedOpportunities({ params: localeParams });
     render(component);
 
-    const content = screen.getByText("SavedOpportunities.heading");
+    const content = await screen.findByText("noSavedCTAParagraphOne");
 
-    expect(content).toBeInTheDocument();
+    await waitFor(() => expect(content).toBeInTheDocument());
   });
 
   it("renders a list of saved opportunities", async () => {
-    savedOpportunities.mockReturnValue([{ opportunity_id: 12345 }]);
-    opportunity.mockReturnValue({ data: mockOpportunity });
+    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({ params: localeParams });
     render(component);
 
@@ -62,6 +73,8 @@ describe("Saved Opportunities page", () => {
   });
 
   it("passes accessibility scan", async () => {
+    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({ params: localeParams });
     const { container } = render(component);
     const results = await waitFor(() => axe(container));
